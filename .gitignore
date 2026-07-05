@@ -28,3 +28,8 @@ dist/
 Thumbs.db
 .idea/
 .vscode/
+
+# Project local files
+trace.db
+output/
+.trace_config.json

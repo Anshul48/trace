@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #050505;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #111111;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666666;
+  
+  --accent-primary: #00ff00; /* Terminal Green */
+  --accent-secondary: #4caf50;
+  --border-color: #333333;
+  --border-radius: 0px; /* Sharp corners for terminal feel */
+  
+  --success: #00ff00;
+  --warning: #ff9800;
+  --error: #f44336;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Consolas', 'Courier New', monospace;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Minimalist forms and inputs */
+.input-field {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.75rem;
+  font-family: 'Consolas', 'Courier New', monospace;
+  outline: none;
+  width: 100%;
+}
+
+.input-field:focus {
+  border-color: var(--accent-primary);
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--bg-secondary);
+}
+
+.badge {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+
+.badge-success { color: var(--success); }
+.badge-warning { color: var(--warning); }
+.badge-error { color: var(--error); }
+
+/* Table styling for Dashboard */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+th {
+  color: var(--text-secondary);
+  font-weight: normal;
+  text-transform: lowercase;
+}
+
+tr:hover td {
+  background: var(--bg-secondary);
+}
+
+/* Terminal Log specific */
+.log-line {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.log-time {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Utilities */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary); 
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color); 
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted); 
+}
