@@ -1,0 +1,23 @@
+{
+  "nodes": [
+    {
+      "id": "1",
+      "type": "file",
+      "file": "Test Concept.md",
+      "x": 0,
+      "y": -150,
+      "width": 400,
+      "height": 200
+    }
+  ],
+  "edges": [
+    {
+      "id": "d09eeef5-6a13-4637-95f1-7bb6612d7c9c",
+      "fromNode": "1",
+      "fromSide": "right",
+      "toNode": "2",
+      "toSide": "left",
+      "label": "depends_on"
+    }
+  ]
+}

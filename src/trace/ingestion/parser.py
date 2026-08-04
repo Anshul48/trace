@@ -1,14 +1,15 @@
 import os
 from pathlib import Path
 from unstructured.partition.auto import partition
-from unstructured.chunking.title import chunk_by_title
+from trace.ingestion.chunker import semantic_chunker
 from trace.core.schemas import Event, SourceMeta, DocumentChunkedPayload
 from trace.events.bus import event_bus
+from trace.core.vector_db import vector_db
 
 import uuid
 from trace.core.db import db
 
-async def ingest_documents(directory_path: str, project_id: str = "default", fast_mode: bool = False):
+async def ingest_documents(directory_path: str, project_id: str, fast_mode: bool = False, is_chronological: bool = False, thread_id: str = "default"):
     """
     Scans a directory for documents, partitions and chunks them using unstructured,
     and publishes a DocumentChunked event for each chunk.
@@ -17,6 +18,8 @@ async def ingest_documents(directory_path: str, project_id: str = "default", fas
     if not path.exists() or not path.is_dir():
         raise ValueError(f"Directory {directory_path} does not exist.")
 
+    import asyncio
+    
     for root, _, files in os.walk(path):
         for file in files:
             file_path = os.path.join(root, file)
@@ -25,22 +28,28 @@ async def ingest_documents(directory_path: str, project_id: str = "default", fas
                 continue
             
             try:
-                # Use unstructured to partition and chunk
+                # Use unstructured to partition
                 if fast_mode:
                     elements = partition(filename=file_path, strategy="fast")
                 else:
                     elements = partition(filename=file_path)
-                chunks = chunk_by_title(
-                    elements, 
-                    max_characters=1000, 
-                    new_after_n_chars=800, 
-                    overlap=100
-                )
+                    
+                full_text = "\n\n".join([str(e) for e in elements if str(e).strip()])
                 
-                for idx, chunk in enumerate(chunks):
-                    chunk_text = str(chunk)
+                # Semantic Chunking
+                chunk_tuples = semantic_chunker.chunk_text(full_text)
+                
+                tasks = []
+                chunk_ids = []
+                chunk_texts = []
+                chunk_metas = []
+                
+                for idx, (chunk_text, sparse_vector, structural_tag) in enumerate(chunk_tuples):
                     block_id = str(uuid.uuid4())
-                    db.upsert_block(block_id, project_id, chunk_text)
+                    db.upsert_block(block_id, project_id, chunk_text, sparse_vector=sparse_vector, structural_tag=structural_tag)
+                    
+                    if structural_tag == 'ephemeral':
+                        continue
                     
                     meta = SourceMeta(
                         filename=file,
@@ -48,13 +57,32 @@ async def ingest_documents(directory_path: str, project_id: str = "default", fas
                         chunk_index=idx,
                         block_id=block_id
                     )
+                    
+                    chunk_ids.append(block_id)
+                    chunk_texts.append(chunk_text)
+                    chunk_metas.append(meta.model_dump())
+                    
                     payload = DocumentChunkedPayload(
                         project_id=project_id,
                         chunk_text=chunk_text,
-                        meta=meta
+                        meta=meta,
+                        is_chronological=is_chronological,
+                        thread_id=thread_id
                     )
                     event = Event(name="DocumentChunked", payload=payload)
-                    await event_bus.publish(event)
+                    
+                    if is_chronological:
+                        await event_bus.publish(event)
+                    else:
+                        tasks.append(event_bus.publish(event))
+                        
+                # Insert into Vector DB for dense embeddings
+                if chunk_ids:
+                    vector_db.upsert_chunks(project_id, chunk_ids, chunk_texts, chunk_metas)
+                        
+                if tasks:
+                    await asyncio.gather(*tasks)
+                    
             except Exception as e:
                 print(f"Error processing {file_path}: {e}")
 

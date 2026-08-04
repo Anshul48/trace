@@ -33,3 +33,5 @@ Thumbs.db
 trace.db
 output/
 .trace_config.json
+.trace/
+.verify_v2/

@@ -22,5 +22,7 @@ COPY . .
 # Sync the project
 RUN uv sync --frozen
 
-# Run the application
-CMD ["uv", "run", "main.py"]
+# API is the default container process.  The same image can run the durable
+# worker or migration process with ``uv run python main.py worker`` and
+# ``uv run python main.py migrate``; no specific orchestrator is required.
+CMD ["uv", "run", "uvicorn", "main_api:app", "--host", "0.0.0.0", "--port", "8000"]

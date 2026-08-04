@@ -53,84 +53,84 @@ export function TraceEditor() {
     setEditingId(null);
   };
 
-  const startGraphBuild = async () => {
-    try {
-      await fetch(`${API_BASE}/api/projects/${id}/synthesize`, { method: 'POST' });
-      navigate(`/project/${id}/toc`);
-    } catch (e) {
-      console.error(e);
-    }
+  const proceedToToc = () => {
+    navigate(`/project/${id}/toc`);
   };
 
   return (
-    <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div className="flex items-center justify-between">
         <div>
-          <h1 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', color: 'var(--accent-primary)' }}>~/pipeline/{id?.split('-')[0]}/traces</h1>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--text-primary)' }}>Trace Review</h1>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Review and edit extracted concepts and relations.</p>
         </div>
-        <button className="btn btn-primary" onClick={startGraphBuild} disabled={loading}>
-          [ BUILD GRAPH ]
+        <button className="btn btn-primary" onClick={proceedToToc} disabled={loading}>
+          Proceed to TOC Planner
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
         </button>
       </div>
 
-      <div style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', overflowX: 'auto' }}>
+      <div className="glass-panel" style={{ overflowX: 'auto', padding: '1.5rem' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr>
-              <th style={{ color: 'var(--text-secondary)' }}>ID</th>
-              <th style={{ color: 'var(--text-secondary)' }}>CONCEPT</th>
-              <th style={{ color: 'var(--text-secondary)' }}>TYPE</th>
-              <th style={{ color: 'var(--text-secondary)' }}>RELATIONS</th>
-              <th style={{ color: 'var(--text-secondary)', width: '150px' }}>ACTIONS</th>
+              <th>ID</th>
+              <th>Concept</th>
+              <th>Type</th>
+              <th>Relations</th>
+              <th style={{ textAlign: 'right', width: '150px' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  &gt; fetching traces...
+                <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+                    <svg className="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    Fetching traces...
+                  </div>
                 </td>
               </tr>
             )}
             {!loading && traces.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  &gt; no traces found.
+                <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  No traces found for this project.
                 </td>
               </tr>
             )}
             {traces.map(trace => (
               <tr key={trace.id}>
-                <td style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>{trace.id.substring(0, 6)}</td>
+                <td style={{ fontFamily: 'monospace', color: 'var(--text-muted)', fontSize: '0.85rem' }}>{trace.id.substring(0, 6)}</td>
                 
                 {editingId === trace.id ? (
                   <>
                     <td style={{ padding: '1rem' }}>
-                      <input className="input-field" value={editForm.concept} onChange={e => setEditForm({...editForm, concept: e.target.value})} style={{ background: 'var(--bg-primary)' }} />
+                      <input className="input-field" value={editForm.concept} onChange={e => setEditForm({...editForm, concept: e.target.value})} />
                     </td>
                     <td style={{ padding: '1rem' }}>
-                      <input className="input-field" value={editForm.type} onChange={e => setEditForm({...editForm, type: e.target.value})} style={{ background: 'var(--bg-primary)' }} />
+                      <input className="input-field" value={editForm.type} onChange={e => setEditForm({...editForm, type: e.target.value})} />
                     </td>
                     <td style={{ padding: '1rem' }}>
-                      <input className="input-field" value={editForm.relations} onChange={e => setEditForm({...editForm, relations: e.target.value})} style={{ background: 'var(--bg-primary)' }} />
+                      <input className="input-field" value={editForm.relations} onChange={e => setEditForm({...editForm, relations: e.target.value})} />
                     </td>
                     <td style={{ padding: '1rem' }}>
-                      <div className="flex gap-2">
-                        <button className="btn btn-primary" onClick={saveEdit} style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>[SAVE]</button>
-                        <button className="btn btn-secondary" onClick={() => setEditingId(null)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>[ESC]</button>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                        <button className="btn btn-primary" onClick={saveEdit} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Save</button>
+                        <button className="btn btn-secondary" onClick={() => setEditingId(null)} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Cancel</button>
                       </div>
                     </td>
                   </>
                 ) : (
                   <>
-                    <td style={{ color: 'var(--accent-primary)', fontWeight: 'bold' }}>{trace.concept}</td>
+                    <td style={{ color: 'var(--text-primary)', fontWeight: '600' }}>{trace.concept}</td>
                     <td>
-                      <span className="badge" style={{ borderColor: 'var(--text-secondary)', color: 'var(--text-secondary)' }}>{trace.type}</span>
+                      <span className="badge">{trace.type}</span>
                     </td>
-                    <td style={{ color: 'var(--text-primary)' }}>{trace.relations}</td>
-                    <td>
-                      <button className="btn btn-secondary" onClick={() => startEdit(trace)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>
-                        [EDIT]
+                    <td style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{trace.relations}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button className="btn btn-secondary" onClick={() => startEdit(trace)} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>
+                        Edit
                       </button>
                     </td>
                   </>

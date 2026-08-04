@@ -1,0 +1,12 @@
+-- Trace V2 production migration entry point.
+-- The executable schema is kept in trace.v2.production.POSTGRES_SCHEMA so
+-- embedded tests and migration runners share one canonical definition.  Run
+-- it through the deployment migration process with a role that can create
+-- time partitions, the fixed workspace-hash partitions, RLS policies, and
+-- indexes concurrently.
+--
+-- Run `python main.py migrate` (or call PostgresEventStore.initialize()) to
+-- execute the canonical, idempotent POSTGRES_SCHEMA. This manifest file is
+-- intentionally non-destructive; later migrations add time windows/index
+-- revisions and never rewrite Atom/Event Spine history.
+SELECT 1;

@@ -1,0 +1,26 @@
+{
+  "name": "bright-coding-v1",
+  "suite": "bright_coding",
+  "corpus_snapshot": "bright-derived-coding-review-2026-08-03",
+  "cases": [
+    {
+      "id": "python-async-boundary",
+      "kind": "direct_lookup",
+      "query": "where is the asynchronous worker boundary defined",
+      "gold_atom_version_ids": ["bright-coding:python-async-boundary"]
+    },
+    {
+      "id": "dependency-chain",
+      "kind": "multi_hop_architecture",
+      "query": "which component persists the task before the worker executes it",
+      "gold_atom_version_ids": ["bright-coding:dependency-chain:source", "bright-coding:dependency-chain:worker"]
+    },
+    {
+      "id": "out-of-scope",
+      "kind": "out_of_scope",
+      "query": "what is the current stock price of the library vendor",
+      "gold_atom_version_ids": [],
+      "out_of_scope": true
+    }
+  ]
+}

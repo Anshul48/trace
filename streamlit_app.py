@@ -107,12 +107,32 @@ class StreamlitRedirect:
     def flush(self):
         pass
 
-if st.session_state.pipeline_state == "idle":
-    raw_text = st.text_area("Paste Raw Document Text", height=300)
+if "threads" not in st.session_state:
+    st.session_state.threads = [{"text": "", "is_chronological": False}]
 
-    if st.button("Run Pipeline"):
-        if not raw_text.strip():
-            st.warning("Please enter some text to process.")
+if st.session_state.pipeline_state == "idle":
+    st.markdown("### Input Threads")
+    st.markdown("Add multiple threads to process different conversations/docs independently before merging them into a unified knowledge graph.")
+    
+    for i, thread in enumerate(st.session_state.threads):
+        with st.expander(f"Thread {i+1}", expanded=(i == len(st.session_state.threads)-1)):
+            thread["text"] = st.text_area(f"Paste Raw Document Text", value=thread["text"], height=150, key=f"text_{i}")
+            thread["is_chronological"] = st.checkbox(f"Thread {i+1} is chronologically sorted (Oldest to Newest)", value=thread["is_chronological"], key=f"chrono_{i}")
+            
+    if st.button("➕ Add Another Thread"):
+        st.session_state.threads.append({"text": "", "is_chronological": False})
+        st.rerun()
+        
+    st.markdown("---")
+    
+    existing_projects = db.get_all_projects()
+    project_options = {p["id"]: f"{p['name']} ({p['created_at']})" for p in existing_projects if p["id"] != "default"}
+    selected_project_ids = st.multiselect("Merge Existing Projects (Optional)", options=list(project_options.keys()), format_func=lambda x: project_options[x])
+
+    if st.button("🚀 Run Pipeline", type="primary"):
+        has_text = any(t["text"].strip() for t in st.session_state.threads)
+        if not has_text and not selected_project_ids:
+            st.warning("Please enter some text in at least one thread, or select an existing project to merge.")
         elif not deepseek_key and not google_key:
             st.warning("Please provide an API key in the sidebar.")
         else:
@@ -151,9 +171,25 @@ if st.session_state.pipeline_state == "idle":
             micro_extractor.model_name = planner_model
             macro_synthesizer.model_name = planner_model
             writer_agent.model_name = writer_model
-            micro_extractor.state = RollingStateBuffer()
             graph_builder.traces = []
             db.init_db() # Init SQLite for blocks
+            
+            # Clear previous default project for a fresh unified context
+            db.delete_project("default")
+            db.create_project("default", "Default Streamlit Run")
+            
+            # Merge selected existing projects
+            if selected_project_ids:
+                import sqlite3
+                with sqlite3.connect(db.db_path) as conn:
+                    for pid in selected_project_ids:
+                        # Copy traces
+                        conn.execute('''
+                            INSERT OR IGNORE INTO traces (trace_id, project_id, block_id, entity_id, metadata, user_concept, user_type, user_relations)
+                            SELECT trace_id, 'default', block_id, entity_id, metadata, user_concept, user_type, user_relations
+                            FROM traces WHERE project_id = ?
+                        ''', (pid,))
+                    conn.commit()
             
             temp_out_dir_obj = tempfile.TemporaryDirectory()
             st.session_state.temp_out_dir_obj = temp_out_dir_obj
@@ -217,13 +253,28 @@ if st.session_state.pipeline_state == "idle":
                 event_bus.subscribe("LLMCall", on_llm_call)
                 event_bus.subscribe("PipelineError", on_error)
                 
-                with tempfile.TemporaryDirectory() as temp_in_dir:
-                    input_file = os.path.join(temp_in_dir, "input.txt")
-                    with open(input_file, "w", encoding="utf-8") as f:
-                        f.write(raw_text)
+                fast_mode = ("Cloud" in processing_mode)
+                
+                any_chronological = any(t["is_chronological"] for t in st.session_state.threads if t["text"].strip())
+                db.set_is_chronological("default", any_chronological)
+                
+                for i, thread in enumerate(st.session_state.threads):
+                    text = thread["text"].strip()
+                    if not text:
+                        continue
                         
-                    fast_mode = ("Cloud" in processing_mode)
-                    await ingest_documents(temp_in_dir, fast_mode=fast_mode)
+                    # Reset memory state before processing each independent thread!
+                    micro_extractor.state = RollingStateBuffer()
+                    
+                    with tempfile.TemporaryDirectory() as temp_in_dir:
+                        input_file = os.path.join(temp_in_dir, f"thread_{i}.txt")
+                        with open(input_file, "w", encoding="utf-8") as f:
+                            f.write(text)
+                            
+                        await ingest_documents(temp_in_dir, fast_mode=fast_mode, is_chronological=thread["is_chronological"])
+                        
+                # Trigger synthesis explicitly since Streamlit acts as the orchestrator
+                    await event_bus.publish(Event(name="TriggerGraphBuild", payload={"project_id": "default"}))
                     
                     try:
                         await asyncio.wait_for(toc_ready.wait(), timeout=120.0)
@@ -317,6 +368,8 @@ elif st.session_state.pipeline_state == "review_toc":
 
 elif st.session_state.pipeline_state == "generating_docs":
     st.markdown("### Live Writer Execution")
+    writer_status_placeholder = st.empty()
+    writer_status_placeholder.info("Writers are warming up...")
     col_writer_logs, col_writer_llm, col_writer_out = st.columns(3)
     with col_writer_logs:
         st.markdown("**System Logs**")
@@ -344,6 +397,10 @@ elif st.session_state.pipeline_state == "generating_docs":
             if e.name == "DocumentWritten":
                 writer_buffer += f"**{e.payload['name']}**\n{e.payload['content'][:200]}...\n\n---\n\n"
                 writer_placeholder.markdown(writer_buffer)
+                
+        def on_document_writing_started(e):
+            if e.name == "DocumentWritingStarted":
+                writer_status_placeholder.info(f"✍️ Writer is currently generating document: **{e.payload['name']}** (Attempt {e.payload['attempt']})")
                 
         llm_html = ""
         def on_llm_call(event: Event):
@@ -376,16 +433,17 @@ elif st.session_state.pipeline_state == "generating_docs":
             st.session_state.error_msg = event.payload
             
         # Safely remove previous UI callbacks
-        ui_cbs = ["on_finish", "on_document_written", "on_llm_call", "on_error"]
-        for ev in ["PipelineFinished", "DocumentWritten", "LLMCall", "PipelineError"]:
+        ui_cbs = ["on_finish", "on_document_written", "on_llm_call", "on_error", "on_document_writing_started"]
+        for ev in ["PipelineFinished", "DocumentWritten", "LLMCall", "PipelineError", "DocumentWritingStarted"]:
             event_bus._subscribers[ev] = [cb for cb in event_bus._subscribers.get(ev, []) if getattr(cb, "__name__", "") not in ui_cbs]
             
         event_bus.subscribe("PipelineFinished", on_finish)
         event_bus.subscribe("DocumentWritten", on_document_written)
+        event_bus.subscribe("DocumentWritingStarted", on_document_writing_started)
         event_bus.subscribe("LLMCall", on_llm_call)
         event_bus.subscribe("PipelineError", on_error)
         
-        await macro_synthesizer.weaver.write_repository(payload.entities, payload.edges, payload.global_toc)
+        await macro_synthesizer.weaver.write_repository(payload.entities, payload.edges, payload.global_toc, payload.entity_parts, payload.part_guidance)
         await event_bus.publish(Event(name="PipelineFinished", payload=None))
         
         await asyncio.wait_for(finished.wait(), timeout=120.0)

@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    {
+      "id": "1",
+      "type": "file",
+      "file": "1.md",
+      "x": 0,
+      "y": -150,
+      "width": 400,
+      "height": 200
+    },
+    {
+      "id": "2",
+      "type": "file",
+      "file": "2.md",
+      "x": 800,
+      "y": -150,
+      "width": 400,
+      "height": 200
+    }
+  ],
+  "edges": [
+    {
+      "id": "26047e02-e277-49f3-99cd-e8bd72624656",
+      "fromNode": "1",
+      "fromSide": "right",
+      "toNode": "2",
+      "toSide": "left",
+      "label": "foo"
+    }
+  ]
+}

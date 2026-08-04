@@ -1,64 +1,78 @@
-# Project Trace: Core Architecture Specifications
+# Trace architecture index
 
-This document outlines the core technical specifications and components of the **Bi-Directional Knowledge Graph OS**.
+Trace V2 is the active architecture. The detailed design contract is in
+[v2-architecture.md](v2-architecture.md); this page is the short orientation
+for maintainers and operators.
 
-## System Overview
+## Active runtime
 
-```mermaid
-graph TD
-    RawDocs[Raw Documents] -->|Upload to API| FastAPI[main_api.py]
-    FastAPI -->|Runs: Ingestion| Parser[ingestion.parser]
-    Parser -->|Emits: DocumentChunked| EventBus[events.bus]
-    
-    EventBus -->|Subscribed: DocumentChunked| MicroExtractor[agents.micro_extractor]
-    MicroExtractor -->|Extracts Traces / Saves to SQLite| DB[(SQLite: trace.db)]
-    MicroExtractor -->|Emits: TraceExtracted| EventBus
-    
-    %% Pauses for Trace Editing
-    DB -->|Fetch Traces| ReactUI[React Frontend: /frontend]
-    ReactUI -->|Manual Edit / Override Traces| DB
-    ReactUI -->|Trigger Graph Build| FastAPI
-    
-    FastAPI -->|Emits: TriggerGraphBuild| EventBus
-    EventBus -->|Subscribed: TriggerGraphBuild| GraphBuilder[core.graph.builder]
-    GraphBuilder -->|Reads traces from DB & clusters| EventBus
-    GraphBuilder -->|Emits: GraphResolved| EventBus
-    
-    EventBus -->|Subscribed: GraphResolved| MacroSynthesizer[agents.macro_synthesizer]
-    MacroSynthesizer -->|Generates TOC| EventBus
-    MacroSynthesizer -->|Emits: TocGenerated| EventBus
-    
-    %% TOC Editing
-    EventBus -->|Subscribed: TocGenerated| ReactUI
-    ReactUI -->|Approve & Finalize| Weaver[core.serializer.markdown_weaver]
-    
-    %% Output Generation
-    Weaver -->|Awaits: generate_document| WriterAgent[agents.writer_agent]
-    WriterAgent -->| Lossless Markdown + Hidden Anchors| RepoOut[repo_out/ markdown files]
-    
-    %% Reverse Sync
-    RepoOut -->|Watcher: watchdog| Watcher[ingestion.watcher]
-    Watcher -->|5s Debounce| Decompiler[core.decompiler]
-    Decompiler -->|Cosine Similarity check| DB
+```text
+client / SDK
+    |
+    v
+FastAPI /v2 router
+    |
+    v
+TraceService (adapter normalization, policy, retrieval, proposals)
+    |
+    +--> private object store (original and parser artifacts)
+    +--> SqliteEventStore (embedded Spine + projections)
+    |       |
+    |       +--> events + transactional outbox
+    |       +--> nodes / immutable node_versions
+    |       +--> edge_versions / evidence_anchors
+    |       +--> hot_inbox / query bundles / proposals
+    |
+    +--> OutboxWorker -> provider-specific event fan-out
 ```
 
-## Module Directory Breakdown
+`main_api.py` imports only `trace.v2.api`. It does not initialize the legacy
+agent pipeline, filesystem watcher, frontend workflow, SQLite `trace.db`
+tables, or Chroma collections. The V2 app is therefore safe to run beside old
+artifacts while using separate `.trace/` storage.
 
-### 1. Ingestion Layer (`src/trace/ingestion/`)
-- `parser.py`: Partitions documents (text, pdf, docx) via the `unstructured` library, chunks them by title (to keep semantic cohesion), hashes the chunk contents, commits them as immutable blocks into the SQLite database under a specific `project_id`, and publishes a `DocumentChunked` event for each chunk.
-- `watcher.py`: A filesystem monitor built on top of the `watchdog` library. It listens to modifications inside the generated `repo_out/` directory, implementing a debouncing thread (5 seconds) to prevent multiple triggers during active writing.
+## Truth boundary
 
-### 2. Event Bus (`src/trace/events/`)
-- `bus.py`: An asynchronous pub/sub event bus that serves as the decoupled messaging backbone. Modules subscribe to semantic events (e.g., `DocumentChunked`, `TraceExtracted`, `GraphResolved`, `TocGenerated`, `PipelineFinished`). Safe subscription hooks prevent UI updates from breaking backend pipelines on reload.
+The event ledger and immutable version records are canonical. `hot_inbox`,
+retrieval scores, graph adjacency projections, vector namespaces, summaries,
+schemas, salience, caches, and generated output are disposable projections.
+Every promoted semantic object carries exact source atom-version anchors. A
+projection rebuild may remove a row from a derived index, but it cannot remove
+or hide the source version from historical or deep retrieval.
 
-### 3. Agent Shell (`src/trace/agents/`)
-- `micro_extractor.py`: A rolling episodic memory state machine that sequentially evaluates chunks, keeping track of prevailing versions and hypotheses. It extracts `HippocampalTrace` nodes representing technical concepts and saves them to the DB.
-- `macro_synthesizer.py`: Orchestrates macro-level synthesis, generating a global Table of Contents (TOC) for the `README.md` file using the graph's topology. Built-in tenacity retry logic guarantees stability against LLM service hiccups.
-- `writer_agent.py`: Employs a low-temperature model (`gemini/gemma-4-31b-it` at temperature `0.1`) to act as a lossless compiler. It weaves the original source blocks into clean, structured Markdown, inserting invisible trace boundaries (`<!-- trace_id: UUID -->`).
+## Main implementation modules
 
-### 4. Core Engine (`src/trace/core/`)
-- `db.py`: Singleton interface managing `trace.db`. Organizes documents and traces under the persistent `projects` schema to prevent token wastage and support failure recovery.
-- `schemas.py`: Houses Pydantic models for type safety.
-- `decompiler.py`: Rips out trace contents between anchors, checks hashes to verify edits, and evaluates semantic similarity via local sentence embeddings.
-- `graph/builder.py` & `graph/clustering.py`: Deterministically builds the global network. It triggers on-demand via `TriggerGraphBuild`, reads traces from the database, and collapses redundant concepts into canonical entities using Agglomerative Clustering.
-- `serializer/markdown_weaver.py`: Traverses the final canonical graph, calls the `WriterAgent` to generate document files, and embeds cross-linking wikilinks (e.g., `[[My Concept]]`).
+| Module | Responsibility |
+|---|---|
+| `trace.v2.models` | Pydantic request contracts, retrieval budgets, proposal decisions, registries |
+| `trace.v2.adapters` | deterministic text/HTML adapter normalization and binary-adapter boundary |
+| `trace.v2.atomizer` | paragraph/bullet atomization with parser offsets |
+| `trace.v2.service` | ingestion, retrieval, synthesis, consolidation, graph views, admin orchestration |
+| `trace.v2.store` | append-only events, canonical records, anchors, projections, replay, snapshots |
+| `trace.v2.worker` | lease-based at-least-once outbox delivery |
+| `trace.v2.api` | versioned `/v2` HTTP routes and domain-error mapping |
+
+## Lifecycle summary
+
+1. An adapter retains original bytes and supplies parser text.
+2. One transaction appends ingestion, attachment, atom-version, structural-edge, and outbox events.
+3. The hot lexical projection is available before the `202` response.
+4. Consolidation examines bounded local neighborhoods and emits evidence-backed proposals.
+5. Promotion/rejection is explicit and event-logged.
+6. Queries persist evidence bundles; synthesis reads only those bundles.
+7. Replay validation compares an independent event fold with canonical records.
+
+## Deployment boundary
+
+The embedded `SqliteEventStore` is a correctness and replay adapter. A scale
+deployment should keep the public models and service semantics while replacing
+storage responsibilities with PostgreSQL, private S3-compatible object
+storage, OpenSearch, Qdrant, NATS JetStream, Redis, and policy-controlled model
+providers. See the production topology and 100K/1M/10M gates in
+[v2-architecture.md](v2-architecture.md).
+
+## Legacy material
+
+The former `trace.core`, `trace.agents`, `trace.events`, and frontend modules
+remain in the working tree as historical prototype material. They are not
+loaded by the V2 entry point and are not part of the V2 storage contract.

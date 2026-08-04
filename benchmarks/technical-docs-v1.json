@@ -1,0 +1,49 @@
+{
+  "name": "trace-technical-docs-v1",
+  "suite": "in_domain",
+  "review_status": "reviewed",
+  "release_authority": true,
+  "corpus_snapshot": "trace-technical-docs-v1: reviewed technical-doc corpus snapshot",
+  "fixture_workspace_id": "benchmark-alpha",
+  "fixture_idempotency_key": "techdocs-v1",
+  "fixture_corpus": "The API gateway validates workspace scope before dispatching a query.\n\nThe retrieval service fuses BM25 and dense candidates with reciprocal-rank fusion.\n\nThe reranker selects evidence passages before synthesis.\n\nVersion two replaces the legacy lexical-only path with hybrid retrieval.\n\nThe migration guide requires rebuilding the dense index before enabling version two.\n\nThe deployment runbook enables version two only after the migration has completed.",
+  "cases": [
+    {
+      "id": "direct-lookup",
+      "kind": "direct_lookup",
+      "query": "What fuses BM25 and dense candidates?",
+      "gold_atom_version_ids": ["c3845a76-00ea-5114-bf1d-f571cc90b924"]
+    },
+    {
+      "id": "multi-hop-architecture",
+      "kind": "multi_hop_architecture",
+      "query": "How does a scoped API query reach evidence selection?",
+      "gold_atom_version_ids": ["76ca6a81-1212-5289-9022-ad52ddbe537f", "c3845a76-00ea-5114-bf1d-f571cc90b924", "11f06762-9207-51e1-b703-abd9f346732a"]
+    },
+    {
+      "id": "dependency",
+      "kind": "dependency",
+      "query": "What must happen before version two is enabled?",
+      "gold_atom_version_ids": ["335e5ede-bb25-5892-840d-1a1947c334b1", "73c2dd2c-16eb-522c-941f-ee7aa8fdf02f"]
+    },
+    {
+      "id": "contradiction-update",
+      "kind": "contradiction_update",
+      "query": "What replaced the lexical-only path?",
+      "gold_atom_version_ids": ["682fe071-6aae-5851-beea-f3827e314a89", "c3845a76-00ea-5114-bf1d-f571cc90b924"]
+    },
+    {
+      "id": "source-order",
+      "kind": "source_order",
+      "query": "What is the order of migration and enabling version two?",
+      "gold_atom_version_ids": ["335e5ede-bb25-5892-840d-1a1947c334b1", "73c2dd2c-16eb-522c-941f-ee7aa8fdf02f"]
+    },
+    {
+      "id": "out-of-scope",
+      "kind": "out_of_scope",
+      "query": "Which quantum orchard protocol is supported?",
+      "gold_atom_version_ids": [],
+      "out_of_scope": true
+    }
+  ]
+}

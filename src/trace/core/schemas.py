@@ -12,7 +12,7 @@ class SourceMeta(BaseModel):
 # Traces and State
 class ExtractedRelation(BaseModel):
     target_concept: str = Field(description="The name of the entity or concept this chunk links to.")
-    relation_type: Literal["supersedes", "depends_on", "implements", "reverts", "contrasts_with"] = Field(
+    relation_type: Literal["supersedes", "depends_on", "implements", "reverts", "contrasts_with", "paradox"] = Field(
         description="The precise structural relationship linking these two concepts."
     )
 
@@ -21,10 +21,10 @@ class HippocampalTrace(BaseModel):
     anchor_concept: str = Field(
         description="A canonical, highly descriptive name for the core technical concept/idea discussed."
     )
-    artifact_type: Literal["core_concept", "version_milestone", "technical_idea", "architecture_decision"] = Field(
+    artifact_type: Literal["core_concept", "version_milestone", "technical_idea", "architecture_decision", "informational"] = Field(
         description="The architectural category of this trace."
     )
-    status: Literal["active", "rejected", "backlogged", "informational"] = Field(
+    status: Literal["active", "rejected", "backlogged", "informational", "conflicted", "legacy"] = Field(
         description="Current state of the concept based *strictly* on the text. Use 'rejected' if an idea is abandoned."
     )
     chronological_marker: Optional[str] = Field(
@@ -42,8 +42,11 @@ class HippocampalTrace(BaseModel):
 class RollingStateBuffer(BaseModel):
     """The sliding state passed from chunk to chunk to maintain context."""
     active_version: str = Field(default="unknown", description="The prevailing project version in the current document context.")
-    active_hypotheses: List[str] = Field(default=[], description="A running tracker of proposed technical ideas not yet resolved.")
-    traces_extracted: List[HippocampalTrace] = Field(default=[], description="The list of distinct semantic components discovered in this chunk.")
+    active_hypotheses: Dict[str, float] = Field(default_factory=dict, description="A running tracker of proposed technical ideas with their activation energies.")
+
+class LLMRollingState(BaseModel):
+    active_version: str = Field(default="unknown")
+    active_hypotheses: List[str] = Field(default=[])
 
 # Canonical Graph representation
 class CanonicalEntity(BaseModel):
@@ -57,6 +60,10 @@ class GraphEdge(BaseModel):
     target_id: str
     relation_type: str
 
+class ConflictResolutionResult(BaseModel):
+    resolved_entities: List[CanonicalEntity]
+    new_edges: List[GraphEdge]
+
 # Event Payloads
 class Event(BaseModel):
     name: str
@@ -66,22 +73,27 @@ class DocumentChunkedPayload(BaseModel):
     project_id: str
     chunk_text: str
     meta: SourceMeta
+    is_chronological: bool = False
+    thread_id: str = "default"
 
 class TraceExtractedPayload(BaseModel):
     project_id: str
-    trace: HippocampalTrace
-    updated_state: RollingStateBuffer
+    trace: Optional[HippocampalTrace] = None
+    updated_state: LLMRollingState
 
 class GraphResolvedPayload(BaseModel):
     project_id: str
     entities: List[CanonicalEntity]
     edges: List[GraphEdge]
+    is_chronological: bool = False
 
 class TocGeneratedPayload(BaseModel):
     project_id: str
     global_toc: str
     entities: List[CanonicalEntity]
     edges: List[GraphEdge]
+    part_guidance: Dict[str, str] = Field(default_factory=dict)
+    entity_parts: Dict[str, str] = Field(default_factory=dict)
 
 class LLMCallPayload(BaseModel):
     project_id: str

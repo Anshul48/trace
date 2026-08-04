@@ -3,30 +3,54 @@
 @tailwind utilities;
 
 :root {
-  --bg-primary: #050505;
-  --bg-secondary: #0a0a0a;
-  --bg-tertiary: #111111;
-  --text-primary: #e0e0e0;
-  --text-secondary: #a0a0a0;
+  /* Obsidian Dark Aesthetic (Default) */
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #161616;
+  --bg-tertiary: #2a2a2a;
+  
+  --text-primary: #dcddde;
+  --text-secondary: #999999;
   --text-muted: #666666;
   
-  --accent-primary: #00ff00; /* Terminal Green */
-  --accent-secondary: #4caf50;
-  --border-color: #333333;
-  --border-radius: 0px; /* Sharp corners for terminal feel */
+  /* Elegant Accents */
+  --accent-primary: #8b5cf6; /* Vibrant Purple */
+  --accent-secondary: #3b82f6; /* Bright Blue */
+  --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   
-  --success: #00ff00;
-  --warning: #ff9800;
-  --error: #f44336;
+  --border-color: rgba(255, 255, 255, 0.15);
+  --border-radius: 8px; /* Obsidian style smaller borders */
+  
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+}
+
+.theme-light {
+  /* Obsidian Light Aesthetic */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f4f4;
+  --bg-tertiary: #e4e4e4;
+  
+  --text-primary: #2e3338;
+  --text-secondary: #5c5c5c;
+  --text-muted: #888888;
+  
+  --border-color: rgba(0, 0, 0, 0.1);
+  --accent-primary: #7c3aed;
+  --accent-secondary: #2563eb;
 }
 
 body {
   background-color: var(--bg-primary);
+  /* Use subtle gradient in dark mode, clean in light mode */
+  background-image: var(--bg-image, none);
+  background-attachment: fixed;
   color: var(--text-primary);
-  font-family: 'Consolas', 'Courier New', monospace;
+  font-family: 'Outfit', sans-serif;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
 .container {
@@ -35,32 +59,50 @@ body {
   padding: 0 1rem;
 }
 
-/* Minimalist forms and inputs */
-.input-field {
+/* Glassmorphism Components */
+.glass-panel {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  /* Obsidian panels are usually solid, not blurred, for better readability */
+}
+
+/* Elegant Inputs */
+.input-field {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   color: var(--text-primary);
-  padding: 0.75rem;
-  font-family: 'Consolas', 'Courier New', monospace;
+  padding: 0.875rem 1rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
   outline: none;
   width: 100%;
+  transition: all 0.3s ease;
 }
 
 .input-field:focus {
   border-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
 }
 
+/* Modern Buttons */
 .btn {
   padding: 0.75rem 1.5rem;
-  font-family: 'Consolas', 'Courier New', monospace;
-  font-weight: bold;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  font-size: 0.9rem;
   cursor: pointer;
-  border: 1px solid var(--border-color);
-  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--bg-tertiary);
   color: var(--text-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .btn:disabled {
@@ -69,73 +111,129 @@ body {
 }
 
 .btn-primary {
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--accent-primary);
-  color: var(--bg-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+  filter: brightness(1.1);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--bg-secondary);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .badge {
-  padding: 0.25rem 0.5rem;
+  padding: 0.35rem 0.75rem;
   font-size: 0.75rem;
-  text-transform: uppercase;
-  border: 1px solid currentColor;
+  font-weight: 600;
+  border-radius: 9999px;
+  letter-spacing: 0.025em;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.badge-success { color: var(--success); }
-.badge-warning { color: var(--warning); }
-.badge-error { color: var(--error); }
+.badge-success { 
+  color: var(--success); 
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+.badge-warning { 
+  color: var(--warning); 
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+.badge-error { 
+  color: var(--error); 
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
 
-/* Table styling for Dashboard */
+/* Elegant Table */
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 th, td {
-  padding: 1rem;
+  padding: 1.25rem 1rem;
   text-align: left;
-  border-bottom: 1px dashed var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 th {
   color: var(--text-secondary);
-  font-weight: normal;
-  text-transform: lowercase;
+  font-weight: 500;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-tr:hover td {
-  background: var(--bg-secondary);
+tr:last-child td {
+  border-bottom: none;
 }
 
-/* Terminal Log specific */
-.log-line {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.875rem;
-  line-height: 1.5;
+tbody tr {
+  transition: background-color 0.2s ease;
 }
 
-.log-time {
-  color: var(--text-muted);
-  white-space: nowrap;
+tbody tr:hover td {
+  background: var(--bg-tertiary);
+}
+
+/* Markdown Styling (Obsidian-like) */
+.markdown-preview h1, .markdown-preview h2, .markdown-preview h3 {
+  color: var(--text-primary);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.markdown-preview a {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+.markdown-preview a:hover {
+  text-decoration: underline;
+}
+.markdown-preview code {
+  background: var(--bg-tertiary);
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+  font-family: monospace;
 }
 
 /* Utilities */
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
 }
 
 ::-webkit-scrollbar {
@@ -147,6 +245,7 @@ tr:hover td {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border-color); 
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted); 

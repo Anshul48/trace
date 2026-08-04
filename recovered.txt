@@ -1,0 +1,25 @@
+Created At: 2026-07-09T11:08:26Z
+Completed At: 2026-07-09T11:08:26Z
+File Path: `file:///c:/Users/anshu/OneDrive/Documents/Code/Utilities/trace/recovered.txt`
+Total Lines: 17
+Total Bytes: 817
+Showing lines 1 to 17
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: Created At: 2026-07-09T11:06:48Z
+2: Tool is running as a background task with task id: 2d030772-655a-421b-b89b-d689fb83daf1/task-349
+3: Task Description: python -c "
+4: import os, glob
+5: history_dir = os.path.expandvars(r'%APPDATA%\Code\User\History')
+6: if os.path.exists(history_dir):
+7:     for root, dirs, files in os.walk(history_dir):
+8:         for f in files:
+9:             path = os.path.join(root, f)
+10:             try:
+11:                 content = open(path, encoding='utf-8').read()
+12:                 if 'export function ProjectOutput' in content and 'dagMode=' in content:
+13:                     print(f'Found backup: {path}')
+14:             except:
+15:                 pass
+16: "
+17: Task logs are available at: file:///C:/Users/anshu/.gemini/antigravity/brain/2d030772-655a-421b-b89b-d689fb83daf1/.system_generated/tasks/task-349.log
+The above content shows the entire, complete file contents of the requested file.

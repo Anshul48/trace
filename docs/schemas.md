@@ -1,92 +1,125 @@
-# Project Trace: Data Contracts & Schemas
+# Trace V2 data contracts
 
-This document defines the key Pydantic data schemas that drive the Project Trace DAG engine.
+The source of truth for API validation is [src/trace/v2/models.py](../src/trace/v2/models.py). This page explains the fields in operational terms; it is not a replacement for the Pydantic models.
 
-## Structural Data Models
+## Ingestion
 
-### 1. SourceMeta
-Metadata linking a semantic trace back to its origin file and partition block.
-```python
-class SourceMeta(BaseModel):
-    filename: str
-    absolute_path: str
-    chunk_index: int
-    block_id: Optional[str] = None # UUID pointing to the SQLite blocks table
+`IngestionRequest` requires a non-empty `workspace_id` and normalized `text`.
+`source` identifies the adapter and provenance:
+
+```json
+{
+  "workspace_id": "research",
+  "text": "A paragraph of source evidence.",
+  "actor": "analyst",
+  "visibility": "private",
+  "source": {
+    "title": "notes.md",
+    "uri": "memory://research/notes.md",
+    "media_type": "text/markdown",
+    "adapter": "markdown",
+    "metadata": {"capture_method": "upload"}
+  },
+  "idempotency_key": "research-notes-001"
+}
 ```
 
-### 2. ExtractedRelation
-Represents a structural relationship between the anchor concept and another concept in the graph.
-```python
-class ExtractedRelation(BaseModel):
-    target_concept: str # The name of the target entity
-    relation_type: Literal["supersedes", "depends_on", "implements", "reverts", "contrasts_with"]
+The multipart upload route accepts original bytes and selects HTML/PDF/text
+adapters from media type and filename. Original objects and parser artifacts
+are private; only bounded excerpts and provenance are returned by retrieval.
+
+## Atom versions
+
+There is no domain-specific `HippocampalTrace` table in V2. An atom is a generic
+node with the `atom` facet and a `node_version` containing:
+
+| Field | Meaning |
+|---|---|
+| `atom_version_id` | immutable evidence version identity |
+| `node_id` | stable identity across edits and lineage operations |
+| `version` | per-node successor number |
+| `content` | parser text for this exact version |
+| `content_hash` | normalized content digest |
+| `properties.ingestion_id` | capture operation that introduced the atom |
+| `properties.attachment_id` | private raw-artifact reference |
+| `properties.source_start/end` | offsets into normalized parser text |
+| `properties.parser_location` | human-readable offset, currently `char:start-end` |
+| `properties.source` | adapter and source provenance |
+
+The `atom` facet is a generic indexable property, not an ontology assertion.
+An edit creates a new version; the old content and offsets remain addressable.
+
+## Edges and evidence
+
+`edge_versions` support any typed relation string. Structural relations include
+`NEXT`, `CHILD_OF`, and `DERIVED_FROM`; organization may add `semantic`,
+`supports`, `contradicts`, `extends`, `supersedes`, `belongs_to`, `alias_of`, or
+other policy-approved types.
+
+Each trusted non-structural edge requires `evidence_atom_version_ids`. The
+store expands those IDs into `evidence_anchors` containing:
+
+```json
+{
+  "target_kind": "edge_version",
+  "target_id": "edge-version-id",
+  "source_atom_version_id": "atom-version-id",
+  "source_start": 0,
+  "source_end": 42,
+  "parser_location": "char:0-42",
+  "quote_hash": "sha256-of-source-content"
+}
 ```
 
-### 3. HippocampalTrace
-The atomic semantic node extracted by the MicroExtractor.
-```python
-class HippocampalTrace(BaseModel):
-    trace_id: str # Cryptographic UUID generated on extraction
-    anchor_concept: str # Canonical concept name
-    artifact_type: Literal["core_concept", "version_milestone", "technical_idea", "architecture_decision"]
-    status: Literal["active", "rejected", "backlogged", "informational"]
-    chronological_marker: Optional[str] # Version tag or date review markers
-    summary_trace: str # Dense 1-2 sentence compression of technical choices
-    relations: List[ExtractedRelation]
-    source_meta: Optional[SourceMeta]
-    raw_source_text: str # Preserved full-text block for lossless compilation
+Promoted Holons, schemas, claims, and summaries are generic derived nodes and
+receive `node_version` anchors under `target_kind=node_version`.
+
+## Queries and evidence bundles
+
+`QueryRequest` makes retrieval scope explicit:
+
+- `workspace_id`: tenant boundary;
+- `as_of_event`: optional historical event offset;
+- `facets`: required generic facets;
+- `privacy_context`: visibility policy inputs;
+- `retrieval_budget`: mode and candidate limits.
+
+`POST /v2/queries` returns a persisted `evidence_bundle_id`, results, source
+locations, temporal status, channel scores, graph paths, and one sufficiency
+state: `answerable`, `ambiguous`, or `insufficient_evidence`.
+
+The embedded lexical control path reports `dense: 0.0` until a versioned vector
+provider is configured. This is intentional: a missing model/index must not be
+represented as a fabricated confidence score.
+
+## Proposals
+
+`ProposalCreateRequest` requires at least one evidence atom-version ID and
+records `confidence` and `model_version`. Proposal types are `edge`, `holon`,
+`schema`, `merge`, `summary`, `contradiction_resolution`, and `claim`.
+
+```text
+pending --promote--> promoted + derived edge/node + anchors
+pending --reject---> rejected + reason
 ```
 
----
+Both transitions append decision events. A proposal is not a fact until the
+promotion transaction has validated workspace and evidence scope.
 
-## Event Bus Payloads
+## Versioned query objects
 
-All event payloads include a `project_id` to route messages correctly inside the workspace and isolate parallel projects.
+Saved queries preserve query logic and a name in a workspace. Frozen queries
+also preserve the selected atom-version IDs, giving a stable historical set
+even if default retrieval later prefers successor versions. Generated synthesis
+is always a view of a bundle and has no canonical write path.
 
-### 1. DocumentChunkedPayload
-Triggered when a document has been partitioned and stored as an immutable block.
-```python
-class DocumentChunkedPayload(BaseModel):
-    project_id: str
-    chunk_text: str
-    meta: SourceMeta
-```
+## Administrative contracts
 
-### 2. TraceExtractedPayload
-Emitted when the MicroExtractor finishes running on a block.
-```python
-class TraceExtractedPayload(BaseModel):
-    project_id: str
-    trace: HippocampalTrace
-    updated_state: RollingStateBuffer # Carries rolling hypotheses and versions
-```
+`IndexRevisionRequest`, `ModelRegistrationRequest`, and
+`ExperimentManifestRequest` capture model/provider versions, vector namespaces,
+lexical revisions, corpus snapshots, code revisions, and parameters. These
+fields make re-indexing and benchmark comparisons reproducible.
 
-### 3. GraphResolvedPayload
-Emitted once the deterministic clustering process finishes semantic deduplication of entities and edges.
-```python
-class GraphResolvedPayload(BaseModel):
-    project_id: str
-    entities: List[CanonicalEntity]
-    edges: List[GraphEdge]
-```
-
-### 4. TocGeneratedPayload
-Emitted by the MacroSynthesizer after building the Table of Contents, pausing the compiler to wait for human intervention.
-```python
-class TocGeneratedPayload(BaseModel):
-    project_id: str
-    global_toc: str
-    entities: List[CanonicalEntity]
-    edges: List[GraphEdge]
-```
-
-### 5. LLMCallPayload
-Emitted on every LLM agent execution, providing detailed system context, prompt inputs, and outputs to the live logs dashboard.
-```python
-class LLMCallPayload(BaseModel):
-    project_id: str
-    agent_name: str
-    model_name: str
-    prompt: Any
-    response: str
-```
+The replay endpoint is a validation operation, not a destructive migration. A
+failed replay report should stop promotion and trigger investigation; it should
+not be “fixed” by deleting the mismatched canonical row.
