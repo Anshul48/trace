@@ -35,3 +35,6 @@ output/
 .trace_config.json
 .trace/
 .verify_v2/
+.verify_phase1_build/
+.verify_phase1_venv/
+tests/.phase1_tmp/

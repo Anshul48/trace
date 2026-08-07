@@ -1,0 +1,37 @@
+{
+  "hardware_profile": {
+    "name": "replace-with-declared-hardware",
+    "cpu": "replace-with-cpu",
+    "memory_bytes": 0,
+    "storage": "replace-with-storage"
+  },
+  "source_atoms": 0,
+  "average_tokens_per_atom": 0,
+  "immutable_version_growth": {
+    "new_atoms": 0,
+    "superseded_atoms": 0
+  },
+  "judged_queries": [],
+  "navigation_summary_reviews": [],
+  "latency_by_class": {
+    "direct_lookup": {
+      "p95_ms": 0
+    },
+    "dependency": {
+      "p95_ms": 0
+    },
+    "contradiction": {
+      "p95_ms": 0
+    },
+    "chronology": {
+      "p95_ms": 0
+    },
+    "navigation": {
+      "p95_ms": 0
+    },
+    "out_of_scope": {
+      "p95_ms": 0
+    }
+  },
+  "critical_defects": []
+}

@@ -14,13 +14,13 @@ ENV UV_COMPILE_BYTECODE=1
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies (without installing the project itself)
-RUN uv sync --frozen --no-install-project
+RUN uv sync --frozen --extra production --no-install-project
 
 # Copy the rest of the application code
 COPY . .
 
 # Sync the project
-RUN uv sync --frozen
+RUN uv sync --frozen --extra production
 
 # API is the default container process.  The same image can run the durable
 # worker or migration process with ``uv run python main.py worker`` and

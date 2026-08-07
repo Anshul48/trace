@@ -16,6 +16,20 @@ class BenchmarkFormatError(ValueError):
     pass
 
 
+class ReleaseCorpusError(BenchmarkFormatError):
+    """A corpus is useful for development but cannot authorize a release."""
+
+
+_RELEASE_KIND_GROUPS = {
+    "direct_lookup": {"direct_lookup", "direct"},
+    "multi_hop": {"multi_hop", "multi_hop_architecture", "multi_hop_dependency"},
+    "dependency": {"dependency", "dependency_chain"},
+    "contradiction": {"contradiction", "contradiction_update"},
+    "order": {"order", "source_order", "temporal_order"},
+    "out_of_scope": {"out_of_scope"},
+}
+
+
 def load_benchmark(path: str | Path) -> dict[str, Any]:
     benchmark_path = Path(path)
     try:
@@ -32,6 +46,43 @@ def load_benchmark(path: str | Path) -> dict[str, Any]:
         if not isinstance(case["gold_atom_version_ids"], list):
             raise BenchmarkFormatError(f"case {case['id']!r} has invalid gold_atom_version_ids")
     return value
+
+
+def validate_release_corpus(benchmark: dict[str, Any]) -> dict[str, Any]:
+    """Prove that a frozen corpus is large and reviewed enough for release.
+
+    This deliberately rejects small developer fixtures.  It is safer to block
+    a release than to label six illustrative cases as a 300-case reviewed
+    corpus.  BRIGHT-derived cases remain separately reported and require their
+    own licence metadata rather than being silently mixed into the in-domain
+    quality result.
+    """
+
+    failures: list[str] = []
+    if benchmark.get("release_authority") is not True:
+        failures.append("release_authority must be true")
+    if benchmark.get("review_status") != "reviewed":
+        failures.append("review_status must be reviewed")
+    if not benchmark.get("corpus_snapshot"):
+        failures.append("corpus_snapshot is required")
+    cases = list(benchmark.get("cases") or [])
+    if len(cases) < 300:
+        failures.append("at least 300 in-domain reviewed cases are required")
+    observed = {str(case.get("kind", "")) for case in cases}
+    missing = sorted(group for group, aliases in _RELEASE_KIND_GROUPS.items() if not observed.intersection(aliases))
+    if missing:
+        failures.append("missing required case kinds: " + ", ".join(missing))
+    unreviewed = [str(case.get("id", "unknown")) for case in cases if case.get("review_status") not in {None, "reviewed"}]
+    if unreviewed:
+        failures.append("contains non-reviewed cases")
+    if failures:
+        raise ReleaseCorpusError("release corpus rejected: " + "; ".join(failures))
+    return {
+        "approved": True,
+        "case_count": len(cases),
+        "kind_coverage": sorted(_RELEASE_KIND_GROUPS),
+        "corpus_snapshot": benchmark["corpus_snapshot"],
+    }
 
 
 def _ndcg(relevant: set[str], returned: Sequence[str], cutoff: int) -> float:

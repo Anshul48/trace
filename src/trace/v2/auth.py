@@ -108,6 +108,96 @@ class Principal:
         requested.pop("visibility", None)
         return {**requested, "allowed_visibility": effective, "principal_subject": self.subject}
 
+    def can_use_model(self, model_id: str) -> bool:
+        """Return whether a server-registered model is within this grant.
+
+        Empty model permissions intentionally mean "no model calls" for an
+        authenticated principal.  The unauthenticated embedded developer path
+        is handled by the deployment's model gateway policy, not by a request
+        body flag.
+        """
+
+        return "*" in self.model_permissions or model_id in self.model_permissions
+
+
+@dataclass(frozen=True)
+class AuthorizationContext:
+    """The one server-derived authorization value passed below HTTP.
+
+    Indexes, queues, caches, and model calls receive this context (or its
+    serialized safe subset), never raw caller-provided tenant/visibility
+    fields.  A context always names exactly one workspace, which prevents an
+    otherwise convenient ``*`` tenant scope from becoming a query path.
+    """
+
+    principal: Principal
+    workspace_id: str
+    allowed_visibility: frozenset[str]
+    request_id: str | None = None
+    as_of_event: int | None = None
+
+    @property
+    def subject(self) -> str:
+        return self.principal.subject
+
+    @property
+    def model_permissions(self) -> frozenset[str]:
+        return self.principal.model_permissions
+
+    def require_scope(self, scope: str) -> None:
+        self.principal.require_scope(scope)
+
+    def require_model(self, model_id: str) -> None:
+        if self.principal.auth_method == "anonymous":
+            # Local development still uses the server registry and budget;
+            # it simply has no persisted OIDC/API-key grant to inspect.
+            return
+        if not self.principal.can_use_model(model_id):
+            raise AuthorizationError("requested model is outside authenticated model permissions", code="model_scope_denied")
+
+    def allows_record(self, record: Mapping[str, Any]) -> bool:
+        """Revalidate a storage/index result before it reaches a caller."""
+
+        if str(record.get("workspace_id")) != self.workspace_id:
+            return False
+        security = record.get("security") or {}
+        visibility = security.get("visibility") if isinstance(security, Mapping) else None
+        return visibility in self.allowed_visibility
+
+    def privacy_context(self) -> dict[str, Any]:
+        return {
+            "allowed_visibility": sorted(self.allowed_visibility),
+            "principal_subject": self.subject,
+            "workspace_id": self.workspace_id,
+            "request_id": self.request_id,
+        }
+
+
+def build_authorization_context(
+    principal: Principal,
+    workspace_id: str | None,
+    *,
+    request_id: str | None = None,
+    as_of_event: int | None = None,
+    requested_privacy: Mapping[str, Any] | None = None,
+) -> AuthorizationContext:
+    """Build an immutable, one-workspace context after validating a request.
+
+    ``requested_privacy`` can only narrow visibility.  It cannot grant a
+    visibility value, workspace, provider, or model not present in the
+    principal.
+    """
+
+    selected_workspace = enforce_workspace(principal, workspace_id)
+    narrowed = principal.privacy_context(requested_privacy)
+    return AuthorizationContext(
+        principal=principal,
+        workspace_id=selected_workspace,
+        allowed_visibility=frozenset(str(item) for item in narrowed["allowed_visibility"]),
+        request_id=request_id,
+        as_of_event=as_of_event,
+    )
+
 
 class IdentityProvider:
     """Authenticate request headers using API keys or signed JWTs."""

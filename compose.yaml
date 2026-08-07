@@ -1,0 +1,167 @@
+# Trace's local-integration profile.  It is intentionally not a claim that one
+# workstation proves the 10M atom / 500 QPS production gate.
+name: trace
+
+x-trace-environment: &trace-environment
+  TRACE_DEPLOYMENT_PROFILE: self_hosted
+  TRACE_PRODUCTION_MODE: "false"
+  TRACE_AUTH_REQUIRED: "false"
+  TRACE_REPOSITORY: postgres
+  TRACE_POSTGRES_DSN: postgresql://trace_runtime:trace_runtime@postgres:5432/trace
+  TRACE_OBJECT_STORE: s3
+  TRACE_S3_BUCKET: trace
+  TRACE_S3_ENDPOINT: http://minio:9000
+  AWS_ACCESS_KEY_ID: trace-minio
+  AWS_SECRET_ACCESS_KEY: trace-minio-secret
+  AWS_DEFAULT_REGION: us-east-1
+  TRACE_OPENSEARCH_URL: http://opensearch:9200
+  TRACE_OPENSEARCH_INDEX: trace-atoms-current
+  TRACE_QDRANT_URL: http://qdrant:6333
+  TRACE_QDRANT_COLLECTION: trace-vectors-current
+  TRACE_NATS_URL: nats://nats:4222
+  TRACE_REDIS_URL: redis://redis:6379/0
+  TRACE_MODEL_GATEWAY_URL: http://fake-model-gateway:8081/v1
+  TRACE_ALLOW_CLOUD_MODELS: "true"
+  # PostgreSQL has forced tenant RLS even in this integration profile.  Local
+  # workers therefore use this explicit fixture workspace; production runs
+  # one worker assignment per workspace or queue partition.
+  TRACE_WORKER_WORKSPACE_ID: ${TRACE_WORKER_WORKSPACE_ID:-local}
+  TRACE_ALLOW_LOCAL_WEBHOOKS: "true"
+  TRACE_WEBHOOK_MASTER_KEY: local-development-only-change-me
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: trace
+      POSTGRES_USER: trace_runtime
+      POSTGRES_PASSWORD: trace_runtime
+    ports: ["5432:5432"]
+    volumes: [postgres-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trace_runtime -d trace"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: trace-minio
+      MINIO_ROOT_PASSWORD: trace-minio-secret
+    ports: ["9000:9000", "9001:9001"]
+    volumes: [minio-data:/data]
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  minio-init:
+    image: minio/mc:RELEASE.2025-04-16T18-13-26Z
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-ec"]
+    command: >-
+      mc alias set trace http://minio:9000 trace-minio trace-minio-secret;
+      mc mb --ignore-existing trace/trace;
+      mc version enable trace/trace
+
+  opensearch:
+    image: opensearchproject/opensearch:2.19.1
+    environment:
+      discovery.type: single-node
+      plugins.security.disabled: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    ports: ["9200:9200"]
+    volumes: [opensearch-data:/usr/share/opensearch/data]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9200 >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  qdrant:
+    image: qdrant/qdrant:v1.14.1
+    ports: ["6333:6333"]
+    volumes: [qdrant-data:/qdrant/storage]
+
+  nats:
+    image: nats:2.10-alpine
+    command: ["-js", "-sd", "/data"]
+    ports: ["4222:4222", "8222:8222"]
+    volumes: [nats-data:/data]
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]
+    volumes: [redis-data:/data]
+
+  fake-model-gateway:
+    build: .
+    command: ["uv", "run", "uvicorn", "infra.fake_model_gateway:app", "--host", "0.0.0.0", "--port", "8081"]
+    ports: ["8081:8081"]
+
+  # Production images run ``infra.model_gateway:app`` on an internal network;
+  # the fake is intentionally used here so local integration never needs a
+  # provider credential or makes an external model call.
+
+  migrate:
+    build: .
+    environment: *trace-environment
+    command: ["uv", "run", "python", "main.py", "migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build: .
+    environment: *trace-environment
+    command: ["uv", "run", "uvicorn", "main_api:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports: ["8000:8000"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      minio-init:
+        condition: service_completed_successfully
+      opensearch:
+        condition: service_healthy
+      fake-model-gateway:
+        condition: service_started
+
+  outbox-publisher:
+    build: .
+    environment: *trace-environment
+    command: ["uv", "run", "python", "main.py", "outbox"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      nats:
+        condition: service_started
+
+  worker:
+    build: .
+    environment: *trace-environment
+    command: ["uv", "run", "python", "main.py", "worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  webhook-worker:
+    build: .
+    environment: *trace-environment
+    command: ["uv", "run", "python", "main.py", "webhook-worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres-data:
+  minio-data:
+  opensearch-data:
+  qdrant-data:
+  nats-data:
+  redis-data:

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "revision": "trace-global-context-v1",
+  "title": "Trace production build dispatch contract",
+  "deployment_profiles": {
+    "self_hosted": {
+      "description": "Containers on operator-controlled infrastructure.",
+      "production_requires": ["capacity_preflight", "security_preflight", "backup_preflight", "load_gate"]
+    },
+    "gcp_mumbai": {
+      "region": "asia-south1",
+      "data_residency": "Workspace data must remain in asia-south1; provisioning fails on another region."
+    }
+  },
+  "api_compatibility": {
+    "version": "v2",
+    "workspace_location": "A workspace exists entirely in one profile/location.",
+    "migration": "Offline canonical-event and attachment export/import followed by projection rebuild; no live cross-cloud reads."
+  },
+  "model_registry": {
+    "default": "deepseek-v4-flash",
+    "models": ["deepseek-v4-flash", "deepseek-v4-pro"],
+    "pro_requires": ["workspace_permission", "budget"],
+    "provider_boundary": "Only the private model gateway receives provider credentials or URLs."
+  },
+  "invariants": [
+    "Attachments and immutable atom versions are the only factual truth.",
+    "Every projection is rebuildable and versioned with source anchors, checksums, model/prompt/index revision, and lineage.",
+    "Tenant and visibility policy is enforced before and after every index hit, in storage, queues, caches, and model calls.",
+    "No query-time or nightly worker may scan an entire workspace at production scale.",
+    "Retrieval returns raw evidence or abstains; graphs and summaries are never sufficient evidence alone.",
+    "LLMs create bounded, auditable derived proposals only; they never auto-create trusted topology.",
+    "Every worker is idempotent by workspace, input revision, configuration revision, and job kind."
+  ],
+  "release_gates": {
+    "target_atoms": 10000000,
+    "target_non_deep_qps": 500,
+    "availability": "99.5%",
+    "rpo": "24h",
+    "rto": "1d",
+    "latency_p95_seconds": {"fast": 2, "standard_graph_hierarchy": 5, "deep": 90},
+    "quality": "A mechanism change needs +2 points complete-gold-evidence coverage with no more than 0.5 points citation-precision regression."
+  },
+  "dag": ["D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9"]
+}

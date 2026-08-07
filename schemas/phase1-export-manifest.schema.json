@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trace.local/schemas/phase1-export-manifest.schema.json",
+  "title": "Trace Phase 1 portable export manifest",
+  "type": "object",
+  "required": [
+    "format",
+    "schema_version",
+    "created_at",
+    "offline_only",
+    "canonical_contract",
+    "counts",
+    "attachments"
+  ],
+  "properties": {
+    "format": {
+      "const": "trace.phase1.export"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "offline_only": {
+      "const": true
+    },
+    "canonical_contract": {
+      "const": "trace.local.v1"
+    },
+    "counts": {
+      "type": "object",
+      "required": [
+        "events",
+        "documents",
+        "attachments",
+        "atoms",
+        "proposals",
+        "navigation_summaries"
+      ],
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "attachment_id",
+          "archive_member",
+          "content_hash",
+          "byte_length"
+        ],
+        "properties": {
+          "attachment_id": { "type": "string", "minLength": 1 },
+          "archive_member": { "type": "string", "minLength": 1 },
+          "content_hash": { "type": "string", "minLength": 1 },
+          "byte_length": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,13 @@
 {
   "name": "bright-coding-v1",
   "suite": "bright_coding",
+  "review_status": "development_fixture",
+  "release_authority": false,
+  "license": {
+    "source": "BRIGHT-derived coding cases",
+    "status": "operator_review_required",
+    "note": "Report this suite separately; do not use it as in-domain release authority until licence and frozen source evidence are approved."
+  },
   "corpus_snapshot": "bright-derived-coding-review-2026-08-03",
   "cases": [
     {

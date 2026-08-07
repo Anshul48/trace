@@ -419,6 +419,28 @@ class SqliteEventStore:
                 CREATE INDEX IF NOT EXISTS webhooks_workspace_status
                     ON webhooks(workspace_id, status);
 
+                CREATE TABLE IF NOT EXISTS webhook_deliveries (
+                    delivery_id TEXT PRIMARY KEY,
+                    webhook_id TEXT NOT NULL REFERENCES webhooks(webhook_id),
+                    workspace_id TEXT NOT NULL,
+                    job_id TEXT NOT NULL REFERENCES jobs(job_id),
+                    event_type TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'pending',
+                    attempts INTEGER NOT NULL DEFAULT 0,
+                    max_attempts INTEGER NOT NULL DEFAULT 8,
+                    available_at TEXT NOT NULL,
+                    lease_until TEXT,
+                    last_error TEXT,
+                    delivered_at TEXT,
+                    created_event_offset INTEGER NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    UNIQUE(webhook_id, job_id, event_type)
+                );
+                CREATE INDEX IF NOT EXISTS webhook_deliveries_available
+                    ON webhook_deliveries(status, available_at, created_at);
+
                 CREATE TABLE IF NOT EXISTS api_keys (
                     api_key_id TEXT PRIMARY KEY,
                     workspace_id TEXT NOT NULL,
@@ -436,6 +458,27 @@ class SqliteEventStore:
                 );
                 CREATE INDEX IF NOT EXISTS api_keys_active_hash
                     ON api_keys(key_hash, status);
+
+                CREATE TABLE IF NOT EXISTS model_call_audits (
+                    model_call_audit_id TEXT PRIMARY KEY,
+                    workspace_id TEXT NOT NULL,
+                    model_id TEXT NOT NULL,
+                    purpose TEXT NOT NULL,
+                    actor TEXT NOT NULL,
+                    request_id TEXT,
+                    prompt_template_revision TEXT NOT NULL,
+                    response_schema_hash TEXT NOT NULL,
+                    excerpt_hashes_json TEXT NOT NULL,
+                    node_count INTEGER NOT NULL,
+                    estimated_tokens INTEGER NOT NULL,
+                    cloud_tokens INTEGER NOT NULL,
+                    cost_usd REAL NOT NULL,
+                    status TEXT NOT NULL,
+                    created_event_offset INTEGER NOT NULL,
+                    created_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS model_call_audits_workspace_created
+                    ON model_call_audits(workspace_id, created_at DESC);
                 """
             )
             # V2 previews created before leases were introduced remain readable.
@@ -1390,6 +1433,88 @@ class SqliteEventStore:
                 result.append(node)
             return result
 
+    def current_nodes_by_facet(
+        self,
+        workspace_id: str,
+        facet: str,
+        *,
+        as_of_event: int | None = None,
+        limit: int = 256,
+    ) -> list[dict[str, Any]]:
+        """Return a bounded current-node projection for one facet.
+
+        Query paths use this instead of loading every derived node merely to
+        find schemas or hierarchy summaries.  SQLite's JSON support varies by
+        distribution, so the indexed workspace selection remains portable and
+        the facet predicate is intentionally conservative.
+        """
+
+        limit = max(1, min(int(limit), 2_000))
+        with self._connect() as conn:
+            event_clause = ""
+            args: list[Any] = [workspace_id, f'%"{facet}"%', limit]
+            if as_of_event is not None:
+                event_clause = " AND nv2.created_event_offset<=?"
+                # The event clause appears before LIMIT in the SQL.
+                args = [workspace_id, f'%"{facet}"%', as_of_event, limit]
+            rows = conn.execute(
+                f"""SELECT nv.*,n.workspace_id,n.facets_json,n.security_json FROM node_versions nv
+                    JOIN nodes n ON n.node_id=nv.node_id
+                    WHERE n.workspace_id=? AND n.facets_json LIKE ?
+                    AND nv.created_event_offset=(
+                        SELECT MAX(nv2.created_event_offset) FROM node_versions nv2
+                        WHERE nv2.node_id=nv.node_id {event_clause}
+                    ) ORDER BY nv.created_event_offset DESC LIMIT ?""",
+                args,
+            ).fetchall()
+            result: list[dict[str, Any]] = []
+            for row in rows:
+                node = self._node_version_row(row, row)
+                anchors = conn.execute(
+                    "SELECT * FROM evidence_anchors WHERE target_kind='node_version' AND target_id=? ORDER BY anchor_id",
+                    (node["atom_version_id"],),
+                ).fetchall()
+                node["evidence_anchors"] = [dict(anchor) for anchor in anchors]
+                result.append(node)
+            return result
+
+    def current_nodes_by_hierarchy_keys(
+        self,
+        workspace_id: str,
+        hierarchy_keys: Sequence[str],
+        *,
+        limit: int = 512,
+    ) -> list[dict[str, Any]]:
+        """Look up known hierarchy materializations without a workspace scan."""
+
+        keys = [str(key) for key in dict.fromkeys(hierarchy_keys) if key]
+        if not keys:
+            return []
+        limit = max(1, min(int(limit), 2_000))
+        key_clause = " OR ".join("nv.properties_json LIKE ?" for _ in keys)
+        values: list[Any] = [workspace_id, *[f'%"hierarchy_key":"{key}"%' for key in keys], limit]
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"""SELECT nv.*,n.workspace_id,n.facets_json,n.security_json FROM node_versions nv
+                    JOIN nodes n ON n.node_id=nv.node_id
+                    WHERE n.workspace_id=? AND ({key_clause})
+                      AND nv.created_event_offset=(
+                        SELECT MAX(nv2.created_event_offset) FROM node_versions nv2
+                        WHERE nv2.node_id=nv.node_id
+                    ) ORDER BY nv.created_event_offset DESC LIMIT ?""",
+                values,
+            ).fetchall()
+            result: list[dict[str, Any]] = []
+            for row in rows:
+                node = self._node_version_row(row, row)
+                anchors = conn.execute(
+                    "SELECT * FROM evidence_anchors WHERE target_kind='node_version' AND target_id=? ORDER BY anchor_id",
+                    (node["atom_version_id"],),
+                ).fetchall()
+                node["evidence_anchors"] = [dict(anchor) for anchor in anchors]
+                result.append(node)
+            return result
+
     def _current_atom_rows(
         self, conn: sqlite3.Connection, *, workspace_id: str | None, as_of_event: int | None
     ) -> list[sqlite3.Row]:
@@ -1443,6 +1568,43 @@ class SqliteEventStore:
                         WHERE ev2.edge_id=ev.edge_id {clause}
                     ) AND ev.status='trusted'""",
                 args,
+            ).fetchall()
+            return [self._edge_row(conn, row) for row in rows]
+
+    def neighbor_edges(
+        self,
+        workspace_id: str,
+        node_ids: Sequence[str],
+        *,
+        as_of_event: int | None = None,
+        limit: int = 512,
+    ) -> list[dict[str, Any]]:
+        """Return a bounded current edge neighbourhood without a workspace scan."""
+
+        selected = list(dict.fromkeys(str(node_id) for node_id in node_ids if node_id))[:512]
+        if not selected:
+            return []
+        limit = max(1, min(int(limit), 2_000))
+        marks = ",".join("?" for _ in selected)
+        event_clause = ""
+        values: list[Any] = [workspace_id, *selected, *selected]
+        if as_of_event is not None:
+            event_clause = " AND ev2.created_event_offset<=?"
+            values.append(as_of_event)
+        values.append(limit)
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"""SELECT ev.* FROM edge_versions ev
+                    WHERE ev.workspace_id=?
+                      AND (ev.source_node_id IN ({marks}) OR ev.target_node_id IN ({marks}))
+                      AND ev.created_event_offset=(
+                        SELECT MAX(ev2.created_event_offset) FROM edge_versions ev2
+                        WHERE ev2.edge_id=ev.edge_id {event_clause}
+                      )
+                      AND ev.status='trusted'
+                    ORDER BY ev.created_event_offset DESC,ev.edge_version_id
+                    LIMIT ?""",
+                values,
             ).fetchall()
             return [self._edge_row(conn, row) for row in rows]
 
@@ -2477,6 +2639,160 @@ class SqliteEventStore:
             result["rotation_event_offset"] = event.offset
             return result
 
+    # ----------------------------------------------------- webhook delivery
+    @staticmethod
+    def _delivery_row(row: sqlite3.Row | None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("webhook delivery was not found")
+        result = dict(row)
+        result["payload"] = _decode(result.pop("payload_json"), {})
+        return result
+
+    def enqueue_webhook_delivery(self, job: dict[str, Any], *, max_attempts: int = 8) -> dict[str, Any] | None:
+        """Durably enqueue a completion callback exactly once per job/event."""
+
+        webhook_id = job.get("webhook_id")
+        if not webhook_id:
+            return None
+        webhook = self.get_webhook(str(webhook_id))
+        event_type = "job." + str(job.get("status"))
+        if webhook["status"] != "active" or (webhook.get("event_types") and event_type not in webhook["event_types"]):
+            return None
+        delivery_id = str(uuid.uuid4())
+        payload = {
+            "delivery_id": delivery_id,
+            "event": event_type,
+            "job_id": job["job_id"],
+            "workspace_id": job["workspace_id"],
+            "kind": job["kind"],
+            "status": job["status"],
+            "result": job.get("result"),
+            "error": job.get("error"),
+            "request_id": job.get("request_id"),
+        }
+        with self.transaction() as conn:
+            existing = conn.execute(
+                "SELECT * FROM webhook_deliveries WHERE webhook_id=? AND job_id=? AND event_type=?",
+                (webhook_id, job["job_id"], event_type),
+            ).fetchone()
+            if existing:
+                return self._delivery_row(existing)
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{job['workspace_id']}",
+                event_type="webhook.delivery_queued",
+                payload={"delivery_id": delivery_id, "webhook_id": webhook_id, "workspace_id": job["workspace_id"], "job_id": job["job_id"], "event_type": event_type},
+                actor="webhook-dispatcher",
+                correlation_id=str(job.get("request_id")) if job.get("request_id") else None,
+            )
+            now = _now()
+            conn.execute(
+                """INSERT INTO webhook_deliveries(
+                    delivery_id,webhook_id,workspace_id,job_id,event_type,payload_json,status,
+                    attempts,max_attempts,available_at,lease_until,last_error,delivered_at,
+                    created_event_offset,created_at,updated_at
+                ) VALUES (?,?,?,?,?,?, 'pending',0,?,?,NULL,NULL,NULL,?,?,?)""",
+                (
+                    delivery_id, webhook_id, job["workspace_id"], job["job_id"], event_type,
+                    _json(payload), max(1, min(int(max_attempts), 32)), now, event.offset, now, now,
+                ),
+            )
+            return self._delivery_row(conn.execute("SELECT * FROM webhook_deliveries WHERE delivery_id=?", (delivery_id,)).fetchone())
+
+    def claim_webhook_deliveries(
+        self,
+        *,
+        limit: int = 25,
+        lease_seconds: int = 30,
+        workspace_id: str | None = None,
+    ) -> list[dict[str, Any]]:
+        now = datetime.now(UTC)
+        now_value = now.isoformat()
+        lease_until = datetime.fromtimestamp(now.timestamp() + max(1, int(lease_seconds)), UTC).isoformat()
+        with self.transaction() as conn:
+            conn.execute(
+                "UPDATE webhook_deliveries SET status='pending',lease_until=NULL,updated_at=? WHERE status='inflight' AND lease_until<?",
+                (now_value, now_value),
+            )
+            clauses = ["status='pending'", "available_at<=?"]
+            values: list[Any] = [now_value]
+            if workspace_id:
+                clauses.append("workspace_id=?")
+                values.append(workspace_id)
+            values.append(max(1, min(int(limit), 100)))
+            rows = conn.execute(
+                f"SELECT * FROM webhook_deliveries WHERE {' AND '.join(clauses)} ORDER BY created_at,delivery_id LIMIT ?",
+                values,
+            ).fetchall()
+            claimed: list[dict[str, Any]] = []
+            for row in rows:
+                updated = conn.execute(
+                    """UPDATE webhook_deliveries SET status='inflight',attempts=attempts+1,lease_until=?,updated_at=?
+                       WHERE delivery_id=? AND status='pending'""",
+                    (lease_until, now_value, row["delivery_id"]),
+                ).rowcount
+                if updated:
+                    claimed.append(self._delivery_row(conn.execute("SELECT * FROM webhook_deliveries WHERE delivery_id=?", (row["delivery_id"],)).fetchone()))
+            return claimed
+
+    def mark_webhook_delivery_succeeded(self, delivery_id: str) -> dict[str, Any]:
+        with self.transaction() as conn:
+            row = conn.execute("SELECT * FROM webhook_deliveries WHERE delivery_id=?", (delivery_id,)).fetchone()
+            delivery = self._delivery_row(row)
+            if delivery["status"] == "succeeded":
+                return delivery
+            if delivery["status"] != "inflight":
+                raise InvariantViolation("webhook delivery is not leased")
+            event = self._append_event(
+                conn, stream_id=f"workspace:{delivery['workspace_id']}", event_type="webhook.delivery_succeeded",
+                payload={"delivery_id": delivery_id, "workspace_id": delivery["workspace_id"], "job_id": delivery["job_id"], "attempts": delivery["attempts"]}, actor="webhook-delivery-worker",
+            )
+            now = _now()
+            conn.execute(
+                "UPDATE webhook_deliveries SET status='succeeded',lease_until=NULL,delivered_at=?,updated_at=?,last_error=NULL WHERE delivery_id=?",
+                (now, now, delivery_id),
+            )
+            result = self._delivery_row(conn.execute("SELECT * FROM webhook_deliveries WHERE delivery_id=?", (delivery_id,)).fetchone())
+            result["status_event_offset"] = event.offset
+            return result
+
+    def fail_webhook_delivery(self, delivery_id: str, *, error: str, retry_delay_seconds: int | None = None) -> dict[str, Any]:
+        with self.transaction() as conn:
+            row = conn.execute("SELECT * FROM webhook_deliveries WHERE delivery_id=?", (delivery_id,)).fetchone()
+            delivery = self._delivery_row(row)
+            if delivery["status"] != "inflight":
+                raise InvariantViolation("webhook delivery is not leased")
+            dead_letter = int(delivery["attempts"]) >= int(delivery["max_attempts"])
+            delay = int(retry_delay_seconds if retry_delay_seconds is not None else min(3_600, 2 ** min(int(delivery["attempts"]), 10)))
+            available = datetime.fromtimestamp(datetime.now(UTC).timestamp() + max(1, delay), UTC).isoformat()
+            status = "dead_letter" if dead_letter else "pending"
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{delivery['workspace_id']}",
+                event_type="webhook.delivery_dead_lettered" if dead_letter else "webhook.delivery_retry_scheduled",
+                payload={"delivery_id": delivery_id, "workspace_id": delivery["workspace_id"], "job_id": delivery["job_id"], "attempts": delivery["attempts"], "error": error[:500]},
+                actor="webhook-delivery-worker",
+            )
+            conn.execute(
+                "UPDATE webhook_deliveries SET status=?,lease_until=NULL,available_at=?,last_error=?,updated_at=? WHERE delivery_id=?",
+                (status, available, error[:2_000], _now(), delivery_id),
+            )
+            result = self._delivery_row(conn.execute("SELECT * FROM webhook_deliveries WHERE delivery_id=?", (delivery_id,)).fetchone())
+            result["status_event_offset"] = event.offset
+            return result
+
+    def list_webhook_deliveries(self, workspace_id: str, *, status: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
+        sql = "SELECT * FROM webhook_deliveries WHERE workspace_id=?"
+        values: list[Any] = [workspace_id]
+        if status:
+            sql += " AND status=?"
+            values.append(status)
+        sql += " ORDER BY created_at DESC,delivery_id DESC LIMIT ?"
+        values.append(max(1, min(int(limit), 200)))
+        with self._connect() as conn:
+            rows = conn.execute(sql, values).fetchall()
+        return [self._delivery_row(row) for row in rows]
+
     # ------------------------------------------------------------- API keys
     @staticmethod
     def _api_key_row(row: sqlite3.Row | None, *, include_hash: bool = False) -> dict[str, Any]:
@@ -2545,6 +2861,65 @@ class SqliteEventStore:
             result = self._api_key_row(conn.execute("SELECT * FROM api_keys WHERE api_key_id=?", (api_key_id,)).fetchone())
             result["revocation_event_offset"] = event.offset
             return result
+
+    # ---------------------------------------------------------- model audits
+    def record_model_audit(self, audit: dict[str, Any]) -> dict[str, Any]:
+        """Persist non-secret model usage/cost provenance in the Spine.
+
+        Prompt text and provider credentials never enter this table.  The
+        audit retains only hashes of redacted excerpts plus enough revisions to
+        reproduce the bounded proposal workflow.
+        """
+
+        workspace_id = str(audit.get("workspace_id") or "")
+        if not workspace_id:
+            raise InvariantViolation("model audit requires a workspace_id")
+        identifier = str(uuid.uuid4())
+        payload = {
+            "model_call_audit_id": identifier,
+            "workspace_id": workspace_id,
+            "model_id": str(audit.get("model_id") or "unknown"),
+            "purpose": str(audit.get("purpose") or "unknown"),
+            "prompt_template_revision": str(audit.get("prompt_template_revision") or "unknown"),
+            "response_schema_hash": str(audit.get("response_schema_hash") or ""),
+            "excerpt_hashes": list(audit.get("excerpt_hashes") or []),
+            "node_count": int(audit.get("node_count") or 0),
+            "estimated_tokens": int(audit.get("estimated_tokens") or 0),
+            "cloud_tokens": int(audit.get("cloud_tokens") or 0),
+            "cost_usd": float(audit.get("cost_usd") or 0.0),
+            "status": str(audit.get("status") or "succeeded"),
+        }
+        with self.transaction() as conn:
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{workspace_id}",
+                event_type="model.call_audited",
+                payload=payload,
+                actor=str(audit.get("actor") or "system"),
+                correlation_id=str(audit["request_id"]) if audit.get("request_id") else None,
+            )
+            conn.execute(
+                """INSERT INTO model_call_audits(
+                    model_call_audit_id,workspace_id,model_id,purpose,actor,request_id,
+                    prompt_template_revision,response_schema_hash,excerpt_hashes_json,node_count,
+                    estimated_tokens,cloud_tokens,cost_usd,status,created_event_offset,created_at
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (
+                    identifier, workspace_id, payload["model_id"], payload["purpose"], str(audit.get("actor") or "system"),
+                    audit.get("request_id"), payload["prompt_template_revision"], payload["response_schema_hash"],
+                    _json(payload["excerpt_hashes"]), payload["node_count"], payload["estimated_tokens"],
+                    payload["cloud_tokens"], payload["cost_usd"], payload["status"], event.offset, _now(),
+                ),
+            )
+        return {"model_call_audit_id": identifier, "created_event_offset": event.offset, **payload}
+
+    def model_cost_total(self, workspace_id: str) -> float:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT COALESCE(SUM(cost_usd),0) FROM model_call_audits WHERE workspace_id=? AND status='succeeded'",
+                (workspace_id,),
+            ).fetchone()
+        return float(row[0] or 0.0)
 
     # -------------------------------------------------------------- internals
     @staticmethod

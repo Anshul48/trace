@@ -2,7 +2,7 @@
   "name": "trace-technical-docs-v1",
   "suite": "in_domain",
   "review_status": "reviewed",
-  "release_authority": true,
+  "release_authority": false,
   "corpus_snapshot": "trace-technical-docs-v1: reviewed technical-doc corpus snapshot",
   "fixture_workspace_id": "benchmark-alpha",
   "fixture_idempotency_key": "techdocs-v1",

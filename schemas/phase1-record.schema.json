@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trace.local/schemas/phase1-record.schema.json",
+  "title": "Trace Phase 1 normalized source record",
+  "type": "object",
+  "required": [
+    "document_name",
+    "content_hash",
+    "metadata"
+  ],
+  "allOf": [
+    {
+      "anyOf": [
+        { "required": ["content"] },
+        { "required": ["text"] }
+      ]
+    },
+    {
+      "anyOf": [
+        { "required": ["source_url"] },
+        { "required": ["file_uri"] },
+        { "required": ["source_uri"] }
+      ]
+    }
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional idempotency key for this immutable source record."
+    },
+    "external_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "document_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_url": {
+      "type": "string"
+    },
+    "file_uri": {
+      "type": "string"
+    },
+    "source_uri": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "content_hash": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Caller or upstream-parser content hash retained verbatim."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "image_descriptions": {
+      "type": "array",
+      "items": {}
+    },
+    "image_description_blocks": {
+      "type": "array",
+      "items": {}
+    },
+    "collection": {
+      "type": "string",
+      "minLength": 1,
+      "default": "default"
+    },
+    "media_type": {
+      "type": "string",
+      "minLength": 1,
+      "default": "text/plain; charset=utf-8"
+    }
+  },
+  "additionalProperties": true
+}

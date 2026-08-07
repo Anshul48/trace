@@ -112,6 +112,28 @@ class EvidenceHierarchyBuilder:
                 lineage.setdefault(logical_key, []).append(node["node_id"])
         return by_key, lineage
 
+    def _existing_for_keys(self, workspace_id: str, hierarchy_keys: Sequence[str]) -> tuple[dict[str, dict[str, Any]], dict[str, list[str]]]:
+        """Fetch only materializations this delta may recreate.
+
+        This is the online path used after ingestion.  It avoids the legacy
+        full-workspace summary read while preserving idempotency for a retried
+        input/configuration revision.
+        """
+
+        lookup = getattr(self.store, "current_nodes_by_hierarchy_keys", None)
+        nodes = lookup(workspace_id, hierarchy_keys) if callable(lookup) else []
+        by_key: dict[str, dict[str, Any]] = {}
+        lineage: dict[str, list[str]] = {}
+        for node in nodes:
+            properties = node.get("properties", {})
+            key = properties.get("hierarchy_key")
+            logical_key = properties.get("hierarchy_logical_key")
+            if key:
+                by_key[str(key)] = node
+            if logical_key:
+                lineage.setdefault(str(logical_key), []).append(node["node_id"])
+        return by_key, lineage
+
     def _materialize(
         self,
         *,
@@ -217,6 +239,8 @@ class EvidenceHierarchyBuilder:
         actor: str = "system",
         model_version: str = "extractive-hierarchy-v1",
     ) -> HierarchyBuildResult:
+        if os.environ.get("TRACE_PRODUCTION_MODE", "false").lower() == "true" and os.environ.get("TRACE_ALLOW_FULL_HIERARCHY_REBUILD", "false").lower() != "true":
+            raise RuntimeError("full-workspace hierarchy rebuild is disabled in production; use build_delta during ingestion")
         atoms = self.store.queryable_atoms(workspace_id)
         atoms.sort(key=lambda atom: (atom["properties"].get("ingestion_id", ""), atom["properties"].get("ordinal", 0), atom["atom_version_id"]))
         generation_id = _key(workspace_id, model_version, *(atom["atom_version_id"] for atom in atoms))[:24]
@@ -299,6 +323,78 @@ class EvidenceHierarchyBuilder:
             section_summaries=[section for section, _ in section_records],
             topic_holons=[topic for topic, _ in topic_records],
             workspace_holons=workspace_holons,
+        )
+
+    def build_delta(
+        self,
+        *,
+        workspace_id: str,
+        source_atoms: Sequence[dict[str, Any]],
+        section_size: int = 8,
+        actor: str = "cognitive-worker",
+        model_version: str = "extractive-hierarchy-v1",
+    ) -> HierarchyBuildResult:
+        """Create validated navigation summaries for one ingestion delta.
+
+        Delta work is bounded by the submitted atom list and exact existing
+        hierarchy keys. It does not build workspace-wide topic clusters,
+        schemas, or graph topology; those require their own bounded candidate
+        generators and review flows.
+        """
+
+        atoms = list(source_atoms)
+        if not atoms:
+            return HierarchyBuildResult(workspace_id=workspace_id, generation_id=_key(workspace_id, model_version, "empty")[:24], section_summaries=[], topic_holons=[], workspace_holons=[])
+        if any(str(atom.get("workspace_id")) != workspace_id for atom in atoms):
+            raise SummaryValidationError("delta atoms must belong to exactly one workspace")
+        atoms.sort(key=lambda atom: (str(atom.get("properties", {}).get("ingestion_id", "")), int(atom.get("properties", {}).get("ordinal", 0)), atom["atom_version_id"]))
+        grouped: dict[str, list[dict[str, Any]]] = {}
+        for atom in atoms:
+            grouped.setdefault(str(atom.get("properties", {}).get("ingestion_id", "unknown")), []).append(atom)
+        plans: list[tuple[str, int, list[dict[str, Any]], str, str]] = []
+        for ingestion_id, group in grouped.items():
+            for start in range(0, len(group), section_size):
+                section = group[start:start + section_size]
+                evidence = [atom["atom_version_id"] for atom in section]
+                logical_key = f"section:{ingestion_id}:{start // section_size}"
+                hierarchy_key = _key(logical_key, model_version, *evidence)
+                plans.append((ingestion_id, start // section_size, section, logical_key, hierarchy_key))
+        existing, lineage = self._existing_for_keys(workspace_id, [plan[4] for plan in plans])
+        summaries: list[dict[str, Any]] = []
+        for ingestion_id, ordinal, group, logical_key, hierarchy_key in plans:
+            evidence = [atom["atom_version_id"] for atom in group]
+            content = _extractive_summary(group, label=f"Source section {ingestion_id}:{ordinal + 1}")
+            validation = SummaryValidator.validate(content, group)
+            section = self._materialize(
+                workspace_id=workspace_id,
+                facet="section_summary",
+                content=content,
+                evidence=evidence,
+                hierarchy_key=hierarchy_key,
+                logical_key=logical_key,
+                parent_node_ids=lineage.get(logical_key, []),
+                coverage={
+                    **_coverage(evidence),
+                    **validation,
+                    "source_checksum": _key(*(atom["content_hash"] for atom in group)),
+                    "ingestion_id": ingestion_id,
+                    "ordinal_start": group[0]["properties"].get("ordinal"),
+                    "ordinal_end": group[-1]["properties"].get("ordinal"),
+                    "input_revision": _key(*evidence),
+                },
+                model_version=model_version,
+                actor=actor,
+                existing=existing,
+            )
+            if not section["reused"]:
+                self._contain(workspace_id, section, group, actor=actor, model_version=model_version)
+            summaries.append(section)
+        return HierarchyBuildResult(
+            workspace_id=workspace_id,
+            generation_id=_key(workspace_id, model_version, *(atom["atom_version_id"] for atom in atoms))[:24],
+            section_summaries=summaries,
+            topic_holons=[],
+            workspace_holons=[],
         )
 
 
@@ -498,8 +594,11 @@ class GovernedSchemaClassifier:
     @classmethod
     def training_ready(cls, schema: dict[str, Any]) -> bool:
         properties = schema.get("properties", {})
-        positive = properties.get("reviewed_positive_examples", properties.get("positive_examples", []))
-        negative = properties.get("reviewed_negative_examples", properties.get("exclusions", []))
+        # Teacher-generated examples are proposal material, not training data.
+        # A reviewer must explicitly place examples in these lists before a
+        # workspace-specific SetFit model is eligible to train.
+        positive = properties.get("reviewed_positive_examples", [])
+        negative = properties.get("reviewed_negative_examples", [])
         return len(positive) >= cls.MIN_REVIEWED_POSITIVE and len(negative) >= cls.MIN_REVIEWED_NEGATIVE
 
     @classmethod
@@ -507,13 +606,126 @@ class GovernedSchemaClassifier:
         ready = [schema for schema in schemas if cls.training_ready(schema)]
         if not ready:
             return SoftSchemaClassifier.classify(atoms, schemas)
-        # SetFit is optional.  Even when installed, keep the deterministic
-        # classifier as a transparent fallback for a single unavailable model.
-        try:
-            from setfit import SetFitModel  # noqa: F401
-        except ImportError:
+        trained = SetFitSchemaClassifier.classify(atoms, ready)
+        if trained is None:
+            # Deterministic classification is the explicit unavailable-model
+            # fallback; it is never silently used after a successful model
+            # prediction.
             return SoftSchemaClassifier.classify(atoms, schemas)
-        return SoftSchemaClassifier.classify(atoms, ready)
+        return trained
+
+
+class SetFitSchemaClassifier:
+    """Actual per-workspace binary SetFit training after reviewed examples.
+
+    Each promoted schema receives its own tiny binary classifier. Cache keys
+    include the workspace, schema identity, reviewed-example checksum, and
+    configured base model so a changed review set creates a fresh model rather
+    than mutating an unversioned in-memory classifier.
+    """
+
+    _cache: dict[str, Any] = {}
+    _failed: set[str] = set()
+
+    @classmethod
+    def _training_rows(cls, schema: dict[str, Any]) -> tuple[list[str], list[int], str]:
+        properties = schema.get("properties", {})
+        positive = [str(item).strip() for item in properties.get("reviewed_positive_examples", []) if str(item).strip()]
+        negative = [str(item).strip() for item in properties.get("reviewed_negative_examples", []) if str(item).strip()]
+        if len(positive) < GovernedSchemaClassifier.MIN_REVIEWED_POSITIVE or len(negative) < GovernedSchemaClassifier.MIN_REVIEWED_NEGATIVE:
+            raise ValueError("SetFit training requires eight reviewed positive and eight reviewed negative examples")
+        texts = positive + negative
+        labels = [1] * len(positive) + [0] * len(negative)
+        revision = hashlib.sha256(
+            json.dumps({"texts": texts, "labels": labels, "base": os.environ.get("TRACE_SETFIT_MODEL", "sentence-transformers/paraphrase-mpnet-base-v2")}, sort_keys=True).encode("utf-8")
+        ).hexdigest()
+        return texts, labels, revision
+
+    @classmethod
+    def _key(cls, schema: dict[str, Any], revision: str) -> str:
+        return ":".join((str(schema.get("workspace_id", "")), str(schema.get("node_id", schema.get("atom_version_id", ""))), revision))
+
+    @classmethod
+    def _train(cls, schema: dict[str, Any]) -> tuple[Any, str] | None:
+        texts, labels, revision = cls._training_rows(schema)
+        key = cls._key(schema, revision)
+        if key in cls._cache:
+            return cls._cache[key], revision
+        if key in cls._failed:
+            return None
+        try:
+            from setfit import SetFitModel
+            try:
+                from datasets import Dataset
+            except ImportError:
+                Dataset = None  # type: ignore[assignment]
+            model = SetFitModel.from_pretrained(os.environ.get("TRACE_SETFIT_MODEL", "sentence-transformers/paraphrase-mpnet-base-v2"))
+            # A small test/in-house adapter may expose ``fit`` directly. The
+            # normal SetFit path uses the installed trainer API.
+            if hasattr(model, "fit"):
+                model.fit(texts, labels)
+            else:
+                if Dataset is None:
+                    raise RuntimeError("datasets is required for SetFit training")
+                train_dataset = Dataset.from_dict({"text": texts, "label": labels})
+                try:
+                    from setfit import Trainer
+                    trainer = Trainer(model=model, train_dataset=train_dataset)
+                except ImportError:  # pragma: no cover - older SetFit releases
+                    from setfit import SetFitTrainer
+                    trainer = SetFitTrainer(model=model, train_dataset=train_dataset)
+                trainer.train()
+            cls._cache[key] = model
+            return model, revision
+        except (ImportError, OSError, RuntimeError, ValueError, TypeError):
+            # Model assets may be unavailable on a local worker. Record this
+            # revision as unavailable and use the deterministic fallback until
+            # the reviewed examples or configuration revision changes.
+            cls._failed.add(key)
+            return None
+
+    @staticmethod
+    def _prediction_values(model: Any, texts: list[str]) -> tuple[list[int], list[float]]:
+        predicted = model.predict(texts)
+        if hasattr(predicted, "tolist"):
+            predicted = predicted.tolist()
+        labels = [int(item) for item in list(predicted)]
+        scores = [1.0 if item else 0.0 for item in labels]
+        if hasattr(model, "predict_proba"):
+            probabilities = model.predict_proba(texts)
+            if hasattr(probabilities, "tolist"):
+                probabilities = probabilities.tolist()
+            values = list(probabilities)
+            scores = [float(item[1] if isinstance(item, (list, tuple)) and len(item) > 1 else item) for item in values]
+        return labels, scores
+
+    @classmethod
+    def classify(cls, atoms: Sequence[dict[str, Any]], schemas: Sequence[dict[str, Any]]) -> dict[str, list[dict[str, Any]]] | None:
+        models: list[tuple[dict[str, Any], Any, str]] = []
+        for schema in schemas:
+            trained = cls._train(schema)
+            if trained is None:
+                return None
+            model, revision = trained
+            models.append((schema, model, revision))
+        output: dict[str, list[dict[str, Any]]] = {atom["atom_version_id"]: [] for atom in atoms}
+        texts = [atom["content"] for atom in atoms]
+        for schema, model, revision in models:
+            labels, scores = cls._prediction_values(model, texts)
+            properties = schema.get("properties", {})
+            label = str(properties.get("label") or properties.get("name") or schema["content"])
+            for atom, predicted, score in zip(atoms, labels, scores, strict=True):
+                if predicted:
+                    output[atom["atom_version_id"]].append({
+                        "label": label,
+                        "confidence": round(max(0.0, min(1.0, score)), 6),
+                        "schema_node_id": schema["node_id"],
+                        "classifier": "setfit",
+                        "training_revision": revision,
+                    })
+        for atom_id, labels in output.items():
+            labels.sort(key=lambda item: (-item["confidence"], item["label"]))
+        return output
 
 
 class SoftSchemaClassifier:

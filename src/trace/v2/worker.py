@@ -8,6 +8,7 @@ recording the Spine event ID they have applied.
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+from contextlib import nullcontext
 from typing import Any, Protocol
 
 from .models import HierarchyBuildRequest, SchemaProposalRequest
@@ -25,25 +26,32 @@ class OutboxWorker:
         self.store = store
         self.publisher = publisher
 
-    async def drain_once(self, *, limit: int = 100) -> dict[str, int]:
-        published = failed = 0
-        for item in self.store.claim_outbox(limit=limit):
-            envelope = item["payload"]
-            # Both embedded and PostgreSQL adapters persist an event envelope.
-            # Preserve the immutable event ID at the top level and expose the
-            # canonical payload without duplicating a nested ``payload`` key.
-            canonical = envelope.get("payload", envelope) if isinstance(envelope, dict) else {}
-            message = {"event_id": item["event_id"], "event_offset": item["event_offset"], **canonical}
+    async def drain_once(self, *, limit: int = 100, workspace_id: str | None = None) -> dict[str, int]:
+        scope_factory = getattr(self.store, "authorization_scope", None)
+        scope = scope_factory(workspace_id) if workspace_id and callable(scope_factory) else nullcontext()
+        with scope:
             try:
-                publisher = getattr(self.publisher, "publish", self.publisher)
-                await publisher(item["topic"], message)
-            except Exception:
-                self.store.release_outbox(item["event_offset"])
-                failed += 1
-            else:
-                self.store.mark_outbox_published(item["event_offset"])
-                published += 1
-        return {"published": published, "failed": failed}
+                claimed = self.store.claim_outbox(limit=limit, workspace_id=workspace_id)
+            except TypeError:
+                claimed = self.store.claim_outbox(limit=limit)
+            published = failed = 0
+            for item in claimed:
+                envelope = item["payload"]
+                # Both embedded and PostgreSQL adapters persist an event envelope.
+                # Preserve the immutable event ID at the top level and expose the
+                # canonical payload without duplicating a nested ``payload`` key.
+                canonical = envelope.get("payload", envelope) if isinstance(envelope, dict) else {}
+                message = {"event_id": item["event_id"], "event_offset": item["event_offset"], **canonical}
+                try:
+                    publisher = getattr(self.publisher, "publish", self.publisher)
+                    await publisher(item["topic"], message)
+                except Exception:
+                    self.store.release_outbox(item["event_offset"])
+                    failed += 1
+                else:
+                    self.store.mark_outbox_published(item["event_offset"])
+                    published += 1
+            return {"published": published, "failed": failed}
 
 
 class IdempotentProjectionConsumer:
@@ -76,8 +84,8 @@ class JobWorker:
     def __init__(self, service: TraceService) -> None:
         self.service = service
 
-    def run_once(self, *, limit: int = 10, kind: str | None = None) -> dict[str, int]:
-        return self.service.jobs.run_once(limit=limit, kind=kind)
+    def run_once(self, *, limit: int = 10, kind: str | None = None, workspace_id: str | None = None) -> dict[str, int]:
+        return self.service.jobs.run_once(limit=limit, kind=kind, workspace_id=workspace_id)
 
 
 class CognitiveProjectionWorker:
@@ -95,14 +103,22 @@ class CognitiveProjectionWorker:
         self,
         *,
         workspace_id: str,
+        ingestion_id: str | None = None,
         propose_schemas: bool = True,
         actor: str = "cognitive-worker",
     ) -> dict[str, Any]:
+        if ingestion_id:
+            result = self.service.run_cognitive_delta(ingestion_id, actor=actor)
+            return {
+                "workspace_id": workspace_id, "ingestion_id": ingestion_id,
+                "hierarchy_generation_id": result["hierarchy"]["generation_id"],
+                "schema_proposal_count": result["schema_proposal_count"] if propose_schemas else 0,
+                "auto_promoted": 0,
+            }
+        if self.service.settings.production_mode:
+            raise ValueError("production cognitive workers require an ingestion_id delta")
         hierarchy = self.service.build_hierarchy(HierarchyBuildRequest(workspace_id=workspace_id, actor=actor))
-        schemas = (
-            self.service.propose_schemas(SchemaProposalRequest(workspace_id=workspace_id, actor=actor))
-            if propose_schemas else {"workspace_id": workspace_id, "proposals": []}
-        )
+        schemas = self.service.propose_schemas(SchemaProposalRequest(workspace_id=workspace_id, actor=actor)) if propose_schemas else {"workspace_id": workspace_id, "proposals": []}
         return {
             "workspace_id": workspace_id,
             "hierarchy_generation_id": hierarchy["generation_id"],

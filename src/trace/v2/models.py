@@ -116,14 +116,26 @@ class QueryRequest(BaseModel):
     privacy_context: dict[str, Any] = Field(default_factory=dict)
     retrieval_budget: RetrievalBudget = Field(default_factory=RetrievalBudget)
     retrieval_profile: Literal["auto", "lexical", "hybrid", "rerank", "hierarchy", "graph", "deep"] = "auto"
+    # A model is meaningful only for bounded deep navigation.  Ordinary
+    # evidence retrieval stays model-independent and cannot be turned into an
+    # arbitrary provider call by adding a model name to a request.
+    model_id: str | None = Field(default=None, min_length=1, max_length=128)
+
+    @model_validator(mode="after")
+    def model_only_for_deep_navigation(self) -> "QueryRequest":
+        if self.model_id and self.retrieval_profile != "deep" and self.retrieval_budget.mode != "deep":
+            raise ValueError("model_id is allowed only for deep navigation")
+        return self
 
 
 class SynthesisRequest(BaseModel):
     """Request for a disposable rendering of one persisted evidence bundle."""
     evidence_bundle_id: str = Field(min_length=1)
+    workspace_id: str | None = Field(default=None, min_length=1)
     prompt: str | None = None
     format: Literal["brief", "report", "weave"] = "brief"
     privacy_context: dict[str, Any] = Field(default_factory=dict)
+    model_id: str | None = Field(default=None, min_length=1, max_length=128)
 
 
 class ProposalCreateRequest(BaseModel):
@@ -155,7 +167,11 @@ class SchemaProposalRequest(BaseModel):
 
     workspace_id: str = Field(min_length=1)
     max_schemas: int = Field(default=12, ge=1, le=100)
+    # Nightly workers supply just-ingested / candidate IDs. Omitting this is
+    # permitted only by the embedded control adapter, never production scale.
+    atom_version_ids: list[str] = Field(default_factory=list, max_length=512)
     model_version: str = "local-schema-proposer-v1"
+    model_id: str | None = Field(default=None, min_length=1, max_length=128)
     actor: str = "system"
 
 
@@ -188,6 +204,7 @@ class BenchmarkRunRequest(BaseModel):
         default_factory=lambda: ["lexical", "hybrid", "rerank", "hierarchy", "graph", "deep"]
     )
     bootstrap_fixture: bool = False
+    release_gate: bool = False
     actor: str = "system"
 
 
@@ -203,13 +220,22 @@ class JobSubmitRequest(BaseModel):
     workspace_id: str = Field(min_length=1, max_length=255)
     kind: Literal[
         "consolidation", "hierarchy.build", "schema.proposals", "benchmark.run",
-        "index.rebuild", "reprocess", "ingestion.index",
+        "index.rebuild", "reprocess", "ingestion.index", "cognitive.delta",
     ]
     payload: dict[str, Any] = Field(default_factory=dict)
     actor: str = "anonymous"
     idempotency_key: str | None = Field(default=None, max_length=255)
     webhook_id: str | None = None
     execute: bool = False
+    # Only the server maps this ID to a provider/model configuration.  The
+    # payload deliberately has no provider URL, API key, or raw prompt field.
+    model_id: str | None = Field(default=None, min_length=1, max_length=128)
+
+    @model_validator(mode="after")
+    def model_only_for_llm_job(self) -> "JobSubmitRequest":
+        if self.model_id and self.kind not in {"schema.proposals", "cognitive.delta"}:
+            raise ValueError("model_id is allowed only for LLM-backed jobs")
+        return self
 
 
 class JobDecisionRequest(BaseModel):
@@ -260,7 +286,7 @@ class FrozenQueryRequest(BaseModel):
 
 class GraphRequest(BaseModel):
     workspace_id: str = Field(min_length=1)
-    seed_node_ids: list[str] = Field(default_factory=list)
+    seed_node_ids: list[str] = Field(default_factory=list, max_length=128)
     depth: int = Field(default=1, ge=0, le=4)
     as_of_event: int | None = Field(default=None, ge=1)
     privacy_context: dict[str, Any] = Field(default_factory=dict)
@@ -279,7 +305,7 @@ class IndexRevisionRequest(BaseModel):
 class ModelRegistrationRequest(BaseModel):
     name: str = Field(min_length=1)
     provider: str = Field(min_length=1)
-    purpose: Literal["embedding", "reranking", "classification", "synthesis"]
+    purpose: Literal["embedding", "reranking", "classification", "synthesis", "navigation"]
     version: str = Field(min_length=1)
     configuration: dict[str, Any] = Field(default_factory=dict)
     actor: str = "anonymous"

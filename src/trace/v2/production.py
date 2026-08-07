@@ -10,6 +10,7 @@ topology concrete rather than merely a documentation promise.
 from __future__ import annotations
 
 import base64
+from contextvars import ContextVar
 import hashlib
 import json
 import os
@@ -20,435 +21,27 @@ import uuid
 from collections.abc import Iterable, Sequence
 from contextlib import contextmanager
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any, Iterator
 
 from .models import AppendResult, EventRecord
 from .store import ALLOWED_RELATIONS, STRUCTURAL_RELATIONS, IdempotencyConflict, InvariantViolation, NotFoundError, _digest, _json, _now
+from .migrations import MigrationRunner, assert_runtime_role
 
 
-POSTGRES_SCHEMA = """
--- Canonical event spine.  Deployments create time partitions and a fixed set
--- of workspace-hash partitions using the migration process before traffic.
-CREATE TABLE IF NOT EXISTS trace_events (
-    event_offset BIGINT GENERATED ALWAYS AS IDENTITY,
-    event_id UUID NOT NULL,
-    workspace_id TEXT NOT NULL,
-    stream_id TEXT NOT NULL,
-    stream_sequence BIGINT NOT NULL,
-    event_type TEXT NOT NULL,
-    occurred_at TIMESTAMPTZ NOT NULL,
-    actor TEXT NOT NULL,
-    causation_id UUID,
-    correlation_id UUID,
-    schema_version INTEGER NOT NULL,
-    payload JSONB NOT NULL,
-    payload_hash CHAR(64) NOT NULL,
-    idempotency_key TEXT,
-    PRIMARY KEY (event_offset, occurred_at, workspace_id)
-) PARTITION BY HASH (workspace_id);
--- Fixed workspace buckets keep tenant traffic spread across partitions. Each
--- bucket is itself range-partitioned by event time; the bucket default is a
--- safe bootstrap target until the migration process adds concrete time
--- windows and moves rows without changing the application contract.
-CREATE TABLE IF NOT EXISTS trace_events_h00 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 0) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h00_default PARTITION OF trace_events_h00 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h01 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 1) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h01_default PARTITION OF trace_events_h01 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h02 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 2) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h02_default PARTITION OF trace_events_h02 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h03 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 3) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h03_default PARTITION OF trace_events_h03 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h04 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 4) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h04_default PARTITION OF trace_events_h04 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h05 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 5) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h05_default PARTITION OF trace_events_h05 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h06 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 6) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h06_default PARTITION OF trace_events_h06 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h07 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 7) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h07_default PARTITION OF trace_events_h07 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h08 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 8) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h08_default PARTITION OF trace_events_h08 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h09 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 9) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h09_default PARTITION OF trace_events_h09 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h10 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 10) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h10_default PARTITION OF trace_events_h10 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h11 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 11) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h11_default PARTITION OF trace_events_h11 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h12 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 12) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h12_default PARTITION OF trace_events_h12 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h13 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 13) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h13_default PARTITION OF trace_events_h13 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h14 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 14) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h14_default PARTITION OF trace_events_h14 DEFAULT;
-CREATE TABLE IF NOT EXISTS trace_events_h15 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 15) PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_h15_default PARTITION OF trace_events_h15 DEFAULT;
--- The parent default preserves zero-downtime bootstrap for older databases;
--- a migration can add buckets later if the schema predates this release.
-CREATE TABLE IF NOT EXISTS trace_events_default PARTITION OF trace_events DEFAULT PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_default_time PARTITION OF trace_events_default DEFAULT;
+# Compatibility export for deployments that imported this symbol before SQL
+# migrations became the only bootstrap path.  The executable source of truth
+# is migrations/001_trace_production.sql, not a Python-embedded schema.
+def _baseline_schema_sql() -> str:
+    return (
+        Path(__file__).resolve().parents[3] / "migrations" / "001_trace_production.sql"
+    ).read_text(encoding="utf-8")
 
--- PostgreSQL partitioned tables cannot have a global unique index that omits
--- the partition key.  These are lookup indexes; the migration's unpartitioned
--- event-key ledger (or the repository transaction) enforces global event and
--- idempotency uniqueness.
-CREATE INDEX IF NOT EXISTS trace_events_event_id ON trace_events(event_id);
-CREATE INDEX IF NOT EXISTS trace_events_stream_sequence ON trace_events(stream_id, stream_sequence);
-CREATE INDEX IF NOT EXISTS trace_events_idempotency ON trace_events(idempotency_key) WHERE idempotency_key IS NOT NULL;
 
-CREATE TABLE IF NOT EXISTS trace_event_keys (
-    event_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    idempotency_key TEXT,
-    event_offset BIGINT NOT NULL,
-    occurred_at TIMESTAMPTZ NOT NULL,
-    UNIQUE(workspace_id, idempotency_key)
-);
+POSTGRES_SCHEMA = _baseline_schema_sql()
 
-CREATE TABLE IF NOT EXISTS trace_outbox (
-    event_offset BIGINT NOT NULL,
-    event_id UUID NOT NULL,
-    topic TEXT NOT NULL,
-    payload JSONB NOT NULL,
-    status TEXT NOT NULL DEFAULT 'pending',
-    attempts INTEGER NOT NULL DEFAULT 0,
-    available_at TIMESTAMPTZ NOT NULL,
-    lease_until TIMESTAMPTZ,
-    published_at TIMESTAMPTZ,
-    PRIMARY KEY (event_offset, event_id)
-);
-CREATE INDEX IF NOT EXISTS trace_outbox_pending ON trace_outbox(status, available_at);
 
--- Canonical state tables are deliberately workspace-keyed.  Production
--- migrations add time partitions and row policies to these tables as well.
-CREATE TABLE IF NOT EXISTS trace_jobs (
-    job_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    kind TEXT NOT NULL,
-    status TEXT NOT NULL,
-    payload JSONB NOT NULL,
-    result JSONB,
-    error JSONB,
-    idempotency_key TEXT,
-    attempts INTEGER NOT NULL DEFAULT 0,
-    max_attempts INTEGER NOT NULL DEFAULT 3,
-    available_at TIMESTAMPTZ NOT NULL,
-    lease_until TIMESTAMPTZ,
-    request_id TEXT,
-    webhook_id UUID,
-    created_event_offset BIGINT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL,
-    updated_at TIMESTAMPTZ NOT NULL,
-    started_at TIMESTAMPTZ,
-    finished_at TIMESTAMPTZ,
-    cancel_requested BOOLEAN NOT NULL DEFAULT FALSE
-);
-CREATE UNIQUE INDEX IF NOT EXISTS trace_jobs_idempotency
-    ON trace_jobs(workspace_id, idempotency_key) WHERE idempotency_key IS NOT NULL;
-CREATE TABLE IF NOT EXISTS trace_webhooks (
-    webhook_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    url TEXT NOT NULL,
-    secret_hash CHAR(64) NOT NULL,
-    secret_ciphertext TEXT NOT NULL,
-    event_types JSONB NOT NULL,
-    status TEXT NOT NULL DEFAULT 'active',
-    created_event_offset BIGINT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL,
-    rotated_at TIMESTAMPTZ
-);
-CREATE INDEX IF NOT EXISTS trace_webhooks_workspace_status ON trace_webhooks(workspace_id, status);
-CREATE TABLE IF NOT EXISTS trace_api_keys (
-    api_key_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    subject TEXT NOT NULL,
-    key_prefix TEXT NOT NULL,
-    key_hash CHAR(64) NOT NULL UNIQUE,
-    scopes JSONB NOT NULL,
-    allowed_visibility JSONB NOT NULL,
-    model_permissions JSONB NOT NULL,
-    status TEXT NOT NULL DEFAULT 'active',
-    expires_at TIMESTAMPTZ,
-    created_event_offset BIGINT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL,
-    revoked_at TIMESTAMPTZ
-);
-CREATE INDEX IF NOT EXISTS trace_api_keys_active_hash ON trace_api_keys(key_hash, status);
-
-CREATE TABLE IF NOT EXISTS trace_attachments (
-    attachment_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    content_hash CHAR(64) NOT NULL,
-    object_key TEXT NOT NULL,
-    media_type TEXT NOT NULL,
-    byte_length BIGINT NOT NULL,
-    metadata JSONB NOT NULL,
-    created_event_offset BIGINT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS trace_ingestions (
-    ingestion_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    source JSONB NOT NULL,
-    attachment_id UUID,
-    accepted_event_offset BIGINT NOT NULL,
-    atom_count INTEGER NOT NULL DEFAULT 0,
-    parsing_status TEXT NOT NULL,
-    indexing_status TEXT NOT NULL,
-    consolidation_status TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL
-);
-CREATE INDEX IF NOT EXISTS trace_ingestions_workspace ON trace_ingestions(workspace_id, created_at DESC);
-CREATE TABLE IF NOT EXISTS trace_hot_inbox (
-    atom_version_id UUID PRIMARY KEY,
-    node_id UUID NOT NULL,
-    workspace_id TEXT NOT NULL,
-    content TEXT NOT NULL,
-    visible_from_event BIGINT NOT NULL,
-    facets JSONB NOT NULL,
-    security JSONB NOT NULL
-);
-CREATE INDEX IF NOT EXISTS trace_hot_inbox_workspace ON trace_hot_inbox(workspace_id, visible_from_event);
-CREATE TABLE IF NOT EXISTS trace_nodes (
-    node_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    facets JSONB NOT NULL,
-    security JSONB NOT NULL,
-    created_event_offset BIGINT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS trace_node_versions (
-    atom_version_id UUID PRIMARY KEY,
-    node_id UUID NOT NULL REFERENCES trace_nodes(node_id),
-    version INTEGER NOT NULL,
-    content TEXT NOT NULL,
-    properties JSONB NOT NULL,
-    content_hash CHAR(64) NOT NULL,
-    created_event_offset BIGINT NOT NULL,
-    UNIQUE(node_id, version)
-);
-CREATE INDEX IF NOT EXISTS trace_node_versions_node ON trace_node_versions(node_id, version DESC);
-CREATE TABLE IF NOT EXISTS trace_edge_versions (
-    edge_version_id UUID PRIMARY KEY,
-    edge_id UUID NOT NULL,
-    version INTEGER NOT NULL,
-    workspace_id TEXT NOT NULL,
-    source_node_id UUID NOT NULL REFERENCES trace_nodes(node_id),
-    target_node_id UUID NOT NULL REFERENCES trace_nodes(node_id),
-    relation_type TEXT NOT NULL,
-    weight DOUBLE PRECISION NOT NULL,
-    confidence DOUBLE PRECISION NOT NULL,
-    status TEXT NOT NULL,
-    valid_from_event BIGINT NOT NULL,
-    valid_to_event BIGINT,
-    model_version TEXT NOT NULL,
-    properties JSONB NOT NULL,
-    created_event_offset BIGINT NOT NULL,
-    UNIQUE(edge_id, version)
-);
-CREATE INDEX IF NOT EXISTS trace_edges_workspace_nodes ON trace_edge_versions(workspace_id, source_node_id, target_node_id);
-CREATE TABLE IF NOT EXISTS trace_evidence_anchors (
-    anchor_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    target_kind TEXT NOT NULL,
-    target_id UUID NOT NULL,
-    source_atom_version_id UUID NOT NULL REFERENCES trace_node_versions(atom_version_id),
-    source_start INTEGER,
-    source_end INTEGER,
-    parser_location TEXT,
-    quote_hash CHAR(64),
-    created_event_offset BIGINT NOT NULL
-);
-CREATE INDEX IF NOT EXISTS trace_anchors_target ON trace_evidence_anchors(workspace_id, target_kind, target_id);
-CREATE TABLE IF NOT EXISTS trace_proposals (
-    proposal_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    proposal_type TEXT NOT NULL,
-    candidate JSONB NOT NULL,
-    evidence_atom_version_ids JSONB NOT NULL,
-    confidence DOUBLE PRECISION NOT NULL,
-    model_version TEXT NOT NULL,
-    status TEXT NOT NULL,
-    created_event_offset BIGINT NOT NULL,
-    decided_event_offset BIGINT,
-    decision_reason TEXT
-);
-CREATE INDEX IF NOT EXISTS trace_proposals_workspace_status ON trace_proposals(workspace_id, status);
-CREATE TABLE IF NOT EXISTS trace_evidence_bundles (
-    evidence_bundle_id UUID PRIMARY KEY,
-    workspace_id TEXT,
-    query JSONB NOT NULL,
-    results JSONB NOT NULL,
-    sufficiency_state TEXT NOT NULL,
-    created_event_offset BIGINT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL
-);
-CREATE TABLE IF NOT EXISTS trace_benchmark_runs (
-    benchmark_run_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    benchmark_name TEXT NOT NULL,
-    stages JSONB NOT NULL,
-    result JSONB NOT NULL,
-    created_event_offset BIGINT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL
-);
-CREATE INDEX IF NOT EXISTS trace_benchmark_runs_workspace ON trace_benchmark_runs(workspace_id, created_at DESC);
-CREATE TABLE IF NOT EXISTS trace_feedback (
-    feedback_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    evidence_bundle_id UUID,
-    atom_version_id UUID NOT NULL REFERENCES trace_node_versions(atom_version_id),
-    event_type TEXT NOT NULL,
-    weight DOUBLE PRECISION NOT NULL,
-    actor TEXT NOT NULL,
-    metadata JSONB NOT NULL,
-    created_event_offset BIGINT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL
-);
-CREATE INDEX IF NOT EXISTS trace_feedback_workspace_atom ON trace_feedback(workspace_id, atom_version_id, created_event_offset DESC);
-CREATE TABLE IF NOT EXISTS trace_saved_queries (
-    saved_query_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    name TEXT NOT NULL,
-    query JSONB NOT NULL,
-    created_event_offset BIGINT NOT NULL,
-    UNIQUE(workspace_id, name)
-);
-CREATE TABLE IF NOT EXISTS trace_frozen_queries (
-    frozen_query_id UUID PRIMARY KEY,
-    workspace_id TEXT NOT NULL,
-    name TEXT NOT NULL,
-    query JSONB NOT NULL,
-    atom_version_ids JSONB NOT NULL,
-    created_event_offset BIGINT NOT NULL,
-    UNIQUE(workspace_id, name)
-);
-CREATE TABLE IF NOT EXISTS trace_index_revisions (
-    index_revision_id UUID PRIMARY KEY,
-    workspace_id TEXT,
-    embedding_model TEXT NOT NULL,
-    vector_namespace TEXT NOT NULL,
-    lexical_revision TEXT NOT NULL,
-    normalization JSONB NOT NULL,
-    rollout_state TEXT NOT NULL,
-    created_event_offset BIGINT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS trace_model_registry (
-    model_registry_id UUID PRIMARY KEY,
-    name TEXT NOT NULL,
-    provider TEXT NOT NULL,
-    purpose TEXT NOT NULL,
-    version TEXT NOT NULL,
-    configuration JSONB NOT NULL,
-    created_event_offset BIGINT NOT NULL,
-    UNIQUE(name, provider, purpose, version)
-);
-CREATE TABLE IF NOT EXISTS trace_experiment_manifests (
-    manifest_id UUID PRIMARY KEY,
-    name TEXT NOT NULL,
-    corpus_snapshot TEXT NOT NULL,
-    code_revision TEXT NOT NULL,
-    model_versions JSONB NOT NULL,
-    index_revisions JSONB NOT NULL,
-    parameters JSONB NOT NULL,
-    created_event_offset BIGINT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS trace_snapshots (
-    snapshot_id UUID PRIMARY KEY,
-    through_event_offset BIGINT NOT NULL,
-    state_hash CHAR(64) NOT NULL,
-    created_event_offset BIGINT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL
-);
-CREATE TABLE IF NOT EXISTS trace_dense_vectors (
-    atom_version_id UUID NOT NULL REFERENCES trace_node_versions(atom_version_id),
-    provider_id TEXT NOT NULL,
-    index_revision TEXT NOT NULL,
-    vector JSONB NOT NULL,
-    created_event_offset BIGINT NOT NULL,
-    PRIMARY KEY(atom_version_id, provider_id, index_revision)
-);
-CREATE TABLE IF NOT EXISTS trace_projection_revisions (
-    projection_name TEXT NOT NULL,
-    workspace_id TEXT NOT NULL,
-    last_applied_event BIGINT NOT NULL,
-    revision BIGINT NOT NULL,
-    updated_at TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(projection_name, workspace_id)
-);
-CREATE TABLE IF NOT EXISTS trace_projection_events (
-    projection_name TEXT NOT NULL,
-    event_id UUID NOT NULL,
-    event_offset BIGINT NOT NULL,
-    workspace_id TEXT NOT NULL,
-    projection_revision BIGINT NOT NULL,
-    applied_at TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(projection_name, event_id)
-);
-
-ALTER TABLE trace_events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_jobs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_webhooks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_api_keys ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_attachments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_ingestions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_hot_inbox ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_nodes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_node_versions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_edge_versions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_evidence_anchors ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_proposals ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_evidence_bundles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_benchmark_runs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_feedback ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_dense_vectors ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_saved_queries ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_frozen_queries ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_index_revisions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_projection_revisions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trace_projection_events ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS trace_events_tenant ON trace_events;
-CREATE POLICY trace_events_tenant ON trace_events
-    USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_jobs_tenant ON trace_jobs;
-CREATE POLICY trace_jobs_tenant ON trace_jobs
-    USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_webhooks_tenant ON trace_webhooks;
-CREATE POLICY trace_webhooks_tenant ON trace_webhooks USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_api_keys_tenant ON trace_api_keys;
-CREATE POLICY trace_api_keys_tenant ON trace_api_keys USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_attachments_tenant ON trace_attachments;
-CREATE POLICY trace_attachments_tenant ON trace_attachments USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_ingestions_tenant ON trace_ingestions;
-CREATE POLICY trace_ingestions_tenant ON trace_ingestions USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_hot_inbox_tenant ON trace_hot_inbox;
-CREATE POLICY trace_hot_inbox_tenant ON trace_hot_inbox USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_nodes_tenant ON trace_nodes;
-CREATE POLICY trace_nodes_tenant ON trace_nodes USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_node_versions_tenant ON trace_node_versions;
-CREATE POLICY trace_node_versions_tenant ON trace_node_versions USING (current_setting('trace.workspace_id', true) = '*' OR EXISTS (SELECT 1 FROM trace_nodes n WHERE n.node_id = trace_node_versions.node_id AND n.workspace_id = current_setting('trace.workspace_id', true)));
-DROP POLICY IF EXISTS trace_edges_tenant ON trace_edge_versions;
-CREATE POLICY trace_edges_tenant ON trace_edge_versions USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_anchors_tenant ON trace_evidence_anchors;
-CREATE POLICY trace_anchors_tenant ON trace_evidence_anchors USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_proposals_tenant ON trace_proposals;
-CREATE POLICY trace_proposals_tenant ON trace_proposals USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_bundles_tenant ON trace_evidence_bundles;
-CREATE POLICY trace_bundles_tenant ON trace_evidence_bundles USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_benchmark_tenant ON trace_benchmark_runs;
-CREATE POLICY trace_benchmark_tenant ON trace_benchmark_runs USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_feedback_tenant ON trace_feedback;
-CREATE POLICY trace_feedback_tenant ON trace_feedback USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_dense_vectors_tenant ON trace_dense_vectors;
-CREATE POLICY trace_dense_vectors_tenant ON trace_dense_vectors USING (current_setting('trace.workspace_id', true) = '*' OR EXISTS (SELECT 1 FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id = nv.node_id WHERE nv.atom_version_id = trace_dense_vectors.atom_version_id AND n.workspace_id = current_setting('trace.workspace_id', true)));
-DROP POLICY IF EXISTS trace_saved_queries_tenant ON trace_saved_queries;
-CREATE POLICY trace_saved_queries_tenant ON trace_saved_queries USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_frozen_queries_tenant ON trace_frozen_queries;
-CREATE POLICY trace_frozen_queries_tenant ON trace_frozen_queries USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_index_revisions_tenant ON trace_index_revisions;
-CREATE POLICY trace_index_revisions_tenant ON trace_index_revisions USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_projection_tenant ON trace_projection_revisions;
-CREATE POLICY trace_projection_tenant ON trace_projection_revisions USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-DROP POLICY IF EXISTS trace_projection_events_tenant ON trace_projection_events;
-CREATE POLICY trace_projection_events_tenant ON trace_projection_events USING (current_setting('trace.workspace_id', true) = '*' OR workspace_id = current_setting('trace.workspace_id', true));
-"""
+_runtime_workspace: ContextVar[str | None] = ContextVar("trace_runtime_workspace", default=None)
 
 
 class ProductionAdapterError(RuntimeError):
@@ -464,14 +57,33 @@ class PostgresEventStore:
     to SQLite.
     """
 
-    def __init__(self, dsn: str | None = None, *, connection_factory: Any | None = None, delegate: Any | None = None) -> None:
+    def __init__(self, dsn: str | None = None, *, connection_factory: Any | None = None, delegate: Any | None = None, pool: Any | None = None) -> None:
         self.dsn = dsn or os.environ.get("TRACE_POSTGRES_DSN")
         self.connection_factory = connection_factory
         self.delegate = delegate
+        self.pool = pool
         if not self.dsn and self.connection_factory is None:
             raise ValueError("TRACE_POSTGRES_DSN or connection_factory is required")
+        if os.environ.get("TRACE_PRODUCTION_MODE", "false").lower() == "true":
+            runtime_role = os.environ.get("TRACE_POSTGRES_RUNTIME_ROLE")
+            migrator_role = os.environ.get("TRACE_POSTGRES_MIGRATION_ROLE")
+            if runtime_role and migrator_role and runtime_role == migrator_role:
+                raise ValueError("runtime and migration PostgreSQL roles must be distinct in production")
+        if self.pool is None and connection_factory is None and os.environ.get("TRACE_POSTGRES_POOL_ENABLED", "false").lower() == "true":
+            try:
+                from psycopg_pool import ConnectionPool
+            except ImportError as error:  # pragma: no cover - optional deployment dependency
+                raise ProductionAdapterError("psycopg_pool is required when TRACE_POSTGRES_POOL_ENABLED=true") from error
+            self.pool = ConnectionPool(
+                conninfo=self.dsn,
+                min_size=max(1, int(os.environ.get("TRACE_POSTGRES_POOL_MIN", "2"))),
+                max_size=max(2, int(os.environ.get("TRACE_POSTGRES_POOL_MAX", "20"))),
+                kwargs={"autocommit": False},
+            )
 
     def _connect(self) -> Any:
+        if self.pool is not None:
+            return self.pool.getconn()
         if self.connection_factory is not None:
             return self.connection_factory()
         try:
@@ -479,6 +91,46 @@ class PostgresEventStore:
         except ImportError as error:  # pragma: no cover - optional production dependency
             raise ProductionAdapterError("psycopg is required for PostgresEventStore") from error
         return psycopg.connect(self.dsn)
+
+    @contextmanager
+    def authorization_scope(self, workspace_id: str) -> Iterator[None]:
+        """Bind one explicit workspace to all PostgreSQL reads in this scope.
+
+        This is the repository counterpart of ``AuthorizationContext``. It is
+        intentionally unable to represent a wildcard tenant; missing scope
+        fails closed before a query can reach a row-policy-protected table.
+        """
+
+        if not workspace_id or workspace_id == "*":
+            raise InvariantViolation("PostgreSQL operations require one explicit workspace scope")
+        token = _runtime_workspace.set(workspace_id)
+        try:
+            yield
+        finally:
+            _runtime_workspace.reset(token)
+
+    @staticmethod
+    def _set_workspace(cursor: Any, workspace_id: str | None = None) -> str:
+        selected = workspace_id or _runtime_workspace.get()
+        if not selected or selected == "*":
+            raise InvariantViolation("PostgreSQL operation has no explicit workspace scope")
+        cursor.execute("SELECT set_config('trace.workspace_id', %s, true)", (selected,))
+        return selected
+
+    @staticmethod
+    def _set_api_key_lookup(cursor: Any, key_hash: str) -> None:
+        """Bind the narrowly-scoped pre-workspace API-key lookup policy.
+
+        Authentication happens before an :class:`AuthorizationContext` exists.
+        The matching RLS policy in migration 003 permits only an equality
+        lookup of this opaque 64-character digest; it cannot enumerate a
+        tenant or become a wildcard read path.
+        """
+
+        if not re.fullmatch(r"[0-9a-f]{64}", key_hash):
+            raise InvariantViolation("API key hash must be a SHA-256 digest")
+        cursor.execute("SELECT set_config('trace.auth_lookup', 'api_key', true)")
+        cursor.execute("SELECT set_config('trace.api_key_hash', %s, true)", (key_hash,))
 
     @contextmanager
     def connection(self) -> Iterator[Any]:
@@ -490,12 +142,20 @@ class PostgresEventStore:
             connection.rollback()
             raise
         finally:
-            connection.close()
+            if self.pool is not None:
+                self.pool.putconn(connection)
+            else:
+                connection.close()
 
     def initialize(self) -> None:
         with self.connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(POSTGRES_SCHEMA)
+            MigrationRunner().apply(conn)
+
+    def verify_runtime_role(self) -> None:
+        """Ensure API/worker connections cannot bypass forced tenant RLS."""
+
+        with self.connection() as conn:
+            assert_runtime_role(conn, expected_role=os.environ.get("TRACE_POSTGRES_RUNTIME_ROLE"))
 
     def _call_delegate(self, name: str, *args: Any, **kwargs: Any) -> Any:
         if self.delegate is None or not hasattr(self.delegate, name):
@@ -582,9 +242,9 @@ class PostgresEventStore:
             )
             offset = int(cursor.fetchone()[0])
             cursor.execute(
-                """INSERT INTO trace_outbox(event_offset,event_id,topic,payload,available_at)
-                   VALUES (%s,%s,%s,%s::jsonb,%s)""",
-                (offset, event_id, event_type, json.dumps({"event_id": event_id, "offset": offset, "payload": payload}), occurred_at),
+                """INSERT INTO trace_outbox(event_offset,event_id,workspace_id,topic,payload,available_at)
+                   VALUES (%s,%s,%s,%s,%s::jsonb,%s)""",
+                (offset, event_id, workspace_id, event_type, json.dumps({"event_id": event_id, "offset": offset, "payload": payload}), occurred_at),
             )
             cursor.execute(
                 "INSERT INTO trace_event_keys(event_id,workspace_id,idempotency_key,event_offset,occurred_at) VALUES (%s,%s,%s,%s,%s)",
@@ -620,7 +280,7 @@ class PostgresEventStore:
         sql += " ORDER BY event_offset"
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute(sql, values)
                 rows = cursor.fetchall()
         records: list[EventRecord] = []
@@ -635,22 +295,30 @@ class PostgresEventStore:
         return records
 
     def last_event_offset(self) -> int:
+        if _runtime_workspace.get() is None:
+            # Health endpoints intentionally reveal no tenant event volume.
+            return 0
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT COALESCE(MAX(event_offset),0) FROM trace_events")
                 return int(cursor.fetchone()[0])
 
     def outbox_status(self) -> dict[str, int]:
+        if _runtime_workspace.get() is None:
+            return {}
         with self.connection() as conn:
             with conn.cursor() as cursor:
+                self._set_workspace(cursor)
                 cursor.execute("SELECT status,COUNT(*) FROM trace_outbox GROUP BY status")
                 return {str(status): int(count) for status, count in cursor.fetchall()}
 
     def projection_status(self, workspace_id: str | None = None) -> list[dict[str, Any]]:
+        if workspace_id is None and _runtime_workspace.get() is None:
+            return []
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', %s, true)", (workspace_id or "*",))
+                self._set_workspace(cursor, workspace_id)
                 if workspace_id:
                     cursor.execute("SELECT projection_name,workspace_id,last_applied_event,revision,updated_at FROM trace_projection_revisions WHERE workspace_id=%s ORDER BY projection_name", (workspace_id,))
                 else:
@@ -658,9 +326,11 @@ class PostgresEventStore:
                 return [self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()]
 
     def workspace_ids(self) -> list[str]:
+        if _runtime_workspace.get() is None:
+            return []
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT DISTINCT workspace_id FROM trace_nodes ORDER BY workspace_id")
                 return [str(row[0]) for row in cursor.fetchall()]
 
@@ -717,7 +387,7 @@ class PostgresEventStore:
             return self.delegate.queryable_atoms(workspace_id, as_of_event)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', %s, true)", (workspace_id or "*",))
+                self._set_workspace(cursor, workspace_id)
                 return self._pg_atoms_query(cursor, workspace_id=workspace_id, as_of_event=as_of_event)
 
     def iter_queryable_atoms(self, workspace_id: str | None, as_of_event: int | None = None, *, batch_size: int = 1_000) -> Iterator[dict[str, Any]]:
@@ -736,6 +406,7 @@ class PostgresEventStore:
             values.append(as_of_event)
         with self.connection() as conn:
             with conn.cursor(name="trace_current_atoms") as cursor:
+                self._set_workspace(cursor, workspace_id)
                 cursor.execute(
                     f"""WITH ranked AS (
                         SELECT nv.atom_version_id,nv.node_id,nv.version,nv.content,nv.properties,nv.content_hash,nv.created_event_offset,
@@ -758,7 +429,7 @@ class PostgresEventStore:
             return self.delegate.atom_versions(atom_version_ids)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 rows = self._pg_atoms_query(cursor, workspace_id=None, as_of_event=None, atom_ids=atom_version_ids)
         by_id = {row["atom_version_id"]: row for row in rows}
         return [by_id[item] for item in atom_version_ids if item in by_id]
@@ -786,7 +457,7 @@ class PostgresEventStore:
             return self.delegate.get_node(node_id, as_of_event)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 node = self._pg_node(cursor, node_id)
                 version = self._pg_node_version(cursor, node_id, as_of_event)
                 result = self._pg_atom_row({**version, "workspace_id": node["workspace_id"], "facets": node["facets"], "security": node["security"]})
@@ -799,7 +470,7 @@ class PostgresEventStore:
             return self.delegate.node_history(node_id)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 node = self._pg_node(cursor, node_id)
                 cursor.execute("SELECT atom_version_id,node_id,version,content,properties,content_hash,created_event_offset FROM trace_node_versions WHERE node_id=%s ORDER BY version", (node_id,))
                 return [self._pg_atom_row({**(self._cursor_mapping(cursor, row) or {}), "workspace_id": node["workspace_id"], "facets": node["facets"], "security": node["security"]}) for row in cursor.fetchall()]
@@ -809,7 +480,7 @@ class PostgresEventStore:
             return self.delegate.edit_node(node_id=node_id, content=content, properties=properties, actor=actor, idempotency_key=idempotency_key)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 node = self._pg_node(cursor, node_id)
                 current = self._pg_node_version(cursor, node_id)
             current_properties = self._json_value(current.get("properties"), {})
@@ -835,7 +506,7 @@ class PostgresEventStore:
             return self.delegate.split_node(node_id=node_id, parts=parts, actor=actor, idempotency_key=idempotency_key)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 parent = self._pg_node(cursor, node_id)
                 parent_version = self._pg_node_version(cursor, node_id)
             marker = self._append_event_in_connection(conn, stream_id=f"node:{node_id}", event_type="node.split_requested", payload={"node_id": node_id, "workspace_id": parent["workspace_id"], "parts_hash": _digest(parts)}, actor=actor, idempotency_key=idempotency_key)
@@ -864,7 +535,7 @@ class PostgresEventStore:
             return self.delegate.create_alias(source_node_id=source_node_id, target_node_id=target_node_id, actor=actor, evidence_atom_version_ids=evidence_atom_version_ids, idempotency_key=idempotency_key)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 source = self._pg_node(cursor, source_node_id)
                 target = self._pg_node(cursor, target_node_id)
                 if source["workspace_id"] != target["workspace_id"]:
@@ -910,12 +581,85 @@ class PostgresEventStore:
                     node["evidence_anchors"] = self._pg_anchor_rows([self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()])
                 return nodes
 
+    def current_nodes_by_facet(
+        self,
+        workspace_id: str,
+        facet: str,
+        *,
+        as_of_event: int | None = None,
+        limit: int = 256,
+    ) -> list[dict[str, Any]]:
+        """Bounded facet lookup used by online retrieval paths."""
+
+        if self.delegate is not None and hasattr(self.delegate, "current_nodes_by_facet"):
+            return self.delegate.current_nodes_by_facet(workspace_id, facet, as_of_event=as_of_event, limit=limit)
+        limit = max(1, min(int(limit), 2_000))
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT set_config('trace.workspace_id', %s, true)", (workspace_id,))
+                clauses = ["n.workspace_id=%s", "n.facets @> %s::jsonb"]
+                values: list[Any] = [workspace_id, json.dumps([facet])]
+                if as_of_event is not None:
+                    clauses.append("nv.created_event_offset<=%s")
+                    values.append(as_of_event)
+                values.append(limit)
+                cursor.execute(
+                    f"""WITH ranked AS (
+                        SELECT nv.atom_version_id,nv.node_id,nv.version,nv.content,nv.properties,nv.content_hash,nv.created_event_offset,
+                               n.workspace_id,n.facets,n.security,
+                               ROW_NUMBER() OVER (PARTITION BY nv.node_id ORDER BY nv.version DESC) AS rank
+                        FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id
+                        WHERE {' AND '.join(clauses)}
+                    ) SELECT atom_version_id,node_id,version,content,properties,content_hash,created_event_offset,workspace_id,facets,security
+                      FROM ranked WHERE rank=1 ORDER BY created_event_offset DESC LIMIT %s""",
+                    values,
+                )
+                nodes = [self._pg_atom_row(self._cursor_mapping(cursor, row) or {}) for row in cursor.fetchall()]
+                for node in nodes:
+                    cursor.execute("SELECT anchor_id,target_kind,target_id,source_atom_version_id,source_start,source_end,parser_location,quote_hash,created_event_offset FROM trace_evidence_anchors WHERE target_kind='node_version' AND target_id=%s ORDER BY anchor_id", (node["atom_version_id"],))
+                    node["evidence_anchors"] = self._pg_anchor_rows([self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()])
+                return nodes
+
+    def current_nodes_by_hierarchy_keys(
+        self,
+        workspace_id: str,
+        hierarchy_keys: Sequence[str],
+        *,
+        limit: int = 512,
+    ) -> list[dict[str, Any]]:
+        """Lookup exact materialization keys using PostgreSQL JSONB indexes."""
+
+        if self.delegate is not None and hasattr(self.delegate, "current_nodes_by_hierarchy_keys"):
+            return self.delegate.current_nodes_by_hierarchy_keys(workspace_id, hierarchy_keys, limit=limit)
+        keys = [str(key) for key in dict.fromkeys(hierarchy_keys) if key]
+        if not keys:
+            return []
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(
+                    """WITH ranked AS (
+                        SELECT nv.atom_version_id,nv.node_id,nv.version,nv.content,nv.properties,nv.content_hash,nv.created_event_offset,
+                               n.workspace_id,n.facets,n.security,
+                               ROW_NUMBER() OVER (PARTITION BY nv.node_id ORDER BY nv.version DESC) AS rank
+                        FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id
+                        WHERE n.workspace_id=%s AND nv.properties->>'hierarchy_key' = ANY(%s)
+                    ) SELECT atom_version_id,node_id,version,content,properties,content_hash,created_event_offset,workspace_id,facets,security
+                      FROM ranked WHERE rank=1 ORDER BY created_event_offset DESC LIMIT %s""",
+                    (workspace_id, keys, max(1, min(int(limit), 2_000))),
+                )
+                nodes = [self._pg_atom_row(self._cursor_mapping(cursor, row) or {}) for row in cursor.fetchall()]
+                for node in nodes:
+                    cursor.execute("SELECT anchor_id,target_kind,target_id,source_atom_version_id,source_start,source_end,parser_location,quote_hash,created_event_offset FROM trace_evidence_anchors WHERE target_kind='node_version' AND target_id=%s ORDER BY anchor_id", (node["atom_version_id"],))
+                    node["evidence_anchors"] = self._pg_anchor_rows([self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()])
+                return nodes
+
     def get_ingestion(self, ingestion_id: str) -> dict[str, Any]:
         if self.delegate is not None and hasattr(self.delegate, "get_ingestion"):
             return self.delegate.get_ingestion(ingestion_id)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT ingestion_id,workspace_id,source,attachment_id,accepted_event_offset,atom_count,parsing_status,indexing_status,consolidation_status,created_at FROM trace_ingestions WHERE ingestion_id=%s", (ingestion_id,))
                 result = self._cursor_mapping(cursor, cursor.fetchone())
         if not result:
@@ -928,7 +672,7 @@ class PostgresEventStore:
             return self.delegate.get_attachment(attachment_id)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT attachment_id,workspace_id,content_hash,object_key,media_type,byte_length,created_event_offset,metadata FROM trace_attachments WHERE attachment_id=%s", (attachment_id,))
                 result = self._cursor_mapping(cursor, cursor.fetchone())
         if not result:
@@ -1084,6 +828,55 @@ class PostgresEventStore:
                     edge["evidence_anchors"] = [self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()]
                 return edges
 
+    def neighbor_edges(
+        self,
+        workspace_id: str,
+        node_ids: Sequence[str],
+        *,
+        as_of_event: int | None = None,
+        limit: int = 512,
+    ) -> list[dict[str, Any]]:
+        """Fetch only one bounded current graph frontier under tenant RLS."""
+
+        if self.delegate is not None and hasattr(self.delegate, "neighbor_edges"):
+            return self.delegate.neighbor_edges(
+                workspace_id, node_ids, as_of_event=as_of_event, limit=limit
+            )
+        selected = list(dict.fromkeys(str(node_id) for node_id in node_ids if node_id))[:512]
+        if not selected:
+            return []
+        values: list[Any] = [workspace_id, selected, selected]
+        event_clause = ""
+        if as_of_event is not None:
+            event_clause = " AND ev.created_event_offset<=%s"
+            values.append(as_of_event)
+        values.append(max(1, min(int(limit), 2_000)))
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(
+                    f"""WITH ranked AS (
+                        SELECT ev.*,ROW_NUMBER() OVER (PARTITION BY ev.edge_id ORDER BY ev.version DESC) AS rank
+                        FROM trace_edge_versions ev
+                        WHERE ev.workspace_id=%s
+                          AND (ev.source_node_id = ANY(%s) OR ev.target_node_id = ANY(%s)){event_clause}
+                    ) SELECT edge_version_id,edge_id,version,workspace_id,source_node_id,target_node_id,
+                             relation_type,weight,confidence,status,valid_from_event,valid_to_event,
+                             model_version,properties,created_event_offset
+                      FROM ranked WHERE rank=1 AND status='trusted'
+                      ORDER BY created_event_offset DESC,edge_version_id LIMIT %s""",
+                    values,
+                )
+                edges = [self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()]
+                for edge in edges:
+                    edge["properties"] = self._json_value(edge.get("properties"), {})
+                    cursor.execute(
+                        "SELECT anchor_id,workspace_id,target_kind,target_id,source_atom_version_id,source_start,source_end,parser_location,quote_hash,created_event_offset FROM trace_evidence_anchors WHERE target_kind='edge_version' AND target_id=%s ORDER BY anchor_id",
+                        (edge["edge_version_id"],),
+                    )
+                    edge["evidence_anchors"] = [self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()]
+                return edges
+
     def semantic_link_exists(self, workspace_id: str, source_node_id: str, target_node_id: str) -> bool:
         if self.delegate is not None and hasattr(self.delegate, "semantic_link_exists"):
             return self.delegate.semantic_link_exists(workspace_id, source_node_id, target_node_id)
@@ -1114,11 +907,15 @@ class PostgresEventStore:
     def reconcile_hot_inbox(self, workspace_id: str | None = None, *, actor: str = "system") -> dict[str, Any]:
         if self.delegate is not None and hasattr(self.delegate, "reconcile_hot_inbox"):
             return self.delegate.reconcile_hot_inbox(workspace_id, actor=actor)
+        workspace_id = workspace_id or _runtime_workspace.get()
+        if not workspace_id:
+            raise InvariantViolation("PostgreSQL projection rebuilds require one explicit workspace")
         with self.connection() as conn:
-            started = self._append_event_in_connection(conn, stream_id="admin:projections", event_type="projection.reconcile_started", payload={"projection": "hot_inbox", "workspace_id": workspace_id}, actor=actor)
-            workspaces = [workspace_id] if workspace_id else self.workspace_ids()
+            started = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="projection.reconcile_started", payload={"projection": "hot_inbox", "workspace_id": workspace_id}, actor=actor)
+            workspaces = [workspace_id]
             with conn.cursor() as cursor:
-                cursor.execute("DELETE FROM trace_hot_inbox WHERE (%s IS NULL OR workspace_id=%s)", (workspace_id, workspace_id))
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("DELETE FROM trace_hot_inbox WHERE workspace_id=%s", (workspace_id,))
             inserted = 0
             for workspace in workspaces:
                 with conn.cursor() as cursor:
@@ -1126,7 +923,7 @@ class PostgresEventStore:
                     for atom in atoms:
                         cursor.execute("INSERT INTO trace_hot_inbox(atom_version_id,node_id,workspace_id,content,visible_from_event,facets,security) VALUES (%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb)", (atom["atom_version_id"], atom["node_id"], workspace, atom["content"], atom["created_event_offset"], json.dumps(atom["facets"]), json.dumps(atom["security"])))
                         inserted += 1
-            completed = self._append_event_in_connection(conn, stream_id="admin:projections", event_type="projection.reconciled", payload={"projection": "hot_inbox", "workspace_id": workspace_id, "inserted": inserted}, actor=actor, causation_id=started.event_id)
+            completed = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="projection.reconciled", payload={"projection": "hot_inbox", "workspace_id": workspace_id, "inserted": inserted}, actor=actor, causation_id=started.event_id)
             with conn.cursor() as cursor:
                 for workspace in workspaces:
                     cursor.execute("INSERT INTO trace_projection_revisions(projection_name,workspace_id,last_applied_event,revision,updated_at) VALUES ('hot_inbox',%s,%s,1,NOW()) ON CONFLICT(projection_name,workspace_id) DO UPDATE SET last_applied_event=EXCLUDED.last_applied_event,revision=trace_projection_revisions.revision+1,updated_at=NOW()", (workspace, completed.offset))
@@ -1161,7 +958,7 @@ class PostgresEventStore:
             return self.delegate.get_bundle(evidence_bundle_id)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 return self._pg_bundle_from_cursor(cursor, evidence_bundle_id)
 
     def record_feedback(
@@ -1222,7 +1019,7 @@ class PostgresEventStore:
         marks = ",".join("%s" for _ in atom_version_ids)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute(f"SELECT atom_version_id,vector FROM trace_dense_vectors WHERE provider_id=%s AND index_revision=%s AND atom_version_id IN ({marks})", [provider_id, index_revision, *atom_version_ids])
                 rows = cursor.fetchall()
         return {str(atom_id): [float(item) for item in self._json_value(vector, [])] for atom_id, vector in rows}
@@ -1310,7 +1107,7 @@ class PostgresEventStore:
             return self.delegate.get_proposal(proposal_id)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT proposal_id,workspace_id,proposal_type,candidate,evidence_atom_version_ids,confidence,model_version,status,created_event_offset,decided_event_offset,decision_reason FROM trace_proposals WHERE proposal_id=%s", (proposal_id,))
                 return self._pg_proposal_row(self._cursor_mapping(cursor, cursor.fetchone()))
 
@@ -1321,7 +1118,7 @@ class PostgresEventStore:
             raise ValueError("decision must be promoted or rejected")
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT proposal_id,workspace_id,proposal_type,candidate,evidence_atom_version_ids,confidence,model_version,status,created_event_offset,decided_event_offset,decision_reason FROM trace_proposals WHERE proposal_id=%s FOR UPDATE", (proposal_id,))
                 row = self._pg_proposal_row(self._cursor_mapping(cursor, cursor.fetchone()))
             if row["status"] != "pending":
@@ -1367,7 +1164,7 @@ class PostgresEventStore:
             return self.delegate.promote_proposal(proposal_id=proposal_id, actor=actor, reason=reason, idempotency_key=idempotency_key)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT proposal_id,workspace_id,proposal_type,candidate,evidence_atom_version_ids,confidence,model_version,status,created_event_offset,decided_event_offset,decision_reason FROM trace_proposals WHERE proposal_id=%s FOR UPDATE", (proposal_id,))
                 proposal = self._pg_proposal_row(self._cursor_mapping(cursor, cursor.fetchone()))
             if proposal["status"] != "pending":
@@ -1422,12 +1219,15 @@ class PostgresEventStore:
         if self.delegate is not None and hasattr(self.delegate, "register_index"):
             return self.delegate.register_index(payload, actor)
         identifier = str(uuid.uuid4())
-        workspace_id = payload.get("workspace_id")
+        workspace_id = str(payload.get("workspace_id") or _runtime_workspace.get() or "")
+        if not workspace_id:
+            raise InvariantViolation("PostgreSQL index revisions require one explicit workspace")
         with self.connection() as conn:
-            event = self._append_event_in_connection(conn, stream_id="admin:indexes", event_type="index_revision.created", payload={"index_revision_id": identifier, **payload}, actor=actor)
+            scoped_payload = {"index_revision_id": identifier, **payload, "workspace_id": workspace_id}
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="index_revision.created", payload=scoped_payload, actor=actor)
             with conn.cursor() as cursor:
                 cursor.execute("INSERT INTO trace_index_revisions(index_revision_id,workspace_id,embedding_model,vector_namespace,lexical_revision,normalization,rollout_state,created_event_offset) VALUES (%s,%s,%s,%s,%s,%s::jsonb,%s,%s)", (identifier, workspace_id, payload["embedding_model"], payload["vector_namespace"], payload["lexical_revision"], json.dumps(payload.get("normalization", {})), payload["rollout_state"], event.offset))
-        return {"index_revision_id": identifier, "created_event_offset": event.offset, **payload}
+        return {"index_revision_id": identifier, "created_event_offset": event.offset, **payload, "workspace_id": workspace_id}
 
     def register_model(self, payload: dict[str, Any], actor: str) -> dict[str, Any]:
         if self.delegate is not None and hasattr(self.delegate, "register_model"):
@@ -1455,7 +1255,7 @@ class PostgresEventStore:
         identifier = str(uuid.uuid4())
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT COALESCE(MAX(event_offset),0) FROM trace_events")
                 through = int(cursor.fetchone()[0])
                 cursor.execute("SELECT event_offset,payload_hash FROM trace_events WHERE event_offset<=%s ORDER BY event_offset", (through,))
@@ -1469,19 +1269,29 @@ class PostgresEventStore:
         event = self.append_event(stream_id="admin:compaction", event_type="compaction.completed", payload={"deleted_spine_events": 0, "deleted_node_versions": 0, "note": "canonical history is retained; only rebuildable projections may be compacted"}, actor=actor)
         return {"deleted_spine_events": 0, "deleted_node_versions": 0, "event_offset": event.offset}
 
-    def claim_outbox(self, *, limit: int = 100, lease_seconds: int = 30) -> list[dict[str, Any]]:
+    def claim_outbox(
+        self,
+        *,
+        limit: int = 100,
+        lease_seconds: int = 30,
+        workspace_id: str | None = None,
+    ) -> list[dict[str, Any]]:
+        workspace_id = workspace_id or _runtime_workspace.get()
+        if not workspace_id:
+            raise InvariantViolation("outbox publisher requires one explicit workspace scope")
         now = datetime.now(UTC)
         lease = datetime.fromtimestamp(now.timestamp() + max(1, lease_seconds), UTC)
         with self.connection() as conn:
             with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
                 cursor.execute(
                     """UPDATE trace_outbox SET status='pending',lease_until=NULL
-                       WHERE status='inflight' AND lease_until<%s""", (now,)
+                       WHERE workspace_id=%s AND status='inflight' AND lease_until<%s""", (workspace_id, now)
                 )
                 cursor.execute(
                     """SELECT o.event_offset,o.event_id,o.topic,o.payload,o.attempts
-                       FROM trace_outbox o WHERE o.status='pending' AND o.available_at<=%s
-                       ORDER BY o.event_offset FOR UPDATE SKIP LOCKED LIMIT %s""", (now, limit),
+                       FROM trace_outbox o WHERE o.workspace_id=%s AND o.status='pending' AND o.available_at<=%s
+                       ORDER BY o.event_offset FOR UPDATE SKIP LOCKED LIMIT %s""", (workspace_id, now, limit),
                 )
                 rows = cursor.fetchall()
                 result: list[dict[str, Any]] = []
@@ -1492,12 +1302,13 @@ class PostgresEventStore:
                     )
                     if not isinstance(payload, dict):
                         payload = json.loads(payload)
-                    result.append({"event_offset": int(offset), "event_id": str(event_id), "topic": topic, "payload": payload, "attempts": int(attempts) + 1})
+                    result.append({"event_offset": int(offset), "event_id": str(event_id), "workspace_id": workspace_id, "topic": topic, "payload": payload, "attempts": int(attempts) + 1})
                 return result
 
     def mark_outbox_published(self, event_offset: int) -> None:
         with self.connection() as conn:
             with conn.cursor() as cursor:
+                self._set_workspace(cursor)
                 cursor.execute(
                     "UPDATE trace_outbox SET status='published',published_at=NOW(),lease_until=NULL WHERE event_offset=%s AND status='inflight'",
                     (event_offset,),
@@ -1508,6 +1319,7 @@ class PostgresEventStore:
     def release_outbox(self, event_offset: int) -> None:
         with self.connection() as conn:
             with conn.cursor() as cursor:
+                self._set_workspace(cursor)
                 cursor.execute(
                     "UPDATE trace_outbox SET status='pending',lease_until=NULL WHERE event_offset=%s AND status='inflight'",
                     (event_offset,),
@@ -1526,7 +1338,7 @@ class PostgresEventStore:
     ) -> bool:
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', %s, true)", (workspace_id,))
+                self._set_workspace(cursor, workspace_id)
                 cursor.execute(
                     """INSERT INTO trace_projection_events(projection_name,event_id,event_offset,workspace_id,projection_revision,applied_at)
                        VALUES (%s,%s,%s,%s,%s,NOW()) ON CONFLICT(projection_name,event_id) DO NOTHING""",
@@ -1545,6 +1357,7 @@ class PostgresEventStore:
     def projection_checkpoint(self, projection_name: str, workspace_id: str) -> dict[str, Any] | None:
         with self.connection() as conn:
             with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
                 cursor.execute("SELECT * FROM trace_projection_revisions WHERE projection_name=%s AND workspace_id=%s", (projection_name, workspace_id))
                 row = cursor.fetchone()
                 if not row:
@@ -1690,7 +1503,7 @@ class PostgresEventStore:
             return self.delegate.get_job(job_id)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 row = self._pg_fetch_job(cursor, job_id)
         return self._pg_job_row(row)
 
@@ -1719,7 +1532,7 @@ class PostgresEventStore:
         where = " WHERE " + " AND ".join(clauses) if clauses else ""
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', %s, true)", (workspace_id or "*",))
+                self._set_workspace(cursor, workspace_id)
                 cursor.execute(f"SELECT {self._JOB_COLUMNS} FROM trace_jobs{where} ORDER BY created_at DESC,job_id DESC LIMIT %s OFFSET %s", [*values, max(1, min(int(limit), 200)), max(0, int(offset))])
                 rows = [self._cursor_mapping(cursor, row) for row in cursor.fetchall()]
         return [self._pg_job_row(row) for row in rows]
@@ -1731,17 +1544,21 @@ class PostgresEventStore:
         lease_seconds: int = 300,
         kind: str | None = None,
         job_id: str | None = None,
+        workspace_id: str | None = None,
     ) -> list[dict[str, Any]]:
         if self.delegate is not None and hasattr(self.delegate, "claim_jobs"):
-            return self.delegate.claim_jobs(limit=limit, lease_seconds=lease_seconds, kind=kind, job_id=job_id)
+            return self.delegate.claim_jobs(limit=limit, lease_seconds=lease_seconds, kind=kind, job_id=job_id, workspace_id=workspace_id)
+        workspace_id = workspace_id or _runtime_workspace.get()
+        if not workspace_id:
+            raise InvariantViolation("job worker requires one explicit workspace scope")
         now = datetime.now(UTC)
         lease_until = datetime.fromtimestamp(now.timestamp() + max(1, lease_seconds), UTC)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
-                cursor.execute("UPDATE trace_jobs SET status='queued',lease_until=NULL,available_at=%s WHERE status='running' AND lease_until IS NOT NULL AND lease_until<%s AND cancel_requested=FALSE", (now, now))
-                clauses = ["status='queued'", "available_at<=%s", "cancel_requested=FALSE"]
-                values: list[Any] = [now]
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("UPDATE trace_jobs SET status='queued',lease_until=NULL,available_at=%s WHERE workspace_id=%s AND status='running' AND lease_until IS NOT NULL AND lease_until<%s AND cancel_requested=FALSE", (now, workspace_id, now))
+                clauses = ["workspace_id=%s", "status='queued'", "available_at<=%s", "cancel_requested=FALSE"]
+                values: list[Any] = [workspace_id, now]
                 if kind:
                     clauses.append("kind=%s")
                     values.append(kind)
@@ -1766,7 +1583,7 @@ class PostgresEventStore:
             return self.delegate.complete_job(job_id, result=result, actor=actor)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 row = self._pg_fetch_job(cursor, job_id, for_update=True)
             if row is None:
                 raise NotFoundError(f"job {job_id} was not found")
@@ -1779,7 +1596,7 @@ class PostgresEventStore:
             return self.delegate.fail_job(job_id, error=error, actor=actor, retry=retry)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 row = self._pg_fetch_job(cursor, job_id, for_update=True)
             if row is None:
                 raise NotFoundError(f"job {job_id} was not found")
@@ -1796,7 +1613,7 @@ class PostgresEventStore:
             return self.delegate.cancel_job(job_id, actor=actor, reason=reason)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 row = self._pg_fetch_job(cursor, job_id, for_update=True)
             if row is None:
                 raise NotFoundError(f"job {job_id} was not found")
@@ -1809,7 +1626,7 @@ class PostgresEventStore:
             return self.delegate.retry_job(job_id, actor=actor)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 row = self._pg_fetch_job(cursor, job_id, for_update=True)
             if row is None:
                 raise NotFoundError(f"job {job_id} was not found")
@@ -1864,7 +1681,7 @@ class PostgresEventStore:
             return self.delegate.get_webhook(webhook_id)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT webhook_id,workspace_id,url,secret_hash,secret_ciphertext,event_types,status,created_event_offset,created_at,rotated_at FROM trace_webhooks WHERE webhook_id=%s", (webhook_id,))
                 return self._pg_webhook_row(self._cursor_mapping(cursor, cursor.fetchone()))
 
@@ -1873,7 +1690,7 @@ class PostgresEventStore:
             return self.delegate.webhook_secret(webhook_id, cipher=cipher)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT secret_ciphertext FROM trace_webhooks WHERE webhook_id=%s", (webhook_id,))
                 row = cursor.fetchone()
         if not row:
@@ -1893,7 +1710,7 @@ class PostgresEventStore:
         now = datetime.now(UTC)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT workspace_id FROM trace_webhooks WHERE webhook_id=%s FOR UPDATE", (webhook_id,))
                 row = cursor.fetchone()
             if not row:
@@ -1908,6 +1725,131 @@ class PostgresEventStore:
                 cursor.execute("SELECT webhook_id,workspace_id,url,secret_hash,secret_ciphertext,event_types,status,created_event_offset,created_at,rotated_at FROM trace_webhooks WHERE webhook_id=%s", (webhook_id,))
                 result = self._pg_webhook_row(self._cursor_mapping(cursor, cursor.fetchone()), include_ciphertext=True)
             result["rotation_event_offset"] = event.offset
+            return result
+
+    # ----------------------------------------------------- webhook delivery
+    @classmethod
+    def _pg_delivery_row(cls, row: dict[str, Any] | None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("webhook delivery was not found")
+        result = dict(row)
+        result["payload"] = cls._json_value(result.pop("payload"), {})
+        return result
+
+    def enqueue_webhook_delivery(self, job: dict[str, Any], *, max_attempts: int = 8) -> dict[str, Any] | None:
+        if self.delegate is not None and hasattr(self.delegate, "enqueue_webhook_delivery"):
+            return self.delegate.enqueue_webhook_delivery(job, max_attempts=max_attempts)
+        webhook_id = job.get("webhook_id")
+        if not webhook_id:
+            return None
+        workspace_id = str(job["workspace_id"])
+        event_type = "job." + str(job["status"])
+        identifier = str(uuid.uuid4())
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("SELECT webhook_id,workspace_id,event_types,status FROM trace_webhooks WHERE webhook_id=%s AND workspace_id=%s", (webhook_id, workspace_id))
+                webhook = self._cursor_mapping(cursor, cursor.fetchone())
+                if not webhook:
+                    raise NotFoundError("job webhook was not found in its workspace")
+                event_types = self._json_value(webhook.get("event_types"), [])
+                if webhook["status"] != "active" or (event_types and event_type not in event_types):
+                    return None
+                cursor.execute("SELECT delivery_id,webhook_id,workspace_id,job_id,event_type,payload,status,attempts,max_attempts,available_at,lease_until,last_error,delivered_at,created_event_offset,created_at,updated_at FROM trace_webhook_deliveries WHERE webhook_id=%s AND job_id=%s AND event_type=%s", (webhook_id, job["job_id"], event_type))
+                existing = self._cursor_mapping(cursor, cursor.fetchone())
+                if existing:
+                    return self._pg_delivery_row(existing)
+            payload = {
+                "delivery_id": identifier, "event": event_type, "job_id": job["job_id"],
+                "workspace_id": workspace_id, "kind": job["kind"], "status": job["status"],
+                "result": job.get("result"), "error": job.get("error"), "request_id": job.get("request_id"),
+            }
+            event = self._append_event_in_connection(
+                conn, stream_id=f"workspace:{workspace_id}", event_type="webhook.delivery_queued",
+                payload={"delivery_id": identifier, "webhook_id": str(webhook_id), "workspace_id": workspace_id, "job_id": str(job["job_id"]), "event_type": event_type},
+                actor="webhook-dispatcher", correlation_id=str(job["request_id"]) if job.get("request_id") else None,
+            )
+            now = datetime.now(UTC)
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """INSERT INTO trace_webhook_deliveries(
+                       delivery_id,webhook_id,workspace_id,job_id,event_type,payload,status,attempts,max_attempts,
+                       available_at,created_event_offset,created_at,updated_at
+                    ) VALUES (%s,%s,%s,%s,%s,%s::jsonb,'pending',0,%s,%s,%s,%s,%s)""",
+                    (identifier, webhook_id, workspace_id, job["job_id"], event_type, json.dumps(payload), max(1, min(int(max_attempts), 32)), now, event.offset, now, now),
+                )
+                cursor.execute("SELECT delivery_id,webhook_id,workspace_id,job_id,event_type,payload,status,attempts,max_attempts,available_at,lease_until,last_error,delivered_at,created_event_offset,created_at,updated_at FROM trace_webhook_deliveries WHERE delivery_id=%s", (identifier,))
+                return self._pg_delivery_row(self._cursor_mapping(cursor, cursor.fetchone()))
+
+    def claim_webhook_deliveries(
+        self,
+        *,
+        limit: int = 25,
+        lease_seconds: int = 30,
+        workspace_id: str | None = None,
+    ) -> list[dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "claim_webhook_deliveries"):
+            return self.delegate.claim_webhook_deliveries(limit=limit, lease_seconds=lease_seconds, workspace_id=workspace_id)
+        workspace_id = workspace_id or _runtime_workspace.get()
+        if not workspace_id:
+            raise InvariantViolation("webhook worker requires TRACE_WORKER_WORKSPACE_ID or an authorization scope")
+        now = datetime.now(UTC)
+        lease_until = datetime.fromtimestamp(now.timestamp() + max(1, int(lease_seconds)), UTC)
+        columns = "delivery_id,webhook_id,workspace_id,job_id,event_type,payload,status,attempts,max_attempts,available_at,lease_until,last_error,delivered_at,created_event_offset,created_at,updated_at"
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("UPDATE trace_webhook_deliveries SET status='pending',lease_until=NULL,updated_at=%s WHERE workspace_id=%s AND status='inflight' AND lease_until<%s", (now, workspace_id, now))
+                cursor.execute(f"SELECT {columns} FROM trace_webhook_deliveries WHERE workspace_id=%s AND status='pending' AND available_at<=%s ORDER BY created_at,delivery_id LIMIT %s FOR UPDATE SKIP LOCKED", (workspace_id, now, max(1, min(int(limit), 100))))
+                rows = [self._cursor_mapping(cursor, row) for row in cursor.fetchall()]
+                claimed: list[dict[str, Any]] = []
+                for row in rows:
+                    if row is None:
+                        continue
+                    cursor.execute("UPDATE trace_webhook_deliveries SET status='inflight',attempts=attempts+1,lease_until=%s,updated_at=%s WHERE delivery_id=%s AND status='pending'", (lease_until, now, row["delivery_id"]))
+                    if cursor.rowcount:
+                        cursor.execute(f"SELECT {columns} FROM trace_webhook_deliveries WHERE delivery_id=%s", (row["delivery_id"],))
+                        claimed.append(self._pg_delivery_row(self._cursor_mapping(cursor, cursor.fetchone())))
+                return claimed
+
+    def mark_webhook_delivery_succeeded(self, delivery_id: str) -> dict[str, Any]:
+        columns = "delivery_id,webhook_id,workspace_id,job_id,event_type,payload,status,attempts,max_attempts,available_at,lease_until,last_error,delivered_at,created_event_offset,created_at,updated_at"
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute(f"SELECT {columns} FROM trace_webhook_deliveries WHERE delivery_id=%s FOR UPDATE", (delivery_id,))
+                delivery = self._pg_delivery_row(self._cursor_mapping(cursor, cursor.fetchone()))
+            if delivery["status"] == "succeeded":
+                return delivery
+            if delivery["status"] != "inflight":
+                raise InvariantViolation("webhook delivery is not leased")
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{delivery['workspace_id']}", event_type="webhook.delivery_succeeded", payload={"delivery_id": delivery_id, "workspace_id": delivery["workspace_id"], "job_id": str(delivery["job_id"]), "attempts": delivery["attempts"]}, actor="webhook-delivery-worker")
+            with conn.cursor() as cursor:
+                cursor.execute("UPDATE trace_webhook_deliveries SET status='succeeded',lease_until=NULL,delivered_at=NOW(),updated_at=NOW(),last_error=NULL WHERE delivery_id=%s", (delivery_id,))
+                cursor.execute(f"SELECT {columns} FROM trace_webhook_deliveries WHERE delivery_id=%s", (delivery_id,))
+                result = self._pg_delivery_row(self._cursor_mapping(cursor, cursor.fetchone()))
+            result["status_event_offset"] = event.offset
+            return result
+
+    def fail_webhook_delivery(self, delivery_id: str, *, error: str, retry_delay_seconds: int | None = None) -> dict[str, Any]:
+        columns = "delivery_id,webhook_id,workspace_id,job_id,event_type,payload,status,attempts,max_attempts,available_at,lease_until,last_error,delivered_at,created_event_offset,created_at,updated_at"
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute(f"SELECT {columns} FROM trace_webhook_deliveries WHERE delivery_id=%s FOR UPDATE", (delivery_id,))
+                delivery = self._pg_delivery_row(self._cursor_mapping(cursor, cursor.fetchone()))
+            if delivery["status"] != "inflight":
+                raise InvariantViolation("webhook delivery is not leased")
+            dead_letter = int(delivery["attempts"]) >= int(delivery["max_attempts"])
+            delay = int(retry_delay_seconds if retry_delay_seconds is not None else min(3_600, 2 ** min(int(delivery["attempts"]), 10)))
+            available_at = datetime.fromtimestamp(datetime.now(UTC).timestamp() + max(1, delay), UTC)
+            status = "dead_letter" if dead_letter else "pending"
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{delivery['workspace_id']}", event_type="webhook.delivery_dead_lettered" if dead_letter else "webhook.delivery_retry_scheduled", payload={"delivery_id": delivery_id, "workspace_id": delivery["workspace_id"], "job_id": str(delivery["job_id"]), "attempts": delivery["attempts"], "error": error[:500]}, actor="webhook-delivery-worker")
+            with conn.cursor() as cursor:
+                cursor.execute("UPDATE trace_webhook_deliveries SET status=%s,lease_until=NULL,available_at=%s,last_error=%s,updated_at=NOW() WHERE delivery_id=%s", (status, available_at, error[:2_000], delivery_id))
+                cursor.execute(f"SELECT {columns} FROM trace_webhook_deliveries WHERE delivery_id=%s", (delivery_id,))
+                result = self._pg_delivery_row(self._cursor_mapping(cursor, cursor.fetchone()))
+            result["status_event_offset"] = event.offset
             return result
 
     @classmethod
@@ -1958,7 +1900,7 @@ class PostgresEventStore:
             return self.delegate.get_api_key(api_key_id)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT api_key_id,workspace_id,subject,key_prefix,key_hash,scopes,allowed_visibility,model_permissions,status,expires_at,created_event_offset,created_at,revoked_at FROM trace_api_keys WHERE api_key_id=%s", (api_key_id,))
                 return self._pg_api_key_row(self._cursor_mapping(cursor, cursor.fetchone()))
 
@@ -1968,7 +1910,7 @@ class PostgresEventStore:
         digest = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_api_key_lookup(cursor, digest)
                 cursor.execute("SELECT api_key_id,workspace_id,subject,key_prefix,key_hash,scopes,allowed_visibility,model_permissions,status,expires_at,created_event_offset,created_at,revoked_at FROM trace_api_keys WHERE key_hash=%s AND status='active' AND (expires_at IS NULL OR expires_at>NOW())", (digest,))
                 row = self._cursor_mapping(cursor, cursor.fetchone())
         return self._pg_api_key_row(row, include_hash=True) if row else None
@@ -1978,7 +1920,7 @@ class PostgresEventStore:
             return self.delegate.revoke_api_key(api_key_id, actor=actor, reason=reason)
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT set_config('trace.workspace_id', '*', true)")
+                self._set_workspace(cursor)
                 cursor.execute("SELECT workspace_id,status FROM trace_api_keys WHERE api_key_id=%s FOR UPDATE", (api_key_id,))
                 row = cursor.fetchone()
             if not row:
@@ -1998,6 +1940,62 @@ class PostgresEventStore:
                 result = self._pg_api_key_row(self._cursor_mapping(cursor, cursor.fetchone()))
             result["revocation_event_offset"] = event.offset
             return result
+
+    # ---------------------------------------------------------- model audits
+    def record_model_audit(self, audit: dict[str, Any]) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "record_model_audit"):
+            return self.delegate.record_model_audit(audit)
+        workspace_id = str(audit.get("workspace_id") or "")
+        if not workspace_id:
+            raise InvariantViolation("model audit requires a workspace_id")
+        identifier = str(uuid.uuid4())
+        payload = {
+            "model_call_audit_id": identifier,
+            "workspace_id": workspace_id,
+            "model_id": str(audit.get("model_id") or "unknown"),
+            "purpose": str(audit.get("purpose") or "unknown"),
+            "prompt_template_revision": str(audit.get("prompt_template_revision") or "unknown"),
+            "response_schema_hash": str(audit.get("response_schema_hash") or ""),
+            "excerpt_hashes": list(audit.get("excerpt_hashes") or []),
+            "node_count": int(audit.get("node_count") or 0),
+            "estimated_tokens": int(audit.get("estimated_tokens") or 0),
+            "cloud_tokens": int(audit.get("cloud_tokens") or 0),
+            "cost_usd": float(audit.get("cost_usd") or 0.0),
+            "status": str(audit.get("status") or "succeeded"),
+        }
+        with self.connection() as conn:
+            event = self._append_event_in_connection(
+                conn,
+                stream_id=f"workspace:{workspace_id}",
+                event_type="model.call_audited",
+                payload=payload,
+                actor=str(audit.get("actor") or "system"),
+                correlation_id=str(audit["request_id"]) if audit.get("request_id") else None,
+            )
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """INSERT INTO trace_model_call_audits(
+                       model_call_audit_id,workspace_id,model_id,purpose,actor,request_id,
+                       prompt_template_revision,response_schema_hash,excerpt_hashes,node_count,
+                       estimated_tokens,cloud_tokens,cost_usd,status,created_event_offset,created_at
+                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,%s,%s,%s,%s,%s,%s,NOW())""",
+                    (
+                        identifier, workspace_id, payload["model_id"], payload["purpose"], str(audit.get("actor") or "system"),
+                        audit.get("request_id"), payload["prompt_template_revision"], payload["response_schema_hash"],
+                        json.dumps(payload["excerpt_hashes"]), payload["node_count"], payload["estimated_tokens"],
+                        payload["cloud_tokens"], payload["cost_usd"], payload["status"], event.offset,
+                    ),
+                )
+        return {"model_call_audit_id": identifier, "created_event_offset": event.offset, **payload}
+
+    def model_cost_total(self, workspace_id: str) -> float:
+        if self.delegate is not None and hasattr(self.delegate, "model_cost_total"):
+            return float(self.delegate.model_cost_total(workspace_id))
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("SELECT COALESCE(SUM(cost_usd),0) FROM trace_model_call_audits WHERE workspace_id=%s AND status='succeeded'", (workspace_id,))
+                return float(cursor.fetchone()[0] or 0.0)
 
 
 class S3ObjectStore:
@@ -2065,6 +2063,54 @@ class S3ObjectStore:
         )
 
 
+class GcsObjectStore:
+    """Private GCS attachment store for the Mumbai profile.
+
+    The Terraform profile configures bucket-level CMEK and versioning.  This
+    adapter intentionally uses application-default credentials only; callers
+    cannot choose a bucket, project, service account, or public URL.
+    """
+
+    def __init__(self, bucket: str, *, client: Any | None = None, prefix: str = "trace") -> None:
+        if not bucket:
+            raise ValueError("TRACE_GCS_BUCKET is required for GCS object storage")
+        self.bucket_name = bucket
+        self.prefix = prefix.strip("/")
+        if client is None:
+            try:
+                from google.cloud import storage
+            except ImportError as error:  # pragma: no cover - optional production dependency
+                raise ProductionAdapterError("google-cloud-storage is required for GcsObjectStore") from error
+            client = storage.Client()
+        self.client = client
+
+    def _put(self, raw: bytes, media_type: str, *, workspace_id: str | None) -> dict[str, Any]:
+        digest = hashlib.sha256(raw).hexdigest()
+        safe_workspace = re.sub(r"[^A-Za-z0-9_.-]", "_", workspace_id or "unassigned")
+        object_key = f"{self.prefix}/workspace/{safe_workspace}/{digest[:2]}/{digest}"
+        bucket = self.client.bucket(self.bucket_name)
+        blob = bucket.blob(object_key)
+        blob.metadata = {"sha256": digest, "tenant": workspace_id or "unassigned"}
+        blob.upload_from_string(raw, content_type=media_type)
+        return {
+            "content_hash": digest,
+            "object_key": object_key,
+            "media_type": media_type,
+            "byte_length": len(raw),
+            "metadata": {"storage": "gcs", "bucket": self.bucket_name, "encrypted": True},
+        }
+
+    def put_bytes(self, raw: bytes, media_type: str, *, workspace_id: str | None = None, **_: Any) -> dict[str, Any]:
+        return self._put(raw, media_type, workspace_id=workspace_id)
+
+    def put_text(self, text: str, media_type: str, *, workspace_id: str | None = None, **kwargs: Any) -> dict[str, Any]:
+        return self.put_bytes(text.encode("utf-8"), media_type, workspace_id=workspace_id, **kwargs)
+
+    def signed_get_url(self, object_key: str, *, expires_seconds: int = 300) -> str:
+        bucket = self.client.bucket(self.bucket_name)
+        return bucket.blob(object_key).generate_signed_url(expiration=max(1, min(expires_seconds, 86_400)), method="GET")
+
+
 class OpenSearchLexicalIndex:
     """BM25/OpenSearch adapter with mandatory tenant and visibility filters."""
 
@@ -2079,6 +2125,61 @@ class OpenSearchLexicalIndex:
                 raise ProductionAdapterError("opensearch-py is required for OpenSearchLexicalIndex") from error
             client = OpenSearch(list(hosts or [os.environ.get("TRACE_OPENSEARCH_URL", "http://localhost:9200")]))
         self.client = client
+
+    @staticmethod
+    def _revision_token(revision: str) -> str:
+        token = re.sub(r"[^a-zA-Z0-9_-]+", "-", str(revision)).strip("-_").lower()
+        if not token:
+            raise ValueError("index revision must contain a letter or digit")
+        return token[:96]
+
+    def revision_index(self, revision: str) -> str:
+        """Return the immutable physical index behind a logical revision."""
+
+        return f"{self.index}--rev-{self._revision_token(revision)}"
+
+    def create_revision(self, revision: str, *, vector_size: int | None = None) -> str:
+        """Create a physical, immutable OpenSearch revision if absent."""
+
+        target = self.revision_index(revision)
+        indexes = getattr(self.client, "indices", None)
+        if indexes is None:
+            return target
+        try:
+            exists = bool(indexes.exists(index=target))
+        except Exception:
+            exists = False
+        if not exists:
+            body = {
+                "settings": {"index": {
+                    "number_of_shards": int(os.environ.get("TRACE_OPENSEARCH_SHARDS", "3")),
+                    "number_of_replicas": int(os.environ.get("TRACE_OPENSEARCH_REPLICAS", "1")),
+                }},
+                "mappings": {"dynamic": "strict", "properties": {
+                    "atom_version_id": {"type": "keyword"},
+                    "workspace_id": {"type": "keyword"},
+                    "content": {"type": "text"},
+                    "title": {"type": "text"},
+                    "visibility": {"type": "keyword"},
+                    "facets": {"type": "keyword"},
+                    "created_event_offset": {"type": "long"},
+                    "index_revision": {"type": "keyword"},
+                    "content_hash": {"type": "keyword"},
+                    "source": {"properties": {"uri": {"type": "keyword", "ignore_above": 2048}}},
+                    "source_start": {"type": "integer"},
+                    "source_end": {"type": "integer"},
+                    "parser_location": {"type": "keyword", "ignore_above": 2048},
+                    "attachment_id": {"type": "keyword"},
+                }},
+            }
+            try:
+                indexes.create(index=target, body=body)
+            except Exception as error:
+                # Concurrent maintenance workers may race index creation. Only
+                # accept the failure if the exact physical target now exists.
+                if not indexes.exists(index=target):
+                    raise error
+        return target
 
     @staticmethod
     def _filters(workspace_id: str, visibility: Sequence[str] | None, facets: Sequence[str] | None, as_of_event: int | None, index_revision: str | None = None) -> list[dict[str, Any]]:
@@ -2104,24 +2205,43 @@ class OpenSearchLexicalIndex:
         return [{**hit.get("_source", {}), "atom_version_id": hit.get("_id"), "lexical_score": float(hit.get("_score") or 0.0)} for hit in hits]
 
     def upsert(self, documents: Iterable[dict[str, Any]], *, revision: str) -> int:
+        target = self.create_revision(revision)
         count = 0
         for document in documents:
             atom_id = document.get("atom_version_id")
             if not atom_id:
                 continue
             payload = {**document, "index_revision": revision}
-            self.client.index(index=self.index, id=atom_id, body=payload, refresh=False)
+            self.client.index(index=target, id=atom_id, body=payload, refresh=False)
             count += 1
         return count
 
-    def activate_revision(self, revision_index: str, *, alias: str | None = None) -> None:
+    def revision_count(self, *, workspace_id: str, revision: str) -> int:
+        target = self.revision_index(revision)
+        body = {"query": {"bool": {"filter": self._filters(workspace_id, None, None, None, revision)}}}
+        try:
+            response = self.client.count(index=target, body=body)
+        except TypeError:
+            response = self.client.count(index=target, query=body["query"])
+        return int(response.get("count", 0) if isinstance(response, dict) else getattr(response, "count", 0))
+
+    def activate_revision(self, revision: str, *, alias: str | None = None) -> None:
         """Atomically move a read alias to a fully rebuilt revision index."""
 
         alias = alias or self.index
-        self.client.indices.update_aliases(body={"actions": [
-            {"remove": {"alias": alias, "index": "*"}},
-            {"add": {"alias": alias, "index": revision_index}},
-        ]})
+        target = revision if "--rev-" in revision else self.revision_index(revision)
+        actions: list[dict[str, Any]] = []
+        try:
+            existing = self.client.indices.get_alias(name=alias)
+        except Exception:
+            existing = {}
+        if isinstance(existing, dict):
+            actions.extend({"remove": {"alias": alias, "index": index}} for index in existing if index != target)
+        actions.append({"add": {"alias": alias, "index": target}})
+        self.client.indices.update_aliases(body={"actions": actions})
+
+    def rollback_revision(self, revision: str, *, alias: str | None = None) -> None:
+        self.activate_revision(revision, alias=alias)
 
 
 class QdrantDenseIndex:
@@ -2138,6 +2258,68 @@ class QdrantDenseIndex:
                 raise ProductionAdapterError("qdrant-client is required for QdrantDenseIndex") from error
             client = QdrantClient(url=url or os.environ.get("TRACE_QDRANT_URL"), api_key=api_key or os.environ.get("TRACE_QDRANT_API_KEY"))
         self.client = client
+
+    @staticmethod
+    def _revision_token(revision: str) -> str:
+        token = re.sub(r"[^a-zA-Z0-9_-]+", "-", str(revision)).strip("-_").lower()
+        if not token:
+            raise ValueError("vector revision must contain a letter or digit")
+        return token[:96]
+
+    def revision_collection(self, revision: str) -> str:
+        return f"{self.collection}--rev-{self._revision_token(revision)}"
+
+    def create_revision(self, revision: str, *, vector_size: int | None = None) -> str:
+        """Create a revision collection plus mandatory tenant payload indexes."""
+
+        target = self.revision_collection(revision)
+        if not vector_size:
+            # Qdrant requires the dimension at collection creation. The first
+            # embedding batch supplies it before any point is accepted.
+            return target
+        exists = False
+        try:
+            exists = bool(self.client.collection_exists(target))
+        except Exception:
+            try:
+                self.client.get_collection(target)
+                exists = True
+            except Exception:
+                exists = False
+        if not exists:
+            try:
+                from qdrant_client.models import Distance, VectorParams
+
+                vectors_config: Any = VectorParams(size=int(vector_size), distance=Distance.COSINE)
+            except ImportError:
+                vectors_config = {"size": int(vector_size), "distance": "Cosine"}
+            self.client.create_collection(collection_name=target, vectors_config=vectors_config)
+        try:
+            from qdrant_client.models import PayloadSchemaType
+
+            schemas: dict[str, Any] = {
+                "workspace_id": PayloadSchemaType.KEYWORD,
+                "visibility": PayloadSchemaType.KEYWORD,
+                "facets": PayloadSchemaType.KEYWORD,
+                "created_event_offset": PayloadSchemaType.INTEGER,
+                "index_revision": PayloadSchemaType.KEYWORD,
+                "atom_version_id": PayloadSchemaType.KEYWORD,
+            }
+        except ImportError:
+            schemas = {
+                "workspace_id": "keyword", "visibility": "keyword", "facets": "keyword",
+                "created_event_offset": "integer", "index_revision": "keyword", "atom_version_id": "keyword",
+            }
+        for field_name, field_schema in schemas.items():
+            try:
+                self.client.create_payload_index(
+                    collection_name=target, field_name=field_name, field_schema=field_schema, wait=True
+                )
+            except Exception:
+                # Existing payload indexes are harmless; a parity check still
+                # blocks activation if a usable revision was not produced.
+                continue
+        return target
 
     @staticmethod
     def _filter(workspace_id: str, visibility: Sequence[str] | None, facets: Sequence[str] | None, as_of_event: int | None, index_revision: str | None = None) -> Any:
@@ -2173,6 +2355,10 @@ class QdrantDenseIndex:
         return output
 
     def upsert(self, vectors: Iterable[dict[str, Any]], *, revision: str) -> int:
+        items = list(vectors)
+        if not items:
+            return 0
+        target = self.create_revision(revision, vector_size=len(items[0]["vector"]))
         injected_client = self.client is not None
         try:
             from qdrant_client.models import PointStruct
@@ -2181,7 +2367,7 @@ class QdrantDenseIndex:
                 raise ProductionAdapterError("qdrant-client models are required for QdrantDenseIndex")
             PointStruct = None
         points = []
-        for item in vectors:
+        for item in items:
             atom_version_id = str(item["atom_version_id"])
             payload = {key: value for key, value in item.items() if key != "vector"}
             payload["atom_version_id"] = atom_version_id
@@ -2193,8 +2379,44 @@ class QdrantDenseIndex:
                 else {"id": point_id, "vector": list(item["vector"]), "payload": payload}
             )
         if points:
-            self.client.upsert(collection_name=self.collection, points=points, wait=True)
+            self.client.upsert(collection_name=target, points=points, wait=True)
         return len(points)
+
+    def revision_count(self, *, workspace_id: str, revision: str) -> int:
+        target = self.revision_collection(revision)
+        query_filter = self._filter(workspace_id, None, None, None, revision)
+        try:
+            response = self.client.count(collection_name=target, count_filter=query_filter, exact=True)
+        except TypeError:
+            response = self.client.count(collection_name=target, filter=query_filter, exact=True)
+        if isinstance(response, dict):
+            return int(response.get("count", 0))
+        return int(getattr(response, "count", 0))
+
+    def activate_revision(self, revision: str, *, alias: str | None = None) -> None:
+        """Atomically move the query alias after successful parity checks."""
+
+        alias = alias or self.collection
+        target = revision if "--rev-" in revision else self.revision_collection(revision)
+        operations = [
+            {"delete_alias": {"alias_name": alias}},
+            {"create_alias": {"collection_name": target, "alias_name": alias}},
+        ]
+        try:
+            self.client.update_collection_aliases(change_aliases_operations=operations)
+        except TypeError:
+            self.client.update_collection_aliases(actions=operations)
+        except Exception:
+            # Initial activation has no old alias. Do not mask a failed create
+            # operation; only retry the safe, create-only form.
+            create_only = [operations[-1]]
+            try:
+                self.client.update_collection_aliases(change_aliases_operations=create_only)
+            except TypeError:
+                self.client.update_collection_aliases(actions=create_only)
+
+    def rollback_revision(self, revision: str, *, alias: str | None = None) -> None:
+        self.activate_revision(revision, alias=alias)
 
 
 class NatsJetStreamPublisher:

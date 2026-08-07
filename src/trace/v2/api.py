@@ -13,7 +13,7 @@ represented as pending state and is expected to be consumed from the outbox.
 
 from __future__ import annotations
 
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, nullcontext
 import os
 import time
 from collections import defaultdict
@@ -53,10 +53,11 @@ from .models import (
     WebhookCreateRequest,
     WebhookRotateRequest,
 )
-from .auth import AuthenticationError, AuthorizationError, IdentityProvider, Principal, enforce_workspace
+from .auth import AuthorizationContext, AuthenticationError, AuthorizationError, IdentityProvider, Principal, build_authorization_context, enforce_workspace
 from .pagination import PaginationError, decode_page_token, encode_page_token
 from .service import TraceService
 from .store import IdempotencyConflict, InvariantViolation, NotFoundError, TraceStoreError
+from .model_gateway import ModelGatewayError, ModelPolicyDenied, ModelUnavailableError
 
 
 def _service(request: Request) -> TraceService:
@@ -84,6 +85,24 @@ def _actor(request: Request, actor: str | None = None) -> str:
 
 def _privacy(request: Request, value: dict[str, object] | None) -> dict[str, object]:
     return _principal(request).privacy_context(value)
+
+
+def _authorization_context(
+    request: Request,
+    workspace_id: str | None,
+    *,
+    privacy: dict[str, object] | None = None,
+    as_of_event: int | None = None,
+) -> AuthorizationContext:
+    """Derive one explicit-workspace context for downstream policy checks."""
+
+    return build_authorization_context(
+        _principal(request),
+        workspace_id,
+        request_id=getattr(request.state, "request_id", None),
+        as_of_event=as_of_event,
+        requested_privacy=privacy,
+    )
 
 
 def _respond_async(request: Request) -> bool:
@@ -131,7 +150,18 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
                 return JSONResponse(status_code=429, content={"type": "about:blank", "title": "Too Many Requests", "status": 429, "detail": "rate limit exceeded", "request_id": request_id}, headers={"Retry-After": "60"})
         request.state.principal = principal
         request.state.request_id = request_id
-        response = await call_next(request)
+        # API keys are deliberately single-workspace grants. Bind that server-
+        # derived scope for the entire request so ID-addressed repository reads
+        # remain RLS-protected without any request path ever setting '*'. Multi-
+        # workspace OIDC principals still have to name a workspace at routes
+        # that support multiple workspaces.
+        scope_factory = getattr(trace_service.store, "authorization_scope", None) if trace_service is not None else None
+        only_workspace = None
+        if principal.workspace_ids is not None and len(principal.workspace_ids) == 1:
+            only_workspace = next(iter(principal.workspace_ids))
+        scope = scope_factory(only_workspace) if only_workspace and callable(scope_factory) else nullcontext()
+        with scope:
+            response = await call_next(request)
         response.headers["X-Request-ID"] = request_id
         return response
 
@@ -148,6 +178,12 @@ def _http_error(error: Exception) -> HTTPException:
         return HTTPException(status_code=413, detail="request payload exceeds configured limit")
     if isinstance(error, PermissionError):
         return HTTPException(status_code=403, detail={"code": "policy_denied", "message": str(error)})
+    if isinstance(error, ModelPolicyDenied):
+        return HTTPException(status_code=403, detail={"code": "model_policy_denied", "message": str(error)})
+    if isinstance(error, ModelUnavailableError):
+        return HTTPException(status_code=503, detail={"code": "model_unavailable", "message": str(error)}, headers={"Retry-After": "5"})
+    if isinstance(error, ModelGatewayError):
+        return HTTPException(status_code=422, detail={"code": "model_response_invalid", "message": str(error)})
     if isinstance(error, (AuthenticationError, AuthorizationError)):
         return HTTPException(status_code=error.status_code, detail={"code": error.code, "message": str(error)})
     return HTTPException(status_code=500, detail="internal Trace V2 error")
@@ -221,6 +257,10 @@ def create_app(service: TraceService | None = None) -> FastAPI:
     def submit_job(payload: JobSubmitRequest, request: Request) -> dict[str, object]:
         try:
             workspace_id = _authorize(request, payload.workspace_id, scope="jobs:write")
+            if payload.model_id:
+                context = _authorization_context(request, workspace_id)
+                if payload.model_id not in {item["id"] for item in _service(request).available_models(authorization_context=context)}:
+                    raise AuthorizationError("requested model is outside the workspace model policy", code="model_scope_denied")
             body = payload.model_copy(update={
                 "actor": _actor(request),
                 "idempotency_key": payload.idempotency_key or request.headers.get("idempotency-key"),
@@ -446,8 +486,26 @@ def create_app(service: TraceService | None = None) -> FastAPI:
                     raise AuthorizationError("workspace_id is required unless the principal has exactly one workspace", code="workspace_required")
             _authorize(request, workspace_id, scope="retrieval:read")
             payload = payload.model_copy(update={"workspace_id": workspace_id})
-            body = payload.model_copy(update={"privacy_context": _privacy(request, payload.privacy_context)})
-            return _service(request).query(body)
+            context = _authorization_context(request, workspace_id, privacy=payload.privacy_context, as_of_event=payload.as_of_event)
+            body = payload.model_copy(update={"privacy_context": context.privacy_context()})
+            return _service(request).query(body, authorization_context=context)
+        except Exception as error:
+            raise _http_error(error) from error
+
+    @router.get("/models")
+    def models(request: Request, workspace_id: str | None = None) -> dict[str, object]:
+        """List only server-registered models allowed for the caller/workspace."""
+
+        try:
+            principal = _principal(request)
+            if not workspace_id:
+                if principal.workspace_ids is not None and len(principal.workspace_ids) == 1:
+                    workspace_id = next(iter(principal.workspace_ids))
+                else:
+                    raise AuthorizationError("workspace_id is required unless the principal has exactly one workspace", code="workspace_required")
+            _authorize(request, workspace_id, scope="retrieval:read")
+            context = _authorization_context(request, workspace_id)
+            return {"workspace_id": workspace_id, "models": _service(request).available_models(authorization_context=context)}
         except Exception as error:
             raise _http_error(error) from error
 
@@ -470,11 +528,26 @@ def create_app(service: TraceService | None = None) -> FastAPI:
     @router.post("/syntheses")
     def synthesize(payload: SynthesisRequest, request: Request) -> dict[str, object]:
         try:
-            bundle = _service(request).store.get_bundle(payload.evidence_bundle_id)
+            trace = _service(request)
+            if payload.workspace_id:
+                _authorize(request, payload.workspace_id, scope="synthesis:read")
+                context = _authorization_context(request, payload.workspace_id, privacy=payload.privacy_context)
+                with trace.workspace_scope(payload.workspace_id):
+                    bundle = trace.store.get_bundle(payload.evidence_bundle_id)
+                    if bundle["workspace_id"] != payload.workspace_id:
+                        raise NotFoundError("evidence bundle was not found in this workspace")
+                    return trace.synthesize(
+                        payload.evidence_bundle_id, prompt=payload.prompt, format=payload.format,
+                        privacy_context=context.privacy_context(), model_id=payload.model_id, authorization_context=context,
+                    )
+            if trace.settings.production_mode:
+                raise InvariantViolation("production synthesis requires workspace_id for tenant-scoped bundle lookup")
+            bundle = trace.store.get_bundle(payload.evidence_bundle_id)
             _authorize(request, bundle["workspace_id"], scope="synthesis:read")
-            return _service(request).synthesize(
+            context = _authorization_context(request, bundle["workspace_id"], privacy=payload.privacy_context)
+            return trace.synthesize(
                 payload.evidence_bundle_id, prompt=payload.prompt, format=payload.format,
-                privacy_context=_privacy(request, payload.privacy_context),
+                privacy_context=context.privacy_context(), model_id=payload.model_id, authorization_context=context,
             )
         except Exception as error:
             raise _http_error(error) from error
@@ -545,12 +618,15 @@ def create_app(service: TraceService | None = None) -> FastAPI:
     def propose_schemas(payload: SchemaProposalRequest, request: Request) -> dict[str, object]:
         try:
             _authorize(request, payload.workspace_id, scope="organization:write")
+            context = _authorization_context(request, payload.workspace_id)
+            if payload.model_id and payload.model_id not in {item["id"] for item in _service(request).available_models(authorization_context=context)}:
+                raise AuthorizationError("requested model is outside the workspace model policy", code="model_scope_denied")
             if _respond_async(request):
                 return JSONResponse(status_code=202, content=_service(request).submit_job(JobSubmitRequest(
                     workspace_id=payload.workspace_id, kind="schema.proposals", payload=payload.model_dump(mode="json"),
                     actor=_actor(request), idempotency_key=request.headers.get("idempotency-key"),
                 ), request_id=getattr(request.state, "request_id", None)))
-            return _service(request).propose_schemas(payload.model_copy(update={"actor": _actor(request)}))
+            return _service(request).propose_schemas(payload.model_copy(update={"actor": _actor(request)}), authorization_context=context)
         except Exception as error:
             raise _http_error(error) from error
 

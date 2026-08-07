@@ -1,0 +1,890 @@
+{
+  "schema_version": 1,
+  "judged_queries": [
+    {
+      "id": "public-001",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-002",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-003",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-004",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-005",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-006",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-007",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-008",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-009",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-010",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-011",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-012",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-013",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-014",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-015",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-016",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-017",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-018",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-019",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-020",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-021",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-022",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-023",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-024",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-025",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-026",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-027",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-028",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-029",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-030",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-031",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-032",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-033",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-034",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-035",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-036",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-037",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-038",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-039",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-040",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-041",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-042",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-043",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-044",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-045",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-046",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-047",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-048",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-049",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-050",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-051",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-052",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-053",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-054",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-055",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-056",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-057",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-058",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-059",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-060",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-061",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-062",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-063",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-064",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-065",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-066",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-067",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-068",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-069",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-070",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-071",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-072",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-073",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-074",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-075",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-076",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-077",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-078",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-079",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-080",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-081",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-082",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-083",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-084",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-085",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-086",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-087",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-088",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-089",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-090",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-091",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-092",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-093",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-094",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-095",
+      "query": "How are navigation summaries grounded?",
+      "query_class": "navigation",
+      "gold_record_ids": [
+        "navigation"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-096",
+      "query": "What is the weather on Mars?",
+      "query_class": "out_of_scope",
+      "gold_record_ids": [],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-097",
+      "query": "What preserves source evidence?",
+      "query_class": "direct_lookup",
+      "gold_record_ids": [
+        "event-ledger"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-098",
+      "query": "What does local retrieval depend on?",
+      "query_class": "dependency",
+      "gold_record_ids": [
+        "dependency-storage"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-099",
+      "query": "What changed about inferred relations?",
+      "query_class": "contradiction",
+      "gold_record_ids": [
+        "contradiction-old",
+        "contradiction-new"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    },
+    {
+      "id": "public-100",
+      "query": "What happened on 2025-06-01?",
+      "query_class": "chronology",
+      "gold_record_ids": [
+        "chronology-second"
+      ],
+      "notes": "Synthetic frozen public fixture."
+    }
+  ]
+}

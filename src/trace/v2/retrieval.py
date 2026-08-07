@@ -544,7 +544,34 @@ class HybridRetrievalEngine:
         if not seeds:
             return {}, {}
         adjacency: dict[str, list[tuple[str, float, dict[str, Any]]]] = defaultdict(list)
-        for edge in store.current_edges(workspace_id, as_of_event):
+        candidate_nodes = list(atom_by_node)[:500]
+        edge_source = getattr(store, "neighbor_edges", None)
+        if callable(edge_source):
+            edges: list[dict[str, Any]] = []
+            seen_edges: set[str] = set()
+            # Candidate generation is already capped by the request budget.
+            # Fetching only their neighbourhood avoids a graph-wide edge scan.
+            for start in range(0, len(candidate_nodes), 128):
+                remaining = max(0, 2_000 - len(edges))
+                if not remaining:
+                    break
+                try:
+                    batch = edge_source(
+                        workspace_id, candidate_nodes[start:start + 128],
+                        as_of_event=as_of_event, limit=remaining,
+                    )
+                except TypeError:
+                    batch = edge_source(workspace_id, candidate_nodes[start:start + 128])
+                for edge in batch:
+                    edge_id = str(edge.get("edge_version_id", ""))
+                    if edge_id and edge_id not in seen_edges:
+                        edges.append(edge)
+                        seen_edges.add(edge_id)
+        elif os.environ.get("TRACE_PRODUCTION_MODE", "false").lower() != "true":
+            edges = store.current_edges(workspace_id, as_of_event)
+        else:
+            edges = []
+        for edge in edges:
             if edge["relation_type"] not in ALLOWED_RELATIONS or edge["confidence"] < 0.55:
                 continue
             source, target = edge["source_node_id"], edge["target_node_id"]
@@ -596,7 +623,28 @@ class HybridRetrievalEngine:
         candidates: list[Candidate] = []
         latest_by_logical_key: dict[str, dict[str, Any]] = {}
         unkeyed: list[dict[str, Any]] = []
-        for node in store.current_nodes(request.workspace_id, request.as_of_event):
+        node_source = getattr(store, "current_nodes_by_facet", None)
+        if callable(node_source):
+            nodes: list[dict[str, Any]] = []
+            seen: set[str] = set()
+            per_facet = max(8, min(256, request.retrieval_budget.hierarchy_limit * 4))
+            for facet in ("section_summary", "topic_holon", "workspace_holon", "summary", "holon"):
+                try:
+                    batch = node_source(
+                        request.workspace_id, facet, as_of_event=request.as_of_event, limit=per_facet
+                    )
+                except TypeError:
+                    batch = node_source(request.workspace_id, facet)
+                for node in batch:
+                    identifier = str(node.get("atom_version_id", ""))
+                    if identifier and identifier not in seen:
+                        nodes.append(node)
+                        seen.add(identifier)
+        elif os.environ.get("TRACE_PRODUCTION_MODE", "false").lower() != "true":
+            nodes = store.current_nodes(request.workspace_id, request.as_of_event)
+        else:
+            nodes = []
+        for node in nodes:
             logical_key = node.get("properties", {}).get("hierarchy_logical_key")
             if not logical_key:
                 unkeyed.append(node)
@@ -633,6 +681,7 @@ class HybridRetrievalEngine:
         request: QueryRequest,
         atoms: list[dict[str, Any]],
         index_hits: dict[str, Sequence[dict[str, Any]]] | None = None,
+        deep_navigator: DeepNavigator | None = None,
     ) -> RetrievalOutcome:
         if not request.workspace_id or not atoms:
             return RetrievalOutcome([], "insufficient_evidence", {"reason": "no_visible_atoms"})
@@ -724,6 +773,7 @@ class HybridRetrievalEngine:
             profile == "auto" and budget.allow_deep_escalation and preliminary_state in {"ambiguous", "insufficient_evidence"} and bool(hierarchy)
         )
         deep_trace: dict[str, Any] | None = None
+        navigator = deep_navigator or self.deep_navigator
         if deep_applied and hierarchy:
             hierarchy_payload = [
                 {
@@ -733,7 +783,7 @@ class HybridRetrievalEngine:
                 }
                 for item in hierarchy
             ]
-            selected_ids, deep_trace = self.deep_navigator.select(
+            selected_ids, deep_trace = navigator.select(
                 query=request.query, candidates=hierarchy_payload, max_nodes=budget.deep_max_nodes, token_budget=budget.deep_token_budget,
             )
             selected_hierarchy = [item for item in hierarchy if item.atom["atom_version_id"] in set(selected_ids)]
@@ -762,7 +812,7 @@ class HybridRetrievalEngine:
                 "colbert_enabled": self.colbert_enabled,
                 "colbert_provider": getattr(self.colbert_tier, "provider_id", None) if self.colbert_enabled else None,
                 "reranker_provider": self.reranker.provider_id if rerank_applied else None,
-                "deep_navigator": self.deep_navigator.provider_id if deep_applied else None,
+                "deep_navigator": navigator.provider_id if deep_applied else None,
                 "stage_counts": {"atoms": len(atoms), "lexical": len(lexical_rank), "dense": len(dense_rank), "fused": len(fused_ids), "hierarchy": len(hierarchy)},
                 "graph_applied": graph_applied,
                 "hierarchy_applied": hierarchy_applied,
