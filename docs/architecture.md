@@ -68,7 +68,7 @@ The embedded `SqliteEventStore` is a correctness and replay adapter. A scale
 deployment should keep the public models and service semantics while replacing
 storage responsibilities with PostgreSQL, private S3-compatible object
 storage, OpenSearch, Qdrant, NATS JetStream, Redis, and policy-controlled model
-providers. See the production topology and 100K/1M/10M gates in
+providers. See the production topology, the 100K baseline, and the 1M gate in
 [v2-architecture.md](v2-architecture.md).
 
 ## Legacy material

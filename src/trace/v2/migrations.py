@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import re
+import sys
+import sysconfig
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -26,7 +29,23 @@ _MIGRATION_NAME = re.compile(r"^(?P<revision>\d{3,})_(?P<name>[a-z0-9_]+)\.sql$"
 
 
 def default_migration_root() -> Path:
-    return Path(__file__).resolve().parents[3] / "migrations"
+    # Editable/source installs use the repository-level migration directory.
+    # Wheels install the same SQL assets through ``data-files``; do not make a
+    # production migration command depend on a checkout being present.
+    candidates = [
+        Path(__file__).resolve().parents[3] / "migrations",
+        Path(sysconfig.get_path("data")) / "trace" / "migrations",
+        Path(sys.prefix) / "trace" / "migrations",
+    ]
+    configured = os.environ.get("TRACE_MIGRATIONS_DIR")
+    if configured:
+        candidates.insert(0, Path(configured))
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate
+    # Keep the conventional source path in the error message emitted by
+    # ``discover`` if no packaged asset can be found.
+    return candidates[0]
 
 
 class MigrationRunner:

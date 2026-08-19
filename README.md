@@ -1,8 +1,14 @@
 # Trace
 
 Trace is a local-first, evidence-preserving retrieval tool for messy
-engineering information. Phase 1 is an Apache-2.0 Python SDK and CLI alpha
-for Windows and Linux.
+engineering information. It has two supported product surfaces:
+
+- Phase 1 is the lightweight Apache-2.0 Python SDK and CLI for Windows and
+  Linux, with standard-library-only operation.
+- Trace V2 is the production service surface for tenant-scoped ingestion,
+  revisioned retrieval, and evidence bundles. It remains subject to the
+  measured production gates in the V2 runbook; it is not presented as an
+  experimental side path.
 
 It stores one immutable source atom for each caller-normalized record, retains
 the original text and provenance in a selected local directory, and returns
@@ -25,9 +31,23 @@ Do not put secrets in source records unless that local directory is protected
 appropriately for the operator.
 
 The SDK uses the import name trace_local because Python reserves trace for its
-own standard-library tracing module; the installed CLI remains trace. Old HTTP
-and managed-runtime experiments remain in the source tree under trace.v2 and
-are not shipped by this alpha or included in its acceptance boundary.
+own standard-library tracing module; the installed CLI remains trace.
+
+## Trace V2 service
+
+Install the explicit V2 or production dependency set when deploying the
+service. The Phase 1 command remains dependency-light.
+
+~~~powershell
+pip install "trace-local[production]"
+trace-v2 --help
+~~~
+
+V2 retains the same evidence-first import/export semantics while adding a
+PostgreSQL Spine, private object storage, revisioned external indexes, durable
+workers, and replaceable Cortex projections. See the
+[V2 architecture](docs/v2-architecture.md) and
+[production runbook](docs/production-runbook.md).
 
 ## Ingest normalized JSONL
 
@@ -183,6 +203,5 @@ python -m trace_local --help
 uv lock --check
 ~~~
 
-Phase 2 may add managed GCP APIs, tenancy, distributed indexes, billing, and
-scale certification, but it must reuse this export/event contract rather than
-change source truth semantics.
+V2 deployment and scale certification must reuse this export/event contract;
+no production projection may replace source truth semantics.

@@ -25,7 +25,38 @@ dependencies = []
 
 [project.scripts]
 trace = "trace_local.cli:main"
+trace-v2 = "trace.v2.__main__:main"
+
+[project.optional-dependencies]
+# V2 remains opt-in so the Phase 1 local CLI stays standard-library-only.
+v2 = [
+    "fastapi>=0.115,<0.116",
+    "pydantic>=2.10,<3",
+    "uvicorn[standard]>=0.32,<0.33",
+]
+# Pin production integration families to compatible minor ranges. Vendor SDKs
+# are imported lazily by the selected adapter, not by the Phase 1 CLI.
+production = [
+    "fastapi>=0.115,<0.116",
+    "pydantic>=2.10,<3",
+    "uvicorn[standard]>=0.32,<0.33",
+    "psycopg[binary]>=3.2,<3.3",
+    "psycopg-pool>=3.2,<3.3",
+    "boto3>=1.35,<2",
+    "google-cloud-storage>=2.18,<3",
+    "opensearch-py>=2.7,<3",
+    "qdrant-client>=1.12,<2",
+    "nats-py>=2.9,<3",
+    "redis>=5.2,<6",
+    "httpx>=0.27,<1",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["trace_local", "trace_local.*"]
+include = ["trace_local", "trace_local.*", "trace", "trace.*"]
+
+# PostgreSQL migrations are executable production assets.  Keep a source-tree
+# copy for operators and install the same checked-in files with wheels so the
+# ``trace-v2 migrate`` command has no hidden repository-path dependency.
+[tool.setuptools.data-files]
+"trace/migrations" = ["migrations/*.sql"]

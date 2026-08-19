@@ -9,6 +9,7 @@ topology concrete rather than merely a documentation promise.
 
 from __future__ import annotations
 
+import asyncio
 import base64
 from contextvars import ContextVar
 import hashlib
@@ -24,18 +25,17 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Iterator
 
-from .models import AppendResult, EventRecord
+from .models import AppendResult, CognitivePolicy, EventRecord
+from .cortex import canonical_pair
 from .store import ALLOWED_RELATIONS, STRUCTURAL_RELATIONS, IdempotencyConflict, InvariantViolation, NotFoundError, _digest, _json, _now
-from .migrations import MigrationRunner, assert_runtime_role
+from .migrations import MigrationRunner, assert_runtime_role, default_migration_root
 
 
 # Compatibility export for deployments that imported this symbol before SQL
 # migrations became the only bootstrap path.  The executable source of truth
 # is migrations/001_trace_production.sql, not a Python-embedded schema.
 def _baseline_schema_sql() -> str:
-    return (
-        Path(__file__).resolve().parents[3] / "migrations" / "001_trace_production.sql"
-    ).read_text(encoding="utf-8")
+    return (default_migration_root() / "001_trace_production.sql").read_text(encoding="utf-8")
 
 
 POSTGRES_SCHEMA = _baseline_schema_sql()
@@ -515,13 +515,22 @@ class PostgresEventStore:
                     cursor.execute("SELECT nv.atom_version_id,nv.node_id,nv.version,nv.content,nv.properties,nv.content_hash,nv.created_event_offset,n.workspace_id,n.facets,n.security FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id WHERE n.workspace_id=%s AND nv.properties->>'split_marker_event'=%s ORDER BY nv.version", (parent["workspace_id"], str(marker.offset)))
                     return [self._pg_atom_row(self._cursor_mapping(cursor, row) or {}) for row in cursor.fetchall()]
             children: list[dict[str, Any]] = []
+            parent_properties = self._json_value(parent_version.get("properties"), {})
             for ordinal, part in enumerate(parts):
                 child_id, version_id = str(uuid.uuid4()), str(uuid.uuid4())
                 security = self._json_value(parent.get("security"), {})
                 node_event = self._append_event_in_connection(conn, stream_id=f"workspace:{parent['workspace_id']}", event_type="node.created", payload={"node_id": child_id, "workspace_id": parent["workspace_id"], "facets": ["atom"], "security": security}, actor=actor, causation_id=marker.event_id)
                 with conn.cursor() as cursor:
                     cursor.execute("INSERT INTO trace_nodes(node_id,workspace_id,facets,security,created_event_offset) VALUES (%s,%s,%s::jsonb,%s::jsonb,%s)", (child_id, parent["workspace_id"], json.dumps(["atom"]), json.dumps(security), node_event.offset))
-                properties = {"split_from_node_id": node_id, "split_from_atom_version_id": parent_version["atom_version_id"], "split_marker_event": marker.offset, "ordinal": ordinal}
+                properties = {
+                    "split_from_node_id": node_id,
+                    "split_from_atom_version_id": parent_version["atom_version_id"],
+                    "split_marker_event": marker.offset,
+                    "ordinal": ordinal,
+                    "ingestion_id": parent_properties.get("ingestion_id"),
+                    "source_ordinal": parent_properties.get("ordinal"),
+                    "projection_section_key": f"section:split:{node_id}:{marker.offset}",
+                }
                 version_event = self._append_event_in_connection(conn, stream_id=f"node:{child_id}", event_type="node.versioned", payload={"node_id": child_id, "workspace_id": parent["workspace_id"], "atom_version_id": version_id, "version": 1, "content": part, "properties": properties, "split_from": parent_version["atom_version_id"]}, actor=actor, causation_id=node_event.event_id)
                 with conn.cursor() as cursor:
                     cursor.execute("INSERT INTO trace_node_versions(atom_version_id,node_id,version,content,properties,content_hash,created_event_offset) VALUES (%s,%s,1,%s,%s::jsonb,%s,%s)", (version_id, child_id, part, json.dumps(properties), _digest(part), version_event.offset))
@@ -930,9 +939,172 @@ class PostgresEventStore:
             return {"projection": "hot_inbox", "workspace_id": workspace_id, "inserted": inserted, "event_offset": completed.offset}
 
     def replay_report(self, workspace_id: str) -> dict[str, Any]:
-        events = self.events()
-        scoped = [event for event in events if event.payload.get("workspace_id") == workspace_id or event.stream_id == f"workspace:{workspace_id}"]
-        return {"workspace_id": workspace_id, "event_count": len(scoped), "last_event_offset": max((event.offset for event in scoped), default=0), "replayable": True}
+        if self.delegate is not None and hasattr(self.delegate, "replay_report"):
+            return self.delegate.replay_report(workspace_id)
+        # Projections are intentionally excluded: this verifies that the
+        # append-only Spine still reconstructs canonical records, not that a
+        # replaceable index happens to be current.
+        with self.authorization_scope(workspace_id):
+            events = self.events()
+            folded_nodes: dict[str, dict[str, Any]] = {}
+            folded_versions: dict[str, dict[str, Any]] = {}
+            folded_edges: dict[str, dict[str, Any]] = {}
+            folded_attachments: dict[str, dict[str, Any]] = {}
+            errors: list[str] = []
+            expected_sequence: dict[str, int] = {}
+            for event in events:
+                if event.payload_hash != _digest(event.payload):
+                    errors.append(f"event {event.offset} payload hash differs from its payload")
+                sequence = expected_sequence.get(event.stream_id, 0) + 1
+                if event.stream_sequence != sequence:
+                    errors.append(f"event {event.offset} breaks stream sequence for {event.stream_id}")
+                expected_sequence[event.stream_id] = event.stream_sequence
+                payload = event.payload
+                if event.event_type == "node.created":
+                    folded_nodes[str(payload["node_id"])] = {
+                        "facets": payload.get("facets", []),
+                        "security": payload.get("security", {}),
+                    }
+                elif event.event_type == "node.versioned" and str(payload.get("node_id")) in folded_nodes:
+                    required = {"atom_version_id", "version", "content", "properties"}
+                    if not required <= payload.keys():
+                        errors.append(f"event {event.offset} cannot replay node version")
+                        continue
+                    folded_versions[str(payload["atom_version_id"])] = {
+                        "node_id": str(payload["node_id"]),
+                        "version": int(payload["version"]),
+                        "content": payload["content"],
+                        "properties": payload["properties"],
+                    }
+                elif event.event_type in {"edge.created", "edge.versioned"}:
+                    required = {
+                        "edge_version_id", "edge_id", "source_node_id", "target_node_id",
+                        "relation_type", "evidence_atom_version_ids",
+                    }
+                    if not required <= payload.keys():
+                        errors.append(f"event {event.offset} cannot replay edge version")
+                        continue
+                    folded_edges[str(payload["edge_version_id"])] = payload
+                elif event.event_type == "attachment.recorded":
+                    folded_attachments[str(payload["attachment_id"])] = payload
+
+            with self.connection() as conn:
+                with conn.cursor() as cursor:
+                    self._set_workspace(cursor, workspace_id)
+                    cursor.execute("SELECT node_id,facets,security FROM trace_nodes WHERE workspace_id=%s", (workspace_id,))
+                    actual_nodes = {
+                        str(node_id): {"facets": self._json_value(facets, []), "security": self._json_value(security, {})}
+                        for node_id, facets, security in cursor.fetchall()
+                    }
+                    cursor.execute(
+                        """SELECT nv.atom_version_id,nv.node_id,nv.version,nv.content,nv.properties
+                           FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id
+                           WHERE n.workspace_id=%s""",
+                        (workspace_id,),
+                    )
+                    actual_versions = {
+                        str(atom_version_id): {
+                            "node_id": str(node_id), "version": int(version), "content": content,
+                            "properties": self._json_value(properties, {}),
+                        }
+                        for atom_version_id, node_id, version, content, properties in cursor.fetchall()
+                    }
+                    cursor.execute(
+                        """SELECT edge_version_id,edge_id,version,source_node_id,target_node_id,relation_type,
+                                  weight,confidence,status,model_version,properties
+                           FROM trace_edge_versions WHERE workspace_id=%s""",
+                        (workspace_id,),
+                    )
+                    actual_edges = {
+                        str(edge_version_id): {
+                            "edge_id": str(edge_id), "version": int(version),
+                            "source_node_id": str(source_node_id), "target_node_id": str(target_node_id),
+                            "relation_type": relation_type, "weight": float(weight), "confidence": float(confidence),
+                            "status": status, "model_version": model_version,
+                            "properties": self._json_value(properties, {}),
+                        }
+                        for edge_version_id, edge_id, version, source_node_id, target_node_id, relation_type,
+                            weight, confidence, status, model_version, properties in cursor.fetchall()
+                    }
+                    cursor.execute(
+                        """SELECT attachment_id,content_hash,object_key,media_type,byte_length,metadata
+                           FROM trace_attachments WHERE workspace_id=%s""",
+                        (workspace_id,),
+                    )
+                    actual_attachments = {
+                        str(attachment_id): {
+                            "content_hash": content_hash, "object_key": object_key, "media_type": media_type,
+                            "byte_length": int(byte_length), "metadata": self._json_value(metadata, {}),
+                        }
+                        for attachment_id, content_hash, object_key, media_type, byte_length, metadata in cursor.fetchall()
+                    }
+                    cursor.execute(
+                        """SELECT e.event_id FROM trace_events e
+                           LEFT JOIN trace_outbox o ON o.event_offset=e.event_offset AND o.event_id=e.event_id
+                           WHERE e.workspace_id=%s AND o.event_id IS NULL""",
+                        (workspace_id,),
+                    )
+                    missing_outbox = [str(row[0]) for row in cursor.fetchall()]
+
+                    for edge_version_id, payload in folded_edges.items():
+                        actual = actual_edges.get(edge_version_id)
+                        if not actual:
+                            errors.append(f"edge {edge_version_id} exists in the event fold but not in canonical records")
+                            continue
+                        cursor.execute(
+                            """SELECT source_atom_version_id FROM trace_evidence_anchors
+                               WHERE workspace_id=%s AND target_kind='edge_version' AND target_id=%s
+                               ORDER BY source_atom_version_id""",
+                            (workspace_id, edge_version_id),
+                        )
+                        anchors = [str(row[0]) for row in cursor.fetchall()]
+                        if sorted(str(item) for item in payload["evidence_atom_version_ids"]) != anchors:
+                            errors.append(f"edge {edge_version_id} evidence anchors differ from its event")
+                        for field in (
+                            "edge_id", "version", "source_node_id", "target_node_id", "relation_type",
+                            "status", "weight", "confidence", "model_version", "properties",
+                        ):
+                            expected = payload.get(field)
+                            if field == "version" and expected is None:
+                                # ``edge.created`` is the first immutable
+                                # edge version and therefore implies version 1.
+                                expected = 1
+                            if field in {"edge_id", "source_node_id", "target_node_id"} and expected is not None:
+                                expected = str(expected)
+                            if field in {"weight", "confidence"} and expected is not None:
+                                expected = float(expected)
+                            if expected != actual.get(field):
+                                errors.append(f"edge {edge_version_id} field {field} differs from its event")
+                    for attachment_id, payload in folded_attachments.items():
+                        actual = actual_attachments.get(attachment_id)
+                        if not actual:
+                            errors.append(f"attachment {attachment_id} exists in the event fold but not in canonical records")
+                            continue
+                        for field in ("content_hash", "object_key", "media_type", "byte_length", "metadata"):
+                            expected = int(payload[field]) if field == "byte_length" else payload.get(field)
+                            if expected != actual.get(field):
+                                errors.append(f"attachment {attachment_id} field {field} differs from its event")
+            if folded_nodes != actual_nodes:
+                errors.append("folded node identities/facets/security differ from canonical records")
+            if folded_versions != actual_versions:
+                errors.append("folded node versions differ from canonical records")
+            if set(folded_edges) != set(actual_edges):
+                errors.append("folded edge versions differ from canonical records")
+            if set(folded_attachments) != set(actual_attachments):
+                errors.append("folded attachments differ from canonical records")
+            if missing_outbox:
+                errors.append(f"{len(missing_outbox)} Spine events have no durable outbox record")
+            return {
+                "workspace_id": workspace_id,
+                "valid": not errors,
+                "errors": errors,
+                "event_count": len(events),
+                "nodes": len(folded_nodes),
+                "node_versions": len(folded_versions),
+                "edge_versions": len(folded_edges),
+                "attachments": len(folded_attachments),
+                "through_event_offset": max((event.offset for event in events), default=0),
+            }
 
     def save_bundle(self, *, workspace_id: str | None, query: dict[str, Any], results: list[dict[str, Any]], sufficiency_state: str) -> dict[str, Any]:
         if self.delegate is not None and hasattr(self.delegate, "save_bundle"):
@@ -1997,6 +2169,800 @@ class PostgresEventStore:
                 cursor.execute("SELECT COALESCE(SUM(cost_usd),0) FROM trace_model_call_audits WHERE workspace_id=%s AND status='succeeded'", (workspace_id,))
                 return float(cursor.fetchone()[0] or 0.0)
 
+    # ------------------------------------------------ Cortex / data-plane additions
+    # These methods intentionally mirror the embedded adapter's bounded
+    # interface. They use the additive 004 migration and never write trusted
+    # ``trace_edge_versions`` for hierarchy, affinity, or behavioral state.
+    def hot_candidates(self, workspace_id: str, query: str, *, limit: int = 100, visibility: Sequence[str] | None = None, facets: Sequence[str] | None = None, as_of_event: int | None = None) -> list[dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "hot_candidates"):
+            return self.delegate.hot_candidates(workspace_id, query, limit=limit, visibility=visibility, facets=facets, as_of_event=as_of_event)
+        terms = [item.lower() for item in re.findall(r"[\w'-]+", query) if len(item) > 1][:8]
+        clauses = ["workspace_id=%s"]
+        values: list[Any] = [workspace_id]
+        if as_of_event is not None:
+            clauses.append("visible_from_event<=%s")
+            values.append(as_of_event)
+        if terms:
+            clauses.append("(" + " OR ".join("LOWER(content) LIKE %s" for _ in terms) + ")")
+            values.extend(f"%{term}%" for term in terms)
+        values.append(max(1, min(int(limit) * 4, 800)))
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(
+                    f"SELECT atom_version_id,security,facets FROM trace_hot_inbox WHERE {' AND '.join(clauses)} ORDER BY visible_from_event DESC LIMIT %s",
+                    values,
+                )
+                rows = cursor.fetchall()
+        allowed = set(visibility or ())
+        required = set(facets or ())
+        ids: list[str] = []
+        for atom_id, security, row_facets in rows:
+            security_value = self._json_value(security, {})
+            facet_value = set(self._json_value(row_facets, []))
+            if (not allowed or security_value.get("visibility") in allowed) and (not required or required <= facet_value):
+                ids.append(str(atom_id))
+            if len(ids) >= max(1, min(int(limit), 200)):
+                break
+        return self.atom_versions(ids)
+
+    def current_atom_versions_for_nodes(self, workspace_id: str, node_ids: Sequence[str], *, as_of_event: int | None = None) -> list[dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "current_atom_versions_for_nodes"):
+            return self.delegate.current_atom_versions_for_nodes(workspace_id, node_ids, as_of_event=as_of_event)
+        if not node_ids:
+            return []
+        marks = ",".join("%s" for _ in node_ids)
+        condition = " AND nv.created_event_offset<=%s" if as_of_event is not None else ""
+        values: list[Any] = [workspace_id, *node_ids]
+        if as_of_event is not None:
+            values.append(as_of_event)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(
+                    f"""WITH ranked AS (
+                        SELECT nv.atom_version_id,nv.node_id,nv.version,nv.content,nv.properties,nv.content_hash,nv.created_event_offset,
+                               n.workspace_id,n.facets,n.security,ROW_NUMBER() OVER (PARTITION BY nv.node_id ORDER BY nv.version DESC) AS rank
+                        FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id
+                        WHERE n.workspace_id=%s AND n.node_id IN ({marks}) AND n.facets @> '[\"atom\"]'::jsonb{condition}
+                    ) SELECT atom_version_id,node_id,version,content,properties,content_hash,created_event_offset,workspace_id,facets,security
+                    FROM ranked WHERE rank=1""",
+                    values,
+                )
+                rows = [self._pg_atom_row(self._cursor_mapping(cursor, row) or {}) for row in cursor.fetchall()]
+        by_node = {row["node_id"]: row for row in rows}
+        return [by_node[str(node_id)] for node_id in node_ids if str(node_id) in by_node]
+
+    def atom_versions_by_event_range(self, workspace_id: str, from_event_offset: int, through_event_offset: int, *, limit: int = 1_000) -> list[dict[str, Any]]:
+        if from_event_offset < 1 or through_event_offset < from_event_offset:
+            raise InvariantViolation("invalid atom event range")
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(
+                    """SELECT nv.atom_version_id,nv.node_id,nv.version,nv.content,nv.properties,nv.content_hash,nv.created_event_offset,
+                              n.workspace_id,n.facets,n.security
+                       FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id
+                       WHERE n.workspace_id=%s AND n.facets @> '[\"atom\"]'::jsonb
+                         AND nv.created_event_offset BETWEEN %s AND %s
+                       ORDER BY nv.created_event_offset,nv.atom_version_id LIMIT %s""",
+                    (workspace_id, from_event_offset, through_event_offset, max(1, min(int(limit), 10_000))),
+                )
+                return [self._pg_atom_row(self._cursor_mapping(cursor, row) or {}) for row in cursor.fetchall()]
+
+    def stage_attachment(self, *, workspace_id: str, attachment: dict[str, Any], ingestion_id: str | None = None) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "stage_attachment"):
+            return self.delegate.stage_attachment(workspace_id=workspace_id, attachment=attachment, ingestion_id=ingestion_id)
+        identifier = str(uuid.uuid4())
+        with self.connection() as conn:
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="attachment.staged", payload={"staging_id": identifier, "workspace_id": workspace_id, "content_hash": attachment["content_hash"], "object_key": attachment["object_key"], "ingestion_id": ingestion_id}, actor="ingestion-stager")
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """INSERT INTO trace_attachment_staging(staging_id,workspace_id,content_hash,object_key,attachment,status,ingestion_id,created_at,updated_at)
+                       VALUES (%s,%s,%s,%s,%s::jsonb,'staged',%s,NOW(),NOW())""",
+                    (identifier, workspace_id, attachment["content_hash"], attachment["object_key"], json.dumps(attachment), ingestion_id),
+                )
+        return {"staging_id": identifier, "workspace_id": workspace_id, "attachment": attachment, "status": "staged", "staged_event_offset": event.offset}
+
+    def finalize_attachment_staging(
+        self,
+        staging_id: str,
+        *,
+        ingestion_id: str,
+        canonical_event_offset: int | None = None,
+        actor: str = "ingestion-stager",
+        workspace_id: str | None = None,
+    ) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "finalize_attachment_staging"):
+            return self.delegate.finalize_attachment_staging(staging_id, ingestion_id=ingestion_id, canonical_event_offset=canonical_event_offset, actor=actor, workspace_id=workspace_id)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("SELECT workspace_id,status FROM trace_attachment_staging WHERE staging_id=%s FOR UPDATE", (staging_id,))
+                row = cursor.fetchone()
+            if not row:
+                raise NotFoundError("attachment staging record was not found")
+            workspace_id, status = str(row[0]), str(row[1])
+            if status == "committed":
+                return {"staging_id": staging_id, "workspace_id": workspace_id, "status": status}
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="attachment.staging_committed", payload={"staging_id": staging_id, "workspace_id": workspace_id, "ingestion_id": ingestion_id}, actor=actor)
+            with conn.cursor() as cursor:
+                cursor.execute("UPDATE trace_attachment_staging SET status='committed',ingestion_id=%s,canonical_event_offset=%s,last_error=NULL,updated_at=NOW() WHERE staging_id=%s", (ingestion_id, canonical_event_offset or event.offset, staging_id))
+        return {"staging_id": staging_id, "workspace_id": workspace_id, "ingestion_id": ingestion_id, "status": "committed", "committed_event_offset": event.offset}
+
+    def fail_attachment_staging(
+        self,
+        staging_id: str,
+        *,
+        error: str,
+        actor: str = "ingestion-stager",
+        workspace_id: str | None = None,
+    ) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "fail_attachment_staging"):
+            return self.delegate.fail_attachment_staging(staging_id, error=error, actor=actor, workspace_id=workspace_id)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("SELECT workspace_id FROM trace_attachment_staging WHERE staging_id=%s FOR UPDATE", (staging_id,))
+                row = cursor.fetchone()
+            if not row:
+                raise NotFoundError("attachment staging record was not found")
+            workspace_id = str(row[0])
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="attachment.staging_cleanup_required", payload={"staging_id": staging_id, "workspace_id": workspace_id, "error": error[:500]}, actor=actor)
+            with conn.cursor() as cursor:
+                cursor.execute("UPDATE trace_attachment_staging SET status='cleanup_required',last_error=%s,updated_at=NOW() WHERE staging_id=%s", (error[:2_000], staging_id))
+        return {"staging_id": staging_id, "workspace_id": workspace_id, "status": "cleanup_required", "cleanup_event_offset": event.offset}
+
+    def reconcile_attachment_staging(self, workspace_id: str, *, actor: str = "attachment-reconciler") -> dict[str, Any]:
+        """Reconcile durable object staging without deleting object bytes.
+
+        A storage lifecycle worker decides whether a cleanup-required object
+        may be removed.  The database worker merely exposes recoverable
+        targets and commits records that did reach canonical attachment state.
+        """
+
+        if self.delegate is not None and hasattr(self.delegate, "reconcile_attachment_staging"):
+            return self.delegate.reconcile_attachment_staging(workspace_id, actor=actor)
+        if not workspace_id:
+            raise InvariantViolation("PostgreSQL attachment reconciliation requires one workspace")
+        with self.authorization_scope(workspace_id):
+            with self.connection() as conn:
+                with conn.cursor() as cursor:
+                    self._set_workspace(cursor, workspace_id)
+                    cursor.execute(
+                        """SELECT staging_id,content_hash,object_key,status FROM trace_attachment_staging
+                           WHERE workspace_id=%s AND status IN ('staged','cleanup_required')
+                           ORDER BY created_at LIMIT 500 FOR UPDATE""",
+                        (workspace_id,),
+                    )
+                    rows = cursor.fetchall()
+                    committed = 0
+                    cleanup: list[dict[str, Any]] = []
+                    for staging_id, content_hash, object_key, status in rows:
+                        cursor.execute(
+                            """SELECT created_event_offset FROM trace_attachments
+                               WHERE workspace_id=%s AND content_hash=%s AND object_key=%s LIMIT 1""",
+                            (workspace_id, content_hash, object_key),
+                        )
+                        attachment = cursor.fetchone()
+                        if attachment:
+                            cursor.execute(
+                                """UPDATE trace_attachment_staging SET status='committed',canonical_event_offset=%s,
+                                   last_error=NULL,updated_at=NOW() WHERE staging_id=%s""",
+                                (attachment[0], staging_id),
+                            )
+                            committed += 1
+                        else:
+                            if status != "cleanup_required":
+                                cursor.execute(
+                                    "UPDATE trace_attachment_staging SET status='cleanup_required',updated_at=NOW() WHERE staging_id=%s",
+                                    (staging_id,),
+                                )
+                            cleanup.append({
+                                "staging_id": str(staging_id), "workspace_id": workspace_id,
+                                "object_key": object_key, "content_hash": content_hash,
+                            })
+                if rows:
+                    event = self._append_event_in_connection(
+                        conn,
+                        stream_id=f"workspace:{workspace_id}",
+                        event_type="attachment.staging_reconciled",
+                        payload={"workspace_id": workspace_id, "committed": committed, "cleanup_required": len(cleanup)},
+                        actor=actor,
+                    )
+                else:
+                    event = None
+        return {
+            "workspace_id": workspace_id,
+            "committed": committed,
+            "cleanup_required": cleanup,
+            "event_offset": event.offset if event else None,
+        }
+
+    def ingestion_index_state(self, ingestion_id: str) -> dict[str, dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "ingestion_index_state"):
+            return self.delegate.ingestion_index_state(ingestion_id)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute("SELECT component,status,index_revision,job_id,run_id,detail,updated_event_offset,updated_at,workspace_id,ingestion_id FROM trace_ingestion_index_state WHERE ingestion_id=%s", (ingestion_id,))
+                rows = [self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()]
+        return {str(row.pop("component")): {**row, "detail": self._json_value(row.get("detail"), {})} for row in rows}
+
+    def set_ingestion_index_state(self, *, ingestion_id: str, component: str, status: str, index_revision: str | None = None, job_id: str | None = None, run_id: str | None = None, detail: dict[str, Any] | None = None, actor: str = "index-worker") -> dict[str, dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "set_ingestion_index_state"):
+            return self.delegate.set_ingestion_index_state(ingestion_id=ingestion_id, component=component, status=status, index_revision=index_revision, job_id=job_id, run_id=run_id, detail=detail, actor=actor)
+        if component not in {"hot", "lexical", "dense"} or status not in {"hot_ready", "lexical_ready", "dense_pending", "dense_ready", "failed", "stale", "pending"}:
+            raise InvariantViolation("invalid ingestion index component or state")
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute("SELECT workspace_id FROM trace_ingestions WHERE ingestion_id=%s", (ingestion_id,))
+                row = cursor.fetchone()
+            if not row:
+                raise NotFoundError(f"ingestion {ingestion_id} was not found")
+            workspace_id = str(row[0])
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="ingestion.index_state_updated", payload={"workspace_id": workspace_id, "ingestion_id": ingestion_id, "component": component, "status": status, "index_revision": index_revision, "job_id": job_id, "run_id": run_id}, actor=actor)
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """INSERT INTO trace_ingestion_index_state(ingestion_id,workspace_id,component,status,index_revision,job_id,run_id,detail,updated_event_offset,updated_at)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s::jsonb,%s,NOW())
+                       ON CONFLICT(ingestion_id,component) DO UPDATE SET status=EXCLUDED.status,index_revision=EXCLUDED.index_revision,job_id=EXCLUDED.job_id,run_id=EXCLUDED.run_id,detail=EXCLUDED.detail,updated_event_offset=EXCLUDED.updated_event_offset,updated_at=NOW()""",
+                    (ingestion_id, workspace_id, component, status, index_revision, job_id, run_id, json.dumps(detail or {}), event.offset),
+                )
+        return self.ingestion_index_state(ingestion_id)
+
+    @staticmethod
+    def _pg_cognitive_policy_row(row: dict[str, Any] | None) -> dict[str, Any] | None:
+        if not row:
+            return None
+        value = dict(row)
+        value["policy"] = PostgresEventStore._json_value(value.pop("policy"), {})
+        return value
+
+    def get_cognitive_policy(self, workspace_id: str) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "get_cognitive_policy"):
+            return self.delegate.get_cognitive_policy(workspace_id)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("SELECT * FROM trace_cognitive_policy_versions WHERE workspace_id=%s AND active=true ORDER BY created_at DESC LIMIT 1", (workspace_id,))
+                row = self._pg_cognitive_policy_row(self._cursor_mapping(cursor, cursor.fetchone()))
+        return row or {"cognitive_policy_id": None, "workspace_id": workspace_id, "policy_revision": "cognitive-policy-v1", "policy": CognitivePolicy().model_dump(mode="json"), "active": True, "source": "default"}
+
+    def put_cognitive_policy(self, *, workspace_id: str, policy: dict[str, Any], actor: str = "system") -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "put_cognitive_policy"):
+            return self.delegate.put_cognitive_policy(workspace_id=workspace_id, policy=policy, actor=actor)
+        validated = CognitivePolicy.model_validate(policy)
+        identifier = str(uuid.uuid4())
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("SELECT policy_revision FROM trace_cognitive_policy_versions WHERE workspace_id=%s", (workspace_id,))
+                used = {str(row[0]) for row in cursor.fetchall()}
+            revision = validated.policy_revision
+            suffix = 1
+            while revision in used:
+                suffix += 1
+                revision = f"{validated.policy_revision}-{suffix}"
+            payload = validated.model_dump(mode="json") | {"policy_revision": revision}
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="cognitive_policy.activated", payload={"workspace_id": workspace_id, "policy_revision": revision, "policy": payload}, actor=actor)
+            with conn.cursor() as cursor:
+                cursor.execute("UPDATE trace_cognitive_policy_versions SET active=false WHERE workspace_id=%s AND active=true", (workspace_id,))
+                cursor.execute("INSERT INTO trace_cognitive_policy_versions(cognitive_policy_id,workspace_id,policy_revision,policy,active,created_event_offset,created_at,actor) VALUES (%s,%s,%s,%s::jsonb,true,%s,NOW(),%s)", (identifier, workspace_id, revision, json.dumps(payload), event.offset, actor))
+                cursor.execute("SELECT * FROM trace_cognitive_policy_versions WHERE cognitive_policy_id=%s", (identifier,))
+                return self._pg_cognitive_policy_row(self._cursor_mapping(cursor, cursor.fetchone())) or {}
+
+    @staticmethod
+    def _pg_projection_run_row(row: dict[str, Any] | None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("projection run was not found")
+        value = dict(row)
+        value["output_statistics"] = PostgresEventStore._json_value(value.pop("output_statistics"), {})
+        return value
+
+    def create_projection_run(self, *, workspace_id: str, projection_kind: str, revision: str, input_from_event: int | None = None, input_through_event: int | None = None, input_checksum: str = "", model_revision: str | None = None, index_revision: str | None = None, prompt_revision: str | None = None, policy_revision: str | None = None, prior_projection_run_id: str | None = None, actor: str = "system") -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "create_projection_run"):
+            return self.delegate.create_projection_run(workspace_id=workspace_id, projection_kind=projection_kind, revision=revision, input_from_event=input_from_event, input_through_event=input_through_event, input_checksum=input_checksum, model_revision=model_revision, index_revision=index_revision, prompt_revision=prompt_revision, policy_revision=policy_revision, prior_projection_run_id=prior_projection_run_id, actor=actor)
+        if projection_kind not in {"hierarchy", "affinity", "activation"}:
+            raise InvariantViolation("invalid projection kind")
+        identifier = str(uuid.uuid4())
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("SELECT * FROM trace_projection_runs WHERE workspace_id=%s AND projection_kind=%s AND revision=%s", (workspace_id, projection_kind, revision))
+                existing = cursor.fetchone()
+                if existing:
+                    return self._pg_projection_run_row(self._cursor_mapping(cursor, existing))
+                effective_prior = prior_projection_run_id
+                if effective_prior is None:
+                    cursor.execute(
+                        """SELECT projection_run_id FROM trace_projection_runs
+                           WHERE workspace_id=%s AND projection_kind=%s AND status='active'
+                           ORDER BY activated_event_offset DESC,created_at DESC LIMIT 1""",
+                        (workspace_id, projection_kind),
+                    )
+                    active = cursor.fetchone()
+                    effective_prior = str(active[0]) if active else None
+                if effective_prior:
+                    cursor.execute(
+                        "SELECT workspace_id,projection_kind FROM trace_projection_runs WHERE projection_run_id=%s",
+                        (effective_prior,),
+                    )
+                    prior = cursor.fetchone()
+                    if not prior or str(prior[0]) != workspace_id or str(prior[1]) != projection_kind:
+                        raise InvariantViolation("projection prior run must belong to the same workspace and projection family")
+            policy_revision = policy_revision or self.get_cognitive_policy(workspace_id)["policy_revision"]
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="projection.run_queued", payload={"projection_run_id": identifier, "workspace_id": workspace_id, "projection_kind": projection_kind, "revision": revision, "input_checksum": input_checksum, "policy_revision": policy_revision}, actor=actor)
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """INSERT INTO trace_projection_runs(projection_run_id,workspace_id,projection_kind,revision,status,input_from_event,input_through_event,input_checksum,output_statistics,model_revision,index_revision,prompt_revision,policy_revision,prior_projection_run_id,cost_usd,created_event_offset,created_at,updated_at)
+                       VALUES (%s,%s,%s,%s,'queued',%s,%s,%s,%s::jsonb,%s,%s,%s,%s,%s,0,%s,NOW(),NOW())""",
+                    (identifier, workspace_id, projection_kind, revision, input_from_event, input_through_event, input_checksum, json.dumps({}), model_revision, index_revision, prompt_revision, policy_revision, effective_prior, event.offset),
+                )
+                cursor.execute("SELECT * FROM trace_projection_runs WHERE projection_run_id=%s", (identifier,))
+                return self._pg_projection_run_row(self._cursor_mapping(cursor, cursor.fetchone()))
+
+    def transition_projection_run(self, projection_run_id: str, *, status: str, output_statistics: dict[str, Any] | None = None, failure_detail: str | None = None, cost_usd: float | None = None, actor: str = "projection-worker") -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "transition_projection_run"):
+            return self.delegate.transition_projection_run(projection_run_id, status=status, output_statistics=output_statistics, failure_detail=failure_detail, cost_usd=cost_usd, actor=actor)
+        if status not in {"queued", "running", "succeeded", "failed", "superseded", "active"}:
+            raise InvariantViolation("unknown projection run status")
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute("SELECT * FROM trace_projection_runs WHERE projection_run_id=%s FOR UPDATE", (projection_run_id,))
+                run = self._pg_projection_run_row(self._cursor_mapping(cursor, cursor.fetchone()))
+            if run["status"] == status:
+                return run
+            allowed = {
+                "queued": {"running", "failed", "superseded"},
+                "running": {"succeeded", "failed", "superseded"},
+                "succeeded": {"active", "superseded"},
+                "active": {"superseded"},
+                "failed": set(),
+                "superseded": set(),
+            }
+            if status not in allowed.get(str(run["status"]), set()):
+                raise InvariantViolation(f"projection run cannot transition from {run['status']} to {status}")
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{run['workspace_id']}", event_type=f"projection.run_{status}", payload={"projection_run_id": projection_run_id, "workspace_id": run["workspace_id"], "projection_kind": run["projection_kind"], "revision": run["revision"], "failure_detail": failure_detail}, actor=actor)
+            with conn.cursor() as cursor:
+                if status == "active":
+                    cursor.execute("UPDATE trace_projection_runs SET status='superseded',updated_at=NOW() WHERE workspace_id=%s AND projection_kind=%s AND status='active' AND projection_run_id<>%s", (run["workspace_id"], run["projection_kind"], projection_run_id))
+                cursor.execute("UPDATE trace_projection_runs SET status=%s,output_statistics=%s::jsonb,failure_detail=%s,cost_usd=%s,activated_event_offset=CASE WHEN %s='active' THEN %s ELSE activated_event_offset END,updated_at=NOW() WHERE projection_run_id=%s", (status, json.dumps(output_statistics if output_statistics is not None else run["output_statistics"]), failure_detail, float(cost_usd if cost_usd is not None else run["cost_usd"]), status, event.offset, projection_run_id))
+                cursor.execute("SELECT * FROM trace_projection_runs WHERE projection_run_id=%s", (projection_run_id,))
+                return self._pg_projection_run_row(self._cursor_mapping(cursor, cursor.fetchone()))
+
+    def activate_projection_run(self, projection_run_id: str, *, actor: str = "projection-worker") -> dict[str, Any]:
+        return self.transition_projection_run(projection_run_id, status="active", actor=actor)
+
+    def effective_projection_run(self, workspace_id: str, projection_kind: str) -> dict[str, Any] | None:
+        if self.delegate is not None and hasattr(self.delegate, "effective_projection_run"):
+            return self.delegate.effective_projection_run(workspace_id, projection_kind)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("SELECT * FROM trace_projection_runs WHERE workspace_id=%s AND projection_kind=%s AND status='active' ORDER BY activated_event_offset DESC,created_at DESC LIMIT 1", (workspace_id, projection_kind))
+                row = cursor.fetchone()
+                return self._pg_projection_run_row(self._cursor_mapping(cursor, row)) if row else None
+
+    @classmethod
+    def _pg_projection_object_row(cls, row: dict[str, Any] | None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("projection object was not found")
+        value = dict(row)
+        value["source_atom_version_ids"] = cls._json_value(value.pop("source_atom_version_ids"), [])
+        value["properties"] = cls._json_value(value.pop("properties"), {})
+        return value
+
+    def projection_objects(self, projection_run_id: str, *, limit: int = 2_000) -> list[dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "projection_objects"):
+            return self.delegate.projection_objects(projection_run_id, limit=limit)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute("SELECT * FROM trace_projection_objects WHERE projection_run_id=%s ORDER BY object_kind,logical_key LIMIT %s", (projection_run_id, max(1, min(int(limit), 10_000))))
+                return [self._pg_projection_object_row(self._cursor_mapping(cursor, row)) for row in cursor.fetchall()]
+
+    def projection_objects_page(
+        self,
+        projection_run_id: str,
+        *,
+        object_kind: str,
+        after_logical_key: str | None = None,
+        limit: int = 1_000,
+    ) -> list[dict[str, Any]]:
+        """Read an indexed, bounded page from one derived projection run."""
+
+        if self.delegate is not None and hasattr(self.delegate, "projection_objects_page"):
+            return self.delegate.projection_objects_page(
+                projection_run_id,
+                object_kind=object_kind,
+                after_logical_key=after_logical_key,
+                limit=limit,
+            )
+        bounded_limit = max(1, min(int(limit), 2_000))
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                if after_logical_key is None:
+                    cursor.execute(
+                        """SELECT * FROM trace_projection_objects
+                           WHERE projection_run_id=%s AND object_kind=%s
+                           ORDER BY logical_key LIMIT %s""",
+                        (projection_run_id, object_kind, bounded_limit),
+                    )
+                else:
+                    cursor.execute(
+                        """SELECT * FROM trace_projection_objects
+                           WHERE projection_run_id=%s AND object_kind=%s AND logical_key>%s
+                           ORDER BY logical_key LIMIT %s""",
+                        (projection_run_id, object_kind, after_logical_key, bounded_limit),
+                    )
+                return [
+                    self._pg_projection_object_row(self._cursor_mapping(cursor, row))
+                    for row in cursor.fetchall()
+                ]
+
+    def hierarchy_objects(self, workspace_id: str, projection_object_ids: Sequence[str], *, limit: int = 256) -> list[dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "hierarchy_objects"):
+            return self.delegate.hierarchy_objects(workspace_id, projection_object_ids, limit=limit)
+        ids = list(dict.fromkeys(str(item) for item in projection_object_ids if item))[:max(1, min(int(limit), 512))]
+        if not ids:
+            return []
+        run = self.effective_projection_run(workspace_id, "hierarchy")
+        if not run:
+            return []
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(
+                    """SELECT * FROM trace_projection_objects
+                       WHERE workspace_id=%s AND projection_run_id=%s
+                         AND projection_object_id = ANY(%s::uuid[])
+                       ORDER BY object_kind,logical_key LIMIT %s""",
+                    (workspace_id, run["projection_run_id"], ids, len(ids)),
+                )
+                rows = [
+                    self._pg_projection_object_row(self._cursor_mapping(cursor, row))
+                    | {"projection_revision": run["revision"]}
+                    for row in cursor.fetchall()
+                ]
+        by_id = {str(row["projection_object_id"]): row for row in rows}
+        return [by_id[item] for item in ids if item in by_id]
+
+    def list_projection_runs(self, workspace_id: str, *, projection_kind: str | None = None, status: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "list_projection_runs"):
+            return self.delegate.list_projection_runs(workspace_id, projection_kind=projection_kind, status=status, limit=limit)
+        clauses = ["workspace_id=%s"]
+        values: list[Any] = [workspace_id]
+        if projection_kind:
+            clauses.append("projection_kind=%s")
+            values.append(projection_kind)
+        if status:
+            clauses.append("status=%s")
+            values.append(status)
+        values.append(max(1, min(int(limit), 500)))
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(f"SELECT * FROM trace_projection_runs WHERE {' AND '.join(clauses)} ORDER BY created_at DESC LIMIT %s", values)
+                return [self._pg_projection_run_row(self._cursor_mapping(cursor, row)) for row in cursor.fetchall()]
+
+    def write_projection_objects(self, *, projection_run_id: str, objects: Sequence[dict[str, Any]], memberships: Sequence[dict[str, Any]] = (), actor: str = "projection-worker") -> list[dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "write_projection_objects"):
+            return self.delegate.write_projection_objects(projection_run_id=projection_run_id, objects=objects, memberships=memberships, actor=actor)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute("SELECT * FROM trace_projection_runs WHERE projection_run_id=%s FOR UPDATE", (projection_run_id,))
+                run = self._pg_projection_run_row(self._cursor_mapping(cursor, cursor.fetchone()))
+            if run["status"] not in {"queued", "running"}:
+                raise InvariantViolation("projection objects can only be written to a queued or running run")
+            materialized: list[dict[str, Any]] = []
+            ids: set[str] = set()
+            for item in objects:
+                identifier = str(item.get("projection_object_id") or uuid.uuid4())
+                source_ids = list(dict.fromkeys(str(value) for value in item.get("source_atom_version_ids", []) if value))
+                if not source_ids or not str(item.get("content") or "").strip() or identifier in ids:
+                    raise InvariantViolation("projection objects require unique IDs, content, and source coverage")
+                ids.add(identifier)
+                materialized.append({"projection_object_id": identifier, "object_kind": str(item.get("object_kind") or "summary"), "logical_key": str(item.get("logical_key") or identifier), "content": str(item["content"]), "source_atom_version_ids": source_ids, "properties": dict(item.get("properties") or {})})
+            graph: dict[str, list[str]] = {identifier: [] for identifier in ids}
+            for membership in memberships:
+                parent = str(membership.get("parent_projection_object_id") or "")
+                child = str(membership.get("child_id") or "")
+                kind = membership.get("child_kind")
+                if parent not in ids or kind not in {"projection_object", "atom_version"}:
+                    raise InvariantViolation("invalid projection membership")
+                if kind == "projection_object":
+                    if child not in ids:
+                        raise InvariantViolation("projection membership references an unknown object")
+                    graph[parent].append(child)
+            visiting: set[str] = set()
+            visited: set[str] = set()
+            def visit(node: str) -> None:
+                if node in visiting:
+                    raise InvariantViolation("hierarchy projection containment must be acyclic")
+                if node in visited:
+                    return
+                visiting.add(node)
+                for child in graph.get(node, []):
+                    visit(child)
+                visiting.remove(node)
+                visited.add(node)
+            for object_id in sorted(ids):
+                visit(object_id)
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{run['workspace_id']}", event_type="projection.objects_written", payload={"projection_run_id": projection_run_id, "workspace_id": run["workspace_id"], "object_count": len(materialized), "membership_count": len(memberships)}, actor=actor)
+            with conn.cursor() as cursor:
+                for item in materialized:
+                    cursor.execute("SELECT COUNT(*) FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id WHERE n.workspace_id=%s AND nv.atom_version_id = ANY(%s::uuid[])", (run["workspace_id"], item["source_atom_version_ids"]))
+                    if int(cursor.fetchone()[0]) != len(item["source_atom_version_ids"]):
+                        raise InvariantViolation("projection source atoms are absent or out of scope")
+                    cursor.execute("INSERT INTO trace_projection_objects(projection_object_id,workspace_id,projection_run_id,object_kind,logical_key,content,source_atom_version_ids,properties,content_hash,created_at) VALUES (%s,%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s,NOW())", (item["projection_object_id"], run["workspace_id"], projection_run_id, item["object_kind"], item["logical_key"], item["content"], json.dumps(item["source_atom_version_ids"]), json.dumps(item["properties"]), _digest(item["content"])))
+                for membership in memberships:
+                    cursor.execute("INSERT INTO trace_projection_memberships(projection_membership_id,workspace_id,projection_run_id,parent_projection_object_id,child_kind,child_id,ordinal,properties) VALUES (%s,%s,%s,%s,%s,%s,%s,%s::jsonb)", (str(membership.get("projection_membership_id") or uuid.uuid4()), run["workspace_id"], projection_run_id, membership["parent_projection_object_id"], membership["child_kind"], membership["child_id"], int(membership.get("ordinal", 0)), json.dumps(dict(membership.get("properties") or {}))))
+                cursor.execute("SELECT * FROM trace_projection_objects WHERE projection_run_id=%s ORDER BY object_kind,logical_key", (projection_run_id,))
+                result = [self._pg_projection_object_row(self._cursor_mapping(cursor, row)) | {"created_event_offset": event.offset} for row in cursor.fetchall()]
+        return result
+
+    def hierarchy_frontier(self, workspace_id: str, query: str, *, limit: int = 32, as_of_event: int | None = None) -> list[dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "hierarchy_frontier"):
+            return self.delegate.hierarchy_frontier(workspace_id, query, limit=limit, as_of_event=as_of_event)
+        run = self.effective_projection_run(workspace_id, "hierarchy")
+        if not run:
+            return []
+        terms = [item.lower() for item in re.findall(r"[\w'-]+", query) if len(item) > 1][:8]
+        clauses = ["workspace_id=%s", "projection_run_id=%s"]
+        values: list[Any] = [workspace_id, run["projection_run_id"]]
+        if terms:
+            clauses.append("(" + " OR ".join("LOWER(content) LIKE %s" for _ in terms) + ")")
+            values.extend(f"%{term}%" for term in terms)
+        values.append(max(1, min(int(limit), 200)))
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(f"SELECT * FROM trace_projection_objects WHERE {' AND '.join(clauses)} ORDER BY object_kind,logical_key LIMIT %s", values)
+                return [self._pg_projection_object_row(self._cursor_mapping(cursor, row)) | {"projection_revision": run["revision"]} for row in cursor.fetchall()]
+
+    def hierarchy_children(self, workspace_id: str, parent_projection_object_ids: Sequence[str], *, limit: int = 256) -> list[dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "hierarchy_children"):
+            return self.delegate.hierarchy_children(workspace_id, parent_projection_object_ids, limit=limit)
+        run = self.effective_projection_run(workspace_id, "hierarchy")
+        if not run or not parent_projection_object_ids:
+            return []
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("SELECT * FROM trace_projection_memberships WHERE workspace_id=%s AND projection_run_id=%s AND parent_projection_object_id = ANY(%s::uuid[]) ORDER BY ordinal,projection_membership_id LIMIT %s", (workspace_id, run["projection_run_id"], list(parent_projection_object_ids), max(1, min(int(limit), 1_000))))
+                rows = [self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()]
+        for row in rows:
+            row["properties"] = self._json_value(row.pop("properties"), {})
+        return rows
+
+    def hierarchy_source_atom_ids(self, workspace_id: str, projection_object_ids: Sequence[str], *, limit: int = 512) -> list[str]:
+        if self.delegate is not None and hasattr(self.delegate, "hierarchy_source_atom_ids"):
+            return self.delegate.hierarchy_source_atom_ids(workspace_id, projection_object_ids, limit=limit)
+        run = self.effective_projection_run(workspace_id, "hierarchy")
+        if not run or not projection_object_ids:
+            return []
+        bounded_limit = max(1, min(int(limit), 4_096))
+        frontier = list(dict.fromkeys(str(item) for item in projection_object_ids if item))[:bounded_limit]
+        seen_objects: set[str] = set()
+        source_ids: list[str] = []
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                while frontier and len(source_ids) < bounded_limit:
+                    batch = [item for item in frontier if item not in seen_objects][:128]
+                    frontier = []
+                    if not batch:
+                        break
+                    seen_objects.update(batch)
+                    cursor.execute(
+                        """SELECT projection_object_id,source_atom_version_ids
+                           FROM trace_projection_objects
+                           WHERE workspace_id=%s AND projection_run_id=%s
+                             AND projection_object_id = ANY(%s::uuid[])""",
+                        (workspace_id, run["projection_run_id"], batch),
+                    )
+                    for object_id, sources in cursor.fetchall():
+                        del object_id
+                        for source in self._json_value(sources, []):
+                            source_id = str(source)
+                            if source_id not in source_ids and len(source_ids) < bounded_limit:
+                                source_ids.append(source_id)
+                    cursor.execute(
+                        """SELECT child_kind,child_id FROM trace_projection_memberships
+                           WHERE workspace_id=%s AND projection_run_id=%s
+                             AND parent_projection_object_id = ANY(%s::uuid[])
+                           ORDER BY ordinal,projection_membership_id""",
+                        (workspace_id, run["projection_run_id"], batch),
+                    )
+                    for child_kind, child_id in cursor.fetchall():
+                        identifier = str(child_id)
+                        if child_kind == "atom_version":
+                            if identifier not in source_ids and len(source_ids) < bounded_limit:
+                                source_ids.append(identifier)
+                        elif child_kind == "projection_object" and identifier not in seen_objects:
+                            frontier.append(identifier)
+        return source_ids[:bounded_limit]
+
+    def affinity_neighbors(self, workspace_id: str, atom_version_ids: Sequence[str], *, limit: int = 64, index_revision: str | None = None) -> list[dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "affinity_neighbors"):
+            return self.delegate.affinity_neighbors(workspace_id, atom_version_ids, limit=limit, index_revision=index_revision)
+        if not atom_version_ids:
+            return []
+        clauses = ["workspace_id=%s", "status='active'", "expires_at>NOW()", "(left_atom_version_id = ANY(%s::uuid[]) OR right_atom_version_id = ANY(%s::uuid[]))"]
+        values: list[Any] = [workspace_id, list(atom_version_ids), list(atom_version_ids)]
+        if index_revision:
+            clauses.append("(index_revision IS NULL OR index_revision=%s)")
+            values.append(index_revision)
+        values.append(max(1, min(int(limit), 256)))
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(f"SELECT * FROM trace_affinity_edges WHERE {' AND '.join(clauses)} ORDER BY score DESC,pair_key LIMIT %s", values)
+                rows = [self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()]
+        for row in rows:
+            row["signal"] = self._json_value(row.pop("signal"), {})
+        return rows
+
+    def put_affinity_edge(self, *, workspace_id: str, source_atom_version_id: str, target_atom_version_id: str, score: float, signal: dict[str, Any], expires_at: str, index_revision: str | None = None, embedding_revision: str | None = None, projection_run_id: str | None = None, degree_cap: int = 16, actor: str = "affinity-worker") -> dict[str, Any] | None:
+        if self.delegate is not None and hasattr(self.delegate, "put_affinity_edge"):
+            return self.delegate.put_affinity_edge(workspace_id=workspace_id, source_atom_version_id=source_atom_version_id, target_atom_version_id=target_atom_version_id, score=score, signal=signal, expires_at=expires_at, index_revision=index_revision, embedding_revision=embedding_revision, projection_run_id=projection_run_id, degree_cap=degree_cap, actor=actor)
+        left, right = canonical_pair(source_atom_version_id, target_atom_version_id)
+        if not 0 <= float(score) <= 1:
+            raise InvariantViolation("affinity score must be between zero and one")
+        pair_key = f"{left}:{right}"
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(
+                    """SELECT COUNT(*) FROM trace_node_versions nv
+                       JOIN trace_nodes n ON n.node_id=nv.node_id
+                       WHERE n.workspace_id=%s AND nv.atom_version_id = ANY(%s::uuid[])""",
+                    (workspace_id, [left, right]),
+                )
+                if int(cursor.fetchone()[0]) != 2:
+                    raise InvariantViolation("affinity endpoints are absent or out of scope")
+                cursor.execute("SELECT 1 FROM trace_affinity_rejections WHERE workspace_id=%s AND pair_key=%s AND (expires_at IS NULL OR expires_at>NOW())", (workspace_id, pair_key))
+                if cursor.fetchone():
+                    return None
+                cursor.execute("SELECT affinity_edge_id FROM trace_affinity_edges WHERE workspace_id=%s AND pair_key=%s", (workspace_id, pair_key))
+                existing = cursor.fetchone()
+                if existing is None:
+                    cap = max(1, int(degree_cap))
+                    cursor.execute(
+                        """SELECT COUNT(*) FROM trace_affinity_edges
+                           WHERE workspace_id=%s AND status='active' AND expires_at>NOW()
+                             AND (left_atom_version_id=%s OR right_atom_version_id=%s)""",
+                        (workspace_id, left, left),
+                    )
+                    left_degree = int(cursor.fetchone()[0])
+                    cursor.execute(
+                        """SELECT COUNT(*) FROM trace_affinity_edges
+                           WHERE workspace_id=%s AND status='active' AND expires_at>NOW()
+                             AND (left_atom_version_id=%s OR right_atom_version_id=%s)""",
+                        (workspace_id, right, right),
+                    )
+                    right_degree = int(cursor.fetchone()[0])
+                    if left_degree >= cap or right_degree >= cap:
+                        return None
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="affinity.edge_upserted", payload={"workspace_id": workspace_id, "left_atom_version_id": left, "right_atom_version_id": right, "score": float(score), "projection_run_id": projection_run_id}, actor=actor)
+            identifier = str(existing[0]) if existing else str(uuid.uuid4())
+            with conn.cursor() as cursor:
+                cursor.execute("""INSERT INTO trace_affinity_edges(affinity_edge_id,workspace_id,left_atom_version_id,right_atom_version_id,pair_key,score,signal,index_revision,embedding_revision,projection_run_id,status,expires_at,created_event_offset,updated_at)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s::jsonb,%s,%s,%s,'active',%s,%s,NOW())
+                    ON CONFLICT(workspace_id,pair_key) DO UPDATE SET score=EXCLUDED.score,signal=EXCLUDED.signal,index_revision=EXCLUDED.index_revision,embedding_revision=EXCLUDED.embedding_revision,projection_run_id=EXCLUDED.projection_run_id,status='active',expires_at=EXCLUDED.expires_at,created_event_offset=EXCLUDED.created_event_offset,updated_at=NOW()""", (identifier, workspace_id, left, right, pair_key, float(score), json.dumps(signal), index_revision, embedding_revision, projection_run_id, expires_at, event.offset))
+                cursor.execute("SELECT * FROM trace_affinity_edges WHERE workspace_id=%s AND pair_key=%s", (workspace_id, pair_key))
+                row = self._cursor_mapping(cursor, cursor.fetchone()) or {}
+        row["signal"] = self._json_value(row.pop("signal"), {})
+        return row
+
+    def reject_affinity(self, *, workspace_id: str, source_atom_version_id: str, target_atom_version_id: str, reason: str | None = None, expires_at: str | None = None, actor: str = "anonymous") -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "reject_affinity"):
+            return self.delegate.reject_affinity(workspace_id=workspace_id, source_atom_version_id=source_atom_version_id, target_atom_version_id=target_atom_version_id, reason=reason, expires_at=expires_at, actor=actor)
+        left, right = canonical_pair(source_atom_version_id, target_atom_version_id)
+        pair_key = f"{left}:{right}"
+        identifier = str(uuid.uuid4())
+        with self.connection() as conn:
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="affinity.rejected", payload={"workspace_id": workspace_id, "left_atom_version_id": left, "right_atom_version_id": right, "reason": reason}, actor=actor)
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("""INSERT INTO trace_affinity_rejections(affinity_rejection_id,workspace_id,pair_key,left_atom_version_id,right_atom_version_id,reason,actor,expires_at,created_event_offset,created_at)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())
+                    ON CONFLICT(workspace_id,pair_key) DO UPDATE SET reason=EXCLUDED.reason,actor=EXCLUDED.actor,expires_at=EXCLUDED.expires_at,created_event_offset=EXCLUDED.created_event_offset,created_at=NOW()""", (identifier, workspace_id, pair_key, left, right, reason, actor, expires_at, event.offset))
+                cursor.execute("UPDATE trace_affinity_edges SET status='rejected',updated_at=NOW() WHERE workspace_id=%s AND pair_key=%s", (workspace_id, pair_key))
+                cursor.execute("SELECT * FROM trace_affinity_rejections WHERE workspace_id=%s AND pair_key=%s", (workspace_id, pair_key))
+                result = self._cursor_mapping(cursor, cursor.fetchone()) or {}
+        result["rejection_event_offset"] = event.offset
+        return result
+
+    def invalidate_affinity_for_atoms(self, *, workspace_id: str, atom_version_ids: Sequence[str], reason: str, actor: str = "projection-worker") -> int:
+        if self.delegate is not None and hasattr(self.delegate, "invalidate_affinity_for_atoms"):
+            return self.delegate.invalidate_affinity_for_atoms(workspace_id=workspace_id, atom_version_ids=atom_version_ids, reason=reason, actor=actor)
+        if not atom_version_ids:
+            return 0
+        with self.connection() as conn:
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="affinity.invalidated", payload={"workspace_id": workspace_id, "atom_version_ids": list(atom_version_ids), "reason": reason}, actor=actor)
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("UPDATE trace_affinity_edges SET status='stale',updated_at=NOW() WHERE workspace_id=%s AND status='active' AND (left_atom_version_id = ANY(%s::uuid[]) OR right_atom_version_id = ANY(%s::uuid[]))", (workspace_id, list(atom_version_ids), list(atom_version_ids)))
+                return int(cursor.rowcount)
+
+    def upsert_activation_prior(self, *, workspace_id: str, atom_version_id: str, prior_kind: str, score: float, provenance: dict[str, Any] | None = None, expires_at: str | None = None, actor: str = "activation-worker") -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "upsert_activation_prior"):
+            return self.delegate.upsert_activation_prior(workspace_id=workspace_id, atom_version_id=atom_version_id, prior_kind=prior_kind, score=score, provenance=provenance, expires_at=expires_at, actor=actor)
+        if prior_kind not in {"pin", "recency", "feedback", "suppression", "co_retrieval"} or not -1 <= float(score) <= 1:
+            raise InvariantViolation("invalid activation prior")
+        identifier = str(uuid.uuid4())
+        with self.connection() as conn:
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="activation.prior_upserted", payload={"workspace_id": workspace_id, "atom_version_id": atom_version_id, "prior_kind": prior_kind, "score": float(score)}, actor=actor)
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("""INSERT INTO trace_activation_priors(activation_prior_id,workspace_id,atom_version_id,prior_kind,score,provenance,expires_at,created_event_offset,updated_at)
+                    VALUES (%s,%s,%s,%s,%s,%s::jsonb,%s,%s,NOW())
+                    ON CONFLICT(workspace_id,atom_version_id,prior_kind) DO UPDATE SET score=EXCLUDED.score,provenance=EXCLUDED.provenance,expires_at=EXCLUDED.expires_at,created_event_offset=EXCLUDED.created_event_offset,updated_at=NOW()""", (identifier, workspace_id, atom_version_id, prior_kind, float(score), json.dumps(provenance or {}), expires_at, event.offset))
+                cursor.execute("SELECT * FROM trace_activation_priors WHERE workspace_id=%s AND atom_version_id=%s AND prior_kind=%s", (workspace_id, atom_version_id, prior_kind))
+                result = self._cursor_mapping(cursor, cursor.fetchone()) or {}
+        result["provenance"] = self._json_value(result.pop("provenance", {}), {})
+        return result
+
+    def activation_priors(self, workspace_id: str, atom_version_ids: Sequence[str]) -> dict[str, list[dict[str, Any]]]:
+        if self.delegate is not None and hasattr(self.delegate, "activation_priors"):
+            return self.delegate.activation_priors(workspace_id, atom_version_ids)
+        if not atom_version_ids:
+            return {}
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("SELECT * FROM trace_activation_priors WHERE workspace_id=%s AND atom_version_id = ANY(%s::uuid[]) AND (expires_at IS NULL OR expires_at>NOW()) ORDER BY prior_kind", (workspace_id, list(atom_version_ids)))
+                rows = [self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()]
+        result: dict[str, list[dict[str, Any]]] = {}
+        for row in rows:
+            row["provenance"] = self._json_value(row.pop("provenance", {}), {})
+            result.setdefault(str(row["atom_version_id"]), []).append(row)
+        return result
+
+    def clear_cortex_projections(self, workspace_id: str, *, actor: str = "projection-recovery") -> dict[str, int]:
+        """Delete only rebuildable Cortex rows for one tenant revision reset."""
+
+        if self.delegate is not None and hasattr(self.delegate, "clear_cortex_projections"):
+            return self.delegate.clear_cortex_projections(workspace_id, actor=actor)
+        if not workspace_id:
+            raise InvariantViolation("PostgreSQL Cortex recovery requires one workspace")
+        with self.authorization_scope(workspace_id):
+            with self.connection() as conn:
+                with conn.cursor() as cursor:
+                    self._set_workspace(cursor, workspace_id)
+                    cursor.execute("SELECT projection_run_id FROM trace_projection_runs WHERE workspace_id=%s", (workspace_id,))
+                    run_ids = [str(row[0]) for row in cursor.fetchall()]
+                    if run_ids:
+                        cursor.execute("DELETE FROM trace_projection_memberships WHERE workspace_id=%s AND projection_run_id = ANY(%s::uuid[])", (workspace_id, run_ids))
+                        memberships = int(cursor.rowcount)
+                        cursor.execute("DELETE FROM trace_projection_objects WHERE workspace_id=%s AND projection_run_id = ANY(%s::uuid[])", (workspace_id, run_ids))
+                        objects = int(cursor.rowcount)
+                    else:
+                        memberships = objects = 0
+                    cursor.execute("DELETE FROM trace_affinity_edges WHERE workspace_id=%s", (workspace_id,))
+                    affinities = int(cursor.rowcount)
+                    cursor.execute("DELETE FROM trace_activation_priors WHERE workspace_id=%s", (workspace_id,))
+                    priors = int(cursor.rowcount)
+                    cursor.execute("DELETE FROM trace_projection_runs WHERE workspace_id=%s", (workspace_id,))
+                    runs = int(cursor.rowcount)
+                self._append_event_in_connection(
+                    conn,
+                    stream_id=f"workspace:{workspace_id}",
+                    event_type="projection.cortex_cleared",
+                    payload={
+                        "workspace_id": workspace_id, "runs": runs, "objects": objects,
+                        "memberships": memberships, "affinities": affinities, "priors": priors,
+                    },
+                    actor=actor,
+                )
+        return {"runs": runs, "objects": objects, "memberships": memberships, "affinities": affinities, "priors": priors}
+
 
 class S3ObjectStore:
     """Private, content-addressed S3-compatible attachment storage.
@@ -2205,16 +3171,45 @@ class OpenSearchLexicalIndex:
         return [{**hit.get("_source", {}), "atom_version_id": hit.get("_id"), "lexical_score": float(hit.get("_score") or 0.0)} for hit in hits]
 
     def upsert(self, documents: Iterable[dict[str, Any]], *, revision: str) -> int:
+        """Idempotently bulk-index one bounded delta into its revision target."""
+
         target = self.create_revision(revision)
-        count = 0
+        batch_size = max(1, min(int(os.environ.get("TRACE_OPENSEARCH_BULK_SIZE", "500")), 2_000))
+        batch: list[tuple[str, dict[str, Any]]] = []
+        indexed = 0
+
+        def flush(rows: list[tuple[str, dict[str, Any]]]) -> int:
+            if not rows:
+                return 0
+            bulk = getattr(self.client, "bulk", None)
+            if not callable(bulk):
+                for atom_id, payload in rows:
+                    self.client.index(index=target, id=atom_id, body=payload, refresh=False)
+                return len(rows)
+            operations: list[dict[str, Any]] = []
+            for atom_id, payload in rows:
+                operations.append({"index": {"_index": target, "_id": atom_id}})
+                operations.append(payload)
+            response = bulk(body=operations, refresh=False)
+            if isinstance(response, dict) and response.get("errors"):
+                failures = [
+                    item for item in response.get("items", [])
+                    if isinstance(item, dict)
+                    and any(int(value.get("status", 500)) >= 300 for value in item.values() if isinstance(value, dict))
+                ]
+                detail = json.dumps(failures[:3], sort_keys=True)[:1_000]
+                raise ProductionAdapterError(f"OpenSearch bulk delta rejected one or more documents: {detail}")
+            return len(rows)
+
         for document in documents:
             atom_id = document.get("atom_version_id")
             if not atom_id:
                 continue
-            payload = {**document, "index_revision": revision}
-            self.client.index(index=target, id=atom_id, body=payload, refresh=False)
-            count += 1
-        return count
+            batch.append((str(atom_id), {**document, "index_revision": revision}))
+            if len(batch) >= batch_size:
+                indexed += flush(batch)
+                batch = []
+        return indexed + flush(batch)
 
     def revision_count(self, *, workspace_id: str, revision: str) -> int:
         target = self.revision_index(revision)
@@ -2378,8 +3373,9 @@ class QdrantDenseIndex:
                 if PointStruct is not None
                 else {"id": point_id, "vector": list(item["vector"]), "payload": payload}
             )
-        if points:
-            self.client.upsert(collection_name=target, points=points, wait=True)
+        batch_size = max(1, min(int(os.environ.get("TRACE_QDRANT_BATCH_SIZE", "256")), 2_000))
+        for start in range(0, len(points), batch_size):
+            self.client.upsert(collection_name=target, points=points[start:start + batch_size], wait=True)
         return len(points)
 
     def revision_count(self, *, workspace_id: str, revision: str) -> int:
@@ -2420,26 +3416,54 @@ class QdrantDenseIndex:
 
 
 class NatsJetStreamPublisher:
-    """NATS JetStream outbox publisher with explicit durable subject naming."""
+    """NATS JetStream publisher with one persistent, drainable connection."""
 
     def __init__(self, *, servers: Sequence[str] | None = None, stream: str = "TRACE_EVENTS", client: Any | None = None) -> None:
         self.servers = list(servers or [os.environ.get("TRACE_NATS_URL", "nats://localhost:4222")])
         self.stream = stream
         self.client = client
+        self._connection_lock = asyncio.Lock()
 
-    async def publish(self, topic: str, message: dict[str, Any]) -> None:
-        if self.client is None:
+    async def _connected_client(self) -> Any:
+        current = self.client
+        if current is not None and not bool(getattr(current, "is_closed", False)):
+            return current
+        async with self._connection_lock:
+            current = self.client
+            if current is not None and not bool(getattr(current, "is_closed", False)):
+                return current
             try:
                 import nats
             except ImportError as error:  # pragma: no cover - optional production dependency
                 raise ProductionAdapterError("nats-py is required for NatsJetStreamPublisher") from error
-        self.client = await nats.connect(servers=self.servers)
+            self.client = await nats.connect(servers=self.servers)
+            return self.client
+
+    async def publish(self, topic: str, message: dict[str, Any]) -> None:
+        client = await self._connected_client()
         subject = f"{self.stream.lower()}.{topic.replace('.', '_')}"
         body = json.dumps(message, sort_keys=True, separators=(",", ":")).encode("utf-8")
-        if hasattr(self.client, "jetstream"):
-            await self.client.jetstream().publish(subject, body)
+        if hasattr(client, "jetstream"):
+            await client.jetstream().publish(subject, body)
         else:
-            await self.client.publish(subject, body)
+            await client.publish(subject, body)
+
+    async def drain(self) -> None:
+        """Flush acknowledged work on shutdown without dropping the outbox."""
+
+        async with self._connection_lock:
+            client, self.client = self.client, None
+        if client is None:
+            return
+        drain = getattr(client, "drain", None)
+        if callable(drain):
+            await drain()
+            return
+        close = getattr(client, "close", None)
+        if callable(close):
+            result = close()
+            if hasattr(result, "__await__"):
+                await result
 
 
 class RedisCoordinationStore:

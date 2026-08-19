@@ -13,12 +13,14 @@ import os
 import sqlite3
 import threading
 import uuid
+from collections import defaultdict
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Iterator, Sequence
 
-from .models import AppendResult, EventRecord
+from .models import AppendResult, CognitivePolicy, EventRecord
+from .cortex import PROJECTION_RUN_STATUSES, canonical_pair
 
 
 # New semantic links are deliberately constrained.  Existing historical rows
@@ -479,6 +481,162 @@ class SqliteEventStore:
                 );
                 CREATE INDEX IF NOT EXISTS model_call_audits_workspace_created
                     ON model_call_audits(workspace_id, created_at DESC);
+
+                -- Cortex records are intentionally additive and replaceable.
+                -- They must never be used as a source of factual edge truth.
+                CREATE TABLE IF NOT EXISTS attachment_staging (
+                    staging_id TEXT PRIMARY KEY,
+                    workspace_id TEXT NOT NULL,
+                    content_hash TEXT NOT NULL,
+                    object_key TEXT NOT NULL,
+                    attachment_json TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    ingestion_id TEXT,
+                    canonical_event_offset INTEGER,
+                    last_error TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS attachment_staging_reconcile
+                    ON attachment_staging(status, workspace_id, created_at);
+
+                CREATE TABLE IF NOT EXISTS ingestion_index_state (
+                    ingestion_id TEXT NOT NULL REFERENCES ingestions(ingestion_id),
+                    workspace_id TEXT NOT NULL,
+                    component TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    index_revision TEXT,
+                    job_id TEXT,
+                    run_id TEXT,
+                    detail_json TEXT NOT NULL DEFAULT '{}',
+                    updated_event_offset INTEGER,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(ingestion_id, component)
+                );
+                CREATE INDEX IF NOT EXISTS ingestion_index_state_workspace
+                    ON ingestion_index_state(workspace_id, status, updated_at);
+
+                CREATE TABLE IF NOT EXISTS cognitive_policy_versions (
+                    cognitive_policy_id TEXT PRIMARY KEY,
+                    workspace_id TEXT NOT NULL,
+                    policy_revision TEXT NOT NULL,
+                    policy_json TEXT NOT NULL,
+                    active INTEGER NOT NULL DEFAULT 0,
+                    created_event_offset INTEGER NOT NULL,
+                    created_at TEXT NOT NULL,
+                    actor TEXT NOT NULL,
+                    UNIQUE(workspace_id, policy_revision)
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS cognitive_policy_active
+                    ON cognitive_policy_versions(workspace_id) WHERE active=1;
+
+                CREATE TABLE IF NOT EXISTS projection_runs (
+                    projection_run_id TEXT PRIMARY KEY,
+                    workspace_id TEXT NOT NULL,
+                    projection_kind TEXT NOT NULL,
+                    revision TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    input_from_event INTEGER,
+                    input_through_event INTEGER,
+                    input_checksum TEXT NOT NULL,
+                    output_statistics_json TEXT NOT NULL DEFAULT '{}',
+                    model_revision TEXT,
+                    index_revision TEXT,
+                    prompt_revision TEXT,
+                    policy_revision TEXT NOT NULL,
+                    prior_projection_run_id TEXT,
+                    cost_usd REAL NOT NULL DEFAULT 0,
+                    failure_detail TEXT,
+                    created_event_offset INTEGER NOT NULL,
+                    activated_event_offset INTEGER,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    FOREIGN KEY(prior_projection_run_id) REFERENCES projection_runs(projection_run_id),
+                    UNIQUE(workspace_id, projection_kind, revision)
+                );
+                CREATE INDEX IF NOT EXISTS projection_runs_workspace_kind
+                    ON projection_runs(workspace_id, projection_kind, status, created_at DESC);
+
+                CREATE TABLE IF NOT EXISTS projection_objects (
+                    projection_object_id TEXT PRIMARY KEY,
+                    workspace_id TEXT NOT NULL,
+                    projection_run_id TEXT NOT NULL REFERENCES projection_runs(projection_run_id),
+                    object_kind TEXT NOT NULL,
+                    logical_key TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    source_atom_version_ids_json TEXT NOT NULL,
+                    properties_json TEXT NOT NULL,
+                    content_hash TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    UNIQUE(projection_run_id, logical_key)
+                );
+                CREATE INDEX IF NOT EXISTS projection_objects_frontier
+                    ON projection_objects(workspace_id, projection_run_id, object_kind, logical_key);
+
+                CREATE TABLE IF NOT EXISTS projection_memberships (
+                    projection_membership_id TEXT PRIMARY KEY,
+                    workspace_id TEXT NOT NULL,
+                    projection_run_id TEXT NOT NULL REFERENCES projection_runs(projection_run_id),
+                    parent_projection_object_id TEXT NOT NULL REFERENCES projection_objects(projection_object_id),
+                    child_kind TEXT NOT NULL,
+                    child_id TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    properties_json TEXT NOT NULL,
+                    UNIQUE(projection_run_id, parent_projection_object_id, child_kind, child_id)
+                );
+                CREATE INDEX IF NOT EXISTS projection_memberships_parent
+                    ON projection_memberships(workspace_id, projection_run_id, parent_projection_object_id, ordinal);
+
+                CREATE TABLE IF NOT EXISTS affinity_edges (
+                    affinity_edge_id TEXT PRIMARY KEY,
+                    workspace_id TEXT NOT NULL,
+                    left_atom_version_id TEXT NOT NULL REFERENCES node_versions(atom_version_id),
+                    right_atom_version_id TEXT NOT NULL REFERENCES node_versions(atom_version_id),
+                    pair_key TEXT NOT NULL,
+                    score REAL NOT NULL,
+                    signal_json TEXT NOT NULL,
+                    index_revision TEXT,
+                    embedding_revision TEXT,
+                    projection_run_id TEXT REFERENCES projection_runs(projection_run_id),
+                    status TEXT NOT NULL,
+                    expires_at TEXT NOT NULL,
+                    created_event_offset INTEGER NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    UNIQUE(workspace_id, pair_key)
+                );
+                CREATE INDEX IF NOT EXISTS affinity_edges_lookup
+                    ON affinity_edges(workspace_id, left_atom_version_id, right_atom_version_id, status, expires_at);
+
+                CREATE TABLE IF NOT EXISTS affinity_rejections (
+                    affinity_rejection_id TEXT PRIMARY KEY,
+                    workspace_id TEXT NOT NULL,
+                    pair_key TEXT NOT NULL,
+                    left_atom_version_id TEXT NOT NULL,
+                    right_atom_version_id TEXT NOT NULL,
+                    reason TEXT,
+                    actor TEXT NOT NULL,
+                    expires_at TEXT,
+                    created_event_offset INTEGER NOT NULL,
+                    created_at TEXT NOT NULL,
+                    UNIQUE(workspace_id, pair_key)
+                );
+                CREATE INDEX IF NOT EXISTS affinity_rejections_lookup
+                    ON affinity_rejections(workspace_id, pair_key, expires_at);
+
+                CREATE TABLE IF NOT EXISTS activation_priors (
+                    activation_prior_id TEXT PRIMARY KEY,
+                    workspace_id TEXT NOT NULL,
+                    atom_version_id TEXT NOT NULL REFERENCES node_versions(atom_version_id),
+                    prior_kind TEXT NOT NULL,
+                    score REAL NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    expires_at TEXT,
+                    created_event_offset INTEGER NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    UNIQUE(workspace_id, atom_version_id, prior_kind)
+                );
+                CREATE INDEX IF NOT EXISTS activation_priors_lookup
+                    ON activation_priors(workspace_id, atom_version_id, expires_at);
                 """
             )
             # V2 previews created before leases were introduced remain readable.
@@ -960,6 +1118,22 @@ class SqliteEventStore:
                     consolidation_status='pending' WHERE ingestion_id=?""",
                 (ingestion_id,),
             )
+            now = _now()
+            # ``hot_inbox`` is the synchronous read path.  Its lexical
+            # fallback is immediately usable, while external lexical/dense
+            # revisions are tracked separately by the index worker.
+            for component, status, detail in (
+                ("hot", "hot_ready", {"projection": "hot_inbox"}),
+                ("lexical", "lexical_ready", {"adapter": "embedded-hot"}),
+                ("dense", "dense_pending", {}),
+            ):
+                conn.execute(
+                    """INSERT INTO ingestion_index_state(
+                        ingestion_id,workspace_id,component,status,index_revision,job_id,run_id,
+                        detail_json,updated_event_offset,updated_at
+                    ) VALUES (?,?,?,?,NULL,NULL,NULL,?,?,?)""",
+                    (ingestion_id, workspace_id, component, status, _json(detail), finished.offset, now),
+                )
             self._set_projection(conn, "hot_inbox", workspace_id, finished.offset)
             return {
                 "ingestion_id": ingestion_id,
@@ -969,6 +1143,9 @@ class SqliteEventStore:
                 "atomized_event_offset": finished.offset,
                 "parsing_status": "completed",
                 "indexing_status": "lexical_ready",
+                "index_state": {
+                    "hot": "hot_ready", "lexical": "lexical_ready", "dense": "dense_pending",
+                },
                 "consolidation_status": "pending",
             }
 
@@ -1218,6 +1395,7 @@ class SqliteEventStore:
                 ).fetchall()
                 return [self._node_version_row(row, row) for row in rows]
             children: list[dict[str, Any]] = []
+            parent_properties = _decode(parent_version["properties_json"], {})
             for ordinal, part in enumerate(parts):
                 child_id, version_id = str(uuid.uuid4()), str(uuid.uuid4())
                 node_event = self._append_event(
@@ -1235,6 +1413,13 @@ class SqliteEventStore:
                 props = {
                     "split_from_node_id": node_id, "split_from_atom_version_id": parent_version["atom_version_id"],
                     "split_marker_event": marker.offset, "ordinal": ordinal,
+                    # Preserve source ownership for index/projection routing,
+                    # while keeping the child in its own local derived section
+                    # rather than silently moving it into an unrelated source
+                    # ordinal group.
+                    "ingestion_id": parent_properties.get("ingestion_id"),
+                    "source_ordinal": parent_properties.get("ordinal"),
+                    "projection_section_key": f"section:split:{node_id}:{marker.offset}",
                 }
                 version_event = self._append_event(
                     conn, stream_id=f"node:{child_id}", event_type="node.versioned",
@@ -1358,6 +1543,1150 @@ class SqliteEventStore:
             args = (workspace_id,)
         with self._connect() as conn:
             return [dict(row) for row in conn.execute(sql, args)]
+
+    # --------------------------------------------------------- data-plane state
+    @staticmethod
+    def _attachment_staging_row(row: sqlite3.Row | None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("attachment staging record was not found")
+        result = dict(row)
+        result["attachment"] = _decode(result.pop("attachment_json"), {})
+        return result
+
+    def stage_attachment(self, *, workspace_id: str, attachment: dict[str, Any], ingestion_id: str | None = None) -> dict[str, Any]:
+        """Record an object-store write before it is linked to the Spine.
+
+        Object storage and the canonical transaction cannot share a database
+        transaction.  This small durable ledger turns a failed second half
+        into recoverable cleanup work instead of a silent orphan object.
+        """
+
+        required = {"content_hash", "object_key", "media_type", "byte_length"}
+        if required - set(attachment):
+            raise InvariantViolation("attachment staging requires content hash, object key, media type, and byte length")
+        identifier = str(uuid.uuid4())
+        with self.transaction() as conn:
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{workspace_id}",
+                event_type="attachment.staged",
+                payload={
+                    "staging_id": identifier,
+                    "workspace_id": workspace_id,
+                    "content_hash": attachment["content_hash"],
+                    "object_key": attachment["object_key"],
+                    "ingestion_id": ingestion_id,
+                },
+                actor="ingestion-stager",
+            )
+            now = _now()
+            conn.execute(
+                """INSERT INTO attachment_staging(
+                    staging_id,workspace_id,content_hash,object_key,attachment_json,status,ingestion_id,
+                    canonical_event_offset,last_error,created_at,updated_at
+                ) VALUES (?,?,?,?,?,'staged',?,NULL,NULL,?,?)""",
+                (identifier, workspace_id, attachment["content_hash"], attachment["object_key"], _json(attachment), ingestion_id, now, now),
+            )
+            result = self._attachment_staging_row(
+                conn.execute("SELECT * FROM attachment_staging WHERE staging_id=?", (identifier,)).fetchone()
+            )
+            result["staged_event_offset"] = event.offset
+            return result
+
+    def finalize_attachment_staging(
+        self,
+        staging_id: str,
+        *,
+        ingestion_id: str,
+        canonical_event_offset: int | None = None,
+        actor: str = "ingestion-stager",
+        workspace_id: str | None = None,
+    ) -> dict[str, Any]:
+        with self.transaction() as conn:
+            row = conn.execute("SELECT * FROM attachment_staging WHERE staging_id=?", (staging_id,)).fetchone()
+            staged = self._attachment_staging_row(row)
+            if workspace_id is not None and workspace_id != staged["workspace_id"]:
+                raise InvariantViolation("attachment staging workspace does not match the canonical ingestion")
+            if staged["status"] == "committed":
+                return staged
+            if staged["status"] not in {"staged", "cleanup_required"}:
+                raise InvariantViolation("attachment staging record cannot be committed from its current state")
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{staged['workspace_id']}",
+                event_type="attachment.staging_committed",
+                payload={"staging_id": staging_id, "workspace_id": staged["workspace_id"], "ingestion_id": ingestion_id},
+                actor=actor,
+            )
+            conn.execute(
+                """UPDATE attachment_staging SET status='committed',ingestion_id=?,canonical_event_offset=?,
+                   last_error=NULL,updated_at=? WHERE staging_id=?""",
+                (ingestion_id, canonical_event_offset or event.offset, _now(), staging_id),
+            )
+            result = self._attachment_staging_row(
+                conn.execute("SELECT * FROM attachment_staging WHERE staging_id=?", (staging_id,)).fetchone()
+            )
+            result["committed_event_offset"] = event.offset
+            return result
+
+    def fail_attachment_staging(
+        self,
+        staging_id: str,
+        *,
+        error: str,
+        actor: str = "ingestion-stager",
+        workspace_id: str | None = None,
+    ) -> dict[str, Any]:
+        with self.transaction() as conn:
+            row = conn.execute("SELECT * FROM attachment_staging WHERE staging_id=?", (staging_id,)).fetchone()
+            staged = self._attachment_staging_row(row)
+            if workspace_id is not None and workspace_id != staged["workspace_id"]:
+                raise InvariantViolation("attachment staging workspace does not match the failed ingestion")
+            if staged["status"] == "committed":
+                return staged
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{staged['workspace_id']}",
+                event_type="attachment.staging_cleanup_required",
+                payload={"staging_id": staging_id, "workspace_id": staged["workspace_id"], "error": error[:500]},
+                actor=actor,
+            )
+            conn.execute(
+                "UPDATE attachment_staging SET status='cleanup_required',last_error=?,updated_at=? WHERE staging_id=?",
+                (error[:2_000], _now(), staging_id),
+            )
+            result = self._attachment_staging_row(
+                conn.execute("SELECT * FROM attachment_staging WHERE staging_id=?", (staging_id,)).fetchone()
+            )
+            result["cleanup_event_offset"] = event.offset
+            return result
+
+    def reconcile_attachment_staging(self, workspace_id: str | None = None, *, actor: str = "attachment-reconciler") -> dict[str, Any]:
+        """Mark linked objects committed and surface unlinked cleanup targets.
+
+        The repository never deletes an object itself: object retention and
+        deletion authority belong to the configured object-store worker.
+        """
+
+        clauses = ["s.status IN ('staged','cleanup_required')"]
+        values: list[Any] = []
+        if workspace_id:
+            clauses.append("s.workspace_id=?")
+            values.append(workspace_id)
+        with self.transaction() as conn:
+            rows = conn.execute(
+                f"""SELECT s.* FROM attachment_staging s WHERE {' AND '.join(clauses)}
+                    ORDER BY s.created_at LIMIT 500""",
+                values,
+            ).fetchall()
+            committed = 0
+            cleanup: list[dict[str, Any]] = []
+            for row in rows:
+                matching = conn.execute(
+                    """SELECT attachment_id,created_event_offset FROM attachments
+                       WHERE workspace_id=? AND content_hash=? AND object_key=? LIMIT 1""",
+                    (row["workspace_id"], row["content_hash"], row["object_key"]),
+                ).fetchone()
+                if matching:
+                    conn.execute(
+                        """UPDATE attachment_staging SET status='committed',canonical_event_offset=?,
+                           last_error=NULL,updated_at=? WHERE staging_id=?""",
+                        (matching["created_event_offset"], _now(), row["staging_id"]),
+                    )
+                    committed += 1
+                else:
+                    if row["status"] != "cleanup_required":
+                        conn.execute(
+                            "UPDATE attachment_staging SET status='cleanup_required',updated_at=? WHERE staging_id=?",
+                            (_now(), row["staging_id"]),
+                        )
+                    cleanup.append({
+                        "staging_id": row["staging_id"], "workspace_id": row["workspace_id"],
+                        "object_key": row["object_key"], "content_hash": row["content_hash"],
+                    })
+            if rows:
+                self._append_event(
+                    conn,
+                    stream_id=f"workspace:{workspace_id or 'attachment-reconciliation'}",
+                    event_type="attachment.staging_reconciled",
+                    payload={"workspace_id": workspace_id, "committed": committed, "cleanup_required": len(cleanup)},
+                    actor=actor,
+                )
+            return {"workspace_id": workspace_id, "committed": committed, "cleanup_required": cleanup}
+
+    @staticmethod
+    def _index_state_rows(rows: Sequence[sqlite3.Row]) -> dict[str, dict[str, Any]]:
+        state: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            value = dict(row)
+            value["detail"] = _decode(value.pop("detail_json"), {})
+            state[value.pop("component")] = value
+        return state
+
+    def ingestion_index_state(self, ingestion_id: str) -> dict[str, dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT * FROM ingestion_index_state WHERE ingestion_id=? ORDER BY component", (ingestion_id,)
+            ).fetchall()
+        return self._index_state_rows(rows)
+
+    def set_ingestion_index_state(
+        self,
+        *,
+        ingestion_id: str,
+        component: str,
+        status: str,
+        index_revision: str | None = None,
+        job_id: str | None = None,
+        run_id: str | None = None,
+        detail: dict[str, Any] | None = None,
+        actor: str = "index-worker",
+    ) -> dict[str, dict[str, Any]]:
+        allowed = {"hot_ready", "lexical_ready", "dense_pending", "dense_ready", "failed", "stale", "pending"}
+        if component not in {"hot", "lexical", "dense"} or status not in allowed:
+            raise InvariantViolation("invalid ingestion index component or state")
+        with self.transaction() as conn:
+            ingestion = conn.execute("SELECT workspace_id FROM ingestions WHERE ingestion_id=?", (ingestion_id,)).fetchone()
+            if not ingestion:
+                raise NotFoundError(f"ingestion {ingestion_id} was not found")
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{ingestion['workspace_id']}",
+                event_type="ingestion.index_state_updated",
+                payload={
+                    "ingestion_id": ingestion_id, "workspace_id": ingestion["workspace_id"], "component": component,
+                    "status": status, "index_revision": index_revision, "job_id": job_id, "run_id": run_id,
+                },
+                actor=actor,
+            )
+            conn.execute(
+                """INSERT INTO ingestion_index_state(
+                    ingestion_id,workspace_id,component,status,index_revision,job_id,run_id,detail_json,
+                    updated_event_offset,updated_at
+                ) VALUES (?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(ingestion_id,component) DO UPDATE SET
+                    status=excluded.status,index_revision=excluded.index_revision,job_id=excluded.job_id,
+                    run_id=excluded.run_id,detail_json=excluded.detail_json,
+                    updated_event_offset=excluded.updated_event_offset,updated_at=excluded.updated_at""",
+                (
+                    ingestion_id, ingestion["workspace_id"], component, status, index_revision, job_id, run_id,
+                    _json(detail or {}), event.offset, _now(),
+                ),
+            )
+            rows = conn.execute("SELECT * FROM ingestion_index_state WHERE ingestion_id=?", (ingestion_id,)).fetchall()
+            state = self._index_state_rows(rows)
+            statuses = {name: item["status"] for name, item in state.items()}
+            aggregate = (
+                "failed" if "failed" in statuses.values()
+                else "dense_ready" if statuses.get("dense") == "dense_ready"
+                else "dense_pending" if statuses.get("dense") == "dense_pending"
+                else statuses.get("lexical", statuses.get("hot", "pending"))
+            )
+            conn.execute("UPDATE ingestions SET indexing_status=? WHERE ingestion_id=?", (aggregate, ingestion_id))
+            return state
+
+    def hot_candidates(
+        self,
+        workspace_id: str,
+        query: str,
+        *,
+        limit: int = 100,
+        visibility: Sequence[str] | None = None,
+        facets: Sequence[str] | None = None,
+        as_of_event: int | None = None,
+    ) -> list[dict[str, Any]]:
+        """Return a bounded hot-inbox fallback without a workspace scan."""
+
+        terms = [term.lower() for term in query.replace("'", " ").split() if len(term) > 1][:8]
+        clauses = ["workspace_id=?"]
+        values: list[Any] = [workspace_id]
+        if as_of_event is not None:
+            clauses.append("visible_from_event<=?")
+            values.append(as_of_event)
+        if terms:
+            clauses.append("(" + " OR ".join("lower(content) LIKE ?" for _ in terms) + ")")
+            values.extend(f"%{term}%" for term in terms)
+        # The JSON columns retain the exact policy record; SQLite's JSON1 is
+        # not guaranteed in embedded builds, so visibility/facet checks below
+        # are authoritative and this SQL remains portable.
+        values.append(max(1, min(int(limit) * 4, 800)))
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"SELECT atom_version_id,security_json,facets_json FROM hot_inbox WHERE {' AND '.join(clauses)} "
+                "ORDER BY visible_from_event DESC LIMIT ?",
+                values,
+            ).fetchall()
+        allowed_visibility = set(visibility or ())
+        wanted_facets = set(facets or ())
+        selected = [
+            row["atom_version_id"] for row in rows
+            if (not allowed_visibility or _decode(row["security_json"], {}).get("visibility") in allowed_visibility)
+            and (not wanted_facets or wanted_facets <= set(_decode(row["facets_json"], [])))
+        ][:max(1, min(int(limit), 200))]
+        return self.atom_versions(selected)
+
+    def current_atom_versions_for_nodes(
+        self,
+        workspace_id: str,
+        node_ids: Sequence[str],
+        *,
+        as_of_event: int | None = None,
+    ) -> list[dict[str, Any]]:
+        if not node_ids:
+            return []
+        marks = ",".join("?" for _ in node_ids)
+        clauses = [f"n.node_id IN ({marks})", "n.workspace_id=?", "n.facets_json LIKE '%\"atom\"%'"]
+        values: list[Any] = [*node_ids, workspace_id]
+        if as_of_event is not None:
+            clauses.append("nv.created_event_offset<=?")
+            values.append(as_of_event)
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"""SELECT * FROM (
+                    SELECT nv.*,n.workspace_id,n.facets_json,n.security_json,
+                       ROW_NUMBER() OVER (PARTITION BY nv.node_id ORDER BY nv.version DESC) AS latest
+                    FROM node_versions nv JOIN nodes n ON n.node_id=nv.node_id
+                    WHERE {' AND '.join(clauses)}
+                ) WHERE latest=1""",
+                values,
+            ).fetchall()
+        by_node = {row["node_id"]: self._node_version_row(row, row) for row in rows}
+        return [by_node[node_id] for node_id in node_ids if node_id in by_node]
+
+    # ------------------------------------------------------ Cortex control plane
+    @staticmethod
+    def _policy_row(row: sqlite3.Row | None) -> dict[str, Any] | None:
+        if not row:
+            return None
+        result = dict(row)
+        result["policy"] = _decode(result.pop("policy_json"), {})
+        result["active"] = bool(result["active"])
+        return result
+
+    def get_cognitive_policy(self, workspace_id: str) -> dict[str, Any]:
+        with self._connect() as conn:
+            row = conn.execute(
+                """SELECT * FROM cognitive_policy_versions WHERE workspace_id=? AND active=1
+                   ORDER BY created_at DESC LIMIT 1""",
+                (workspace_id,),
+            ).fetchone()
+        policy = self._policy_row(row)
+        if policy:
+            return policy
+        # Defaults are explicit and safe even before an administrator saves a
+        # workspace override.  Returning an effective default avoids a hidden
+        # unversioned policy branch in query paths.
+        return {
+            "cognitive_policy_id": None,
+            "workspace_id": workspace_id,
+            "policy_revision": "cognitive-policy-v1",
+            "policy": CognitivePolicy().model_dump(mode="json"),
+            "active": True,
+            "source": "default",
+        }
+
+    def put_cognitive_policy(self, *, workspace_id: str, policy: dict[str, Any], actor: str = "system") -> dict[str, Any]:
+        validated = CognitivePolicy.model_validate(policy)
+        with self.transaction() as conn:
+            existing = conn.execute(
+                "SELECT policy_revision FROM cognitive_policy_versions WHERE workspace_id=? ORDER BY created_at DESC",
+                (workspace_id,),
+            ).fetchall()
+            base_revision = validated.policy_revision
+            used = {str(row["policy_revision"]) for row in existing}
+            revision = base_revision
+            suffix = 1
+            while revision in used:
+                suffix += 1
+                revision = f"{base_revision}-{suffix}"
+            payload = validated.model_dump(mode="json")
+            payload["policy_revision"] = revision
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{workspace_id}",
+                event_type="cognitive_policy.activated",
+                payload={"workspace_id": workspace_id, "policy_revision": revision, "policy": payload},
+                actor=actor,
+            )
+            conn.execute("UPDATE cognitive_policy_versions SET active=0 WHERE workspace_id=? AND active=1", (workspace_id,))
+            identifier = str(uuid.uuid4())
+            conn.execute(
+                """INSERT INTO cognitive_policy_versions(
+                    cognitive_policy_id,workspace_id,policy_revision,policy_json,active,created_event_offset,created_at,actor
+                ) VALUES (?,?,?,?,1,?,?,?)""",
+                (identifier, workspace_id, revision, _json(payload), event.offset, _now(), actor),
+            )
+            result = self._policy_row(
+                conn.execute("SELECT * FROM cognitive_policy_versions WHERE cognitive_policy_id=?", (identifier,)).fetchone()
+            )
+            assert result is not None
+            return result
+
+    @staticmethod
+    def _projection_run_row(row: sqlite3.Row | None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("projection run was not found")
+        result = dict(row)
+        result["output_statistics"] = _decode(result.pop("output_statistics_json"), {})
+        return result
+
+    def create_projection_run(
+        self,
+        *,
+        workspace_id: str,
+        projection_kind: str,
+        revision: str,
+        input_from_event: int | None = None,
+        input_through_event: int | None = None,
+        input_checksum: str = "",
+        model_revision: str | None = None,
+        index_revision: str | None = None,
+        prompt_revision: str | None = None,
+        policy_revision: str | None = None,
+        prior_projection_run_id: str | None = None,
+        actor: str = "system",
+    ) -> dict[str, Any]:
+        if projection_kind not in {"hierarchy", "affinity", "activation"}:
+            raise InvariantViolation("projection_kind must be hierarchy, affinity, or activation")
+        if not revision:
+            raise InvariantViolation("projection revision is required")
+        if input_from_event and input_through_event and input_from_event > input_through_event:
+            raise InvariantViolation("projection input range is invalid")
+        with self.transaction() as conn:
+            duplicate = conn.execute(
+                "SELECT * FROM projection_runs WHERE workspace_id=? AND projection_kind=? AND revision=?",
+                (workspace_id, projection_kind, revision),
+            ).fetchone()
+            if duplicate:
+                return self._projection_run_row(duplicate)
+            active = conn.execute(
+                """SELECT projection_run_id FROM projection_runs WHERE workspace_id=? AND projection_kind=? AND status='active'
+                   ORDER BY created_at DESC LIMIT 1""",
+                (workspace_id, projection_kind),
+            ).fetchone()
+            effective_prior = prior_projection_run_id or (active["projection_run_id"] if active else None)
+            if effective_prior:
+                prior = conn.execute(
+                    "SELECT workspace_id,projection_kind FROM projection_runs WHERE projection_run_id=?",
+                    (effective_prior,),
+                ).fetchone()
+                if not prior or prior["workspace_id"] != workspace_id or prior["projection_kind"] != projection_kind:
+                    raise InvariantViolation("projection prior run must belong to the same workspace and projection family")
+            policy = self._policy_row(
+                conn.execute(
+                    "SELECT * FROM cognitive_policy_versions WHERE workspace_id=? AND active=1", (workspace_id,)
+                ).fetchone()
+            )
+            effective_policy_revision = policy_revision or (policy or {}).get("policy_revision") or "cognitive-policy-v1"
+            identifier = str(uuid.uuid4())
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{workspace_id}",
+                event_type="projection.run_queued",
+                payload={
+                    "projection_run_id": identifier, "workspace_id": workspace_id, "projection_kind": projection_kind,
+                    "revision": revision, "input_from_event": input_from_event, "input_through_event": input_through_event,
+                    "input_checksum": input_checksum, "policy_revision": effective_policy_revision,
+                },
+                actor=actor,
+            )
+            now = _now()
+            conn.execute(
+                """INSERT INTO projection_runs(
+                    projection_run_id,workspace_id,projection_kind,revision,status,input_from_event,input_through_event,
+                    input_checksum,output_statistics_json,model_revision,index_revision,prompt_revision,policy_revision,
+                    prior_projection_run_id,cost_usd,failure_detail,created_event_offset,activated_event_offset,created_at,updated_at
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (
+                    identifier, workspace_id, projection_kind, revision, "queued", input_from_event, input_through_event,
+                    input_checksum, _json({}), model_revision, index_revision, prompt_revision, effective_policy_revision,
+                    effective_prior, 0.0, None,
+                    event.offset, None, now, now,
+                ),
+            )
+            return self._projection_run_row(
+                conn.execute("SELECT * FROM projection_runs WHERE projection_run_id=?", (identifier,)).fetchone()
+            )
+
+    def get_projection_run(self, projection_run_id: str) -> dict[str, Any]:
+        with self._connect() as conn:
+            return self._projection_run_row(
+                conn.execute("SELECT * FROM projection_runs WHERE projection_run_id=?", (projection_run_id,)).fetchone()
+            )
+
+    def list_projection_runs(
+        self,
+        workspace_id: str,
+        *,
+        projection_kind: str | None = None,
+        status: str | None = None,
+        limit: int = 100,
+    ) -> list[dict[str, Any]]:
+        clauses = ["workspace_id=?"]
+        values: list[Any] = [workspace_id]
+        if projection_kind:
+            clauses.append("projection_kind=?")
+            values.append(projection_kind)
+        if status:
+            clauses.append("status=?")
+            values.append(status)
+        values.append(max(1, min(int(limit), 500)))
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"SELECT * FROM projection_runs WHERE {' AND '.join(clauses)} ORDER BY created_at DESC LIMIT ?", values
+            ).fetchall()
+        return [self._projection_run_row(row) for row in rows]
+
+    def transition_projection_run(
+        self,
+        projection_run_id: str,
+        *,
+        status: str,
+        output_statistics: dict[str, Any] | None = None,
+        failure_detail: str | None = None,
+        cost_usd: float | None = None,
+        actor: str = "projection-worker",
+    ) -> dict[str, Any]:
+        if status not in PROJECTION_RUN_STATUSES:
+            raise InvariantViolation("unknown projection run status")
+        allowed = {
+            "queued": {"running", "failed", "superseded"},
+            "running": {"succeeded", "failed", "superseded"},
+            "succeeded": {"active", "superseded"},
+            "active": {"superseded"},
+            "failed": set(),
+            "superseded": set(),
+        }
+        with self.transaction() as conn:
+            row = conn.execute("SELECT * FROM projection_runs WHERE projection_run_id=?", (projection_run_id,)).fetchone()
+            run = self._projection_run_row(row)
+            if run["status"] == status:
+                return run
+            if status not in allowed.get(run["status"], set()):
+                raise InvariantViolation(f"projection run cannot transition from {run['status']} to {status}")
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{run['workspace_id']}",
+                event_type=f"projection.run_{status}",
+                payload={
+                    "projection_run_id": projection_run_id, "workspace_id": run["workspace_id"],
+                    "projection_kind": run["projection_kind"], "revision": run["revision"],
+                    "output_statistics": output_statistics or {}, "failure_detail": failure_detail,
+                },
+                actor=actor,
+            )
+            if status == "active":
+                conn.execute(
+                    """UPDATE projection_runs SET status='superseded',updated_at=?
+                       WHERE workspace_id=? AND projection_kind=? AND status='active' AND projection_run_id<>?""",
+                    (_now(), run["workspace_id"], run["projection_kind"], projection_run_id),
+                )
+            conn.execute(
+                """UPDATE projection_runs SET status=?,output_statistics_json=?,failure_detail=?,cost_usd=?,
+                   activated_event_offset=?,updated_at=? WHERE projection_run_id=?""",
+                (
+                    status, _json(output_statistics if output_statistics is not None else run["output_statistics"]),
+                    failure_detail, float(cost_usd if cost_usd is not None else run["cost_usd"]),
+                    event.offset if status == "active" else run["activated_event_offset"], _now(), projection_run_id,
+                ),
+            )
+            return self._projection_run_row(
+                conn.execute("SELECT * FROM projection_runs WHERE projection_run_id=?", (projection_run_id,)).fetchone()
+            )
+
+    def activate_projection_run(self, projection_run_id: str, *, actor: str = "projection-worker") -> dict[str, Any]:
+        return self.transition_projection_run(projection_run_id, status="active", actor=actor)
+
+    def effective_projection_run(self, workspace_id: str, projection_kind: str) -> dict[str, Any] | None:
+        with self._connect() as conn:
+            row = conn.execute(
+                """SELECT * FROM projection_runs WHERE workspace_id=? AND projection_kind=? AND status='active'
+                   ORDER BY activated_event_offset DESC,created_at DESC LIMIT 1""",
+                (workspace_id, projection_kind),
+            ).fetchone()
+        return self._projection_run_row(row) if row else None
+
+    @staticmethod
+    def _projection_object_row(row: sqlite3.Row | None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("projection object was not found")
+        result = dict(row)
+        result["source_atom_version_ids"] = _decode(result.pop("source_atom_version_ids_json"), [])
+        result["properties"] = _decode(result.pop("properties_json"), {})
+        return result
+
+    @staticmethod
+    def _assert_projection_acyclic(
+        memberships: Sequence[dict[str, Any]],
+        object_ids: set[str],
+    ) -> None:
+        graph: dict[str, list[str]] = defaultdict(list)
+        for membership in memberships:
+            if membership.get("child_kind") == "projection_object":
+                parent = str(membership["parent_projection_object_id"])
+                child = str(membership["child_id"])
+                if parent not in object_ids or child not in object_ids:
+                    raise InvariantViolation("hierarchy membership references an unknown projection object")
+                graph[parent].append(child)
+        visiting: set[str] = set()
+        visited: set[str] = set()
+
+        def visit(node: str) -> None:
+            if node in visiting:
+                raise InvariantViolation("hierarchy projection containment must be acyclic")
+            if node in visited:
+                return
+            visiting.add(node)
+            for child in graph.get(node, []):
+                visit(child)
+            visiting.remove(node)
+            visited.add(node)
+
+        for object_id in sorted(object_ids):
+            visit(object_id)
+
+    def write_projection_objects(
+        self,
+        *,
+        projection_run_id: str,
+        objects: Sequence[dict[str, Any]],
+        memberships: Sequence[dict[str, Any]] = (),
+        actor: str = "projection-worker",
+    ) -> list[dict[str, Any]]:
+        """Persist one replaceable hierarchy/affinity projection output.
+
+        Membership is stored outside ``edge_versions``.  The pre-insert cycle
+        check applies only to hierarchy containment; trusted evidence and
+        affinity can remain cyclic in their own separate families.
+        """
+
+        with self.transaction() as conn:
+            run = self._projection_run_row(
+                conn.execute("SELECT * FROM projection_runs WHERE projection_run_id=?", (projection_run_id,)).fetchone()
+            )
+            if run["status"] not in {"queued", "running"}:
+                raise InvariantViolation("projection objects can only be written to a queued or running run")
+            materialized: list[dict[str, Any]] = []
+            ids: set[str] = set()
+            for item in objects:
+                identifier = str(item.get("projection_object_id") or uuid.uuid4())
+                if identifier in ids:
+                    raise InvariantViolation("projection object IDs must be unique")
+                ids.add(identifier)
+                source_ids = list(dict.fromkeys(str(value) for value in item.get("source_atom_version_ids", []) if value))
+                if not source_ids:
+                    raise InvariantViolation("projection objects require source atom-version coverage")
+                for source_id in source_ids:
+                    self._assert_atom_version(conn, source_id, run["workspace_id"])
+                materialized.append({
+                    "projection_object_id": identifier,
+                    "object_kind": str(item.get("object_kind") or "summary"),
+                    "logical_key": str(item.get("logical_key") or identifier),
+                    "content": str(item.get("content") or ""),
+                    "source_atom_version_ids": source_ids,
+                    "properties": dict(item.get("properties") or {}),
+                })
+            if any(not item["content"].strip() for item in materialized):
+                raise InvariantViolation("projection object content must not be empty")
+            existing_ids = {
+                row[0] for row in conn.execute(
+                    "SELECT projection_object_id FROM projection_objects WHERE projection_run_id=?", (projection_run_id,)
+                ).fetchall()
+            }
+            effective_memberships: list[dict[str, Any]] = [dict(item) for item in memberships]
+            for membership in effective_memberships:
+                if membership.get("child_kind") not in {"projection_object", "atom_version"}:
+                    raise InvariantViolation("projection membership child_kind must be projection_object or atom_version")
+                if membership.get("child_kind") == "atom_version":
+                    self._assert_atom_version(conn, str(membership.get("child_id") or ""), run["workspace_id"])
+            self._assert_projection_acyclic(effective_memberships, ids | existing_ids)
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{run['workspace_id']}",
+                event_type="projection.objects_written",
+                payload={
+                    "projection_run_id": projection_run_id, "workspace_id": run["workspace_id"],
+                    "object_count": len(materialized), "membership_count": len(effective_memberships),
+                },
+                actor=actor,
+            )
+            now = _now()
+            for item in materialized:
+                conn.execute(
+                    """INSERT INTO projection_objects(
+                        projection_object_id,workspace_id,projection_run_id,object_kind,logical_key,content,
+                        source_atom_version_ids_json,properties_json,content_hash,created_at
+                    ) VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                    (
+                        item["projection_object_id"], run["workspace_id"], projection_run_id, item["object_kind"],
+                        item["logical_key"], item["content"], _json(item["source_atom_version_ids"]), _json(item["properties"]),
+                        _digest(item["content"]), now,
+                    ),
+                )
+            for membership in effective_memberships:
+                parent_id = str(membership.get("parent_projection_object_id") or "")
+                if parent_id not in ids | existing_ids:
+                    raise InvariantViolation("projection membership parent is absent from this run")
+                conn.execute(
+                    """INSERT INTO projection_memberships(
+                        projection_membership_id,workspace_id,projection_run_id,parent_projection_object_id,
+                        child_kind,child_id,ordinal,properties_json
+                    ) VALUES (?,?,?,?,?,?,?,?)""",
+                    (
+                        str(membership.get("projection_membership_id") or uuid.uuid4()), run["workspace_id"], projection_run_id,
+                        parent_id, membership["child_kind"], str(membership.get("child_id") or ""),
+                        int(membership.get("ordinal", 0)), _json(dict(membership.get("properties") or {})),
+                    ),
+                )
+            # ``event`` is deliberately not attached to a canonical fact; it
+            # only gives operators an audit offset for this replaceable output.
+            return [
+                self._projection_object_row(
+                    conn.execute("SELECT * FROM projection_objects WHERE projection_object_id=?", (item["projection_object_id"],)).fetchone()
+                ) | {"created_event_offset": event.offset}
+                for item in materialized
+            ]
+
+    def hierarchy_frontier(
+        self,
+        workspace_id: str,
+        query: str,
+        *,
+        limit: int = 32,
+        as_of_event: int | None = None,
+    ) -> list[dict[str, Any]]:
+        """Read the active hierarchy revision as bounded navigation objects."""
+
+        run = self.effective_projection_run(workspace_id, "hierarchy")
+        if not run:
+            return []
+        terms = [term.lower() for term in query.replace("'", " ").split() if len(term) > 1][:8]
+        clauses = ["workspace_id=?", "projection_run_id=?"]
+        values: list[Any] = [workspace_id, run["projection_run_id"]]
+        if terms:
+            clauses.append("(" + " OR ".join("lower(content) LIKE ?" for _ in terms) + ")")
+            values.extend(f"%{term}%" for term in terms)
+        values.append(max(1, min(int(limit), 200)))
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"SELECT * FROM projection_objects WHERE {' AND '.join(clauses)} ORDER BY object_kind,logical_key LIMIT ?", values
+            ).fetchall()
+        return [self._projection_object_row(row) | {"projection_revision": run["revision"]} for row in rows]
+
+    def projection_objects(self, projection_run_id: str, *, limit: int = 2_000) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT * FROM projection_objects WHERE projection_run_id=? ORDER BY object_kind,logical_key LIMIT ?",
+                (projection_run_id, max(1, min(int(limit), 10_000))),
+            ).fetchall()
+        return [self._projection_object_row(row) for row in rows]
+
+    def projection_objects_page(
+        self,
+        projection_run_id: str,
+        *,
+        object_kind: str,
+        after_logical_key: str | None = None,
+        limit: int = 1_000,
+    ) -> list[dict[str, Any]]:
+        """Page one immutable projection snapshot by its indexed logical key.
+
+        Snapshot-plus-delta handover reads this derived data in bounded pages;
+        it must not fall back to a canonical workspace scan merely to retain
+        unchanged hierarchy leaves.
+        """
+
+        bounded_limit = max(1, min(int(limit), 2_000))
+        clauses = ["projection_run_id=?", "object_kind=?"]
+        values: list[Any] = [projection_run_id, object_kind]
+        if after_logical_key is not None:
+            clauses.append("logical_key>?")
+            values.append(after_logical_key)
+        values.append(bounded_limit)
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"SELECT * FROM projection_objects WHERE {' AND '.join(clauses)} "
+                "ORDER BY logical_key LIMIT ?",
+                values,
+            ).fetchall()
+        return [self._projection_object_row(row) for row in rows]
+
+    def hierarchy_objects(
+        self,
+        workspace_id: str,
+        projection_object_ids: Sequence[str],
+        *,
+        limit: int = 256,
+    ) -> list[dict[str, Any]]:
+        """Load only named objects from the active hierarchy revision.
+
+        Deep navigation receives opaque IDs from the membership frontier.  It
+        must never recover the next round by scanning every projection object.
+        """
+
+        ids = list(dict.fromkeys(str(item) for item in projection_object_ids if item))[:max(1, min(int(limit), 512))]
+        if not ids:
+            return []
+        run = self.effective_projection_run(workspace_id, "hierarchy")
+        if not run:
+            return []
+        marks = ",".join("?" for _ in ids)
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"""SELECT * FROM projection_objects WHERE workspace_id=? AND projection_run_id=?
+                    AND projection_object_id IN ({marks}) ORDER BY object_kind,logical_key LIMIT ?""",
+                [workspace_id, run["projection_run_id"], *ids, len(ids)],
+            ).fetchall()
+        by_id = {
+            row["projection_object_id"]: self._projection_object_row(row) | {"projection_revision": run["revision"]}
+            for row in rows
+        }
+        return [by_id[item] for item in ids if item in by_id]
+
+    def hierarchy_children(self, workspace_id: str, parent_projection_object_ids: Sequence[str], *, limit: int = 256) -> list[dict[str, Any]]:
+        if not parent_projection_object_ids:
+            return []
+        run = self.effective_projection_run(workspace_id, "hierarchy")
+        if not run:
+            return []
+        marks = ",".join("?" for _ in parent_projection_object_ids)
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"""SELECT * FROM projection_memberships WHERE workspace_id=? AND projection_run_id=?
+                    AND parent_projection_object_id IN ({marks}) ORDER BY ordinal,projection_membership_id LIMIT ?""",
+                [workspace_id, run["projection_run_id"], *parent_projection_object_ids, max(1, min(int(limit), 1_000))],
+            ).fetchall()
+        result: list[dict[str, Any]] = []
+        for row in rows:
+            value = dict(row)
+            value["properties"] = _decode(value.pop("properties_json"), {})
+            result.append(value)
+        return result
+
+    def hierarchy_source_atom_ids(
+        self,
+        workspace_id: str,
+        projection_object_ids: Sequence[str],
+        *,
+        limit: int = 512,
+    ) -> list[str]:
+        """Expand active hierarchy navigation objects to raw source identities."""
+
+        run = self.effective_projection_run(workspace_id, "hierarchy")
+        if not run or not projection_object_ids:
+            return []
+        wanted = list(dict.fromkeys(str(value) for value in projection_object_ids if value))[:max(1, min(int(limit), 512))]
+        seen_objects: set[str] = set()
+        source_ids: list[str] = []
+        frontier = wanted
+        while frontier and len(source_ids) < limit:
+            batch = [item for item in frontier if item not in seen_objects][:128]
+            frontier = []
+            if not batch:
+                break
+            seen_objects.update(batch)
+            marks = ",".join("?" for _ in batch)
+            with self._connect() as conn:
+                objects = conn.execute(
+                    f"""SELECT projection_object_id,source_atom_version_ids_json FROM projection_objects
+                        WHERE workspace_id=? AND projection_run_id=? AND projection_object_id IN ({marks})""",
+                    [workspace_id, run["projection_run_id"], *batch],
+                ).fetchall()
+                memberships = conn.execute(
+                    f"""SELECT child_kind,child_id FROM projection_memberships WHERE workspace_id=? AND projection_run_id=?
+                        AND parent_projection_object_id IN ({marks}) ORDER BY ordinal""",
+                    [workspace_id, run["projection_run_id"], *batch],
+                ).fetchall()
+            for row in objects:
+                for source_id in _decode(row["source_atom_version_ids_json"], []):
+                    if source_id not in source_ids and len(source_ids) < limit:
+                        source_ids.append(source_id)
+            for membership in memberships:
+                if membership["child_kind"] == "atom_version":
+                    if membership["child_id"] not in source_ids and len(source_ids) < limit:
+                        source_ids.append(membership["child_id"])
+                elif membership["child_kind"] == "projection_object" and membership["child_id"] not in seen_objects:
+                    frontier.append(membership["child_id"])
+        return source_ids[:limit]
+
+    # ----------------------------------------------------------- affinity layer
+    @staticmethod
+    def _affinity_row(row: sqlite3.Row | None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("affinity edge was not found")
+        result = dict(row)
+        result["signal"] = _decode(result.pop("signal_json"), {})
+        return result
+
+    def put_affinity_edge(
+        self,
+        *,
+        workspace_id: str,
+        source_atom_version_id: str,
+        target_atom_version_id: str,
+        score: float,
+        signal: dict[str, Any],
+        expires_at: str,
+        index_revision: str | None = None,
+        embedding_revision: str | None = None,
+        projection_run_id: str | None = None,
+        degree_cap: int = 16,
+        actor: str = "affinity-worker",
+    ) -> dict[str, Any] | None:
+        """Upsert a non-factual pair after rejection and degree safeguards."""
+
+        left, right = canonical_pair(source_atom_version_id, target_atom_version_id)
+        if not 0 <= float(score) <= 1:
+            raise InvariantViolation("affinity score must be between zero and one")
+        pair_key = f"{left}:{right}"
+        with self.transaction() as conn:
+            self._assert_atom_version(conn, left, workspace_id)
+            self._assert_atom_version(conn, right, workspace_id)
+            rejected = conn.execute(
+                """SELECT 1 FROM affinity_rejections WHERE workspace_id=? AND pair_key=?
+                   AND (expires_at IS NULL OR expires_at>?)""",
+                (workspace_id, pair_key, _now()),
+            ).fetchone()
+            if rejected:
+                return None
+            existing = conn.execute(
+                "SELECT * FROM affinity_edges WHERE workspace_id=? AND pair_key=?", (workspace_id, pair_key)
+            ).fetchone()
+            if existing is None:
+                cap = max(1, int(degree_cap))
+                left_degree = conn.execute(
+                    """SELECT COUNT(*) FROM affinity_edges WHERE workspace_id=? AND status='active' AND expires_at>?
+                       AND (left_atom_version_id=? OR right_atom_version_id=?)""",
+                    (workspace_id, _now(), left, left),
+                ).fetchone()[0]
+                right_degree = conn.execute(
+                    """SELECT COUNT(*) FROM affinity_edges WHERE workspace_id=? AND status='active' AND expires_at>?
+                       AND (left_atom_version_id=? OR right_atom_version_id=?)""",
+                    (workspace_id, _now(), right, right),
+                ).fetchone()[0]
+                if int(left_degree) >= cap or int(right_degree) >= cap:
+                    return None
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{workspace_id}",
+                event_type="affinity.edge_upserted",
+                payload={
+                    "workspace_id": workspace_id, "left_atom_version_id": left, "right_atom_version_id": right,
+                    "score": float(score), "index_revision": index_revision, "embedding_revision": embedding_revision,
+                    "projection_run_id": projection_run_id,
+                },
+                actor=actor,
+            )
+            identifier = str(existing["affinity_edge_id"]) if existing else str(uuid.uuid4())
+            conn.execute(
+                """INSERT INTO affinity_edges(
+                    affinity_edge_id,workspace_id,left_atom_version_id,right_atom_version_id,pair_key,score,signal_json,
+                    index_revision,embedding_revision,projection_run_id,status,expires_at,created_event_offset,updated_at
+                ) VALUES (?,?,?,?,?,?,?,?,?,?, 'active',?,?,?)
+                ON CONFLICT(workspace_id,pair_key) DO UPDATE SET
+                    score=excluded.score,signal_json=excluded.signal_json,index_revision=excluded.index_revision,
+                    embedding_revision=excluded.embedding_revision,projection_run_id=excluded.projection_run_id,
+                    status='active',expires_at=excluded.expires_at,created_event_offset=excluded.created_event_offset,
+                    updated_at=excluded.updated_at""",
+                (
+                    identifier, workspace_id, left, right, pair_key, float(score), _json(signal), index_revision,
+                    embedding_revision, projection_run_id, expires_at, event.offset, _now(),
+                ),
+            )
+            return self._affinity_row(
+                conn.execute("SELECT * FROM affinity_edges WHERE workspace_id=? AND pair_key=?", (workspace_id, pair_key)).fetchone()
+            )
+
+    def reject_affinity(
+        self,
+        *,
+        workspace_id: str,
+        source_atom_version_id: str,
+        target_atom_version_id: str,
+        reason: str | None = None,
+        expires_at: str | None = None,
+        actor: str = "anonymous",
+    ) -> dict[str, Any]:
+        left, right = canonical_pair(source_atom_version_id, target_atom_version_id)
+        pair_key = f"{left}:{right}"
+        with self.transaction() as conn:
+            self._assert_atom_version(conn, left, workspace_id)
+            self._assert_atom_version(conn, right, workspace_id)
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{workspace_id}",
+                event_type="affinity.rejected",
+                payload={"workspace_id": workspace_id, "left_atom_version_id": left, "right_atom_version_id": right, "reason": reason},
+                actor=actor,
+            )
+            identifier = str(uuid.uuid4())
+            conn.execute(
+                """INSERT INTO affinity_rejections(
+                    affinity_rejection_id,workspace_id,pair_key,left_atom_version_id,right_atom_version_id,reason,actor,
+                    expires_at,created_event_offset,created_at
+                ) VALUES (?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(workspace_id,pair_key) DO UPDATE SET
+                    reason=excluded.reason,actor=excluded.actor,expires_at=excluded.expires_at,
+                    created_event_offset=excluded.created_event_offset,created_at=excluded.created_at""",
+                (identifier, workspace_id, pair_key, left, right, reason, actor, expires_at, event.offset, _now()),
+            )
+            conn.execute(
+                "UPDATE affinity_edges SET status='rejected',updated_at=? WHERE workspace_id=? AND pair_key=?",
+                (_now(), workspace_id, pair_key),
+            )
+            row = conn.execute(
+                "SELECT * FROM affinity_rejections WHERE workspace_id=? AND pair_key=?", (workspace_id, pair_key)
+            ).fetchone()
+            result = dict(row)
+            result["rejection_event_offset"] = event.offset
+            return result
+
+    def affinity_neighbors(
+        self,
+        workspace_id: str,
+        atom_version_ids: Sequence[str],
+        *,
+        limit: int = 64,
+        index_revision: str | None = None,
+    ) -> list[dict[str, Any]]:
+        if not atom_version_ids:
+            return []
+        marks = ",".join("?" for _ in atom_version_ids)
+        clauses = [
+            "workspace_id=?", "status='active'", "expires_at>?",
+            f"(left_atom_version_id IN ({marks}) OR right_atom_version_id IN ({marks}))",
+        ]
+        values: list[Any] = [workspace_id, _now(), *atom_version_ids, *atom_version_ids]
+        if index_revision:
+            clauses.append("(index_revision IS NULL OR index_revision=?)")
+            values.append(index_revision)
+        values.append(max(1, min(int(limit), 256)))
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"SELECT * FROM affinity_edges WHERE {' AND '.join(clauses)} ORDER BY score DESC,pair_key LIMIT ?", values
+            ).fetchall()
+        return [self._affinity_row(row) for row in rows]
+
+    def invalidate_affinity_for_atoms(
+        self,
+        *,
+        workspace_id: str,
+        atom_version_ids: Sequence[str],
+        reason: str,
+        actor: str = "projection-worker",
+    ) -> int:
+        if not atom_version_ids:
+            return 0
+        marks = ",".join("?" for _ in atom_version_ids)
+        with self.transaction() as conn:
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{workspace_id}",
+                event_type="affinity.invalidated",
+                payload={"workspace_id": workspace_id, "atom_version_ids": sorted(set(atom_version_ids)), "reason": reason},
+                actor=actor,
+            )
+            updated = conn.execute(
+                f"""UPDATE affinity_edges SET status='stale',updated_at=? WHERE workspace_id=? AND status='active'
+                    AND (left_atom_version_id IN ({marks}) OR right_atom_version_id IN ({marks}))""",
+                [_now(), workspace_id, *atom_version_ids, *atom_version_ids],
+            ).rowcount
+            return int(updated)
+
+    # ------------------------------------------------------- activation priors
+    @staticmethod
+    def _activation_prior_row(row: sqlite3.Row | None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("activation prior was not found")
+        result = dict(row)
+        result["provenance"] = _decode(result.pop("provenance_json"), {})
+        return result
+
+    def upsert_activation_prior(
+        self,
+        *,
+        workspace_id: str,
+        atom_version_id: str,
+        prior_kind: str,
+        score: float,
+        provenance: dict[str, Any] | None = None,
+        expires_at: str | None = None,
+        actor: str = "activation-worker",
+    ) -> dict[str, Any]:
+        if prior_kind not in {"pin", "recency", "feedback", "suppression", "co_retrieval"}:
+            raise InvariantViolation("unknown activation prior kind")
+        if not -1 <= float(score) <= 1:
+            raise InvariantViolation("activation prior score must be between -1 and 1")
+        with self.transaction() as conn:
+            self._assert_atom_version(conn, atom_version_id, workspace_id)
+            event = self._append_event(
+                conn,
+                stream_id=f"workspace:{workspace_id}",
+                event_type="activation.prior_upserted",
+                payload={"workspace_id": workspace_id, "atom_version_id": atom_version_id, "prior_kind": prior_kind, "score": float(score)},
+                actor=actor,
+            )
+            identifier = str(uuid.uuid4())
+            conn.execute(
+                """INSERT INTO activation_priors(
+                    activation_prior_id,workspace_id,atom_version_id,prior_kind,score,provenance_json,expires_at,
+                    created_event_offset,updated_at
+                ) VALUES (?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(workspace_id,atom_version_id,prior_kind) DO UPDATE SET
+                    score=excluded.score,provenance_json=excluded.provenance_json,expires_at=excluded.expires_at,
+                    created_event_offset=excluded.created_event_offset,updated_at=excluded.updated_at""",
+                (identifier, workspace_id, atom_version_id, prior_kind, float(score), _json(provenance or {}), expires_at, event.offset, _now()),
+            )
+            return self._activation_prior_row(
+                conn.execute(
+                    "SELECT * FROM activation_priors WHERE workspace_id=? AND atom_version_id=? AND prior_kind=?",
+                    (workspace_id, atom_version_id, prior_kind),
+                ).fetchone()
+            )
+
+    def activation_priors(self, workspace_id: str, atom_version_ids: Sequence[str]) -> dict[str, list[dict[str, Any]]]:
+        if not atom_version_ids:
+            return {}
+        marks = ",".join("?" for _ in atom_version_ids)
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"""SELECT * FROM activation_priors WHERE workspace_id=? AND atom_version_id IN ({marks})
+                    AND (expires_at IS NULL OR expires_at>?) ORDER BY prior_kind""",
+                [workspace_id, *atom_version_ids, _now()],
+            ).fetchall()
+        result: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        for row in rows:
+            prior = self._activation_prior_row(row)
+            result[prior["atom_version_id"]].append(prior)
+        return dict(result)
+
+    def clear_cortex_projections(self, workspace_id: str, *, actor: str = "projection-recovery") -> dict[str, int]:
+        """Drop only rebuildable Cortex rows; canonical Spine rows are untouched."""
+
+        with self.transaction() as conn:
+            run_rows = conn.execute("SELECT projection_run_id FROM projection_runs WHERE workspace_id=?", (workspace_id,)).fetchall()
+            run_ids = [row["projection_run_id"] for row in run_rows]
+            if run_ids:
+                marks = ",".join("?" for _ in run_ids)
+                memberships = conn.execute(
+                    f"DELETE FROM projection_memberships WHERE projection_run_id IN ({marks})", run_ids
+                ).rowcount
+                objects = conn.execute(
+                    f"DELETE FROM projection_objects WHERE projection_run_id IN ({marks})", run_ids
+                ).rowcount
+            else:
+                memberships = objects = 0
+            affinities = conn.execute("DELETE FROM affinity_edges WHERE workspace_id=?", (workspace_id,)).rowcount
+            priors = conn.execute("DELETE FROM activation_priors WHERE workspace_id=?", (workspace_id,)).rowcount
+            runs = conn.execute("DELETE FROM projection_runs WHERE workspace_id=?", (workspace_id,)).rowcount
+            self._append_event(
+                conn,
+                stream_id=f"workspace:{workspace_id}",
+                event_type="projection.cortex_cleared",
+                payload={"workspace_id": workspace_id, "runs": runs, "objects": objects, "memberships": memberships, "affinities": affinities, "priors": priors},
+                actor=actor,
+            )
+            return {"runs": int(runs), "objects": int(objects), "memberships": int(memberships), "affinities": int(affinities), "priors": int(priors)}
 
     # --------------------------------------------------------------- reads
     def get_ingestion(self, ingestion_id: str) -> dict[str, Any]:
@@ -1547,6 +2876,10 @@ class SqliteEventStore:
     def _node_version_row(row: sqlite3.Row, node: sqlite3.Row | dict[str, Any]) -> dict[str, Any]:
         result = dict(row)
         result["properties"] = _decode(result.pop("properties_json"))
+        # ``get_node`` passes a bare canonical node row while query joins may
+        # already include this column.  Preserve tenant identity uniformly so
+        # callers can safely schedule bounded follow-up work after a revision.
+        result["workspace_id"] = result.get("workspace_id") or node["workspace_id"]
         facets = result.pop("facets_json", None) or node["facets_json"]
         security = result.pop("security_json", None) or node["security_json"]
         result["facets"] = _decode(facets, [])
@@ -2171,6 +3504,29 @@ class SqliteEventStore:
             ).fetchall()
         by_id = {row["atom_version_id"]: self._node_version_row(row, row) for row in rows}
         return [by_id[item] for item in atom_version_ids if item in by_id]
+
+    def atom_versions_by_event_range(
+        self,
+        workspace_id: str,
+        from_event_offset: int,
+        through_event_offset: int,
+        *,
+        limit: int = 1_000,
+    ) -> list[dict[str, Any]]:
+        """Bounded immutable atom input for snapshot-plus-delta projections."""
+
+        if from_event_offset < 1 or through_event_offset < from_event_offset:
+            raise InvariantViolation("invalid atom event range")
+        with self._connect() as conn:
+            rows = conn.execute(
+                """SELECT nv.*,n.workspace_id,n.facets_json,n.security_json FROM node_versions nv
+                    JOIN nodes n ON n.node_id=nv.node_id
+                    WHERE n.workspace_id=? AND n.facets_json LIKE '%\"atom\"%'
+                      AND nv.created_event_offset>=? AND nv.created_event_offset<=?
+                    ORDER BY nv.created_event_offset,nv.atom_version_id LIMIT ?""",
+                (workspace_id, from_event_offset, through_event_offset, max(1, min(int(limit), 10_000))),
+            ).fetchall()
+        return [self._node_version_row(row, row) for row in rows]
 
     def save_query(self, *, workspace_id: str, name: str, query: dict[str, Any], frozen_atom_version_ids: list[str] | None, actor: str) -> dict[str, Any]:
         table = "frozen_queries" if frozen_atom_version_ids is not None else "saved_queries"

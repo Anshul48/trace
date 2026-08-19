@@ -326,6 +326,7 @@ class TraceModelGateway:
         prompt_template_revision: str,
         response_schema: Mapping[str, Any],
         status: str,
+        policy_revision: str | None = None,
     ) -> dict[str, Any]:
         """Persist only non-secret model-call provenance, including failures."""
 
@@ -337,6 +338,7 @@ class TraceModelGateway:
             "actor": getattr(context, "subject", "system"),
             "request_id": getattr(context, "request_id", None),
             "prompt_template_revision": prompt_template_revision,
+            "cognitive_policy_revision": policy_revision,
             "response_schema_hash": hashlib.sha256(json.dumps(response_schema, sort_keys=True).encode("utf-8")).hexdigest(),
             "status": status,
         }
@@ -357,6 +359,7 @@ class TraceModelGateway:
         max_nodes: int,
         token_budget: int,
         prompt_template_revision: str,
+        policy_revision: str | None = None,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         """Call one registered model and return validated JSON plus audit data."""
 
@@ -404,7 +407,7 @@ class TraceModelGateway:
                     self._persist_audit(
                         audit=audit, model=model, context=context,
                         prompt_template_revision=prompt_template_revision,
-                        response_schema=response_schema, status="failed",
+                        response_schema=response_schema, status="failed", policy_revision=policy_revision,
                     )
                     raise ModelUnavailableError("model provider is unavailable; retry the same model later") from error
                 self.sleep(min(2.0, 0.1 * (2 ** attempt)))
@@ -413,7 +416,7 @@ class TraceModelGateway:
             self._persist_audit(
                 audit=audit, model=model, context=context,
                 prompt_template_revision=prompt_template_revision,
-                response_schema=response_schema, status="failed",
+                response_schema=response_schema, status="failed", policy_revision=policy_revision,
             )
             raise ModelUnavailableError("model provider is unavailable; retry the same model later") from last_error
         try:
@@ -423,7 +426,7 @@ class TraceModelGateway:
             self._persist_audit(
                 audit=audit, model=model, context=context,
                 prompt_template_revision=prompt_template_revision,
-                response_schema=response_schema, status="failed",
+                response_schema=response_schema, status="failed", policy_revision=policy_revision,
             )
             raise ModelGatewayError("model returned invalid JSON") from error
         try:
@@ -433,7 +436,7 @@ class TraceModelGateway:
             self._persist_audit(
                 audit=audit, model=model, context=context,
                 prompt_template_revision=prompt_template_revision,
-                response_schema=response_schema, status="failed",
+                response_schema=response_schema, status="failed", policy_revision=policy_revision,
             )
             raise
         prompt_tokens, completion_tokens = _usage(response, audit.estimated_tokens)
@@ -446,7 +449,7 @@ class TraceModelGateway:
         audit_record = self._persist_audit(
             audit=audit, model=model, context=context,
             prompt_template_revision=prompt_template_revision,
-            response_schema=response_schema, status="succeeded",
+            response_schema=response_schema, status="succeeded", policy_revision=policy_revision,
         )
         return dict(value), audit_record
 
@@ -459,6 +462,7 @@ class TraceModelGateway:
         candidates: Sequence[dict[str, Any]],
         max_nodes: int,
         token_budget: int,
+        policy_revision: str | None = None,
     ) -> tuple[list[str], dict[str, Any]]:
         value, audit = self.call_json(
             context=context,
@@ -470,6 +474,7 @@ class TraceModelGateway:
             max_nodes=max_nodes,
             token_budget=token_budget,
             prompt_template_revision="deep-navigation-v1",
+            policy_revision=policy_revision,
         )
         allowed = {str(item.get("atom_version_id")) for item in candidates}
         selected = [str(item) for item in value["selected_ids"] if isinstance(item, str) and item in allowed][:max_nodes]
@@ -486,10 +491,11 @@ class TraceModelGateway:
 class GatewayDeepNavigator:
     """Request-scoped DeepNavigator adapter backed by :class:`TraceModelGateway`."""
 
-    def __init__(self, gateway: TraceModelGateway, *, context: Any, model_id: str) -> None:
+    def __init__(self, gateway: TraceModelGateway, *, context: Any, model_id: str, policy_revision: str | None = None) -> None:
         self.gateway = gateway
         self.context = context
         self.model_id = model_id
+        self.policy_revision = policy_revision
         self.provider_id = f"trace-model-gateway:{model_id}"
 
     def select(
@@ -507,4 +513,5 @@ class GatewayDeepNavigator:
             candidates=candidates,
             max_nodes=max_nodes,
             token_budget=token_budget,
+            policy_revision=self.policy_revision,
         )

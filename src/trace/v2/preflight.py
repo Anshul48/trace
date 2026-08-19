@@ -2,7 +2,8 @@
 
 These checks intentionally reject an undersized installation instead of
 turning a developer laptop into an accidental production declaration. They are
-not a substitute for the 100K/1M/10M measured release gates.
+not a substitute for the measured 100K baseline and 1M production gate; the
+10M/500-QPS program is a separate later scale release.
 """
 
 from __future__ import annotations

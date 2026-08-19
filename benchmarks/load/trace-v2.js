@@ -1,4 +1,4 @@
-// k6 workload for the 10M/500-QPS non-deep Trace release gate.
+// k6 workload for the 1M-atom non-deep Trace production gate.
 //
 // Run only against a seeded staging workspace and record the generated summary
 // in release evidence. Deep navigation is intentionally excluded: it is a

@@ -130,8 +130,8 @@ class ReleaseControlTests(unittest.TestCase):
         self.assertFalse(evaluate_release_evidence({}).passed)
         result = evaluate_release_evidence({
             "load": {
-                "atoms": 10_000_000,
-                "non_deep_qps": 500,
+                "atoms": 1_000_000,
+                "non_deep_qps": 100,
                 "mix": {"fast": 0.70, "standard": 0.20, "graph": 0.05, "hierarchy": 0.05},
                 "fast_p95_seconds": 2,
                 "standard_p95_seconds": 5,
@@ -144,8 +144,24 @@ class ReleaseControlTests(unittest.TestCase):
                 "tenant_leak_test_passed": True,
                 "rls_visibility_test_passed": True,
                 "provider_redaction_test_passed": True,
+                "critical_privacy_defect": False,
+                "critical_destructive_data_defect": False,
             },
-            "quality": {"complete_gold_evidence_delta": 0.02, "citation_precision_delta": -0.005},
+            "replay": {"passed": True, "critical_replay_defect": False},
+            "quality": {
+                "reviewed_query_count": 300,
+                "complete_gold_evidence_coverage": 0.80,
+                "citation_precision": 0.90,
+                "quality_delta_from_100k": 0.02,
+            },
+            "freshness": {"zero_hot_data_blind_spots": True},
+            "operations": {
+                "max_queue_age_seconds": 300,
+                "max_index_lag_seconds": 300,
+                "max_graph_degree": 128,
+                "model_cost_usd": 0,
+                "stale_projection_count": 0,
+            },
             "shadow": {"passed": True, "stages": [5, 25, 50, 100], "automatic_rollback_triggered": False},
         })
         self.assertTrue(result.passed)

@@ -28,9 +28,11 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 
 from .models import (
     AliasRequest,
+    AffinityRejectionRequest,
     ApiKeyCreateRequest,
     ApiKeyDecisionRequest,
     BenchmarkRunRequest,
+    CognitivePolicy,
     EvidenceFeedbackRequest,
     FeedbackEdgeProposalRequest,
     ExperimentManifestRequest,
@@ -45,6 +47,7 @@ from .models import (
     NodeEditRequest,
     ProposalCreateRequest,
     ProposalDecisionRequest,
+    ProjectionRebuildRequest,
     QueryRequest,
     SavedQueryRequest,
     SchemaProposalRequest,
@@ -614,6 +617,14 @@ def create_app(service: TraceService | None = None) -> FastAPI:
         except Exception as error:
             raise _http_error(error) from error
 
+    @router.post("/affinity/rejections")
+    def reject_affinity(payload: AffinityRejectionRequest, request: Request) -> dict[str, object]:
+        try:
+            _authorize(request, payload.workspace_id, scope="organization:write")
+            return _service(request).reject_affinity(payload.model_copy(update={"actor": _actor(request)}))
+        except Exception as error:
+            raise _http_error(error) from error
+
     @router.post("/schemas/proposals")
     def propose_schemas(payload: SchemaProposalRequest, request: Request) -> dict[str, object]:
         try:
@@ -719,13 +730,79 @@ def create_app(service: TraceService | None = None) -> FastAPI:
         except Exception as error:
             raise _http_error(error) from error
 
+    @router.post("/admin/attachments/reconcile")
+    def reconcile_attachment_staging(request: Request, workspace_id: str) -> dict[str, object]:
+        try:
+            _authorize(request, workspace_id, scope="admin:write")
+            return _service(request).reconcile_attachment_staging(workspace_id, actor=_actor(request))
+        except Exception as error:
+            raise _http_error(error) from error
+
     @router.get("/admin/projections")
     def projection_status(request: Request, workspace_id: str | None = None) -> list[dict[str, object]]:
+        trace = _service(request)
         if workspace_id:
             _authorize(request, workspace_id, scope="admin:read")
         else:
             _principal(request).require_scope("admin:read")
-        return _service(request).store.projection_status(workspace_id)
+            if trace.settings.production_mode:
+                raise InvariantViolation("production projection inspection requires workspace_id")
+        with trace.workspace_scope(workspace_id):
+            return trace.store.projection_status(workspace_id)
+
+    @router.get("/admin/cognitive-policies/{workspace_id}")
+    def get_cognitive_policy(workspace_id: str, request: Request) -> dict[str, object]:
+        try:
+            _authorize(request, workspace_id, scope="admin:read")
+            return _service(request).get_cognitive_policy(workspace_id)
+        except Exception as error:
+            raise _http_error(error) from error
+
+    @router.put("/admin/cognitive-policies/{workspace_id}")
+    def put_cognitive_policy(workspace_id: str, payload: CognitivePolicy, request: Request) -> dict[str, object]:
+        try:
+            _authorize(request, workspace_id, scope="admin:write")
+            return _service(request).put_cognitive_policy(workspace_id, payload, actor=_actor(request))
+        except Exception as error:
+            raise _http_error(error) from error
+
+    @router.get("/admin/projection-runs")
+    def projection_runs(
+        request: Request,
+        workspace_id: str,
+        projection_kind: str | None = None,
+        status: str | None = None,
+        limit: int = Query(default=100, ge=1, le=500),
+    ) -> list[dict[str, object]]:
+        try:
+            _authorize(request, workspace_id, scope="admin:read")
+            trace = _service(request)
+            source = getattr(trace.store, "list_projection_runs", None)
+            if not callable(source):
+                raise InvariantViolation("the configured repository does not support projection inspection")
+            with trace.workspace_scope(workspace_id):
+                return source(workspace_id, projection_kind=projection_kind, status=status, limit=limit)
+        except Exception as error:
+            raise _http_error(error) from error
+
+    @router.post("/admin/projections/rebuild")
+    def rebuild_projection(payload: ProjectionRebuildRequest, request: Request) -> dict[str, object]:
+        try:
+            _authorize(request, payload.workspace_id, scope="admin:write")
+            body = payload.model_copy(update={"actor": _actor(request)})
+            if _respond_async(request):
+                kind = {
+                    "hierarchy": "hierarchy.delta",
+                    "affinity": "affinity.delta",
+                    "activation": "activation.recompute",
+                }[body.projection_kind]
+                return JSONResponse(status_code=202, content=_service(request).submit_job(JobSubmitRequest(
+                    workspace_id=body.workspace_id, kind=kind, payload=body.model_dump(mode="json"), actor=_actor(request),
+                    idempotency_key=request.headers.get("idempotency-key"),
+                ), request_id=getattr(request.state, "request_id", None)))
+            return _service(request).rebuild_projection(body)
+        except Exception as error:
+            raise _http_error(error) from error
 
     @router.post("/admin/snapshots")
     def snapshot(request: Request, actor: str = "system") -> dict[str, object]:

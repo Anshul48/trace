@@ -96,7 +96,10 @@ class RetrievalBudget(BaseModel):
     feedback_weight: float = Field(default=0.08, ge=0, le=1)
     hierarchy_limit: int = Field(default=32, ge=1, le=200)
     deep_max_nodes: int = Field(default=12, ge=1, le=100)
+    deep_max_rounds: int = Field(default=3, ge=1, le=8)
+    deep_branch_width: int = Field(default=4, ge=1, le=32)
     deep_token_budget: int = Field(default=4_000, ge=128, le=100_000)
+    affinity_limit: int = Field(default=24, ge=0, le=128)
     allow_deep_escalation: bool = True
     mode: Literal["fast", "standard", "graph", "hierarchy", "deep"] = "fast"
 
@@ -221,6 +224,7 @@ class JobSubmitRequest(BaseModel):
     kind: Literal[
         "consolidation", "hierarchy.build", "schema.proposals", "benchmark.run",
         "index.rebuild", "reprocess", "ingestion.index", "cognitive.delta",
+        "projection.backfill", "projection.legacy_import", "hierarchy.delta", "affinity.delta", "activation.recompute",
     ]
     payload: dict[str, Any] = Field(default_factory=dict)
     actor: str = "anonymous"
@@ -233,8 +237,129 @@ class JobSubmitRequest(BaseModel):
 
     @model_validator(mode="after")
     def model_only_for_llm_job(self) -> "JobSubmitRequest":
-        if self.model_id and self.kind not in {"schema.proposals", "cognitive.delta"}:
+        if self.model_id and self.kind not in {"schema.proposals", "cognitive.delta", "hierarchy.delta"}:
             raise ValueError("model_id is allowed only for LLM-backed jobs")
+        return self
+
+
+class ActivationWeights(BaseModel):
+    """Server-governed transition mass for the query-local energy layer.
+
+    These values are policy state, not request tuning knobs.  Keeping every
+    family individually bounded prevents a client from turning a feedback or
+    affinity signal into a factual proof path.
+    """
+
+    structural: float = Field(default=0.35, ge=0, le=0.70)
+    trusted_evidence: float = Field(default=0.35, ge=0, le=0.70)
+    affinity: float = Field(default=0.20, ge=0, le=0.50)
+    behavioral: float = Field(default=0.10, ge=0, le=0.35)
+    damping: float = Field(default=0.55, ge=0, le=0.95)
+    iterations: int = Field(default=12, ge=1, le=50)
+    max_degree: int = Field(default=24, ge=1, le=128)
+
+    @model_validator(mode="after")
+    def bounded_total_mass(self) -> "ActivationWeights":
+        if self.structural + self.trusted_evidence + self.affinity + self.behavioral > 1.0 + 1e-9:
+            raise ValueError("activation family mass must not exceed 1")
+        return self
+
+
+class CognitivePolicy(BaseModel):
+    """Revisioned workspace policy for replaceable Cortex projections."""
+
+    policy_revision: str = Field(default="cognitive-policy-v1", min_length=1, max_length=128)
+    auto_derived_projections: bool = True
+    auto_promote_trusted_evidence: bool = False
+    cloud_models_enabled: bool = True
+    raw_evidence_required: bool = True
+    allow_low_risk_projection_visibility: bool = True
+    affinity_degree_cap: int = Field(default=16, ge=1, le=128)
+    affinity_ttl_seconds: int = Field(default=2_592_000, ge=60, le=31_536_000)
+    activation: ActivationWeights = Field(default_factory=ActivationWeights)
+
+    @model_validator(mode="after")
+    def factual_promotion_remains_reviewed(self) -> "CognitivePolicy":
+        if self.auto_promote_trusted_evidence:
+            raise ValueError("automatic promotion of trusted evidence is not permitted")
+        if not self.raw_evidence_required:
+            raise ValueError("raw evidence is required for factual synthesis")
+        return self
+
+
+class ProjectionRebuildRequest(BaseModel):
+    """Bounded projection work request; it can never target canonical rows."""
+
+    workspace_id: str = Field(min_length=1, max_length=255)
+    projection_kind: Literal["hierarchy", "affinity", "activation"]
+    from_event_offset: int | None = Field(default=None, ge=1)
+    through_event_offset: int | None = Field(default=None, ge=1)
+    atom_version_ids: list[str] = Field(default_factory=list, max_length=1_000)
+    index_revision: str | None = Field(default=None, max_length=255)
+    model_revision: str | None = Field(default=None, max_length=255)
+    prompt_revision: str | None = Field(default=None, max_length=255)
+    # Server-pinned at enqueue time. A worker refuses a stale policy rather
+    # than silently rebuilding a projection under different controls.
+    policy_revision: str | None = Field(default=None, max_length=255)
+    actor: str = "system"
+
+    @model_validator(mode="after")
+    def bounded_event_range(self) -> "ProjectionRebuildRequest":
+        if self.from_event_offset and self.through_event_offset and self.from_event_offset > self.through_event_offset:
+            raise ValueError("from_event_offset must not exceed through_event_offset")
+        return self
+
+
+class AffinityRejectionRequest(BaseModel):
+    workspace_id: str = Field(min_length=1, max_length=255)
+    source_atom_version_id: str = Field(min_length=1)
+    target_atom_version_id: str = Field(min_length=1)
+    reason: str | None = Field(default=None, max_length=2_000)
+    actor: str = "anonymous"
+
+    @model_validator(mode="after")
+    def distinct_endpoints(self) -> "AffinityRejectionRequest":
+        if self.source_atom_version_id == self.target_atom_version_id:
+            raise ValueError("an affinity pair needs two distinct atom versions")
+        return self
+
+
+class DeepNavigationPlan(BaseModel):
+    """Validated opaque-ID plan emitted by bounded deep navigation.
+
+    The plan intentionally contains IDs and stop reasons only.  It cannot
+    create relations, inject text, or act as a source of truth.
+    """
+
+    frontier_ids: list[str] = Field(default_factory=list, max_length=100)
+    selected_ids: list[str] = Field(default_factory=list, max_length=100)
+    bridge_seed_ids: list[str] = Field(default_factory=list, max_length=100)
+    stop_reason: Literal["sufficient", "budget_exhausted", "no_frontier", "provider_unavailable", "max_rounds"] = "no_frontier"
+    round: int = Field(default=1, ge=1, le=8)
+
+    @model_validator(mode="after")
+    def opaque_ids_are_unique(self) -> "DeepNavigationPlan":
+        for values in (self.frontier_ids, self.selected_ids, self.bridge_seed_ids):
+            if len(values) != len(set(values)):
+                raise ValueError("deep-navigation IDs must be unique within each plan field")
+        return self
+
+    def validated_against(
+        self,
+        allowed_ids: set[str],
+        *,
+        branch_width: int,
+        allowed_bridge_ids: set[str] | None = None,
+    ) -> "DeepNavigationPlan":
+        if branch_width < 1:
+            raise ValueError("branch_width must be positive")
+        invalid = (set(self.frontier_ids) | set(self.selected_ids)) - allowed_ids
+        bridge_allowed = allowed_ids if allowed_bridge_ids is None else allowed_bridge_ids
+        invalid |= set(self.bridge_seed_ids) - bridge_allowed
+        if invalid:
+            raise ValueError("deep-navigation plan contains an ID outside the allowed navigation set")
+        if len(self.selected_ids) > branch_width:
+            raise ValueError("deep-navigation plan exceeds branch_width")
         return self
 
 

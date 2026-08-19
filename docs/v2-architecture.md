@@ -22,7 +22,12 @@ atom node identities + immutable node versions
         +--> promoted graph and generic derived nodes
 ```
 
-The graph is the primary cognitive/query-facing reality after projection, but it is not a second source of truth. It can be rebuilt from Spine events and source attachments. A generated report is a view; a report becomes a memory candidate only after it is converted into an evidence-backed proposal and explicitly promoted.
+The canonical Spine is the only factual source of truth. The Cortex is the
+query-facing navigation/control layer, but any of its hierarchy, affinity,
+activation, vector, or summary projections can be rebuilt from Spine events
+and source attachments without changing canonical hashes. A generated report
+is a view; a report becomes a memory candidate only after it is converted into
+an evidence-backed proposal and explicitly promoted.
 
 ## 2. Truth layers
 
@@ -30,7 +35,7 @@ The graph is the primary cognitive/query-facing reality after projection, but it
 |---|---|---|---|
 | Spine | `events`, attachments, nodes, node versions, edge versions, evidence anchors | canonical history and provenance | append-only; no ordinary deletes |
 | Hot inbox | current atom versions and lexical projection metadata | immediate post-capture visibility | rebuildable; old current rows may be removed |
-| Cortex | promoted edges, Holons, claims, schemas, summaries | graph and organization reality | versioned and reversible |
+| Cortex | hierarchy, affinity, activation, vector, and summary projections | navigation and retrieval control plane | revisioned, rebuildable, never factual by itself |
 | Archive | old atom versions and topology | historical/deep recall | route out of default ranking, never erase evidence |
 | Working memory | query candidates, bundles, temporary state | request-scoped retrieval state | TTL or disposable |
 | Procedural memory | model/index revisions and experiment manifests | reproducibility and policy | versioned configuration |
@@ -88,7 +93,11 @@ One ingestion transaction appends and projects:
 4. `edge.versioned` for each deterministic adjacent `NEXT` relation;
 5. `ingestion.atomized` and the hot-inbox projection revision.
 
-The API returns `202` after these writes are durable. `indexing_status` is `lexical_ready` and `dense_index_status` is `pending` in the embedded control path. Consolidation remains `pending` until its explicit worker/endpoint is run.
+The API returns `202` after these writes are durable. The index-state ledger
+reports `hot_ready`, `lexical_ready`/`pending`, and `dense_pending`/`dense_ready`
+with the job and revision that own each transition. Queries union bounded hot
+candidates with external hits while an externally indexed delta is pending.
+Consolidation remains `pending` until its explicit worker/endpoint is run.
 
 ### Atomization rules
 
@@ -122,14 +131,14 @@ query + workspace + as_of + facet + privacy filters
 
 Trace V2 now exposes an explicit bounded ladder: Okapi BM25 and a versioned dense provider are fused by reciprocal-rank fusion, a local reranker scores the fused set, then typed-graph Personalized PageRank and hierarchy/deep traversal may be applied. The embedded default dense provider is explicitly labelled `hashing-dense-v1` and can only reinforce sparse evidence; it is an offline control path, not a claimed semantic model. `TRACE_DENSE_MODEL` configures a lazy local SentenceTransformer/BGE-compatible provider, `TRACE_RERANK_MODEL` configures a lazy local cross-encoder, and vectors remain rebuildable `dense_vectors` projections keyed by atom version and provider ID.
 
-`fast` uses hybrid retrieval, `standard` adds reranking, `graph` adds PPR, `hierarchy` retrieves anchored resolutions, and `deep` performs bounded hierarchy selection before expanding back to raw atoms. `TRACE_DEEP_MODEL` enables an explicitly configured LiteLLM navigator that receives only bounded derived summaries and opaque anchor IDs. A derived node alone is never sufficient evidence.
+`fast` uses hybrid retrieval, `standard` adds reranking, `graph` adds PPR, `hierarchy` retrieves anchored resolutions, and `deep` performs bounded hierarchy selection before expanding back to raw atoms. A cloud deep navigator is created only for a registered `model_id` through the model gateway, after workspace policy and authorization checks; it receives only bounded derived summaries and opaque anchor IDs. A derived node alone is never sufficient evidence.
 
 | Configuration | Effect | Default |
 |---|---|---|
 | `TRACE_DENSE_MODEL` | local SentenceTransformer/BGE-compatible dense model | deterministic `hashing-dense-v1` control provider |
 | `TRACE_RERANK_MODEL` | local SentenceTransformer CrossEncoder | deterministic evidence reranker |
-| `TRACE_DEEP_MODEL` | explicit LiteLLM deep hierarchy selector | bounded heuristic selector |
-| `TRACE_SCHEMA_MODEL` | explicit LiteLLM review-only schema teacher | deterministic local proposer |
+| registered deep `model_id` + `TRACE_MODEL_GATEWAY_URL` | gateway-mediated deep hierarchy selector | bounded heuristic selector |
+| registered schema `model_id` + `TRACE_MODEL_GATEWAY_URL` | gateway-mediated review-only schema teacher | deterministic local proposer |
 | `TRACE_MODEL_LOCAL_FILES_ONLY` | prohibit model downloads at runtime | `true` |
 | `TRACE_DEEP_TOKEN_COST_PER_1K_USD` | cost accounting for configured deep calls | `0` |
 
@@ -174,9 +183,19 @@ The hierarchy builder makes four replaceable resolutions:
 | local topic | `topic_holon` | related source sections, grouped transparently by term overlap |
 | workspace overview | `workspace_holon` | bounded overview of local topics |
 
-Each derived node persists its evidence-anchor IDs, source atom-version IDs, coverage metadata, model version, hierarchy key, and regeneration lineage in its immutable node-version payload. `CONTAINS` edges are structural and carry source atom anchors. An identical rebuild reuses the existing projection; changed atom versions yield a new projection linked to its prior logical projection.
+New hierarchy membership is stored in the Cortex projection layer:
+`projection_runs`, `projection_objects`, and `projection_memberships`. Each
+object records source atom-version coverage, checksum, model/prompt/index/policy
+revisions, and regeneration lineage. A hierarchy revision is acyclic, but the
+trusted-evidence and affinity families are not forced into one DAG. Legacy
+derived nodes remain readable during migration only. An identical run reuses
+its revision; a replacement becomes active by reversible revision handover.
 
-Graph activation uses only trusted conservative relation types plus immutable structural edges. It takes high-confidence raw hybrid results as seeds, rejects low-confidence edges, runs bounded Personalized PageRank, and mixes activation with direct raw retrieval. Results retain traversed edge IDs and their source anchors.
+Activation is a pure, query-local energy layer over structural, reviewed
+evidence, affinity, and behavioral families. Its persisted policy caps family
+mass and degree, normalizes rows, and records score contributions and traversed
+bridges. Affinity endpoints are atom-version IDs, are expiring/rejectable, and
+are never promoted to trusted evidence automatically.
 
 Schema induction creates only pending `schema` proposals containing labels, definitions, positive examples, exclusions, confidence, and source IDs. Reviewers promote them; local classification becomes a soft ranking feature only. Retrieval feedback (`selected`, `opened`, `cited`, `accepted`, `rejected`) is append-only and can influence rank features, but never graph topology or edge trust automatically.
 
@@ -184,7 +203,7 @@ Schema induction creates only pending `schema` proposals containing labels, defi
 
 The outbox row is inserted in the same transaction as its event. `OutboxWorker` claims pending rows with a lease, publishes `{event_id,event_offset,payload}`, and marks the row published only after the publisher succeeds. Lease expiry returns an in-flight row to pending. This gives at-least-once delivery; consumers must deduplicate on `event_id` and record their last applied offset.
 
-`reconcile_hot_inbox()` removes only the selected projection rows, folds current atom versions from the canonical tables, rebuilds the inbox, and records a new projection revision. `replay_report()` independently folds event payloads into an in-memory canonical state and compares node identities, node versions, edge fields, anchors, and attachments against the database. A failed replay report is an integrity incident, not a reason to delete records.
+`reconcile_hot_inbox()` removes only the selected projection rows, folds current atom versions from the canonical tables, rebuilds the inbox, and records a new projection revision. Attachment staging records make object-store writes recoverable if the canonical transaction fails. `replay_report()` independently folds event payloads into an in-memory canonical state and compares node identities, node versions, edge fields, anchors, and attachments against the database. A failed replay report is an integrity incident, not a reason to delete records.
 
 Snapshots hash event IDs and payload hashes through an event offset. Re-indexing registers an embedding/vector/lexical revision before rebuilding traffic. The embedded compaction endpoint logs a safe pass and deletes no Spine evidence.
 
@@ -198,8 +217,8 @@ Snapshots hash event IDs and payload hashes through an event offset. Re-indexing
 | `POST /v2/ingestions/{id}/consolidate` | optional actor | bounded proposals and consolidation status |
 | `GET /v2/nodes/{id}` | optional `as_of_event` | one version with properties and security metadata |
 | `GET /v2/nodes/{id}/history` | node ID | every immutable version |
-| `PATCH /v2/nodes/{id}` | content/properties/actor/idempotency | successor version |
-| `POST /v2/nodes/{id}/split` | child parts | child versions and lineage edges |
+| `PATCH /v2/nodes/{id}` | content/properties/actor/idempotency | successor version plus bounded version-index handoff |
+| `POST /v2/nodes/{id}/split` | child parts | child versions, lineage edges, and bounded version-index handoff |
 | `POST /v2/nodes/{id}/alias` | target node/evidence | trusted alias edge |
 | `POST /v2/queries` | query/scope/privacy/budget/profile | persisted evidence bundle with per-stage diagnostics |
 | `POST /v2/retrieval-feedback` | selected/opened/cited/accepted/rejected evidence | append-only soft-rank feedback event |
@@ -208,9 +227,13 @@ Snapshots hash event IDs and payload hashes through an event offset. Re-indexing
 | `GET|POST /v2/graph/subgraph` | workspace/seeds/depth/policy | filtered nodes, edges, evidence paths |
 | `POST /v2/proposals` | candidate + evidence IDs | pending proposal |
 | `POST /v2/hierarchy/build` | workspace and hierarchy bounds | anchored section/topic/workspace projections |
+| `POST /v2/affinity/rejections` | atom-version pair and reason | durable negative affinity feedback; never a factual edge |
 | `POST /v2/schemas/proposals` | workspace and proposal bound | reviewable schema proposals |
 | `GET /v2/schemas/classifications` | workspace/atoms | soft labels from accepted schemas |
 | `POST /v2/benchmarks/runs` | frozen benchmark and stage list | persisted ablation metrics |
+| `GET|PUT /v2/admin/cognitive-policies/{workspace}` | workspace policy | active, revisioned Cortex policy |
+| `GET /v2/admin/projection-runs` | workspace/kind/status | revision, inputs, output stats, and lifecycle inspection |
+| `POST /v2/admin/projections/rebuild` | bounded atom IDs or event range | durable hierarchy, affinity, or activation rebuild |
 | `POST /v2/proposals/{id}/promote` | actor/reason | promoted edge or derived node |
 | `POST /v2/proposals/{id}/reject` | actor/reason | rejected proposal decision |
 | `POST /v2/saved-queries` | retrieval logic | persistent named query |
@@ -223,7 +246,7 @@ All errors use a structured `detail` response. Missing entities return `404`, id
 
 The foundation and cognitive tests exercise idempotency, atomization, replay, hybrid channels, abstention, hierarchy anchoring/regeneration, typed PPR, deep raw-evidence expansion, schema review/classification, feedback, and benchmark reporting. Production gates also cover worker crashes, duplicate delivery, partial index writes, configured-provider outages, historical retrieval, privacy leakage, ANN recall, citation precision, and corpus-scale latency.
 
-The frozen benchmark runner evaluates lexical, hybrid, rerank, hierarchy, graph, and deep profiles with Recall@5/20, nDCG@10, complete-gold-evidence coverage, citation precision, abstention correctness, p95 latency, local compute, and cloud-token cost. `benchmarks/technical-docs-v1.json` covers direct lookup, multi-hop architecture, dependency, contradiction/update, source-order, and out-of-scope questions using deterministic atom-version IDs. Production benchmarks should bind their own corpus snapshot and gold IDs; BRIGHT-style coding cases use the same JSON contract after evidence is atomized.
+The frozen benchmark runner evaluates lexical, hybrid, rerank, hierarchy, graph, and deep profiles with Recall@5/20, nDCG@10, complete-gold-evidence coverage, citation precision, abstention correctness, p95 latency, local compute, and cloud-token cost. Every run persists a baseline identity containing the corpus checksum, code/policy/model/index/projection revisions, hardware, and measured cost/latency. `benchmarks/technical-docs-v1.json` is a six-case developer fixture only. A release corpus has at least 300 reviewed, tagged cases across direct lookup, chronology, contradiction/revision, cross-domain, global-context, multi-hop, historical-read, and out-of-scope slices.
 
 New cognitive mechanisms remain behind explicit profiles and ablations. HippoRAG-style graph activation, LATTICE-style multi-level navigation, RAPTOR/GraphRAG summaries, RLM synthesis, dynamic schema induction, and plasticity signals may improve a relevant workload, but none may be allowed to create an unanchored fact or hide source evidence. Every experiment records a corpus snapshot, code revision, model versions, index revisions, parameters, and baseline comparison.
 
@@ -239,7 +262,7 @@ The V2 public API is stable across storage adapters. A production implementation
 - Redis TTL caches and working-memory state;
 - policy-aware model gateway calls with bounded excerpts only.
 
-At 100K, 1M, and 10M chunks, measure event lag, projection parity, orphan vectors, stale index rows, graph degree, storage growth, consolidation backlog, query cost, and ingestion throughput. Partition by workspace/time, use snapshot-plus-delta replay, and forbid global pairwise clustering. Required workload gates are fast p95 <= 2 seconds, standard p95 <= 5 seconds, deep p95 <= 90 seconds, and quality within two points of the 100K baseline.
+At 100K and 1M atoms, measure event lag, projection parity, orphan vectors, stale index rows, graph degree, storage growth, consolidation backlog, query cost, and ingestion throughput. Partition by workspace/time, use snapshot-plus-delta replay, and forbid global pairwise clustering. The 1M gate requires 300+ reviewed queries, >=80% complete-gold-evidence coverage, >=90% citation precision, zero hot-data blind spots, no critical replay/privacy/destructive-data defect, bounded operational state, fast p95 <= 2 seconds, standard/graph/hierarchy p95 <= 5 seconds, deep p95 <= 90 seconds, and quality within two points of the 100K baseline. A 10M/500-QPS release is a separate later program.
 
 The embedded implementation is the correctness/control layer for these deployments. It labels deterministic hashing/reranking providers honestly, persists their provider IDs in bundle diagnostics, and never silently represents them as ANN, BGE, or cross-encoder results.
 

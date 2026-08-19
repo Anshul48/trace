@@ -5,11 +5,14 @@ from __future__ import annotations
 import hashlib
 import io
 import os
+import platform
 import re
 import secrets
 import json
 import tempfile
+import uuid
 from contextlib import contextmanager, nullcontext
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from pathlib import Path
 from typing import Any
@@ -19,7 +22,9 @@ from .atomizer import atomize, normalize_text
 from .benchmark import BenchmarkRunner, load_benchmark, validate_release_corpus
 from .models import (
     AliasRequest,
+    AffinityRejectionRequest,
     BenchmarkRunRequest,
+    CognitivePolicy,
     EvidenceFeedbackRequest,
     FeedbackEdgeProposalRequest,
     ExperimentManifestRequest,
@@ -31,13 +36,14 @@ from .models import (
     JobSubmitRequest,
     ModelRegistrationRequest,
     NodeEditRequest,
+    ProjectionRebuildRequest,
     ProposalCreateRequest,
     QueryRequest,
     SavedQueryRequest,
     SchemaProposalRequest,
     SplitRequest,
 )
-from .organization import DeterministicSchemaProposer, EvidenceHierarchyBuilder, GLiNERSchemaProposer, GovernedSchemaClassifier, LiteLLMSchemaProposer, SchemaProposer, SoftSchemaClassifier
+from .organization import DeterministicSchemaProposer, EvidenceHierarchyBuilder, GLiNERSchemaProposer, GovernedSchemaClassifier, SchemaProposer, SoftSchemaClassifier
 from .retrieval import HybridRetrievalEngine, RetrievalOutcome
 from .repository import Repository
 from .jobs import JobManager
@@ -46,8 +52,9 @@ from .observability import MetricsRegistry, telemetry_span
 from .store import InvariantViolation, NotFoundError, SqliteEventStore
 from .config import TraceSettings
 from .auth import AuthorizationContext
-from .model_gateway import GatewayDeepNavigator, TraceModelGateway
+from .model_gateway import GatewayDeepNavigator, ModelPolicyDenied, TraceModelGateway
 from .projections import ProjectionRevisionError, RevisionedProjectionController
+from .cortex import canonical_pair
 
 
 _TOKEN = re.compile(r"[\w][\w'-]*", re.UNICODE)
@@ -125,11 +132,13 @@ class TraceService:
         self.store = store
         self.object_store = object_store
         self.retrieval_engine = retrieval_engine or HybridRetrievalEngine()
-        schema_model = os.environ.get("TRACE_SCHEMA_MODEL")
+        # Automatic schema proposals stay local/reviewable.  A cloud schema
+        # call requires an explicit registered ``model_id`` and goes through
+        # ``TraceModelGateway`` in ``propose_schemas`` below.
         self.schema_proposer = schema_proposer or (
-            LiteLLMSchemaProposer(schema_model)
-            if schema_model
-            else (GLiNERSchemaProposer() if os.environ.get("TRACE_GLINER_ENABLED", "false").lower() == "true" else DeterministicSchemaProposer())
+            GLiNERSchemaProposer()
+            if os.environ.get("TRACE_GLINER_ENABLED", "false").lower() == "true"
+            else DeterministicSchemaProposer()
         )
         self.hierarchy_builder = EvidenceHierarchyBuilder(store)
         self.metrics = MetricsRegistry()
@@ -145,6 +154,11 @@ class TraceService:
         self.jobs.register("index.rebuild", self._run_reindex_job)
         self.jobs.register("reprocess", self._run_reprocess_job)
         self.jobs.register("cognitive.delta", self._run_cognitive_delta_job)
+        self.jobs.register("projection.backfill", self._run_projection_backfill_job)
+        self.jobs.register("projection.legacy_import", self._run_projection_legacy_import_job)
+        self.jobs.register("hierarchy.delta", self._run_hierarchy_delta_job)
+        self.jobs.register("affinity.delta", self._run_affinity_delta_job)
+        self.jobs.register("activation.recompute", self._run_activation_recompute_job)
 
     @classmethod
     def from_environment(cls) -> "TraceService":
@@ -254,8 +268,22 @@ class TraceService:
     # Job handlers deliberately call the synchronous core with job creation
     # disabled.  The worker's state transition is the durable operation record.
     def _run_ingestion_index_job(self, payload: dict[str, Any]) -> dict[str, Any]:
-        workspace_id = str(payload["workspace_id"])
-        return {"workspace_id": workspace_id, "dense_indexed": self.rebuild_dense_index(workspace_id, actor="index-worker")}
+        # ``ingestion.index`` is a delta-job family, not an instruction to
+        # rebuild a tenant.  Node revisions and splits do not have a new
+        # ingestion row, so they carry their immutable atom-version IDs in the
+        # same durable envelope.
+        if payload.get("atom_version_ids"):
+            return self._index_atom_delta(
+                workspace_id=str(payload["workspace_id"]),
+                atom_version_ids=[str(item) for item in payload["atom_version_ids"]],
+                ingestion_ids=[str(item) for item in payload.get("ingestion_ids", [])],
+                actor=str(payload.get("actor", "index-worker")),
+                index_revision=str(payload.get("index_revision") or os.environ.get("TRACE_INDEX_REVISION", "embedded-current")),
+            )
+        return self._index_ingestion_delta(
+            str(payload["ingestion_id"]), actor=str(payload.get("actor", "index-worker")),
+            index_revision=str(payload.get("index_revision") or os.environ.get("TRACE_INDEX_REVISION", "embedded-current")),
+        )
 
     def _run_consolidation_job(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self.consolidate_ingestion(str(payload["ingestion_id"]), actor=str(payload.get("actor", "job-worker")), _create_job=False)
@@ -281,8 +309,43 @@ class TraceService:
             model_id=str(payload["model_id"]) if payload.get("model_id") else None,
         )
 
+    def _run_projection_backfill_job(self, payload: dict[str, Any]) -> dict[str, Any]:
+        request = ProjectionRebuildRequest.model_validate(payload)
+        return self.rebuild_projection(request, _create_job=False)
+
+    def _run_projection_legacy_import_job(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Backfill a Cortex revision while retaining legacy derived reads.
+
+        This job never rewrites legacy nodes or their old containment edges;
+        it creates a separate Cortex revision from the supplied bounded source
+        snapshot and lets effective-revision reads switch only after success.
+        """
+
+        request = ProjectionRebuildRequest.model_validate(payload)
+        result = self.rebuild_projection(request, _create_job=False)
+        result["legacy_import"] = True
+        return result
+
+    def _run_hierarchy_delta_job(self, payload: dict[str, Any]) -> dict[str, Any]:
+        request = ProjectionRebuildRequest.model_validate({**payload, "projection_kind": "hierarchy"})
+        return self.rebuild_projection(request, _create_job=False)
+
+    def _run_affinity_delta_job(self, payload: dict[str, Any]) -> dict[str, Any]:
+        request = ProjectionRebuildRequest.model_validate({**payload, "projection_kind": "affinity"})
+        return self.rebuild_projection(request, _create_job=False)
+
+    def _run_activation_recompute_job(self, payload: dict[str, Any]) -> dict[str, Any]:
+        request = ProjectionRebuildRequest.model_validate({**payload, "projection_kind": "activation"})
+        return self.rebuild_projection(request, _create_job=False)
+
     def submit_job(self, request: JobSubmitRequest, *, request_id: str | None = None) -> dict[str, Any]:
         """Validate an asynchronous workflow envelope before it enters the queue."""
+
+        with self.workspace_scope(request.workspace_id):
+            return self._submit_job(request, request_id=request_id)
+
+    def _submit_job(self, request: JobSubmitRequest, *, request_id: str | None = None) -> dict[str, Any]:
+        """Scoped durable enqueue implementation."""
 
         payload = dict(request.payload)
         supplied_workspace = payload.get("workspace_id")
@@ -297,9 +360,20 @@ class TraceService:
             "schema.proposals": SchemaProposalRequest,
             "benchmark.run": BenchmarkRunRequest,
             "index.rebuild": IndexRevisionRequest,
+            "projection.backfill": ProjectionRebuildRequest,
+            "projection.legacy_import": ProjectionRebuildRequest,
+            "hierarchy.delta": ProjectionRebuildRequest,
+            "affinity.delta": ProjectionRebuildRequest,
+            "activation.recompute": ProjectionRebuildRequest,
         }
         validator = validators.get(request.kind)
         if validator is not None:
+            if request.kind == "hierarchy.delta":
+                payload["projection_kind"] = "hierarchy"
+            elif request.kind == "affinity.delta":
+                payload["projection_kind"] = "affinity"
+            elif request.kind == "activation.recompute":
+                payload["projection_kind"] = "activation"
             payload = validator.model_validate(payload).model_dump(mode="json")
         if request.kind == "consolidation" and not payload.get("ingestion_id"):
             raise ValueError("consolidation jobs require ingestion_id")
@@ -376,6 +450,12 @@ class TraceService:
 
     # --------------------------------------------------------------- ingestion
     def ingest(self, request: IngestionRequest, *, attachment_override: dict[str, Any] | None = None) -> dict[str, Any]:
+        """Capture source text under one explicit tenant scope."""
+
+        with self.workspace_scope(request.workspace_id):
+            return self._ingest(request, attachment_override=attachment_override)
+
+    def _ingest(self, request: IngestionRequest, *, attachment_override: dict[str, Any] | None = None) -> dict[str, Any]:
         """Capture source text and return after the hot lexical path is ready.
 
         ``attachment_override`` is used by file adapters: the request text is
@@ -389,41 +469,107 @@ class TraceService:
         # normalization changes them (for example CRLF -> LF), retain the
         # normalized artifact as a private parser reference too so atom offsets
         # remain exact and reproducible.
-        attachment = attachment_override or self._put_text(raw_text, request.source.media_type, workspace_id=request.workspace_id)
-        if text != raw_text:
-            normalized_attachment = self._put_text(text, "text/plain; charset=utf-8", workspace_id=request.workspace_id)
-            attachment["metadata"] = {
-                **attachment["metadata"],
-                "normalized_parser_artifact": {
-                    "content_hash": normalized_attachment["content_hash"],
-                    "object_key": normalized_attachment["object_key"],
-                    "byte_length": normalized_attachment["byte_length"],
-                },
-            }
-        drafts = atomize(text)
-        source = request.source.model_dump(mode="json")
-        source["adapter_payload"] = request.adapter_payload
-        source["normalized_content_hash"] = hashlib.sha256(text.encode("utf-8")).hexdigest()
-        result = self.store.ingest(
-            workspace_id=request.workspace_id,
-            source=source,
-            attachment=attachment,
-            atoms=[draft.__dict__ for draft in drafts],
-            actor=request.actor,
-            visibility=request.visibility,
-            idempotency_key=request.idempotency_key,
-        )
+        staging_records: list[dict[str, Any]] = []
+        stage = getattr(self.store, "stage_attachment", None)
+        try:
+            attachment = attachment_override or self._put_text(raw_text, request.source.media_type, workspace_id=request.workspace_id)
+            if callable(stage):
+                staging_records.append(stage(workspace_id=request.workspace_id, attachment=attachment))
+            if text != raw_text:
+                normalized_attachment = self._put_text(text, "text/plain; charset=utf-8", workspace_id=request.workspace_id)
+                if callable(stage):
+                    staging_records.append(stage(workspace_id=request.workspace_id, attachment=normalized_attachment))
+                attachment["metadata"] = {
+                    **dict(attachment.get("metadata", {})),
+                    "normalized_parser_artifact": {
+                        "content_hash": normalized_attachment["content_hash"],
+                        "object_key": normalized_attachment["object_key"],
+                        "byte_length": normalized_attachment["byte_length"],
+                    },
+                }
+            drafts = atomize(text)
+            source = request.source.model_dump(mode="json")
+            source["adapter_payload"] = request.adapter_payload
+            source["normalized_content_hash"] = hashlib.sha256(text.encode("utf-8")).hexdigest()
+            result = self.store.ingest(
+                workspace_id=request.workspace_id,
+                source=source,
+                attachment=attachment,
+                atoms=[draft.__dict__ for draft in drafts],
+                actor=request.actor,
+                visibility=request.visibility,
+                idempotency_key=request.idempotency_key,
+            )
+        except Exception as error:
+            fail_stage = getattr(self.store, "fail_attachment_staging", None)
+            if callable(fail_stage):
+                for staged in staging_records:
+                    try:
+                        try:
+                            fail_stage(
+                                staged["staging_id"],
+                                workspace_id=request.workspace_id,
+                                error=f"canonical ingestion failed: {error}",
+                            )
+                        except TypeError as staging_error:
+                            if "workspace_id" not in str(staging_error):
+                                raise
+                            fail_stage(staged["staging_id"], error=f"canonical ingestion failed: {error}")
+                    except Exception:
+                        # Preserve the original ingestion error. Reconciliation
+                        # still sees any staging record that was committed.
+                        pass
+            raise
+        finalize_stage = getattr(self.store, "finalize_attachment_staging", None)
+        if callable(finalize_stage):
+            for staged in staging_records:
+                try:
+                    try:
+                        finalize_stage(
+                            staged["staging_id"], ingestion_id=result["ingestion_id"],
+                            canonical_event_offset=result.get("atomized_event_offset"), actor=request.actor,
+                            workspace_id=request.workspace_id,
+                        )
+                    except TypeError as staging_error:
+                        if "workspace_id" not in str(staging_error):
+                            raise
+                        finalize_stage(
+                            staged["staging_id"], ingestion_id=result["ingestion_id"],
+                            canonical_event_offset=result.get("atomized_event_offset"), actor=request.actor,
+                        )
+                except Exception:
+                    # The source capture is already canonical. Leave the
+                    # staging row for the reconciliation worker rather than
+                    # reporting a failed ingestion that a retry could duplicate.
+                    pass
         result["status"] = "accepted"
-        result["dense_index_status"] = "pending"
+        revision = os.environ.get("TRACE_INDEX_REVISION", "embedded-current")
+        set_state = getattr(self.store, "set_ingestion_index_state", None)
+        if callable(set_state) and self.retrieval_engine.lexical_index is not None:
+            # External index acknowledgement has not happened yet. The hot
+            # inbox remains the read path until this delta job completes.
+            result["index_state"] = set_state(
+                ingestion_id=result["ingestion_id"], component="lexical", status="pending",
+                index_revision=revision, detail={"reason": "external_delta_queued"}, actor=request.actor,
+            )
+        result["dense_index_status"] = "dense_pending"
         index_job = self.jobs.submit(
             workspace_id=request.workspace_id,
             kind="ingestion.index",
-            payload={"workspace_id": request.workspace_id, "ingestion_id": result["ingestion_id"]},
+            payload={
+                "workspace_id": request.workspace_id, "ingestion_id": result["ingestion_id"],
+                "actor": request.actor, "index_revision": revision,
+            },
             actor=request.actor,
             idempotency_key=f"{request.idempotency_key}:index" if request.idempotency_key else None,
         )
         result["job_id"] = index_job["job_id"]
         result["job"] = index_job
+        if callable(set_state):
+            result["index_state"] = set_state(
+                ingestion_id=result["ingestion_id"], component="dense", status="dense_pending",
+                index_revision=revision, job_id=index_job["job_id"], detail={"reason": "delta_queued"}, actor=request.actor,
+            )
         return result
 
     def ingest_bytes(
@@ -463,6 +609,9 @@ class TraceService:
     def ingestion_status(self, ingestion_id: str) -> dict[str, Any]:
         status = self.store.get_ingestion(ingestion_id)
         status["attachment"] = self.store.get_attachment(status["attachment_id"])
+        index_state = getattr(self.store, "ingestion_index_state", None)
+        if callable(index_state):
+            status["index_state"] = index_state(ingestion_id)
         status["events"] = {
             "accepted": status["accepted_event_offset"],
             "projection_status": self.store.projection_status(status["workspace_id"]),
@@ -493,13 +642,128 @@ class TraceService:
         return checks
 
     def edit_node(self, node_id: str, request: NodeEditRequest) -> dict[str, Any]:
-        return self.store.edit_node(
+        before = self.store.get_node(node_id)
+        result = self.store.edit_node(
             node_id=node_id, content=request.content, properties=request.properties,
             actor=request.actor, idempotency_key=request.idempotency_key,
         )
+        self._invalidate_affinity_versions(
+            workspace_id=before["workspace_id"],
+            atom_version_ids=[before["atom_version_id"], result["atom_version_id"]],
+            reason="atom_versioned",
+            actor=request.actor,
+        )
+        result["index_job"] = self._submit_atom_index_delta(
+            workspace_id=before["workspace_id"],
+            atom_version_ids=[result["atom_version_id"]],
+            ingestion_ids=[str(before.get("properties", {}).get("ingestion_id"))] if before.get("properties", {}).get("ingestion_id") else [],
+            actor=request.actor,
+            idempotency_key=(f"{request.idempotency_key}:index" if request.idempotency_key else None),
+        )
+        return result
 
     def split_node(self, node_id: str, request: SplitRequest) -> list[dict[str, Any]]:
-        return self.store.split_node(node_id=node_id, parts=request.parts, actor=request.actor, idempotency_key=request.idempotency_key)
+        before = self.store.get_node(node_id)
+        children = self.store.split_node(
+            node_id=node_id, parts=request.parts, actor=request.actor, idempotency_key=request.idempotency_key,
+        )
+        child_ids = [str(child["atom_version_id"]) for child in children]
+        self._invalidate_affinity_versions(
+            workspace_id=before["workspace_id"],
+            atom_version_ids=[before["atom_version_id"], *child_ids],
+            reason="atom_split",
+            actor=request.actor,
+        )
+        if child_ids:
+            job = self._submit_atom_index_delta(
+                workspace_id=before["workspace_id"],
+                atom_version_ids=child_ids,
+                ingestion_ids=[str(before.get("properties", {}).get("ingestion_id"))] if before.get("properties", {}).get("ingestion_id") else [],
+                actor=request.actor,
+                idempotency_key=(f"{request.idempotency_key}:index" if request.idempotency_key else None),
+            )
+            # Keep the established list response shape while making the delta
+            # handoff observable to clients that need indexing diagnostics.
+            for child in children:
+                child["index_job_id"] = job["job_id"]
+        return children
+
+    def _invalidate_affinity_versions(
+        self,
+        *,
+        workspace_id: str,
+        atom_version_ids: list[str],
+        reason: str,
+        actor: str,
+    ) -> int:
+        invalidator = getattr(self.store, "invalidate_affinity_for_atoms", None)
+        if not callable(invalidator):
+            return 0
+        return int(invalidator(
+            workspace_id=workspace_id,
+            atom_version_ids=list(dict.fromkeys(atom_version_ids)),
+            reason=reason,
+            actor=actor,
+        ))
+
+    def _submit_atom_index_delta(
+        self,
+        *,
+        workspace_id: str,
+        atom_version_ids: list[str],
+        ingestion_ids: list[str],
+        actor: str,
+        idempotency_key: str | None,
+    ) -> dict[str, Any]:
+        """Queue one bounded version-index handoff after a canonical edit.
+
+        The job is intentionally keyed by immutable atom-version IDs.  It
+        never asks an edit retry to scan, rebuild, or mutate unrelated rows.
+        """
+
+        ids = list(dict.fromkeys(str(item) for item in atom_version_ids if item))[:1_000]
+        if not ids:
+            raise InvariantViolation("atom index delta requires at least one atom-version ID")
+        revision = os.environ.get("TRACE_INDEX_REVISION", "embedded-current")
+        job = self.jobs.submit(
+            workspace_id=workspace_id,
+            kind="ingestion.index",
+            payload={
+                "workspace_id": workspace_id,
+                "atom_version_ids": ids,
+                "ingestion_ids": list(dict.fromkeys(ingestion_ids)),
+                "actor": actor,
+                "index_revision": revision,
+            },
+            actor=actor,
+            idempotency_key=idempotency_key or f"atom-index:{workspace_id}:{hashlib.sha256('\x1f'.join(ids).encode('utf-8')).hexdigest()}",
+        )
+        # A hot-inbox candidate stays visible until this new immutable version
+        # has reached the external lexical and dense revisions.  State remains
+        # per ingestion for operator visibility, while the job itself remains
+        # keyed only by the changed atom versions.
+        state_writer = getattr(self.store, "set_ingestion_index_state", None)
+        if callable(state_writer):
+            for ingestion_id in list(dict.fromkeys(ingestion_ids)):
+                state_writer(
+                    ingestion_id=ingestion_id,
+                    component="lexical",
+                    status="stale",
+                    index_revision=revision,
+                    job_id=job["job_id"],
+                    detail={"reason": "atom_version_delta", "atom_version_ids": ids},
+                    actor=actor,
+                )
+                state_writer(
+                    ingestion_id=ingestion_id,
+                    component="dense",
+                    status="dense_pending",
+                    index_revision=revision,
+                    job_id=job["job_id"],
+                    detail={"reason": "atom_version_delta", "atom_version_ids": ids},
+                    actor=actor,
+                )
+        return job
 
     def alias_node(self, node_id: str, request: AliasRequest) -> dict[str, Any]:
         return self.store.create_alias(
@@ -680,7 +944,21 @@ class TraceService:
         )
 
     def build_hierarchy(self, request: HierarchyBuildRequest, *, _create_job: bool = True) -> dict[str, Any]:
+        # Keep the legacy derived-node read path for embedded compatibility,
+        # while every new production-facing hierarchy is also materialized in
+        # the replaceable Cortex control plane.  Production callers must use a
+        # bounded delta/backfill request instead of this historical full scan.
+        if self.settings.production_mode:
+            raise InvariantViolation("production hierarchy builds require a bounded projection.backfill or hierarchy.delta request")
         response = self.hierarchy_builder.build(**request.model_dump()).model_dump()
+        cortex = self._build_cortex_hierarchy(
+            workspace_id=request.workspace_id,
+            atoms=self.store.queryable_atoms(request.workspace_id),
+            model_revision=request.model_version,
+            prompt_revision=os.environ.get("TRACE_SUMMARY_PROMPT_VERSION", "extractive-v1"),
+            actor=request.actor,
+        )
+        response["cortex_projection"] = cortex
         if _create_job:
             job = self._completed_job(
                 workspace_id=request.workspace_id, kind="hierarchy.build", payload=request.model_dump(mode="json"),
@@ -689,6 +967,842 @@ class TraceService:
             response["job_id"] = job["job_id"]
             response["job"] = job
         return response
+
+    @staticmethod
+    def _cortex_summary(label: str, atoms: list[dict[str, Any]], *, limit: int = 3) -> str:
+        excerpts = [" ".join(str(atom["content"]).split())[:180] for atom in atoms[:limit]]
+        return f"{label}: " + " | ".join(excerpts)
+
+    @staticmethod
+    def _projection_view(objects: list[dict[str, Any]], run: dict[str, Any]) -> dict[str, Any]:
+        grouped: dict[str, list[dict[str, Any]]] = {"source_section": [], "topic_holon": [], "workspace_overview": []}
+        for object_row in objects:
+            view = {
+                "node_id": object_row["projection_object_id"],
+                "atom_version_id": object_row["projection_object_id"],
+                "projection_object_id": object_row["projection_object_id"],
+                "content": object_row["content"],
+                "evidence_anchor_ids": [],
+                "evidence_atom_version_ids": object_row["source_atom_version_ids"],
+                "source_atom_version_ids": object_row["source_atom_version_ids"],
+                "reused": run["status"] == "active",
+            }
+            grouped.setdefault(object_row["object_kind"], []).append(view)
+        return {
+            "projection_run_id": run["projection_run_id"], "revision": run["revision"], "status": run["status"],
+            "section_summaries": grouped.get("source_section", []),
+            "topic_holons": grouped.get("topic_holon", []),
+            "workspace_holons": grouped.get("workspace_overview", []),
+        }
+
+    def _build_cortex_hierarchy(
+        self,
+        *,
+        workspace_id: str,
+        atoms: list[dict[str, Any]],
+        model_revision: str,
+        prompt_revision: str,
+        actor: str,
+        section_size: int = 8,
+        topic_size: int = 6,
+        input_from_event: int | None = None,
+        input_through_event: int | None = None,
+        policy_revision: str | None = None,
+    ) -> dict[str, Any]:
+        """Build a RAPTOR-inspired navigation projection without Spine writes.
+
+        Clustering is deliberately local and bounded: source sections are
+        contiguous, topic holons combine at most ``topic_size`` sections, and
+        a workspace overview only links those already-built local objects.
+        """
+        atoms = [atom for atom in atoms if atom.get("workspace_id") == workspace_id and "atom" in atom.get("facets", [])]
+        atoms.sort(key=lambda atom: (
+            str(atom.get("properties", {}).get("ingestion_id", "")),
+            int(atom.get("properties", {}).get("ordinal", 0)), atom["atom_version_id"],
+        ))
+        if not atoms:
+            return {"status": "empty", "section_summaries": [], "topic_holons": [], "workspace_holons": []}
+        input_through_event = input_through_event or max(int(atom.get("created_event_offset", 0)) for atom in atoms)
+        input_checksum = hashlib.sha256(
+            "\x1f".join(atom["atom_version_id"] for atom in atoms).encode("utf-8")
+        ).hexdigest()
+
+        return self._materialize_cortex_hierarchy(
+            workspace_id=workspace_id,
+            sections=self._source_sections_from_atoms(
+                atoms, model_revision=model_revision, prompt_revision=prompt_revision, section_size=section_size,
+            ),
+            input_checksum=input_checksum,
+            model_revision=model_revision,
+            prompt_revision=prompt_revision,
+            actor=actor,
+            section_size=section_size,
+            topic_size=topic_size,
+            input_from_event=input_from_event,
+            input_through_event=input_through_event,
+            policy_revision=policy_revision,
+        )
+
+    @staticmethod
+    def _bounded_hierarchy_size(value: int, *, minimum: int, maximum: int) -> int:
+        return max(minimum, min(int(value), maximum))
+
+    def _source_sections_from_atoms(
+        self,
+        atoms: list[dict[str, Any]],
+        *,
+        model_revision: str,
+        prompt_revision: str,
+        section_size: int,
+    ) -> list[dict[str, Any]]:
+        """Create deterministic source-section descriptors from current atoms.
+
+        The descriptors intentionally retain source node IDs as projection
+        metadata.  That lets a later delta replace only a changed source
+        section without a workspace-wide canonical scan.
+        """
+
+        width = self._bounded_hierarchy_size(section_size, minimum=2, maximum=64)
+        by_ingestion: dict[str, list[dict[str, Any]]] = {}
+        explicit_groups: dict[str, list[dict[str, Any]]] = {}
+        for atom in atoms:
+            explicit_key = atom.get("properties", {}).get("projection_section_key")
+            if explicit_key:
+                explicit_groups.setdefault(str(explicit_key), []).append(atom)
+                continue
+            ingestion_id = str(atom.get("properties", {}).get("ingestion_id", "unknown"))
+            by_ingestion.setdefault(ingestion_id, []).append(atom)
+        sections: list[dict[str, Any]] = []
+        for ingestion_id in sorted(by_ingestion):
+            source_atoms = sorted(
+                by_ingestion[ingestion_id],
+                key=lambda atom: (int(atom.get("properties", {}).get("ordinal", 0)), atom["atom_version_id"]),
+            )
+            for start in range(0, len(source_atoms), width):
+                group = source_atoms[start:start + width]
+                source_ids = [str(atom["atom_version_id"]) for atom in group]
+                source_nodes = [str(atom["node_id"]) for atom in group]
+                sections.append({
+                    "logical_key": f"section:{ingestion_id}:{start // width}",
+                    "content": self._cortex_summary(f"Source section {ingestion_id}:{start + 1}", group),
+                    "source_atom_version_ids": source_ids,
+                    "properties": {
+                        "coverage": {"covered_atom_version_ids": source_ids, "covered_atom_count": len(source_ids)},
+                        "source_checksum": hashlib.sha256(
+                            "\x1f".join(str(atom["content_hash"]) for atom in group).encode("utf-8")
+                        ).hexdigest(),
+                        "source_node_ids": source_nodes,
+                        "model_revision": model_revision,
+                        "prompt_revision": prompt_revision,
+                        "resolution": "source_section",
+                        "ingestion_id": ingestion_id,
+                        "section_size": width,
+                    },
+                })
+        for logical_key in sorted(explicit_groups):
+            source_atoms = sorted(
+                explicit_groups[logical_key],
+                key=lambda atom: (int(atom.get("properties", {}).get("ordinal", 0)), atom["atom_version_id"]),
+            )
+            for start in range(0, len(source_atoms), width):
+                group = source_atoms[start:start + width]
+                key = logical_key if start == 0 else f"{logical_key}:{start // width}"
+                source_ids = [str(atom["atom_version_id"]) for atom in group]
+                source_nodes = [str(atom["node_id"]) for atom in group]
+                sections.append({
+                    "logical_key": key,
+                    "content": self._cortex_summary(f"Source section {key.removeprefix('section:')}", group),
+                    "source_atom_version_ids": source_ids,
+                    "properties": {
+                        "coverage": {"covered_atom_version_ids": source_ids, "covered_atom_count": len(source_ids)},
+                        "source_checksum": hashlib.sha256(
+                            "\x1f".join(str(atom["content_hash"]) for atom in group).encode("utf-8")
+                        ).hexdigest(),
+                        "source_node_ids": source_nodes,
+                        "model_revision": model_revision,
+                        "prompt_revision": prompt_revision,
+                        "resolution": "source_section",
+                        "ingestion_id": str(group[0].get("properties", {}).get("ingestion_id", "derived")),
+                        "section_size": width,
+                        "projection_section_key": logical_key,
+                    },
+                })
+        return sections
+
+    def _projection_source_sections(self, projection_run_id: str) -> list[dict[str, Any]]:
+        """Read a projection snapshot in bounded pages, never raw workspace rows."""
+
+        page_reader = getattr(self.store, "projection_objects_page", None)
+        if callable(page_reader):
+            sections: list[dict[str, Any]] = []
+            after_logical_key: str | None = None
+            page_size = 1_000
+            for _ in range(2_000):
+                page = page_reader(
+                    projection_run_id,
+                    object_kind="source_section",
+                    after_logical_key=after_logical_key,
+                    limit=page_size,
+                )
+                if not page:
+                    return sections
+                sections.extend(page)
+                next_key = str(page[-1]["logical_key"])
+                if len(page) < page_size:
+                    return sections
+                if after_logical_key == next_key:
+                    raise InvariantViolation("projection snapshot cursor did not advance")
+                after_logical_key = next_key
+            raise InvariantViolation("projection snapshot exceeded the bounded page budget")
+        reader = getattr(self.store, "projection_objects", None)
+        if not callable(reader):
+            raise InvariantViolation("repository has no projection snapshot reader")
+        rows = reader(projection_run_id, limit=20_000)
+        if len(rows) >= 20_000:
+            raise InvariantViolation("repository must support paged projection snapshots before hierarchy delta handover")
+        return [row for row in rows if row.get("object_kind") == "source_section"]
+
+    def _section_node_ids(self, section: dict[str, Any]) -> list[str]:
+        properties = dict(section.get("properties") or {})
+        source_ids = [str(item) for item in section.get("source_atom_version_ids", [])]
+        node_ids = [str(item) for item in properties.get("source_node_ids", []) if item]
+        if len(node_ids) == len(source_ids):
+            return node_ids
+        # Old hierarchy revisions predate source-node snapshot metadata. This
+        # compatibility read is explicitly limited to the existing projection
+        # coverage; it never reaches unrelated workspace atoms.
+        historical = self.store.atom_versions(source_ids)
+        by_version = {str(atom["atom_version_id"]): str(atom["node_id"]) for atom in historical}
+        resolved = [by_version[item] for item in source_ids if item in by_version]
+        if len(resolved) != len(source_ids):
+            raise InvariantViolation("legacy hierarchy snapshot references unavailable source atoms")
+        return resolved
+
+    def _materialize_cortex_hierarchy(
+        self,
+        *,
+        workspace_id: str,
+        sections: list[dict[str, Any]],
+        input_checksum: str,
+        model_revision: str,
+        prompt_revision: str,
+        actor: str,
+        section_size: int,
+        topic_size: int,
+        input_from_event: int | None,
+        input_through_event: int | None,
+        prior_projection_run_id: str | None = None,
+        carried_forward_sections: int = 0,
+        regenerated_sections: int = 0,
+        policy_revision: str | None = None,
+    ) -> dict[str, Any]:
+        """Write and hand over one fully self-contained hierarchy revision.
+
+        A new revision is constructed while the prior revision remains active;
+        activation is the only handover point.  Thus a worker crash leaves the
+        prior traversal graph intact instead of exposing a partial delta.
+        """
+
+        required = (
+            "create_projection_run", "write_projection_objects", "transition_projection_run",
+            "activate_projection_run", "projection_objects",
+        )
+        if not all(callable(getattr(self.store, name, None)) for name in required):
+            return {"status": "not_supported", "reason": "repository_has_no_cortex_projection_interface"}
+        normalized_sections: list[dict[str, Any]] = []
+        seen_keys: set[str] = set()
+        for section in sorted(sections, key=lambda item: str(item["logical_key"])):
+            logical_key = str(section["logical_key"])
+            source_ids = list(dict.fromkeys(str(item) for item in section.get("source_atom_version_ids", []) if item))
+            if logical_key in seen_keys or not source_ids or not str(section.get("content") or "").strip():
+                raise InvariantViolation("hierarchy source sections require unique keys, content, and source coverage")
+            seen_keys.add(logical_key)
+            properties = dict(section.get("properties") or {})
+            node_ids = self._section_node_ids(section)
+            properties.update({
+                "coverage": {"covered_atom_version_ids": source_ids, "covered_atom_count": len(source_ids)},
+                "source_node_ids": node_ids,
+                "model_revision": model_revision,
+                "prompt_revision": prompt_revision,
+                "resolution": "source_section",
+                "section_size": self._bounded_hierarchy_size(section_size, minimum=2, maximum=64),
+            })
+            normalized_sections.append({
+                "logical_key": logical_key,
+                "content": str(section["content"]),
+                "source_atom_version_ids": source_ids,
+                "properties": properties,
+            })
+        if not normalized_sections:
+            return {"status": "empty", "section_summaries": [], "topic_holons": [], "workspace_holons": []}
+
+        revision = f"hierarchy-{input_checksum[:20]}-{model_revision[:24]}"
+        policy = self.get_cognitive_policy(workspace_id)
+        active_policy_revision = str(policy["policy_revision"])
+        if policy_revision and policy_revision != active_policy_revision:
+            raise InvariantViolation("cognitive policy changed before hierarchy projection handover")
+        run = self.store.create_projection_run(
+            workspace_id=workspace_id,
+            projection_kind="hierarchy",
+            revision=revision,
+            input_from_event=input_from_event,
+            input_through_event=input_through_event,
+            input_checksum=input_checksum,
+            model_revision=model_revision,
+            index_revision=os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
+            prompt_revision=prompt_revision,
+            policy_revision=policy_revision or active_policy_revision,
+            prior_projection_run_id=prior_projection_run_id,
+            actor=actor,
+        )
+        if run["status"] == "active":
+            return self._projection_view(self.store.projection_objects(run["projection_run_id"]), run)
+        if run["status"] == "succeeded":
+            active = self.store.activate_projection_run(run["projection_run_id"], actor=actor)
+            return self._projection_view(self.store.projection_objects(active["projection_run_id"]), active)
+        if run["status"] == "running":
+            return {
+                "projection_run_id": run["projection_run_id"],
+                "revision": run["revision"],
+                "status": "running",
+                "section_summaries": [],
+                "topic_holons": [],
+                "workspace_holons": [],
+            }
+        if run["status"] != "queued":
+            raise InvariantViolation(f"hierarchy run is not writable from status {run['status']!r}")
+        run = self.store.transition_projection_run(run["projection_run_id"], status="running", actor=actor)
+        try:
+            objects: list[dict[str, Any]] = []
+            memberships: list[dict[str, Any]] = []
+            section_records: list[dict[str, Any]] = []
+            for section in normalized_sections:
+                object_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"trace:cortex:{revision}:{section['logical_key']}"))
+                properties = dict(section["properties"])
+                if not properties.get("source_checksum"):
+                    properties["source_checksum"] = hashlib.sha256(section["content"].encode("utf-8")).hexdigest()
+                objects.append({
+                    "projection_object_id": object_id,
+                    "object_kind": "source_section",
+                    "logical_key": section["logical_key"],
+                    "content": section["content"],
+                    "source_atom_version_ids": section["source_atom_version_ids"],
+                    "properties": properties,
+                })
+                for ordinal, source_id in enumerate(section["source_atom_version_ids"]):
+                    memberships.append({
+                        "parent_projection_object_id": object_id,
+                        "child_kind": "atom_version",
+                        "child_id": source_id,
+                        "ordinal": ordinal,
+                    })
+                section_records.append({"object_id": object_id, **section, "properties": properties})
+
+            topic_records: list[dict[str, Any]] = []
+            width = self._bounded_hierarchy_size(topic_size, minimum=2, maximum=32)
+            for index in range(0, len(section_records), width):
+                members = section_records[index:index + width]
+                source_ids = list(dict.fromkeys(
+                    source_id for section in members for source_id in section["source_atom_version_ids"]
+                ))
+                checksums = [str(section["properties"].get("source_checksum", "")) for section in members]
+                logical_key = f"topic:{index // width}"
+                object_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"trace:cortex:{revision}:{logical_key}"))
+                content = self._cortex_summary(
+                    f"Topic holon {index // width + 1}",
+                    [{"content": section["content"]} for section in members],
+                )
+                properties = {
+                    "coverage": {"covered_atom_version_ids": source_ids, "covered_atom_count": len(source_ids)},
+                    "source_checksum": hashlib.sha256("\x1f".join(checksums).encode("utf-8")).hexdigest(),
+                    "model_revision": model_revision,
+                    "prompt_revision": prompt_revision,
+                    "resolution": "topic_holon",
+                    "member_section_count": len(members),
+                }
+                objects.append({
+                    "projection_object_id": object_id,
+                    "object_kind": "topic_holon",
+                    "logical_key": logical_key,
+                    "content": content,
+                    "source_atom_version_ids": source_ids,
+                    "properties": properties,
+                })
+                for ordinal, section in enumerate(members):
+                    memberships.append({
+                        "parent_projection_object_id": object_id,
+                        "child_kind": "projection_object",
+                        "child_id": section["object_id"],
+                        "ordinal": ordinal,
+                    })
+                topic_records.append({"object_id": object_id, "content": content, "source_atom_version_ids": source_ids, "properties": properties})
+
+            if topic_records:
+                all_source = list(dict.fromkeys(
+                    source_id for topic in topic_records for source_id in topic["source_atom_version_ids"]
+                ))
+                overview_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"trace:cortex:{revision}:workspace:overview"))
+                overview_properties = {
+                    "coverage": {
+                        "covered_atom_count": len(all_source),
+                        # Descendant membership carries the complete coverage
+                        # set; this inline list remains bounded for storage.
+                        "anchor_truncated": len(all_source) > 512,
+                    },
+                    "source_checksum": hashlib.sha256(
+                        "\x1f".join(str(topic["properties"]["source_checksum"]) for topic in topic_records).encode("utf-8")
+                    ).hexdigest(),
+                    "model_revision": model_revision,
+                    "prompt_revision": prompt_revision,
+                    "resolution": "workspace_overview",
+                    "member_topic_count": len(topic_records),
+                }
+                objects.append({
+                    "projection_object_id": overview_id,
+                    "object_kind": "workspace_overview",
+                    "logical_key": "workspace:overview",
+                    "content": self._cortex_summary(
+                        "Workspace overview", [{"content": topic["content"]} for topic in topic_records],
+                    ),
+                    "source_atom_version_ids": all_source[:512],
+                    "properties": overview_properties,
+                })
+                for ordinal, topic in enumerate(topic_records):
+                    memberships.append({
+                        "parent_projection_object_id": overview_id,
+                        "child_kind": "projection_object",
+                        "child_id": topic["object_id"],
+                        "ordinal": ordinal,
+                    })
+
+            written = self.store.write_projection_objects(
+                projection_run_id=run["projection_run_id"], objects=objects, memberships=memberships, actor=actor,
+            )
+            completed = self.store.transition_projection_run(
+                run["projection_run_id"],
+                status="succeeded",
+                output_statistics={
+                    "object_count": len(written),
+                    "membership_count": len(memberships),
+                    "source_atom_count": len({source_id for section in normalized_sections for source_id in section["source_atom_version_ids"]}),
+                    "carried_forward_section_count": carried_forward_sections,
+                    "regenerated_section_count": regenerated_sections,
+                    "handover": "snapshot_plus_delta" if prior_projection_run_id else "snapshot",
+                },
+                actor=actor,
+            )
+            active = self.store.activate_projection_run(completed["projection_run_id"], actor=actor)
+            return self._projection_view(written, active)
+        except Exception as error:
+            try:
+                self.store.transition_projection_run(
+                    run["projection_run_id"], status="failed", failure_detail=str(error)[:2_000], actor=actor,
+                )
+            except Exception:
+                pass
+            raise
+
+    def _build_cortex_hierarchy_delta(
+        self,
+        *,
+        workspace_id: str,
+        delta_atoms: list[dict[str, Any]],
+        model_revision: str,
+        prompt_revision: str,
+        actor: str,
+        section_size: int = 8,
+        topic_size: int = 6,
+        input_from_event: int | None = None,
+        input_through_event: int | None = None,
+        policy_revision: str | None = None,
+    ) -> dict[str, Any]:
+        """Carry an active hierarchy snapshot forward while replacing local leaves.
+
+        The read side stays on the active revision until every copied source
+        section, regenerated section, topic, and overview is valid.  This is
+        deliberately safer than activating a hierarchy made from only the
+        changed atom versions.
+        """
+
+        delta_atoms = [
+            atom for atom in delta_atoms
+            if atom.get("workspace_id") == workspace_id and "atom" in atom.get("facets", [])
+        ]
+        active = self.store.effective_projection_run(workspace_id, "hierarchy")
+        if active is None:
+            return self._build_cortex_hierarchy(
+                workspace_id=workspace_id,
+                atoms=delta_atoms,
+                model_revision=model_revision,
+                prompt_revision=prompt_revision,
+                actor=actor,
+                section_size=section_size,
+                topic_size=topic_size,
+                input_from_event=input_from_event,
+                input_through_event=input_through_event,
+                policy_revision=policy_revision,
+            )
+        if not delta_atoms:
+            return self._projection_view(self.store.projection_objects(active["projection_run_id"]), active)
+        snapshot = self._projection_source_sections(active["projection_run_id"])
+        if not snapshot:
+            raise InvariantViolation("active hierarchy has no source-section snapshot; retain it and run a bounded backfill")
+
+        changed_node_ids = list(dict.fromkeys(str(atom["node_id"]) for atom in delta_atoms))
+        current_atoms = self.store.current_atom_versions_for_nodes(workspace_id, changed_node_ids)
+        current_by_node = {str(atom["node_id"]): atom for atom in current_atoms}
+        missing_nodes = [node_id for node_id in changed_node_ids if node_id not in current_by_node]
+        if missing_nodes:
+            raise InvariantViolation("hierarchy delta contains an unavailable or cross-workspace source atom")
+
+        section_nodes: dict[str, list[str]] = {
+            str(section["logical_key"]): self._section_node_ids(section) for section in snapshot
+        }
+        section_by_key = {str(section["logical_key"]): dict(section) for section in snapshot}
+        changed_node_set = set(changed_node_ids)
+        snapshot_node_ids = {node_id for nodes in section_nodes.values() for node_id in nodes}
+        affected_keys = {
+            key for key, nodes in section_nodes.items() if set(nodes) & changed_node_set
+        }
+        width = self._bounded_hierarchy_size(section_size, minimum=2, maximum=64)
+        new_atoms_by_key: dict[str, list[dict[str, Any]]] = {}
+        for atom in current_by_node.values():
+            if str(atom["node_id"]) in snapshot_node_ids:
+                continue
+            properties = dict(atom.get("properties") or {})
+            explicit_key = properties.get("projection_section_key")
+            ingestion_id = str(properties.get("ingestion_id", "derived"))
+            ordinal = int(properties.get("ordinal", 0))
+            logical_key = str(explicit_key) if explicit_key else f"section:{ingestion_id}:{ordinal // width}"
+            new_atoms_by_key.setdefault(logical_key, []).append(atom)
+            if logical_key in section_by_key:
+                affected_keys.add(logical_key)
+
+        carried: list[dict[str, Any]] = []
+        regenerated: list[dict[str, Any]] = []
+        for key in sorted(section_by_key):
+            section = section_by_key[key]
+            if key not in affected_keys:
+                properties = dict(section.get("properties") or {})
+                properties["source_node_ids"] = section_nodes[key]
+                properties["carried_forward_from_projection_run_id"] = active["projection_run_id"]
+                carried.append({
+                    "logical_key": key,
+                    "content": section["content"],
+                    "source_atom_version_ids": section["source_atom_version_ids"],
+                    "properties": properties,
+                })
+                continue
+            nodes = list(section_nodes[key])
+            for atom in new_atoms_by_key.get(key, []):
+                node_id = str(atom["node_id"])
+                if node_id not in nodes:
+                    nodes.append(node_id)
+            current_section_atoms = self.store.current_atom_versions_for_nodes(workspace_id, nodes)
+            by_node = {str(atom["node_id"]): atom for atom in current_section_atoms}
+            if len(by_node) != len(nodes):
+                raise InvariantViolation("cannot hand over hierarchy delta with missing source-section atoms")
+            ordered = sorted(
+                (by_node[node_id] for node_id in nodes),
+                key=lambda atom: (int(atom.get("properties", {}).get("ordinal", 0)), str(atom["node_id"])),
+            )
+            source_ids = [str(atom["atom_version_id"]) for atom in ordered]
+            properties = dict(section.get("properties") or {})
+            properties.update({
+                "coverage": {"covered_atom_version_ids": source_ids, "covered_atom_count": len(source_ids)},
+                "source_checksum": hashlib.sha256(
+                    "\x1f".join(str(atom["content_hash"]) for atom in ordered).encode("utf-8")
+                ).hexdigest(),
+                "source_node_ids": [str(atom["node_id"]) for atom in ordered],
+                "model_revision": model_revision,
+                "prompt_revision": prompt_revision,
+                "resolution": "source_section",
+                "section_size": width,
+                "regenerated_from_projection_run_id": active["projection_run_id"],
+            })
+            regenerated.append({
+                "logical_key": key,
+                "content": self._cortex_summary(f"Source section {key.removeprefix('section:')}", ordered),
+                "source_atom_version_ids": source_ids,
+                "properties": properties,
+            })
+        for key, atoms in sorted(new_atoms_by_key.items()):
+            if key in section_by_key:
+                continue
+            ordered = sorted(
+                atoms,
+                key=lambda atom: (int(atom.get("properties", {}).get("ordinal", 0)), str(atom["node_id"])),
+            )
+            source_ids = [str(atom["atom_version_id"]) for atom in ordered]
+            ingestion_id = str(ordered[0].get("properties", {}).get("ingestion_id", "derived"))
+            properties = {
+                "coverage": {"covered_atom_version_ids": source_ids, "covered_atom_count": len(source_ids)},
+                "source_checksum": hashlib.sha256(
+                    "\x1f".join(str(atom["content_hash"]) for atom in ordered).encode("utf-8")
+                ).hexdigest(),
+                "source_node_ids": [str(atom["node_id"]) for atom in ordered],
+                "model_revision": model_revision,
+                "prompt_revision": prompt_revision,
+                "resolution": "source_section",
+                "ingestion_id": ingestion_id,
+                "section_size": width,
+                "regenerated_from_projection_run_id": active["projection_run_id"],
+            }
+            regenerated.append({
+                "logical_key": key,
+                "content": self._cortex_summary(f"Source section {key.removeprefix('section:')}", ordered),
+                "source_atom_version_ids": source_ids,
+                "properties": properties,
+            })
+
+        sections = carried + regenerated
+        source_fingerprint = "\x1e".join(
+            f"{section['logical_key']}:{'\x1f'.join(str(item) for item in section['source_atom_version_ids'])}"
+            for section in sorted(sections, key=lambda item: str(item["logical_key"]))
+        )
+        input_checksum = hashlib.sha256(
+            f"{active['revision']}\x1d{source_fingerprint}".encode("utf-8")
+        ).hexdigest()
+        through = input_through_event or max(
+            [int(active.get("input_through_event") or 0)]
+            + [int(atom.get("created_event_offset", 0)) for atom in current_by_node.values()]
+        )
+        return self._materialize_cortex_hierarchy(
+            workspace_id=workspace_id,
+            sections=sections,
+            input_checksum=input_checksum,
+            model_revision=model_revision,
+            prompt_revision=prompt_revision,
+            actor=actor,
+            section_size=width,
+            topic_size=topic_size,
+            input_from_event=input_from_event,
+            input_through_event=through,
+            prior_projection_run_id=str(active["projection_run_id"]),
+            carried_forward_sections=len(carried),
+            regenerated_sections=len(regenerated),
+            policy_revision=policy_revision,
+        )
+
+    def get_cognitive_policy(self, workspace_id: str) -> dict[str, Any]:
+        getter = getattr(self.store, "get_cognitive_policy", None)
+        if not callable(getter):
+            return {"workspace_id": workspace_id, "policy_revision": "cognitive-policy-v1", "policy": CognitivePolicy().model_dump(mode="json"), "source": "default"}
+        with self.workspace_scope(workspace_id):
+            return getter(workspace_id)
+
+    def _cloud_model_policy_revision(self, workspace_id: str) -> str:
+        """Resolve the workspace policy before any registered cloud call."""
+
+        policy = self.get_cognitive_policy(workspace_id)
+        if not bool(policy.get("policy", {}).get("cloud_models_enabled", True)):
+            raise ModelPolicyDenied("cloud model calls are disabled by the active cognitive policy")
+        return str(policy.get("policy_revision") or "cognitive-policy-v1")
+
+    def put_cognitive_policy(self, workspace_id: str, policy: CognitivePolicy, *, actor: str = "system") -> dict[str, Any]:
+        writer = getattr(self.store, "put_cognitive_policy", None)
+        if not callable(writer):
+            raise InvariantViolation("the configured repository does not support cognitive policies")
+        with self.workspace_scope(workspace_id):
+            return writer(workspace_id=workspace_id, policy=policy.model_dump(mode="json"), actor=actor)
+
+    def rebuild_projection(self, request: ProjectionRebuildRequest, *, _create_job: bool = True) -> dict[str, Any]:
+        """Run one bounded, revisioned Cortex projection job."""
+
+        with self.workspace_scope(request.workspace_id):
+            active_policy_revision = str(self.get_cognitive_policy(request.workspace_id)["policy_revision"])
+            if request.policy_revision and request.policy_revision != active_policy_revision:
+                raise InvariantViolation(
+                    "projection job policy revision is stale; enqueue a new job under the active cognitive policy"
+                )
+            pinned = request.model_copy(update={"policy_revision": active_policy_revision})
+            return self._rebuild_projection(pinned, _create_job=_create_job)
+
+    def _rebuild_projection(self, request: ProjectionRebuildRequest, *, _create_job: bool = True) -> dict[str, Any]:
+        """Scoped implementation for one bounded, revisioned Cortex job."""
+
+        if request.atom_version_ids:
+            atoms = self._revalidate_atoms(self.store.atom_versions(request.atom_version_ids), QueryRequest(query="projection", workspace_id=request.workspace_id), None)
+        elif request.from_event_offset is not None or request.through_event_offset is not None:
+            event_source = getattr(self.store, "atom_versions_by_event_range", None)
+            if not callable(event_source):
+                raise InvariantViolation("repository does not support bounded event-range projection input")
+            atoms = event_source(
+                request.workspace_id, request.from_event_offset or 1, request.through_event_offset or self.store.last_event_offset(), limit=1_001
+            )
+            if len(atoms) > 1_000:
+                raise InvariantViolation("projection event range exceeds 1,000 atom versions; split it into bounded delta jobs")
+        elif self.settings.production_mode:
+            raise InvariantViolation("production projection rebuilds require atom_version_ids or an event range")
+        else:
+            atoms = self.store.queryable_atoms(request.workspace_id)
+        if request.projection_kind == "hierarchy":
+            hierarchy_args = {
+                "workspace_id": request.workspace_id,
+                "model_revision": request.model_revision or "extractive-hierarchy-v2",
+                "prompt_revision": request.prompt_revision or "extractive-v1",
+                "actor": request.actor,
+                "input_from_event": request.from_event_offset,
+                "input_through_event": request.through_event_offset,
+                "policy_revision": request.policy_revision,
+            }
+            if request.atom_version_ids or request.from_event_offset is not None or request.through_event_offset is not None:
+                response = self._build_cortex_hierarchy_delta(delta_atoms=atoms, **hierarchy_args)
+            else:
+                response = self._build_cortex_hierarchy(atoms=atoms, **hierarchy_args)
+        elif request.projection_kind == "affinity":
+            response = self._build_affinity_projection(request, atoms)
+        else:
+            response = self._recompute_activation_projection(request, atoms)
+        if _create_job:
+            kind = {"hierarchy": "hierarchy.delta", "affinity": "affinity.delta", "activation": "activation.recompute"}[request.projection_kind]
+            selector = (
+                f"atoms:{hashlib.sha256('\x1f'.join(sorted(request.atom_version_ids)).encode('utf-8')).hexdigest()[:24]}"
+                if request.atom_version_ids else
+                f"events:{request.from_event_offset or 1}:{request.through_event_offset or 'latest'}"
+            )
+            job = self._completed_job(
+                workspace_id=request.workspace_id, kind=kind, payload=request.model_dump(mode="json"), result=response,
+                actor=request.actor,
+                idempotency_key=(
+                    f"projection:{request.projection_kind}:{request.workspace_id}:{selector}:"
+                    f"{request.model_revision or 'current'}:{request.index_revision or 'current'}:{request.policy_revision or 'current'}"
+                ),
+            )
+            response["job_id"] = job["job_id"]
+            response["job"] = job
+        return response
+
+    def _build_affinity_projection(self, request: ProjectionRebuildRequest, atoms: list[dict[str, Any]]) -> dict[str, Any]:
+        """Materialize sparse, expiring bridges from bounded candidate sets."""
+
+        required = ("create_projection_run", "transition_projection_run", "activate_projection_run", "put_affinity_edge")
+        if not all(callable(getattr(self.store, name, None)) for name in required):
+            return {"status": "not_supported", "reason": "repository_has_no_affinity_interface"}
+        atoms = [atom for atom in atoms if atom.get("workspace_id") == request.workspace_id and "atom" in atom.get("facets", [])][:1_000]
+        checksum = hashlib.sha256("\x1f".join(atom["atom_version_id"] for atom in atoms).encode("utf-8")).hexdigest()
+        policy = self.get_cognitive_policy(request.workspace_id)
+        if request.policy_revision and request.policy_revision != policy["policy_revision"]:
+            raise InvariantViolation("cognitive policy changed before affinity projection handover")
+        revision = f"affinity-{checksum[:20]}-{(request.index_revision or 'current')[:24]}"
+        run = self.store.create_projection_run(
+            workspace_id=request.workspace_id, projection_kind="affinity", revision=revision,
+            input_from_event=request.from_event_offset, input_through_event=request.through_event_offset,
+            input_checksum=checksum, index_revision=request.index_revision or os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
+            model_revision=request.model_revision, prompt_revision=request.prompt_revision,
+            policy_revision=request.policy_revision or policy["policy_revision"], actor=request.actor,
+        )
+        if run["status"] == "active":
+            return {"projection_run_id": run["projection_run_id"], "revision": run["revision"], "status": "active", "materialized": 0, "reused": True}
+        if run["status"] == "queued":
+            run = self.store.transition_projection_run(run["projection_run_id"], status="running", actor=request.actor)
+        try:
+            materialized = rejected_or_capped = candidates = 0
+            local_pool = atoms if not self.settings.production_mode else None
+            ttl = datetime.now(UTC) + timedelta(seconds=int(policy["policy"].get("affinity_ttl_seconds", 2_592_000)))
+            seen_pairs: set[tuple[str, str]] = set()
+            for atom in atoms:
+                neighbors = self._consolidation_neighbors(
+                    workspace_id=request.workspace_id, atom=atom, max_neighbors=8, local_corpus=local_pool,
+                )
+                source_terms = set(_tokens(atom["content"]))
+                for neighbor in neighbors[:8]:
+                    if neighbor.get("atom_version_id") == atom["atom_version_id"]:
+                        continue
+                    pair = canonical_pair(atom["atom_version_id"], neighbor["atom_version_id"])
+                    if pair in seen_pairs:
+                        continue
+                    seen_pairs.add(pair)
+                    target_terms = set(_tokens(neighbor["content"]))
+                    overlap = len(source_terms & target_terms) / max(1, len(source_terms | target_terms))
+                    if overlap < 0.12:
+                        continue
+                    candidates += 1
+                    edge = self.store.put_affinity_edge(
+                        workspace_id=request.workspace_id, source_atom_version_id=pair[0], target_atom_version_id=pair[1],
+                        score=round(min(1.0, overlap), 6),
+                        signal={"provider": "bounded-jaccard-affinity-v1", "shared_terms": sorted(source_terms & target_terms), "recurrent": False},
+                        expires_at=ttl.isoformat(), index_revision=request.index_revision or os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
+                        embedding_revision=request.model_revision, projection_run_id=run["projection_run_id"],
+                        degree_cap=int(policy["policy"].get("affinity_degree_cap", 16)), actor=request.actor,
+                    )
+                    if edge is None:
+                        rejected_or_capped += 1
+                    else:
+                        materialized += 1
+            completed = self.store.transition_projection_run(
+                run["projection_run_id"], status="succeeded",
+                output_statistics={"candidate_pairs": candidates, "materialized": materialized, "rejected_or_capped": rejected_or_capped},
+                actor=request.actor,
+            )
+            active = self.store.activate_projection_run(completed["projection_run_id"], actor=request.actor)
+            return {
+                "projection_run_id": active["projection_run_id"], "revision": active["revision"], "status": active["status"],
+                "candidate_pairs": candidates, "materialized": materialized, "rejected_or_capped": rejected_or_capped,
+            }
+        except Exception as error:
+            try:
+                self.store.transition_projection_run(run["projection_run_id"], status="failed", failure_detail=str(error)[:2_000], actor=request.actor)
+            except Exception:
+                pass
+            raise
+
+    def _recompute_activation_projection(self, request: ProjectionRebuildRequest, atoms: list[dict[str, Any]]) -> dict[str, Any]:
+        """Persist only bounded behavioral priors, never generated answers."""
+
+        required = ("create_projection_run", "transition_projection_run", "activate_projection_run", "upsert_activation_prior")
+        if not all(callable(getattr(self.store, name, None)) for name in required):
+            return {"status": "not_supported", "reason": "repository_has_no_activation_interface"}
+        atoms = [atom for atom in atoms if atom.get("workspace_id") == request.workspace_id and "atom" in atom.get("facets", [])][:1_000]
+        checksum = hashlib.sha256("\x1f".join(atom["atom_version_id"] for atom in atoms).encode("utf-8")).hexdigest()
+        policy = self.get_cognitive_policy(request.workspace_id)
+        if request.policy_revision and request.policy_revision != policy["policy_revision"]:
+            raise InvariantViolation("cognitive policy changed before activation projection handover")
+        revision = f"activation-{checksum[:20]}"
+        run = self.store.create_projection_run(
+            workspace_id=request.workspace_id, projection_kind="activation", revision=revision,
+            input_from_event=request.from_event_offset, input_through_event=request.through_event_offset,
+            input_checksum=checksum, index_revision=request.index_revision, model_revision=request.model_revision,
+            prompt_revision=request.prompt_revision, policy_revision=request.policy_revision or policy["policy_revision"], actor=request.actor,
+        )
+        if run["status"] == "active":
+            return {"projection_run_id": run["projection_run_id"], "revision": run["revision"], "status": "active", "prior_count": 0, "reused": True}
+        if run["status"] == "queued":
+            run = self.store.transition_projection_run(run["projection_run_id"], status="running", actor=request.actor)
+        try:
+            feedback = self.store.feedback_scores(request.workspace_id, [atom["atom_version_id"] for atom in atoms])
+            expires = (datetime.now(UTC) + timedelta(days=30)).isoformat()
+            count = 0
+            for atom_id, score in feedback.items():
+                if not score:
+                    continue
+                self.store.upsert_activation_prior(
+                    workspace_id=request.workspace_id, atom_version_id=atom_id, prior_kind="feedback",
+                    score=max(-1.0, min(1.0, float(score))), provenance={"source": "retrieval_feedback", "projection_run_id": run["projection_run_id"]},
+                    expires_at=expires, actor=request.actor,
+                )
+                count += 1
+            completed = self.store.transition_projection_run(
+                run["projection_run_id"], status="succeeded", output_statistics={"prior_count": count}, actor=request.actor,
+            )
+            active = self.store.activate_projection_run(completed["projection_run_id"], actor=request.actor)
+            return {"projection_run_id": active["projection_run_id"], "revision": active["revision"], "status": active["status"], "prior_count": count}
+        except Exception as error:
+            try:
+                self.store.transition_projection_run(run["projection_run_id"], status="failed", failure_detail=str(error)[:2_000], actor=request.actor)
+            except Exception:
+                pass
+            raise
+
+    def reject_affinity(self, request: AffinityRejectionRequest) -> dict[str, Any]:
+        reject = getattr(self.store, "reject_affinity", None)
+        if not callable(reject):
+            raise InvariantViolation("the configured repository does not support affinity rejection")
+        with self.workspace_scope(request.workspace_id):
+            return reject(
+                workspace_id=request.workspace_id, source_atom_version_id=request.source_atom_version_id,
+                target_atom_version_id=request.target_atom_version_id, reason=request.reason, actor=request.actor,
+            )
 
     def propose_schemas(
         self,
@@ -707,6 +1821,7 @@ class TraceService:
         else:
             atoms = self.store.queryable_atoms(request.workspace_id)
         if request.model_id:
+            policy_revision = self._cloud_model_policy_revision(request.workspace_id)
             context = authorization_context or SimpleNamespace(
                 workspace_id=request.workspace_id,
                 subject=request.actor,
@@ -723,6 +1838,7 @@ class TraceService:
                 max_nodes=min(128, len(atoms)),
                 token_budget=int(os.environ.get("TRACE_SCHEMA_TOKEN_BUDGET", "4000")),
                 prompt_template_revision="schema-proposal-v1",
+                policy_revision=policy_revision,
             )
             proposed = [item for item in generated["schemas"] if isinstance(item, dict)][:request.max_schemas]
             provider_id = f"trace-model-gateway:{request.model_id}"
@@ -838,7 +1954,77 @@ class TraceService:
                 break
         return {"workspace_id": request.workspace_id, "proposals": proposals, "auto_promoted": 0}
 
+    def _benchmark_baseline_identity(self, workspace_id: str, benchmark: dict[str, Any]) -> dict[str, Any]:
+        """Capture every mutable retrieval input alongside a benchmark run.
+
+        A score without its corpus, policy, model, and projection revisions is
+        not reproducible evidence.  This intentionally performs a bounded
+        benchmark-time corpus digest; it is never on a normal query path.
+        """
+
+        atom_source = getattr(self.store, "iter_queryable_atoms", None)
+        atoms = atom_source(workspace_id) if callable(atom_source) else iter(self.store.queryable_atoms(workspace_id))
+        corpus_rows = sorted(
+            (
+                str(atom["atom_version_id"]),
+                str(atom.get("content_hash", "")),
+                int(atom.get("created_event_offset", 0)),
+            )
+            for atom in atoms
+        )
+        digest = hashlib.sha256()
+        for atom_version_id, content_hash, offset in corpus_rows:
+            digest.update(f"{atom_version_id}\x1f{content_hash}\x1f{offset}\n".encode("utf-8"))
+        policy = self.get_cognitive_policy(workspace_id)
+        effective_projection = getattr(self.store, "effective_projection_run", None)
+        active_projections: dict[str, dict[str, Any] | None] = {}
+        if callable(effective_projection):
+            for kind in ("hierarchy", "affinity", "activation"):
+                active = effective_projection(workspace_id, kind)
+                active_projections[kind] = (
+                    {
+                        "projection_run_id": active.get("projection_run_id"),
+                        "revision": active.get("revision"),
+                        "policy_revision": active.get("policy_revision"),
+                        "index_revision": active.get("index_revision"),
+                        "model_revision": active.get("model_revision"),
+                        "prompt_revision": active.get("prompt_revision"),
+                    }
+                    if active else None
+                )
+        return {
+            "captured_at": datetime.now(UTC).isoformat(),
+            "benchmark_checksum": hashlib.sha256(
+                json.dumps(benchmark, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            ).hexdigest(),
+            "corpus_checksum": digest.hexdigest(),
+            "corpus_atom_count": len(corpus_rows),
+            "code_revision": os.environ.get("TRACE_CODE_REVISION", os.environ.get("TRACE_BUILD_REVISION", "unknown")),
+            "policy_revision": policy.get("policy_revision"),
+            "policy_id": policy.get("cognitive_policy_id"),
+            "model_revisions": {
+                "dense": getattr(self.retrieval_engine.dense_embedder, "provider_id", None),
+                "reranker": getattr(self.retrieval_engine.reranker, "provider_id", None),
+                "deep_navigator": getattr(self.retrieval_engine.deep_navigator, "provider_id", None),
+            },
+            "index_revisions": {
+                "requested": os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
+                "lexical_provider": getattr(self.retrieval_engine.lexical_index, "provider_id", None),
+                "dense_provider": getattr(self.retrieval_engine.dense_index, "provider_id", None),
+            },
+            "active_projections": active_projections,
+            "hardware": {
+                "platform": platform.platform(),
+                "python": platform.python_version(),
+                "cpu_count": os.cpu_count(),
+            },
+        }
+
     def run_benchmark(self, request: BenchmarkRunRequest, *, _create_job: bool = True) -> dict[str, Any]:
+        with self.workspace_scope(request.workspace_id):
+            return self._run_benchmark(request, _create_job=_create_job)
+
+    def _run_benchmark(self, request: BenchmarkRunRequest, *, _create_job: bool = True) -> dict[str, Any]:
         benchmark = load_benchmark(request.benchmark_path)
         release_corpus = validate_release_corpus(benchmark) if request.release_gate else None
         if request.bootstrap_fixture:
@@ -862,6 +2048,7 @@ class TraceService:
             benchmark=benchmark,
             stages=request.stages,
         )
+        report["baseline_identity"] = self._benchmark_baseline_identity(request.workspace_id, benchmark)
         if release_corpus is not None:
             report["release_corpus"] = release_corpus
         response = self.store.save_benchmark_run(
@@ -926,6 +2113,8 @@ class TraceService:
     def query(self, request: QueryRequest, *, authorization_context: AuthorizationContext | None = None) -> dict[str, Any]:
         """Run retrieval inside the repository's explicit tenant scope."""
 
+        if request.model_id and authorization_context is None:
+            raise PermissionError("a server-derived authorization context is required for model-backed deep navigation")
         scope_factory = getattr(self.store, "authorization_scope", None)
         scope = (
             scope_factory(authorization_context.workspace_id)
@@ -954,6 +2143,7 @@ class TraceService:
             self.metrics.inc("trace_query_cache_misses_total")
 
         index_hits: dict[str, list[dict[str, Any]]] = {}
+        provider_diagnostics: dict[str, Any] = {"hot_candidates": 0, "provider_failures": {}}
         if request.workspace_id and (self.retrieval_engine.lexical_index is not None or self.retrieval_engine.dense_index is not None):
             visibility = request.privacy_context.get("allowed_visibility")
             atom_ids: set[str] = set()
@@ -971,28 +2161,112 @@ class TraceService:
                     index_hits["lexical"] = self.retrieval_engine.lexical_index.search(**lexical_kwargs)
                 except TypeError:
                     lexical_kwargs.pop("index_revision", None)
-                    index_hits["lexical"] = self.retrieval_engine.lexical_index.search(**lexical_kwargs)
+                    try:
+                        index_hits["lexical"] = self.retrieval_engine.lexical_index.search(**lexical_kwargs)
+                    except Exception as error:
+                        index_hits["lexical"] = []
+                        provider_diagnostics["provider_failures"]["lexical"] = str(error)[:300]
+                except Exception as error:
+                    # A stale/unavailable external index is a read-time
+                    # degradation, never a reason to write vectors or hide
+                    # fresh hot-inbox evidence.
+                    index_hits["lexical"] = []
+                    provider_diagnostics["provider_failures"]["lexical"] = str(error)[:300]
                 atom_ids.update(str(hit["atom_version_id"]) for hit in index_hits["lexical"] if hit.get("atom_version_id"))
             if self.retrieval_engine.dense_index is not None and request.retrieval_profile != "lexical":
-                query_vector = self.retrieval_engine.dense_embedder.embed([request.query])[0]
-                dense_kwargs = {
-                    "workspace_id": request.workspace_id,
-                    "vector": query_vector,
-                    "limit": request.retrieval_budget.dense_limit,
-                    "visibility": visibility,
-                    "facets": request.facets,
-                    "as_of_event": request.as_of_event,
-                    "index_revision": os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
-                }
                 try:
-                    index_hits["dense"] = self.retrieval_engine.dense_index.search(**dense_kwargs)
-                except TypeError:
-                    # Compatibility for an older injected adapter; production
-                    # adapters implement revision-aware filtering.
-                    dense_kwargs.pop("index_revision", None)
-                    index_hits["dense"] = self.retrieval_engine.dense_index.search(**dense_kwargs)
+                    query_vector = self.retrieval_engine.dense_embedder.embed([request.query])[0]
+                    dense_kwargs = {
+                        "workspace_id": request.workspace_id,
+                        "vector": query_vector,
+                        "limit": request.retrieval_budget.dense_limit,
+                        "visibility": visibility,
+                        "facets": request.facets,
+                        "as_of_event": request.as_of_event,
+                        "index_revision": os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
+                    }
+                    try:
+                        index_hits["dense"] = self.retrieval_engine.dense_index.search(**dense_kwargs)
+                    except TypeError:
+                        # Compatibility for an older injected adapter; production
+                        # adapters implement revision-aware filtering.
+                        dense_kwargs.pop("index_revision", None)
+                        index_hits["dense"] = self.retrieval_engine.dense_index.search(**dense_kwargs)
+                except Exception as error:
+                    index_hits["dense"] = []
+                    provider_diagnostics["provider_failures"]["dense"] = str(error)[:300]
                 atom_ids.update(str(hit["atom_version_id"]) for hit in index_hits["dense"] if hit.get("atom_version_id"))
-            atoms = self._revalidate_atoms(self.store.atom_versions(sorted(atom_ids)), request, authorization_context)
+            hot_source = getattr(self.store, "hot_candidates", None)
+            hot_atoms: list[dict[str, Any]] = []
+            if callable(hot_source):
+                try:
+                    hot_atoms = hot_source(
+                        request.workspace_id, request.query,
+                        limit=max(request.retrieval_budget.lexical_limit, request.retrieval_budget.dense_limit),
+                        visibility=visibility, facets=request.facets, as_of_event=request.as_of_event,
+                    )
+                except Exception as error:
+                    provider_diagnostics["provider_failures"]["hot_inbox"] = str(error)[:300]
+            # The hot path is a handoff buffer, not a second permanent full
+            # corpus.  Include it while an externally-indexed ingestion is
+            # pending/stale or when a provider is degraded.  This also avoids
+            # treating an index attached after an old embedded ingestion as a
+            # reason to bypass a successful external result set forever.
+            state_source = getattr(self.store, "ingestion_index_state", None)
+            if callable(state_source) and not provider_diagnostics["provider_failures"]:
+                filtered_hot: list[dict[str, Any]] = []
+                for atom in hot_atoms:
+                    ingestion_id = atom.get("properties", {}).get("ingestion_id")
+                    if not ingestion_id:
+                        # Atom revisions produced by split/import flows may
+                        # have no single ingestion owner.  They have not been
+                        # proved externally indexed, so retain their bounded
+                        # hot candidate rather than creating a blind spot.
+                        filtered_hot.append(atom)
+                        continue
+                    state = state_source(str(ingestion_id))
+                    lexical_state = state.get("lexical", {})
+                    if lexical_state.get("status") in {"pending", "stale", "failed"}:
+                        filtered_hot.append(atom)
+                hot_atoms = filtered_hot
+            provider_diagnostics["hot_candidates"] = len(hot_atoms)
+            atom_ids.update(str(atom["atom_version_id"]) for atom in hot_atoms)
+            reloaded = self.store.atom_versions(sorted(atom_ids))
+            # External indexes are keyed by immutable atom-version IDs.  A
+            # current read must not quietly return a superseded version while
+            # its replacement delta is in flight.  Historical reads retain
+            # their explicit as-of semantics and therefore skip this filter.
+            current_loader = getattr(self.store, "current_atom_versions_for_nodes", None)
+            if request.as_of_event is None and callable(current_loader) and reloaded:
+                current = current_loader(
+                    request.workspace_id,
+                    list(dict.fromkeys(str(atom["node_id"]) for atom in reloaded)),
+                )
+                current_ids = {str(atom["atom_version_id"]) for atom in current}
+                stale_ids = {
+                    str(atom["atom_version_id"])
+                    for atom in reloaded
+                    if str(atom["atom_version_id"]) not in current_ids
+                }
+                if stale_ids:
+                    reloaded = [atom for atom in reloaded if str(atom["atom_version_id"]) not in stale_ids]
+                    for channel in ("lexical", "dense"):
+                        index_hits[channel] = [
+                            hit for hit in index_hits.get(channel, [])
+                            if str(hit.get("atom_version_id", "")) not in stale_ids
+                        ]
+                    provider_diagnostics["stale_external_candidates_dropped"] = len(stale_ids)
+            atoms = self._revalidate_atoms(reloaded, request, authorization_context)
+            # External score payloads need not yet contain this ingestion.
+            # Give hot candidates a bounded lexical score in memory; this does
+            # not persist embeddings or trigger a corpus scan.
+            known_lexical = {str(hit.get("atom_version_id")) for hit in index_hits.get("lexical", [])}
+            hot_visible = [atom for atom in atoms if atom["atom_version_id"] in {item["atom_version_id"] for item in hot_atoms}]
+            hot_scores = self.retrieval_engine._bm25(_tokens(request.query), hot_visible)
+            index_hits.setdefault("lexical", []).extend(
+                {"atom_version_id": atom_id, "lexical_score": score, "source": "hot_inbox"}
+                for atom_id, score in hot_scores.items() if atom_id not in known_lexical and score > 0
+            )
         else:
             if self.settings.requires_external_indexes:
                 raise InvariantViolation("production retrieval requires both revisioned OpenSearch and Qdrant adapters")
@@ -1003,12 +2277,18 @@ class TraceService:
         with telemetry_span("trace.retrieval", {"workspace_id": request.workspace_id, "profile": request.retrieval_profile}):
             with self.metrics.timer("trace_retrieval_seconds", labels={"profile": request.retrieval_profile}):
                 navigator = (
-                    GatewayDeepNavigator(self.model_gateway, context=authorization_context, model_id=request.model_id)
+                    GatewayDeepNavigator(
+                        self.model_gateway,
+                        context=authorization_context,
+                        model_id=request.model_id,
+                        policy_revision=self._cloud_model_policy_revision(request.workspace_id),
+                    )
                     if request.model_id and authorization_context is not None else None
                 )
                 outcome: RetrievalOutcome = self.retrieval_engine.retrieve(
                     store=self.store, request=request, atoms=atoms, index_hits=index_hits or None, deep_navigator=navigator,
                 )
+        outcome.diagnostics["index_degradation"] = provider_diagnostics
         self.metrics.inc("trace_retrieval_total", labels={"profile": request.retrieval_profile, "state": outcome.sufficiency_state})
         self.metrics.inc("trace_retrieval_candidates_total", len(outcome.candidates), labels={"profile": request.retrieval_profile})
         schema_source = getattr(self.store, "current_nodes_by_facet", None)
@@ -1064,6 +2344,9 @@ class TraceService:
                     "graph_ppr": candidate.graph,
                     "feedback": candidate.feedback,
                     "hierarchy": candidate.hierarchy,
+                    "affinity": candidate.affinity,
+                    "activation": candidate.activation,
+                    "activation_contributions": candidate.activation_contributions,
                     "deep": candidate.deep,
                     "schema": atom.get("schema_feature", 0.0),
                     "soft_schema_labels": atom.get("soft_schema_labels", []),
@@ -1119,6 +2402,8 @@ class TraceService:
         }
 
     def available_models(self, *, authorization_context: AuthorizationContext) -> list[dict[str, Any]]:
+        if not bool(self.get_cognitive_policy(authorization_context.workspace_id).get("policy", {}).get("cloud_models_enabled", True)):
+            return []
         return self.model_gateway.list_models(context=authorization_context, workspace_id=authorization_context.workspace_id)
 
     def synthesize(
@@ -1161,6 +2446,7 @@ class TraceService:
         elif model_id:
             if authorization_context is None:
                 raise PermissionError("a server-derived authorization context is required for model synthesis")
+            policy_revision = self._cloud_model_policy_revision(authorization_context.workspace_id)
             generated, model_audit = self.model_gateway.call_json(
                 context=authorization_context,
                 model_id=model_id,
@@ -1171,6 +2457,7 @@ class TraceService:
                 max_nodes=min(32, len(evidence_atoms)),
                 token_budget=int(os.environ.get("TRACE_SYNTHESIS_TOKEN_BUDGET", "4000")),
                 prompt_template_revision="synthesis-v1",
+                policy_revision=policy_revision,
             )
             rendering = generated["rendering"]
         elif format == "report":
@@ -1278,7 +2565,10 @@ class TraceService:
         return self.store.register_manifest(payload, actor)
 
     def replay(self, *, workspace_id: str | None, actor: str = "system", _create_job: bool = True) -> dict[str, Any]:
-        result = self.store.reconcile_hot_inbox(workspace_id, actor=actor)
+        if self.settings.production_mode and not workspace_id:
+            raise InvariantViolation("production replay requires one explicit workspace")
+        with self.workspace_scope(workspace_id):
+            result = self.store.reconcile_hot_inbox(workspace_id, actor=actor)
         if _create_job and workspace_id:
             job = self._completed_job(
                 workspace_id=workspace_id, kind="reprocess", payload={"workspace_id": workspace_id, "actor": actor},
@@ -1289,7 +2579,17 @@ class TraceService:
         return result
 
     def validate_replay(self, workspace_id: str) -> dict[str, Any]:
-        return self.store.replay_report(workspace_id)
+        with self.workspace_scope(workspace_id):
+            return self.store.replay_report(workspace_id)
+
+    def reconcile_attachment_staging(self, workspace_id: str, *, actor: str = "attachment-reconciler") -> dict[str, Any]:
+        """Surface recoverable object-store cleanup work for one workspace."""
+
+        reconciler = getattr(self.store, "reconcile_attachment_staging", None)
+        if not callable(reconciler):
+            raise InvariantViolation("the configured repository does not support attachment staging reconciliation")
+        with self.workspace_scope(workspace_id):
+            return reconciler(workspace_id, actor=actor)
 
     def snapshot(self, *, actor: str = "system") -> dict[str, Any]:
         return self.store.snapshot(actor=actor)
@@ -1417,6 +2717,197 @@ class TraceService:
         if batch:
             stored += self._index_atom_batch(workspace_id, batch, actor=actor, revision=revision)
         return stored
+
+    @staticmethod
+    def _lexical_documents(workspace_id: str, atoms: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        return [
+            {
+                "atom_version_id": atom["atom_version_id"],
+                "workspace_id": workspace_id,
+                "content": atom["content"],
+                "content_hash": atom.get("content_hash"),
+                "facets": atom.get("facets", []),
+                "visibility": atom.get("security", {}).get("visibility"),
+                "created_event_offset": atom.get("created_event_offset"),
+                "source": atom.get("properties", {}).get("source", {}),
+                "source_start": atom.get("properties", {}).get("source_start"),
+                "source_end": atom.get("properties", {}).get("source_end"),
+                "parser_location": atom.get("properties", {}).get("parser_location"),
+                "attachment_id": atom.get("properties", {}).get("attachment_id"),
+            }
+            for atom in atoms
+        ]
+
+    def _index_ingestion_delta(
+        self,
+        ingestion_id: str,
+        *,
+        actor: str = "index-worker",
+        index_revision: str | None = None,
+    ) -> dict[str, Any]:
+        """Index exactly one immutable ingestion delta.
+
+        This is deliberately distinct from the explicit administrator reindex
+        workflow.  A normal delivery/retry never invokes a workspace-wide
+        read, so duplicate queue messages remain bounded at 100K+ atoms.
+        """
+
+        ingestion = self.store.get_ingestion(ingestion_id)
+        workspace_id = ingestion["workspace_id"]
+        atoms = self.store.ingestion_atoms(ingestion_id)
+        revision = index_revision or os.environ.get("TRACE_INDEX_REVISION", "embedded-current")
+        set_state = getattr(self.store, "set_ingestion_index_state", None)
+        result: dict[str, Any] = {
+            "ingestion_id": ingestion_id,
+            "workspace_id": workspace_id,
+            "atom_count": len(atoms),
+            "index_revision": revision,
+            "lexical_indexed": 0,
+            "dense_indexed": 0,
+        }
+        if not atoms:
+            if callable(set_state):
+                set_state(
+                    ingestion_id=ingestion_id, component="dense", status="failed", index_revision=revision,
+                    detail={"reason": "ingestion_has_no_atoms"}, actor=actor,
+                )
+            raise InvariantViolation("ingestion index delta has no atoms")
+        try:
+            lexical = self.retrieval_engine.lexical_index
+            if lexical is not None:
+                for start in range(0, len(atoms), 1_000):
+                    result["lexical_indexed"] += int(lexical.upsert(self._lexical_documents(workspace_id, atoms[start:start + 1_000]), revision=revision))
+            if callable(set_state):
+                set_state(
+                    ingestion_id=ingestion_id, component="lexical", status="lexical_ready", index_revision=revision,
+                    detail={"atom_count": len(atoms), "external": lexical is not None}, actor=actor,
+                )
+        except Exception as error:
+            if callable(set_state):
+                set_state(
+                    ingestion_id=ingestion_id, component="lexical", status="failed", index_revision=revision,
+                    detail={"error": str(error)[:500]}, actor=actor,
+                )
+            raise
+        try:
+            for start in range(0, len(atoms), 1_000):
+                result["dense_indexed"] += self._index_atom_batch(
+                    workspace_id, atoms[start:start + 1_000], actor=actor, revision=revision
+                )
+            if callable(set_state):
+                set_state(
+                    ingestion_id=ingestion_id, component="dense", status="dense_ready", index_revision=revision,
+                    detail={"atom_count": len(atoms), "external": self.retrieval_engine.dense_index is not None}, actor=actor,
+                )
+        except Exception as error:
+            if callable(set_state):
+                set_state(
+                    ingestion_id=ingestion_id, component="dense", status="failed", index_revision=revision,
+                    detail={"error": str(error)[:500]}, actor=actor,
+                )
+            raise
+        if callable(getattr(self.store, "ingestion_index_state", None)):
+            result["index_state"] = self.store.ingestion_index_state(ingestion_id)
+        return result
+
+    def _index_atom_delta(
+        self,
+        *,
+        workspace_id: str,
+        atom_version_ids: list[str],
+        ingestion_ids: list[str] | None = None,
+        actor: str = "index-worker",
+        index_revision: str | None = None,
+    ) -> dict[str, Any]:
+        """Index a bounded set of newly immutable atom versions.
+
+        This is used by edit/split delivery.  It has deliberately separate
+        accounting from ``_index_ingestion_delta`` because a revised atom
+        belongs to an older ingestion but must not make that entire ingestion
+        appear newly pending or cause a workspace-wide replay.
+        """
+
+        ids = list(dict.fromkeys(str(item) for item in atom_version_ids if item))[:1_000]
+        if not ids:
+            raise InvariantViolation("atom index delta has no atom-version IDs")
+        atoms = self.store.atom_versions(ids)
+        atoms = [
+            atom for atom in atoms
+            if atom.get("workspace_id") == workspace_id and "atom" in atom.get("facets", [])
+        ]
+        found = {str(atom["atom_version_id"]) for atom in atoms}
+        missing = [atom_id for atom_id in ids if atom_id not in found]
+        if missing:
+            raise InvariantViolation("atom index delta contains missing or cross-workspace atom versions")
+        revision = index_revision or os.environ.get("TRACE_INDEX_REVISION", "embedded-current")
+        ingestions = list(dict.fromkeys(str(item) for item in (ingestion_ids or []) if item))
+        state_writer = getattr(self.store, "set_ingestion_index_state", None)
+        result: dict[str, Any] = {
+            "workspace_id": workspace_id,
+            "atom_version_ids": ids,
+            "ingestion_ids": ingestions,
+            "atom_count": len(atoms),
+            "index_revision": revision,
+            "lexical_indexed": 0,
+            "dense_indexed": 0,
+        }
+        try:
+            lexical = self.retrieval_engine.lexical_index
+            if lexical is not None:
+                for start in range(0, len(atoms), 1_000):
+                    result["lexical_indexed"] += int(
+                        lexical.upsert(self._lexical_documents(workspace_id, atoms[start:start + 1_000]), revision=revision)
+                    )
+            if callable(state_writer):
+                for ingestion_id in ingestions:
+                    state_writer(
+                        ingestion_id=ingestion_id,
+                        component="lexical",
+                        status="lexical_ready",
+                        index_revision=revision,
+                        detail={"reason": "atom_version_delta_indexed", "atom_version_ids": ids, "external": lexical is not None},
+                        actor=actor,
+                    )
+        except Exception as error:
+            if callable(state_writer):
+                for ingestion_id in ingestions:
+                    state_writer(
+                        ingestion_id=ingestion_id,
+                        component="lexical",
+                        status="failed",
+                        index_revision=revision,
+                        detail={"reason": "atom_version_delta_failed", "error": str(error)[:500], "atom_version_ids": ids},
+                        actor=actor,
+                    )
+            raise
+        try:
+            for start in range(0, len(atoms), 1_000):
+                result["dense_indexed"] += self._index_atom_batch(
+                    workspace_id, atoms[start:start + 1_000], actor=actor, revision=revision,
+                )
+            if callable(state_writer):
+                for ingestion_id in ingestions:
+                    state_writer(
+                        ingestion_id=ingestion_id,
+                        component="dense",
+                        status="dense_ready",
+                        index_revision=revision,
+                        detail={"reason": "atom_version_delta_indexed", "atom_version_ids": ids, "external": self.retrieval_engine.dense_index is not None},
+                        actor=actor,
+                    )
+        except Exception as error:
+            if callable(state_writer):
+                for ingestion_id in ingestions:
+                    state_writer(
+                        ingestion_id=ingestion_id,
+                        component="dense",
+                        status="failed",
+                        index_revision=revision,
+                        detail={"reason": "atom_version_delta_failed", "error": str(error)[:500], "atom_version_ids": ids},
+                        actor=actor,
+                    )
+            raise
+        return result
 
     def _index_atom_batch(self, workspace_id: str, atoms: list[dict[str, Any]], *, actor: str, revision: str) -> int:
         vectors = self.retrieval_engine.dense_embedder.embed([atom["content"] for atom in atoms])

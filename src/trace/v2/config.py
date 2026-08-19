@@ -138,9 +138,11 @@ class TraceSettings:
             raise ConfigurationError("production mode requires TRACE_MODEL_GATEWAY_URL")
         if set(self.allowed_models) - {"deepseek-v4-flash", "deepseek-v4-pro"}:
             raise ConfigurationError("TRACE_ALLOWED_MODELS contains a model absent from the deployed registry")
-        configured_models = {item for item in (self.deep_model, self.schema_model) if item}
-        if configured_models - set(self.allowed_models):
-            raise ConfigurationError("TRACE_DEEP_MODEL and TRACE_SCHEMA_MODEL must name a registered model_id")
+        if self.deep_model or self.schema_model:
+            raise ConfigurationError(
+                "TRACE_DEEP_MODEL and TRACE_SCHEMA_MODEL are not direct-provider settings in production; "
+                "use a registered request model_id through TRACE_MODEL_GATEWAY_URL"
+            )
 
     def public_dict(self) -> dict[str, object]:
         """Safe deployment information suitable for readiness and diagnostics."""

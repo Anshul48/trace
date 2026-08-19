@@ -22,10 +22,12 @@ class ReleaseCorpusError(BenchmarkFormatError):
 
 _RELEASE_KIND_GROUPS = {
     "direct_lookup": {"direct_lookup", "direct"},
+    "chronology": {"order", "source_order", "temporal_order", "chronology"},
+    "contradiction_revision": {"contradiction", "contradiction_update", "revision"},
+    "cross_domain": {"cross_domain", "cross-domain"},
+    "global_context": {"global_context", "global-context"},
     "multi_hop": {"multi_hop", "multi_hop_architecture", "multi_hop_dependency"},
-    "dependency": {"dependency", "dependency_chain"},
-    "contradiction": {"contradiction", "contradiction_update"},
-    "order": {"order", "source_order", "temporal_order"},
+    "historical_read": {"historical_read", "historical", "as_of"},
     "out_of_scope": {"out_of_scope"},
 }
 
@@ -75,12 +77,16 @@ def validate_release_corpus(benchmark: dict[str, Any]) -> dict[str, Any]:
     unreviewed = [str(case.get("id", "unknown")) for case in cases if case.get("review_status") not in {None, "reviewed"}]
     if unreviewed:
         failures.append("contains non-reviewed cases")
+    untagged = [str(case.get("id", "unknown")) for case in cases if not isinstance(case.get("tags", []), list) or not case.get("tags")]
+    if untagged:
+        failures.append("every release case requires at least one tag")
     if failures:
         raise ReleaseCorpusError("release corpus rejected: " + "; ".join(failures))
     return {
         "approved": True,
         "case_count": len(cases),
         "kind_coverage": sorted(_RELEASE_KIND_GROUPS),
+        "tagged_case_count": len(cases),
         "corpus_snapshot": benchmark["corpus_snapshot"],
     }
 

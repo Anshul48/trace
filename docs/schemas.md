@@ -51,10 +51,13 @@ An edit creates a new version; the old content and offsets remain addressable.
 
 ## Edges and evidence
 
-`edge_versions` support any typed relation string. Structural relations include
-`NEXT`, `CHILD_OF`, and `DERIVED_FROM`; organization may add `semantic`,
-`supports`, `contradicts`, `extends`, `supersedes`, `belongs_to`, `alias_of`, or
-other policy-approved types.
+`edge_versions` accept only the audited relation contract in
+`models.py`/`store.py`. Structural relations are `NEXT`, `CHILD_OF`,
+`DERIVED_FROM`, `CONTAINS`, and `alias_of`; reviewed evidence relations are
+`supports`, `contradicts`, `depends_on`, `implements`, and `example_of`.
+Generic `semantic` links and opaque relation names are rejected on write.
+Similarity, clustering, affinity, feedback, and activation are replaceable
+Cortex projections, never canonical evidence edges.
 
 Each trusted non-structural edge requires `evidence_atom_version_ids`. The
 store expands those IDs into `evidence_anchors` containing:
