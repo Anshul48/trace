@@ -2788,29 +2788,353 @@ class PostgresEventStore:
                             frontier.append(identifier)
         return source_ids[:bounded_limit]
 
-    def affinity_neighbors(self, workspace_id: str, atom_version_ids: Sequence[str], *, limit: int = 64, index_revision: str | None = None) -> list[dict[str, Any]]:
-        if self.delegate is not None and hasattr(self.delegate, "affinity_neighbors"):
-            return self.delegate.affinity_neighbors(workspace_id, atom_version_ids, limit=limit, index_revision=index_revision)
-        if not atom_version_ids:
-            return []
-        clauses = ["workspace_id=%s", "status='active'", "expires_at>NOW()", "(left_atom_version_id = ANY(%s::uuid[]) OR right_atom_version_id = ANY(%s::uuid[]))"]
-        values: list[Any] = [workspace_id, list(atom_version_ids), list(atom_version_ids)]
-        if index_revision:
-            clauses.append("(index_revision IS NULL OR index_revision=%s)")
-            values.append(index_revision)
-        values.append(max(1, min(int(limit), 256)))
+    # ---------------------------------------------------- cortex release lifecycle
+    @classmethod
+    def _pg_cortex_release_row(cls, row: dict[str, Any] | None, components: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("cortex release was not found")
+        result = dict(row)
+        result["validation_receipt"] = cls._json_value(result.pop("validation_receipt", {}), {})
+        if components is not None:
+            result["components"] = components
+        return result
+
+    @classmethod
+    def _pg_cortex_component_row(cls, row: dict[str, Any] | None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("cortex release component was not found")
+        result = dict(row)
+        result["metadata"] = cls._json_value(result.pop("metadata", {}), {})
+        return result
+
+    def _create_bootstrap_release_in_pg(self, cursor: Any, workspace_id: str, actor: str = "system") -> str:
+        cursor.execute("SELECT release_id FROM trace_cortex_releases WHERE workspace_id=%s AND status='active'", (workspace_id,))
+        active_row = cursor.fetchone()
+        if active_row:
+            return str(active_row[0])
+        cursor.execute("SELECT COALESCE(MAX(event_offset), 0) FROM trace_events WHERE stream_id=%s", (f"workspace:{workspace_id}",))
+        ev_row = cursor.fetchone()
+        watermark = int(ev_row[0]) if ev_row and ev_row[0] else 0
+        rel_id = str(uuid.uuid4())
+        cursor.execute(
+            """INSERT INTO trace_cortex_releases(release_id,workspace_id,parent_release_id,spine_event_watermark,status,policy_revision,policy_snapshot_hash,code_revision,validation_receipt,created_at,activated_at)
+               VALUES (%s,%s,NULL,%s,'active','bootstrap-v0','0000000000000000000000000000000000000000000000000000000000000000','bootstrap-v0','{"bootstrap": true}'::jsonb,NOW(),NOW())""",
+            (rel_id, workspace_id, watermark),
+        )
+        for kind in ('hierarchy', 'affinity', 'activation_priors', 'lexical_index', 'dense_index'):
+            cursor.execute(
+                """INSERT INTO trace_cortex_release_components(release_id,workspace_id,component_kind,component_revision,input_checksum,source_watermark,carried_forward_from_release_id,validation_status,metadata,created_at)
+                   VALUES (%s,%s,%s,'bootstrap-v0','0000000000000000000000000000000000000000000000000000000000000000',%s,NULL,'validated','{"bootstrap": true}'::jsonb,NOW())
+                   ON CONFLICT DO NOTHING""",
+                (rel_id, workspace_id, kind, watermark),
+            )
+        return rel_id
+
+    def create_cortex_release(
+        self,
+        *,
+        workspace_id: str,
+        parent_release_id: str | None = None,
+        spine_event_watermark: int | None = None,
+        policy_revision: str | None = None,
+        policy_snapshot_hash: str | None = None,
+        code_revision: str | None = None,
+        components: Sequence[dict[str, Any]] | None = None,
+        actor: str = "system",
+    ) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "create_cortex_release"):
+            return self.delegate.create_cortex_release(workspace_id=workspace_id, parent_release_id=parent_release_id, spine_event_watermark=spine_event_watermark, policy_revision=policy_revision, policy_snapshot_hash=policy_snapshot_hash, code_revision=code_revision, components=components, actor=actor)
+        if not workspace_id:
+            raise InvariantViolation("cortex release requires a workspace_id")
+        identifier = str(uuid.uuid4())
         with self.connection() as conn:
             with conn.cursor() as cursor:
                 self._set_workspace(cursor, workspace_id)
+                if spine_event_watermark is None:
+                    cursor.execute("SELECT COALESCE(MAX(event_offset), 0) FROM trace_events WHERE stream_id=%s", (f"workspace:{workspace_id}",))
+                    ev_row = cursor.fetchone()
+                    watermark = int(ev_row[0]) if ev_row and ev_row[0] else 0
+                else:
+                    watermark = int(spine_event_watermark)
+                cursor.execute("SELECT * FROM trace_cognitive_policy_versions WHERE workspace_id=%s AND active=true", (workspace_id,))
+                pol_row = self._cursor_mapping(cursor, cursor.fetchone())
+                eff_policy_rev = policy_revision or (pol_row or {}).get("policy_revision") or "cognitive-policy-v1"
+                eff_policy_hash = policy_snapshot_hash or _digest(self._json_value((pol_row or {}).get("policy", {}), {}))
+                eff_code_rev = code_revision or os.environ.get("TRACE_CODE_REVISION", "trace-v2-cortex")
+                if parent_release_id is None:
+                    cursor.execute("SELECT release_id FROM trace_cortex_releases WHERE workspace_id=%s AND status='active'", (workspace_id,))
+                    active_row = cursor.fetchone()
+                    parent_release_id = str(active_row[0]) if active_row else None
+            event = self._append_event_in_connection(
+                conn, stream_id=f"workspace:{workspace_id}", event_type="cortex.release_planned",
+                payload={"release_id": identifier, "workspace_id": workspace_id, "parent_release_id": parent_release_id, "spine_event_watermark": watermark, "policy_revision": eff_policy_rev, "code_revision": eff_code_rev},
+                actor=actor,
+            )
+            comps: list[dict[str, Any]] = []
+            default_kinds = ('hierarchy', 'affinity', 'activation_priors', 'lexical_index', 'dense_index')
+            comp_map = {item["component_kind"]: item for item in (components or []) if "component_kind" in item}
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(
+                    """INSERT INTO trace_cortex_releases(release_id,workspace_id,parent_release_id,spine_event_watermark,status,policy_revision,policy_snapshot_hash,code_revision,validation_receipt,created_at)
+                       VALUES (%s,%s,%s,%s,'building',%s,%s,%s,'{}'::jsonb,NOW())""",
+                    (identifier, workspace_id, parent_release_id, watermark, eff_policy_rev, eff_policy_hash, eff_code_rev),
+                )
+                for kind in default_kinds:
+                    c = comp_map.get(kind, {})
+                    c_rev = c.get("component_revision") or f"{kind}-{watermark}"
+                    c_checksum = c.get("input_checksum") or _digest(f"{kind}:{watermark}")
+                    c_watermark = int(c.get("source_watermark", watermark))
+                    c_carried = c.get("carried_forward_from_release_id")
+                    c_status = c.get("validation_status", "pending")
+                    c_meta = c.get("metadata", {})
+                    cursor.execute(
+                        """INSERT INTO trace_cortex_release_components(release_id,workspace_id,component_kind,component_revision,input_checksum,source_watermark,carried_forward_from_release_id,validation_status,metadata,created_at)
+                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,NOW())""",
+                        (identifier, workspace_id, kind, c_rev, c_checksum, c_watermark, c_carried, c_status, json.dumps(c_meta)),
+                    )
+                    comps.append({
+                        "release_id": identifier, "workspace_id": workspace_id, "component_kind": kind,
+                        "component_revision": c_rev, "input_checksum": c_checksum, "source_watermark": c_watermark,
+                        "carried_forward_from_release_id": c_carried, "validation_status": c_status, "metadata": c_meta,
+                    })
+                cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s", (identifier,))
+                row = self._cursor_mapping(cursor, cursor.fetchone())
+                return self._pg_cortex_release_row(row, components=comps)
+
+    def get_cortex_release(self, release_id: str) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "get_cortex_release"):
+            return self.delegate.get_cortex_release(release_id)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s", (release_id,))
+                row = self._cursor_mapping(cursor, cursor.fetchone())
+                if not row:
+                    raise NotFoundError(f"cortex release {release_id} was not found")
+                cursor.execute("SELECT * FROM trace_cortex_release_components WHERE release_id=%s ORDER BY component_kind", (release_id,))
+                comps = [self._pg_cortex_component_row(self._cursor_mapping(cursor, r)) for r in cursor.fetchall()]
+                return self._pg_cortex_release_row(row, components=comps)
+
+    def get_active_cortex_release(self, workspace_id: str) -> dict[str, Any] | None:
+        if self.delegate is not None and hasattr(self.delegate, "get_active_cortex_release"):
+            return self.delegate.get_active_cortex_release(workspace_id)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("SELECT * FROM trace_cortex_releases WHERE workspace_id=%s AND status='active' ORDER BY activated_at DESC LIMIT 1", (workspace_id,))
+                row = self._cursor_mapping(cursor, cursor.fetchone())
+                if not row:
+                    return None
+                cursor.execute("SELECT * FROM trace_cortex_release_components WHERE release_id=%s ORDER BY component_kind", (row["release_id"],))
+                comps = [self._pg_cortex_component_row(self._cursor_mapping(cursor, r)) for r in cursor.fetchall()]
+                return self._pg_cortex_release_row(row, components=comps)
+
+    def list_cortex_releases(self, workspace_id: str, *, status: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "list_cortex_releases"):
+            return self.delegate.list_cortex_releases(workspace_id, status=status, limit=limit)
+        clauses = ["workspace_id=%s"]
+        values: list[Any] = [workspace_id]
+        if status:
+            clauses.append("status=%s")
+            values.append(status)
+        values.append(max(1, min(int(limit), 200)))
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(f"SELECT * FROM trace_cortex_releases WHERE {' AND '.join(clauses)} ORDER BY created_at DESC LIMIT %s", values)
+                rows = [self._cursor_mapping(cursor, r) for r in cursor.fetchall()]
+                results: list[dict[str, Any]] = []
+                for row in rows:
+                    cursor.execute("SELECT * FROM trace_cortex_release_components WHERE release_id=%s ORDER BY component_kind", (row["release_id"],))
+                    comps = [self._pg_cortex_component_row(self._cursor_mapping(cursor, cr)) for cr in cursor.fetchall()]
+                    results.append(self._pg_cortex_release_row(row, components=comps))
+                return results
+
+    def record_cortex_component(self, release_id: str, *, component_kind: str, component_revision: str, input_checksum: str, source_watermark: int, carried_forward_from_release_id: str | None = None, validation_status: str = "pending", metadata: dict[str, Any] | None = None) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "record_cortex_component"):
+            return self.delegate.record_cortex_component(release_id, component_kind=component_kind, component_revision=component_revision, input_checksum=input_checksum, source_watermark=source_watermark, carried_forward_from_release_id=carried_forward_from_release_id, validation_status=validation_status, metadata=metadata)
+        if component_kind not in {'hierarchy', 'affinity', 'activation_priors', 'lexical_index', 'dense_index'}:
+            raise InvariantViolation(f"invalid cortex component kind: {component_kind}")
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute("SELECT workspace_id, status FROM trace_cortex_releases WHERE release_id=%s FOR UPDATE", (release_id,))
+                rel = self._cursor_mapping(cursor, cursor.fetchone())
+                if not rel:
+                    raise NotFoundError(f"cortex release {release_id} was not found")
+                if rel["status"] not in {"planned", "building", "validating"}:
+                    raise InvariantViolation(f"cannot update component on release in status {rel['status']}")
+                cursor.execute(
+                    """INSERT INTO trace_cortex_release_components(release_id,workspace_id,component_kind,component_revision,input_checksum,source_watermark,carried_forward_from_release_id,validation_status,metadata,created_at)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,NOW())
+                       ON CONFLICT(release_id,component_kind) DO UPDATE SET
+                         component_revision=EXCLUDED.component_revision,
+                         input_checksum=EXCLUDED.input_checksum,
+                         source_watermark=EXCLUDED.source_watermark,
+                         carried_forward_from_release_id=EXCLUDED.carried_forward_from_release_id,
+                         validation_status=EXCLUDED.validation_status,
+                         metadata=EXCLUDED.metadata""",
+                    (release_id, rel["workspace_id"], component_kind, component_revision, input_checksum, int(source_watermark), carried_forward_from_release_id, validation_status, json.dumps(metadata or {})),
+                )
+                cursor.execute("SELECT * FROM trace_cortex_release_components WHERE release_id=%s AND component_kind=%s", (release_id, component_kind))
+                return self._pg_cortex_component_row(self._cursor_mapping(cursor, cursor.fetchone()))
+
+    def validate_cortex_release(self, release_id: str, validation_receipt: dict[str, Any], *, actor: str = "validation-worker") -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "validate_cortex_release"):
+            return self.delegate.validate_cortex_release(release_id, validation_receipt, actor=actor)
+        passed = bool(validation_receipt.get("passed", True))
+        new_status = "validated" if passed else "failed"
+        failure_detail = validation_receipt.get("failure_detail") if not passed else None
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s FOR UPDATE", (release_id,))
+                rel = self._cursor_mapping(cursor, cursor.fetchone())
+                if not rel:
+                    raise NotFoundError(f"cortex release {release_id} was not found")
+                if rel["status"] not in {"planned", "building", "validating"}:
+                    raise InvariantViolation(f"cortex release in status {rel['status']} cannot be validated")
+            event = self._append_event_in_connection(
+                conn, stream_id=f"workspace:{rel['workspace_id']}", event_type=f"cortex.release_{new_status}",
+                payload={"release_id": release_id, "workspace_id": rel["workspace_id"], "validation_receipt": validation_receipt, "status": new_status},
+                actor=actor,
+            )
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, rel["workspace_id"])
+                cursor.execute("UPDATE trace_cortex_releases SET status=%s,validation_receipt=%s::jsonb,failure_detail=%s WHERE release_id=%s", (new_status, json.dumps(validation_receipt), failure_detail, release_id))
+                if passed:
+                    cursor.execute("UPDATE trace_cortex_release_components SET validation_status='validated' WHERE release_id=%s", (release_id,))
+                cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s", (release_id,))
+                row = self._cursor_mapping(cursor, cursor.fetchone())
+                cursor.execute("SELECT * FROM trace_cortex_release_components WHERE release_id=%s ORDER BY component_kind", (release_id,))
+                comps = [self._pg_cortex_component_row(self._cursor_mapping(cursor, r)) for r in cursor.fetchall()]
+                return self._pg_cortex_release_row(row, components=comps)
+
+    def activate_cortex_release(self, release_id: str, *, actor: str = "system") -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "activate_cortex_release"):
+            return self.delegate.activate_cortex_release(release_id, actor=actor)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s FOR UPDATE", (release_id,))
+                rel = self._cursor_mapping(cursor, cursor.fetchone())
+                if not rel:
+                    raise NotFoundError(f"cortex release {release_id} was not found")
+                if rel["status"] != "validated":
+                    raise InvariantViolation(f"cannot activate cortex release in status {rel['status']!r}; must be 'validated'")
+                ws = rel["workspace_id"]
+            event = self._append_event_in_connection(
+                conn, stream_id=f"workspace:{ws}", event_type="cortex.release_activated",
+                payload={"release_id": release_id, "workspace_id": ws, "spine_event_watermark": rel["spine_event_watermark"], "policy_revision": rel["policy_revision"], "code_revision": rel["code_revision"]},
+                actor=actor,
+            )
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, ws)
+                cursor.execute("UPDATE trace_cortex_releases SET status='superseded',superseded_at=NOW() WHERE workspace_id=%s AND status='active' AND release_id<>%s", (ws, release_id))
+                cursor.execute("UPDATE trace_cortex_releases SET status='active',activated_at=NOW(),superseded_at=NULL WHERE release_id=%s", (release_id,))
+                cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s", (release_id,))
+                row = self._cursor_mapping(cursor, cursor.fetchone())
+                cursor.execute("SELECT * FROM trace_cortex_release_components WHERE release_id=%s ORDER BY component_kind", (release_id,))
+                comps = [self._pg_cortex_component_row(self._cursor_mapping(cursor, r)) for r in cursor.fetchall()]
+                return self._pg_cortex_release_row(row, components=comps)
+
+    def rollback_cortex_release(self, workspace_id: str, *, target_release_id: str | None = None, reason: str | None = None, actor: str = "system") -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "rollback_cortex_release"):
+            return self.delegate.rollback_cortex_release(workspace_id, target_release_id=target_release_id, reason=reason, actor=actor)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("SELECT * FROM trace_cortex_releases WHERE workspace_id=%s AND status='active' FOR UPDATE", (workspace_id,))
+                current_active = self._cursor_mapping(cursor, cursor.fetchone())
+                if not current_active:
+                    raise InvariantViolation("cannot rollback: workspace has no active cortex release")
+                target_row = None
+                if target_release_id is not None:
+                    cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s AND workspace_id=%s FOR UPDATE", (target_release_id, workspace_id))
+                    target_row = self._cursor_mapping(cursor, cursor.fetchone())
+                    if not target_row:
+                        raise NotFoundError(f"target rollback release {target_release_id} was not found")
+                    if target_row["status"] not in {"superseded", "validated"}:
+                        raise InvariantViolation(f"cannot rollback to release with status {target_row['status']!r}")
+                else:
+                    if current_active.get("parent_release_id"):
+                        cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s FOR UPDATE", (current_active["parent_release_id"],))
+                        target_row = self._cursor_mapping(cursor, cursor.fetchone())
+                    if not target_row:
+                        cursor.execute("SELECT * FROM trace_cortex_releases WHERE workspace_id=%s AND status='superseded' ORDER BY activated_at DESC, created_at DESC LIMIT 1 FOR UPDATE", (workspace_id,))
+                        target_row = self._cursor_mapping(cursor, cursor.fetchone())
+                    if not target_row:
+                        raise InvariantViolation("cannot rollback: no validated predecessor release available")
+            event = self._append_event_in_connection(
+                conn, stream_id=f"workspace:{workspace_id}", event_type="cortex.release_rolled_back",
+                payload={"workspace_id": workspace_id, "from_release_id": current_active["release_id"], "to_release_id": target_row["release_id"], "reason": reason},
+                actor=actor,
+            )
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("UPDATE trace_cortex_releases SET status='superseded',superseded_at=NOW() WHERE release_id=%s", (current_active["release_id"],))
+                cursor.execute("UPDATE trace_cortex_releases SET status='active',activated_at=NOW(),superseded_at=NULL WHERE release_id=%s", (target_row["release_id"],))
+                cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s", (target_row["release_id"],))
+                row = self._cursor_mapping(cursor, cursor.fetchone())
+                cursor.execute("SELECT * FROM trace_cortex_release_components WHERE release_id=%s ORDER BY component_kind", (target_row["release_id"],))
+                comps = [self._pg_cortex_component_row(self._cursor_mapping(cursor, r)) for r in cursor.fetchall()]
+                return self._pg_cortex_release_row(row, components=comps)
+
+    def fail_cortex_release(self, release_id: str, failure_detail: str, *, actor: str = "system") -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "fail_cortex_release"):
+            return self.delegate.fail_cortex_release(release_id, failure_detail, actor=actor)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s FOR UPDATE", (release_id,))
+                rel = self._cursor_mapping(cursor, cursor.fetchone())
+                if not rel:
+                    raise NotFoundError(f"cortex release {release_id} was not found")
+            event = self._append_event_in_connection(
+                conn, stream_id=f"workspace:{rel['workspace_id']}", event_type="cortex.release_failed",
+                payload={"release_id": release_id, "workspace_id": rel["workspace_id"], "failure_detail": failure_detail},
+                actor=actor,
+            )
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, rel["workspace_id"])
+                cursor.execute("UPDATE trace_cortex_releases SET status='failed',failure_detail=%s WHERE release_id=%s", (failure_detail, release_id))
+                cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s", (release_id,))
+                row = self._cursor_mapping(cursor, cursor.fetchone())
+                cursor.execute("SELECT * FROM trace_cortex_release_components WHERE release_id=%s ORDER BY component_kind", (release_id,))
+                comps = [self._pg_cortex_component_row(self._cursor_mapping(cursor, r)) for r in cursor.fetchall()]
+                return self._pg_cortex_release_row(row, components=comps)
+
+    def affinity_neighbors(self, workspace_id: str, atom_version_ids: Sequence[str], *, release_id: str | None = None, limit: int = 64, index_revision: str | None = None) -> list[dict[str, Any]]:
+        if self.delegate is not None and hasattr(self.delegate, "affinity_neighbors"):
+            return self.delegate.affinity_neighbors(workspace_id, atom_version_ids, release_id=release_id, limit=limit, index_revision=index_revision)
+        if not atom_version_ids:
+            return []
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                eff_release_id = release_id
+                if eff_release_id is None:
+                    cursor.execute("SELECT release_id FROM trace_cortex_releases WHERE workspace_id=%s AND status='active'", (workspace_id,))
+                    active = cursor.fetchone()
+                    if not active:
+                        return []
+                    eff_release_id = str(active[0])
+                clauses = ["workspace_id=%s", "release_id=%s", "status='active'", "expires_at>NOW()", "(left_atom_version_id = ANY(%s::uuid[]) OR right_atom_version_id = ANY(%s::uuid[]))"]
+                values: list[Any] = [workspace_id, eff_release_id, list(atom_version_ids), list(atom_version_ids)]
+                if index_revision:
+                    clauses.append("(index_revision IS NULL OR index_revision=%s)")
+                    values.append(index_revision)
+                values.append(max(1, min(int(limit), 256)))
                 cursor.execute(f"SELECT * FROM trace_affinity_edges WHERE {' AND '.join(clauses)} ORDER BY score DESC,pair_key LIMIT %s", values)
                 rows = [self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()]
         for row in rows:
             row["signal"] = self._json_value(row.pop("signal"), {})
         return rows
 
-    def put_affinity_edge(self, *, workspace_id: str, source_atom_version_id: str, target_atom_version_id: str, score: float, signal: dict[str, Any], expires_at: str, index_revision: str | None = None, embedding_revision: str | None = None, projection_run_id: str | None = None, degree_cap: int = 16, actor: str = "affinity-worker") -> dict[str, Any] | None:
+    def put_affinity_edge(self, *, workspace_id: str, source_atom_version_id: str, target_atom_version_id: str, score: float, signal: dict[str, Any], expires_at: str, release_id: str | None = None, index_revision: str | None = None, embedding_revision: str | None = None, projection_run_id: str | None = None, degree_cap: int = 16, actor: str = "affinity-worker") -> dict[str, Any] | None:
         if self.delegate is not None and hasattr(self.delegate, "put_affinity_edge"):
-            return self.delegate.put_affinity_edge(workspace_id=workspace_id, source_atom_version_id=source_atom_version_id, target_atom_version_id=target_atom_version_id, score=score, signal=signal, expires_at=expires_at, index_revision=index_revision, embedding_revision=embedding_revision, projection_run_id=projection_run_id, degree_cap=degree_cap, actor=actor)
+            return self.delegate.put_affinity_edge(workspace_id=workspace_id, source_atom_version_id=source_atom_version_id, target_atom_version_id=target_atom_version_id, score=score, signal=signal, expires_at=expires_at, release_id=release_id, index_revision=index_revision, embedding_revision=embedding_revision, projection_run_id=projection_run_id, degree_cap=degree_cap, actor=actor)
         left, right = canonical_pair(source_atom_version_id, target_atom_version_id)
         if not 0 <= float(score) <= 1:
             raise InvariantViolation("affinity score must be between zero and one")
@@ -2826,36 +3150,38 @@ class PostgresEventStore:
                 )
                 if int(cursor.fetchone()[0]) != 2:
                     raise InvariantViolation("affinity endpoints are absent or out of scope")
+                eff_release_id = release_id or self._create_bootstrap_release_in_pg(cursor, workspace_id, actor=actor)
                 cursor.execute("SELECT 1 FROM trace_affinity_rejections WHERE workspace_id=%s AND pair_key=%s AND (expires_at IS NULL OR expires_at>NOW())", (workspace_id, pair_key))
                 if cursor.fetchone():
                     return None
-                cursor.execute("SELECT affinity_edge_id FROM trace_affinity_edges WHERE workspace_id=%s AND pair_key=%s", (workspace_id, pair_key))
+                cursor.execute("SELECT affinity_edge_id FROM trace_affinity_edges WHERE workspace_id=%s AND release_id=%s AND pair_key=%s", (workspace_id, eff_release_id, pair_key))
                 existing = cursor.fetchone()
                 if existing is None:
                     cap = max(1, int(degree_cap))
                     cursor.execute(
                         """SELECT COUNT(*) FROM trace_affinity_edges
-                           WHERE workspace_id=%s AND status='active' AND expires_at>NOW()
+                           WHERE workspace_id=%s AND release_id=%s AND status='active' AND expires_at>NOW()
                              AND (left_atom_version_id=%s OR right_atom_version_id=%s)""",
-                        (workspace_id, left, left),
+                        (workspace_id, eff_release_id, left, left),
                     )
                     left_degree = int(cursor.fetchone()[0])
                     cursor.execute(
                         """SELECT COUNT(*) FROM trace_affinity_edges
-                           WHERE workspace_id=%s AND status='active' AND expires_at>NOW()
+                           WHERE workspace_id=%s AND release_id=%s AND status='active' AND expires_at>NOW()
                              AND (left_atom_version_id=%s OR right_atom_version_id=%s)""",
-                        (workspace_id, right, right),
+                        (workspace_id, eff_release_id, right, right),
                     )
                     right_degree = int(cursor.fetchone()[0])
                     if left_degree >= cap or right_degree >= cap:
                         return None
-            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="affinity.edge_upserted", payload={"workspace_id": workspace_id, "left_atom_version_id": left, "right_atom_version_id": right, "score": float(score), "projection_run_id": projection_run_id}, actor=actor)
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="affinity.edge_upserted", payload={"workspace_id": workspace_id, "release_id": eff_release_id, "left_atom_version_id": left, "right_atom_version_id": right, "score": float(score), "projection_run_id": projection_run_id}, actor=actor)
             identifier = str(existing[0]) if existing else str(uuid.uuid4())
             with conn.cursor() as cursor:
-                cursor.execute("""INSERT INTO trace_affinity_edges(affinity_edge_id,workspace_id,left_atom_version_id,right_atom_version_id,pair_key,score,signal,index_revision,embedding_revision,projection_run_id,status,expires_at,created_event_offset,updated_at)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s::jsonb,%s,%s,%s,'active',%s,%s,NOW())
-                    ON CONFLICT(workspace_id,pair_key) DO UPDATE SET score=EXCLUDED.score,signal=EXCLUDED.signal,index_revision=EXCLUDED.index_revision,embedding_revision=EXCLUDED.embedding_revision,projection_run_id=EXCLUDED.projection_run_id,status='active',expires_at=EXCLUDED.expires_at,created_event_offset=EXCLUDED.created_event_offset,updated_at=NOW()""", (identifier, workspace_id, left, right, pair_key, float(score), json.dumps(signal), index_revision, embedding_revision, projection_run_id, expires_at, event.offset))
-                cursor.execute("SELECT * FROM trace_affinity_edges WHERE workspace_id=%s AND pair_key=%s", (workspace_id, pair_key))
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("""INSERT INTO trace_affinity_edges(affinity_edge_id,workspace_id,release_id,left_atom_version_id,right_atom_version_id,pair_key,score,signal,index_revision,embedding_revision,projection_run_id,status,expires_at,created_event_offset,updated_at)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s::jsonb,%s,%s,%s,'active',%s,%s,NOW())
+                    ON CONFLICT(workspace_id,release_id,pair_key) DO UPDATE SET score=EXCLUDED.score,signal=EXCLUDED.signal,index_revision=EXCLUDED.index_revision,embedding_revision=EXCLUDED.embedding_revision,projection_run_id=EXCLUDED.projection_run_id,status='active',expires_at=EXCLUDED.expires_at,created_event_offset=EXCLUDED.created_event_offset,updated_at=NOW()""", (identifier, workspace_id, eff_release_id, left, right, pair_key, float(score), json.dumps(signal), index_revision, embedding_revision, projection_run_id, expires_at, event.offset))
+                cursor.execute("SELECT * FROM trace_affinity_edges WHERE workspace_id=%s AND release_id=%s AND pair_key=%s", (workspace_id, eff_release_id, pair_key))
                 row = self._cursor_mapping(cursor, cursor.fetchone()) or {}
         row["signal"] = self._json_value(row.pop("signal"), {})
         return row
@@ -2891,33 +3217,43 @@ class PostgresEventStore:
                 cursor.execute("UPDATE trace_affinity_edges SET status='stale',updated_at=NOW() WHERE workspace_id=%s AND status='active' AND (left_atom_version_id = ANY(%s::uuid[]) OR right_atom_version_id = ANY(%s::uuid[]))", (workspace_id, list(atom_version_ids), list(atom_version_ids)))
                 return int(cursor.rowcount)
 
-    def upsert_activation_prior(self, *, workspace_id: str, atom_version_id: str, prior_kind: str, score: float, provenance: dict[str, Any] | None = None, expires_at: str | None = None, actor: str = "activation-worker") -> dict[str, Any]:
+    def upsert_activation_prior(self, *, workspace_id: str, atom_version_id: str, prior_kind: str, score: float, release_id: str | None = None, provenance: dict[str, Any] | None = None, expires_at: str | None = None, actor: str = "activation-worker") -> dict[str, Any]:
         if self.delegate is not None and hasattr(self.delegate, "upsert_activation_prior"):
-            return self.delegate.upsert_activation_prior(workspace_id=workspace_id, atom_version_id=atom_version_id, prior_kind=prior_kind, score=score, provenance=provenance, expires_at=expires_at, actor=actor)
+            return self.delegate.upsert_activation_prior(workspace_id=workspace_id, atom_version_id=atom_version_id, prior_kind=prior_kind, score=score, release_id=release_id, provenance=provenance, expires_at=expires_at, actor=actor)
         if prior_kind not in {"pin", "recency", "feedback", "suppression", "co_retrieval"} or not -1 <= float(score) <= 1:
             raise InvariantViolation("invalid activation prior")
         identifier = str(uuid.uuid4())
         with self.connection() as conn:
-            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="activation.prior_upserted", payload={"workspace_id": workspace_id, "atom_version_id": atom_version_id, "prior_kind": prior_kind, "score": float(score)}, actor=actor)
             with conn.cursor() as cursor:
                 self._set_workspace(cursor, workspace_id)
-                cursor.execute("""INSERT INTO trace_activation_priors(activation_prior_id,workspace_id,atom_version_id,prior_kind,score,provenance,expires_at,created_event_offset,updated_at)
-                    VALUES (%s,%s,%s,%s,%s,%s::jsonb,%s,%s,NOW())
-                    ON CONFLICT(workspace_id,atom_version_id,prior_kind) DO UPDATE SET score=EXCLUDED.score,provenance=EXCLUDED.provenance,expires_at=EXCLUDED.expires_at,created_event_offset=EXCLUDED.created_event_offset,updated_at=NOW()""", (identifier, workspace_id, atom_version_id, prior_kind, float(score), json.dumps(provenance or {}), expires_at, event.offset))
-                cursor.execute("SELECT * FROM trace_activation_priors WHERE workspace_id=%s AND atom_version_id=%s AND prior_kind=%s", (workspace_id, atom_version_id, prior_kind))
+                eff_release_id = release_id or self._create_bootstrap_release_in_pg(cursor, workspace_id, actor=actor)
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="activation.prior_upserted", payload={"workspace_id": workspace_id, "release_id": eff_release_id, "atom_version_id": atom_version_id, "prior_kind": prior_kind, "score": float(score)}, actor=actor)
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute("""INSERT INTO trace_activation_priors(activation_prior_id,workspace_id,release_id,atom_version_id,prior_kind,score,provenance,expires_at,created_event_offset,updated_at)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s::jsonb,%s,%s,NOW())
+                    ON CONFLICT(workspace_id,release_id,atom_version_id,prior_kind) DO UPDATE SET score=EXCLUDED.score,provenance=EXCLUDED.provenance,expires_at=EXCLUDED.expires_at,created_event_offset=EXCLUDED.created_event_offset,updated_at=NOW()""", (identifier, workspace_id, eff_release_id, atom_version_id, prior_kind, float(score), json.dumps(provenance or {}), expires_at, event.offset))
+                cursor.execute("SELECT * FROM trace_activation_priors WHERE workspace_id=%s AND release_id=%s AND atom_version_id=%s AND prior_kind=%s", (workspace_id, eff_release_id, atom_version_id, prior_kind))
                 result = self._cursor_mapping(cursor, cursor.fetchone()) or {}
         result["provenance"] = self._json_value(result.pop("provenance", {}), {})
         return result
 
-    def activation_priors(self, workspace_id: str, atom_version_ids: Sequence[str]) -> dict[str, list[dict[str, Any]]]:
+    def activation_priors(self, workspace_id: str, atom_version_ids: Sequence[str], *, release_id: str | None = None) -> dict[str, list[dict[str, Any]]]:
         if self.delegate is not None and hasattr(self.delegate, "activation_priors"):
-            return self.delegate.activation_priors(workspace_id, atom_version_ids)
+            return self.delegate.activation_priors(workspace_id, atom_version_ids, release_id=release_id)
         if not atom_version_ids:
             return {}
         with self.connection() as conn:
             with conn.cursor() as cursor:
                 self._set_workspace(cursor, workspace_id)
-                cursor.execute("SELECT * FROM trace_activation_priors WHERE workspace_id=%s AND atom_version_id = ANY(%s::uuid[]) AND (expires_at IS NULL OR expires_at>NOW()) ORDER BY prior_kind", (workspace_id, list(atom_version_ids)))
+                eff_release_id = release_id
+                if eff_release_id is None:
+                    cursor.execute("SELECT release_id FROM trace_cortex_releases WHERE workspace_id=%s AND status='active'", (workspace_id,))
+                    active = cursor.fetchone()
+                    if not active:
+                        return {}
+                    eff_release_id = str(active[0])
+                cursor.execute("SELECT * FROM trace_activation_priors WHERE workspace_id=%s AND release_id=%s AND atom_version_id = ANY(%s::uuid[]) AND (expires_at IS NULL OR expires_at>NOW()) ORDER BY prior_kind", (workspace_id, eff_release_id, list(atom_version_ids)))
                 rows = [self._cursor_mapping(cursor, row) or {} for row in cursor.fetchall()]
         result: dict[str, list[dict[str, Any]]] = {}
         for row in rows:

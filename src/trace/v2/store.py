@@ -587,9 +587,52 @@ class SqliteEventStore:
                 CREATE INDEX IF NOT EXISTS projection_memberships_parent
                     ON projection_memberships(workspace_id, projection_run_id, parent_projection_object_id, ordinal);
 
+                CREATE TABLE IF NOT EXISTS cortex_releases (
+                    release_id TEXT PRIMARY KEY,
+                    workspace_id TEXT NOT NULL,
+                    parent_release_id TEXT,
+                    spine_event_watermark INTEGER NOT NULL,
+                    status TEXT NOT NULL,
+                    policy_revision TEXT NOT NULL,
+                    policy_snapshot_hash TEXT NOT NULL,
+                    code_revision TEXT NOT NULL,
+                    validation_receipt_json TEXT NOT NULL DEFAULT '{}',
+                    created_at TEXT NOT NULL,
+                    activated_at TEXT,
+                    superseded_at TEXT,
+                    retired_at TEXT,
+                    failure_detail TEXT,
+                    FOREIGN KEY(parent_release_id) REFERENCES cortex_releases(release_id)
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS cortex_releases_active
+                    ON cortex_releases(workspace_id) WHERE status = 'active';
+                CREATE INDEX IF NOT EXISTS cortex_releases_workspace_status
+                    ON cortex_releases(workspace_id, status, activated_at DESC);
+                CREATE INDEX IF NOT EXISTS cortex_releases_parent
+                    ON cortex_releases(parent_release_id) WHERE parent_release_id IS NOT NULL;
+
+                CREATE TABLE IF NOT EXISTS cortex_release_components (
+                    release_id TEXT NOT NULL,
+                    workspace_id TEXT NOT NULL,
+                    component_kind TEXT NOT NULL,
+                    component_revision TEXT NOT NULL,
+                    input_checksum TEXT NOT NULL,
+                    source_watermark INTEGER NOT NULL,
+                    carried_forward_from_release_id TEXT,
+                    validation_status TEXT NOT NULL,
+                    metadata_json TEXT NOT NULL DEFAULT '{}',
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY (release_id, component_kind),
+                    FOREIGN KEY(release_id) REFERENCES cortex_releases(release_id) ON DELETE CASCADE,
+                    FOREIGN KEY(carried_forward_from_release_id) REFERENCES cortex_releases(release_id)
+                );
+                CREATE INDEX IF NOT EXISTS cortex_release_components_workspace
+                    ON cortex_release_components(workspace_id, component_kind, validation_status);
+
                 CREATE TABLE IF NOT EXISTS affinity_edges (
                     affinity_edge_id TEXT PRIMARY KEY,
                     workspace_id TEXT NOT NULL,
+                    release_id TEXT REFERENCES cortex_releases(release_id),
                     left_atom_version_id TEXT NOT NULL REFERENCES node_versions(atom_version_id),
                     right_atom_version_id TEXT NOT NULL REFERENCES node_versions(atom_version_id),
                     pair_key TEXT NOT NULL,
@@ -602,10 +645,10 @@ class SqliteEventStore:
                     expires_at TEXT NOT NULL,
                     created_event_offset INTEGER NOT NULL,
                     updated_at TEXT NOT NULL,
-                    UNIQUE(workspace_id, pair_key)
+                    UNIQUE(workspace_id, release_id, pair_key)
                 );
                 CREATE INDEX IF NOT EXISTS affinity_edges_lookup
-                    ON affinity_edges(workspace_id, left_atom_version_id, right_atom_version_id, status, expires_at);
+                    ON affinity_edges(workspace_id, release_id, left_atom_version_id, right_atom_version_id, status, expires_at);
 
                 CREATE TABLE IF NOT EXISTS affinity_rejections (
                     affinity_rejection_id TEXT PRIMARY KEY,
@@ -626,6 +669,7 @@ class SqliteEventStore:
                 CREATE TABLE IF NOT EXISTS activation_priors (
                     activation_prior_id TEXT PRIMARY KEY,
                     workspace_id TEXT NOT NULL,
+                    release_id TEXT REFERENCES cortex_releases(release_id),
                     atom_version_id TEXT NOT NULL REFERENCES node_versions(atom_version_id),
                     prior_kind TEXT NOT NULL,
                     score REAL NOT NULL,
@@ -633,10 +677,10 @@ class SqliteEventStore:
                     expires_at TEXT,
                     created_event_offset INTEGER NOT NULL,
                     updated_at TEXT NOT NULL,
-                    UNIQUE(workspace_id, atom_version_id, prior_kind)
+                    UNIQUE(workspace_id, release_id, atom_version_id, prior_kind)
                 );
                 CREATE INDEX IF NOT EXISTS activation_priors_lookup
-                    ON activation_priors(workspace_id, atom_version_id, expires_at);
+                    ON activation_priors(workspace_id, release_id, atom_version_id, expires_at);
                 """
             )
             # V2 previews created before leases were introduced remain readable.
@@ -680,6 +724,55 @@ class SqliteEventStore:
             dense_columns = {row[1] for row in conn.execute("PRAGMA table_info(dense_vectors)").fetchall()}
             if "index_revision" not in dense_columns:
                 conn.execute("ALTER TABLE dense_vectors ADD COLUMN index_revision TEXT NOT NULL DEFAULT 'embedded-current'")
+
+            affinity_columns = {row[1] for row in conn.execute("PRAGMA table_info(affinity_edges)").fetchall()}
+            if "release_id" not in affinity_columns:
+                conn.execute("ALTER TABLE affinity_edges ADD COLUMN release_id TEXT REFERENCES cortex_releases(release_id)")
+
+            prior_columns = {row[1] for row in conn.execute("PRAGMA table_info(activation_priors)").fetchall()}
+            if "release_id" not in prior_columns:
+                conn.execute("ALTER TABLE activation_priors ADD COLUMN release_id TEXT REFERENCES cortex_releases(release_id)")
+
+            unscoped_workspaces = [row[0] for row in conn.execute("""
+                SELECT DISTINCT workspace_id FROM affinity_edges WHERE release_id IS NULL
+                UNION
+                SELECT DISTINCT workspace_id FROM activation_priors WHERE release_id IS NULL
+                UNION
+                SELECT DISTINCT workspace_id FROM nodes
+            """).fetchall()]
+            for ws in unscoped_workspaces:
+                if not ws:
+                    continue
+                active_rel = conn.execute(
+                    "SELECT release_id FROM cortex_releases WHERE workspace_id=? AND status='active'", (ws,)
+                ).fetchone()
+                if active_rel is None:
+                    rel_id = str(uuid.uuid4())
+                    ev_row = conn.execute("SELECT COALESCE(MAX(event_offset), 0) FROM events WHERE stream_id=?", (f"workspace:{ws}",)).fetchone()
+                    watermark = int(ev_row[0]) if ev_row and ev_row[0] else int(conn.execute("SELECT COALESCE(MAX(event_offset), 0) FROM events").fetchone()[0])
+                    conn.execute("""
+                        INSERT INTO cortex_releases (
+                            release_id, workspace_id, parent_release_id, spine_event_watermark,
+                            status, policy_revision, policy_snapshot_hash, code_revision,
+                            validation_receipt_json, created_at, activated_at
+                        ) VALUES (?, ?, NULL, ?, 'active', 'bootstrap-v0',
+                                  '0000000000000000000000000000000000000000000000000000000000000000',
+                                  'bootstrap-v0', '{"bootstrap": true}', ?, ?)
+                    """, (rel_id, ws, watermark, now, now))
+                    for kind in ('hierarchy', 'affinity', 'activation_priors', 'lexical_index', 'dense_index'):
+                        conn.execute("""
+                            INSERT OR IGNORE INTO cortex_release_components (
+                                release_id, workspace_id, component_kind, component_revision,
+                                input_checksum, source_watermark, carried_forward_from_release_id,
+                                validation_status, metadata_json, created_at
+                            ) VALUES (?, ?, ?, 'bootstrap-v0',
+                                      '0000000000000000000000000000000000000000000000000000000000000000',
+                                      ?, NULL, 'validated', '{"bootstrap": true}', ?)
+                        """, (rel_id, ws, kind, watermark, now))
+                else:
+                    rel_id = active_rel["release_id"]
+                conn.execute("UPDATE affinity_edges SET release_id=? WHERE workspace_id=? AND release_id IS NULL", (rel_id, ws))
+                conn.execute("UPDATE activation_priors SET release_id=? WHERE workspace_id=? AND release_id IS NULL", (rel_id, ws))
 
     # ------------------------------------------------------------------ Spine
     def _append_event(
@@ -2418,6 +2511,428 @@ class SqliteEventStore:
         result["signal"] = _decode(result.pop("signal_json"), {})
         return result
 
+    # ---------------------------------------------------- cortex release lifecycle
+    @staticmethod
+    def _cortex_release_row(row: sqlite3.Row | None, components: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("cortex release was not found")
+        result = dict(row)
+        result["validation_receipt"] = _decode(result.pop("validation_receipt_json"), {})
+        if components is not None:
+            result["components"] = components
+        return result
+
+    @staticmethod
+    def _cortex_component_row(row: sqlite3.Row | None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("cortex release component was not found")
+        result = dict(row)
+        result["metadata"] = _decode(result.pop("metadata_json"), {})
+        return result
+
+    def _create_bootstrap_release_in_conn(self, conn: sqlite3.Connection, workspace_id: str, actor: str = "system") -> str:
+        active = conn.execute("SELECT release_id FROM cortex_releases WHERE workspace_id=? AND status='active'", (workspace_id,)).fetchone()
+        if active:
+            return str(active["release_id"])
+        ev_row = conn.execute("SELECT COALESCE(MAX(event_offset), 0) FROM events WHERE stream_id=?", (f"workspace:{workspace_id}",)).fetchone()
+        watermark = int(ev_row[0]) if ev_row and ev_row[0] else int(conn.execute("SELECT COALESCE(MAX(event_offset), 0) FROM events").fetchone()[0])
+        now = _now()
+        rel_id = str(uuid.uuid4())
+        conn.execute("""
+            INSERT INTO cortex_releases (
+                release_id, workspace_id, parent_release_id, spine_event_watermark,
+                status, policy_revision, policy_snapshot_hash, code_revision,
+                validation_receipt_json, created_at, activated_at
+            ) VALUES (?, ?, NULL, ?, 'active', 'bootstrap-v0',
+                      '0000000000000000000000000000000000000000000000000000000000000000',
+                      'bootstrap-v0', '{"bootstrap": true}', ?, ?)
+        """, (rel_id, workspace_id, watermark, now, now))
+        for kind in ('hierarchy', 'affinity', 'activation_priors', 'lexical_index', 'dense_index'):
+            conn.execute("""
+                INSERT OR IGNORE INTO cortex_release_components (
+                    release_id, workspace_id, component_kind, component_revision,
+                    input_checksum, source_watermark, carried_forward_from_release_id,
+                    validation_status, metadata_json, created_at
+                ) VALUES (?, ?, ?, 'bootstrap-v0',
+                          '0000000000000000000000000000000000000000000000000000000000000000',
+                          ?, NULL, 'validated', '{"bootstrap": true}', ?)
+            """, (rel_id, workspace_id, kind, watermark, now))
+        return rel_id
+
+    def create_cortex_release(
+        self,
+        *,
+        workspace_id: str,
+        parent_release_id: str | None = None,
+        spine_event_watermark: int | None = None,
+        policy_revision: str | None = None,
+        policy_snapshot_hash: str | None = None,
+        code_revision: str | None = None,
+        components: Sequence[dict[str, Any]] | None = None,
+        actor: str = "system",
+    ) -> dict[str, Any]:
+        if not workspace_id:
+            raise InvariantViolation("cortex release requires a workspace_id")
+        with self.transaction() as conn:
+            if spine_event_watermark is None:
+                ev_row = conn.execute(
+                    "SELECT COALESCE(MAX(event_offset), 0) FROM events WHERE stream_id=?", (f"workspace:{workspace_id}",)
+                ).fetchone()
+                watermark = int(ev_row[0]) if ev_row and ev_row[0] else int(conn.execute("SELECT COALESCE(MAX(event_offset), 0) FROM events").fetchone()[0])
+            else:
+                watermark = int(spine_event_watermark)
+            pol_row = conn.execute("SELECT * FROM cognitive_policy_versions WHERE workspace_id=? AND active=1", (workspace_id,)).fetchone()
+            active_pol = self._policy_row(pol_row) if pol_row else {}
+            eff_policy_rev = policy_revision or active_pol.get("policy_revision") or "cognitive-policy-v1"
+            eff_policy_hash = policy_snapshot_hash or _digest(active_pol.get("policy", {}))
+            eff_code_rev = code_revision or os.environ.get("TRACE_CODE_REVISION", "trace-v2-cortex")
+
+            if parent_release_id is None:
+                active_rel = conn.execute(
+                    "SELECT release_id FROM cortex_releases WHERE workspace_id=? AND status='active'", (workspace_id,)
+                ).fetchone()
+                parent_release_id = str(active_rel["release_id"]) if active_rel else None
+
+            release_id = str(uuid.uuid4())
+            now = _now()
+            self._append_event(
+                conn,
+                stream_id=f"workspace:{workspace_id}",
+                event_type="cortex.release_planned",
+                payload={
+                    "release_id": release_id,
+                    "workspace_id": workspace_id,
+                    "parent_release_id": parent_release_id,
+                    "spine_event_watermark": watermark,
+                    "policy_revision": eff_policy_rev,
+                    "code_revision": eff_code_rev,
+                },
+                actor=actor,
+            )
+            conn.execute(
+                """INSERT INTO cortex_releases (
+                    release_id, workspace_id, parent_release_id, spine_event_watermark,
+                    status, policy_revision, policy_snapshot_hash, code_revision,
+                    validation_receipt_json, created_at, activated_at, superseded_at, retired_at, failure_detail
+                ) VALUES (?, ?, ?, ?, 'building', ?, ?, ?, '{}', ?, NULL, NULL, NULL, NULL)""",
+                (release_id, workspace_id, parent_release_id, watermark, eff_policy_rev, eff_policy_hash, eff_code_rev, now),
+            )
+            comps: list[dict[str, Any]] = []
+            default_kinds = ('hierarchy', 'affinity', 'activation_priors', 'lexical_index', 'dense_index')
+            comp_map = {item["component_kind"]: item for item in (components or []) if "component_kind" in item}
+            for kind in default_kinds:
+                c = comp_map.get(kind, {})
+                c_rev = c.get("component_revision") or f"{kind}-{watermark}"
+                c_checksum = c.get("input_checksum") or _digest(f"{kind}:{watermark}")
+                c_watermark = int(c.get("source_watermark", watermark))
+                c_carried = c.get("carried_forward_from_release_id")
+                c_status = c.get("validation_status", "pending")
+                c_metadata = c.get("metadata", {})
+                conn.execute(
+                    """INSERT INTO cortex_release_components (
+                        release_id, workspace_id, component_kind, component_revision,
+                        input_checksum, source_watermark, carried_forward_from_release_id,
+                        validation_status, metadata_json, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (release_id, workspace_id, kind, c_rev, c_checksum, c_watermark, c_carried, c_status, _json(c_metadata), now),
+                )
+                comps.append({
+                    "release_id": release_id, "workspace_id": workspace_id, "component_kind": kind,
+                    "component_revision": c_rev, "input_checksum": c_checksum, "source_watermark": c_watermark,
+                    "carried_forward_from_release_id": c_carried, "validation_status": c_status, "metadata": c_metadata,
+                    "created_at": now,
+                })
+            row = conn.execute("SELECT * FROM cortex_releases WHERE release_id=?", (release_id,)).fetchone()
+            return self._cortex_release_row(row, components=comps)
+
+    def get_cortex_release(self, release_id: str) -> dict[str, Any]:
+        with self._connect() as conn:
+            row = conn.execute("SELECT * FROM cortex_releases WHERE release_id=?", (release_id,)).fetchone()
+            if not row:
+                raise NotFoundError(f"cortex release {release_id} was not found")
+            comp_rows = conn.execute(
+                "SELECT * FROM cortex_release_components WHERE release_id=? ORDER BY component_kind", (release_id,)
+            ).fetchall()
+            comps = [self._cortex_component_row(r) for r in comp_rows]
+            return self._cortex_release_row(row, components=comps)
+
+    def get_active_cortex_release(self, workspace_id: str) -> dict[str, Any] | None:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT * FROM cortex_releases WHERE workspace_id=? AND status='active' ORDER BY activated_at DESC LIMIT 1",
+                (workspace_id,),
+            ).fetchone()
+            if not row:
+                return None
+            comp_rows = conn.execute(
+                "SELECT * FROM cortex_release_components WHERE release_id=? ORDER BY component_kind", (row["release_id"],)
+            ).fetchall()
+            comps = [self._cortex_component_row(r) for r in comp_rows]
+            return self._cortex_release_row(row, components=comps)
+
+    def list_cortex_releases(
+        self,
+        workspace_id: str,
+        *,
+        status: str | None = None,
+        limit: int = 50,
+    ) -> list[dict[str, Any]]:
+        clauses = ["workspace_id=?"]
+        values: list[Any] = [workspace_id]
+        if status:
+            clauses.append("status=?")
+            values.append(status)
+        values.append(max(1, min(int(limit), 200)))
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"SELECT * FROM cortex_releases WHERE {' AND '.join(clauses)} ORDER BY created_at DESC LIMIT ?",
+                values,
+            ).fetchall()
+            results: list[dict[str, Any]] = []
+            for row in rows:
+                comp_rows = conn.execute(
+                    "SELECT * FROM cortex_release_components WHERE release_id=? ORDER BY component_kind", (row["release_id"],)
+                ).fetchall()
+                comps = [self._cortex_component_row(r) for r in comp_rows]
+                results.append(self._cortex_release_row(row, components=comps))
+            return results
+
+    def record_cortex_component(
+        self,
+        release_id: str,
+        *,
+        component_kind: str,
+        component_revision: str,
+        input_checksum: str,
+        source_watermark: int,
+        carried_forward_from_release_id: str | None = None,
+        validation_status: str = "pending",
+        metadata: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if component_kind not in {'hierarchy', 'affinity', 'activation_priors', 'lexical_index', 'dense_index'}:
+            raise InvariantViolation(f"invalid cortex component kind: {component_kind}")
+        with self.transaction() as conn:
+            rel = conn.execute("SELECT workspace_id, status FROM cortex_releases WHERE release_id=?", (release_id,)).fetchone()
+            if not rel:
+                raise NotFoundError(f"cortex release {release_id} was not found")
+            if rel["status"] not in {"planned", "building", "validating"}:
+                raise InvariantViolation(f"cannot update component on release in status {rel['status']}")
+            now = _now()
+            conn.execute(
+                """INSERT INTO cortex_release_components (
+                    release_id, workspace_id, component_kind, component_revision,
+                    input_checksum, source_watermark, carried_forward_from_release_id,
+                    validation_status, metadata_json, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(release_id, component_kind) DO UPDATE SET
+                    component_revision=excluded.component_revision,
+                    input_checksum=excluded.input_checksum,
+                    source_watermark=excluded.source_watermark,
+                    carried_forward_from_release_id=excluded.carried_forward_from_release_id,
+                    validation_status=excluded.validation_status,
+                    metadata_json=excluded.metadata_json""",
+                (release_id, rel["workspace_id"], component_kind, component_revision, input_checksum, int(source_watermark), carried_forward_from_release_id, validation_status, _json(metadata or {}), now),
+            )
+            row = conn.execute(
+                "SELECT * FROM cortex_release_components WHERE release_id=? AND component_kind=?",
+                (release_id, component_kind),
+            ).fetchone()
+            return self._cortex_component_row(row)
+
+    def validate_cortex_release(
+        self,
+        release_id: str,
+        validation_receipt: dict[str, Any],
+        *,
+        actor: str = "validation-worker",
+    ) -> dict[str, Any]:
+        with self.transaction() as conn:
+            rel = conn.execute("SELECT * FROM cortex_releases WHERE release_id=?", (release_id,)).fetchone()
+            if not rel:
+                raise NotFoundError(f"cortex release {release_id} was not found")
+            if rel["status"] not in {"planned", "building", "validating"}:
+                raise InvariantViolation(f"cortex release in status {rel['status']} cannot be validated")
+
+            passed = bool(validation_receipt.get("passed", True))
+            new_status = "validated" if passed else "failed"
+            failure_detail = validation_receipt.get("failure_detail") if not passed else None
+
+            self._append_event(
+                conn,
+                stream_id=f"workspace:{rel['workspace_id']}",
+                event_type=f"cortex.release_{new_status}",
+                payload={
+                    "release_id": release_id,
+                    "workspace_id": rel["workspace_id"],
+                    "validation_receipt": validation_receipt,
+                    "status": new_status,
+                },
+                actor=actor,
+            )
+            now = _now()
+            conn.execute(
+                """UPDATE cortex_releases SET
+                    status=?, validation_receipt_json=?, failure_detail=?
+                WHERE release_id=?""",
+                (new_status, _json(validation_receipt), failure_detail, release_id),
+            )
+            if passed:
+                conn.execute(
+                    "UPDATE cortex_release_components SET validation_status='validated' WHERE release_id=?",
+                    (release_id,),
+                )
+            comp_rows = conn.execute(
+                "SELECT * FROM cortex_release_components WHERE release_id=? ORDER BY component_kind", (release_id,)
+            ).fetchall()
+            comps = [self._cortex_component_row(r) for r in comp_rows]
+            row = conn.execute("SELECT * FROM cortex_releases WHERE release_id=?", (release_id,)).fetchone()
+            return self._cortex_release_row(row, components=comps)
+
+    def activate_cortex_release(
+        self,
+        release_id: str,
+        *,
+        actor: str = "system",
+    ) -> dict[str, Any]:
+        with self.transaction() as conn:
+            rel = conn.execute("SELECT * FROM cortex_releases WHERE release_id=?", (release_id,)).fetchone()
+            if not rel:
+                raise NotFoundError(f"cortex release {release_id} was not found")
+            if rel["status"] != "validated":
+                raise InvariantViolation(f"cannot activate cortex release in status {rel['status']!r}; must be 'validated'")
+
+            now = _now()
+            ws = rel["workspace_id"]
+            conn.execute(
+                """UPDATE cortex_releases SET status='superseded', superseded_at=?
+                WHERE workspace_id=? AND status='active' AND release_id<>?""",
+                (now, ws, release_id),
+            )
+            conn.execute(
+                """UPDATE cortex_releases SET status='active', activated_at=?, superseded_at=NULL
+                WHERE release_id=?""",
+                (now, release_id),
+            )
+            self._append_event(
+                conn,
+                stream_id=f"workspace:{ws}",
+                event_type="cortex.release_activated",
+                payload={
+                    "release_id": release_id,
+                    "workspace_id": ws,
+                    "spine_event_watermark": rel["spine_event_watermark"],
+                    "policy_revision": rel["policy_revision"],
+                    "code_revision": rel["code_revision"],
+                },
+                actor=actor,
+            )
+            comp_rows = conn.execute(
+                "SELECT * FROM cortex_release_components WHERE release_id=? ORDER BY component_kind", (release_id,)
+            ).fetchall()
+            comps = [self._cortex_component_row(r) for r in comp_rows]
+            row = conn.execute("SELECT * FROM cortex_releases WHERE release_id=?", (release_id,)).fetchone()
+            return self._cortex_release_row(row, components=comps)
+
+    def rollback_cortex_release(
+        self,
+        workspace_id: str,
+        *,
+        target_release_id: str | None = None,
+        reason: str | None = None,
+        actor: str = "system",
+    ) -> dict[str, Any]:
+        with self.transaction() as conn:
+            current_active = conn.execute(
+                "SELECT * FROM cortex_releases WHERE workspace_id=? AND status='active'", (workspace_id,)
+            ).fetchone()
+            if not current_active:
+                raise InvariantViolation("cannot rollback: workspace has no active cortex release")
+
+            target_row = None
+            if target_release_id is not None:
+                target_row = conn.execute(
+                    "SELECT * FROM cortex_releases WHERE release_id=? AND workspace_id=?", (target_release_id, workspace_id)
+                ).fetchone()
+                if not target_row:
+                    raise NotFoundError(f"target rollback release {target_release_id} was not found")
+                if target_row["status"] not in {"superseded", "validated"}:
+                    raise InvariantViolation(f"cannot rollback to release with status {target_row['status']!r}")
+            else:
+                if current_active["parent_release_id"]:
+                    target_row = conn.execute(
+                        "SELECT * FROM cortex_releases WHERE release_id=?", (current_active["parent_release_id"],)
+                    ).fetchone()
+                if not target_row:
+                    target_row = conn.execute(
+                        """SELECT * FROM cortex_releases WHERE workspace_id=? AND status='superseded'
+                        ORDER BY activated_at DESC, created_at DESC LIMIT 1""",
+                        (workspace_id,),
+                    ).fetchone()
+                if not target_row:
+                    raise InvariantViolation("cannot rollback: no validated predecessor release available")
+
+            now = _now()
+            conn.execute(
+                "UPDATE cortex_releases SET status='superseded', superseded_at=? WHERE release_id=?",
+                (now, current_active["release_id"]),
+            )
+            conn.execute(
+                "UPDATE cortex_releases SET status='active', activated_at=?, superseded_at=NULL WHERE release_id=?",
+                (now, target_row["release_id"]),
+            )
+            self._append_event(
+                conn,
+                stream_id=f"workspace:{workspace_id}",
+                event_type="cortex.release_rolled_back",
+                payload={
+                    "workspace_id": workspace_id,
+                    "from_release_id": current_active["release_id"],
+                    "to_release_id": target_row["release_id"],
+                    "reason": reason,
+                },
+                actor=actor,
+            )
+            comp_rows = conn.execute(
+                "SELECT * FROM cortex_release_components WHERE release_id=? ORDER BY component_kind", (target_row["release_id"],)
+            ).fetchall()
+            comps = [self._cortex_component_row(r) for r in comp_rows]
+            row = conn.execute("SELECT * FROM cortex_releases WHERE release_id=?", (target_row["release_id"],)).fetchone()
+            return self._cortex_release_row(row, components=comps)
+
+    def fail_cortex_release(
+        self,
+        release_id: str,
+        failure_detail: str,
+        *,
+        actor: str = "system",
+    ) -> dict[str, Any]:
+        with self.transaction() as conn:
+            rel = conn.execute("SELECT * FROM cortex_releases WHERE release_id=?", (release_id,)).fetchone()
+            if not rel:
+                raise NotFoundError(f"cortex release {release_id} was not found")
+            now = _now()
+            conn.execute(
+                "UPDATE cortex_releases SET status='failed', failure_detail=? WHERE release_id=?",
+                (failure_detail, release_id),
+            )
+            self._append_event(
+                conn,
+                stream_id=f"workspace:{rel['workspace_id']}",
+                event_type="cortex.release_failed",
+                payload={
+                    "release_id": release_id,
+                    "workspace_id": rel["workspace_id"],
+                    "failure_detail": failure_detail,
+                },
+                actor=actor,
+            )
+            comp_rows = conn.execute(
+                "SELECT * FROM cortex_release_components WHERE release_id=? ORDER BY component_kind", (release_id,)
+            ).fetchall()
+            comps = [self._cortex_component_row(r) for r in comp_rows]
+            row = conn.execute("SELECT * FROM cortex_releases WHERE release_id=?", (release_id,)).fetchone()
+            return self._cortex_release_row(row, components=comps)
+
     def put_affinity_edge(
         self,
         *,
@@ -2427,6 +2942,7 @@ class SqliteEventStore:
         score: float,
         signal: dict[str, Any],
         expires_at: str,
+        release_id: str | None = None,
         index_revision: str | None = None,
         embedding_revision: str | None = None,
         projection_run_id: str | None = None,
@@ -2442,6 +2958,9 @@ class SqliteEventStore:
         with self.transaction() as conn:
             self._assert_atom_version(conn, left, workspace_id)
             self._assert_atom_version(conn, right, workspace_id)
+            eff_release_id = release_id
+            if eff_release_id is None:
+                eff_release_id = self._create_bootstrap_release_in_conn(conn, workspace_id, actor=actor)
             rejected = conn.execute(
                 """SELECT 1 FROM affinity_rejections WHERE workspace_id=? AND pair_key=?
                    AND (expires_at IS NULL OR expires_at>?)""",
@@ -2450,19 +2969,19 @@ class SqliteEventStore:
             if rejected:
                 return None
             existing = conn.execute(
-                "SELECT * FROM affinity_edges WHERE workspace_id=? AND pair_key=?", (workspace_id, pair_key)
+                "SELECT * FROM affinity_edges WHERE workspace_id=? AND release_id=? AND pair_key=?", (workspace_id, eff_release_id, pair_key)
             ).fetchone()
             if existing is None:
                 cap = max(1, int(degree_cap))
                 left_degree = conn.execute(
-                    """SELECT COUNT(*) FROM affinity_edges WHERE workspace_id=? AND status='active' AND expires_at>?
+                    """SELECT COUNT(*) FROM affinity_edges WHERE workspace_id=? AND release_id=? AND status='active' AND expires_at>?
                        AND (left_atom_version_id=? OR right_atom_version_id=?)""",
-                    (workspace_id, _now(), left, left),
+                    (workspace_id, eff_release_id, _now(), left, left),
                 ).fetchone()[0]
                 right_degree = conn.execute(
-                    """SELECT COUNT(*) FROM affinity_edges WHERE workspace_id=? AND status='active' AND expires_at>?
+                    """SELECT COUNT(*) FROM affinity_edges WHERE workspace_id=? AND release_id=? AND status='active' AND expires_at>?
                        AND (left_atom_version_id=? OR right_atom_version_id=?)""",
-                    (workspace_id, _now(), right, right),
+                    (workspace_id, eff_release_id, _now(), right, right),
                 ).fetchone()[0]
                 if int(left_degree) >= cap or int(right_degree) >= cap:
                     return None
@@ -2471,7 +2990,7 @@ class SqliteEventStore:
                 stream_id=f"workspace:{workspace_id}",
                 event_type="affinity.edge_upserted",
                 payload={
-                    "workspace_id": workspace_id, "left_atom_version_id": left, "right_atom_version_id": right,
+                    "workspace_id": workspace_id, "release_id": eff_release_id, "left_atom_version_id": left, "right_atom_version_id": right,
                     "score": float(score), "index_revision": index_revision, "embedding_revision": embedding_revision,
                     "projection_run_id": projection_run_id,
                 },
@@ -2480,21 +2999,21 @@ class SqliteEventStore:
             identifier = str(existing["affinity_edge_id"]) if existing else str(uuid.uuid4())
             conn.execute(
                 """INSERT INTO affinity_edges(
-                    affinity_edge_id,workspace_id,left_atom_version_id,right_atom_version_id,pair_key,score,signal_json,
+                    affinity_edge_id,workspace_id,release_id,left_atom_version_id,right_atom_version_id,pair_key,score,signal_json,
                     index_revision,embedding_revision,projection_run_id,status,expires_at,created_event_offset,updated_at
-                ) VALUES (?,?,?,?,?,?,?,?,?,?, 'active',?,?,?)
-                ON CONFLICT(workspace_id,pair_key) DO UPDATE SET
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?, 'active',?,?,?)
+                ON CONFLICT(workspace_id,release_id,pair_key) DO UPDATE SET
                     score=excluded.score,signal_json=excluded.signal_json,index_revision=excluded.index_revision,
                     embedding_revision=excluded.embedding_revision,projection_run_id=excluded.projection_run_id,
                     status='active',expires_at=excluded.expires_at,created_event_offset=excluded.created_event_offset,
                     updated_at=excluded.updated_at""",
                 (
-                    identifier, workspace_id, left, right, pair_key, float(score), _json(signal), index_revision,
+                    identifier, workspace_id, eff_release_id, left, right, pair_key, float(score), _json(signal), index_revision,
                     embedding_revision, projection_run_id, expires_at, event.offset, _now(),
                 ),
             )
             return self._affinity_row(
-                conn.execute("SELECT * FROM affinity_edges WHERE workspace_id=? AND pair_key=?", (workspace_id, pair_key)).fetchone()
+                conn.execute("SELECT * FROM affinity_edges WHERE workspace_id=? AND release_id=? AND pair_key=?", (workspace_id, eff_release_id, pair_key)).fetchone()
             )
 
     def reject_affinity(
@@ -2546,17 +3065,24 @@ class SqliteEventStore:
         workspace_id: str,
         atom_version_ids: Sequence[str],
         *,
+        release_id: str | None = None,
         limit: int = 64,
         index_revision: str | None = None,
     ) -> list[dict[str, Any]]:
         if not atom_version_ids:
             return []
+        eff_release_id = release_id
+        if eff_release_id is None:
+            active = self.get_active_cortex_release(workspace_id)
+            if not active:
+                return []
+            eff_release_id = active["release_id"]
         marks = ",".join("?" for _ in atom_version_ids)
         clauses = [
-            "workspace_id=?", "status='active'", "expires_at>?",
+            "workspace_id=?", "release_id=?", "status='active'", "expires_at>?",
             f"(left_atom_version_id IN ({marks}) OR right_atom_version_id IN ({marks}))",
         ]
-        values: list[Any] = [workspace_id, _now(), *atom_version_ids, *atom_version_ids]
+        values: list[Any] = [workspace_id, eff_release_id, _now(), *atom_version_ids, *atom_version_ids]
         if index_revision:
             clauses.append("(index_revision IS NULL OR index_revision=?)")
             values.append(index_revision)
@@ -2609,6 +3135,7 @@ class SqliteEventStore:
         atom_version_id: str,
         prior_kind: str,
         score: float,
+        release_id: str | None = None,
         provenance: dict[str, Any] | None = None,
         expires_at: str | None = None,
         actor: str = "activation-worker",
@@ -2619,40 +3146,55 @@ class SqliteEventStore:
             raise InvariantViolation("activation prior score must be between -1 and 1")
         with self.transaction() as conn:
             self._assert_atom_version(conn, atom_version_id, workspace_id)
+            eff_release_id = release_id
+            if eff_release_id is None:
+                eff_release_id = self._create_bootstrap_release_in_conn(conn, workspace_id, actor=actor)
             event = self._append_event(
                 conn,
                 stream_id=f"workspace:{workspace_id}",
                 event_type="activation.prior_upserted",
-                payload={"workspace_id": workspace_id, "atom_version_id": atom_version_id, "prior_kind": prior_kind, "score": float(score)},
+                payload={"workspace_id": workspace_id, "release_id": eff_release_id, "atom_version_id": atom_version_id, "prior_kind": prior_kind, "score": float(score)},
                 actor=actor,
             )
             identifier = str(uuid.uuid4())
             conn.execute(
                 """INSERT INTO activation_priors(
-                    activation_prior_id,workspace_id,atom_version_id,prior_kind,score,provenance_json,expires_at,
+                    activation_prior_id,workspace_id,release_id,atom_version_id,prior_kind,score,provenance_json,expires_at,
                     created_event_offset,updated_at
-                ) VALUES (?,?,?,?,?,?,?,?,?)
-                ON CONFLICT(workspace_id,atom_version_id,prior_kind) DO UPDATE SET
+                ) VALUES (?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(workspace_id,release_id,atom_version_id,prior_kind) DO UPDATE SET
                     score=excluded.score,provenance_json=excluded.provenance_json,expires_at=excluded.expires_at,
                     created_event_offset=excluded.created_event_offset,updated_at=excluded.updated_at""",
-                (identifier, workspace_id, atom_version_id, prior_kind, float(score), _json(provenance or {}), expires_at, event.offset, _now()),
+                (identifier, workspace_id, eff_release_id, atom_version_id, prior_kind, float(score), _json(provenance or {}), expires_at, event.offset, _now()),
             )
             return self._activation_prior_row(
                 conn.execute(
-                    "SELECT * FROM activation_priors WHERE workspace_id=? AND atom_version_id=? AND prior_kind=?",
-                    (workspace_id, atom_version_id, prior_kind),
+                    "SELECT * FROM activation_priors WHERE workspace_id=? AND release_id=? AND atom_version_id=? AND prior_kind=?",
+                    (workspace_id, eff_release_id, atom_version_id, prior_kind),
                 ).fetchone()
             )
 
-    def activation_priors(self, workspace_id: str, atom_version_ids: Sequence[str]) -> dict[str, list[dict[str, Any]]]:
+    def activation_priors(
+        self,
+        workspace_id: str,
+        atom_version_ids: Sequence[str],
+        *,
+        release_id: str | None = None,
+    ) -> dict[str, list[dict[str, Any]]]:
         if not atom_version_ids:
             return {}
+        eff_release_id = release_id
+        if eff_release_id is None:
+            active = self.get_active_cortex_release(workspace_id)
+            if not active:
+                return {}
+            eff_release_id = active["release_id"]
         marks = ",".join("?" for _ in atom_version_ids)
         with self._connect() as conn:
             rows = conn.execute(
-                f"""SELECT * FROM activation_priors WHERE workspace_id=? AND atom_version_id IN ({marks})
+                f"""SELECT * FROM activation_priors WHERE workspace_id=? AND release_id=? AND atom_version_id IN ({marks})
                     AND (expires_at IS NULL OR expires_at>?) ORDER BY prior_kind""",
-                [workspace_id, *atom_version_ids, _now()],
+                [workspace_id, eff_release_id, *atom_version_ids, _now()],
             ).fetchall()
         result: dict[str, list[dict[str, Any]]] = defaultdict(list)
         for row in rows:

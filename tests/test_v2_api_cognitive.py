@@ -50,6 +50,71 @@ class TraceV2CognitiveApiTests(unittest.TestCase):
             self.assertEqual(feedback.json()["event_type"], "opened")
         service.store.close()
 
+    def test_cortex_release_http_endpoints(self) -> None:
+        service = TraceService(SqliteEventStore(":memory:"), MemoryObjectStore())
+        with TestClient(create_app(service)) as client:
+            client.post("/v2/ingestions", json={"workspace_id": "cortex-api", "text": "node alpha\n\nnode beta"})
+
+            # Create initial release
+            r0_res = client.post("/v2/cortex/releases", json={
+                "workspace_id": "cortex-api",
+                "policy_revision": "cortex-v0",
+            })
+            self.assertEqual(r0_res.status_code, 201)
+            r0_id = r0_res.json()["release_id"]
+            client.post(f"/v2/cortex/releases/{r0_id}/validate", json={"validation_receipt": {"passed": True}})
+            client.post(f"/v2/cortex/releases/{r0_id}/activate")
+
+            # List releases
+            list_res = client.get("/v2/cortex/releases?workspace_id=cortex-api")
+            self.assertEqual(list_res.status_code, 200)
+            initial_releases = list_res.json()
+            self.assertGreaterEqual(len(initial_releases), 1)
+
+            # Get active release
+            active_res = client.get("/v2/cortex/releases/active?workspace_id=cortex-api")
+            self.assertEqual(active_res.status_code, 200)
+            active_rel = active_res.json()
+            self.assertEqual(active_rel["status"], "active")
+            self.assertEqual(active_rel["release_id"], r0_id)
+
+            # Create candidate release
+            create_res = client.post("/v2/cortex/releases", json={
+                "workspace_id": "cortex-api",
+                "policy_revision": "cortex-api-v1",
+            })
+            self.assertEqual(create_res.status_code, 201)
+            cand = create_res.json()
+            cand_id = cand["release_id"]
+            self.assertEqual(cand["status"], "building")
+
+            # Validate candidate
+            val_res = client.post(f"/v2/cortex/releases/{cand_id}/validate", json={
+                "validation_receipt": {"passed": True, "rationale": "all tests pass"}
+            })
+            self.assertEqual(val_res.status_code, 200)
+            self.assertEqual(val_res.json()["status"], "validated")
+
+            # Activate candidate
+            act_res = client.post(f"/v2/cortex/releases/{cand_id}/activate")
+            self.assertEqual(act_res.status_code, 200)
+            self.assertEqual(act_res.json()["status"], "active")
+
+            # Check active is now candidate
+            active_res2 = client.get("/v2/cortex/releases/active?workspace_id=cortex-api")
+            self.assertEqual(active_res2.status_code, 200)
+            self.assertEqual(active_res2.json()["release_id"], cand_id)
+
+            # Rollback
+            rb_res = client.post("/v2/cortex/releases/rollback", json={
+                "workspace_id": "cortex-api",
+                "reason": "testing rollback api",
+            })
+            self.assertEqual(rb_res.status_code, 200)
+            self.assertEqual(rb_res.json()["release_id"], r0_id)
+        service.store.close()
+
+
 
 if __name__ == "__main__":
     unittest.main()

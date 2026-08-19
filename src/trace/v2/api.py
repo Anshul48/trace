@@ -33,6 +33,10 @@ from .models import (
     ApiKeyDecisionRequest,
     BenchmarkRunRequest,
     CognitivePolicy,
+    CortexReleaseCreateRequest,
+    CortexReleaseValidateRequest,
+    CortexReleaseActivateRequest,
+    CortexReleaseRollbackRequest,
     EvidenceFeedbackRequest,
     FeedbackEdgeProposalRequest,
     ExperimentManifestRequest,
@@ -347,6 +351,70 @@ def create_app(service: TraceService | None = None) -> FastAPI:
                 model_permissions=payload.model_permissions,
             )
             return _service(request).create_api_key(payload.model_copy(update={"actor": _actor(request)}))
+        except Exception as error:
+            raise _http_error(error) from error
+
+    # ---------------------------------------------------- cortex release endpoints
+    @router.post("/cortex/releases", status_code=201)
+    def create_cortex_release(payload: CortexReleaseCreateRequest, request: Request) -> dict[str, object]:
+        try:
+            _authorize(request, payload.workspace_id, scope="cortex:write")
+            return _service(request).create_cortex_release(payload.model_copy(update={"actor": _actor(request)}))
+        except Exception as error:
+            raise _http_error(error) from error
+
+    @router.get("/cortex/releases")
+    def list_cortex_releases(request: Request, workspace_id: str, status: str | None = None, limit: int = 50) -> list[dict[str, object]]:
+        try:
+            _authorize(request, workspace_id, scope="cortex:read")
+            return _service(request).list_cortex_releases(workspace_id, status=status, limit=limit)
+        except Exception as error:
+            raise _http_error(error) from error
+
+    @router.get("/cortex/releases/active")
+    def get_active_cortex_release(request: Request, workspace_id: str) -> dict[str, object]:
+        try:
+            _authorize(request, workspace_id, scope="cortex:read")
+            active = _service(request).get_active_cortex_release(workspace_id)
+            if active is None:
+                raise HTTPException(status_code=404, detail=f"no active cortex release found for workspace {workspace_id}")
+            return active
+        except Exception as error:
+            raise _http_error(error) from error
+
+    @router.get("/cortex/releases/{release_id}")
+    def get_cortex_release(release_id: str, request: Request) -> dict[str, object]:
+        try:
+            release = _service(request).get_cortex_release(release_id)
+            _authorize(request, release["workspace_id"], scope="cortex:read")
+            return release
+        except Exception as error:
+            raise _http_error(error) from error
+
+    @router.post("/cortex/releases/{release_id}/validate")
+    def validate_cortex_release(release_id: str, payload: CortexReleaseValidateRequest, request: Request) -> dict[str, object]:
+        try:
+            rel = _service(request).get_cortex_release(release_id)
+            _authorize(request, rel["workspace_id"], scope="cortex:write")
+            return _service(request).validate_cortex_release(release_id, payload.model_copy(update={"actor": _actor(request)}))
+        except Exception as error:
+            raise _http_error(error) from error
+
+    @router.post("/cortex/releases/{release_id}/activate")
+    def activate_cortex_release(release_id: str, request: Request, payload: CortexReleaseActivateRequest | None = None) -> dict[str, object]:
+        try:
+            rel = _service(request).get_cortex_release(release_id)
+            _authorize(request, rel["workspace_id"], scope="cortex:write")
+            act_payload = payload.model_copy(update={"actor": _actor(request)}) if payload else CortexReleaseActivateRequest(actor=_actor(request))
+            return _service(request).activate_cortex_release(release_id, act_payload)
+        except Exception as error:
+            raise _http_error(error) from error
+
+    @router.post("/cortex/releases/rollback")
+    def rollback_cortex_release(payload: CortexReleaseRollbackRequest, request: Request) -> dict[str, object]:
+        try:
+            _authorize(request, payload.workspace_id, scope="cortex:write")
+            return _service(request).rollback_cortex_release(payload.model_copy(update={"actor": _actor(request)}))
         except Exception as error:
             raise _http_error(error) from error
 

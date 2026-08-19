@@ -627,6 +627,7 @@ class HybridRetrievalEngine:
         direct: dict[str, Candidate],
         atoms: Sequence[dict[str, Any]],
         seed_limit: int,
+        release_id: str | None = None,
     ) -> tuple[dict[str, float], dict[str, list[dict[str, Any]]], dict[str, dict[str, float]], dict[str, Any], dict[str, dict[str, Any]]]:
         """Run bounded activation and load selected endpoints outside seeds.
 
@@ -719,10 +720,14 @@ class HybridRetrievalEngine:
             try:
                 affinity_rows = affinity_source(
                     workspace_id, [item.atom["atom_version_id"] for item in ranked],
+                    release_id=release_id,
                     limit=max(0, min(128, seed_limit * 8)), index_revision=os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
                 )
             except TypeError:
-                affinity_rows = affinity_source(workspace_id, [item.atom["atom_version_id"] for item in ranked], limit=seed_limit * 8)
+                try:
+                    affinity_rows = affinity_source(workspace_id, [item.atom["atom_version_id"] for item in ranked], release_id=release_id, limit=seed_limit * 8)
+                except TypeError:
+                    affinity_rows = affinity_source(workspace_id, [item.atom["atom_version_id"] for item in ranked], limit=seed_limit * 8)
         affinity_ids = list(dict.fromkeys(
             endpoint
             for edge in affinity_rows
@@ -750,7 +755,12 @@ class HybridRetrievalEngine:
 
         seed_scores = {item.atom["atom_version_id"]: max(item.score, 0.001) for item in ranked}
         prior_source = getattr(store, "activation_priors", None)
-        priors = prior_source(workspace_id, list(atom_by_id)) if callable(prior_source) else {}
+        priors: dict[str, list[dict[str, Any]]] = {}
+        if callable(prior_source):
+            try:
+                priors = prior_source(workspace_id, list(atom_by_id), release_id=release_id)
+            except TypeError:
+                priors = prior_source(workspace_id, list(atom_by_id))
         for atom_id, values in priors.items():
             # Priors may add a small local baseline, but suppression can only
             # reduce it to zero. They do not mutate factual edge weights.
@@ -900,12 +910,18 @@ class HybridRetrievalEngine:
         atoms: list[dict[str, Any]],
         index_hits: dict[str, Sequence[dict[str, Any]]] | None = None,
         deep_navigator: DeepNavigator | None = None,
+        release_id: str | None = None,
     ) -> RetrievalOutcome:
         if not request.workspace_id or not atoms:
             return RetrievalOutcome([], "insufficient_evidence", {"reason": "no_visible_atoms"})
         query_terms = tokens(request.query)
         if not query_terms:
             return RetrievalOutcome([], "insufficient_evidence", {"reason": "no_query_terms"})
+
+        active_rel_getter = getattr(store, "get_active_cortex_release", None)
+        active_rel = active_rel_getter(request.workspace_id) if callable(active_rel_getter) else None
+        eff_release_id = release_id or (active_rel["release_id"] if active_rel else None)
+
         budget = request.retrieval_budget
         profile = request.retrieval_profile
         lexical = self._lexical_scores(request=request, atoms=atoms, hits=(index_hits or {}).get("lexical"))
@@ -966,6 +982,7 @@ class HybridRetrievalEngine:
             graph, paths, contributions, activation_diagnostics, activation_atoms = self._activation_scores(
                 store=store, workspace_id=request.workspace_id, as_of_event=request.as_of_event,
                 direct=candidates, atoms=atoms, seed_limit=budget.graph_seed_limit,
+                release_id=eff_release_id,
             )
             # Request budgets can reduce graph influence, never raise it past
             # the policy-safe ceiling. Family transition mass is exclusively
@@ -1186,5 +1203,12 @@ class HybridRetrievalEngine:
                 "deep_applied": deep_applied,
                 "deep_trace": deep_trace,
                 "deep_degraded": bool(deep_trace and deep_trace.get("degraded")),
+                "active_cortex_release_id": eff_release_id,
+                "active_cortex_release": {
+                    "release_id": active_rel["release_id"],
+                    "spine_event_watermark": active_rel.get("spine_event_watermark"),
+                    "policy_revision": active_rel.get("policy_revision"),
+                    "code_revision": active_rel.get("code_revision"),
+                } if active_rel else None,
             },
         )

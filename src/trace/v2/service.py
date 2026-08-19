@@ -33,6 +33,10 @@ from .models import (
     IndexRevisionRequest,
     IngestionRequest,
     ApiKeyCreateRequest,
+    CortexReleaseCreateRequest,
+    CortexReleaseValidateRequest,
+    CortexReleaseActivateRequest,
+    CortexReleaseRollbackRequest,
     JobSubmitRequest,
     ModelRegistrationRequest,
     NodeEditRequest,
@@ -2931,3 +2935,65 @@ class TraceService:
                 revision=revision,
             )
         return int(stored)
+
+    # ---------------------------------------------------- cortex release lifecycle
+    def create_cortex_release(self, request: CortexReleaseCreateRequest) -> dict[str, Any]:
+        with self.workspace_scope(request.workspace_id):
+            return self.store.create_cortex_release(
+                workspace_id=request.workspace_id,
+                parent_release_id=request.parent_release_id,
+                spine_event_watermark=request.spine_event_watermark,
+                policy_revision=request.policy_revision,
+                policy_snapshot_hash=request.policy_snapshot_hash,
+                code_revision=request.code_revision,
+                components=[c.model_dump() for c in request.components] if request.components else None,
+                actor=request.actor,
+            )
+
+    def get_cortex_release(self, release_id: str) -> dict[str, Any]:
+        return self.store.get_cortex_release(release_id)
+
+    def get_active_cortex_release(self, workspace_id: str) -> dict[str, Any] | None:
+        with self.workspace_scope(workspace_id):
+            return self.store.get_active_cortex_release(workspace_id)
+
+    def list_cortex_releases(self, workspace_id: str, *, status: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
+        with self.workspace_scope(workspace_id):
+            return self.store.list_cortex_releases(workspace_id, status=status, limit=limit)
+
+    def validate_cortex_release(self, release_id: str, request: CortexReleaseValidateRequest) -> dict[str, Any]:
+        receipt = request.validation_receipt.model_dump() if hasattr(request.validation_receipt, "model_dump") else dict(request.validation_receipt)
+        return self.store.validate_cortex_release(
+            release_id,
+            receipt,
+            actor=request.actor,
+        )
+
+    def activate_cortex_release(self, release_id: str, request: CortexReleaseActivateRequest | None = None) -> dict[str, Any]:
+        actor = request.actor if request else "system"
+        rel = self.store.get_cortex_release(release_id)
+        if not rel:
+            raise NotFoundError(f"cortex release {release_id} was not found")
+        if rel["status"] != "validated":
+            raise InvariantViolation(f"cannot activate cortex release in status {rel['status']!r}; must be 'validated'")
+
+        try:
+            if hasattr(self.retrieval_engine.lexical_index, "promote_alias"):
+                self.retrieval_engine.lexical_index.promote_alias(rel["workspace_id"], release_id)
+            if hasattr(self.retrieval_engine.dense_index, "promote_alias"):
+                self.retrieval_engine.dense_index.promote_alias(rel["workspace_id"], release_id)
+        except Exception as err:
+            self.store.fail_cortex_release(release_id, failure_detail=f"External index alias promotion failed: {err}", actor=actor)
+            raise InvariantViolation(f"external index alias promotion failed: {err}") from err
+
+        with self.workspace_scope(rel["workspace_id"]):
+            return self.store.activate_cortex_release(release_id, actor=actor)
+
+    def rollback_cortex_release(self, request: CortexReleaseRollbackRequest) -> dict[str, Any]:
+        with self.workspace_scope(request.workspace_id):
+            return self.store.rollback_cortex_release(
+                workspace_id=request.workspace_id,
+                target_release_id=request.target_release_id,
+                reason=request.reason,
+                actor=request.actor,
+            )

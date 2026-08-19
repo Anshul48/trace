@@ -467,3 +467,75 @@ class EventRecord(BaseModel):
     payload: dict[str, Any]
     payload_hash: str
     idempotency_key: str | None = None
+
+
+class CortexValidationReceipt(BaseModel):
+    """Durable validation receipt for a candidate Cortex release."""
+    structural: dict[str, Any] = Field(default_factory=dict)
+    provenance: dict[str, Any] = Field(default_factory=dict)
+    policy: dict[str, Any] = Field(default_factory=dict)
+    parity: dict[str, Any] = Field(default_factory=dict)
+    evaluator_manifest_id: str | None = None
+    validated_at: datetime | None = None
+    passed: bool = True
+
+
+class CortexReleaseComponent(BaseModel):
+    """One immutable component revision within a Cortex release root."""
+    release_id: str
+    workspace_id: str
+    component_kind: Literal["hierarchy", "affinity", "activation_priors", "lexical_index", "dense_index"]
+    component_revision: str
+    input_checksum: str
+    source_watermark: int
+    carried_forward_from_release_id: str | None = None
+    validation_status: Literal["pending", "validated", "failed"] = "pending"
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime | None = None
+
+
+class CortexRelease(BaseModel):
+    """Unified Cortex Release Root representing one validated derived state."""
+    release_id: str
+    workspace_id: str
+    parent_release_id: str | None = None
+    spine_event_watermark: int
+    status: Literal["planned", "building", "validating", "validated", "active", "superseded", "retired", "failed"]
+    policy_revision: str
+    policy_snapshot_hash: str
+    code_revision: str
+    validation_receipt: dict[str, Any] = Field(default_factory=dict)
+    components: list[CortexReleaseComponent] | dict[str, Any] = Field(default_factory=list)
+    created_at: datetime
+    activated_at: datetime | None = None
+    superseded_at: datetime | None = None
+    retired_at: datetime | None = None
+    failure_detail: str | None = None
+
+
+class CortexReleaseCreateRequest(BaseModel):
+    workspace_id: str = Field(min_length=1)
+    parent_release_id: str | None = None
+    spine_event_watermark: int | None = None
+    policy_revision: str | None = None
+    policy_snapshot_hash: str | None = None
+    code_revision: str | None = None
+    components: list[dict[str, Any]] = Field(default_factory=list)
+    actor: str = "system"
+
+
+class CortexReleaseValidateRequest(BaseModel):
+    validation_receipt: CortexValidationReceipt | dict[str, Any] = Field(default_factory=dict)
+    actor: str = "system"
+
+
+class CortexReleaseActivateRequest(BaseModel):
+    actor: str = "system"
+
+
+class CortexReleaseRollbackRequest(BaseModel):
+    workspace_id: str = Field(min_length=1)
+    target_release_id: str | None = None
+    reason: str | None = None
+    actor: str = "system"
+
