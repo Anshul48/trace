@@ -8,6 +8,7 @@ projection contracts available for tests, local development, and replay drills.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import os
 import sqlite3
@@ -17,7 +18,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterator, Sequence
+from typing import Any, Iterator, Mapping, Sequence
 
 from .models import AppendResult, CognitivePolicy, EventRecord
 from .cortex import PROJECTION_RUN_STATUSES, canonical_pair
@@ -61,6 +62,116 @@ def _decode(value: str | None, default: Any = None) -> Any:
 
 def _digest(value: Any) -> str:
     return hashlib.sha256(_json(value).encode("utf-8")).hexdigest()
+
+
+SOURCE_LIFECYCLE_STATES = frozenset({
+    "active", "superseded", "revoked", "tombstoned", "conflicted", "redacted_purged",
+})
+_NON_READABLE_LIFECYCLE_STATES = frozenset({"revoked", "tombstoned", "redacted_purged"})
+
+
+def _temporal_value(value: Any) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            raise InvariantViolation("explicit valid-time values must include a timezone")
+        return value.isoformat()
+    return str(value)
+
+
+def normalize_valid_time(value: Mapping[str, Any] | None) -> dict[str, Any]:
+    """Normalize explicit valid-time metadata without filling missing dates."""
+
+    value = dict(value or {})
+    valid_from = _temporal_value(value.get("valid_from"))
+    valid_to = _temporal_value(value.get("valid_to"))
+    precision = str(value.get("precision") or value.get("valid_time_precision") or "unknown")
+    confidence = str(value.get("confidence") or value.get("valid_time_confidence") or "unknown")
+    provenance = dict(value.get("provenance") or value.get("valid_time_provenance") or {})
+    if precision not in {"unknown", "partial", "year", "month", "day", "instant"}:
+        raise InvariantViolation(f"unsupported valid-time precision {precision!r}")
+    if confidence not in {"unknown", "explicit", "asserted", "partial"}:
+        raise InvariantViolation(f"unsupported valid-time confidence {confidence!r}")
+    if (valid_from is None) != (valid_to is None) and precision not in {"partial", "unknown"}:
+        raise InvariantViolation("partial valid time must declare precision='partial' or 'unknown'")
+    if precision == "unknown" and (valid_from is not None or valid_to is not None):
+        raise InvariantViolation("unknown valid-time precision cannot carry explicit boundaries")
+    if valid_from is not None and valid_to is not None:
+        try:
+            start = datetime.fromisoformat(valid_from.replace("Z", "+00:00"))
+            end = datetime.fromisoformat(valid_to.replace("Z", "+00:00"))
+            if start.tzinfo is None or end.tzinfo is None or start >= end:
+                raise ValueError
+        except ValueError as error:
+            raise InvariantViolation("valid time must be a non-empty half-open [valid_from, valid_to) interval") from error
+    return {
+        "valid_from": valid_from,
+        "valid_to": valid_to,
+        "precision": precision,
+        "confidence": confidence,
+        "provenance": provenance,
+    }
+
+
+def evaluate_temporal_visibility(
+    atom: Mapping[str, Any],
+    *,
+    current_lifecycle: Mapping[str, Any] | None,
+    historical_state: str | None,
+    as_of_event: int | None,
+    valid_at: datetime | str | None = None,
+    valid_from: datetime | str | None = None,
+    valid_to: datetime | str | None = None,
+) -> dict[str, Any]:
+    """Return a non-content visibility decision for one canonical atom."""
+
+    atom_created = int(atom.get("created_event_offset", 0) or 0)
+    current_state = str((current_lifecycle or {}).get("state") or "active")
+    selected_state = str(historical_state or current_state)
+    result: dict[str, Any] = {
+        "visible": True,
+        "lifecycle_state": selected_state,
+        "current_lifecycle_state": current_state,
+        "policy_result": "allowed",
+        "exclusion_reason": None,
+        "valid_time": dict((atom.get("properties") or {}).get("temporal") or {}),
+    }
+    if as_of_event is not None and atom_created > int(as_of_event):
+        result.update(visible=False, policy_result="excluded", exclusion_reason="event_after_requested_watermark")
+        return result
+    if current_state in _NON_READABLE_LIFECYCLE_STATES:
+        result.update(visible=False, policy_result="denied", exclusion_reason=f"current_lifecycle_{current_state}")
+        return result
+    if selected_state in _NON_READABLE_LIFECYCLE_STATES:
+        result.update(visible=False, policy_result="denied", exclusion_reason=f"historical_lifecycle_{selected_state}")
+        return result
+
+    temporal = result["valid_time"]
+    requested_at = _temporal_value(valid_at)
+    requested_from = _temporal_value(valid_from)
+    requested_to = _temporal_value(valid_to)
+    if requested_at is not None or requested_from is not None or requested_to is not None:
+        stored_from = temporal.get("valid_from")
+        stored_to = temporal.get("valid_to")
+        if not stored_from or not stored_to:
+            result.update(visible=False, policy_result="excluded", exclusion_reason="valid_time_unknown_or_partial")
+            return result
+        try:
+            stored_start = datetime.fromisoformat(str(stored_from).replace("Z", "+00:00"))
+            stored_end = datetime.fromisoformat(str(stored_to).replace("Z", "+00:00"))
+            if requested_at is not None:
+                point = datetime.fromisoformat(requested_at.replace("Z", "+00:00"))
+                matches = stored_start <= point < stored_end
+            else:
+                query_start = datetime.fromisoformat(str(requested_from).replace("Z", "+00:00"))
+                query_end = datetime.fromisoformat(str(requested_to).replace("Z", "+00:00"))
+                matches = stored_start < query_end and query_start < stored_end
+        except (TypeError, ValueError):
+            matches = False
+        if not matches:
+            result.update(visible=False, policy_result="excluded", exclusion_reason="valid_time_outside_interval")
+    return result
 
 
 class SqliteEventStore:
@@ -199,6 +310,24 @@ class SqliteEventStore:
                 );
                 CREATE INDEX IF NOT EXISTS node_versions_node_event
                     ON node_versions(node_id, created_event_offset DESC);
+
+                CREATE TABLE IF NOT EXISTS source_lifecycle (
+                    atom_version_id TEXT PRIMARY KEY REFERENCES node_versions(atom_version_id),
+                    workspace_id TEXT NOT NULL,
+                    state TEXT NOT NULL CHECK (state IN ('active','superseded','revoked','tombstoned','conflicted','redacted_purged')),
+                    valid_from TEXT,
+                    valid_to TEXT,
+                    valid_precision TEXT NOT NULL DEFAULT 'unknown',
+                    valid_confidence TEXT NOT NULL DEFAULT 'unknown',
+                    valid_provenance_json TEXT NOT NULL DEFAULT '{}',
+                    predecessor_atom_version_id TEXT,
+                    superseded_by_atom_version_id TEXT,
+                    changed_event_offset INTEGER NOT NULL,
+                    erasure_receipt_json TEXT,
+                    created_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS source_lifecycle_workspace_state
+                    ON source_lifecycle(workspace_id, state, changed_event_offset);
 
                 CREATE TABLE IF NOT EXISTS edge_versions (
                     edge_version_id TEXT PRIMARY KEY,
@@ -599,7 +728,9 @@ class SqliteEventStore:
                     validation_receipt_json TEXT NOT NULL DEFAULT '{}',
                     created_at TEXT NOT NULL,
                     activated_at TEXT,
+                    activated_event_offset INTEGER,
                     superseded_at TEXT,
+                    superseded_event_offset INTEGER,
                     retired_at TEXT,
                     failure_detail TEXT,
                     FOREIGN KEY(parent_release_id) REFERENCES cortex_releases(release_id)
@@ -682,6 +813,30 @@ class SqliteEventStore:
                 CREATE INDEX IF NOT EXISTS activation_priors_lookup
                     ON activation_priors(workspace_id, release_id, atom_version_id, expires_at);
                 """
+            )
+            # TR2 adds only forward-compatible metadata to existing local
+            # databases.  No prior release or source event is rewritten.
+            release_columns = {row[1] for row in conn.execute("PRAGMA table_info(cortex_releases)").fetchall()}
+            for column, declaration in {
+                "activated_event_offset": "INTEGER",
+                "superseded_event_offset": "INTEGER",
+            }.items():
+                if column not in release_columns:
+                    conn.execute(f"ALTER TABLE cortex_releases ADD COLUMN {column} {declaration}")
+            conn.execute(
+                "UPDATE cortex_releases SET activated_event_offset=COALESCE(activated_event_offset, spine_event_watermark) "
+                "WHERE status IN ('active','superseded','retired')"
+            )
+            conn.execute(
+                """INSERT OR IGNORE INTO source_lifecycle(
+                    atom_version_id,workspace_id,state,valid_from,valid_to,valid_precision,valid_confidence,
+                    valid_provenance_json,predecessor_atom_version_id,superseded_by_atom_version_id,
+                    changed_event_offset,erasure_receipt_json,created_at
+                )
+                SELECT nv.atom_version_id,n.workspace_id,'active',NULL,NULL,'unknown','unknown','{}',NULL,NULL,
+                       nv.created_event_offset,NULL,?
+                FROM node_versions nv JOIN nodes n ON n.node_id=nv.node_id""",
+                (_now(),),
             )
             # V2 previews created before leases were introduced remain readable.
             try:
@@ -1039,6 +1194,269 @@ class SqliteEventStore:
                 raise InvariantViolation(f"outbox event {event_offset} is not leased")
 
     # ---------------------------------------------------------- write helpers
+    @staticmethod
+    def _source_lifecycle_row(row: sqlite3.Row | None) -> dict[str, Any]:
+        if not row:
+            raise NotFoundError("source lifecycle record was not found")
+        result = dict(row)
+        result["valid_provenance"] = _decode(result.pop("valid_provenance_json"), {})
+        result["erasure_receipt"] = _decode(result.pop("erasure_receipt_json"), None)
+        result["valid_time"] = {
+            "valid_from": result.get("valid_from"),
+            "valid_to": result.get("valid_to"),
+            "precision": result.get("valid_precision", "unknown"),
+            "confidence": result.get("valid_confidence", "unknown"),
+            "provenance": result.get("valid_provenance", {}),
+        }
+        return result
+
+    def _current_source_lifecycle_conn(self, conn: sqlite3.Connection, atom_version_id: str) -> dict[str, Any] | None:
+        row = conn.execute("SELECT * FROM source_lifecycle WHERE atom_version_id=?", (atom_version_id,)).fetchone()
+        return self._source_lifecycle_row(row) if row else None
+
+    def _historical_source_state_conn(
+        self, conn: sqlite3.Connection, atom_version_id: str, as_of_event: int | None
+    ) -> str | None:
+        current = self._current_source_lifecycle_conn(conn, atom_version_id)
+        if as_of_event is None:
+            return str(current["state"]) if current else None
+        state: str | None = None
+        rows = conn.execute(
+            "SELECT event_type,payload_json FROM events "
+            "WHERE event_offset<=? AND event_type IN ('source.lifecycle_changed','source.lifecycle_initialized') "
+            "ORDER BY event_offset",
+            (int(as_of_event),),
+        ).fetchall()
+        for row in rows:
+            payload = _decode(row["payload_json"], {})
+            if str(payload.get("atom_version_id")) == atom_version_id:
+                state = str(payload.get("state") or state or "active")
+        if state is None and current is not None:
+            # Legacy rows predate lifecycle events. Their explicit state is
+            # active until a post-TR2 transition appends a lifecycle event.
+            changed_at = int(current.get("changed_event_offset", 0) or 0)
+            state = str(current["state"]) if changed_at <= int(as_of_event) else "active"
+        return state
+
+    def get_source_lifecycle(self, atom_version_id: str, *, as_of_event: int | None = None) -> dict[str, Any]:
+        with self._connect() as conn:
+            current = self._current_source_lifecycle_conn(conn, atom_version_id)
+            if current is None:
+                raise NotFoundError(f"source lifecycle for {atom_version_id} was not found")
+            state = self._historical_source_state_conn(conn, atom_version_id, as_of_event)
+            result = dict(current)
+            if state is not None:
+                result["state"] = state
+            result["requested_as_of_event"] = as_of_event
+            return result
+
+    def temporal_visibility(
+        self,
+        atom: Mapping[str, Any],
+        *,
+        as_of_event: int | None = None,
+        valid_at: datetime | str | None = None,
+        valid_from: datetime | str | None = None,
+        valid_to: datetime | str | None = None,
+    ) -> dict[str, Any]:
+        atom_id = str(atom.get("atom_version_id") or "")
+        with self._connect() as conn:
+            current = self._current_source_lifecycle_conn(conn, atom_id)
+            historical_state = self._historical_source_state_conn(conn, atom_id, as_of_event)
+        return evaluate_temporal_visibility(
+            atom, current_lifecycle=current, historical_state=historical_state,
+            as_of_event=as_of_event, valid_at=valid_at, valid_from=valid_from, valid_to=valid_to,
+        )
+
+    def _insert_source_lifecycle_conn(
+        self,
+        conn: sqlite3.Connection,
+        *,
+        atom_version_id: str,
+        workspace_id: str,
+        state: str,
+        temporal: Mapping[str, Any] | None,
+        changed_event_offset: int,
+        predecessor_atom_version_id: str | None = None,
+        superseded_by_atom_version_id: str | None = None,
+        erasure_receipt: Mapping[str, Any] | None = None,
+    ) -> None:
+        if state not in SOURCE_LIFECYCLE_STATES:
+            raise InvariantViolation(f"unsupported source lifecycle state {state!r}")
+        normalized = normalize_valid_time(temporal)
+        conn.execute(
+            """INSERT INTO source_lifecycle(
+                atom_version_id,workspace_id,state,valid_from,valid_to,valid_precision,valid_confidence,
+                valid_provenance_json,predecessor_atom_version_id,superseded_by_atom_version_id,
+                changed_event_offset,erasure_receipt_json,created_at
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ON CONFLICT(atom_version_id) DO UPDATE SET
+                workspace_id=excluded.workspace_id,state=excluded.state,valid_from=excluded.valid_from,
+                valid_to=excluded.valid_to,valid_precision=excluded.valid_precision,
+                valid_confidence=excluded.valid_confidence,valid_provenance_json=excluded.valid_provenance_json,
+                predecessor_atom_version_id=excluded.predecessor_atom_version_id,
+                superseded_by_atom_version_id=excluded.superseded_by_atom_version_id,
+                changed_event_offset=excluded.changed_event_offset,erasure_receipt_json=excluded.erasure_receipt_json""",
+            (
+                atom_version_id, workspace_id, state, normalized["valid_from"], normalized["valid_to"],
+                normalized["precision"], normalized["confidence"], _json(normalized["provenance"]),
+                predecessor_atom_version_id, superseded_by_atom_version_id, int(changed_event_offset),
+                _json(erasure_receipt) if erasure_receipt is not None else None, _now(),
+            ),
+        )
+
+    def _change_source_lifecycle_conn(
+        self,
+        conn: sqlite3.Connection,
+        *,
+        atom_version_id: str,
+        state: str,
+        actor: str,
+        reason: str | None = None,
+        superseded_by_atom_version_id: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        if state not in SOURCE_LIFECYCLE_STATES:
+            raise InvariantViolation(f"unsupported source lifecycle state {state!r}")
+        current = self._current_source_lifecycle_conn(conn, atom_version_id)
+        if current is None:
+            raise NotFoundError(f"source lifecycle for {atom_version_id} was not found")
+        previous = str(current["state"])
+        if previous == "redacted_purged":
+            raise InvariantViolation("redacted/purged source content cannot transition")
+        if state == "active":
+            raise InvariantViolation("source lifecycle cannot be resurrected through a normal transition")
+        if state == "superseded" and not superseded_by_atom_version_id:
+            raise InvariantViolation("superseded source requires an explicit successor atom version")
+        if previous == state and not reason:
+            return current | {"event_offset": current.get("changed_event_offset")}
+        node = conn.execute(
+            "SELECT workspace_id FROM nodes n JOIN node_versions nv ON nv.node_id=n.node_id WHERE nv.atom_version_id=?",
+            (atom_version_id,),
+        ).fetchone()
+        if not node:
+            raise NotFoundError(f"atom version {atom_version_id} was not found")
+        event = self._append_event(
+            conn,
+            stream_id=f"node:{atom_version_id}",
+            event_type="source.lifecycle_changed",
+            payload={
+                "atom_version_id": atom_version_id,
+                "workspace_id": node["workspace_id"],
+                "previous_state": previous,
+                "state": state,
+                "reason": reason,
+                "superseded_by_atom_version_id": superseded_by_atom_version_id,
+            },
+            actor=actor,
+            idempotency_key=idempotency_key,
+        )
+        self._insert_source_lifecycle_conn(
+            conn,
+            atom_version_id=atom_version_id,
+            workspace_id=node["workspace_id"],
+            state=state,
+            temporal=current["valid_time"],
+            changed_event_offset=event.offset,
+            predecessor_atom_version_id=current.get("predecessor_atom_version_id"),
+            superseded_by_atom_version_id=superseded_by_atom_version_id or current.get("superseded_by_atom_version_id"),
+            erasure_receipt=current.get("erasure_receipt"),
+        )
+        if state in _NON_READABLE_LIFECYCLE_STATES:
+            conn.execute("DELETE FROM hot_inbox WHERE atom_version_id=?", (atom_version_id,))
+        return self._source_lifecycle_row(conn.execute("SELECT * FROM source_lifecycle WHERE atom_version_id=?", (atom_version_id,)).fetchone()) | {"event_offset": event.offset}
+
+    def transition_source_lifecycle(
+        self,
+        atom_version_id: str,
+        *,
+        state: str,
+        actor: str = "system",
+        reason: str | None = None,
+        superseded_by_atom_version_id: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        with self.transaction() as conn:
+            return self._change_source_lifecycle_conn(
+                conn, atom_version_id=atom_version_id, state=state, actor=actor,
+                reason=reason, superseded_by_atom_version_id=superseded_by_atom_version_id,
+                idempotency_key=idempotency_key,
+            )
+
+    def revoke_source(self, atom_version_id: str, *, actor: str = "system", reason: str | None = None, idempotency_key: str | None = None) -> dict[str, Any]:
+        return self.transition_source_lifecycle(atom_version_id, state="revoked", actor=actor, reason=reason, idempotency_key=idempotency_key)
+
+    def tombstone_source(self, atom_version_id: str, *, actor: str = "system", reason: str | None = None, idempotency_key: str | None = None) -> dict[str, Any]:
+        return self.transition_source_lifecycle(atom_version_id, state="tombstoned", actor=actor, reason=reason, idempotency_key=idempotency_key)
+
+    def mark_source_conflicted(self, atom_version_id: str, *, actor: str = "system", reason: str | None = None, idempotency_key: str | None = None) -> dict[str, Any]:
+        return self.transition_source_lifecycle(atom_version_id, state="conflicted", actor=actor, reason=reason, idempotency_key=idempotency_key)
+
+    def erase_source(
+        self,
+        atom_version_id: str,
+        *,
+        signing_key: str,
+        actor: str = "system",
+        reason: str | None = None,
+    ) -> dict[str, Any]:
+        if not signing_key:
+            raise InvariantViolation("compliance erasure requires a configured signing key")
+        with self.transaction() as conn:
+            current = self._current_source_lifecycle_conn(conn, atom_version_id)
+            if current is None:
+                raise NotFoundError(f"source lifecycle for {atom_version_id} was not found")
+            source = conn.execute(
+                "SELECT nv.content_hash,n.workspace_id,nv.node_id FROM node_versions nv JOIN nodes n ON n.node_id=nv.node_id WHERE nv.atom_version_id=?",
+                (atom_version_id,),
+            ).fetchone()
+            if not source:
+                raise NotFoundError(f"atom version {atom_version_id} was not found")
+            receipt_payload = {
+                "receipt_id": str(uuid.uuid4()), "atom_version_id": atom_version_id,
+                "workspace_id": source["workspace_id"], "original_content_hash": source["content_hash"],
+                "reason": reason, "issued_at": _now(), "action": "redacted_purged",
+            }
+            signature = hmac.new(signing_key.encode("utf-8"), _json(receipt_payload).encode("utf-8"), hashlib.sha256).hexdigest()
+            receipt = {**receipt_payload, "signature": signature}
+            event = self._append_event(
+                conn,
+                stream_id=f"node:{atom_version_id}",
+                event_type="source.erasure_applied",
+                payload={"atom_version_id": atom_version_id, "workspace_id": source["workspace_id"], "receipt": receipt},
+                actor=actor,
+            )
+            old_version = conn.execute("SELECT properties_json FROM node_versions WHERE atom_version_id=?", (atom_version_id,)).fetchone()
+            old_properties = _decode(old_version["properties_json"], {}) if old_version else {}
+            redacted_properties = {
+                "temporal": old_properties.get("temporal", normalize_valid_time(None)),
+                "erasure_receipt_id": receipt["receipt_id"],
+                "erasure_event_offset": event.offset,
+            }
+            conn.execute("UPDATE node_versions SET content='', properties_json=? WHERE atom_version_id=?", (_json(redacted_properties), atom_version_id))
+            self._insert_source_lifecycle_conn(
+                conn,
+                atom_version_id=atom_version_id, workspace_id=source["workspace_id"], state="redacted_purged",
+                temporal=redacted_properties["temporal"], changed_event_offset=event.offset,
+                predecessor_atom_version_id=current.get("predecessor_atom_version_id"),
+                superseded_by_atom_version_id=current.get("superseded_by_atom_version_id"), erasure_receipt=receipt,
+            )
+            conn.execute("DELETE FROM hot_inbox WHERE atom_version_id=?", (atom_version_id,))
+            conn.execute("DELETE FROM dense_vectors WHERE atom_version_id=?", (atom_version_id,))
+            conn.execute("DELETE FROM activation_priors WHERE atom_version_id=?", (atom_version_id,))
+            conn.execute("DELETE FROM affinity_edges WHERE left_atom_version_id=? OR right_atom_version_id=?", (atom_version_id, atom_version_id))
+            conn.execute("DELETE FROM evidence_anchors WHERE source_atom_version_id=?", (atom_version_id,))
+            conn.execute("UPDATE edge_versions SET status='tombstoned', properties_json=? WHERE source_node_id=? OR target_node_id=?", (_json({"erasure_receipt_id": receipt["receipt_id"]}), source["node_id"], source["node_id"]))
+            projection_rows = conn.execute("SELECT projection_object_id,source_atom_version_ids_json FROM projection_objects WHERE workspace_id=?", (source["workspace_id"],)).fetchall()
+            for projection in projection_rows:
+                if atom_version_id in _decode(projection["source_atom_version_ids_json"], []):
+                    conn.execute(
+                        "DELETE FROM projection_memberships WHERE parent_projection_object_id=? OR child_id=?",
+                        (projection["projection_object_id"], projection["projection_object_id"]),
+                    )
+                    conn.execute("DELETE FROM projection_objects WHERE projection_object_id=?", (projection["projection_object_id"],))
+            return self._source_lifecycle_row(conn.execute("SELECT * FROM source_lifecycle WHERE atom_version_id=?", (atom_version_id,)).fetchone()) | {"event_offset": event.offset}
+
     def ingest(
         self,
         *,
@@ -1156,6 +1574,7 @@ class SqliteEventStore:
                     "ordinal": atom["ordinal"],
                     "parser_location": atom["parser_location"],
                     "source": source,
+                    "temporal": normalize_valid_time(atom.get("temporal")),
                 }
                 version_event = self._append_event(
                     conn,
@@ -1173,6 +1592,14 @@ class SqliteEventStore:
                     """INSERT INTO node_versions(atom_version_id, node_id, version, content, properties_json,
                        created_event_offset, content_hash) VALUES (?, ?, 1, ?, ?, ?, ?)""",
                     (version_id, node_id, atom["content"], _json(properties), version_event.offset, _digest(atom["content"])),
+                )
+                self._insert_source_lifecycle_conn(
+                    conn,
+                    atom_version_id=version_id,
+                    workspace_id=workspace_id,
+                    state="active",
+                    temporal=properties["temporal"],
+                    changed_event_offset=version_event.offset,
                 )
                 conn.execute(
                     """INSERT INTO hot_inbox(atom_version_id, node_id, workspace_id, content,
@@ -1321,6 +1748,29 @@ class SqliteEventStore:
                     _digest(source["content"]), event.offset,
                 ),
             )
+        if relation_type == "contradicts":
+            # Contradictory assertions remain readable but are explicitly
+            # marked for policy/review; neither assertion is silently replaced.
+            endpoint_rows = conn.execute(
+                """SELECT nv.atom_version_id FROM node_versions nv
+                   JOIN nodes n ON n.node_id=nv.node_id
+                   WHERE n.workspace_id=? AND n.node_id IN (?,?)
+                     AND n.facets_json LIKE '%\"atom\"%'
+                     AND nv.created_event_offset=(
+                         SELECT MAX(nv2.created_event_offset) FROM node_versions nv2 WHERE nv2.node_id=nv.node_id
+                     )""",
+                (workspace_id, source_node_id, target_node_id),
+            ).fetchall()
+            for endpoint in endpoint_rows:
+                lifecycle = self._current_source_lifecycle_conn(conn, endpoint["atom_version_id"])
+                if lifecycle and lifecycle["state"] not in {"revoked", "tombstoned", "redacted_purged", "conflicted"}:
+                    self._change_source_lifecycle_conn(
+                        conn,
+                        atom_version_id=endpoint["atom_version_id"],
+                        state="conflicted",
+                        actor=actor,
+                        reason=f"contradicts_edge:{edge_version_id}",
+                    )
         return {"edge_id": edge_id, "edge_version_id": edge_version_id, "event_offset": event.offset}
 
     def create_edge(self, **kwargs: Any) -> dict[str, Any]:
@@ -1419,6 +1869,10 @@ class SqliteEventStore:
                     return self._node_version_row(duplicate, node)
             current = self._current_version(conn, node_id)
             merged_properties = {**_decode(current["properties_json"]), **properties, "predecessor_atom_version_id": current["atom_version_id"]}
+            if "temporal" in merged_properties:
+                merged_properties["temporal"] = normalize_valid_time(merged_properties["temporal"])
+            else:
+                merged_properties["temporal"] = normalize_valid_time(None)
             version = current["version"] + 1
             version_id = (
                 str(uuid.uuid5(uuid.NAMESPACE_URL, f"node-version:{node_id}:{idempotency_key}"))
@@ -1446,6 +1900,29 @@ class SqliteEventStore:
                 """INSERT INTO node_versions(atom_version_id,node_id,version,content,properties_json,created_event_offset,content_hash)
                     VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 (version_id, node_id, version, content, _json(merged_properties), event.offset, _digest(content)),
+            )
+            predecessor = self._current_source_lifecycle_conn(conn, current["atom_version_id"])
+            if predecessor is not None:
+                if predecessor["state"] in _NON_READABLE_LIFECYCLE_STATES:
+                    raise InvariantViolation(
+                        f"cannot edit source in non-readable lifecycle state {predecessor['state']!r}"
+                    )
+                self._change_source_lifecycle_conn(
+                    conn,
+                    atom_version_id=current["atom_version_id"],
+                    state="superseded",
+                    actor=actor,
+                    reason="superseded_by_node_edit",
+                    superseded_by_atom_version_id=version_id,
+                )
+            self._insert_source_lifecycle_conn(
+                conn,
+                atom_version_id=version_id,
+                workspace_id=node["workspace_id"],
+                state="active",
+                temporal=merged_properties["temporal"],
+                changed_event_offset=event.offset,
+                predecessor_atom_version_id=current["atom_version_id"],
             )
             # This is a rebuildable index: the old current version is deliberately removed from it,
             # but remains immutable and searchable in historical/replay views.
@@ -1513,6 +1990,7 @@ class SqliteEventStore:
                     "ingestion_id": parent_properties.get("ingestion_id"),
                     "source_ordinal": parent_properties.get("ordinal"),
                     "projection_section_key": f"section:split:{node_id}:{marker.offset}",
+                    "temporal": normalize_valid_time(parent_properties.get("temporal")),
                 }
                 version_event = self._append_event(
                     conn, stream_id=f"node:{child_id}", event_type="node.versioned",
@@ -1525,6 +2003,15 @@ class SqliteEventStore:
                 conn.execute(
                     "INSERT INTO node_versions VALUES (?, ?, 1, ?, ?, ?, ?)",
                     (version_id, child_id, part, _json(props), version_event.offset, _digest(part)),
+                )
+                self._insert_source_lifecycle_conn(
+                    conn,
+                    atom_version_id=version_id,
+                    workspace_id=parent["workspace_id"],
+                    state="active",
+                    temporal=props["temporal"],
+                    changed_event_offset=version_event.offset,
+                    predecessor_atom_version_id=parent_version["atom_version_id"],
                 )
                 conn.execute(
                     "INSERT INTO hot_inbox VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -2190,13 +2677,51 @@ class SqliteEventStore:
     def activate_projection_run(self, projection_run_id: str, *, actor: str = "projection-worker") -> dict[str, Any]:
         return self.transition_projection_run(projection_run_id, status="active", actor=actor)
 
-    def effective_projection_run(self, workspace_id: str, projection_kind: str) -> dict[str, Any] | None:
+    def effective_projection_run(
+        self,
+        workspace_id: str,
+        projection_kind: str,
+        *,
+        release_id: str | None = None,
+        as_of_event: int | None = None,
+    ) -> dict[str, Any] | None:
         with self._connect() as conn:
-            row = conn.execute(
-                """SELECT * FROM projection_runs WHERE workspace_id=? AND projection_kind=? AND status='active'
-                   ORDER BY activated_event_offset DESC,created_at DESC LIMIT 1""",
-                (workspace_id, projection_kind),
-            ).fetchone()
+            if release_id is None:
+                row = conn.execute(
+                    """SELECT * FROM projection_runs WHERE workspace_id=? AND projection_kind=? AND status='active'
+                       ORDER BY activated_event_offset DESC,created_at DESC LIMIT 1""",
+                    (workspace_id, projection_kind),
+                ).fetchone()
+            else:
+                component = conn.execute(
+                    """SELECT component_revision,source_watermark,metadata_json FROM cortex_release_components
+                       WHERE release_id=? AND workspace_id=? AND component_kind=?""",
+                    (release_id, workspace_id, projection_kind),
+                ).fetchone()
+                if not component:
+                    return None
+                metadata = _decode(component["metadata_json"], {})
+                run_id = metadata.get("projection_run_id")
+                if run_id:
+                    row = conn.execute(
+                        "SELECT * FROM projection_runs WHERE projection_run_id=? AND workspace_id=? AND projection_kind=?",
+                        (str(run_id), workspace_id, projection_kind),
+                    ).fetchone()
+                else:
+                    watermark = min(
+                        int(component["source_watermark"]),
+                        int(as_of_event) if as_of_event is not None else int(component["source_watermark"]),
+                    )
+                    row = conn.execute(
+                        """SELECT * FROM projection_runs
+                           WHERE workspace_id=? AND projection_kind=?
+                             AND status IN ('active','superseded','succeeded')
+                             AND COALESCE(input_through_event,created_event_offset)<=?
+                             AND COALESCE(activated_event_offset,created_event_offset)<=?
+                           ORDER BY COALESCE(input_through_event,created_event_offset) DESC,created_at DESC
+                           LIMIT 1""",
+                        (workspace_id, projection_kind, watermark, int(as_of_event) if as_of_event is not None else watermark),
+                    ).fetchone()
         return self._projection_run_row(row) if row else None
 
     @staticmethod
@@ -2347,10 +2872,11 @@ class SqliteEventStore:
         *,
         limit: int = 32,
         as_of_event: int | None = None,
+        release_id: str | None = None,
     ) -> list[dict[str, Any]]:
         """Read the active hierarchy revision as bounded navigation objects."""
 
-        run = self.effective_projection_run(workspace_id, "hierarchy")
+        run = self.effective_projection_run(workspace_id, "hierarchy", release_id=release_id, as_of_event=as_of_event)
         if not run:
             return []
         terms = [term.lower() for term in query.replace("'", " ").split() if len(term) > 1][:8]
@@ -2410,6 +2936,8 @@ class SqliteEventStore:
         projection_object_ids: Sequence[str],
         *,
         limit: int = 256,
+        release_id: str | None = None,
+        as_of_event: int | None = None,
     ) -> list[dict[str, Any]]:
         """Load only named objects from the active hierarchy revision.
 
@@ -2420,7 +2948,7 @@ class SqliteEventStore:
         ids = list(dict.fromkeys(str(item) for item in projection_object_ids if item))[:max(1, min(int(limit), 512))]
         if not ids:
             return []
-        run = self.effective_projection_run(workspace_id, "hierarchy")
+        run = self.effective_projection_run(workspace_id, "hierarchy", release_id=release_id, as_of_event=as_of_event)
         if not run:
             return []
         marks = ",".join("?" for _ in ids)
@@ -2436,10 +2964,18 @@ class SqliteEventStore:
         }
         return [by_id[item] for item in ids if item in by_id]
 
-    def hierarchy_children(self, workspace_id: str, parent_projection_object_ids: Sequence[str], *, limit: int = 256) -> list[dict[str, Any]]:
+    def hierarchy_children(
+        self,
+        workspace_id: str,
+        parent_projection_object_ids: Sequence[str],
+        *,
+        limit: int = 256,
+        release_id: str | None = None,
+        as_of_event: int | None = None,
+    ) -> list[dict[str, Any]]:
         if not parent_projection_object_ids:
             return []
-        run = self.effective_projection_run(workspace_id, "hierarchy")
+        run = self.effective_projection_run(workspace_id, "hierarchy", release_id=release_id, as_of_event=as_of_event)
         if not run:
             return []
         marks = ",".join("?" for _ in parent_projection_object_ids)
@@ -2462,10 +2998,12 @@ class SqliteEventStore:
         projection_object_ids: Sequence[str],
         *,
         limit: int = 512,
+        release_id: str | None = None,
+        as_of_event: int | None = None,
     ) -> list[str]:
         """Expand active hierarchy navigation objects to raw source identities."""
 
-        run = self.effective_projection_run(workspace_id, "hierarchy")
+        run = self.effective_projection_run(workspace_id, "hierarchy", release_id=release_id, as_of_event=as_of_event)
         if not run or not projection_object_ids:
             return []
         wanted = list(dict.fromkeys(str(value) for value in projection_object_ids if value))[:max(1, min(int(limit), 512))]
@@ -2670,6 +3208,57 @@ class SqliteEventStore:
             comps = [self._cortex_component_row(r) for r in comp_rows]
             return self._cortex_release_row(row, components=comps)
 
+    def get_cortex_release_as_of_event(self, workspace_id: str, as_of_event: int) -> dict[str, Any] | None:
+        """Resolve the release selected by the immutable activation history.
+
+        Mutable ``status`` and wall-clock timestamps are not historical truth:
+        rollback deliberately changes them.  Historical reads therefore fold
+        only release transition events up to the requested event watermark and
+        reject incomplete component manifests instead of using the current
+        release as a fallback.
+        """
+
+        if int(as_of_event) < 1:
+            raise InvariantViolation("historical release resolution requires a positive event watermark")
+        with self._connect() as conn:
+            transition_rows = conn.execute(
+                """SELECT event_type,payload_json FROM events
+                   WHERE stream_id=? AND event_offset<=?
+                     AND event_type IN ('cortex.release_activated','cortex.release_rolled_back')
+                   ORDER BY event_offset""",
+                (f"workspace:{workspace_id}", int(as_of_event)),
+            ).fetchall()
+            selected_id: str | None = None
+            for row in transition_rows:
+                payload = _decode(row["payload_json"], {})
+                if row["event_type"] == "cortex.release_activated":
+                    selected_id = str(payload.get("release_id") or "") or selected_id
+                else:
+                    selected_id = str(payload.get("to_release_id") or "") or selected_id
+            if selected_id is None:
+                bootstrap = conn.execute(
+                    """SELECT * FROM cortex_releases
+                       WHERE workspace_id=? AND policy_revision='bootstrap-v0'
+                         AND spine_event_watermark<=?
+                       ORDER BY created_at,release_id LIMIT 1""",
+                    (workspace_id, int(as_of_event)),
+                ).fetchone()
+                row = bootstrap
+            else:
+                row = conn.execute(
+                    "SELECT * FROM cortex_releases WHERE release_id=? AND workspace_id=?",
+                    (selected_id, workspace_id),
+                ).fetchone()
+            if not row or int(row["spine_event_watermark"]) > int(as_of_event):
+                return None
+            comp_rows = conn.execute(
+                "SELECT * FROM cortex_release_components WHERE release_id=? ORDER BY component_kind",
+                (row["release_id"],),
+            ).fetchall()
+            if len(comp_rows) != 5 or any(int(component["source_watermark"]) > int(as_of_event) for component in comp_rows):
+                return None
+            return self._cortex_release_row(row, components=[self._cortex_component_row(item) for item in comp_rows])
+
     def list_cortex_releases(
         self,
         workspace_id: str,
@@ -2803,6 +3392,10 @@ class SqliteEventStore:
 
             now = _now()
             ws = rel["workspace_id"]
+            previous_active = conn.execute(
+                "SELECT release_id FROM cortex_releases WHERE workspace_id=? AND status='active' AND release_id<>?",
+                (ws, release_id),
+            ).fetchone()
             conn.execute(
                 """UPDATE cortex_releases SET status='superseded', superseded_at=?
                 WHERE workspace_id=? AND status='active' AND release_id<>?""",
@@ -2813,7 +3406,7 @@ class SqliteEventStore:
                 WHERE release_id=?""",
                 (now, release_id),
             )
-            self._append_event(
+            activation_event = self._append_event(
                 conn,
                 stream_id=f"workspace:{ws}",
                 event_type="cortex.release_activated",
@@ -2825,6 +3418,14 @@ class SqliteEventStore:
                     "code_revision": rel["code_revision"],
                 },
                 actor=actor,
+            )
+            conn.execute(
+                "UPDATE cortex_releases SET superseded_event_offset=? WHERE release_id=?",
+                (activation_event.offset, previous_active["release_id"] if previous_active else None),
+            )
+            conn.execute(
+                "UPDATE cortex_releases SET activated_event_offset=? WHERE release_id=?",
+                (activation_event.offset, release_id),
             )
             comp_rows = conn.execute(
                 "SELECT * FROM cortex_release_components WHERE release_id=? ORDER BY component_kind", (release_id,)
@@ -2880,7 +3481,7 @@ class SqliteEventStore:
                 "UPDATE cortex_releases SET status='active', activated_at=?, superseded_at=NULL WHERE release_id=?",
                 (now, target_row["release_id"]),
             )
-            self._append_event(
+            rollback_event = self._append_event(
                 conn,
                 stream_id=f"workspace:{workspace_id}",
                 event_type="cortex.release_rolled_back",
@@ -2891,6 +3492,14 @@ class SqliteEventStore:
                     "reason": reason,
                 },
                 actor=actor,
+            )
+            conn.execute(
+                "UPDATE cortex_releases SET superseded_event_offset=? WHERE release_id=?",
+                (rollback_event.offset, current_active["release_id"]),
+            )
+            conn.execute(
+                "UPDATE cortex_releases SET activated_event_offset=? WHERE release_id=?",
+                (rollback_event.offset, target_row["release_id"]),
             )
             comp_rows = conn.execute(
                 "SELECT * FROM cortex_release_components WHERE release_id=? ORDER BY component_kind", (target_row["release_id"],)
@@ -3265,10 +3874,28 @@ class SqliteEventStore:
             version = self._current_version(conn, node_id, as_of_event)
         return self._node_version_row(version, node)
 
-    def queryable_atoms(self, workspace_id: str | None, as_of_event: int | None = None) -> list[dict[str, Any]]:
+    def queryable_atoms(
+        self,
+        workspace_id: str | None,
+        as_of_event: int | None = None,
+        *,
+        valid_at: datetime | str | None = None,
+        valid_from: datetime | str | None = None,
+        valid_to: datetime | str | None = None,
+    ) -> list[dict[str, Any]]:
         with self._connect() as conn:
             rows = self._current_atom_rows(conn, workspace_id=workspace_id, as_of_event=as_of_event)
-        return [self._node_version_row(row, row) for row in rows]
+        atoms = [self._node_version_row(row, row) for row in rows]
+        return [
+            atom for atom in atoms
+            if self.temporal_visibility(
+                atom,
+                as_of_event=as_of_event,
+                valid_at=valid_at,
+                valid_from=valid_from,
+                valid_to=valid_to,
+            )["visible"]
+        ]
 
     def workspace_ids(self) -> list[str]:
         with self._connect() as conn:
@@ -3729,6 +4356,14 @@ class SqliteEventStore:
         conn.execute(
             "INSERT INTO node_versions VALUES (?, ?, 1, ?, ?, ?, ?)",
             (version_id, node_id, content, _json(stored_properties), version_event.offset, _digest(content)),
+        )
+        self._insert_source_lifecycle_conn(
+            conn,
+            atom_version_id=version_id,
+            workspace_id=workspace_id,
+            state="active",
+            temporal=stored_properties.get("temporal"),
+            changed_event_offset=version_event.offset,
         )
         for anchor_id, source_version_id in zip(anchor_ids, evidence_atom_version_ids, strict=True):
             source = conn.execute(

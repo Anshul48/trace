@@ -55,6 +55,8 @@ from .models import (
     QueryRequest,
     SavedQueryRequest,
     SchemaProposalRequest,
+    SourceErasureRequest,
+    SourceLifecycleRequest,
     SplitRequest,
     SynthesisRequest,
     WebhookCreateRequest,
@@ -524,6 +526,30 @@ def create_app(service: TraceService | None = None) -> FastAPI:
             node = _service(request).store.get_node(node_id)
             _authorize(request, node["workspace_id"], scope="ingestion:write")
             return _service(request).edit_node(node_id, payload.model_copy(update={"actor": _actor(request), "idempotency_key": payload.idempotency_key or request.headers.get("idempotency-key")}))
+        except Exception as error:
+            raise _http_error(error) from error
+
+    @router.post("/atom-versions/{atom_version_id}/lifecycle")
+    def transition_source_lifecycle(atom_version_id: str, payload: SourceLifecycleRequest, request: Request) -> dict[str, object]:
+        try:
+            atoms = _service(request).store.atom_versions([atom_version_id])
+            if not atoms:
+                raise NotFoundError(f"atom version {atom_version_id} was not found")
+            _authorize(request, atoms[0]["workspace_id"], scope="ingestion:write")
+            body = payload.model_copy(update={"actor": _actor(request), "idempotency_key": payload.idempotency_key or request.headers.get("idempotency-key")})
+            return _service(request).transition_source_lifecycle(atom_version_id, body)
+        except Exception as error:
+            raise _http_error(error) from error
+
+    @router.post("/atom-versions/{atom_version_id}/erase")
+    def erase_source(atom_version_id: str, payload: SourceErasureRequest, request: Request) -> dict[str, object]:
+        try:
+            atoms = _service(request).store.atom_versions([atom_version_id])
+            if not atoms:
+                raise NotFoundError(f"atom version {atom_version_id} was not found")
+            _authorize(request, atoms[0]["workspace_id"], scope="admin:write")
+            body = payload.model_copy(update={"actor": _actor(request), "idempotency_key": payload.idempotency_key or request.headers.get("idempotency-key")})
+            return _service(request).erase_source(atom_version_id, body)
         except Exception as error:
             raise _http_error(error) from error
 

@@ -14,6 +14,36 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
+TemporalPrecision = Literal["unknown", "partial", "year", "month", "day", "instant"]
+TemporalConfidence = Literal["unknown", "explicit", "asserted", "partial"]
+SourceLifecycleState = Literal[
+    "active", "superseded", "revoked", "tombstoned", "conflicted", "redacted_purged"
+]
+
+
+class ValidTimeMetadata(BaseModel):
+    """Explicit real-world validity; missing values are never inferred."""
+
+    valid_from: datetime | None = None
+    valid_to: datetime | None = None
+    precision: TemporalPrecision = "unknown"
+    confidence: TemporalConfidence = "unknown"
+    provenance: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def valid_half_open_interval(self) -> "ValidTimeMetadata":
+        if (self.valid_from is None) != (self.valid_to is None) and self.precision not in {"partial", "unknown"}:
+            raise ValueError("a partial valid-time interval must declare precision='partial' or 'unknown'")
+        for value in (self.valid_from, self.valid_to):
+            if value is not None and value.tzinfo is None:
+                raise ValueError("explicit valid-time values must include a timezone")
+        if self.valid_from is not None and self.valid_to is not None and self.valid_from >= self.valid_to:
+            raise ValueError("valid time uses a non-empty half-open [valid_from, valid_to) interval")
+        if self.precision == "unknown" and (self.valid_from is not None or self.valid_to is not None):
+            raise ValueError("unknown precision cannot carry an explicit valid-time boundary")
+        return self
+
+
 class SourceInput(BaseModel):
     """Ingress provenance and adapter metadata, never an atom owner.
 
@@ -44,12 +74,33 @@ class IngestionRequest(BaseModel):
     visibility: str = "private"
     idempotency_key: str | None = Field(default=None, max_length=255)
     adapter_payload: dict[str, Any] = Field(default_factory=dict)
+    valid_from: datetime | None = None
+    valid_to: datetime | None = None
+    valid_time_precision: TemporalPrecision = "unknown"
+    valid_time_confidence: TemporalConfidence = "unknown"
+    valid_time_provenance: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def requires_text(self) -> "IngestionRequest":
         if not self.text or not self.text.strip():
             raise ValueError("text is required; adapters must provide normalized text")
+        ValidTimeMetadata(
+            valid_from=self.valid_from,
+            valid_to=self.valid_to,
+            precision=self.valid_time_precision,
+            confidence=self.valid_time_confidence,
+            provenance=self.valid_time_provenance,
+        )
         return self
+
+    def temporal_metadata(self) -> dict[str, Any]:
+        return ValidTimeMetadata(
+            valid_from=self.valid_from,
+            valid_to=self.valid_to,
+            precision=self.valid_time_precision,
+            confidence=self.valid_time_confidence,
+            provenance=self.valid_time_provenance,
+        ).model_dump(mode="json")
 
 
 class NodeEditRequest(BaseModel):
@@ -115,6 +166,9 @@ class QueryRequest(BaseModel):
     query: str = Field(min_length=1)
     workspace_id: str | None = None
     as_of_event: int | None = Field(default=None, ge=1)
+    valid_at: datetime | None = None
+    valid_from: datetime | None = None
+    valid_to: datetime | None = None
     facets: list[str] = Field(default_factory=list)
     privacy_context: dict[str, Any] = Field(default_factory=dict)
     retrieval_budget: RetrievalBudget = Field(default_factory=RetrievalBudget)
@@ -128,7 +182,37 @@ class QueryRequest(BaseModel):
     def model_only_for_deep_navigation(self) -> "QueryRequest":
         if self.model_id and self.retrieval_profile != "deep" and self.retrieval_budget.mode != "deep":
             raise ValueError("model_id is allowed only for deep navigation")
+        ValidTimeMetadata(
+            valid_from=self.valid_from,
+            valid_to=self.valid_to,
+            precision="partial" if (self.valid_from is None) != (self.valid_to is None) else ("day" if self.valid_from and self.valid_from.time() == datetime.min.time() else "instant"),
+            confidence="explicit" if self.valid_from or self.valid_to else "unknown",
+        )
+        if self.valid_at is not None and self.valid_at.tzinfo is None:
+            raise ValueError("valid_at must include a timezone")
+        if self.valid_at is not None and (self.valid_from is not None or self.valid_to is not None):
+            raise ValueError("choose valid_at or a valid_from/valid_to interval, not both")
+        if (self.valid_from is None) != (self.valid_to is None):
+            raise ValueError("valid_from and valid_to must be supplied together")
         return self
+
+
+class SourceLifecycleRequest(BaseModel):
+    """Append-only source lifecycle transition; content is never supplied here."""
+
+    state: Literal["revoked", "tombstoned", "conflicted"]
+    reason: str | None = Field(default=None, max_length=2_000)
+    superseded_by_atom_version_id: str | None = None
+    actor: str = "anonymous"
+    idempotency_key: str | None = Field(default=None, max_length=255)
+
+
+class SourceErasureRequest(BaseModel):
+    """Compliance erasure request; the signing key is server-side only."""
+
+    reason: str | None = Field(default=None, max_length=2_000)
+    actor: str = "anonymous"
+    idempotency_key: str | None = Field(default=None, max_length=255)
 
 
 class SynthesisRequest(BaseModel):
@@ -509,6 +593,8 @@ class CortexRelease(BaseModel):
     created_at: datetime
     activated_at: datetime | None = None
     superseded_at: datetime | None = None
+    activated_event_offset: int | None = None
+    superseded_event_offset: int | None = None
     retired_at: datetime | None = None
     failure_detail: str | None = None
 

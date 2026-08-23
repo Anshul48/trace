@@ -432,6 +432,7 @@ class HybridRetrievalEngine:
         request: QueryRequest,
         atoms: Sequence[dict[str, Any]],
         hits: Sequence[dict[str, Any]] | None = None,
+        index_revision: str | None = None,
     ) -> dict[str, float]:
         if self.lexical_index is None:
             return self._bm25(tokens(request.query), atoms)
@@ -445,7 +446,7 @@ class HybridRetrievalEngine:
                     visibility=visibility,
                     facets=request.facets,
                     as_of_event=request.as_of_event,
-                    index_revision=os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
+                    index_revision=index_revision or os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
                 )
             except TypeError:
                 hits = self.lexical_index.search(
@@ -475,6 +476,7 @@ class HybridRetrievalEngine:
         facets: Sequence[str] | None = None,
         as_of_event: int | None = None,
         hits: Sequence[dict[str, Any]] | None = None,
+        index_revision: str | None = None,
     ) -> dict[str, float]:
         if self.dense_index is not None:
             if hits is None:
@@ -486,7 +488,7 @@ class HybridRetrievalEngine:
                         visibility=visibility,
                         facets=facets,
                         as_of_event=as_of_event,
-                        index_revision=os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
+                        index_revision=index_revision or os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
                     )
                 except TypeError:
                     # Keep compatibility with early injected index implementations
@@ -505,7 +507,7 @@ class HybridRetrievalEngine:
                 if hit.get("atom_version_id") in allowed
             }
         atom_ids = [atom["atom_version_id"] for atom in atoms]
-        index_revision = os.environ.get("TRACE_INDEX_REVISION", "embedded-current")
+        index_revision = index_revision or os.environ.get("TRACE_INDEX_REVISION", "embedded-current")
         try:
             vectors = store.dense_vectors(self.dense_embedder.provider_id, atom_ids, index_revision=index_revision)
         except TypeError:
@@ -628,6 +630,10 @@ class HybridRetrievalEngine:
         atoms: Sequence[dict[str, Any]],
         seed_limit: int,
         release_id: str | None = None,
+        valid_at: Any | None = None,
+        valid_from: Any | None = None,
+        valid_to: Any | None = None,
+        index_revision: str | None = None,
     ) -> tuple[dict[str, float], dict[str, list[dict[str, Any]]], dict[str, dict[str, float]], dict[str, Any], dict[str, dict[str, Any]]]:
         """Run bounded activation and load selected endpoints outside seeds.
 
@@ -676,6 +682,15 @@ class HybridRetrievalEngine:
             except TypeError:
                 loaded = endpoint_loader(workspace_id, endpoint_nodes)
             for atom in loaded:
+                temporal_visibility = getattr(store, "temporal_visibility", None)
+                if callable(temporal_visibility) and not temporal_visibility(
+                    atom,
+                    as_of_event=as_of_event,
+                    valid_at=valid_at,
+                    valid_from=valid_from,
+                    valid_to=valid_to,
+                )["visible"]:
+                    continue
                 atom_by_node[atom["node_id"]] = atom
                 atom_by_id[atom["atom_version_id"]] = atom
 
@@ -721,7 +736,7 @@ class HybridRetrievalEngine:
                 affinity_rows = affinity_source(
                     workspace_id, [item.atom["atom_version_id"] for item in ranked],
                     release_id=release_id,
-                    limit=max(0, min(128, seed_limit * 8)), index_revision=os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
+                    limit=max(0, min(128, seed_limit * 8)), index_revision=index_revision or os.environ.get("TRACE_INDEX_REVISION", "embedded-current"),
                 )
             except TypeError:
                 try:
@@ -736,7 +751,17 @@ class HybridRetrievalEngine:
         ))[:seed_limit * 16]
         if affinity_ids:
             for atom in store.atom_versions(affinity_ids):
-                if atom.get("workspace_id") == workspace_id:
+                temporal_visibility = getattr(store, "temporal_visibility", None)
+                if atom.get("workspace_id") == workspace_id and (
+                    not callable(temporal_visibility)
+                    or temporal_visibility(
+                        atom,
+                        as_of_event=as_of_event,
+                        valid_at=valid_at,
+                        valid_from=valid_from,
+                        valid_to=valid_to,
+                    )["visible"]
+                ):
                     atom_by_id[atom["atom_version_id"]] = atom
                     atom_by_node[atom["node_id"]] = atom
         for edge in affinity_rows:
@@ -782,7 +807,7 @@ class HybridRetrievalEngine:
         }
         return normalized, path_rows, result.contributions, diagnostics, atom_by_id
 
-    def _hierarchy_candidates(self, *, store: Any, request: QueryRequest) -> list[Candidate]:
+    def _hierarchy_candidates(self, *, store: Any, request: QueryRequest, release_id: str | None = None) -> list[Candidate]:
         if not request.workspace_id:
             return []
         wanted = set(tokens(request.query))
@@ -797,6 +822,7 @@ class HybridRetrievalEngine:
                     request.workspace_id, request.query,
                     limit=max(8, min(200, request.retrieval_budget.hierarchy_limit * 2)),
                     as_of_event=request.as_of_event,
+                    release_id=release_id,
                 )
             except TypeError:
                 frontier = frontier_source(request.workspace_id, request.query, limit=request.retrieval_budget.hierarchy_limit)
@@ -804,10 +830,24 @@ class HybridRetrievalEngine:
                 source_ids = source_expander(
                     request.workspace_id, [item["projection_object_id"]],
                     limit=min(512, request.retrieval_budget.hierarchy_limit * 16),
+                    as_of_event=request.as_of_event,
+                    release_id=release_id,
                 )
                 if not source_ids:
                     continue
                 raw_sources = store.atom_versions(source_ids)
+                temporal_visibility = getattr(store, "temporal_visibility", None)
+                if callable(temporal_visibility):
+                    raw_sources = [
+                        source for source in raw_sources
+                        if temporal_visibility(
+                            source,
+                            as_of_event=request.as_of_event,
+                            valid_at=request.valid_at,
+                            valid_from=request.valid_from,
+                            valid_to=request.valid_to,
+                        )["visible"]
+                    ]
                 if {str(source.get("atom_version_id")) for source in raw_sources} != set(source_ids):
                     # RLS or a stale projection withheld at least one source.
                     # A summary is navigational only and cannot bridge that
@@ -849,6 +889,12 @@ class HybridRetrievalEngine:
                 ))
             if candidates:
                 return sorted(candidates, key=lambda item: (-item.score, item.atom["atom_version_id"]))[:request.retrieval_budget.hierarchy_limit]
+            if request.as_of_event is not None:
+                # A historical release without a matching hierarchy snapshot
+                # is unavailable; current derived nodes are not a valid fallback.
+                return []
+        elif request.as_of_event is not None:
+            return []
         latest_by_logical_key: dict[str, dict[str, Any]] = {}
         unkeyed: list[dict[str, Any]] = []
         node_source = getattr(store, "current_nodes_by_facet", None)
@@ -920,17 +966,31 @@ class HybridRetrievalEngine:
 
         active_rel_getter = getattr(store, "get_active_cortex_release", None)
         active_rel = active_rel_getter(request.workspace_id) if callable(active_rel_getter) else None
+        selected_rel_getter = getattr(store, "get_cortex_release", None)
+        selected_rel = selected_rel_getter(release_id) if release_id and callable(selected_rel_getter) else None
+        if selected_rel is not None:
+            active_rel = selected_rel
         eff_release_id = release_id or (active_rel["release_id"] if active_rel else None)
+        release_revisions = {
+            str(component.get("component_kind")): str(component.get("component_revision"))
+            for component in (active_rel or {}).get("components", [])
+        }
 
         budget = request.retrieval_budget
         profile = request.retrieval_profile
-        lexical = self._lexical_scores(request=request, atoms=atoms, hits=(index_hits or {}).get("lexical"))
+        lexical = self._lexical_scores(
+            request=request,
+            atoms=atoms,
+            hits=(index_hits or {}).get("lexical"),
+            index_revision=release_revisions.get("lexical_index"),
+        )
         dense = {} if profile == "lexical" else self._dense_scores(
             store=store, workspace_id=request.workspace_id, query=request.query, atoms=atoms,
             limit=budget.dense_limit,
             visibility=request.privacy_context.get("allowed_visibility"), facets=request.facets,
             as_of_event=request.as_of_event,
             hits=(index_hits or {}).get("dense"),
+            index_revision=release_revisions.get("dense_index"),
         )
         # Feature hashing is a deterministic local control path, not a semantic
         # model.  It may collide on unrelated words, so it only augments sparse
@@ -983,6 +1043,8 @@ class HybridRetrievalEngine:
                 store=store, workspace_id=request.workspace_id, as_of_event=request.as_of_event,
                 direct=candidates, atoms=atoms, seed_limit=budget.graph_seed_limit,
                 release_id=eff_release_id,
+                valid_at=request.valid_at, valid_from=request.valid_from, valid_to=request.valid_to,
+                index_revision=release_revisions.get("affinity"),
             )
             # Request budgets can reduce graph influence, never raise it past
             # the policy-safe ceiling. Family transition mass is exclusively
@@ -1003,7 +1065,7 @@ class HybridRetrievalEngine:
         ordered = sorted(candidates.values(), key=lambda item: (-item.score, item.atom["atom_version_id"]))
         top_raw = ordered[:budget.candidate_limit]
         hierarchy_applied = profile in {"hierarchy", "deep"} or (profile == "auto" and budget.mode in {"hierarchy", "deep"})
-        hierarchy = self._hierarchy_candidates(store=store, request=request) if hierarchy_applied else []
+        hierarchy = self._hierarchy_candidates(store=store, request=request, release_id=eff_release_id) if hierarchy_applied else []
         # Hierarchy summaries are navigation compression only. Every selected
         # holon is expanded back to raw atom versions before sufficiency or
         # synthesis can see it; summary text never becomes proof.
@@ -1013,7 +1075,16 @@ class HybridRetrievalEngine:
                 for item in hierarchy[:budget.hierarchy_limit]
                 for source_id in item.atom.get("source_atom_version_ids", [])
             ))[:max(budget.candidate_limit * 8, budget.hierarchy_limit)]
+            temporal_visibility = getattr(store, "temporal_visibility", None)
             for atom in store.atom_versions(hierarchy_sources):
+                if callable(temporal_visibility) and not temporal_visibility(
+                    atom,
+                    as_of_event=request.as_of_event,
+                    valid_at=request.valid_at,
+                    valid_from=request.valid_from,
+                    valid_to=request.valid_to,
+                )["visible"]:
+                    continue
                 atom_id = atom["atom_version_id"]
                 parent_score = max(
                     (item.hierarchy for item in hierarchy if atom_id in item.atom.get("source_atom_version_ids", [])),
@@ -1095,6 +1166,15 @@ class HybridRetrievalEngine:
                         anchor for item in selected for anchor in item.atom.get("source_atom_version_ids", [])
                     ))[:budget.deep_max_nodes * 64]
                     for atom in store.atom_versions(anchor_ids):
+                        temporal_visibility = getattr(store, "temporal_visibility", None)
+                        if callable(temporal_visibility) and not temporal_visibility(
+                            atom,
+                            as_of_event=request.as_of_event,
+                            valid_at=request.valid_at,
+                            valid_from=request.valid_from,
+                            valid_to=request.valid_to,
+                        )["visible"]:
+                            continue
                         atom_id = atom["atom_version_id"]
                         if atom_id not in candidates:
                             candidates[atom_id] = Candidate(atom=atom, deep=1.0, score=0.04)
@@ -1106,7 +1186,13 @@ class HybridRetrievalEngine:
                     child_ids: set[str] = set()
                     if callable(child_source):
                         projection_ids = [item.atom.get("projection_object_id") for item in selected if item.atom.get("projection_object_id")]
-                        for child in child_source(request.workspace_id, projection_ids, limit=budget.deep_branch_width * 8):
+                        for child in child_source(
+                            request.workspace_id,
+                            projection_ids,
+                            limit=budget.deep_branch_width * 8,
+                            release_id=eff_release_id,
+                            as_of_event=request.as_of_event,
+                        ):
                             if child.get("child_kind") == "projection_object":
                                 child_ids.add(str(child.get("child_id")))
                     next_frontier: list[Candidate] = []
@@ -1115,6 +1201,8 @@ class HybridRetrievalEngine:
                             request.workspace_id,
                             sorted(child_ids),
                             limit=budget.deep_branch_width * 8,
+                            release_id=eff_release_id,
+                            as_of_event=request.as_of_event,
                         )
                         for child_object in child_objects:
                             projection_object_id = str(child_object["projection_object_id"])
@@ -1122,10 +1210,24 @@ class HybridRetrievalEngine:
                                 source_ids = source_expander(
                                     request.workspace_id, [projection_object_id],
                                     limit=min(512, budget.deep_max_nodes * 64),
+                                    release_id=eff_release_id,
+                                    as_of_event=request.as_of_event,
                                 )
                             else:
                                 source_ids = list(child_object.get("source_atom_version_ids", []))
                             raw_sources = store.atom_versions(source_ids)
+                            temporal_visibility = getattr(store, "temporal_visibility", None)
+                            if callable(temporal_visibility):
+                                raw_sources = [
+                                    source for source in raw_sources
+                                    if temporal_visibility(
+                                        source,
+                                        as_of_event=request.as_of_event,
+                                        valid_at=request.valid_at,
+                                        valid_from=request.valid_from,
+                                        valid_to=request.valid_to,
+                                    )["visible"]
+                                ]
                             allowed_visibility = request.privacy_context.get("allowed_visibility")
                             if allowed_visibility is None and "visibility" in request.privacy_context:
                                 allowed_visibility = [request.privacy_context["visibility"]]

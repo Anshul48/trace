@@ -13,6 +13,7 @@ import asyncio
 import base64
 from contextvars import ContextVar
 import hashlib
+import hmac
 import json
 import os
 import re
@@ -27,7 +28,18 @@ from typing import Any, Iterator
 
 from .models import AppendResult, CognitivePolicy, EventRecord
 from .cortex import canonical_pair
-from .store import ALLOWED_RELATIONS, STRUCTURAL_RELATIONS, IdempotencyConflict, InvariantViolation, NotFoundError, _digest, _json, _now
+from .store import (
+    ALLOWED_RELATIONS,
+    STRUCTURAL_RELATIONS,
+    IdempotencyConflict,
+    InvariantViolation,
+    NotFoundError,
+    evaluate_temporal_visibility,
+    normalize_valid_time,
+    _digest,
+    _json,
+    _now,
+)
 from .migrations import MigrationRunner, assert_runtime_role, default_migration_root
 
 
@@ -382,13 +394,278 @@ class PostgresEventStore:
         )
         return [self._pg_atom_row(self._cursor_mapping(cursor, row) or {}) for row in cursor.fetchall()]
 
-    def queryable_atoms(self, workspace_id: str | None, as_of_event: int | None = None) -> list[dict[str, Any]]:
+    @classmethod
+    def _pg_lifecycle_row(cls, row: dict[str, Any] | None) -> dict[str, Any] | None:
+        if not row:
+            return None
+        result = dict(row)
+        for key in ("valid_from", "valid_to", "created_at"):
+            value = result.get(key)
+            if hasattr(value, "isoformat"):
+                result[key] = value.isoformat()
+        result["valid_provenance"] = cls._json_value(result.pop("valid_provenance", {}), {})
+        erasure_receipt = result.pop("erasure_receipt", None)
+        result["erasure_receipt"] = None if erasure_receipt is None else cls._json_value(erasure_receipt, {})
+        result["valid_time"] = {
+            "valid_from": result.get("valid_from"),
+            "valid_to": result.get("valid_to"),
+            "precision": result.get("valid_precision", "unknown"),
+            "confidence": result.get("valid_confidence", "unknown"),
+            "provenance": result.get("valid_provenance", {}),
+        }
+        return result
+
+    def _pg_historical_source_state(self, cursor: Any, atom_version_id: str, as_of_event: int) -> str | None:
+        cursor.execute(
+            """SELECT event_type,payload FROM trace_events
+               WHERE event_offset<=%s
+                 AND event_type IN ('source.lifecycle_changed','source.lifecycle_initialized')
+                 AND payload->>'atom_version_id'=%s
+               ORDER BY event_offset""",
+            (int(as_of_event), atom_version_id),
+        )
+        state: str | None = None
+        for event_type, payload in cursor.fetchall():
+            del event_type
+            value = payload if isinstance(payload, dict) else json.loads(payload)
+            state = str(value.get("state") or state or "active")
+        if state is None:
+            cursor.execute(
+                "SELECT state,changed_event_offset FROM trace_source_lifecycle WHERE atom_version_id=%s",
+                (atom_version_id,),
+            )
+            current = cursor.fetchone()
+            if current:
+                state = str(current[0]) if int(current[1] or 0) <= int(as_of_event) else "active"
+        return state
+
+    def get_source_lifecycle(self, atom_version_id: str, *, as_of_event: int | None = None) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "get_source_lifecycle"):
+            return self.delegate.get_source_lifecycle(atom_version_id, as_of_event=as_of_event)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute("SELECT * FROM trace_source_lifecycle WHERE atom_version_id=%s", (atom_version_id,))
+                current = self._pg_lifecycle_row(self._cursor_mapping(cursor, cursor.fetchone()))
+                if current is None:
+                    raise NotFoundError(f"source lifecycle for {atom_version_id} was not found")
+                state = self._pg_historical_source_state(cursor, atom_version_id, int(as_of_event)) if as_of_event is not None else current["state"]
+                result = dict(current)
+                result["state"] = state
+                result["requested_as_of_event"] = as_of_event
+                return result
+
+    def temporal_visibility(
+        self,
+        atom: dict[str, Any],
+        *,
+        as_of_event: int | None = None,
+        valid_at: Any | None = None,
+        valid_from: Any | None = None,
+        valid_to: Any | None = None,
+    ) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "temporal_visibility"):
+            return self.delegate.temporal_visibility(
+                atom, as_of_event=as_of_event, valid_at=valid_at, valid_from=valid_from, valid_to=valid_to,
+            )
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, str(atom.get("workspace_id") or _runtime_workspace.get() or ""))
+                cursor.execute("SELECT * FROM trace_source_lifecycle WHERE atom_version_id=%s", (atom.get("atom_version_id"),))
+                current = self._pg_lifecycle_row(self._cursor_mapping(cursor, cursor.fetchone())) or {"state": "active"}
+                historical = self._pg_historical_source_state(cursor, str(atom.get("atom_version_id")), int(as_of_event)) if as_of_event is not None else None
+        return evaluate_temporal_visibility(
+            atom,
+            current_lifecycle=current,
+            historical_state=historical,
+            as_of_event=as_of_event,
+            valid_at=valid_at,
+            valid_from=valid_from,
+            valid_to=valid_to,
+        )
+
+    def _change_source_lifecycle_in_connection(
+        self,
+        conn: Any,
+        *,
+        atom_version_id: str,
+        state: str,
+        actor: str,
+        reason: str | None = None,
+        superseded_by_atom_version_id: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        allowed = {"active", "superseded", "revoked", "tombstoned", "conflicted", "redacted_purged"}
+        if state not in allowed:
+            raise InvariantViolation(f"unsupported source lifecycle state {state!r}")
+        with conn.cursor() as cursor:
+            self._set_workspace(cursor)
+            cursor.execute("SELECT * FROM trace_source_lifecycle WHERE atom_version_id=%s FOR UPDATE", (atom_version_id,))
+            current = self._pg_lifecycle_row(self._cursor_mapping(cursor, cursor.fetchone()))
+            if current is None:
+                raise NotFoundError(f"source lifecycle for {atom_version_id} was not found")
+            cursor.execute("SELECT workspace_id FROM trace_nodes n JOIN trace_node_versions nv ON nv.node_id=n.node_id WHERE nv.atom_version_id=%s", (atom_version_id,))
+            node = self._cursor_mapping(cursor, cursor.fetchone())
+        previous = str(current["state"])
+        if previous == "redacted_purged":
+            raise InvariantViolation("redacted/purged source content cannot transition")
+        if state == "active":
+            raise InvariantViolation("source lifecycle cannot be resurrected through a normal transition")
+        if state == "superseded" and not superseded_by_atom_version_id:
+            raise InvariantViolation("superseded source requires an explicit successor atom version")
+        if previous == state and not reason:
+            return current | {"event_offset": current.get("changed_event_offset")}
+        event = self._append_event_in_connection(
+            conn,
+            stream_id=f"node:{atom_version_id}",
+            event_type="source.lifecycle_changed",
+            payload={
+                "atom_version_id": atom_version_id, "workspace_id": node["workspace_id"],
+                "previous_state": previous, "state": state, "reason": reason,
+                "superseded_by_atom_version_id": superseded_by_atom_version_id,
+            },
+            actor=actor,
+            idempotency_key=idempotency_key,
+        )
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE trace_source_lifecycle SET state=%s,superseded_by_atom_version_id=COALESCE(%s,superseded_by_atom_version_id),changed_event_offset=%s WHERE atom_version_id=%s",
+                (state, superseded_by_atom_version_id, event.offset, atom_version_id),
+            )
+            if state in {"revoked", "tombstoned", "redacted_purged"}:
+                cursor.execute("DELETE FROM trace_hot_inbox WHERE atom_version_id=%s", (atom_version_id,))
+            cursor.execute("SELECT * FROM trace_source_lifecycle WHERE atom_version_id=%s", (atom_version_id,))
+            result = self._pg_lifecycle_row(self._cursor_mapping(cursor, cursor.fetchone()))
+        return (result or current) | {"event_offset": event.offset}
+
+    def transition_source_lifecycle(self, atom_version_id: str, *, state: str, actor: str = "system", reason: str | None = None, superseded_by_atom_version_id: str | None = None, idempotency_key: str | None = None) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "transition_source_lifecycle"):
+            return self.delegate.transition_source_lifecycle(
+                atom_version_id,
+                state=state,
+                actor=actor,
+                reason=reason,
+                superseded_by_atom_version_id=superseded_by_atom_version_id,
+                idempotency_key=idempotency_key,
+            )
+        with self.connection() as conn:
+            return self._change_source_lifecycle_in_connection(
+                conn,
+                atom_version_id=atom_version_id,
+                state=state,
+                actor=actor,
+                reason=reason,
+                superseded_by_atom_version_id=superseded_by_atom_version_id,
+                idempotency_key=idempotency_key,
+            )
+
+    def erase_source(self, atom_version_id: str, *, signing_key: str, actor: str = "system", reason: str | None = None) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "erase_source"):
+            return self.delegate.erase_source(atom_version_id, signing_key=signing_key, actor=actor, reason=reason)
+        if not signing_key:
+            raise InvariantViolation("compliance erasure requires a configured signing key")
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute(
+                    """SELECT nv.content_hash,n.workspace_id,nv.node_id,nv.properties
+                       FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id
+                       WHERE nv.atom_version_id=%s FOR UPDATE""",
+                    (atom_version_id,),
+                )
+                source = self._cursor_mapping(cursor, cursor.fetchone())
+                if not source:
+                    raise NotFoundError(f"atom version {atom_version_id} was not found")
+                cursor.execute("SELECT * FROM trace_source_lifecycle WHERE atom_version_id=%s FOR UPDATE", (atom_version_id,))
+                current = self._pg_lifecycle_row(self._cursor_mapping(cursor, cursor.fetchone()))
+                if current is None:
+                    raise NotFoundError(f"source lifecycle for {atom_version_id} was not found")
+            receipt_payload = {
+                "receipt_id": str(uuid.uuid4()), "atom_version_id": atom_version_id,
+                "workspace_id": source["workspace_id"], "original_content_hash": source["content_hash"],
+                "reason": reason, "issued_at": _now(), "action": "redacted_purged",
+            }
+            signature = hmac.new(signing_key.encode("utf-8"), _json(receipt_payload).encode("utf-8"), hashlib.sha256).hexdigest()
+            receipt = {**receipt_payload, "signature": signature}
+            event = self._append_event_in_connection(
+                conn,
+                stream_id=f"node:{atom_version_id}",
+                event_type="source.erasure_applied",
+                payload={"atom_version_id": atom_version_id, "workspace_id": source["workspace_id"], "receipt": receipt},
+                actor=actor,
+            )
+            properties = self._json_value(source.get("properties"), {})
+            redacted = {
+                "temporal": properties.get("temporal", normalize_valid_time(None)),
+                "erasure_receipt_id": receipt["receipt_id"], "erasure_event_offset": event.offset,
+            }
+            with conn.cursor() as cursor:
+                cursor.execute("UPDATE trace_node_versions SET content='',properties=%s::jsonb WHERE atom_version_id=%s", (json.dumps(redacted), atom_version_id))
+                cursor.execute(
+                    "UPDATE trace_source_lifecycle SET state='redacted_purged',erasure_receipt=%s::jsonb,changed_event_offset=%s WHERE atom_version_id=%s",
+                    (json.dumps(receipt), event.offset, atom_version_id),
+                )
+                cursor.execute("DELETE FROM trace_hot_inbox WHERE atom_version_id=%s", (atom_version_id,))
+                cursor.execute("DELETE FROM trace_dense_vectors WHERE atom_version_id=%s", (atom_version_id,))
+                cursor.execute("DELETE FROM trace_activation_priors WHERE atom_version_id=%s", (atom_version_id,))
+                cursor.execute("DELETE FROM trace_affinity_edges WHERE left_atom_version_id=%s OR right_atom_version_id=%s", (atom_version_id, atom_version_id))
+                cursor.execute("DELETE FROM trace_evidence_anchors WHERE source_atom_version_id=%s", (atom_version_id,))
+                cursor.execute(
+                    "UPDATE trace_edge_versions SET status='tombstoned',properties=jsonb_build_object('erasure_receipt_id',%s) WHERE source_node_id=%s OR target_node_id=%s",
+                    (receipt["receipt_id"], source["node_id"], source["node_id"]),
+                )
+                cursor.execute(
+                    """WITH doomed AS (
+                           SELECT projection_object_id FROM trace_projection_objects
+                           WHERE workspace_id=%s AND source_atom_version_ids @> %s::jsonb
+                       ) DELETE FROM trace_projection_memberships WHERE parent_projection_object_id IN (SELECT projection_object_id FROM doomed) OR child_id IN (SELECT projection_object_id FROM doomed)""",
+                    (source["workspace_id"], json.dumps([atom_version_id])),
+                )
+                cursor.execute(
+                    "DELETE FROM trace_projection_objects WHERE workspace_id=%s AND source_atom_version_ids @> %s::jsonb",
+                    (source["workspace_id"], json.dumps([atom_version_id])),
+                )
+                attachment_id = properties.get("attachment_id")
+                if attachment_id:
+                    cursor.execute(
+                        """DELETE FROM trace_attachments WHERE attachment_id=%s
+                           AND NOT EXISTS (SELECT 1 FROM trace_node_versions WHERE properties->>'attachment_id'=%s AND content<>'' )""",
+                        (attachment_id, str(attachment_id)),
+                    )
+                cursor.execute("SELECT * FROM trace_source_lifecycle WHERE atom_version_id=%s", (atom_version_id,))
+                result = self._pg_lifecycle_row(self._cursor_mapping(cursor, cursor.fetchone()))
+            return (result or current) | {"event_offset": event.offset}
+
+    def queryable_atoms(
+        self,
+        workspace_id: str | None,
+        as_of_event: int | None = None,
+        *,
+        valid_at: Any | None = None,
+        valid_from: Any | None = None,
+        valid_to: Any | None = None,
+    ) -> list[dict[str, Any]]:
         if self.delegate is not None and hasattr(self.delegate, "queryable_atoms"):
-            return self.delegate.queryable_atoms(workspace_id, as_of_event)
+            try:
+                return self.delegate.queryable_atoms(
+                    workspace_id, as_of_event, valid_at=valid_at, valid_from=valid_from, valid_to=valid_to,
+                )
+            except TypeError:
+                return self.delegate.queryable_atoms(workspace_id, as_of_event)
         with self.connection() as conn:
             with conn.cursor() as cursor:
                 self._set_workspace(cursor, workspace_id)
-                return self._pg_atoms_query(cursor, workspace_id=workspace_id, as_of_event=as_of_event)
+                atoms = self._pg_atoms_query(cursor, workspace_id=workspace_id, as_of_event=as_of_event)
+        return [
+            atom for atom in atoms
+            if self.temporal_visibility(
+                atom,
+                as_of_event=as_of_event,
+                valid_at=valid_at,
+                valid_from=valid_from,
+                valid_to=valid_to,
+            )["visible"]
+        ]
 
     def iter_queryable_atoms(self, workspace_id: str | None, as_of_event: int | None = None, *, batch_size: int = 1_000) -> Iterator[dict[str, Any]]:
         """Stream current source atoms so rebuild workers do not materialize a tenant."""
@@ -485,6 +762,7 @@ class PostgresEventStore:
                 current = self._pg_node_version(cursor, node_id)
             current_properties = self._json_value(current.get("properties"), {})
             merged = {**current_properties, **properties, "predecessor_atom_version_id": current["atom_version_id"]}
+            merged["temporal"] = normalize_valid_time(merged.get("temporal"))
             version = int(current["version"]) + 1
             version_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"node-version:{node_id}:{idempotency_key}")) if idempotency_key else str(uuid.uuid4())
             event = self._append_event_in_connection(conn, stream_id=f"node:{node_id}", event_type="node.versioned", payload={"node_id": node_id, "workspace_id": node["workspace_id"], "atom_version_id": version_id, "version": version, "content": content, "properties": merged, "patch": properties, "predecessor": current["atom_version_id"]}, actor=actor, idempotency_key=idempotency_key)
@@ -496,6 +774,47 @@ class PostgresEventStore:
                         raise InvariantViolation("duplicate edit event has no node projection")
                     return self._pg_atom_row({**duplicate, "workspace_id": node["workspace_id"], "facets": node["facets"], "security": node["security"]})
                 cursor.execute("INSERT INTO trace_node_versions(atom_version_id,node_id,version,content,properties,content_hash,created_event_offset) VALUES (%s,%s,%s,%s,%s::jsonb,%s,%s)", (version_id, node_id, version, content, json.dumps(merged), _digest(content), event.offset))
+                cursor.execute(
+                    "SELECT state,valid_from,valid_to,valid_precision,valid_confidence,valid_provenance,predecessor_atom_version_id,superseded_by_atom_version_id,erasure_receipt FROM trace_source_lifecycle WHERE atom_version_id=%s",
+                    (current["atom_version_id"],),
+                )
+                predecessor_lifecycle = self._pg_lifecycle_row(self._cursor_mapping(cursor, cursor.fetchone()))
+            if predecessor_lifecycle and predecessor_lifecycle["state"] in {"revoked", "tombstoned", "redacted_purged"}:
+                raise InvariantViolation(
+                    f"cannot edit source in non-readable lifecycle state {predecessor_lifecycle['state']!r}"
+                )
+            if predecessor_lifecycle is not None:
+                lifecycle_event = self._append_event_in_connection(
+                    conn,
+                    stream_id=f"node:{current['atom_version_id']}",
+                    event_type="source.lifecycle_changed",
+                    payload={
+                        "atom_version_id": current["atom_version_id"], "workspace_id": node["workspace_id"],
+                        "previous_state": predecessor_lifecycle["state"], "state": "superseded",
+                        "reason": "superseded_by_node_edit", "superseded_by_atom_version_id": version_id,
+                    },
+                    actor=actor,
+                )
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE trace_source_lifecycle SET state='superseded',superseded_by_atom_version_id=%s,changed_event_offset=%s WHERE atom_version_id=%s",
+                        (version_id, lifecycle_event.offset, current["atom_version_id"]),
+                    )
+            temporal = merged["temporal"]
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """INSERT INTO trace_source_lifecycle(
+                       atom_version_id,workspace_id,state,valid_from,valid_to,valid_precision,valid_confidence,
+                       valid_provenance,predecessor_atom_version_id,changed_event_offset,created_at
+                    ) VALUES (%s,%s,'active',%s,%s,%s,%s,%s::jsonb,%s,%s,NOW())
+                    ON CONFLICT (atom_version_id) DO NOTHING""",
+                    (
+                        version_id, node["workspace_id"], temporal.get("valid_from"), temporal.get("valid_to"),
+                        temporal.get("precision", "unknown"), temporal.get("confidence", "unknown"),
+                        json.dumps(temporal.get("provenance", {})), current["atom_version_id"], event.offset,
+                    ),
+                )
+            with conn.cursor() as cursor:
                 cursor.execute("DELETE FROM trace_hot_inbox WHERE node_id=%s", (node_id,))
                 cursor.execute("INSERT INTO trace_hot_inbox(atom_version_id,node_id,workspace_id,content,visible_from_event,facets,security) VALUES (%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb)", (version_id, node_id, node["workspace_id"], content, event.offset, json.dumps(self._json_value(node["facets"], [])), json.dumps(self._json_value(node["security"], {}))))
                 cursor.execute("INSERT INTO trace_projection_revisions(projection_name,workspace_id,last_applied_event,revision,updated_at) VALUES ('hot_inbox',%s,%s,1,NOW()) ON CONFLICT(projection_name,workspace_id) DO UPDATE SET last_applied_event=EXCLUDED.last_applied_event,revision=trace_projection_revisions.revision+1,updated_at=NOW()", (node["workspace_id"], event.offset))
@@ -530,10 +849,23 @@ class PostgresEventStore:
                     "ingestion_id": parent_properties.get("ingestion_id"),
                     "source_ordinal": parent_properties.get("ordinal"),
                     "projection_section_key": f"section:split:{node_id}:{marker.offset}",
+                    "temporal": normalize_valid_time(parent_properties.get("temporal")),
                 }
                 version_event = self._append_event_in_connection(conn, stream_id=f"node:{child_id}", event_type="node.versioned", payload={"node_id": child_id, "workspace_id": parent["workspace_id"], "atom_version_id": version_id, "version": 1, "content": part, "properties": properties, "split_from": parent_version["atom_version_id"]}, actor=actor, causation_id=node_event.event_id)
                 with conn.cursor() as cursor:
                     cursor.execute("INSERT INTO trace_node_versions(atom_version_id,node_id,version,content,properties,content_hash,created_event_offset) VALUES (%s,%s,1,%s,%s::jsonb,%s,%s)", (version_id, child_id, part, json.dumps(properties), _digest(part), version_event.offset))
+                    temporal = properties["temporal"]
+                    cursor.execute(
+                        """INSERT INTO trace_source_lifecycle(
+                           atom_version_id,workspace_id,state,valid_from,valid_to,valid_precision,valid_confidence,
+                           valid_provenance,predecessor_atom_version_id,changed_event_offset,created_at
+                        ) VALUES (%s,%s,'active',%s,%s,%s,%s,%s::jsonb,%s,%s,NOW())""",
+                        (
+                            version_id, parent["workspace_id"], temporal.get("valid_from"), temporal.get("valid_to"),
+                            temporal.get("precision", "unknown"), temporal.get("confidence", "unknown"),
+                            json.dumps(temporal.get("provenance", {})), parent_version["atom_version_id"], version_event.offset,
+                        ),
+                    )
                     cursor.execute("INSERT INTO trace_hot_inbox(atom_version_id,node_id,workspace_id,content,visible_from_event,facets,security) VALUES (%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb)", (version_id, child_id, parent["workspace_id"], part, version_event.offset, json.dumps(["atom"]), json.dumps(security)))
                 self._pg_insert_edge(conn, workspace_id=parent["workspace_id"], source_node_id=child_id, target_node_id=node_id, relation_type="CHILD_OF", evidence_atom_version_ids=[parent_version["atom_version_id"]], actor=actor, model_version="lineage-v1", confidence=1.0, weight=1.0, status="trusted", properties={"operation": "split", "marker_event": marker.offset}, causation_id=marker.event_id)
                 children.append(self._pg_atom_row({"atom_version_id": version_id, "node_id": child_id, "version": 1, "content": part, "properties": properties, "content_hash": _digest(part), "created_event_offset": version_event.offset, "workspace_id": parent["workspace_id"], "facets": ["atom"], "security": security}))
@@ -754,10 +1086,27 @@ class PostgresEventStore:
                 with conn.cursor() as cursor:
                     cursor.execute("INSERT INTO trace_nodes(node_id,workspace_id,facets,security,created_event_offset) VALUES (%s,%s,%s::jsonb,%s::jsonb,%s)", (node_id, workspace_id, json.dumps(["atom"]), json.dumps(security), node_event.offset))
                 version_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"atom-version:{stable_seed}:{ordinal}:1")) if stable_seed else str(uuid.uuid4())
-                properties = {"ingestion_id": ingestion_id, "attachment_id": attachment_id, "source_start": atom["start"], "source_end": atom["end"], "ordinal": atom["ordinal"], "parser_location": atom["parser_location"], "source": source}
+                properties = {
+                    "ingestion_id": ingestion_id, "attachment_id": attachment_id,
+                    "source_start": atom["start"], "source_end": atom["end"],
+                    "ordinal": atom["ordinal"], "parser_location": atom["parser_location"],
+                    "source": source, "temporal": normalize_valid_time(atom.get("temporal")),
+                }
                 version_event = self._append_event_in_connection(conn, stream_id=f"node:{node_id}", event_type="node.versioned", payload={"node_id": node_id, "workspace_id": workspace_id, "atom_version_id": version_id, "version": 1, "content": atom["content"], "properties": properties}, actor=actor, causation_id=node_event.event_id, correlation_id=ingestion_id)
                 with conn.cursor() as cursor:
                     cursor.execute("INSERT INTO trace_node_versions(atom_version_id,node_id,version,content,properties,content_hash,created_event_offset) VALUES (%s,%s,1,%s,%s::jsonb,%s,%s)", (version_id, node_id, atom["content"], json.dumps(properties), _digest(atom["content"]), version_event.offset))
+                    temporal = properties["temporal"]
+                    cursor.execute(
+                        """INSERT INTO trace_source_lifecycle(
+                           atom_version_id,workspace_id,state,valid_from,valid_to,valid_precision,valid_confidence,
+                           valid_provenance,changed_event_offset,created_at
+                        ) VALUES (%s,%s,'active',%s,%s,%s,%s,%s::jsonb,%s,NOW())""",
+                        (
+                            version_id, workspace_id, temporal.get("valid_from"), temporal.get("valid_to"),
+                            temporal.get("precision", "unknown"), temporal.get("confidence", "unknown"),
+                            json.dumps(temporal.get("provenance", {})), version_event.offset,
+                        ),
+                    )
                     cursor.execute("INSERT INTO trace_hot_inbox(atom_version_id,node_id,workspace_id,content,visible_from_event,facets,security) VALUES (%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb)", (version_id, node_id, workspace_id, atom["content"], version_event.offset, json.dumps(["atom"]), json.dumps(security)))
                 created.append({"node_id": node_id, "atom_version_id": version_id, "event_offset": version_event.offset, **properties})
             for previous, following in zip(created, created[1:]):
@@ -795,11 +1144,22 @@ class PostgresEventStore:
             payload={"edge_id": edge_id, "edge_version_id": edge_version_id, "workspace_id": workspace_id, "source_node_id": source_node_id, "target_node_id": target_node_id, "relation_type": relation_type, "weight": weight, "confidence": confidence, "status": status, "model_version": model_version, "evidence_atom_version_ids": evidence_atom_version_ids, "properties": properties},
             actor=actor, causation_id=causation_id, correlation_id=correlation_id,
         )
+        conflicting_atom_version_ids: list[str] = []
         with conn.cursor() as cursor:
             cursor.execute("SELECT workspace_id FROM trace_nodes WHERE node_id IN (%s,%s) ORDER BY node_id", (source_node_id, target_node_id))
             node_workspaces = [str(row[0]) for row in cursor.fetchall()]
             if len(node_workspaces) != 2 or any(item != workspace_id for item in node_workspaces):
                 raise InvariantViolation("nodes and relations must stay within one workspace")
+            if relation_type == "contradicts":
+                cursor.execute(
+                    """SELECT DISTINCT ON (nv.node_id) nv.atom_version_id
+                       FROM trace_node_versions nv
+                       JOIN trace_nodes n ON n.node_id=nv.node_id
+                       WHERE n.workspace_id=%s AND n.node_id IN (%s,%s)
+                       ORDER BY nv.node_id,nv.version DESC""",
+                    (workspace_id, source_node_id, target_node_id),
+                )
+                conflicting_atom_version_ids = [str(row[0]) for row in cursor.fetchall()]
             cursor.execute("INSERT INTO trace_edge_versions(edge_version_id,edge_id,version,workspace_id,source_node_id,target_node_id,relation_type,weight,confidence,status,valid_from_event,model_version,properties,created_event_offset) VALUES (%s,%s,1,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,%s)", (edge_version_id, edge_id, workspace_id, source_node_id, target_node_id, relation_type, weight, confidence, status, event.offset, model_version, json.dumps(properties), event.offset))
             for source_atom_version_id in evidence_atom_version_ids:
                 cursor.execute("SELECT nv.properties,nv.content FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id WHERE nv.atom_version_id=%s AND n.workspace_id=%s", (source_atom_version_id, workspace_id))
@@ -808,6 +1168,20 @@ class PostgresEventStore:
                     raise InvariantViolation(f"evidence atom version {source_atom_version_id} is absent or out of scope")
                 source_properties = self._json_value(source.get("properties"), {})
                 cursor.execute("INSERT INTO trace_evidence_anchors(anchor_id,workspace_id,target_kind,target_id,source_atom_version_id,source_start,source_end,parser_location,quote_hash,created_event_offset) VALUES (%s,%s,'edge_version',%s,%s,%s,%s,%s,%s,%s)", (str(uuid.uuid4()), workspace_id, edge_version_id, source_atom_version_id, source_properties.get("source_start"), source_properties.get("source_end"), source_properties.get("parser_location"), _digest(source.get("content", "")), event.offset))
+        if relation_type == "contradicts":
+            for atom_version_id in conflicting_atom_version_ids:
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT state FROM trace_source_lifecycle WHERE atom_version_id=%s FOR UPDATE", (atom_version_id,))
+                    lifecycle_row = cursor.fetchone()
+                lifecycle_state = str(lifecycle_row[0]) if lifecycle_row else None
+                if lifecycle_state and lifecycle_state not in {"revoked", "tombstoned", "redacted_purged", "conflicted"}:
+                    self._change_source_lifecycle_in_connection(
+                        conn,
+                        atom_version_id=atom_version_id,
+                        state="conflicted",
+                        actor=actor,
+                        reason="contradiction_edge_created",
+                    )
         return {"edge_id": edge_id, "edge_version_id": edge_version_id, "version": 1, "workspace_id": workspace_id, "source_node_id": source_node_id, "target_node_id": target_node_id, "relation_type": relation_type, "weight": weight, "confidence": confidence, "status": status, "model_version": model_version, "properties": properties, "evidence_atom_version_ids": list(evidence_atom_version_ids), "created_event_offset": event.offset}
 
     def create_edge(self, **kwargs: Any) -> dict[str, Any]:
@@ -1316,6 +1690,18 @@ class PostgresEventStore:
         version_event = self._append_event_in_connection(conn, stream_id=f"node:{node_id}", event_type="node.versioned", payload={"node_id": node_id, "workspace_id": workspace_id, "atom_version_id": version_id, "version": 1, "derived": True, "content": content, "properties": stored, "evidence_atom_version_ids": evidence_atom_version_ids}, actor=actor, causation_id=node_event.event_id)
         with conn.cursor() as cursor:
             cursor.execute("INSERT INTO trace_node_versions(atom_version_id,node_id,version,content,properties,content_hash,created_event_offset) VALUES (%s,%s,1,%s,%s::jsonb,%s,%s)", (version_id, node_id, content, json.dumps(stored), _digest(content), version_event.offset))
+            temporal = normalize_valid_time(stored.get("temporal"))
+            cursor.execute(
+                """INSERT INTO trace_source_lifecycle(
+                   atom_version_id,workspace_id,state,valid_from,valid_to,valid_precision,valid_confidence,
+                   valid_provenance,changed_event_offset,created_at
+                ) VALUES (%s,%s,'active',%s,%s,%s,%s,%s::jsonb,%s,NOW())""",
+                (
+                    version_id, workspace_id, temporal.get("valid_from"), temporal.get("valid_to"),
+                    temporal.get("precision", "unknown"), temporal.get("confidence", "unknown"),
+                    json.dumps(temporal.get("provenance", {})), version_event.offset,
+                ),
+            )
             for anchor_id, source_id in zip(anchor_ids, evidence_atom_version_ids, strict=True):
                 cursor.execute("SELECT nv.properties,nv.content FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id WHERE nv.atom_version_id=%s AND n.workspace_id=%s", (source_id, workspace_id))
                 source = self._cursor_mapping(cursor, cursor.fetchone())
@@ -2536,13 +2922,47 @@ class PostgresEventStore:
     def activate_projection_run(self, projection_run_id: str, *, actor: str = "projection-worker") -> dict[str, Any]:
         return self.transition_projection_run(projection_run_id, status="active", actor=actor)
 
-    def effective_projection_run(self, workspace_id: str, projection_kind: str) -> dict[str, Any] | None:
+    def effective_projection_run(
+        self,
+        workspace_id: str,
+        projection_kind: str,
+        *,
+        release_id: str | None = None,
+        as_of_event: int | None = None,
+    ) -> dict[str, Any] | None:
         if self.delegate is not None and hasattr(self.delegate, "effective_projection_run"):
-            return self.delegate.effective_projection_run(workspace_id, projection_kind)
+            try:
+                return self.delegate.effective_projection_run(
+                    workspace_id, projection_kind, release_id=release_id, as_of_event=as_of_event,
+                )
+            except TypeError:
+                return self.delegate.effective_projection_run(workspace_id, projection_kind)
         with self.connection() as conn:
             with conn.cursor() as cursor:
                 self._set_workspace(cursor, workspace_id)
-                cursor.execute("SELECT * FROM trace_projection_runs WHERE workspace_id=%s AND projection_kind=%s AND status='active' ORDER BY activated_event_offset DESC,created_at DESC LIMIT 1", (workspace_id, projection_kind))
+                if release_id is None:
+                    cursor.execute("SELECT * FROM trace_projection_runs WHERE workspace_id=%s AND projection_kind=%s AND status='active' ORDER BY activated_event_offset DESC,created_at DESC LIMIT 1", (workspace_id, projection_kind))
+                else:
+                    cursor.execute("SELECT component_revision,source_watermark,metadata FROM trace_cortex_release_components WHERE release_id=%s AND workspace_id=%s AND component_kind=%s", (release_id, workspace_id, projection_kind))
+                    component = self._cursor_mapping(cursor, cursor.fetchone())
+                    if not component:
+                        return None
+                    metadata = self._json_value(component.get("metadata"), {})
+                    run_id = metadata.get("projection_run_id")
+                    if run_id:
+                        cursor.execute("SELECT * FROM trace_projection_runs WHERE projection_run_id=%s AND workspace_id=%s AND projection_kind=%s", (run_id, workspace_id, projection_kind))
+                    else:
+                        watermark = min(int(component["source_watermark"]), int(as_of_event) if as_of_event is not None else int(component["source_watermark"]))
+                        through = int(as_of_event) if as_of_event is not None else watermark
+                        cursor.execute(
+                            """SELECT * FROM trace_projection_runs
+                               WHERE workspace_id=%s AND projection_kind=%s
+                                 AND status IN ('active','superseded','succeeded')
+                                 AND COALESCE(input_through_event,created_event_offset)<=%s
+                                 AND COALESCE(activated_event_offset,created_event_offset)<=%s
+                               ORDER BY COALESCE(input_through_event,created_event_offset) DESC,created_at DESC LIMIT 1""",
+                            (workspace_id, projection_kind, watermark, through),
+                        )
                 row = cursor.fetchone()
                 return self._pg_projection_run_row(self._cursor_mapping(cursor, row)) if row else None
 
@@ -2604,13 +3024,24 @@ class PostgresEventStore:
                     for row in cursor.fetchall()
                 ]
 
-    def hierarchy_objects(self, workspace_id: str, projection_object_ids: Sequence[str], *, limit: int = 256) -> list[dict[str, Any]]:
+    def hierarchy_objects(
+        self,
+        workspace_id: str,
+        projection_object_ids: Sequence[str],
+        *,
+        limit: int = 256,
+        release_id: str | None = None,
+        as_of_event: int | None = None,
+    ) -> list[dict[str, Any]]:
         if self.delegate is not None and hasattr(self.delegate, "hierarchy_objects"):
-            return self.delegate.hierarchy_objects(workspace_id, projection_object_ids, limit=limit)
+            try:
+                return self.delegate.hierarchy_objects(workspace_id, projection_object_ids, limit=limit, release_id=release_id, as_of_event=as_of_event)
+            except TypeError:
+                return self.delegate.hierarchy_objects(workspace_id, projection_object_ids, limit=limit)
         ids = list(dict.fromkeys(str(item) for item in projection_object_ids if item))[:max(1, min(int(limit), 512))]
         if not ids:
             return []
-        run = self.effective_projection_run(workspace_id, "hierarchy")
+        run = self.effective_projection_run(workspace_id, "hierarchy", release_id=release_id, as_of_event=as_of_event)
         if not run:
             return []
         with self.connection() as conn:
@@ -2706,10 +3137,13 @@ class PostgresEventStore:
                 result = [self._pg_projection_object_row(self._cursor_mapping(cursor, row)) | {"created_event_offset": event.offset} for row in cursor.fetchall()]
         return result
 
-    def hierarchy_frontier(self, workspace_id: str, query: str, *, limit: int = 32, as_of_event: int | None = None) -> list[dict[str, Any]]:
+    def hierarchy_frontier(self, workspace_id: str, query: str, *, limit: int = 32, as_of_event: int | None = None, release_id: str | None = None) -> list[dict[str, Any]]:
         if self.delegate is not None and hasattr(self.delegate, "hierarchy_frontier"):
-            return self.delegate.hierarchy_frontier(workspace_id, query, limit=limit, as_of_event=as_of_event)
-        run = self.effective_projection_run(workspace_id, "hierarchy")
+            try:
+                return self.delegate.hierarchy_frontier(workspace_id, query, limit=limit, as_of_event=as_of_event, release_id=release_id)
+            except TypeError:
+                return self.delegate.hierarchy_frontier(workspace_id, query, limit=limit, as_of_event=as_of_event)
+        run = self.effective_projection_run(workspace_id, "hierarchy", release_id=release_id, as_of_event=as_of_event)
         if not run:
             return []
         terms = [item.lower() for item in re.findall(r"[\w'-]+", query) if len(item) > 1][:8]
@@ -2725,10 +3159,13 @@ class PostgresEventStore:
                 cursor.execute(f"SELECT * FROM trace_projection_objects WHERE {' AND '.join(clauses)} ORDER BY object_kind,logical_key LIMIT %s", values)
                 return [self._pg_projection_object_row(self._cursor_mapping(cursor, row)) | {"projection_revision": run["revision"]} for row in cursor.fetchall()]
 
-    def hierarchy_children(self, workspace_id: str, parent_projection_object_ids: Sequence[str], *, limit: int = 256) -> list[dict[str, Any]]:
+    def hierarchy_children(self, workspace_id: str, parent_projection_object_ids: Sequence[str], *, limit: int = 256, release_id: str | None = None, as_of_event: int | None = None) -> list[dict[str, Any]]:
         if self.delegate is not None and hasattr(self.delegate, "hierarchy_children"):
-            return self.delegate.hierarchy_children(workspace_id, parent_projection_object_ids, limit=limit)
-        run = self.effective_projection_run(workspace_id, "hierarchy")
+            try:
+                return self.delegate.hierarchy_children(workspace_id, parent_projection_object_ids, limit=limit, release_id=release_id, as_of_event=as_of_event)
+            except TypeError:
+                return self.delegate.hierarchy_children(workspace_id, parent_projection_object_ids, limit=limit)
+        run = self.effective_projection_run(workspace_id, "hierarchy", release_id=release_id, as_of_event=as_of_event)
         if not run or not parent_projection_object_ids:
             return []
         with self.connection() as conn:
@@ -2740,10 +3177,13 @@ class PostgresEventStore:
             row["properties"] = self._json_value(row.pop("properties"), {})
         return rows
 
-    def hierarchy_source_atom_ids(self, workspace_id: str, projection_object_ids: Sequence[str], *, limit: int = 512) -> list[str]:
+    def hierarchy_source_atom_ids(self, workspace_id: str, projection_object_ids: Sequence[str], *, limit: int = 512, release_id: str | None = None, as_of_event: int | None = None) -> list[str]:
         if self.delegate is not None and hasattr(self.delegate, "hierarchy_source_atom_ids"):
-            return self.delegate.hierarchy_source_atom_ids(workspace_id, projection_object_ids, limit=limit)
-        run = self.effective_projection_run(workspace_id, "hierarchy")
+            try:
+                return self.delegate.hierarchy_source_atom_ids(workspace_id, projection_object_ids, limit=limit, release_id=release_id, as_of_event=as_of_event)
+            except TypeError:
+                return self.delegate.hierarchy_source_atom_ids(workspace_id, projection_object_ids, limit=limit)
+        run = self.effective_projection_run(workspace_id, "hierarchy", release_id=release_id, as_of_event=as_of_event)
         if not run or not projection_object_ids:
             return []
         bounded_limit = max(1, min(int(limit), 4_096))
@@ -2930,6 +3370,46 @@ class PostgresEventStore:
                 comps = [self._pg_cortex_component_row(self._cursor_mapping(cursor, r)) for r in cursor.fetchall()]
                 return self._pg_cortex_release_row(row, components=comps)
 
+    def get_cortex_release_as_of_event(self, workspace_id: str, as_of_event: int) -> dict[str, Any] | None:
+        if self.delegate is not None and hasattr(self.delegate, "get_cortex_release_as_of_event"):
+            return self.delegate.get_cortex_release_as_of_event(workspace_id, as_of_event)
+        if int(as_of_event) < 1:
+            raise InvariantViolation("historical release resolution requires a positive event watermark")
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(
+                    """SELECT event_type,payload FROM trace_events
+                       WHERE workspace_id=%s AND stream_id=%s AND event_offset<=%s
+                         AND event_type IN ('cortex.release_activated','cortex.release_rolled_back')
+                       ORDER BY event_offset""",
+                    (workspace_id, f"workspace:{workspace_id}", int(as_of_event)),
+                )
+                selected_id: str | None = None
+                for event_type, payload in cursor.fetchall():
+                    value = payload if isinstance(payload, dict) else json.loads(payload)
+                    if event_type == "cortex.release_activated":
+                        selected_id = str(value.get("release_id") or "") or selected_id
+                    else:
+                        selected_id = str(value.get("to_release_id") or "") or selected_id
+                if selected_id is None:
+                    cursor.execute(
+                        """SELECT * FROM trace_cortex_releases
+                           WHERE workspace_id=%s AND policy_revision='bootstrap-v0' AND spine_event_watermark<=%s
+                           ORDER BY created_at,release_id LIMIT 1""",
+                        (workspace_id, int(as_of_event)),
+                    )
+                else:
+                    cursor.execute("SELECT * FROM trace_cortex_releases WHERE workspace_id=%s AND release_id=%s", (workspace_id, selected_id))
+                row = self._cursor_mapping(cursor, cursor.fetchone())
+                if not row or int(row["spine_event_watermark"]) > int(as_of_event):
+                    return None
+                cursor.execute("SELECT * FROM trace_cortex_release_components WHERE release_id=%s ORDER BY component_kind", (row["release_id"],))
+                component_rows = [self._cursor_mapping(cursor, item) or {} for item in cursor.fetchall()]
+                if len(component_rows) != 5 or any(int(item["source_watermark"]) > int(as_of_event) for item in component_rows):
+                    return None
+                return self._pg_cortex_release_row(row, components=[self._pg_cortex_component_row(item) for item in component_rows])
+
     def list_cortex_releases(self, workspace_id: str, *, status: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
         if self.delegate is not None and hasattr(self.delegate, "list_cortex_releases"):
             return self.delegate.list_cortex_releases(workspace_id, status=status, limit=limit)
@@ -3031,8 +3511,8 @@ class PostgresEventStore:
             )
             with conn.cursor() as cursor:
                 self._set_workspace(cursor, ws)
-                cursor.execute("UPDATE trace_cortex_releases SET status='superseded',superseded_at=NOW() WHERE workspace_id=%s AND status='active' AND release_id<>%s", (ws, release_id))
-                cursor.execute("UPDATE trace_cortex_releases SET status='active',activated_at=NOW(),superseded_at=NULL WHERE release_id=%s", (release_id,))
+                cursor.execute("UPDATE trace_cortex_releases SET status='superseded',superseded_at=NOW(),superseded_event_offset=%s WHERE workspace_id=%s AND status='active' AND release_id<>%s", (event.offset, ws, release_id))
+                cursor.execute("UPDATE trace_cortex_releases SET status='active',activated_at=NOW(),activated_event_offset=%s,superseded_at=NULL WHERE release_id=%s", (event.offset, release_id))
                 cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s", (release_id,))
                 row = self._cursor_mapping(cursor, cursor.fetchone())
                 cursor.execute("SELECT * FROM trace_cortex_release_components WHERE release_id=%s ORDER BY component_kind", (release_id,))
@@ -3073,8 +3553,8 @@ class PostgresEventStore:
             )
             with conn.cursor() as cursor:
                 self._set_workspace(cursor, workspace_id)
-                cursor.execute("UPDATE trace_cortex_releases SET status='superseded',superseded_at=NOW() WHERE release_id=%s", (current_active["release_id"],))
-                cursor.execute("UPDATE trace_cortex_releases SET status='active',activated_at=NOW(),superseded_at=NULL WHERE release_id=%s", (target_row["release_id"],))
+                cursor.execute("UPDATE trace_cortex_releases SET status='superseded',superseded_at=NOW(),superseded_event_offset=%s WHERE release_id=%s", (event.offset, current_active["release_id"]))
+                cursor.execute("UPDATE trace_cortex_releases SET status='active',activated_at=NOW(),activated_event_offset=%s,superseded_at=NULL WHERE release_id=%s", (event.offset, target_row["release_id"]))
                 cursor.execute("SELECT * FROM trace_cortex_releases WHERE release_id=%s", (target_row["release_id"],))
                 row = self._cursor_mapping(cursor, cursor.fetchone())
                 cursor.execute("SELECT * FROM trace_cortex_release_components WHERE release_id=%s ORDER BY component_kind", (target_row["release_id"],))
