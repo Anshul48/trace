@@ -58,10 +58,10 @@ CREATE TABLE IF NOT EXISTS trace_events_h14 PARTITION OF trace_events FOR VALUES
 CREATE TABLE IF NOT EXISTS trace_events_h14_default PARTITION OF trace_events_h14 DEFAULT;
 CREATE TABLE IF NOT EXISTS trace_events_h15 PARTITION OF trace_events FOR VALUES WITH (MODULUS 16, REMAINDER 15) PARTITION BY RANGE (occurred_at);
 CREATE TABLE IF NOT EXISTS trace_events_h15_default PARTITION OF trace_events_h15 DEFAULT;
--- The parent default preserves zero-downtime bootstrap for older databases;
--- a migration can add buckets later if the schema predates this release.
-CREATE TABLE IF NOT EXISTS trace_events_default PARTITION OF trace_events DEFAULT PARTITION BY RANGE (occurred_at);
-CREATE TABLE IF NOT EXISTS trace_events_default_time PARTITION OF trace_events_default DEFAULT;
+-- PostgreSQL does not permit a DEFAULT partition beneath a hash-partitioned
+-- parent.  The sixteen explicit hash partitions cover the complete hash key
+-- space, and each range-partitioned bucket has its own default child for
+-- bootstrap rows until concrete time windows are added.
 
 -- PostgreSQL partitioned tables cannot have a global unique index that omits
 -- the partition key.  These are lookup indexes; the migration's unpartitioned
