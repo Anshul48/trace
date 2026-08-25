@@ -349,10 +349,15 @@ class PostgresEventStore:
     @classmethod
     def _pg_atom_row(cls, row: dict[str, Any]) -> dict[str, Any]:
         result = dict(row)
+        if "atom_version_id" in result and result["atom_version_id"] is not None:
+            result["atom_version_id"] = str(result["atom_version_id"])
+        if "node_id" in result and result["node_id"] is not None:
+            result["node_id"] = str(result["node_id"])
         result["properties"] = cls._json_value(result.pop("properties"), {})
         result["facets"] = cls._json_value(result.pop("facets"), [])
         result["security"] = cls._json_value(result.pop("security"), {})
         return result
+
 
     @classmethod
     def _pg_anchor_rows(cls, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -903,8 +908,9 @@ class PostgresEventStore:
             with conn.cursor() as cursor:
                 self._set_workspace(cursor)
                 rows = self._pg_atoms_query(cursor, workspace_id=None, as_of_event=None, atom_ids=atom_version_ids)
-        by_id = {row["atom_version_id"]: row for row in rows}
-        return [by_id[item] for item in atom_version_ids if item in by_id]
+        by_id = {str(row["atom_version_id"]): row for row in rows}
+        return [by_id[str(item)] for item in atom_version_ids if str(item) in by_id]
+
 
     def _pg_node(self, cursor: Any, node_id: str) -> dict[str, Any]:
         cursor.execute("SELECT node_id,workspace_id,facets,security,created_event_offset FROM trace_nodes WHERE node_id=%s", (node_id,))
