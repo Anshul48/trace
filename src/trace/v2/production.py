@@ -3994,10 +3994,12 @@ class S3ObjectStore:
         prefix: str = "trace/attachments",
         kms_key_id: str | None = None,
         endpoint_url: str | None = None,
+        server_side_encryption: str | None = "AES256",
     ) -> None:
         self.bucket = bucket
         self.prefix = prefix.strip("/")
         self.kms_key_id = kms_key_id or os.environ.get("TRACE_OBJECT_KMS_KEY_ID")
+        self.server_side_encryption = server_side_encryption
         if client is None:
             try:
                 import boto3
@@ -4017,18 +4019,20 @@ class S3ObjectStore:
             "Body": raw,
             "ContentType": media_type,
             "Metadata": {"sha256": digest, "tenant": workspace_id or "unassigned"},
-            "ServerSideEncryption": "aws:kms" if self.kms_key_id else "AES256",
         }
-        if self.kms_key_id:
-            kwargs["SSEKMSKeyId"] = self.kms_key_id
+        if self.server_side_encryption:
+            kwargs["ServerSideEncryption"] = "aws:kms" if self.kms_key_id else self.server_side_encryption
+            if self.kms_key_id:
+                kwargs["SSEKMSKeyId"] = self.kms_key_id
         self.client.put_object(**kwargs)
         return {
             "content_hash": digest,
             "object_key": key,
             "media_type": media_type,
             "byte_length": len(raw),
-            "metadata": {"storage": "s3", "bucket": self.bucket, "encrypted": True},
+            "metadata": {"storage": "s3", "bucket": self.bucket, "encrypted": bool(self.server_side_encryption)},
         }
+
 
     def put_bytes(self, raw: bytes, media_type: str, *, workspace_id: str | None = None, **_: Any) -> dict[str, Any]:
         return self._put(raw, media_type, workspace_id=workspace_id)
