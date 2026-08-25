@@ -3672,7 +3672,7 @@ class PostgresEventStore:
                     raise InvariantViolation(f"cortex release in status {rel['status']} cannot be validated")
             event = self._append_event_in_connection(
                 conn, stream_id=f"workspace:{rel['workspace_id']}", event_type=f"cortex.release_{new_status}",
-                payload={"release_id": release_id, "workspace_id": rel["workspace_id"], "validation_receipt": validation_receipt, "status": new_status},
+                payload={"release_id": str(release_id), "workspace_id": rel["workspace_id"], "validation_receipt": validation_receipt, "status": new_status},
                 actor=actor,
             )
             with conn.cursor() as cursor:
@@ -3701,7 +3701,7 @@ class PostgresEventStore:
                 ws = rel["workspace_id"]
             event = self._append_event_in_connection(
                 conn, stream_id=f"workspace:{ws}", event_type="cortex.release_activated",
-                payload={"release_id": release_id, "workspace_id": ws, "spine_event_watermark": rel["spine_event_watermark"], "policy_revision": rel["policy_revision"], "code_revision": rel["code_revision"]},
+                payload={"release_id": str(release_id), "workspace_id": ws, "spine_event_watermark": rel["spine_event_watermark"], "policy_revision": rel["policy_revision"], "code_revision": rel["code_revision"]},
                 actor=actor,
             )
             with conn.cursor() as cursor:
@@ -3743,9 +3743,10 @@ class PostgresEventStore:
                         raise InvariantViolation("cannot rollback: no validated predecessor release available")
             event = self._append_event_in_connection(
                 conn, stream_id=f"workspace:{workspace_id}", event_type="cortex.release_rolled_back",
-                payload={"workspace_id": workspace_id, "from_release_id": current_active["release_id"], "to_release_id": target_row["release_id"], "reason": reason},
+                payload={"workspace_id": workspace_id, "from_release_id": str(current_active["release_id"]), "to_release_id": str(target_row["release_id"]), "reason": reason},
                 actor=actor,
             )
+
             with conn.cursor() as cursor:
                 self._set_workspace(cursor, workspace_id)
                 cursor.execute("UPDATE trace_cortex_releases SET status='superseded',superseded_at=NOW(),superseded_event_offset=%s WHERE release_id=%s", (event.offset, current_active["release_id"]))
