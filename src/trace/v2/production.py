@@ -4565,7 +4565,21 @@ class OpenSearchLexicalIndex:
                     "created_event_offset": {"type": "long"},
                     "index_revision": {"type": "keyword"},
                     "content_hash": {"type": "keyword"},
-                    "source": {"properties": {"uri": {"type": "keyword", "ignore_above": 2048}}},
+                    # SourceInput permits adapter provenance extensions. Keep
+                    # the enclosing index strict while explicitly accepting
+                    # the stable source fields and retaining opaque metadata
+                    # without dynamically mapping arbitrary user keys.
+                    "source": {
+                        "type": "object",
+                        "dynamic": False,
+                        "properties": {
+                            "title": {"type": "text"},
+                            "uri": {"type": "keyword", "ignore_above": 2048},
+                            "media_type": {"type": "keyword"},
+                            "adapter": {"type": "keyword"},
+                            "metadata": {"type": "object", "enabled": False},
+                        },
+                    },
                     "source_start": {"type": "integer"},
                     "source_end": {"type": "integer"},
                     "parser_location": {"type": "keyword", "ignore_above": 2048},

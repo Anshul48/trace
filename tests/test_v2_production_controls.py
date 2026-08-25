@@ -56,13 +56,14 @@ class RecordingNatsClient:
 class RecordingOpenSearchIndices:
     def __init__(self) -> None:
         self.created: list[str] = []
+        self.creation_bodies: list[dict] = []
 
     def exists(self, *, index: str) -> bool:
         return index in self.created
 
     def create(self, *, index: str, body: dict) -> None:  # type: ignore[no-untyped-def]
-        del body
         self.created.append(index)
+        self.creation_bodies.append(body)
 
 
 class RecordingOpenSearchClient:
@@ -243,6 +244,13 @@ class ProductionControlTests(unittest.TestCase):
         self.assertEqual(count, 2)
         self.assertEqual(len(lexical_client.bulk_calls), 1)
         self.assertEqual(lexical_client.bulk_calls[0][0]["index"]["_id"], "atom-1")
+        source_mapping = lexical_client.indices.creation_bodies[0]["mappings"]["properties"]["source"]
+        self.assertFalse(source_mapping["dynamic"])
+        self.assertEqual(
+            set(source_mapping["properties"]),
+            {"title", "uri", "media_type", "adapter", "metadata"},
+        )
+        self.assertFalse(source_mapping["properties"]["metadata"]["enabled"])
 
         dense_client = RecordingQdrantClient()
         dense = QdrantDenseIndex("trace", client=dense_client)
