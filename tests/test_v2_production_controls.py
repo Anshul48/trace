@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import json
 import os
 import sys
 import unittest
 import uuid
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -15,7 +17,7 @@ from fastapi.testclient import TestClient
 
 from trace.v2.api import create_app
 from trace.v2.model_gateway import ModelGatewayPolicy, ModelPolicy
-from trace.v2.models import CortexReleaseCreateRequest, IngestionRequest, JobSubmitRequest
+from trace.v2.models import CortexReleaseCreateRequest, IngestionRequest, JobSubmitRequest, QueryRequest
 from trace.v2.pagination import PaginationError, decode_page_token, encode_page_token
 from trace.v2.production import NatsJetStreamPublisher, OpenSearchLexicalIndex, PostgresEventStore, QdrantDenseIndex
 from trace.v2.service import TraceService
@@ -205,6 +207,59 @@ class ProductionControlTests(unittest.TestCase):
         self.assertEqual(node["node_id"], str(node_id))
         self.assertEqual(version["node_id"], str(node_id))
         self.assertEqual(version["atom_version_id"], str(atom_version_id))
+
+    def test_postgres_cortex_release_boundaries_are_bundle_json_serializable(self) -> None:
+        release_id = uuid.uuid4()
+        parent_release_id = uuid.uuid4()
+        created_at = datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC)
+        activated_at = datetime(2024, 1, 2, 4, 5, 6, tzinfo=UTC)
+        superseded_at = datetime(2024, 1, 3, 5, 6, 7, tzinfo=UTC)
+        retired_at = datetime(2024, 1, 4, 6, 7, 8, tzinfo=UTC)
+        component = PostgresEventStore._pg_cortex_component_row({
+            "release_id": release_id,
+            "component_kind": "lexical_index",
+            "component_revision": "temporal-r1",
+            "carried_forward_from_release_id": parent_release_id,
+            "metadata": {"source": "postgres"},
+            "created_at": created_at,
+        })
+        release = PostgresEventStore._pg_cortex_release_row({
+            "release_id": release_id,
+            "workspace_id": "alpha",
+            "parent_release_id": parent_release_id,
+            "validation_receipt": {"passed": True},
+            "created_at": created_at,
+            "activated_at": activated_at,
+            "superseded_at": superseded_at,
+            "retired_at": retired_at,
+        }, components=[component])
+
+        self.assertEqual(release["release_id"], str(release_id))
+        self.assertEqual(release["parent_release_id"], str(parent_release_id))
+        self.assertEqual(release["created_at"], created_at.isoformat())
+        self.assertEqual(release["activated_at"], activated_at.isoformat())
+        self.assertEqual(release["superseded_at"], superseded_at.isoformat())
+        self.assertEqual(release["retired_at"], retired_at.isoformat())
+        self.assertEqual(component["release_id"], str(release_id))
+        self.assertEqual(component["carried_forward_from_release_id"], str(parent_release_id))
+        self.assertEqual(component["created_at"], created_at.isoformat())
+        json.dumps({
+            "results": [{"temporal": {"release_id": release["release_id"]}}],
+            "retrieval_diagnostics": {"release": release},
+        })
+
+        self.service.ingest(IngestionRequest(workspace_id="alpha", text="postgres release bundle evidence"))
+        with (
+            patch.object(self.service.store, "get_active_cortex_release", return_value=release),
+            patch.object(self.service.store, "get_cortex_release", return_value=release),
+        ):
+            response = self.service.query(QueryRequest(
+                workspace_id="alpha",
+                query="postgres release bundle evidence",
+            ))
+        self.assertTrue(response["results"])
+        self.assertEqual(response["results"][0]["temporal"]["release_id"], str(release_id))
+        json.dumps(response)
 
     def test_jobs_are_idempotent_and_retryable(self) -> None:
         first = self.service.submit_job(JobSubmitRequest(

@@ -3758,6 +3758,14 @@ class PostgresEventStore:
         if not row:
             raise NotFoundError("cortex release was not found")
         result = dict(row)
+        for key in ("release_id", "parent_release_id"):
+            value = result.get(key)
+            if value is not None:
+                result[key] = str(value)
+        for key in ("created_at", "activated_at", "superseded_at", "retired_at"):
+            value = result.get(key)
+            if hasattr(value, "isoformat"):
+                result[key] = value.isoformat()
         result["validation_receipt"] = cls._json_value(result.pop("validation_receipt", {}), {})
         if components is not None:
             result["components"] = components
@@ -3768,6 +3776,13 @@ class PostgresEventStore:
         if not row:
             raise NotFoundError("cortex release component was not found")
         result = dict(row)
+        for key in ("release_id", "carried_forward_from_release_id"):
+            value = result.get(key)
+            if value is not None:
+                result[key] = str(value)
+        value = result.get("created_at")
+        if hasattr(value, "isoformat"):
+            result["created_at"] = value.isoformat()
         result["metadata"] = cls._json_value(result.pop("metadata", {}), {})
         return result
 
