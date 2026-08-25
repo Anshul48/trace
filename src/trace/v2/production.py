@@ -422,6 +422,14 @@ class PostgresEventStore:
         if not row:
             return None
         result = dict(row)
+        for key in (
+            "atom_version_id",
+            "predecessor_atom_version_id",
+            "superseded_by_atom_version_id",
+        ):
+            value = result.get(key)
+            if value is not None:
+                result[key] = str(value)
         for key in ("valid_from", "valid_to", "created_at"):
             value = result.get(key)
             if hasattr(value, "isoformat"):

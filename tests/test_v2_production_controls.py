@@ -17,7 +17,13 @@ from fastapi.testclient import TestClient
 
 from trace.v2.api import create_app
 from trace.v2.model_gateway import ModelGatewayPolicy, ModelPolicy
-from trace.v2.models import CortexReleaseCreateRequest, IngestionRequest, JobSubmitRequest, QueryRequest
+from trace.v2.models import (
+    CortexReleaseCreateRequest,
+    IngestionRequest,
+    JobSubmitRequest,
+    QueryRequest,
+    SourceLifecycleRequest,
+)
 from trace.v2.pagination import PaginationError, decode_page_token, encode_page_token
 from trace.v2.production import NatsJetStreamPublisher, OpenSearchLexicalIndex, PostgresEventStore, QdrantDenseIndex
 from trace.v2.service import TraceService
@@ -260,6 +266,65 @@ class ProductionControlTests(unittest.TestCase):
         self.assertTrue(response["results"])
         self.assertEqual(response["results"][0]["temporal"]["release_id"], str(release_id))
         json.dumps(response)
+
+    def test_postgres_lifecycle_boundaries_are_service_and_api_json_serializable(self) -> None:
+        atom_version_id = uuid.uuid4()
+        predecessor_atom_version_id = uuid.uuid4()
+        successor_atom_version_id = uuid.uuid4()
+        changed_at = datetime(2024, 2, 3, 4, 5, 6, tzinfo=UTC)
+        lifecycle = PostgresEventStore._pg_lifecycle_row({
+            "atom_version_id": atom_version_id,
+            "workspace_id": "alpha",
+            "state": "superseded",
+            "valid_from": changed_at,
+            "valid_to": None,
+            "valid_precision": "day",
+            "valid_confidence": "explicit",
+            "valid_provenance": {"source": "postgres"},
+            "predecessor_atom_version_id": predecessor_atom_version_id,
+            "superseded_by_atom_version_id": successor_atom_version_id,
+            "changed_event_offset": 11,
+            "erasure_receipt": None,
+            "created_at": changed_at,
+        })
+        assert lifecycle is not None
+
+        self.assertEqual(lifecycle["atom_version_id"], str(atom_version_id))
+        self.assertEqual(
+            lifecycle["predecessor_atom_version_id"], str(predecessor_atom_version_id)
+        )
+        self.assertEqual(
+            lifecycle["superseded_by_atom_version_id"], str(successor_atom_version_id)
+        )
+        json.dumps(lifecycle)
+
+        request = SourceLifecycleRequest(
+            state="conflicted",
+            actor="reviewer",
+        )
+        with patch.object(
+            self.service.store,
+            "transition_source_lifecycle",
+            return_value=lifecycle,
+        ), patch.object(
+            self.service.store,
+            "atom_versions",
+            return_value=[{"workspace_id": "alpha"}],
+        ):
+            service_result = self.service.transition_source_lifecycle(str(atom_version_id), request)
+            self.assertEqual(
+                service_result["superseded_by_atom_version_id"], str(successor_atom_version_id)
+            )
+            json.dumps(service_result)
+            with TestClient(create_app(self.service)) as client:
+                response = client.post(
+                    f"/v2/atom-versions/{atom_version_id}/lifecycle",
+                    json=request.model_dump(mode="json"),
+                )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json()["superseded_by_atom_version_id"], str(successor_atom_version_id)
+        )
 
     def test_jobs_are_idempotent_and_retryable(self) -> None:
         first = self.service.submit_job(JobSubmitRequest(
