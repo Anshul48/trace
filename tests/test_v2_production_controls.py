@@ -17,7 +17,7 @@ from trace.v2.api import create_app
 from trace.v2.model_gateway import ModelGatewayPolicy, ModelPolicy
 from trace.v2.models import CortexReleaseCreateRequest, IngestionRequest, JobSubmitRequest
 from trace.v2.pagination import PaginationError, decode_page_token, encode_page_token
-from trace.v2.production import NatsJetStreamPublisher, OpenSearchLexicalIndex, QdrantDenseIndex
+from trace.v2.production import NatsJetStreamPublisher, OpenSearchLexicalIndex, PostgresEventStore, QdrantDenseIndex
 from trace.v2.service import TraceService
 from trace.v2.store import InvariantViolation, SqliteEventStore
 
@@ -114,12 +114,67 @@ class RecordingQdrantClient:
         self.delete_calls.append((collection_name, points_selector))
 
 
+class RecordingPgCursor:
+    def __init__(self, name: str | None) -> None:
+        self.name = name
+        self.executions: list[tuple[str, object]] = []
+
+    def __enter__(self):  # type: ignore[no-untyped-def]
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        return None
+
+    def execute(self, query: str, params: object = None) -> None:
+        self.executions.append((query, params))
+
+    def fetchmany(self, size: int) -> list[object]:
+        del size
+        return []
+
+
+class RecordingPgConnection:
+    def __init__(self) -> None:
+        self.cursors: list[RecordingPgCursor] = []
+
+    def cursor(self, name: str | None = None) -> RecordingPgCursor:
+        cursor = RecordingPgCursor(name)
+        self.cursors.append(cursor)
+        return cursor
+
+    def commit(self) -> None:
+        return None
+
+    def rollback(self) -> None:
+        return None
+
+    def close(self) -> None:
+        return None
+
+
 class ProductionControlTests(unittest.TestCase):
     def setUp(self) -> None:
         self.service = TraceService(SqliteEventStore(":memory:"), MemoryObjectStore())
 
     def tearDown(self) -> None:
         self.service.store.close()
+
+    def test_postgres_streaming_iterators_bind_rls_before_named_cursor(self) -> None:
+        connection = RecordingPgConnection()
+        store = PostgresEventStore(connection_factory=lambda: connection)
+
+        self.assertEqual(list(store.iter_indexable_atom_versions("alpha")), [])
+        self.assertEqual(list(store.iter_queryable_atoms("alpha")), [])
+
+        self.assertEqual(
+            [cursor.name for cursor in connection.cursors],
+            [None, "trace_indexable_atom_versions", None, "trace_current_atoms"],
+        )
+        for regular in (connection.cursors[0], connection.cursors[2]):
+            self.assertIn("set_config('trace.workspace_id'", regular.executions[0][0])
+            self.assertEqual(regular.executions[0][1], ("alpha",))
+        for named in (connection.cursors[1], connection.cursors[3]):
+            self.assertNotIn("set_config", named.executions[0][0])
 
     def test_jobs_are_idempotent_and_retryable(self) -> None:
         first = self.service.submit_job(JobSubmitRequest(

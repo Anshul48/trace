@@ -1157,8 +1157,14 @@ class PostgresEventStore:
             clauses.append("nv.created_event_offset<=%s")
             values.append(as_of_event)
         with self.connection() as conn:
+            # A named/server-side cursor defers executing SELECT expressions
+            # until rows are fetched.  Binding set_config through that cursor
+            # therefore leaves forced RLS unset when the streaming query is
+            # declared.  Establish the transaction-local workspace eagerly on
+            # a normal cursor before opening the bounded stream.
+            with conn.cursor() as workspace_cursor:
+                self._set_workspace(workspace_cursor, workspace_id)
             with conn.cursor(name="trace_indexable_atom_versions") as cursor:
-                self._set_workspace(cursor, workspace_id)
                 cursor.execute(
                     f"""SELECT nv.atom_version_id,nv.node_id,nv.version,nv.content,nv.properties,nv.content_hash,nv.created_event_offset,
                                n.workspace_id,n.facets,n.security
@@ -1189,8 +1195,9 @@ class PostgresEventStore:
             clauses.append("nv.created_event_offset<=%s")
             values.append(as_of_event)
         with self.connection() as conn:
+            with conn.cursor() as workspace_cursor:
+                self._set_workspace(workspace_cursor, workspace_id)
             with conn.cursor(name="trace_current_atoms") as cursor:
-                self._set_workspace(cursor, workspace_id)
                 cursor.execute(
                     f"""WITH ranked AS (
                         SELECT nv.atom_version_id,nv.node_id,nv.version,nv.content,nv.properties,nv.content_hash,nv.created_event_offset,
