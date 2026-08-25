@@ -200,7 +200,13 @@ class PostgresEventStore:
         for description in cursor.description:
             name = getattr(description, "name", None)
             columns.append(str(name if name is not None else description[0]))
-        return dict(zip(columns, row, strict=True))
+        return dict(
+            zip(
+                columns,
+                (str(val) if isinstance(val, uuid.UUID) else val for val in row),
+                strict=True,
+            )
+        )
 
     def _append_event_in_connection(
         self,
@@ -249,14 +255,14 @@ class PostgresEventStore:
                 (
                     event_id, workspace_id, stream_id, sequence, event_type, occurred_at,
                     actor, causation_id, correlation_id, schema_version,
-                    json.dumps(payload, sort_keys=True, separators=(",", ":")), payload_hash, idempotency_key,
+                    json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str), payload_hash, idempotency_key,
                 ),
             )
             offset = int(cursor.fetchone()[0])
             cursor.execute(
                 """INSERT INTO trace_outbox(event_offset,event_id,workspace_id,topic,payload,available_at)
                    VALUES (%s,%s,%s,%s,%s::jsonb,%s)""",
-                (offset, event_id, workspace_id, event_type, json.dumps({"event_id": event_id, "offset": offset, "payload": payload}), occurred_at),
+                (offset, event_id, workspace_id, event_type, json.dumps({"event_id": event_id, "offset": offset, "payload": payload}, default=str), occurred_at),
             )
             cursor.execute(
                 "INSERT INTO trace_event_keys(event_id,workspace_id,idempotency_key,event_offset,occurred_at) VALUES (%s,%s,%s,%s,%s)",
@@ -3376,6 +3382,12 @@ class PostgresEventStore:
         if not row:
             raise NotFoundError("projection run was not found")
         value = dict(row)
+        if value.get("projection_run_id") is not None:
+            value["projection_run_id"] = str(value["projection_run_id"])
+        if value.get("prior_projection_run_id") is not None:
+            value["prior_projection_run_id"] = str(value["prior_projection_run_id"])
+        if value.get("workspace_id") is not None:
+            value["workspace_id"] = str(value["workspace_id"])
         value["output_statistics"] = PostgresEventStore._json_value(value.pop("output_statistics"), {})
         return value
 
@@ -3443,7 +3455,7 @@ class PostgresEventStore:
             }
             if status not in allowed.get(str(run["status"]), set()):
                 raise InvariantViolation(f"projection run cannot transition from {run['status']} to {status}")
-            event = self._append_event_in_connection(conn, stream_id=f"workspace:{run['workspace_id']}", event_type=f"projection.run_{status}", payload={"projection_run_id": projection_run_id, "workspace_id": run["workspace_id"], "projection_kind": run["projection_kind"], "revision": run["revision"], "failure_detail": failure_detail}, actor=actor)
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{run['workspace_id']}", event_type=f"projection.run_{status}", payload={"projection_run_id": str(projection_run_id), "workspace_id": str(run["workspace_id"]), "projection_kind": str(run["projection_kind"]), "revision": str(run["revision"]), "failure_detail": failure_detail}, actor=actor)
             with conn.cursor() as cursor:
                 if status == "active":
                     cursor.execute("UPDATE trace_projection_runs SET status='superseded',updated_at=NOW() WHERE workspace_id=%s AND projection_kind=%s AND status='active' AND projection_run_id<>%s", (run["workspace_id"], run["projection_kind"], projection_run_id))
@@ -3503,7 +3515,14 @@ class PostgresEventStore:
         if not row:
             raise NotFoundError("projection object was not found")
         value = dict(row)
-        value["source_atom_version_ids"] = cls._json_value(value.pop("source_atom_version_ids"), [])
+        if value.get("projection_object_id") is not None:
+            value["projection_object_id"] = str(value["projection_object_id"])
+        if value.get("projection_run_id") is not None:
+            value["projection_run_id"] = str(value["projection_run_id"])
+        if value.get("workspace_id") is not None:
+            value["workspace_id"] = str(value["workspace_id"])
+        raw_sources = cls._json_value(value.pop("source_atom_version_ids"), [])
+        value["source_atom_version_ids"] = [str(x) for x in raw_sources] if isinstance(raw_sources, (list, tuple)) else []
         value["properties"] = cls._json_value(value.pop("properties"), {})
         return value
 
@@ -3656,7 +3675,7 @@ class PostgresEventStore:
                 visited.add(node)
             for object_id in sorted(ids):
                 visit(object_id)
-            event = self._append_event_in_connection(conn, stream_id=f"workspace:{run['workspace_id']}", event_type="projection.objects_written", payload={"projection_run_id": projection_run_id, "workspace_id": run["workspace_id"], "object_count": len(materialized), "membership_count": len(memberships)}, actor=actor)
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{run['workspace_id']}", event_type="projection.objects_written", payload={"projection_run_id": str(projection_run_id), "workspace_id": str(run["workspace_id"]), "object_count": len(materialized), "membership_count": len(memberships)}, actor=actor)
             with conn.cursor() as cursor:
                 for item in materialized:
                     cursor.execute("SELECT COUNT(*) FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id WHERE n.workspace_id=%s AND nv.atom_version_id = ANY(%s::uuid[])", (run["workspace_id"], item["source_atom_version_ids"]))
@@ -4231,7 +4250,7 @@ class PostgresEventStore:
                     right_degree = int(cursor.fetchone()[0])
                     if left_degree >= cap or right_degree >= cap:
                         return None
-            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="affinity.edge_upserted", payload={"workspace_id": workspace_id, "release_id": eff_release_id, "left_atom_version_id": left, "right_atom_version_id": right, "score": float(score), "projection_run_id": projection_run_id}, actor=actor)
+            event = self._append_event_in_connection(conn, stream_id=f"workspace:{workspace_id}", event_type="affinity.edge_upserted", payload={"workspace_id": str(workspace_id), "release_id": str(eff_release_id), "left_atom_version_id": str(left), "right_atom_version_id": str(right), "score": float(score), "projection_run_id": str(projection_run_id) if projection_run_id is not None else None}, actor=actor)
             identifier = str(existing[0]) if existing else str(uuid.uuid4())
             with conn.cursor() as cursor:
                 self._set_workspace(cursor, workspace_id)
