@@ -3769,9 +3769,10 @@ class PostgresEventStore:
                     raise NotFoundError(f"cortex release {release_id} was not found")
             event = self._append_event_in_connection(
                 conn, stream_id=f"workspace:{rel['workspace_id']}", event_type="cortex.release_failed",
-                payload={"release_id": release_id, "workspace_id": rel["workspace_id"], "failure_detail": failure_detail},
+                payload={"release_id": str(release_id), "workspace_id": rel["workspace_id"], "failure_detail": failure_detail},
                 actor=actor,
             )
+
             with conn.cursor() as cursor:
                 self._set_workspace(cursor, rel["workspace_id"])
                 cursor.execute("UPDATE trace_cortex_releases SET status='failed',failure_detail=%s WHERE release_id=%s", (failure_detail, release_id))
