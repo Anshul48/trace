@@ -3491,6 +3491,31 @@ class SqliteEventStore:
                 results.append(self._cortex_release_row(row, components=comps))
             return results
 
+    def cortex_component_revisions(
+        self,
+        workspace_id: str,
+        component_kinds: Sequence[str],
+    ) -> dict[str, list[str]]:
+        """List every immutable external component revision known to a workspace."""
+
+        kinds = list(dict.fromkeys(str(kind) for kind in component_kinds if kind))
+        result = {kind: [] for kind in kinds}
+        if not kinds:
+            return result
+        marks = ",".join("?" for _ in kinds)
+        with self._connect() as conn:
+            rows = conn.execute(
+                f"""SELECT component_kind,component_revision
+                      FROM cortex_release_components
+                     WHERE workspace_id=? AND component_kind IN ({marks})
+                     GROUP BY component_kind,component_revision
+                     ORDER BY component_kind,component_revision""",
+                [workspace_id, *kinds],
+            ).fetchall()
+        for row in rows:
+            result[str(row["component_kind"])].append(str(row["component_revision"]))
+        return result
+
     def record_cortex_component(
         self,
         release_id: str,
@@ -4088,11 +4113,18 @@ class SqliteEventStore:
         valid_from: datetime | str | None = None,
         valid_to: datetime | str | None = None,
     ) -> list[dict[str, Any]]:
+        valid_time_requested = any(value is not None for value in (valid_at, valid_from, valid_to))
         with self._connect() as conn:
-            rows = self._current_atom_rows(conn, workspace_id=workspace_id, as_of_event=as_of_event)
+            rows = self._current_atom_rows(
+                conn,
+                workspace_id=workspace_id,
+                as_of_event=as_of_event,
+                all_versions=valid_time_requested,
+            )
         atoms = [self._node_version_row(row, row) for row in rows]
-        return [
-            atom for atom in atoms
+        visible = [
+            atom
+            for atom in atoms
             if self.temporal_visibility(
                 atom,
                 as_of_event=as_of_event,
@@ -4101,6 +4133,48 @@ class SqliteEventStore:
                 valid_to=valid_to,
             )["visible"]
         ]
+        if not valid_time_requested:
+            return visible
+        selected: dict[str, dict[str, Any]] = {}
+        for atom in visible:
+            selected.setdefault(str(atom["node_id"]), atom)
+        return sorted(selected.values(), key=lambda item: int(item.get("created_event_offset", 0)), reverse=True)
+
+    def temporal_candidate_atoms(
+        self,
+        workspace_id: str | None,
+        as_of_event: int | None = None,
+    ) -> list[dict[str, Any]]:
+        """Return all immutable source versions eligible for valid-time policy checks."""
+
+        with self._connect() as conn:
+            rows = self._current_atom_rows(
+                conn,
+                workspace_id=workspace_id,
+                as_of_event=as_of_event,
+                all_versions=True,
+            )
+        return [self._node_version_row(row, row) for row in rows]
+
+    def iter_indexable_atom_versions(
+        self,
+        workspace_id: str | None,
+        as_of_event: int | None = None,
+        *,
+        batch_size: int = 1_000,
+    ) -> Iterator[dict[str, Any]]:
+        """Yield immutable, non-erased source versions for revision rebuilds."""
+
+        del batch_size
+        with self._connect() as conn:
+            rows = self._current_atom_rows(
+                conn,
+                workspace_id=workspace_id,
+                as_of_event=as_of_event,
+                all_versions=True,
+            )
+            atoms = [self._node_version_row(row, row) for row in rows]
+        yield from (atom for atom in atoms if atom.get("content"))
 
     def workspace_ids(self) -> list[str]:
         with self._connect() as conn:
@@ -4219,7 +4293,12 @@ class SqliteEventStore:
             return result
 
     def _current_atom_rows(
-        self, conn: sqlite3.Connection, *, workspace_id: str | None, as_of_event: int | None
+        self,
+        conn: sqlite3.Connection,
+        *,
+        workspace_id: str | None,
+        as_of_event: int | None,
+        all_versions: bool = False,
     ) -> list[sqlite3.Row]:
         where = ["n.facets_json LIKE '%\"atom\"%'"]
         args: list[Any] = []
@@ -4228,8 +4307,17 @@ class SqliteEventStore:
             args.append(workspace_id)
         event_clause = ""
         if as_of_event is not None:
-            event_clause = " AND nv2.created_event_offset <= ?"
+            event_clause = " AND nv.created_event_offset <= ?" if all_versions else " AND nv2.created_event_offset <= ?"
             args.append(as_of_event)
+        if all_versions:
+            sql = f"""
+                SELECT nv.*, n.workspace_id, n.facets_json, n.security_json
+                FROM node_versions nv
+                JOIN nodes n ON n.node_id=nv.node_id
+                WHERE {' AND '.join(where)} {event_clause}
+                ORDER BY nv.node_id, nv.version DESC, nv.created_event_offset DESC
+            """
+            return conn.execute(sql, args).fetchall()
         sql = f"""
             SELECT nv.*, n.workspace_id, n.facets_json, n.security_json
             FROM node_versions nv

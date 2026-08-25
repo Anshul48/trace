@@ -10,7 +10,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+from trace.v2.auth import AuthorizationContext, Principal
 from trace.v2.models import IngestionRequest, QueryRequest, ValidTimeMetadata
+from trace.v2.service import TEMPORAL_EXCLUSION_DETAIL_LIMIT
 from trace.v2.store import SqliteEventStore
 
 
@@ -97,6 +99,213 @@ class TemporalRevocationTests(unittest.TestCase):
         self.assertIn(original["atom_version_id"], historical_ids)
         self.assertIn(successor["atom_version_id"], current_ids)
         self.assertNotIn(original["atom_version_id"], current_ids)
+
+    def test_valid_time_selects_predecessor_before_current_version_filter(self) -> None:
+        january = datetime(2024, 1, 1, tzinfo=UTC)
+        june = datetime(2024, 6, 1, tzinfo=UTC)
+        december = datetime(2024, 12, 1, tzinfo=UTC)
+        original = self._ingest(
+            "historical price was ten",
+            temporal={
+                "valid_from": january.isoformat(),
+                "valid_to": june.isoformat(),
+                "precision": "day",
+                "confidence": "explicit",
+                "provenance": {"field": "effective_date"},
+            },
+        )
+        successor = self.store.edit_node(
+            node_id=original["node_id"],
+            content="historical price became twelve",
+            properties={
+                "temporal": {
+                    "valid_from": june.isoformat(),
+                    "valid_to": december.isoformat(),
+                    "precision": "day",
+                    "confidence": "explicit",
+                    "provenance": {"field": "effective_date"},
+                }
+            },
+            actor="editor",
+        )
+
+        before_boundary = self.store.queryable_atoms(
+            "alpha", valid_at=june - timedelta(seconds=1)
+        )
+        at_boundary = self.store.queryable_atoms("alpha", valid_at=june)
+
+        from trace.v2.service import TraceService
+
+        service = TraceService(self.store, object())
+        before_response = service.query(
+            QueryRequest(
+                workspace_id="alpha",
+                query="historical price",
+                valid_at=june - timedelta(seconds=1),
+            )
+        )
+        boundary_response = service.query(
+            QueryRequest(workspace_id="alpha", query="historical price", valid_at=june)
+        )
+
+        self.assertIn(original["atom_version_id"], {item["atom_version_id"] for item in before_boundary})
+        self.assertNotIn(successor["atom_version_id"], {item["atom_version_id"] for item in before_boundary})
+        self.assertIn(successor["atom_version_id"], {item["atom_version_id"] for item in at_boundary})
+        self.assertNotIn(original["atom_version_id"], {item["atom_version_id"] for item in at_boundary})
+        self.assertIn(original["atom_version_id"], {item["atom_version_id"] for item in before_response["results"]})
+        self.assertNotIn(successor["atom_version_id"], {item["atom_version_id"] for item in before_response["results"]})
+        self.assertIn(successor["atom_version_id"], {item["atom_version_id"] for item in boundary_response["results"]})
+        self.assertNotIn(original["atom_version_id"], {item["atom_version_id"] for item in boundary_response["results"]})
+
+    def test_temporal_bundle_retains_source_revision_and_exclusion_metadata(self) -> None:
+        from trace.v2.service import TraceService
+
+        start = datetime(2024, 1, 1, tzinfo=UTC)
+        end = datetime(2024, 2, 1, tzinfo=UTC)
+        dated = self._ingest(
+            "temporal marker dated",
+            temporal={
+                "valid_from": start.isoformat(),
+                "valid_to": end.isoformat(),
+                "precision": "month",
+                "confidence": "explicit",
+                "provenance": {"field": "source"},
+            },
+        )
+        unknown = self._ingest("temporal marker unknown")
+        response = TraceService(self.store, object()).query(
+            QueryRequest(
+                workspace_id="alpha",
+                query="temporal marker",
+                valid_at=start + timedelta(days=1),
+            )
+        )
+
+        result = next(item for item in response["results"] if item["atom_version_id"] == dated["atom_version_id"])
+        self.assertEqual(result["source_revision"], dated["atom_version_id"])
+        self.assertEqual(result["temporal"]["requested_valid_at"], (start + timedelta(days=1)).isoformat())
+        self.assertEqual(result["temporal"]["provenance"], {"field": "source"})
+        exclusions = response["retrieval_diagnostics"]["temporal_exclusion_details"]
+        exclusion = next(item for item in exclusions if item["source_revision"] == unknown["atom_version_id"])
+        self.assertEqual(exclusion["exclusion_reason"], "valid_time_unknown_or_partial")
+        self.assertEqual(exclusion["policy_result"], "excluded")
+        self.assertIn("release_id", exclusion)
+
+    def test_unauthorized_temporal_exclusion_is_aggregate_only_in_response_and_bundle(self) -> None:
+        marker = "never-disclose-this-provenance"
+        source = self._ingest(
+            "unauthorized temporal secret",
+            temporal={
+                "valid_from": "2024-01-01T00:00:00+00:00",
+                "valid_to": "2024-02-01T00:00:00+00:00",
+                "precision": "day",
+                "confidence": "explicit",
+                "provenance": {"marker": marker},
+            },
+        )
+        context = AuthorizationContext(
+            principal=Principal(
+                subject="public-only",
+                auth_method="test",
+                workspace_ids=frozenset({"alpha"}),
+                allowed_visibility=frozenset({"public"}),
+            ),
+            workspace_id="alpha",
+            allowed_visibility=frozenset({"public"}),
+        )
+
+        from trace.v2.service import TraceService
+
+        response = TraceService(self.store, object()).query(
+            QueryRequest(
+                workspace_id="alpha",
+                query="unauthorized temporal secret",
+                valid_at=datetime(2025, 1, 1, tzinfo=UTC),
+            ),
+            authorization_context=context,
+        )
+        diagnostics = response["retrieval_diagnostics"]
+        self.assertEqual(diagnostics["temporal_exclusions"], {"current_authorization_denied": 1})
+        self.assertEqual(diagnostics["temporal_exclusion_details"], [])
+        self.assertFalse(diagnostics["temporal_exclusion_details_truncated"])
+        persisted = self.store.get_bundle(response["evidence_bundle_id"])
+        serialized = json.dumps(persisted["query"]["retrieval_diagnostics"], sort_keys=True)
+        self.assertNotIn(str(source["atom_version_id"]), serialized)
+        self.assertNotIn(marker, serialized)
+
+    def test_authorized_temporal_exclusion_details_are_bounded_with_exact_aggregates(self) -> None:
+        total = TEMPORAL_EXCLUSION_DETAIL_LIMIT + 5
+        for index in range(total):
+            self._ingest(f"bounded unknown temporal {index}")
+
+        from trace.v2.service import TraceService
+
+        response = TraceService(self.store, object()).query(
+            QueryRequest(
+                workspace_id="alpha",
+                query="bounded unknown temporal",
+                valid_at=datetime(2025, 1, 1, tzinfo=UTC),
+            )
+        )
+        diagnostics = response["retrieval_diagnostics"]
+        self.assertEqual(diagnostics["temporal_exclusions"]["valid_time_unknown_or_partial"], total)
+        self.assertEqual(len(diagnostics["temporal_exclusion_details"]), TEMPORAL_EXCLUSION_DETAIL_LIMIT)
+        self.assertTrue(diagnostics["temporal_exclusion_details_truncated"])
+        self.assertEqual(diagnostics["temporal_exclusion_details_omitted_count"], 5)
+        persisted = self.store.get_bundle(response["evidence_bundle_id"])
+        stored = persisted["query"]["retrieval_diagnostics"]
+        self.assertEqual(stored["temporal_exclusions"]["valid_time_unknown_or_partial"], total)
+        self.assertEqual(stored["temporal_exclusion_details_omitted_count"], 5)
+
+    def test_revision_rebuild_retains_immutable_predecessor_versions(self) -> None:
+        from trace.v2.service import TraceService
+
+        original = self._ingest("revision rebuild predecessor")
+        successor = self.store.edit_node(
+            node_id=original["node_id"],
+            content="revision rebuild successor",
+            properties={},
+            actor="editor",
+        )
+
+        class RecordingIndex:
+            def __init__(self) -> None:
+                self.atom_ids: list[str] = []
+
+            def upsert(self, documents: list[dict[str, object]], *, revision: str) -> int:
+                del revision
+                self.atom_ids.extend(str(item["atom_version_id"]) for item in documents)
+                return len(documents)
+
+        service = TraceService(self.store, object())
+        recording = RecordingIndex()
+        service.retrieval_engine.lexical_index = recording
+        indexed = service.rebuild_lexical_index("alpha", revision="temporal-r1")
+
+        dense_ids: list[str] = []
+
+        def record_dense(
+            workspace_id: str,
+            atoms: list[dict[str, object]],
+            *,
+            actor: str,
+            revision: str,
+        ) -> int:
+            self.assertEqual(workspace_id, "alpha")
+            self.assertEqual(actor, "system")
+            self.assertEqual(revision, "temporal-r1")
+            dense_ids.extend(str(item["atom_version_id"]) for item in atoms)
+            return len(atoms)
+
+        service._index_atom_batch = record_dense  # type: ignore[method-assign]
+        dense_indexed = service.rebuild_dense_index("alpha", revision="temporal-r1")
+
+        self.assertGreaterEqual(indexed, 2)
+        self.assertGreaterEqual(dense_indexed, 2)
+        self.assertIn(original["atom_version_id"], recording.atom_ids)
+        self.assertIn(successor["atom_version_id"], recording.atom_ids)
+        self.assertIn(original["atom_version_id"], dense_ids)
+        self.assertIn(successor["atom_version_id"], dense_ids)
 
     def test_contradiction_is_explicit_and_does_not_make_assertions_unreadable(self) -> None:
         left = self._ingest("left assertion")

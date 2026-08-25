@@ -363,7 +363,15 @@ class PostgresEventStore:
     def _pg_anchor_rows(cls, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         return [dict(row) for row in rows]
 
-    def _pg_atoms_query(self, cursor: Any, *, workspace_id: str | None, as_of_event: int | None, atom_ids: Sequence[str] | None = None) -> list[dict[str, Any]]:
+    def _pg_atoms_query(
+        self,
+        cursor: Any,
+        *,
+        workspace_id: str | None,
+        as_of_event: int | None,
+        atom_ids: Sequence[str] | None = None,
+        all_versions: bool = False,
+    ) -> list[dict[str, Any]]:
         clauses = ["n.facets @> '[\"atom\"]'::jsonb"]
         values: list[Any] = []
         if workspace_id is not None:
@@ -383,6 +391,16 @@ class PostgresEventStore:
                            n.workspace_id,n.facets,n.security
                     FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id
                     WHERE {' AND '.join(clauses)} ORDER BY nv.created_event_offset DESC""",
+                values,
+            )
+            return [self._pg_atom_row(self._cursor_mapping(cursor, row) or {}) for row in cursor.fetchall()]
+        if all_versions:
+            cursor.execute(
+                f"""SELECT nv.atom_version_id,nv.node_id,nv.version,nv.content,nv.properties,nv.content_hash,nv.created_event_offset,
+                           n.workspace_id,n.facets,n.security
+                    FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id
+                    WHERE {' AND '.join(clauses)}
+                    ORDER BY nv.node_id,nv.version DESC,nv.created_event_offset DESC""",
                 values,
             )
             return [self._pg_atom_row(self._cursor_mapping(cursor, row) or {}) for row in cursor.fetchall()]
@@ -853,12 +871,19 @@ class PostgresEventStore:
                 )
             except TypeError:
                 return self.delegate.queryable_atoms(workspace_id, as_of_event)
+        valid_time_requested = any(value is not None for value in (valid_at, valid_from, valid_to))
         with self.connection() as conn:
             with conn.cursor() as cursor:
                 self._set_workspace(cursor, workspace_id)
-                atoms = self._pg_atoms_query(cursor, workspace_id=workspace_id, as_of_event=as_of_event)
-        return [
-            atom for atom in atoms
+                atoms = self._pg_atoms_query(
+                    cursor,
+                    workspace_id=workspace_id,
+                    as_of_event=as_of_event,
+                    all_versions=valid_time_requested,
+                )
+        visible = [
+            atom
+            for atom in atoms
             if self.temporal_visibility(
                 atom,
                 as_of_event=as_of_event,
@@ -867,6 +892,74 @@ class PostgresEventStore:
                 valid_to=valid_to,
             )["visible"]
         ]
+        if not valid_time_requested:
+            return visible
+        # Valid-time is orthogonal to system/event time. Select the newest
+        # immutable version that is valid at the requested real-world time,
+        # rather than selecting today's version and filtering it afterwards.
+        selected: dict[str, dict[str, Any]] = {}
+        for atom in visible:
+            selected.setdefault(str(atom["node_id"]), atom)
+        return sorted(selected.values(), key=lambda item: int(item.get("created_event_offset", 0)), reverse=True)
+
+    def temporal_candidate_atoms(
+        self,
+        workspace_id: str | None,
+        as_of_event: int | None = None,
+    ) -> list[dict[str, Any]]:
+        """Return all immutable source versions eligible for valid-time policy checks."""
+
+        if self.delegate is not None and hasattr(self.delegate, "temporal_candidate_atoms"):
+            return self.delegate.temporal_candidate_atoms(workspace_id, as_of_event)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                return self._pg_atoms_query(
+                    cursor,
+                    workspace_id=workspace_id,
+                    as_of_event=as_of_event,
+                    all_versions=True,
+                )
+
+    def iter_indexable_atom_versions(
+        self,
+        workspace_id: str | None,
+        as_of_event: int | None = None,
+        *,
+        batch_size: int = 1_000,
+    ) -> Iterator[dict[str, Any]]:
+        """Stream immutable source versions retained by a revisioned index."""
+
+        if self.delegate is not None and hasattr(self.delegate, "iter_indexable_atom_versions"):
+            yield from self.delegate.iter_indexable_atom_versions(
+                workspace_id, as_of_event, batch_size=batch_size
+            )
+            return
+        clauses = ["n.facets @> '[\"atom\"]'::jsonb", "nv.content<>''"]
+        values: list[Any] = []
+        if workspace_id is not None:
+            clauses.append("n.workspace_id=%s")
+            values.append(workspace_id)
+        if as_of_event is not None:
+            clauses.append("nv.created_event_offset<=%s")
+            values.append(as_of_event)
+        with self.connection() as conn:
+            with conn.cursor(name="trace_indexable_atom_versions") as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(
+                    f"""SELECT nv.atom_version_id,nv.node_id,nv.version,nv.content,nv.properties,nv.content_hash,nv.created_event_offset,
+                               n.workspace_id,n.facets,n.security
+                        FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id
+                        WHERE {' AND '.join(clauses)}
+                        ORDER BY nv.created_event_offset,nv.atom_version_id""",
+                    values,
+                )
+                while True:
+                    rows = cursor.fetchmany(max(1, min(int(batch_size), 10_000)))
+                    if not rows:
+                        break
+                    for row in rows:
+                        yield self._pg_atom_row(self._cursor_mapping(cursor, row) or {})
 
     def iter_queryable_atoms(self, workspace_id: str | None, as_of_event: int | None = None, *, batch_size: int = 1_000) -> Iterator[dict[str, Any]]:
         """Stream current source atoms so rebuild workers do not materialize a tenant."""
@@ -3633,6 +3726,34 @@ class PostgresEventStore:
                     results.append(self._pg_cortex_release_row(row, components=comps))
                 return results
 
+    def cortex_component_revisions(
+        self,
+        workspace_id: str,
+        component_kinds: Sequence[str],
+    ) -> dict[str, list[str]]:
+        """List every immutable external component revision known to a workspace."""
+
+        if self.delegate is not None and hasattr(self.delegate, "cortex_component_revisions"):
+            return self.delegate.cortex_component_revisions(workspace_id, component_kinds)
+        kinds = list(dict.fromkeys(str(kind) for kind in component_kinds if kind))
+        result = {kind: [] for kind in kinds}
+        if not kinds:
+            return result
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(
+                    """SELECT component_kind,component_revision
+                         FROM trace_cortex_release_components
+                        WHERE workspace_id=%s AND component_kind=ANY(%s)
+                        GROUP BY component_kind,component_revision
+                        ORDER BY component_kind,component_revision""",
+                    (workspace_id, kinds),
+                )
+                for kind, revision in cursor.fetchall():
+                    result[str(kind)].append(str(revision))
+        return result
+
     def record_cortex_component(self, release_id: str, *, component_kind: str, component_revision: str, input_checksum: str, source_watermark: int, carried_forward_from_release_id: str | None = None, validation_status: str = "pending", metadata: dict[str, Any] | None = None) -> dict[str, Any]:
         if self.delegate is not None and hasattr(self.delegate, "record_cortex_component"):
             return self.delegate.record_cortex_component(release_id, component_kind=component_kind, component_revision=component_revision, input_checksum=input_checksum, source_watermark=source_watermark, carried_forward_from_release_id=carried_forward_from_release_id, validation_status=validation_status, metadata=metadata)
@@ -4177,10 +4298,19 @@ class OpenSearchLexicalIndex:
             raise ValueError("index revision must contain a letter or digit")
         return token[:96]
 
+    @classmethod
+    def _logical_revision(cls, revision: str) -> str:
+        value = str(revision)
+        if "--rev-" in value:
+            raise ValueError("OpenSearch revision must be a logical component revision, not a physical index name")
+        cls._revision_token(value)
+        return value
+
     def revision_index(self, revision: str) -> str:
         """Return the immutable physical index behind a logical revision."""
 
-        return f"{self.index}--rev-{self._revision_token(revision)}"
+        logical = self._logical_revision(revision)
+        return f"{self.index}--rev-{self._revision_token(logical)}"
 
     def create_revision(self, revision: str, *, vector_size: int | None = None) -> str:
         """Create a physical, immutable OpenSearch revision if absent."""
@@ -4244,7 +4374,8 @@ class OpenSearchLexicalIndex:
             "query": {"bool": {"must": [{"multi_match": {"query": query, "fields": ["content^2", "title", "source.uri"]}}], "filter": self._filters(workspace_id, visibility, facets, as_of_event, index_revision)}},
             "_source": True,
         }
-        response = self.client.search(index=self.index, body=body)
+        target = self.revision_index(index_revision) if index_revision else self.index
+        response = self.client.search(index=target, body=body)
         hits = response.get("hits", {}).get("hits", [])
         return [{**hit.get("_source", {}), "atom_version_id": hit.get("_id"), "lexical_score": float(hit.get("_score") or 0.0)} for hit in hits]
 
@@ -4328,7 +4459,7 @@ class OpenSearchLexicalIndex:
             pass
 
     def delete_atom(self, atom_version_id: str, *, revision: str) -> None:
-        target = revision if "--rev-" in revision else self.revision_index(revision)
+        target = self.revision_index(revision)
         try:
             self.client.delete(index=target, id=str(atom_version_id), refresh=True)
         except Exception as error:
@@ -4337,7 +4468,7 @@ class OpenSearchLexicalIndex:
                 raise ProductionAdapterError(f"failed to delete atom {atom_version_id} from OpenSearch {target}: {error}") from error
 
     def verify_atom_absent(self, atom_version_id: str, *, revision: str) -> bool:
-        target = revision if "--rev-" in revision else self.revision_index(revision)
+        target = self.revision_index(revision)
         try:
             return not bool(self.client.exists(index=target, id=str(atom_version_id)))
         except Exception as error:
@@ -4384,8 +4515,17 @@ class QdrantDenseIndex:
             raise ValueError("vector revision must contain a letter or digit")
         return token[:96]
 
+    @classmethod
+    def _logical_revision(cls, revision: str) -> str:
+        value = str(revision)
+        if "--rev-" in value:
+            raise ValueError("Qdrant revision must be a logical component revision, not a physical collection name")
+        cls._revision_token(value)
+        return value
+
     def revision_collection(self, revision: str) -> str:
-        return f"{self.collection}--rev-{self._revision_token(revision)}"
+        logical = self._logical_revision(revision)
+        return f"{self.collection}--rev-{self._revision_token(logical)}"
 
     def create_revision(self, revision: str, *, vector_size: int | None = None) -> str:
         """Create a revision collection plus mandatory tenant payload indexes."""
@@ -4454,11 +4594,12 @@ class QdrantDenseIndex:
 
     def search(self, *, workspace_id: str, vector: Sequence[float], limit: int, visibility: Sequence[str] | None = None, facets: Sequence[str] | None = None, as_of_event: int | None = None, index_revision: str | None = None) -> list[dict[str, Any]]:
         query_filter = self._filter(workspace_id, visibility, facets, as_of_event, index_revision)
+        target = self.revision_collection(index_revision) if index_revision else self.collection
         if hasattr(self.client, "query_points"):
-            response = self.client.query_points(collection_name=self.collection, query=list(vector), query_filter=query_filter, limit=max(1, min(limit, 1_000)), with_payload=True)
+            response = self.client.query_points(collection_name=target, query=list(vector), query_filter=query_filter, limit=max(1, min(limit, 1_000)), with_payload=True)
             points = response.get("points", []) if isinstance(response, dict) else getattr(response, "points", response)
         else:  # qdrant-client versions before query_points
-            points = self.client.search(collection_name=self.collection, query_vector=list(vector), query_filter=query_filter, limit=max(1, min(limit, 1_000)), with_payload=True)
+            points = self.client.search(collection_name=target, query_vector=list(vector), query_filter=query_filter, limit=max(1, min(limit, 1_000)), with_payload=True)
         output: list[dict[str, Any]] = []
         for point in points:
             if isinstance(point, dict):
@@ -4542,8 +4683,9 @@ class QdrantDenseIndex:
             pass
 
     def delete_atom(self, atom_version_id: str, *, revision: str) -> None:
-        target = revision if "--rev-" in revision else self.revision_collection(revision)
-        point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"trace:qdrant:{atom_version_id}:{revision}"))
+        logical_revision = self._logical_revision(revision)
+        target = self.revision_collection(logical_revision)
+        point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"trace:qdrant:{atom_version_id}:{logical_revision}"))
         try:
             try:
                 from qdrant_client.models import PointIdsList
@@ -4554,8 +4696,9 @@ class QdrantDenseIndex:
             raise ProductionAdapterError(f"failed to delete atom {atom_version_id} from Qdrant {target}: {error}") from error
 
     def verify_atom_absent(self, atom_version_id: str, *, revision: str) -> bool:
-        target = revision if "--rev-" in revision else self.revision_collection(revision)
-        point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"trace:qdrant:{atom_version_id}:{revision}"))
+        logical_revision = self._logical_revision(revision)
+        target = self.revision_collection(logical_revision)
+        point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"trace:qdrant:{atom_version_id}:{logical_revision}"))
         try:
             res = self.client.retrieve(collection_name=target, ids=[point_id])
             return len(res) == 0

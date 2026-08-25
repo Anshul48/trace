@@ -5,6 +5,7 @@ import hashlib
 import os
 import sys
 import unittest
+import uuid
 from pathlib import Path
 from unittest.mock import patch
 
@@ -14,11 +15,11 @@ from fastapi.testclient import TestClient
 
 from trace.v2.api import create_app
 from trace.v2.model_gateway import ModelGatewayPolicy, ModelPolicy
-from trace.v2.models import IngestionRequest, JobSubmitRequest
+from trace.v2.models import CortexReleaseCreateRequest, IngestionRequest, JobSubmitRequest
 from trace.v2.pagination import PaginationError, decode_page_token, encode_page_token
 from trace.v2.production import NatsJetStreamPublisher, OpenSearchLexicalIndex, QdrantDenseIndex
 from trace.v2.service import TraceService
-from trace.v2.store import SqliteEventStore
+from trace.v2.store import InvariantViolation, SqliteEventStore
 
 
 class MemoryObjectStore:
@@ -68,11 +69,16 @@ class RecordingOpenSearchClient:
     def __init__(self) -> None:
         self.indices = RecordingOpenSearchIndices()
         self.bulk_calls: list[list[dict]] = []
+        self.search_calls: list[tuple[str, dict]] = []
 
     def bulk(self, *, body: list[dict], refresh: bool) -> dict[str, object]:
         self.bulk_calls.append(body)
         self.asserted_refresh = refresh
         return {"errors": False}
+
+    def search(self, *, index: str, body: dict) -> dict[str, object]:
+        self.search_calls.append((index, body))
+        return {"hits": {"hits": []}}
 
 
 class RecordingQdrantClient:
@@ -80,6 +86,8 @@ class RecordingQdrantClient:
         self.collections: list[str] = []
         self.payload_indexes: list[str] = []
         self.upsert_batches: list[list[object]] = []
+        self.search_calls: list[tuple[str, object]] = []
+        self.delete_calls: list[tuple[str, object]] = []
 
     def collection_exists(self, collection: str) -> bool:
         return collection in self.collections
@@ -95,6 +103,15 @@ class RecordingQdrantClient:
     def upsert(self, *, collection_name: str, points: list[object], wait: bool) -> None:
         del collection_name, wait
         self.upsert_batches.append(points)
+
+    def query_points(self, *, collection_name: str, query: list[float], query_filter: object, limit: int, with_payload: bool) -> dict[str, object]:
+        del query, limit, with_payload
+        self.search_calls.append((collection_name, query_filter))
+        return {"points": []}
+
+    def delete(self, *, collection_name: str, points_selector: object, wait: bool) -> None:
+        del wait
+        self.delete_calls.append((collection_name, points_selector))
 
 
 class ProductionControlTests(unittest.TestCase):
@@ -181,6 +198,85 @@ class ProductionControlTests(unittest.TestCase):
             ], revision="current")
         self.assertEqual(count, 2)
         self.assertEqual(len(dense_client.upsert_batches), 2)
+
+    def test_revision_aware_search_targets_historical_physical_indexes(self) -> None:
+        lexical_client = RecordingOpenSearchClient()
+        lexical = OpenSearchLexicalIndex("trace", client=lexical_client)
+        lexical.search(
+            workspace_id="alpha",
+            query="historical",
+            limit=10,
+            as_of_event=42,
+            index_revision="history-v1",
+        )
+        self.assertEqual(lexical_client.search_calls[0][0], "trace--rev-history-v1")
+        lexical_filters = lexical_client.search_calls[0][1]["query"]["bool"]["filter"]
+        self.assertIn({"term": {"index_revision": "history-v1"}}, lexical_filters)
+        self.assertIn({"range": {"created_event_offset": {"lte": 42}}}, lexical_filters)
+
+        dense_client = RecordingQdrantClient()
+        dense = QdrantDenseIndex("trace", client=dense_client)
+        dense.search(
+            workspace_id="alpha",
+            vector=[0.1, 0.2],
+            limit=10,
+            as_of_event=42,
+            index_revision="history-v1",
+        )
+        self.assertEqual(dense_client.search_calls[0][0], "trace--rev-history-v1")
+        dense_filter = dense_client.search_calls[0][1]
+        self.assertIn(
+            {"key": "index_revision", "match": {"value": "history-v1"}},
+            dense_filter["must"],
+        )
+        dense.delete_atom("atom-1", revision="history-v1")
+        delete_collection, selector = dense_client.delete_calls[0]
+        selector_ids = getattr(selector, "points", selector)
+        self.assertEqual(delete_collection, "trace--rev-history-v1")
+        self.assertEqual(
+            list(selector_ids),
+            [str(uuid.uuid5(uuid.NAMESPACE_URL, "trace:qdrant:atom-1:history-v1"))],
+        )
+        with self.assertRaisesRegex(ValueError, "logical component revision"):
+            lexical.search(
+                workspace_id="alpha",
+                query="ambiguous",
+                limit=1,
+                index_revision="trace--rev-history-v1",
+            )
+        with self.assertRaisesRegex(ValueError, "logical component revision"):
+            dense.search(
+                workspace_id="alpha",
+                vector=[0.1, 0.2],
+                limit=1,
+                index_revision="trace--rev-history-v1",
+            )
+        with self.assertRaisesRegex(ValueError, "logical component revision"):
+            dense.delete_atom("atom-1", revision="trace--rev-history-v1")
+        with self.assertRaises(InvariantViolation):
+            self.service.create_cortex_release(
+                CortexReleaseCreateRequest(
+                    workspace_id="alpha",
+                    components=[{
+                        "component_kind": "dense_index",
+                        "component_revision": "trace--rev-history-v1",
+                    }],
+                )
+            )
+        logical_release = self.service.create_cortex_release(
+            CortexReleaseCreateRequest(
+                workspace_id="alpha",
+                components=[{
+                    "component_kind": "dense_index",
+                    "component_revision": "history-v1",
+                }],
+            )
+        )
+        dense_component = next(
+            item for item in logical_release["components"]
+            if item["component_kind"] == "dense_index"
+        )
+        self.assertEqual(dense_component["component_revision"], "history-v1")
 
 
 if __name__ == "__main__":

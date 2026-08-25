@@ -49,6 +49,7 @@ class MockRevisionedIndex:
         self.revisions: dict[str, set[str]] = {}
         self.activate_should_raise = False
         self.delete_atom_should_raise = False
+        self.delete_calls: list[tuple[str, str]] = []
 
     def get_active_alias(self, alias: str | None = None) -> str | None:
         return self.aliases.get(alias or self.name)
@@ -68,6 +69,7 @@ class MockRevisionedIndex:
         self.aliases.pop(alias, None)
 
     def delete_atom(self, atom_version_id: str, *, revision: str) -> None:
+        self.delete_calls.append((atom_version_id, revision))
         if self.delete_atom_should_raise:
             raise RuntimeError(f"simulated {self.name} delete error")
         if revision in self.revisions:
@@ -211,6 +213,55 @@ def test_erasure_fail_closed_on_head_500_error(store: SqliteEventStore, signing_
 
     op = store.get_erasure_operation("ws-1", atom_id)
     assert op["state"] == "retryable_failure"
+
+
+def test_erasure_deletes_atom_from_every_known_external_revision(store: SqliteEventStore, signing_key: str) -> None:
+    mock_obj = MockObjectStore()
+    lexical = MockRevisionedIndex("lexical")
+    dense = MockRevisionedIndex("dense")
+    retrieval = type("LiveRetrieval", (), {"lexical_index": lexical, "dense_index": dense})()
+    service = TraceService(store=store, object_store=mock_obj, retrieval_engine=retrieval)
+
+    obj_info = mock_obj.put_bytes(b"multi revision erasure", "text/plain", workspace_id="ws-1")
+    atom_id = _ingest_atom(store, "ws-1", "multi revision erasure", object_key=obj_info["object_key"])
+    for ordinal in (1, 2):
+        store.create_cortex_release(
+            workspace_id="ws-1",
+            components=[
+                {"component_kind": "lexical_index", "component_revision": f"lex-v{ordinal}"},
+                {"component_kind": "dense_index", "component_revision": f"dense-v{ordinal}"},
+            ],
+            actor="test",
+        )
+        lexical.revisions[f"lex-v{ordinal}"] = {atom_id}
+        dense.revisions[f"dense-v{ordinal}"] = {atom_id}
+
+    result = service.erase_source(atom_id, SourceErasureRequest(actor="compliance"))
+
+    assert result["state"] == "redacted_purged"
+    for revision in ("lex-v1", "lex-v2"):
+        assert (atom_id, revision) in lexical.delete_calls
+        assert lexical.verify_atom_absent(atom_id, revision=revision)
+    for revision in ("dense-v1", "dense-v2"):
+        assert (atom_id, revision) in dense.delete_calls
+        assert dense.verify_atom_absent(atom_id, revision=revision)
+
+
+def test_erasure_fails_closed_without_object_absence_capability(store: SqliteEventStore, signing_key: str) -> None:
+    class DeleteOnlyObjectStore:
+        def delete_object(self, object_key: str) -> dict[str, Any]:
+            return {"deleted": True, "object_key": object_key}
+
+    atom_id = _ingest_atom(store, "ws-1", "capability required", object_key="objects/source")
+    service = TraceService(store=store, object_store=DeleteOnlyObjectStore())
+
+    with pytest.raises(InvariantViolation, match="absence-verification capabilities"):
+        service.erase_source(atom_id, SourceErasureRequest(actor="compliance"))
+
+    operation = store.get_erasure_operation("ws-1", atom_id)
+    assert operation is not None
+    assert operation["state"] == "retryable_failure"
+    assert store.atom_versions([atom_id])[0]["content"] == "capability required"
 
 
 def test_release_activation_with_rollback_compensation(store: SqliteEventStore) -> None:

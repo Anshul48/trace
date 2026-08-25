@@ -64,6 +64,8 @@ class TraceV2CognitiveTests(unittest.TestCase):
         derived = [item for item in hierarchy["results"] if item["candidate_kind"] == "derived"]
         self.assertTrue(derived)
         self.assertTrue(derived[0]["source_atom_version_ids"])
+        self.assertIsNone(derived[0]["source_revision"])
+        self.assertEqual(derived[0]["source_revisions"], derived[0]["source_atom_version_ids"])
         self.assertTrue(any(item["atom_version_id"] == atoms[2]["atom_version_id"] for item in hierarchy["results"]))
 
     def test_graph_ppr_uses_typed_evidence_edges(self) -> None:

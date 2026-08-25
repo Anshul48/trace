@@ -65,6 +65,7 @@ from .cortex import canonical_pair
 
 _TOKEN = re.compile(r"[\w][\w'-]*", re.UNICODE)
 _STOPWORDS = frozenset({"a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "in", "is", "it", "of", "on", "or", "that", "the", "to", "with"})
+TEMPORAL_EXCLUSION_DETAIL_LIMIT = 64
 
 
 def _tokens(text: str) -> list[str]:
@@ -770,22 +771,42 @@ class TraceService:
         lexical_idx = getattr(self.retrieval_engine, "lexical_index", None)
         dense_idx = getattr(self.retrieval_engine, "dense_index", None)
 
-        if hasattr(self.store, "get_active_cortex_release"):
-            active_rel = self.store.get_active_cortex_release(workspace_id)
-            if active_rel:
-                raw_comps = active_rel.get("components")
-                if isinstance(raw_comps, list):
-                    comp_map = {c.get("component_kind"): c.get("component_revision") for c in raw_comps if isinstance(c, dict)}
-                elif isinstance(raw_comps, dict):
-                    comp_map = raw_comps
-                else:
-                    comp_map = {}
-                lex_rev = comp_map.get("lexical_index") or active_rel.get("properties", {}).get("lexical_revision")
-                dense_rev = comp_map.get("dense_index") or active_rel.get("properties", {}).get("dense_revision")
-                if lex_rev and lexical_idx:
-                    external_targets.append({"type": "opensearch", "target": lex_rev})
-                if dense_rev and dense_idx:
-                    external_targets.append({"type": "qdrant", "target": dense_rev})
+        # Erasure applies to every immutable index revision that may still
+        # retain this atom, not only to the currently active aliases. The
+        # repository query is intentionally unbounded by release-list paging:
+        # compliance cannot leave an older superseded revision readable.
+        try:
+            revision_loader = getattr(self.store, "cortex_component_revisions", None)
+            with self.workspace_scope(workspace_id):
+                if not callable(revision_loader):
+                    raise InvariantViolation(
+                        "the configured repository cannot enumerate external index revisions for erasure"
+                    )
+                revisions = revision_loader(
+                    workspace_id,
+                    ["lexical_index", "dense_index"],
+                )
+        except Exception as err:
+            raise InvariantViolation(
+                f"compliance erasure failed (incomplete): could not enumerate external revisions: {err}"
+            ) from err
+        if lexical_idx is not None:
+            external_targets.extend(
+                {"type": "opensearch", "target": revision}
+                for revision in revisions.get("lexical_index", [])
+            )
+        if dense_idx is not None:
+            external_targets.extend(
+                {"type": "qdrant", "target": revision}
+                for revision in revisions.get("dense_index", [])
+            )
+        external_targets = [
+            dict(item)
+            for item in {
+                (str(target["type"]), str(target["target"])): target
+                for target in external_targets
+            }.values()
+        ]
 
 
         # 2. Create or acquire erasure operation (sets state to pending / read-denial hold)
@@ -800,35 +821,47 @@ class TraceService:
         try:
             # 3. External absence deletion & verification (FAIL-CLOSED)
             # 3a. Object store
-            if object_key and self.object_store:
-                if hasattr(self.object_store, "delete_object"):
-                    self.object_store.delete_object(object_key)
-                if hasattr(self.object_store, "verify_object_absent"):
-                    is_absent = self.object_store.verify_object_absent(object_key)
-                    if not is_absent:
-                        raise RuntimeError(f"object store verification failed: object {object_key} is still present")
+            if object_key:
+                delete_object = getattr(self.object_store, "delete_object", None)
+                verify_object_absent = getattr(self.object_store, "verify_object_absent", None)
+                if not callable(delete_object) or not callable(verify_object_absent):
+                    raise RuntimeError(
+                        "configured object store lacks required delete and absence-verification capabilities"
+                    )
+                delete_object(object_key)
+                is_absent = verify_object_absent(object_key)
+                if not is_absent:
+                    raise RuntimeError(f"object store verification failed: object {object_key} is still present")
 
             # 3b. Lexical index
-            if lexical_idx:
-                for target in external_targets:
-                    if target.get("type") == "opensearch":
-                        rev = target["target"]
-                        if hasattr(lexical_idx, "delete_atom"):
-                            lexical_idx.delete_atom(atom_version_id, revision=rev)
-                        if hasattr(lexical_idx, "verify_atom_absent"):
-                            if not lexical_idx.verify_atom_absent(atom_version_id, revision=rev):
-                                raise RuntimeError(f"lexical index revision {rev} verification failed: atom {atom_version_id} still present")
+            lexical_targets = [target for target in external_targets if target.get("type") == "opensearch"]
+            if lexical_targets:
+                delete_atom = getattr(lexical_idx, "delete_atom", None)
+                verify_atom_absent = getattr(lexical_idx, "verify_atom_absent", None)
+                if not callable(delete_atom) or not callable(verify_atom_absent):
+                    raise RuntimeError(
+                        "configured lexical index lacks required delete and absence-verification capabilities"
+                    )
+                for target in lexical_targets:
+                    rev = target["target"]
+                    delete_atom(atom_version_id, revision=rev)
+                    if not verify_atom_absent(atom_version_id, revision=rev):
+                        raise RuntimeError(f"lexical index revision {rev} verification failed: atom {atom_version_id} still present")
 
             # 3c. Dense index
-            if dense_idx:
-                for target in external_targets:
-                    if target.get("type") == "qdrant":
-                        rev = target["target"]
-                        if hasattr(dense_idx, "delete_atom"):
-                            dense_idx.delete_atom(atom_version_id, revision=rev)
-                        if hasattr(dense_idx, "verify_atom_absent"):
-                            if not dense_idx.verify_atom_absent(atom_version_id, revision=rev):
-                                raise RuntimeError(f"dense index revision {rev} verification failed: atom {atom_version_id} still present")
+            dense_targets = [target for target in external_targets if target.get("type") == "qdrant"]
+            if dense_targets:
+                delete_atom = getattr(dense_idx, "delete_atom", None)
+                verify_atom_absent = getattr(dense_idx, "verify_atom_absent", None)
+                if not callable(delete_atom) or not callable(verify_atom_absent):
+                    raise RuntimeError(
+                        "configured dense index lacks required delete and absence-verification capabilities"
+                    )
+                for target in dense_targets:
+                    rev = target["target"]
+                    delete_atom(atom_version_id, revision=rev)
+                    if not verify_atom_absent(atom_version_id, revision=rev):
+                        raise RuntimeError(f"dense index revision {rev} verification failed: atom {atom_version_id} still present")
 
             # Update state to external_absence_verified
             self.store.update_erasure_operation_state(operation_id, state="external_absence_verified")
@@ -2150,7 +2183,9 @@ class TraceService:
         benchmark-time corpus digest; it is never on a normal query path.
         """
 
-        atom_source = getattr(self.store, "iter_queryable_atoms", None)
+        atom_source = getattr(self.store, "iter_indexable_atom_versions", None)
+        if not callable(atom_source):
+            atom_source = getattr(self.store, "iter_queryable_atoms", None)
         atoms = atom_source(workspace_id) if callable(atom_source) else iter(self.store.queryable_atoms(workspace_id))
         corpus_rows = sorted(
             (
@@ -2274,6 +2309,9 @@ class TraceService:
         request: QueryRequest,
         authorization_context: AuthorizationContext | None,
         temporal_exclusions: dict[str, int] | None = None,
+        temporal_exclusion_details: list[dict[str, Any]] | None = None,
+        release_context: dict[str, Any] | None = None,
+        temporal_exclusion_state: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """Apply the mandatory post-index policy check to canonical rows.
 
@@ -2284,12 +2322,96 @@ class TraceService:
 
         result: list[dict[str, Any]] = []
         wanted_facets = set(request.facets)
+        exclusion_state = temporal_exclusion_state if temporal_exclusion_state is not None else {}
+        aggregate_seen: set[tuple[str, str]] = exclusion_state.setdefault("aggregate_seen", set())
+        detail_seen: set[tuple[str, str]] = exclusion_state.setdefault("detail_seen", set())
+        exclusion_state.setdefault("omitted_count", 0)
+        exclusion_state.setdefault("truncated", False)
+
+        def requested_value(value: Any) -> Any:
+            return value.isoformat() if hasattr(value, "isoformat") else value
+
+        def exclusion_identity(atom: dict[str, Any], reason: str) -> tuple[str, str]:
+            opaque_identity = str(atom.get("atom_version_id") or atom.get("node_id") or id(atom))
+            return opaque_identity, reason
+
+        def record_aggregate(atom: dict[str, Any], reason: str) -> bool:
+            identity = exclusion_identity(atom, reason)
+            if identity in aggregate_seen:
+                return False
+            aggregate_seen.add(identity)
+            if temporal_exclusions is not None:
+                temporal_exclusions[reason] = temporal_exclusions.get(reason, 0) + 1
+            return True
+
+        def record_exclusion(
+            atom: dict[str, Any],
+            temporal: dict[str, Any],
+            *,
+            reason: str,
+            policy_result: str | None = None,
+        ) -> None:
+            record_aggregate(atom, reason)
+            if temporal_exclusion_details is None:
+                return
+            identity = exclusion_identity(atom, reason)
+            if identity in detail_seen:
+                return
+            detail_seen.add(identity)
+            if len(temporal_exclusion_details) >= TEMPORAL_EXCLUSION_DETAIL_LIMIT:
+                exclusion_state["omitted_count"] = int(exclusion_state["omitted_count"]) + 1
+                exclusion_state["truncated"] = True
+                return
+            valid_interval = dict(
+                temporal.get("valid_time")
+                or (atom.get("properties") or {}).get("temporal")
+                or {}
+            )
+            detail = {
+                "source_revision": str(atom.get("atom_version_id") or ""),
+                "requested_time": {
+                    "as_of_event": request.as_of_event,
+                    "valid_at": requested_value(request.valid_at),
+                    "valid_from": requested_value(request.valid_from),
+                    "valid_to": requested_value(request.valid_to),
+                },
+                "resolved_event_watermark": (release_context or {}).get("spine_event_watermark"),
+                "release_id": (release_context or {}).get("release_id"),
+                "valid_interval": valid_interval,
+                "lifecycle_state": temporal.get("lifecycle_state", "unknown"),
+                "current_lifecycle_state": temporal.get("current_lifecycle_state", "unknown"),
+                "policy_result": policy_result or temporal.get("policy_result", "excluded"),
+                "provenance": dict(valid_interval.get("provenance") or {}),
+                "exclusion_reason": reason,
+            }
+            temporal_exclusion_details.append(detail)
+
         for atom in atoms:
             if request.workspace_id and atom.get("workspace_id") != request.workspace_id:
                 continue
+            # Authorization precedes temporal-policy evaluation because valid
+            # intervals, provenance, lifecycle state, and source revisions are
+            # themselves record metadata. An unauthorized record contributes
+            # only to a redacted aggregate counter.
+            authorized = (
+                authorization_context.allows_record(atom)
+                if authorization_context is not None
+                else self._allowed(atom, request.privacy_context)
+            )
+            if not authorized:
+                record_aggregate(atom, "current_authorization_denied")
+                continue
             if request.as_of_event is not None and int(atom.get("created_event_offset", 0)) > request.as_of_event:
-                if temporal_exclusions is not None:
-                    temporal_exclusions["event_after_requested_watermark"] = temporal_exclusions.get("event_after_requested_watermark", 0) + 1
+                record_exclusion(
+                    atom,
+                    {
+                        "lifecycle_state": "unknown",
+                        "current_lifecycle_state": "unknown",
+                        "policy_result": "excluded",
+                        "valid_time": (atom.get("properties") or {}).get("temporal", {}),
+                    },
+                    reason="event_after_requested_watermark",
+                )
                 continue
             temporal_checker = getattr(self.store, "temporal_visibility", None)
             if callable(temporal_checker):
@@ -2301,17 +2423,11 @@ class TraceService:
                     valid_to=request.valid_to,
                 )
                 if not temporal.get("visible"):
-                    if temporal_exclusions is not None:
-                        reason = str(temporal.get("exclusion_reason") or "temporal_policy_denied")
-                        temporal_exclusions[reason] = temporal_exclusions.get(reason, 0) + 1
+                    reason = str(temporal.get("exclusion_reason") or "temporal_policy_denied")
+                    record_exclusion(atom, temporal, reason=reason)
                     continue
                 atom["temporal_visibility"] = temporal
             if wanted_facets and not wanted_facets.issubset(set(atom.get("facets", []))):
-                continue
-            if authorization_context is not None:
-                if not authorization_context.allows_record(atom):
-                    continue
-            elif not self._allowed(atom, request.privacy_context):
                 continue
             result.append(atom)
         return result
@@ -2349,6 +2465,13 @@ class TraceService:
             self.metrics.inc("trace_query_cache_misses_total")
 
         temporal_exclusions: dict[str, int] = {}
+        temporal_exclusion_details: list[dict[str, Any]] = []
+        temporal_exclusion_state: dict[str, Any] = {
+            "aggregate_seen": set(),
+            "detail_seen": set(),
+            "omitted_count": 0,
+            "truncated": False,
+        }
         resolved_release: dict[str, Any] | None = None
         if request.as_of_event is not None:
             release_resolver = getattr(self.store, "get_cortex_release_as_of_event", None)
@@ -2360,12 +2483,19 @@ class TraceService:
                 diagnostics = {
                     "temporal": {
                         "requested_as_of_event": request.as_of_event,
+                        "requested_valid_at": request.valid_at.isoformat() if request.valid_at else None,
+                        "requested_valid_from": request.valid_from.isoformat() if request.valid_from else None,
+                        "requested_valid_to": request.valid_to.isoformat() if request.valid_to else None,
                         "resolved_event_watermark": None,
                         "release_id": None,
+                        "policy_revision": None,
                         "policy_result": "denied",
                         "exclusion_reason": "historical_release_unavailable",
                     },
                     "temporal_exclusions": {"historical_release_unavailable": 1},
+                    "temporal_exclusion_details": [],
+                    "temporal_exclusion_details_truncated": False,
+                    "temporal_exclusion_details_omitted_count": 0,
                 }
                 query_snapshot = request.model_dump(mode="json")
                 query_snapshot["retrieval_diagnostics"] = diagnostics
@@ -2392,10 +2522,17 @@ class TraceService:
             "hot_candidates": 0,
             "provider_failures": {},
             "temporal_exclusions": temporal_exclusions,
+            "temporal_exclusion_details": temporal_exclusion_details,
+            "temporal_exclusion_details_truncated": False,
+            "temporal_exclusion_details_omitted_count": 0,
             "temporal": {
                 "requested_as_of_event": request.as_of_event,
+                "requested_valid_at": request.valid_at.isoformat() if request.valid_at else None,
+                "requested_valid_from": request.valid_from.isoformat() if request.valid_from else None,
+                "requested_valid_to": request.valid_to.isoformat() if request.valid_to else None,
                 "resolved_event_watermark": (resolved_release or {}).get("spine_event_watermark"),
                 "release_id": selected_release_id,
+                "policy_revision": (resolved_release or {}).get("policy_revision"),
                 "policy_result": "allowed",
                 "exclusion_reason": None,
             },
@@ -2496,7 +2633,14 @@ class TraceService:
             # its replacement delta is in flight.  Historical reads retain
             # their explicit as-of semantics and therefore skip this filter.
             current_loader = getattr(self.store, "current_atom_versions_for_nodes", None)
-            if request.as_of_event is None and callable(current_loader) and reloaded:
+            if (
+                request.as_of_event is None
+                and request.valid_at is None
+                and request.valid_from is None
+                and request.valid_to is None
+                and callable(current_loader)
+                and reloaded
+            ):
                 current = current_loader(
                     request.workspace_id,
                     list(dict.fromkeys(str(atom["node_id"]) for atom in reloaded)),
@@ -2515,7 +2659,15 @@ class TraceService:
                             if str(hit.get("atom_version_id", "")) not in stale_ids
                         ]
                     provider_diagnostics["stale_external_candidates_dropped"] = len(stale_ids)
-            atoms = self._revalidate_atoms(reloaded, request, authorization_context, temporal_exclusions)
+            atoms = self._revalidate_atoms(
+                reloaded,
+                request,
+                authorization_context,
+                temporal_exclusions,
+                temporal_exclusion_details,
+                resolved_release,
+                temporal_exclusion_state,
+            )
             # External score payloads need not yet contain this ingestion.
             # Give hot candidates a bounded lexical score in memory; this does
             # not persist embeddings or trigger a corpus scan.
@@ -2531,14 +2683,23 @@ class TraceService:
                 raise InvariantViolation("production retrieval requires both revisioned OpenSearch and Qdrant adapters")
             # The embedded adapter is deliberately a correctness path.  It is
             # never selected by a production-profile deployment.
-            atoms = self.store.queryable_atoms(
-                request.workspace_id,
-                request.as_of_event,
-                valid_at=request.valid_at,
-                valid_from=request.valid_from,
-                valid_to=request.valid_to,
+            valid_time_requested = any(
+                value is not None for value in (request.valid_at, request.valid_from, request.valid_to)
             )
-            atoms = self._revalidate_atoms(atoms, request, authorization_context, temporal_exclusions)
+            temporal_source = getattr(self.store, "temporal_candidate_atoms", None)
+            if valid_time_requested and callable(temporal_source):
+                atoms = temporal_source(request.workspace_id, request.as_of_event)
+            else:
+                atoms = self.store.queryable_atoms(request.workspace_id, request.as_of_event)
+            atoms = self._revalidate_atoms(
+                atoms,
+                request,
+                authorization_context,
+                temporal_exclusions,
+                temporal_exclusion_details,
+                resolved_release,
+                temporal_exclusion_state,
+            )
         with telemetry_span("trace.retrieval", {"workspace_id": request.workspace_id, "profile": request.retrieval_profile}):
             with self.metrics.timer("trace_retrieval_seconds", labels={"profile": request.retrieval_profile}):
                 navigator = (
@@ -2557,6 +2718,7 @@ class TraceService:
         outcome.diagnostics["index_degradation"] = provider_diagnostics
         outcome.diagnostics["temporal"] = provider_diagnostics["temporal"]
         outcome.diagnostics["temporal_exclusions"] = temporal_exclusions
+        outcome.diagnostics["temporal_exclusion_details"] = temporal_exclusion_details
         self.metrics.inc("trace_retrieval_total", labels={"profile": request.retrieval_profile, "state": outcome.sufficiency_state})
         self.metrics.inc("trace_retrieval_candidates_total", len(outcome.candidates), labels={"profile": request.retrieval_profile})
         schema_source = getattr(self.store, "current_nodes_by_facet", None)
@@ -2580,15 +2742,36 @@ class TraceService:
         # canonical policy check once more before formatting a response.
         outcome.candidates = [
             candidate for candidate in outcome.candidates
-            if self._revalidate_atoms([candidate.atom], request, authorization_context, temporal_exclusions)
+            if self._revalidate_atoms(
+                [candidate.atom],
+                request,
+                authorization_context,
+                temporal_exclusions,
+                temporal_exclusion_details,
+                resolved_release,
+                temporal_exclusion_state,
+            )
         ]
+        details_truncated = bool(temporal_exclusion_state["truncated"])
+        details_omitted = int(temporal_exclusion_state["omitted_count"])
+        provider_diagnostics["temporal_exclusion_details_truncated"] = details_truncated
+        provider_diagnostics["temporal_exclusion_details_omitted_count"] = details_omitted
+        outcome.diagnostics["temporal_exclusion_details_truncated"] = details_truncated
+        outcome.diagnostics["temporal_exclusion_details_omitted_count"] = details_omitted
         outcome.candidates.sort(key=lambda candidate: (-candidate.score, candidate.atom["atom_version_id"]))
         terms = set(_tokens(request.query))
         results: list[dict[str, Any]] = []
         for rank, candidate in enumerate(outcome.candidates[:request.retrieval_budget.candidate_limit], start=1):
             atom = candidate.atom
             is_source_atom = "atom" in atom.get("facets", [])
-            source_ids = atom.get("source_atom_version_ids", [atom["atom_version_id"]] if is_source_atom else [])
+            source_ids = list(dict.fromkeys(
+                str(item)
+                for item in atom.get(
+                    "source_atom_version_ids",
+                    [atom["atom_version_id"]] if is_source_atom else [],
+                )
+                if item
+            ))
             temporal = atom.get("temporal_visibility")
             if temporal is None and is_source_atom:
                 temporal_checker = getattr(self.store, "temporal_visibility", None)
@@ -2612,6 +2795,8 @@ class TraceService:
                 "candidate_kind": "atom" if is_source_atom else "derived",
                 "node_id": atom["node_id"],
                 "atom_version_id": atom["atom_version_id"],
+                "source_revision": atom["atom_version_id"] if is_source_atom else None,
+                "source_revisions": source_ids,
                 "excerpt": _excerpt(atom["content"], terms),
                 "content_hash": atom["content_hash"],
                 "source_location": {
@@ -2624,12 +2809,22 @@ class TraceService:
                 "temporal_status": "as_of" if request.as_of_event is not None else "current",
                 "temporal": {
                     "requested_as_of_event": request.as_of_event,
+                    "requested_valid_at": request.valid_at.isoformat() if request.valid_at else None,
+                    "requested_valid_from": request.valid_from.isoformat() if request.valid_from else None,
+                    "requested_valid_to": request.valid_to.isoformat() if request.valid_to else None,
                     "resolved_event_watermark": (resolved_release or {}).get("spine_event_watermark"),
                     "release_id": selected_release_id,
+                    "policy_revision": (resolved_release or {}).get("policy_revision"),
                     "valid_interval": temporal.get("valid_time", atom.get("properties", {}).get("temporal", {})),
                     "lifecycle_state": temporal.get("lifecycle_state", "active"),
                     "current_lifecycle_state": temporal.get("current_lifecycle_state", temporal.get("lifecycle_state", "active")),
                     "policy_result": temporal.get("policy_result", "allowed"),
+                    "provenance": dict(
+                        (
+                            temporal.get("valid_time")
+                            or atom.get("properties", {}).get("temporal", {})
+                        ).get("provenance", {})
+                    ),
                     "exclusion_reason": temporal.get("exclusion_reason"),
                 },
                 "channel_scores": {
@@ -2971,7 +3166,9 @@ class TraceService:
         if index is None:
             return 0
         revision = revision or os.environ.get("TRACE_INDEX_REVISION", "embedded-current")
-        atom_source = getattr(self.store, "iter_queryable_atoms", None)
+        atom_source = getattr(self.store, "iter_indexable_atom_versions", None)
+        if not callable(atom_source):
+            atom_source = getattr(self.store, "iter_queryable_atoms", None)
         atoms = atom_source(workspace_id) if callable(atom_source) else iter(self.store.queryable_atoms(workspace_id))
         indexed = 0
         documents: list[dict[str, Any]] = []
@@ -3000,7 +3197,9 @@ class TraceService:
     def rebuild_dense_index(self, workspace_id: str, *, actor: str = "system", revision: str | None = None) -> int:
         """Rebuild the replaceable local vector projection for one workspace."""
 
-        atom_source = getattr(self.store, "iter_queryable_atoms", None)
+        atom_source = getattr(self.store, "iter_indexable_atom_versions", None)
+        if not callable(atom_source):
+            atom_source = getattr(self.store, "iter_queryable_atoms", None)
         atoms = atom_source(workspace_id) if callable(atom_source) else iter(self.store.queryable_atoms(workspace_id))
         revision = revision or os.environ.get("TRACE_INDEX_REVISION", "embedded-current")
         stored = 0
@@ -3230,6 +3429,13 @@ class TraceService:
 
     # ---------------------------------------------------- cortex release lifecycle
     def create_cortex_release(self, request: CortexReleaseCreateRequest) -> dict[str, Any]:
+        for component in request.components:
+            kind = str(component.get("component_kind") or "")
+            revision = str(component.get("component_revision") or "")
+            if kind in {"lexical_index", "dense_index"} and "--rev-" in revision:
+                raise InvariantViolation(
+                    f"{kind} component_revision must be logical, not a physical index or collection name"
+                )
         with self.workspace_scope(request.workspace_id):
             return self.store.create_cortex_release(
                 workspace_id=request.workspace_id,
@@ -3238,7 +3444,10 @@ class TraceService:
                 policy_revision=request.policy_revision,
                 policy_snapshot_hash=request.policy_snapshot_hash,
                 code_revision=request.code_revision,
-                components=[c.model_dump() for c in request.components] if request.components else None,
+                components=[
+                    c.model_dump() if hasattr(c, "model_dump") else dict(c)
+                    for c in request.components
+                ] if request.components else None,
                 actor=request.actor,
             )
 
