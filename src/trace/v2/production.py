@@ -478,6 +478,219 @@ class PostgresEventStore:
                 result["requested_as_of_event"] = as_of_event
                 return result
 
+    @staticmethod
+    def _pg_authorization_events(
+        cursor: Any,
+        node_id: str,
+        node_created_event: int,
+        as_of_event: int | None = None,
+    ) -> tuple[dict[str, Any] | None, dict[str, Any] | None, dict[str, Any] | None]:
+        def fetch_event(query: str, parameters: tuple[Any, ...]) -> dict[str, Any] | None:
+            cursor.execute(query, parameters)
+            row = cursor.fetchone()
+            if not row:
+                return None
+            payload = row[1] if isinstance(row[1], dict) else json.loads(row[1])
+            if str(payload.get("node_id") or "") != node_id:
+                return None
+            return {"event_offset": int(row[0]), "payload": payload}
+
+        initial = fetch_event(
+            """SELECT event_offset,payload FROM trace_events
+                 WHERE event_offset=%s AND event_type='node.created' LIMIT 1""",
+            (int(node_created_event),),
+        )
+        current = fetch_event(
+            """SELECT event_offset,payload FROM trace_events
+                 WHERE stream_id=%s AND event_type='node.security_changed'
+                 ORDER BY event_offset DESC LIMIT 1""",
+            (f"node:{node_id}",),
+        )
+        if as_of_event is None:
+            historical = current
+        else:
+            historical = fetch_event(
+                """SELECT event_offset,payload FROM trace_events
+                     WHERE stream_id=%s AND event_type='node.security_changed' AND event_offset<=%s
+                     ORDER BY event_offset DESC LIMIT 1""",
+                (f"node:{node_id}", int(as_of_event)),
+            )
+        return initial, current, historical
+
+    def transition_source_authorization(
+        self,
+        atom_version_id: str,
+        *,
+        visibility: str,
+        actor: str,
+        reason: str | None = None,
+    ) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "transition_source_authorization"):
+            return self.delegate.transition_source_authorization(
+                atom_version_id, visibility=visibility, actor=actor, reason=reason,
+            )
+        visibility = str(visibility).strip()
+        if not visibility:
+            raise InvariantViolation("source authorization visibility must be non-empty")
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute(
+                    """SELECT nv.node_id,n.workspace_id,n.security,n.created_event_offset
+                         FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id
+                        WHERE nv.atom_version_id=%s FOR UPDATE OF n""",
+                    (atom_version_id,),
+                )
+                row = cursor.fetchone()
+                if not row:
+                    raise NotFoundError(f"atom version {atom_version_id} was not found")
+                node_id, workspace_id = str(row[0]), str(row[1])
+                previous = self._json_value(row[2], {})
+                security = {**previous, "visibility": visibility, "actor": actor}
+                if previous.get("visibility") == visibility:
+                    initial, current, _ = self._pg_authorization_events(cursor, node_id, int(row[3]))
+                    revision = current["event_offset"] if current else (initial or {}).get("event_offset")
+                    return {
+                        "atom_version_id": atom_version_id,
+                        "node_id": node_id,
+                        "workspace_id": workspace_id,
+                        "security": previous,
+                        "authorization_revision_event": revision,
+                        "changed": False,
+                    }
+            event = self._append_event_in_connection(
+                conn,
+                stream_id=f"node:{node_id}",
+                event_type="node.security_changed",
+                payload={
+                    "node_id": node_id,
+                    "workspace_id": workspace_id,
+                    "atom_version_id": atom_version_id,
+                    "previous_security": previous,
+                    "security": security,
+                    "reason": reason,
+                },
+                actor=actor,
+            )
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor, workspace_id)
+                cursor.execute(
+                    "UPDATE trace_nodes SET security=%s::jsonb WHERE node_id=%s",
+                    (json.dumps(security), node_id),
+                )
+                cursor.execute(
+                    "UPDATE trace_hot_inbox SET security=%s::jsonb WHERE node_id=%s",
+                    (json.dumps(security), node_id),
+                )
+            return {
+                "atom_version_id": atom_version_id,
+                "node_id": node_id,
+                "workspace_id": workspace_id,
+                "security": security,
+                "authorization_revision_event": event.offset,
+                "changed": True,
+            }
+
+    def resolve_source_authorization(
+        self,
+        atom_version_id: str,
+        *,
+        as_of_event: int | None = None,
+    ) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "resolve_source_authorization"):
+            return self.delegate.resolve_source_authorization(atom_version_id, as_of_event=as_of_event)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                self._set_workspace(cursor)
+                cursor.execute(
+                    """SELECT nv.node_id,n.security,n.created_event_offset
+                         FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id
+                        WHERE nv.atom_version_id=%s""",
+                    (atom_version_id,),
+                )
+                row = cursor.fetchone()
+                if not row:
+                    raise NotFoundError(f"atom version {atom_version_id} was not found")
+                node_id = str(row[0])
+                current_security = self._json_value(row[1], {})
+                node_created_event = int(row[2])
+                initial, current, historical = self._pg_authorization_events(
+                    cursor, node_id, node_created_event, as_of_event
+                )
+        current_revision = (
+            current["event_offset"] if current
+            else (initial or {}).get("event_offset", node_created_event)
+        )
+        if as_of_event is None:
+            if not current_security.get("visibility"):
+                return {
+                    "available": False,
+                    "requested_as_of_event": None,
+                    "current_authorization_revision_event": current_revision,
+                    "exclusion_reason": "current_authorization_unavailable",
+                }
+            return {
+                "available": True,
+                "requested_as_of_event": None,
+                "historical_security": current_security,
+                "current_security": current_security,
+                "historical_authorization_revision_event": current_revision,
+                "current_authorization_revision_event": current_revision,
+                "historical_resolution": "current",
+            }
+        requested = int(as_of_event)
+        if requested < node_created_event:
+            return {
+                "available": False,
+                "requested_as_of_event": requested,
+                "current_security": current_security,
+                "current_authorization_revision_event": current_revision,
+                "exclusion_reason": "historical_authorization_unavailable",
+            }
+        initial_security = dict((initial or {}).get("payload", {}).get("security") or {})
+        current_event_security = dict((current or {}).get("payload", {}).get("security") or {})
+        if (
+            not initial_security.get("visibility")
+            or (current is not None and not current_event_security.get("visibility"))
+        ):
+            return {
+                "available": False,
+                "requested_as_of_event": requested,
+                "current_authorization_revision_event": current_revision,
+                "exclusion_reason": "historical_authorization_unavailable",
+            }
+        if historical:
+            historical_security = dict(historical["payload"].get("security") or {})
+            historical_revision = historical["event_offset"]
+            resolution = "latest_change_at_or_before_requested_event"
+        elif initial and initial["event_offset"] <= requested:
+            historical_security = initial_security
+            historical_revision = initial["event_offset"]
+            resolution = "node_created_event"
+        else:
+            return {
+                "available": False,
+                "requested_as_of_event": requested,
+                "current_authorization_revision_event": current_revision,
+                "exclusion_reason": "historical_authorization_unavailable",
+            }
+        if not historical_security.get("visibility") or not current_security.get("visibility"):
+            return {
+                "available": False,
+                "requested_as_of_event": requested,
+                "current_authorization_revision_event": current_revision,
+                "exclusion_reason": "historical_authorization_unavailable",
+            }
+        return {
+            "available": True,
+            "requested_as_of_event": requested,
+            "historical_security": historical_security,
+            "current_security": current_security,
+            "historical_authorization_revision_event": historical_revision,
+            "current_authorization_revision_event": current_revision,
+            "historical_resolution": resolution,
+        }
+
     def temporal_visibility(
         self,
         atom: dict[str, Any],
@@ -1634,6 +1847,12 @@ class PostgresEventStore:
                         "facets": payload.get("facets", []),
                         "security": payload.get("security", {}),
                     }
+                elif event.event_type == "node.security_changed" and str(payload.get("node_id")) in folded_nodes:
+                    security = payload.get("security")
+                    if not isinstance(security, dict) or not security.get("visibility"):
+                        errors.append(f"event {event.offset} cannot replay node security")
+                        continue
+                    folded_nodes[str(payload["node_id"])]["security"] = dict(security)
                 elif event.event_type == "node.versioned" and str(payload.get("node_id")) in folded_nodes:
                     required = {"atom_version_id", "version", "content", "properties"}
                     if not required <= payload.keys():

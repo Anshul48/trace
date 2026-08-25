@@ -1055,6 +1055,12 @@ class SqliteEventStore:
                 folded_nodes[payload["node_id"]] = {
                     "facets": payload.get("facets", []), "security": payload.get("security", {}),
                 }
+            elif event.event_type == "node.security_changed" and payload.get("node_id") in folded_nodes:
+                security = payload.get("security")
+                if not isinstance(security, dict) or not security.get("visibility"):
+                    errors.append(f"event {event.offset} cannot replay node security")
+                    continue
+                folded_nodes[payload["node_id"]]["security"] = security
             elif event.event_type == "node.versioned" and payload.get("node_id") in folded_nodes:
                 required = {"atom_version_id", "version", "content", "properties"}
                 if not required <= payload.keys():
@@ -1266,6 +1272,210 @@ class SqliteEventStore:
                 result["state"] = state
             result["requested_as_of_event"] = as_of_event
             return result
+
+    @staticmethod
+    def _authorization_events_conn(
+        conn: sqlite3.Connection,
+        node_id: str,
+        node_created_event: int,
+        as_of_event: int | None = None,
+    ) -> tuple[dict[str, Any] | None, dict[str, Any] | None, dict[str, Any] | None]:
+        """Load the immutable baseline and at most two security revisions.
+
+        Keeping this lookup to three indexed rows prevents a long-lived node's
+        authorization history from escaping the retrieval budget.  The exact
+        ``node.created`` event remains mandatory for historical resolution;
+        a later event's ``previous_security`` is never accepted as a substitute.
+        """
+
+        def event_from_row(row: sqlite3.Row | None) -> dict[str, Any] | None:
+            if row is None:
+                return None
+            payload = _decode(row["payload_json"], {})
+            if str(payload.get("node_id") or "") != node_id:
+                return None
+            return {"event_offset": int(row["event_offset"]), "payload": payload}
+
+        initial = event_from_row(conn.execute(
+            """SELECT event_offset,payload_json FROM events
+                 WHERE event_offset=? AND event_type='node.created' LIMIT 1""",
+            (int(node_created_event),),
+        ).fetchone())
+        current = event_from_row(conn.execute(
+            """SELECT event_offset,payload_json FROM events
+                 WHERE stream_id=? AND event_type='node.security_changed'
+                 ORDER BY event_offset DESC LIMIT 1""",
+            (f"node:{node_id}",),
+        ).fetchone())
+        if as_of_event is None:
+            historical = current
+        else:
+            historical = event_from_row(conn.execute(
+                """SELECT event_offset,payload_json FROM events
+                     WHERE stream_id=? AND event_type='node.security_changed' AND event_offset<=?
+                     ORDER BY event_offset DESC LIMIT 1""",
+                (f"node:{node_id}", int(as_of_event)),
+            ).fetchone())
+        return initial, current, historical
+
+    def transition_source_authorization(
+        self,
+        atom_version_id: str,
+        *,
+        visibility: str,
+        actor: str,
+        reason: str | None = None,
+    ) -> dict[str, Any]:
+        visibility = str(visibility).strip()
+        if not visibility:
+            raise InvariantViolation("source authorization visibility must be non-empty")
+        with self.transaction() as conn:
+            row = conn.execute(
+                """SELECT nv.node_id,n.workspace_id,n.security_json,
+                          n.created_event_offset AS node_created_event
+                     FROM node_versions nv JOIN nodes n ON n.node_id=nv.node_id
+                    WHERE nv.atom_version_id=?""",
+                (atom_version_id,),
+            ).fetchone()
+            if not row:
+                raise NotFoundError(f"atom version {atom_version_id} was not found")
+            previous = _decode(row["security_json"], {})
+            security = {**previous, "visibility": visibility, "actor": actor}
+            if previous.get("visibility") == visibility:
+                initial, current, _ = self._authorization_events_conn(
+                    conn, str(row["node_id"]), int(row["node_created_event"])
+                )
+                current_revision = (
+                    current["event_offset"] if current
+                    else (initial or {}).get("event_offset")
+                )
+                return {
+                    "atom_version_id": atom_version_id,
+                    "node_id": row["node_id"],
+                    "workspace_id": row["workspace_id"],
+                    "security": previous,
+                    "authorization_revision_event": current_revision,
+                    "changed": False,
+                }
+            event = self._append_event(
+                conn,
+                stream_id=f"node:{row['node_id']}",
+                event_type="node.security_changed",
+                payload={
+                    "node_id": row["node_id"],
+                    "workspace_id": row["workspace_id"],
+                    "atom_version_id": atom_version_id,
+                    "previous_security": previous,
+                    "security": security,
+                    "reason": reason,
+                },
+                actor=actor,
+            )
+            conn.execute("UPDATE nodes SET security_json=? WHERE node_id=?", (_json(security), row["node_id"]))
+            conn.execute("UPDATE hot_inbox SET security_json=? WHERE node_id=?", (_json(security), row["node_id"]))
+            return {
+                "atom_version_id": atom_version_id,
+                "node_id": row["node_id"],
+                "workspace_id": row["workspace_id"],
+                "security": security,
+                "authorization_revision_event": event.offset,
+                "changed": True,
+            }
+
+    def resolve_source_authorization(
+        self,
+        atom_version_id: str,
+        *,
+        as_of_event: int | None = None,
+    ) -> dict[str, Any]:
+        with self._connect() as conn:
+            row = conn.execute(
+                """SELECT nv.node_id,n.workspace_id,n.security_json,
+                          n.created_event_offset AS node_created_event
+                     FROM node_versions nv JOIN nodes n ON n.node_id=nv.node_id
+                    WHERE nv.atom_version_id=?""",
+                (atom_version_id,),
+            ).fetchone()
+            if not row:
+                raise NotFoundError(f"atom version {atom_version_id} was not found")
+            node_id = str(row["node_id"])
+            current_security = _decode(row["security_json"], {})
+            initial, current, historical = self._authorization_events_conn(
+                conn, node_id, int(row["node_created_event"]), as_of_event
+            )
+            current_revision = (
+                current["event_offset"] if current
+                else (initial or {}).get("event_offset", int(row["node_created_event"]))
+            )
+            if as_of_event is None:
+                if not current_security.get("visibility"):
+                    return {
+                        "available": False,
+                        "requested_as_of_event": None,
+                        "current_authorization_revision_event": current_revision,
+                        "exclusion_reason": "current_authorization_unavailable",
+                    }
+                return {
+                    "available": True,
+                    "requested_as_of_event": None,
+                    "historical_security": current_security,
+                    "current_security": current_security,
+                    "historical_authorization_revision_event": current_revision,
+                    "current_authorization_revision_event": current_revision,
+                    "historical_resolution": "current",
+                }
+            requested = int(as_of_event)
+            if requested < int(row["node_created_event"]):
+                return {
+                    "available": False,
+                    "requested_as_of_event": requested,
+                    "current_security": current_security,
+                    "current_authorization_revision_event": current_revision,
+                    "exclusion_reason": "historical_authorization_unavailable",
+                }
+            initial_security = dict((initial or {}).get("payload", {}).get("security") or {})
+            current_event_security = dict((current or {}).get("payload", {}).get("security") or {})
+            if (
+                not initial_security.get("visibility")
+                or (current is not None and not current_event_security.get("visibility"))
+            ):
+                return {
+                    "available": False,
+                    "requested_as_of_event": requested,
+                    "current_authorization_revision_event": current_revision,
+                    "exclusion_reason": "historical_authorization_unavailable",
+                }
+            if historical:
+                historical_security = dict(historical["payload"].get("security") or {})
+                historical_revision = historical["event_offset"]
+                resolution = "latest_change_at_or_before_requested_event"
+            elif initial and initial["event_offset"] <= requested:
+                historical_security = initial_security
+                historical_revision = initial["event_offset"]
+                resolution = "node_created_event"
+            else:
+                return {
+                    "available": False,
+                    "requested_as_of_event": requested,
+                    "current_authorization_revision_event": current_revision,
+                    "exclusion_reason": "historical_authorization_unavailable",
+                }
+            if not historical_security.get("visibility") or not current_security.get("visibility"):
+                return {
+                    "available": False,
+                    "requested_as_of_event": requested,
+                    "current_authorization_revision_event": current_revision,
+                    "exclusion_reason": "historical_authorization_unavailable",
+                }
+            return {
+                "available": True,
+                "requested_as_of_event": requested,
+                "historical_security": historical_security,
+                "current_security": current_security,
+                "historical_authorization_revision_event": historical_revision,
+                "current_authorization_revision_event": current_revision,
+                "historical_resolution": resolution,
+            }
 
     def temporal_visibility(
         self,

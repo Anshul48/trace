@@ -2383,6 +2383,13 @@ class TraceService:
                 "policy_result": policy_result or temporal.get("policy_result", "excluded"),
                 "provenance": dict(valid_interval.get("provenance") or {}),
                 "exclusion_reason": reason,
+                "authorization_policy_result": (atom.get("authorization_policy") or {}).get("policy_result"),
+                "historical_authorization_revision_event": (atom.get("authorization_policy") or {}).get(
+                    "historical_authorization_revision_event"
+                ),
+                "current_authorization_revision_event": (atom.get("authorization_policy") or {}).get(
+                    "current_authorization_revision_event"
+                ),
             }
             temporal_exclusion_details.append(detail)
 
@@ -2393,12 +2400,110 @@ class TraceService:
             # intervals, provenance, lifecycle state, and source revisions are
             # themselves record metadata. An unauthorized record contributes
             # only to a redacted aggregate counter.
-            authorized = (
-                authorization_context.allows_record(atom)
-                if authorization_context is not None
-                else self._allowed(atom, request.privacy_context)
-            )
-            if not authorized:
+            def permits(security: dict[str, Any]) -> bool:
+                candidate = {**atom, "security": security}
+                return (
+                    authorization_context.allows_record(candidate)
+                    if authorization_context is not None
+                    else self._allowed(candidate, request.privacy_context)
+                )
+
+            authorization_resolver = getattr(self.store, "resolve_source_authorization", None)
+            source_authorization_ids = list(dict.fromkeys(
+                str(item)
+                for item in atom.get(
+                    "source_atom_version_ids",
+                    [atom.get("atom_version_id")] if "atom" in atom.get("facets", []) else [],
+                )
+                if item
+            ))
+            authorizations: list[dict[str, Any]] | None = None
+            if callable(authorization_resolver):
+                authorizations = []
+                for source_atom_version_id in source_authorization_ids:
+                    try:
+                        authorizations.append(authorization_resolver(
+                            source_atom_version_id,
+                            as_of_event=request.as_of_event,
+                        ))
+                    except Exception:
+                        authorizations.append({
+                            "available": False,
+                            "exclusion_reason": (
+                                "historical_authorization_unavailable"
+                                if request.as_of_event is not None
+                                else "current_authorization_unavailable"
+                            ),
+                        })
+                if not authorizations:
+                    authorizations = None
+            elif request.as_of_event is not None:
+                authorizations = [{"available": False}]
+
+            if authorizations is not None:
+                unavailable = next(
+                    (item for item in authorizations if not item.get("available")),
+                    None,
+                )
+                if unavailable is not None:
+                    record_aggregate(
+                        atom,
+                        str(
+                            unavailable.get("exclusion_reason")
+                            or (
+                                "historical_authorization_unavailable"
+                                if request.as_of_event is not None
+                                else "current_authorization_unavailable"
+                            )
+                        ),
+                    )
+                    continue
+                historical_allowed = all(
+                    permits(dict(item.get("historical_security") or {}))
+                    for item in authorizations
+                )
+                current_allowed = all(
+                    permits(dict(item.get("current_security") or {}))
+                    for item in authorizations
+                )
+                # A derived projection is additionally constrained by its own
+                # current record classification; every source classification
+                # is ANDed independently above.
+                if "atom" not in atom.get("facets", []):
+                    current_allowed = current_allowed and permits(dict(atom.get("security") or {}))
+                if request.as_of_event is not None and not historical_allowed:
+                    record_aggregate(atom, "historical_authorization_denied")
+                    continue
+                if not current_allowed:
+                    record_aggregate(atom, "current_authorization_denied")
+                    continue
+                historical_revisions = list(dict.fromkeys(
+                    item.get("historical_authorization_revision_event")
+                    for item in authorizations
+                    if item.get("historical_authorization_revision_event") is not None
+                ))
+                current_revisions = list(dict.fromkeys(
+                    item.get("current_authorization_revision_event")
+                    for item in authorizations
+                    if item.get("current_authorization_revision_event") is not None
+                ))
+                is_source_atom = "atom" in atom.get("facets", [])
+                atom["authorization_policy"] = {
+                    "policy_result": "allowed",
+                    "policy": "most_restrictive_historical_and_current",
+                    "historical_authorization_revision_event": (
+                        historical_revisions[0] if is_source_atom and historical_revisions else None
+                    ),
+                    "current_authorization_revision_event": (
+                        current_revisions[0] if is_source_atom and current_revisions else None
+                    ),
+                    "historical_authorization_revision_events": historical_revisions,
+                    "current_authorization_revision_events": current_revisions,
+                    "historical_resolution": (
+                        authorizations[0].get("historical_resolution") if is_source_atom else "all_sources"
+                    ),
+                }
+            elif not permits(dict(atom.get("security") or {})):
                 record_aggregate(atom, "current_authorization_denied")
                 continue
             if request.as_of_event is not None and int(atom.get("created_event_offset", 0)) > request.as_of_event:
@@ -2700,6 +2805,34 @@ class TraceService:
                 resolved_release,
                 temporal_exclusion_state,
             )
+        if (
+            request.as_of_event is not None
+            and temporal_exclusions.get("historical_authorization_unavailable", 0) > 0
+        ):
+            provider_diagnostics["temporal"] = {
+                **provider_diagnostics["temporal"],
+                "policy_result": "denied",
+                "exclusion_reason": "historical_authorization_unavailable",
+            }
+            diagnostics = {
+                **provider_diagnostics,
+                "temporal_exclusions": temporal_exclusions,
+                "temporal_exclusion_details": [],
+                "temporal_exclusion_details_truncated": False,
+                "temporal_exclusion_details_omitted_count": 0,
+            }
+            query_snapshot = request.model_dump(mode="json")
+            query_snapshot["retrieval_diagnostics"] = diagnostics
+            bundle = self.store.save_bundle(
+                workspace_id=request.workspace_id,
+                query=query_snapshot,
+                results=[],
+                sufficiency_state="historical_unavailable",
+            )
+            response = self._bundle_response(bundle)
+            response["status"] = "historical_unavailable"
+            response["retrieval_diagnostics"] = diagnostics
+            return response
         with telemetry_span("trace.retrieval", {"workspace_id": request.workspace_id, "profile": request.retrieval_profile}):
             with self.metrics.timer("trace_retrieval_seconds", labels={"profile": request.retrieval_profile}):
                 navigator = (
@@ -2825,7 +2958,23 @@ class TraceService:
                             or atom.get("properties", {}).get("temporal", {})
                         ).get("provenance", {})
                     ),
-                    "exclusion_reason": temporal.get("exclusion_reason"),
+                "exclusion_reason": temporal.get("exclusion_reason"),
+                    "authorization_policy_result": (atom.get("authorization_policy") or {}).get("policy_result"),
+                    "historical_authorization_revision_event": (atom.get("authorization_policy") or {}).get(
+                        "historical_authorization_revision_event"
+                    ),
+                    "current_authorization_revision_event": (atom.get("authorization_policy") or {}).get(
+                        "current_authorization_revision_event"
+                    ),
+                    "historical_authorization_revision_events": (atom.get("authorization_policy") or {}).get(
+                        "historical_authorization_revision_events", []
+                    ),
+                    "current_authorization_revision_events": (atom.get("authorization_policy") or {}).get(
+                        "current_authorization_revision_events", []
+                    ),
+                    "historical_authorization_resolution": (atom.get("authorization_policy") or {}).get(
+                        "historical_resolution"
+                    ),
                 },
                 "channel_scores": {
                     "lexical_bm25": candidate.lexical,

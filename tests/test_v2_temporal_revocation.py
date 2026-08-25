@@ -23,7 +23,13 @@ class TemporalRevocationTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.store.close()
 
-    def _ingest(self, content: str, *, temporal: dict[str, object] | None = None) -> dict[str, object]:
+    def _ingest(
+        self,
+        content: str,
+        *,
+        temporal: dict[str, object] | None = None,
+        visibility: str = "private",
+    ) -> dict[str, object]:
         raw = content.encode("utf-8")
         content_hash = hashlib.sha256(raw).hexdigest()
         result = self.store.ingest(
@@ -45,10 +51,21 @@ class TemporalRevocationTests(unittest.TestCase):
                 "temporal": temporal or {},
             }],
             actor="test",
-            visibility="private",
+            visibility=visibility,
             idempotency_key=None,
         )
         return self.store.ingestion_atoms(result["ingestion_id"])[0]
+
+    def _activate_release(self) -> int:
+        planned = self.store.create_cortex_release(workspace_id="alpha", actor="release-controller")
+        self.store.validate_cortex_release(
+            planned["release_id"], {"passed": True, "receipt_id": "authorization-test"},
+            actor="release-validator",
+        )
+        activated = self.store.activate_cortex_release(
+            planned["release_id"], actor="release-controller"
+        )
+        return int(activated["activated_event_offset"])
 
     def test_valid_time_is_explicit_half_open_and_unknown_is_not_inferred(self) -> None:
         start = datetime(2024, 1, 1, tzinfo=UTC)
@@ -232,6 +249,217 @@ class TemporalRevocationTests(unittest.TestCase):
         serialized = json.dumps(persisted["query"]["retrieval_diagnostics"], sort_keys=True)
         self.assertNotIn(str(source["atom_version_id"]), serialized)
         self.assertNotIn(marker, serialized)
+
+    def test_historical_public_current_private_uses_most_restrictive_authorization(self) -> None:
+        source = self._ingest("authorization reclassification public private", visibility="public")
+        activated_at = self._activate_release()
+        context = AuthorizationContext(
+            principal=Principal(
+                subject="public-only",
+                auth_method="test",
+                workspace_ids=frozenset({"alpha"}),
+                allowed_visibility=frozenset({"public"}),
+            ),
+            workspace_id="alpha",
+            allowed_visibility=frozenset({"public"}),
+            as_of_event=activated_at,
+        )
+
+        from trace.v2.service import TraceService
+
+        service = TraceService(self.store, object())
+        allowed = service.query(
+            QueryRequest(
+                workspace_id="alpha",
+                query="authorization reclassification public private",
+                as_of_event=activated_at,
+            ),
+            authorization_context=context,
+        )
+        evidence = next(
+            item for item in allowed["results"]
+            if item["atom_version_id"] == source["atom_version_id"]
+        )
+        self.assertEqual(evidence["temporal"]["authorization_policy_result"], "allowed")
+        self.assertIsInstance(evidence["temporal"]["historical_authorization_revision_event"], int)
+        self.assertIsInstance(evidence["temporal"]["current_authorization_revision_event"], int)
+
+        self.store.transition_source_authorization(
+            str(source["atom_version_id"]),
+            visibility="private",
+            actor="policy-admin",
+            reason="classification raised",
+        )
+        denied = service.query(
+            QueryRequest(
+                workspace_id="alpha",
+                query="authorization reclassification public private",
+                as_of_event=activated_at,
+            ),
+            authorization_context=context,
+        )
+        self.assertNotIn(source["atom_version_id"], {item["atom_version_id"] for item in denied["results"]})
+        self.assertEqual(denied["retrieval_diagnostics"]["temporal_exclusions"], {"current_authorization_denied": 1})
+        self.assertEqual(denied["retrieval_diagnostics"]["temporal_exclusion_details"], [])
+        persisted = self.store.get_bundle(denied["evidence_bundle_id"])
+        serialized = json.dumps(persisted["query"]["retrieval_diagnostics"], sort_keys=True)
+        self.assertNotIn(str(source["atom_version_id"]), serialized)
+        self.assertNotIn("current_authorization_revision_event", serialized)
+        self.assertNotIn("historical_authorization_revision_event", serialized)
+
+    def test_historical_private_current_public_uses_most_restrictive_authorization(self) -> None:
+        source = self._ingest("authorization reclassification private public", visibility="private")
+        activated_at = self._activate_release()
+        self.store.transition_source_authorization(
+            str(source["atom_version_id"]),
+            visibility="public",
+            actor="policy-admin",
+            reason="classification lowered",
+        )
+        context = AuthorizationContext(
+            principal=Principal(
+                subject="public-only",
+                auth_method="test",
+                workspace_ids=frozenset({"alpha"}),
+                allowed_visibility=frozenset({"public"}),
+            ),
+            workspace_id="alpha",
+            allowed_visibility=frozenset({"public"}),
+            as_of_event=activated_at,
+        )
+
+        from trace.v2.service import TraceService
+
+        denied = TraceService(self.store, object()).query(
+            QueryRequest(
+                workspace_id="alpha",
+                query="authorization reclassification private public",
+                as_of_event=activated_at,
+            ),
+            authorization_context=context,
+        )
+        self.assertNotIn(source["atom_version_id"], {item["atom_version_id"] for item in denied["results"]})
+        self.assertEqual(
+            denied["retrieval_diagnostics"]["temporal_exclusions"],
+            {"historical_authorization_denied": 1},
+        )
+        self.assertEqual(denied["retrieval_diagnostics"]["temporal_exclusion_details"], [])
+
+    def test_missing_historical_authorization_fails_closed_without_record_details(self) -> None:
+        source = self._ingest("malformed authorization history sentinel", visibility="public")
+        activated_at = self._activate_release()
+        with self.store.transaction() as conn:
+            row = conn.execute(
+                """SELECT e.event_offset,e.payload_json FROM events e
+                     JOIN nodes n ON n.created_event_offset=e.event_offset
+                    WHERE n.node_id=?""",
+                (source["node_id"],),
+            ).fetchone()
+            payload = json.loads(row["payload_json"])
+            payload.pop("security", None)
+            conn.execute(
+                "UPDATE events SET payload_json=? WHERE event_offset=?",
+                (json.dumps(payload, sort_keys=True), row["event_offset"]),
+            )
+        context = AuthorizationContext(
+            principal=Principal(
+                subject="public-only",
+                auth_method="test",
+                workspace_ids=frozenset({"alpha"}),
+                allowed_visibility=frozenset({"public"}),
+            ),
+            workspace_id="alpha",
+            allowed_visibility=frozenset({"public"}),
+            as_of_event=activated_at,
+        )
+
+        from trace.v2.service import TraceService
+
+        response = TraceService(self.store, object()).query(
+            QueryRequest(
+                workspace_id="alpha",
+                query="malformed authorization history sentinel",
+                as_of_event=activated_at,
+            ),
+            authorization_context=context,
+        )
+        self.assertEqual(response["status"], "historical_unavailable")
+        self.assertEqual(response["results"], [])
+        self.assertEqual(
+            response["retrieval_diagnostics"]["temporal_exclusions"],
+            {"historical_authorization_unavailable": 1},
+        )
+        self.assertEqual(response["retrieval_diagnostics"]["temporal_exclusion_details"], [])
+        persisted = self.store.get_bundle(response["evidence_bundle_id"])
+        serialized = json.dumps(persisted, sort_keys=True)
+        self.assertNotIn(str(source["atom_version_id"]), serialized)
+
+    def test_later_security_change_cannot_replace_missing_created_baseline(self) -> None:
+        source = self._ingest("missing baseline after authorization change", visibility="private")
+        activated_at = self._activate_release()
+        self.store.transition_source_authorization(
+            str(source["atom_version_id"]), visibility="public", actor="policy-admin",
+        )
+        with self.store.transaction() as conn:
+            row = conn.execute(
+                """SELECT e.event_offset,e.payload_json FROM events e
+                     JOIN nodes n ON n.created_event_offset=e.event_offset
+                    WHERE n.node_id=?""",
+                (source["node_id"],),
+            ).fetchone()
+            payload = json.loads(row["payload_json"])
+            payload.pop("security", None)
+            conn.execute(
+                "UPDATE events SET payload_json=? WHERE event_offset=?",
+                (json.dumps(payload, sort_keys=True), row["event_offset"]),
+            )
+        resolved = self.store.resolve_source_authorization(
+            str(source["atom_version_id"]), as_of_event=activated_at,
+        )
+        self.assertFalse(resolved["available"])
+        self.assertEqual(resolved["exclusion_reason"], "historical_authorization_unavailable")
+
+    def test_multiple_authorization_changes_resolve_latest_at_or_before_event(self) -> None:
+        source = self._ingest("multiple authorization revisions sentinel", visibility="public")
+        self._activate_release()
+        private = self.store.transition_source_authorization(
+            str(source["atom_version_id"]), visibility="private", actor="policy-admin",
+        )
+        internal = self.store.transition_source_authorization(
+            str(source["atom_version_id"]), visibility="internal", actor="policy-admin",
+        )
+        resolved = self.store.resolve_source_authorization(
+            str(source["atom_version_id"]),
+            as_of_event=int(private["authorization_revision_event"]),
+        )
+        self.assertEqual(resolved["historical_security"]["visibility"], "private")
+        self.assertEqual(resolved["current_security"]["visibility"], "internal")
+        self.assertEqual(
+            resolved["historical_authorization_revision_event"],
+            private["authorization_revision_event"],
+        )
+        self.assertEqual(
+            resolved["current_authorization_revision_event"],
+            internal["authorization_revision_event"],
+        )
+
+    def test_same_authorization_is_zero_event_and_replay_updates_hot_security(self) -> None:
+        source = self._ingest("authorization replay and hot inbox sentinel", visibility="public")
+        changed = self.store.transition_source_authorization(
+            str(source["atom_version_id"]), visibility="private", actor="policy-admin",
+        )
+        before_repeat = self.store.last_event_offset()
+        repeated = self.store.transition_source_authorization(
+            str(source["atom_version_id"]), visibility="private", actor="policy-admin",
+        )
+        self.assertFalse(repeated["changed"])
+        self.assertEqual(repeated["authorization_revision_event"], changed["authorization_revision_event"])
+        self.assertEqual(self.store.last_event_offset(), before_repeat)
+        hot = self.store.hot_candidates(
+            "alpha", "authorization replay hot inbox", visibility=["private"]
+        )
+        self.assertIn(source["atom_version_id"], {item["atom_version_id"] for item in hot})
+        self.assertTrue(self.store.replay_report("alpha")["valid"])
 
     def test_authorized_temporal_exclusion_details_are_bounded_with_exact_aggregates(self) -> None:
         total = TEMPORAL_EXCLUSION_DETAIL_LIMIT + 5
