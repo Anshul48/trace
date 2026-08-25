@@ -86,12 +86,13 @@ class EventPartitionBootstrapContractTests(unittest.TestCase):
         first = runner.apply(connection)
         first_execution_count = len(connection.cursor_instance.executed_migrations)
         second = runner.apply(connection)
+        self.assertEqual([migration.revision for migration in first], [1, 2, 3, 4, 5, 6, 7])
+        self.assertEqual([migration.revision for migration in second], [1, 2, 3, 4, 5, 6, 7])
 
-        self.assertEqual([migration.revision for migration in first], [1, 2, 3, 4, 5, 6])
-        self.assertEqual([migration.revision for migration in second], [1, 2, 3, 4, 5, 6])
-        self.assertEqual(first_execution_count, 6)
+        self.assertEqual(first_execution_count, 7)
         self.assertEqual(len(connection.cursor_instance.executed_migrations), first_execution_count)
-        self.assertEqual(set(connection.cursor_instance.ledger), {1, 2, 3, 4, 5, 6})
+        self.assertEqual(set(connection.cursor_instance.ledger), {1, 2, 3, 4, 5, 6, 7})
+
 
 
 if __name__ == "__main__":

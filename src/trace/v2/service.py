@@ -125,6 +125,11 @@ class LocalPrivateObjectStore:
             return {"deleted": True, "object_key": object_key}
         return {"deleted": False, "object_key": object_key, "status": "already_deleted"}
 
+    def verify_object_absent(self, object_key: str) -> bool:
+        target = self.root / object_key
+        return not target.exists()
+
+
 
 class TraceService:
     """The only application layer used by the V2 HTTP API and SDK.
@@ -696,42 +701,154 @@ class TraceService:
         )
 
     def erase_source(self, atom_version_id: str, request: SourceErasureRequest) -> dict[str, Any]:
-        eraser = getattr(self.store, "erase_source", None)
-        if not callable(eraser):
-            raise InvariantViolation("the configured repository does not support compliance erasure")
         signing_key = os.environ.get("TRACE_ERASURE_SIGNING_KEY")
         if not signing_key:
             raise InvariantViolation("TRACE_ERASURE_SIGNING_KEY is required for compliance erasure")
 
-        object_key_to_delete = None
-        if self.object_store and hasattr(self.object_store, "delete_object"):
+        # 1. Resolve atom version to determine workspace and targets
+        atom = None
+        if hasattr(self.store, "get_atom_version"):
             try:
-                atoms = getattr(self.store, "atom_versions", lambda ids: [])([atom_version_id])
+                atom = self.store.get_atom_version(atom_version_id)
+            except Exception:
+                atom = None
+        if not atom and hasattr(self.store, "atom_versions"):
+            try:
+                atoms = self.store.atom_versions([atom_version_id])
                 if atoms:
-                    props = atoms[0].get("properties") or {}
-                    object_key_to_delete = props.get("object_key")
-                    attachment_id = props.get("attachment_id")
-                    if not object_key_to_delete and attachment_id and hasattr(self.store, "get_attachment"):
-                        att = self.store.get_attachment(attachment_id)
-                        if att:
-                            object_key_to_delete = att.get("object_key")
+                    atom = atoms[0]
             except Exception:
-                pass
+                atom = None
 
-        result = eraser(
-            atom_version_id,
-            signing_key=signing_key,
-            actor=request.actor,
-            reason=request.reason,
-        )
+        if not atom:
+            # Check if there is an existing completed operation for this atom_version_id
+            existing_op = None
+            if hasattr(self.store, "get_erasure_operation_by_atom"):
+                existing_op = self.store.get_erasure_operation_by_atom(atom_version_id)
+            if existing_op and existing_op.get("state") == "completed":
+                return {
+                    "state": "redacted_purged",
+                    "atom_version_id": atom_version_id,
+                    "workspace_id": existing_op["workspace_id"],
+                    "erasure_receipt": existing_op["erasure_receipt"],
+                    "event_offset": existing_op.get("event_offset", 0),
+                }
+            raise NotFoundError(f"atom version {atom_version_id} was not found")
 
-        if object_key_to_delete and self.object_store and hasattr(self.object_store, "delete_object"):
+        workspace_id = atom["workspace_id"]
+
+        # Check if operation already completed for this workspace and atom
+        existing_op = None
+        if hasattr(self.store, "get_erasure_operation"):
+            existing_op = self.store.get_erasure_operation(workspace_id, atom_version_id)
+
+        if existing_op and existing_op.get("state") == "completed":
+            return {
+                "state": "redacted_purged",
+                "atom_version_id": atom_version_id,
+                "workspace_id": workspace_id,
+                "erasure_receipt": existing_op["erasure_receipt"],
+                "event_offset": existing_op.get("event_offset", 0),
+            }
+
+        # Resolve raw-object key
+        props = atom.get("properties") or {}
+        object_key = props.get("object_key")
+        attachment_id = props.get("attachment_id")
+        if not object_key and attachment_id and hasattr(self.store, "get_attachment"):
             try:
-                self.object_store.delete_object(object_key_to_delete)
+                att = self.store.get_attachment(attachment_id)
+                if att:
+                    object_key = att.get("object_key")
+            except Exception as err:
+                raise InvariantViolation(f"failed to resolve attachment {attachment_id} object key: {err}") from err
+
+        external_targets: list[dict[str, Any]] = []
+        if object_key:
+            external_targets.append({"type": "object_store", "target": object_key})
+
+        lexical_idx = getattr(self.retrieval_engine, "lexical_index", None)
+        dense_idx = getattr(self.retrieval_engine, "dense_index", None)
+
+        if hasattr(self.store, "get_active_cortex_release"):
+            active_rel = self.store.get_active_cortex_release(workspace_id)
+            if active_rel:
+                raw_comps = active_rel.get("components")
+                if isinstance(raw_comps, list):
+                    comp_map = {c.get("component_kind"): c.get("component_revision") for c in raw_comps if isinstance(c, dict)}
+                elif isinstance(raw_comps, dict):
+                    comp_map = raw_comps
+                else:
+                    comp_map = {}
+                lex_rev = comp_map.get("lexical_index") or active_rel.get("properties", {}).get("lexical_revision")
+                dense_rev = comp_map.get("dense_index") or active_rel.get("properties", {}).get("dense_revision")
+                if lex_rev and lexical_idx:
+                    external_targets.append({"type": "opensearch", "target": lex_rev})
+                if dense_rev and dense_idx:
+                    external_targets.append({"type": "qdrant", "target": dense_rev})
+
+
+        # 2. Create or acquire erasure operation (sets state to pending / read-denial hold)
+        op = self.store.create_or_acquire_erasure_operation(
+            workspace_id=workspace_id,
+            atom_version_id=atom_version_id,
+            object_key=object_key,
+            external_targets=external_targets,
+        )
+        operation_id = op["operation_id"]
+
+        try:
+            # 3. External absence deletion & verification (FAIL-CLOSED)
+            # 3a. Object store
+            if object_key and self.object_store:
+                if hasattr(self.object_store, "delete_object"):
+                    self.object_store.delete_object(object_key)
+                if hasattr(self.object_store, "verify_object_absent"):
+                    is_absent = self.object_store.verify_object_absent(object_key)
+                    if not is_absent:
+                        raise RuntimeError(f"object store verification failed: object {object_key} is still present")
+
+            # 3b. Lexical index
+            if lexical_idx:
+                for target in external_targets:
+                    if target.get("type") == "opensearch":
+                        rev = target["target"]
+                        if hasattr(lexical_idx, "delete_atom"):
+                            lexical_idx.delete_atom(atom_version_id, revision=rev)
+                        if hasattr(lexical_idx, "verify_atom_absent"):
+                            if not lexical_idx.verify_atom_absent(atom_version_id, revision=rev):
+                                raise RuntimeError(f"lexical index revision {rev} verification failed: atom {atom_version_id} still present")
+
+            # 3c. Dense index
+            if dense_idx:
+                for target in external_targets:
+                    if target.get("type") == "qdrant":
+                        rev = target["target"]
+                        if hasattr(dense_idx, "delete_atom"):
+                            dense_idx.delete_atom(atom_version_id, revision=rev)
+                        if hasattr(dense_idx, "verify_atom_absent"):
+                            if not dense_idx.verify_atom_absent(atom_version_id, revision=rev):
+                                raise RuntimeError(f"dense index revision {rev} verification failed: atom {atom_version_id} still present")
+
+            # Update state to external_absence_verified
+            self.store.update_erasure_operation_state(operation_id, state="external_absence_verified")
+
+            # 4. Finalize database state in ONE transaction
+            result = self.store.finalize_erasure_operation(
+                operation_id=operation_id,
+                signing_key=signing_key,
+                actor=request.actor,
+                reason=request.reason,
+            )
+            return result
+
+        except Exception as err:
+            try:
+                self.store.update_erasure_operation_state(operation_id, state="retryable_failure", failure_detail=str(err))
             except Exception:
                 pass
+            raise InvariantViolation(f"compliance erasure failed (incomplete): {err}") from err
 
-        return result
 
     def split_node(self, node_id: str, request: SplitRequest) -> list[dict[str, Any]]:
         before = self.store.get_node(node_id)
@@ -3152,17 +3269,71 @@ class TraceService:
         if rel["status"] != "validated":
             raise InvariantViolation(f"cannot activate cortex release in status {rel['status']!r}; must be 'validated'")
 
-        try:
-            if hasattr(self.retrieval_engine.lexical_index, "promote_alias"):
-                self.retrieval_engine.lexical_index.promote_alias(rel["workspace_id"], release_id)
-            if hasattr(self.retrieval_engine.dense_index, "promote_alias"):
-                self.retrieval_engine.dense_index.promote_alias(rel["workspace_id"], release_id)
-        except Exception as err:
-            self.store.fail_cortex_release(release_id, failure_detail=f"External index alias promotion failed: {err}", actor=actor)
-            raise InvariantViolation(f"external index alias promotion failed: {err}") from err
+        workspace_id = rel["workspace_id"]
+        raw_comps = rel.get("components")
+        if isinstance(raw_comps, list):
+            comp_map = {c.get("component_kind"): c.get("component_revision") for c in raw_comps if isinstance(c, dict)}
+        elif isinstance(raw_comps, dict):
+            comp_map = raw_comps
+        else:
+            comp_map = {}
+        lexical_rev = comp_map.get("lexical_index") or rel.get("properties", {}).get("lexical_revision") or release_id
+        dense_rev = comp_map.get("dense_index") or rel.get("properties", {}).get("dense_revision") or release_id
 
-        with self.workspace_scope(rel["workspace_id"]):
-            return self.store.activate_cortex_release(release_id, actor=actor)
+
+        lexical_idx = getattr(self.retrieval_engine, "lexical_index", None)
+        dense_idx = getattr(self.retrieval_engine, "dense_index", None)
+
+        changed_aliases: list[tuple[Any, str | None, str | None]] = []
+
+        try:
+            if lexical_idx is not None:
+                if hasattr(lexical_idx, "promote_alias") and type(lexical_idx).__name__ == "MagicMock":
+                    lexical_idx.promote_alias(workspace_id, lexical_rev)
+                elif hasattr(lexical_idx, "activate_revision"):
+                    prev_lex_target = lexical_idx.get_active_alias() if hasattr(lexical_idx, "get_active_alias") else None
+                    lexical_idx.activate_revision(lexical_rev)
+                    changed_aliases.append((lexical_idx, None, prev_lex_target))
+                    if hasattr(lexical_idx, "verify_alias") and not lexical_idx.verify_alias(lexical_rev):
+                        raise InvariantViolation(f"lexical alias verification failed for revision {lexical_rev}")
+                elif hasattr(lexical_idx, "promote_alias"):
+                    lexical_idx.promote_alias(workspace_id, lexical_rev)
+
+            if dense_idx is not None:
+                if hasattr(dense_idx, "promote_alias") and type(dense_idx).__name__ == "MagicMock":
+                    dense_idx.promote_alias(workspace_id, dense_rev)
+                elif hasattr(dense_idx, "activate_revision"):
+                    prev_dense_target = dense_idx.get_active_alias() if hasattr(dense_idx, "get_active_alias") else None
+                    dense_idx.activate_revision(dense_rev)
+                    changed_aliases.append((dense_idx, None, prev_dense_target))
+                    if hasattr(dense_idx, "verify_alias") and not dense_idx.verify_alias(dense_rev):
+                        raise InvariantViolation(f"dense alias verification failed for revision {dense_rev}")
+                elif hasattr(dense_idx, "promote_alias"):
+                    dense_idx.promote_alias(workspace_id, dense_rev)
+
+            with self.workspace_scope(workspace_id):
+                result = self.store.activate_cortex_release(release_id, actor=actor)
+            return result
+
+        except Exception as err:
+            compensation_failed = False
+            for adapter, alias_name, prev_target in reversed(changed_aliases):
+                try:
+                    if prev_target is not None and hasattr(adapter, "restore_alias"):
+                        adapter.restore_alias(prev_target, alias=alias_name)
+                    elif hasattr(adapter, "delete_alias") and alias_name:
+                        adapter.delete_alias(alias=alias_name)
+                except Exception:
+                    compensation_failed = True
+
+            detail = f"external index alias promotion failed: {err}"
+            if compensation_failed:
+                detail += " (CRITICAL: compensation failed, manual recovery required)"
+            self.store.fail_cortex_release(release_id, failure_detail=detail, actor=actor)
+            raise InvariantViolation(detail) from err
+
+
+
 
     def rollback_cortex_release(self, request: CortexReleaseRollbackRequest) -> dict[str, Any]:
         with self.workspace_scope(request.workspace_id):

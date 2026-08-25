@@ -398,6 +398,23 @@ class SqliteEventStore:
                 );
                 CREATE INDEX IF NOT EXISTS proposals_workspace_status ON proposals(workspace_id, status);
 
+                CREATE TABLE IF NOT EXISTS erasure_operations (
+                    operation_id TEXT PRIMARY KEY,
+                    workspace_id TEXT NOT NULL,
+                    atom_version_id TEXT NOT NULL,
+                    state TEXT NOT NULL CHECK (state IN ('pending', 'external_absence_verified', 'completed', 'retryable_failure')),
+                    object_key TEXT,
+                    external_targets_json TEXT NOT NULL DEFAULT '[]',
+                    erasure_receipt_json TEXT,
+                    event_offset INTEGER,
+                    failure_detail TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    UNIQUE(workspace_id, atom_version_id)
+                );
+                CREATE INDEX IF NOT EXISTS erasure_operations_lookup
+                    ON erasure_operations(workspace_id, atom_version_id, state);
+
                 CREATE TABLE IF NOT EXISTS evidence_bundles (
                     evidence_bundle_id TEXT PRIMARY KEY,
                     workspace_id TEXT,
@@ -1392,9 +1409,109 @@ class SqliteEventStore:
     def mark_source_conflicted(self, atom_version_id: str, *, actor: str = "system", reason: str | None = None, idempotency_key: str | None = None) -> dict[str, Any]:
         return self.transition_source_lifecycle(atom_version_id, state="conflicted", actor=actor, reason=reason, idempotency_key=idempotency_key)
 
-    def erase_source(
+    def get_erasure_operation(self, workspace_id: str, atom_version_id: str) -> dict[str, Any] | None:
+        with self.transaction() as conn:
+            row = conn.execute(
+                "SELECT * FROM erasure_operations WHERE workspace_id=? AND atom_version_id=?",
+                (workspace_id, str(atom_version_id)),
+            ).fetchone()
+            if not row:
+                return None
+            return {
+                "operation_id": row["operation_id"],
+                "workspace_id": row["workspace_id"],
+                "atom_version_id": row["atom_version_id"],
+                "state": row["state"],
+                "object_key": row["object_key"],
+                "external_targets": _decode(row["external_targets_json"], []),
+                "erasure_receipt": _decode(row["erasure_receipt_json"], None) if row["erasure_receipt_json"] else None,
+                "event_offset": row["event_offset"],
+                "failure_detail": row["failure_detail"],
+                "created_at": row["created_at"],
+                "updated_at": row["updated_at"],
+            }
+
+    def get_erasure_operation_by_atom(self, atom_version_id: str) -> dict[str, Any] | None:
+        with self.transaction() as conn:
+            row = conn.execute(
+                "SELECT * FROM erasure_operations WHERE atom_version_id=?",
+                (str(atom_version_id),),
+            ).fetchone()
+            if not row:
+                return None
+            return {
+                "operation_id": row["operation_id"],
+                "workspace_id": row["workspace_id"],
+                "atom_version_id": row["atom_version_id"],
+                "state": row["state"],
+                "object_key": row["object_key"],
+                "external_targets": _decode(row["external_targets_json"], []),
+                "erasure_receipt": _decode(row["erasure_receipt_json"], None) if row["erasure_receipt_json"] else None,
+                "event_offset": row["event_offset"],
+                "failure_detail": row["failure_detail"],
+                "created_at": row["created_at"],
+                "updated_at": row["updated_at"],
+            }
+
+    def create_or_acquire_erasure_operation(
         self,
+        workspace_id: str,
         atom_version_id: str,
+        object_key: str | None = None,
+        external_targets: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        with self.transaction() as conn:
+            existing = conn.execute(
+                "SELECT * FROM erasure_operations WHERE workspace_id=? AND atom_version_id=?",
+                (workspace_id, str(atom_version_id)),
+            ).fetchone()
+            if existing:
+                return {
+                    "operation_id": existing["operation_id"],
+                    "workspace_id": existing["workspace_id"],
+                    "atom_version_id": existing["atom_version_id"],
+                    "state": existing["state"],
+                    "object_key": existing["object_key"],
+                    "external_targets": _decode(existing["external_targets_json"], []),
+                    "erasure_receipt": _decode(existing["erasure_receipt_json"], None) if existing["erasure_receipt_json"] else None,
+                    "event_offset": existing["event_offset"],
+                    "failure_detail": existing["failure_detail"],
+                    "created_at": existing["created_at"],
+                    "updated_at": existing["updated_at"],
+                }
+            op_id = str(uuid.uuid4())
+            now_iso = _now()
+            conn.execute(
+                """INSERT INTO erasure_operations(
+                    operation_id, workspace_id, atom_version_id, state, object_key,
+                    external_targets_json, failure_detail, created_at, updated_at
+                ) VALUES (?, ?, ?, 'pending', ?, ?, NULL, ?, ?)""",
+                (op_id, workspace_id, str(atom_version_id), object_key, _json(external_targets or []), now_iso, now_iso),
+            )
+            return {
+                "operation_id": op_id,
+                "workspace_id": workspace_id,
+                "atom_version_id": str(atom_version_id),
+                "state": "pending",
+                "object_key": object_key,
+                "external_targets": external_targets or [],
+                "erasure_receipt": None,
+                "event_offset": None,
+                "failure_detail": None,
+                "created_at": now_iso,
+                "updated_at": now_iso,
+            }
+
+    def update_erasure_operation_state(self, operation_id: str, state: str, failure_detail: str | None = None) -> None:
+        with self.transaction() as conn:
+            conn.execute(
+                "UPDATE erasure_operations SET state=?, failure_detail=?, updated_at=? WHERE operation_id=?",
+                (state, failure_detail, _now(), str(operation_id)),
+            )
+
+    def finalize_erasure_operation(
+        self,
+        operation_id: str,
         *,
         signing_key: str,
         actor: str = "system",
@@ -1403,33 +1520,54 @@ class SqliteEventStore:
         if not signing_key:
             raise InvariantViolation("compliance erasure requires a configured signing key")
         with self.transaction() as conn:
+            op = conn.execute("SELECT * FROM erasure_operations WHERE operation_id=?", (str(operation_id),)).fetchone()
+            if not op:
+                raise NotFoundError(f"erasure operation {operation_id} was not found")
+            if op["state"] == "completed":
+                return {
+                    "state": "redacted_purged",
+                    "atom_version_id": op["atom_version_id"],
+                    "workspace_id": op["workspace_id"],
+                    "erasure_receipt": _decode(op["erasure_receipt_json"]),
+                    "event_offset": op["event_offset"],
+                }
+
+            atom_version_id = op["atom_version_id"]
+            workspace_id = op["workspace_id"]
             current = self._current_source_lifecycle_conn(conn, atom_version_id)
             if current is None:
                 raise NotFoundError(f"source lifecycle for {atom_version_id} was not found")
-            if current.get("state") == "redacted_purged":
-                return self._source_lifecycle_row(
-                    conn.execute("SELECT * FROM source_lifecycle WHERE atom_version_id=?", (atom_version_id,)).fetchone()
-                ) | {"event_offset": current.get("changed_event_offset", 0)}
+
             source = conn.execute(
                 "SELECT nv.content_hash,n.workspace_id,nv.node_id FROM node_versions nv JOIN nodes n ON n.node_id=nv.node_id WHERE nv.atom_version_id=?",
                 (atom_version_id,),
             ).fetchone()
             if not source:
                 raise NotFoundError(f"atom version {atom_version_id} was not found")
+
+            # Strict non-content allow-list receipt
             receipt_payload = {
-                "receipt_id": str(uuid.uuid4()), "atom_version_id": atom_version_id,
-                "workspace_id": source["workspace_id"], "original_content_hash": source["content_hash"],
-                "reason": reason, "issued_at": _now(), "action": "redacted_purged",
+                "receipt_id": str(uuid.uuid4()),
+                "atom_version_id": str(atom_version_id),
+                "workspace_id": str(workspace_id),
+                "action": "redacted_purged",
+                "issued_at": _now(),
             }
-            signature = hmac.new(signing_key.encode("utf-8"), _json(receipt_payload).encode("utf-8"), hashlib.sha256).hexdigest()
+            signature = hmac.new(
+                signing_key.encode("utf-8"),
+                _json(receipt_payload).encode("utf-8"),
+                hashlib.sha256
+            ).hexdigest()
             receipt = {**receipt_payload, "signature": signature}
+
             event = self._append_event(
                 conn,
                 stream_id=f"node:{atom_version_id}",
                 event_type="source.erasure_applied",
-                payload={"atom_version_id": atom_version_id, "workspace_id": source["workspace_id"], "receipt": receipt},
+                payload={"atom_version_id": atom_version_id, "workspace_id": workspace_id, "receipt": receipt},
                 actor=actor,
             )
+
             old_version = conn.execute("SELECT properties_json FROM node_versions WHERE atom_version_id=?", (atom_version_id,)).fetchone()
             old_properties = _decode(old_version["properties_json"], {}) if old_version else {}
             redacted_properties = {
@@ -1440,7 +1578,7 @@ class SqliteEventStore:
             conn.execute("UPDATE node_versions SET content='', properties_json=? WHERE atom_version_id=?", (_json(redacted_properties), atom_version_id))
             self._insert_source_lifecycle_conn(
                 conn,
-                atom_version_id=atom_version_id, workspace_id=source["workspace_id"], state="redacted_purged",
+                atom_version_id=atom_version_id, workspace_id=workspace_id, state="redacted_purged",
                 temporal=redacted_properties["temporal"], changed_event_offset=event.offset,
                 predecessor_atom_version_id=current.get("predecessor_atom_version_id"),
                 superseded_by_atom_version_id=current.get("superseded_by_atom_version_id"), erasure_receipt=receipt,
@@ -1451,15 +1589,78 @@ class SqliteEventStore:
             conn.execute("DELETE FROM affinity_edges WHERE left_atom_version_id=? OR right_atom_version_id=?", (atom_version_id, atom_version_id))
             conn.execute("DELETE FROM evidence_anchors WHERE source_atom_version_id=?", (atom_version_id,))
             conn.execute("UPDATE edge_versions SET status='tombstoned', properties_json=? WHERE source_node_id=? OR target_node_id=?", (_json({"erasure_receipt_id": receipt["receipt_id"]}), source["node_id"], source["node_id"]))
-            projection_rows = conn.execute("SELECT projection_object_id,source_atom_version_ids_json FROM projection_objects WHERE workspace_id=?", (source["workspace_id"],)).fetchall()
+            projection_rows = conn.execute("SELECT projection_object_id,source_atom_version_ids_json FROM projection_objects WHERE workspace_id=?", (workspace_id,)).fetchall()
             for projection in projection_rows:
                 if atom_version_id in _decode(projection["source_atom_version_ids_json"], []):
                     conn.execute(
                         "DELETE FROM projection_memberships WHERE parent_projection_object_id=? OR child_id=?",
                         (projection["projection_object_id"], projection["projection_object_id"]),
                     )
-                    conn.execute("DELETE FROM projection_objects WHERE projection_object_id=?", (projection["projection_object_id"],))
-            return self._source_lifecycle_row(conn.execute("SELECT * FROM source_lifecycle WHERE atom_version_id=?", (atom_version_id,)).fetchone()) | {"event_offset": event.offset}
+            conn.execute(
+                "DELETE FROM projection_objects WHERE workspace_id=? AND source_atom_version_ids_json LIKE ?",
+                (workspace_id, f"%{atom_version_id}%"),
+            )
+            attachment_id = old_properties.get("attachment_id")
+            if attachment_id:
+                conn.execute(
+                    "DELETE FROM attachments WHERE attachment_id=? AND NOT EXISTS (SELECT 1 FROM node_versions WHERE properties_json LIKE ? AND content<>'')",
+                    (str(attachment_id), f"%{attachment_id}%"),
+                )
+
+            # Scrub object_key and external targets from retained state on completion
+            conn.execute(
+                """UPDATE erasure_operations
+                   SET state='completed', erasure_receipt_json=?, event_offset=?, object_key=NULL, external_targets_json='[]', failure_detail=NULL, updated_at=?
+                   WHERE operation_id=?""",
+                (_json(receipt), event.offset, _now(), str(operation_id)),
+            )
+            return {
+                "state": "redacted_purged",
+                "atom_version_id": atom_version_id,
+                "workspace_id": workspace_id,
+                "erasure_receipt": receipt,
+                "event_offset": event.offset,
+            }
+
+    def erase_source(
+        self,
+        atom_version_id: str,
+        *,
+        signing_key: str,
+        actor: str = "system",
+        reason: str | None = None,
+    ) -> dict[str, Any]:
+        with self.transaction() as conn:
+            row = conn.execute(
+                "SELECT nv.atom_version_id, n.workspace_id, nv.properties_json FROM node_versions nv JOIN nodes n ON n.node_id=nv.node_id WHERE nv.atom_version_id=?",
+                (str(atom_version_id),),
+            ).fetchone()
+            if not row:
+                existing_op = self.get_erasure_operation_by_atom(atom_version_id)
+                if existing_op and existing_op.get("state") == "completed":
+                    return {
+                        "state": "redacted_purged",
+                        "atom_version_id": atom_version_id,
+                        "workspace_id": existing_op["workspace_id"],
+                        "erasure_receipt": existing_op["erasure_receipt"],
+                        "event_offset": existing_op.get("event_offset", 0),
+                    }
+                raise NotFoundError(f"atom version {atom_version_id} was not found")
+            workspace_id = row["workspace_id"]
+            props = _decode(row["properties_json"], {})
+            object_key = props.get("object_key")
+
+        op = self.create_or_acquire_erasure_operation(workspace_id, atom_version_id, object_key=object_key)
+        if op.get("state") == "completed":
+            return {
+                "state": "redacted_purged",
+                "atom_version_id": atom_version_id,
+                "workspace_id": workspace_id,
+                "erasure_receipt": op["erasure_receipt"],
+                "event_offset": op.get("event_offset", 0),
+            }
+        return self.finalize_erasure_operation(op["operation_id"], signing_key=signing_key, actor=actor, reason=reason)
+
 
     def ingest(
         self,

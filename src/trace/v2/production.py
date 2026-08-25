@@ -559,14 +559,150 @@ class PostgresEventStore:
                 idempotency_key=idempotency_key,
             )
 
-    def erase_source(self, atom_version_id: str, *, signing_key: str, actor: str = "system", reason: str | None = None) -> dict[str, Any]:
-        if self.delegate is not None and hasattr(self.delegate, "erase_source"):
-            return self.delegate.erase_source(atom_version_id, signing_key=signing_key, actor=actor, reason=reason)
+    def get_erasure_operation(self, workspace_id: str, atom_version_id: str) -> dict[str, Any] | None:
+        if self.delegate is not None and hasattr(self.delegate, "get_erasure_operation"):
+            return self.delegate.get_erasure_operation(workspace_id, atom_version_id)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT set_config('trace.workspace_id', %s, true)", (workspace_id,))
+                cursor.execute(
+                    "SELECT * FROM trace_erasure_operations WHERE workspace_id=%s AND atom_version_id=%s",
+                    (workspace_id, str(atom_version_id)),
+                )
+                row = self._cursor_mapping(cursor, cursor.fetchone())
+                if not row:
+                    return None
+                return {
+                    "operation_id": str(row["operation_id"]),
+                    "workspace_id": str(row["workspace_id"]),
+                    "atom_version_id": str(row["atom_version_id"]),
+                    "state": str(row["state"]),
+                    "object_key": row.get("object_key"),
+                    "external_targets": self._json_value(row.get("external_targets"), []),
+                    "erasure_receipt": self._json_value(row.get("erasure_receipt")),
+                    "event_offset": row.get("event_offset"),
+                    "failure_detail": row.get("failure_detail"),
+                    "created_at": str(row.get("created_at")),
+                    "updated_at": str(row.get("updated_at")),
+                }
+
+    def get_erasure_operation_by_atom(self, atom_version_id: str) -> dict[str, Any] | None:
+        if self.delegate is not None and hasattr(self.delegate, "get_erasure_operation_by_atom"):
+            return self.delegate.get_erasure_operation_by_atom(atom_version_id)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT * FROM trace_erasure_operations WHERE atom_version_id=%s",
+                    (str(atom_version_id),),
+                )
+                row = self._cursor_mapping(cursor, cursor.fetchone())
+                if not row:
+                    return None
+                return {
+                    "operation_id": str(row["operation_id"]),
+                    "workspace_id": str(row["workspace_id"]),
+                    "atom_version_id": str(row["atom_version_id"]),
+                    "state": str(row["state"]),
+                    "object_key": row.get("object_key"),
+                    "external_targets": self._json_value(row.get("external_targets"), []),
+                    "erasure_receipt": self._json_value(row.get("erasure_receipt")),
+                    "event_offset": row.get("event_offset"),
+                    "failure_detail": row.get("failure_detail"),
+                    "created_at": str(row.get("created_at")),
+                    "updated_at": str(row.get("updated_at")),
+                }
+
+    def create_or_acquire_erasure_operation(
+        self,
+        workspace_id: str,
+        atom_version_id: str,
+        object_key: str | None = None,
+        external_targets: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "create_or_acquire_erasure_operation"):
+            return self.delegate.create_or_acquire_erasure_operation(workspace_id, atom_version_id, object_key, external_targets)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT set_config('trace.workspace_id', %s, true)", (workspace_id,))
+                cursor.execute(
+                    "SELECT * FROM trace_erasure_operations WHERE workspace_id=%s AND atom_version_id=%s FOR UPDATE",
+                    (workspace_id, str(atom_version_id)),
+                )
+                existing = self._cursor_mapping(cursor, cursor.fetchone())
+                if existing:
+                    return {
+                        "operation_id": str(existing["operation_id"]),
+                        "workspace_id": str(existing["workspace_id"]),
+                        "atom_version_id": str(existing["atom_version_id"]),
+                        "state": str(existing["state"]),
+                        "object_key": existing.get("object_key"),
+                        "external_targets": self._json_value(existing.get("external_targets"), []),
+                        "erasure_receipt": self._json_value(existing.get("erasure_receipt")),
+                        "event_offset": existing.get("event_offset"),
+                        "failure_detail": existing.get("failure_detail"),
+                    }
+                op_id = str(uuid.uuid4())
+                cursor.execute(
+                    """INSERT INTO trace_erasure_operations(
+                        operation_id, workspace_id, atom_version_id, state, object_key,
+                        external_targets, failure_detail, created_at, updated_at
+                    ) VALUES (%s, %s, %s, 'pending', %s, %s::jsonb, NULL, NOW(), NOW())
+                    ON CONFLICT (workspace_id, atom_version_id) DO UPDATE SET updated_at=NOW()
+                    RETURNING *""",
+                    (op_id, workspace_id, str(atom_version_id), object_key, json.dumps(external_targets or [])),
+                )
+                row = self._cursor_mapping(cursor, cursor.fetchone())
+                return {
+                    "operation_id": str(row["operation_id"]),
+                    "workspace_id": str(row["workspace_id"]),
+                    "atom_version_id": str(row["atom_version_id"]),
+                    "state": str(row["state"]),
+                    "object_key": row.get("object_key"),
+                    "external_targets": self._json_value(row.get("external_targets"), []),
+                    "erasure_receipt": self._json_value(row.get("erasure_receipt")),
+                    "event_offset": row.get("event_offset"),
+                    "failure_detail": row.get("failure_detail"),
+                }
+
+    def update_erasure_operation_state(self, operation_id: str, state: str, failure_detail: str | None = None) -> None:
+        if self.delegate is not None and hasattr(self.delegate, "update_erasure_operation_state"):
+            return self.delegate.update_erasure_operation_state(operation_id, state, failure_detail)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE trace_erasure_operations SET state=%s, failure_detail=%s, updated_at=NOW() WHERE operation_id=%s",
+                    (state, failure_detail, str(operation_id)),
+                )
+
+    def finalize_erasure_operation(
+        self,
+        operation_id: str,
+        *,
+        signing_key: str,
+        actor: str = "system",
+        reason: str | None = None,
+    ) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "finalize_erasure_operation"):
+            return self.delegate.finalize_erasure_operation(operation_id, signing_key=signing_key, actor=actor, reason=reason)
         if not signing_key:
             raise InvariantViolation("compliance erasure requires a configured signing key")
         with self.connection() as conn:
             with conn.cursor() as cursor:
-                self._set_workspace(cursor)
+                cursor.execute("SELECT * FROM trace_erasure_operations WHERE operation_id=%s FOR UPDATE", (str(operation_id),))
+                op = self._cursor_mapping(cursor, cursor.fetchone())
+                if not op:
+                    raise NotFoundError(f"erasure operation {operation_id} was not found")
+                workspace_id = str(op["workspace_id"])
+                atom_version_id = str(op["atom_version_id"])
+                cursor.execute("SELECT set_config('trace.workspace_id', %s, true)", (workspace_id,))
+                if op["state"] == "completed":
+                    return {
+                        "state": "redacted_purged",
+                        "atom_version_id": atom_version_id,
+                        "workspace_id": workspace_id,
+                        "erasure_receipt": self._json_value(op.get("erasure_receipt")),
+                        "event_offset": op.get("event_offset"),
+                    }
                 cursor.execute(
                     """SELECT nv.content_hash,n.workspace_id,nv.node_id,nv.properties
                        FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id
@@ -580,28 +716,37 @@ class PostgresEventStore:
                 current = self._pg_lifecycle_row(self._cursor_mapping(cursor, cursor.fetchone()))
                 if current is None:
                     raise NotFoundError(f"source lifecycle for {atom_version_id} was not found")
-                if current.get("state") == "redacted_purged":
-                    return current | {"event_offset": current.get("changed_event_offset", 0)}
+
+            # Strict non-content allow-list receipt
             receipt_payload = {
-                "receipt_id": str(uuid.uuid4()), "atom_version_id": atom_version_id,
-                "workspace_id": source["workspace_id"], "original_content_hash": source["content_hash"],
-                "reason": reason, "issued_at": _now(), "action": "redacted_purged",
+                "receipt_id": str(uuid.uuid4()),
+                "atom_version_id": str(atom_version_id),
+                "workspace_id": str(workspace_id),
+                "action": "redacted_purged",
+                "issued_at": _now(),
             }
-            signature = hmac.new(signing_key.encode("utf-8"), _json(receipt_payload).encode("utf-8"), hashlib.sha256).hexdigest()
+            signature = hmac.new(
+                signing_key.encode("utf-8"),
+                _json(receipt_payload).encode("utf-8"),
+                hashlib.sha256
+            ).hexdigest()
             receipt = {**receipt_payload, "signature": signature}
+
             event = self._append_event_in_connection(
                 conn,
                 stream_id=f"node:{atom_version_id}",
                 event_type="source.erasure_applied",
-                payload={"atom_version_id": atom_version_id, "workspace_id": source["workspace_id"], "receipt": receipt},
+                payload={"atom_version_id": atom_version_id, "workspace_id": workspace_id, "receipt": receipt},
                 actor=actor,
             )
             properties = self._json_value(source.get("properties"), {})
             redacted = {
                 "temporal": properties.get("temporal", normalize_valid_time(None)),
-                "erasure_receipt_id": receipt["receipt_id"], "erasure_event_offset": event.offset,
+                "erasure_receipt_id": receipt["receipt_id"],
+                "erasure_event_offset": event.offset,
             }
             with conn.cursor() as cursor:
+                cursor.execute("SELECT set_config('trace.workspace_id', %s, true)", (workspace_id,))
                 cursor.execute("UPDATE trace_node_versions SET content='',properties=%s::jsonb WHERE atom_version_id=%s", (json.dumps(redacted), atom_version_id))
                 cursor.execute(
                     "UPDATE trace_source_lifecycle SET state='redacted_purged',erasure_receipt=%s::jsonb,changed_event_offset=%s WHERE atom_version_id=%s",
@@ -621,11 +766,11 @@ class PostgresEventStore:
                            SELECT projection_object_id FROM trace_projection_objects
                            WHERE workspace_id=%s AND source_atom_version_ids @> %s::jsonb
                        ) DELETE FROM trace_projection_memberships WHERE parent_projection_object_id IN (SELECT projection_object_id FROM doomed) OR child_id IN (SELECT projection_object_id FROM doomed)""",
-                    (source["workspace_id"], json.dumps([atom_version_id])),
+                    (workspace_id, json.dumps([atom_version_id])),
                 )
                 cursor.execute(
                     "DELETE FROM trace_projection_objects WHERE workspace_id=%s AND source_atom_version_ids @> %s::jsonb",
-                    (source["workspace_id"], json.dumps([atom_version_id])),
+                    (workspace_id, json.dumps([atom_version_id])),
                 )
                 attachment_id = properties.get("attachment_id")
                 if attachment_id:
@@ -634,9 +779,57 @@ class PostgresEventStore:
                            AND NOT EXISTS (SELECT 1 FROM trace_node_versions WHERE properties->>'attachment_id'=%s AND content<>'' )""",
                         (attachment_id, str(attachment_id)),
                     )
-                cursor.execute("SELECT * FROM trace_source_lifecycle WHERE atom_version_id=%s", (atom_version_id,))
-                result = self._pg_lifecycle_row(self._cursor_mapping(cursor, cursor.fetchone()))
-            return (result or current) | {"event_offset": event.offset}
+                # Mark operation completed and scrub object_key and external_targets
+                cursor.execute(
+                    """UPDATE trace_erasure_operations
+                       SET state='completed', erasure_receipt=%s::jsonb, event_offset=%s, object_key=NULL, external_targets='[]'::jsonb, failure_detail=NULL, updated_at=NOW()
+                       WHERE operation_id=%s""",
+                    (json.dumps(receipt), event.offset, str(operation_id)),
+                )
+            return {
+                "state": "redacted_purged",
+                "atom_version_id": atom_version_id,
+                "workspace_id": workspace_id,
+                "erasure_receipt": receipt,
+                "event_offset": event.offset,
+            }
+
+    def erase_source(self, atom_version_id: str, *, signing_key: str, actor: str = "system", reason: str | None = None) -> dict[str, Any]:
+        if self.delegate is not None and hasattr(self.delegate, "erase_source"):
+            return self.delegate.erase_source(atom_version_id, signing_key=signing_key, actor=actor, reason=reason)
+        with self.connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT nv.atom_version_id, n.workspace_id, nv.properties FROM trace_node_versions nv JOIN trace_nodes n ON n.node_id=nv.node_id WHERE nv.atom_version_id=%s",
+                    (str(atom_version_id),),
+                )
+                row = self._cursor_mapping(cursor, cursor.fetchone())
+                if not row:
+                    existing_op = self.get_erasure_operation_by_atom(atom_version_id)
+                    if existing_op and existing_op.get("state") == "completed":
+                        return {
+                            "state": "redacted_purged",
+                            "atom_version_id": atom_version_id,
+                            "workspace_id": existing_op["workspace_id"],
+                            "erasure_receipt": existing_op["erasure_receipt"],
+                            "event_offset": existing_op.get("event_offset", 0),
+                        }
+                    raise NotFoundError(f"atom version {atom_version_id} was not found")
+                workspace_id = str(row["workspace_id"])
+                props = self._json_value(row.get("properties"), {})
+                object_key = props.get("object_key")
+
+        op = self.create_or_acquire_erasure_operation(workspace_id, atom_version_id, object_key=object_key)
+        if op.get("state") == "completed":
+            return {
+                "state": "redacted_purged",
+                "atom_version_id": atom_version_id,
+                "workspace_id": workspace_id,
+                "erasure_receipt": op["erasure_receipt"],
+                "event_offset": op.get("event_offset", 0),
+            }
+        return self.finalize_erasure_operation(op["operation_id"], signing_key=signing_key, actor=actor, reason=reason)
+
 
     def queryable_atoms(
         self,
@@ -3860,6 +4053,22 @@ class S3ObjectStore:
         except Exception as error:
             raise ProductionAdapterError(f"failed to delete object {object_key} from bucket {self.bucket}") from error
 
+    def verify_object_absent(self, object_key: str) -> bool:
+        try:
+            self.client.head_object(Bucket=self.bucket, Key=object_key)
+            return False
+        except Exception as error:
+            status_code = 0
+            err_code = ""
+            if hasattr(error, "response"):
+                resp = getattr(error, "response", {})
+                status_code = resp.get("ResponseMetadata", {}).get("HTTPStatusCode", 0)
+                err_code = resp.get("Error", {}).get("Code", "")
+            err_str = str(error).lower()
+            if status_code == 404 or err_code in ("404", "NoSuchKey", "NotFound") or "not found" in err_str or "404" in err_str:
+                return True
+            raise ProductionAdapterError(f"failed to verify absence of object {object_key}: {error}") from error
+
 
 class GcsObjectStore:
     """Private GCS attachment store for the Mumbai profile.
@@ -3922,6 +4131,15 @@ class GcsObjectStore:
             blob.delete()
             return {"deleted": True, "object_key": object_key, "bucket": self.bucket_name}
         return {"deleted": False, "object_key": object_key, "status": "already_deleted"}
+
+    def verify_object_absent(self, object_key: str) -> bool:
+        try:
+            bucket = self.client.bucket(self.bucket_name)
+            blob = bucket.blob(object_key)
+            return not blob.exists()
+        except Exception as error:
+            raise ProductionAdapterError(f"failed to verify absence of object {object_key}: {error}") from error
+
 
 
 class OpenSearchLexicalIndex:
@@ -4066,6 +4284,51 @@ class OpenSearchLexicalIndex:
         except TypeError:
             response = self.client.count(index=target, query=body["query"])
         return int(response.get("count", 0) if isinstance(response, dict) else getattr(response, "count", 0))
+
+    def get_active_alias(self, alias: str | None = None) -> str | None:
+        alias_name = alias or self.index
+        try:
+            aliases = self.client.indices.get_alias(name=alias_name)
+            if isinstance(aliases, dict) and aliases:
+                return list(aliases.keys())[0]
+        except Exception:
+            return None
+        return None
+
+    def verify_alias(self, revision: str, *, alias: str | None = None) -> bool:
+        alias_name = alias or self.index
+        expected_target = revision if "--rev-" in revision else self.revision_index(revision)
+        current = self.get_active_alias(alias_name)
+        return current == expected_target
+
+    def restore_alias(self, target: str, *, alias: str | None = None) -> None:
+        self.activate_revision(target, alias=alias)
+
+    def delete_alias(self, alias: str) -> None:
+        try:
+            existing = self.client.indices.get_alias(name=alias)
+            if isinstance(existing, dict):
+                actions = [{"remove": {"alias": alias, "index": index}} for index in existing]
+                if actions:
+                    self.client.indices.update_aliases(body={"actions": actions})
+        except Exception:
+            pass
+
+    def delete_atom(self, atom_version_id: str, *, revision: str) -> None:
+        target = revision if "--rev-" in revision else self.revision_index(revision)
+        try:
+            self.client.delete(index=target, id=str(atom_version_id), refresh=True)
+        except Exception as error:
+            status = getattr(error, "status_code", 0)
+            if status != 404 and "not_found" not in str(error).lower() and "404" not in str(error):
+                raise ProductionAdapterError(f"failed to delete atom {atom_version_id} from OpenSearch {target}: {error}") from error
+
+    def verify_atom_absent(self, atom_version_id: str, *, revision: str) -> bool:
+        target = revision if "--rev-" in revision else self.revision_index(revision)
+        try:
+            return not bool(self.client.exists(index=target, id=str(atom_version_id)))
+        except Exception as error:
+            raise ProductionAdapterError(f"failed to verify absence of atom {atom_version_id} in OpenSearch {target}: {error}") from error
 
     def activate_revision(self, revision: str, *, alias: str | None = None) -> None:
         """Atomically move a read alias to a fully rebuilt revision index."""
@@ -4236,6 +4499,56 @@ class QdrantDenseIndex:
             return int(response.get("count", 0))
         return int(getattr(response, "count", 0))
 
+    def get_active_alias(self, alias: str | None = None) -> str | None:
+        alias_name = alias or self.collection
+        try:
+            aliases_info = self.client.get_aliases()
+            aliases = getattr(aliases_info, "aliases", aliases_info)
+            for a in aliases:
+                a_name = getattr(a, "alias_name", None) or (a.get("alias_name") if isinstance(a, dict) else None)
+                c_name = getattr(a, "collection_name", None) or (a.get("collection_name") if isinstance(a, dict) else None)
+                if a_name == alias_name:
+                    return c_name
+        except Exception:
+            return None
+        return None
+
+    def verify_alias(self, revision: str, *, alias: str | None = None) -> bool:
+        alias_name = alias or self.collection
+        expected_target = revision if "--rev-" in revision else self.revision_collection(revision)
+        current = self.get_active_alias(alias_name)
+        return current == expected_target
+
+    def restore_alias(self, target: str, *, alias: str | None = None) -> None:
+        self.activate_revision(target, alias=alias)
+
+    def delete_alias(self, alias: str) -> None:
+        try:
+            self.client.update_collection_aliases(change_aliases_operations=[{"delete_alias": {"alias_name": alias}}])
+        except Exception:
+            pass
+
+    def delete_atom(self, atom_version_id: str, *, revision: str) -> None:
+        target = revision if "--rev-" in revision else self.revision_collection(revision)
+        point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"trace:qdrant:{atom_version_id}:{revision}"))
+        try:
+            try:
+                from qdrant_client.models import PointIdsList
+                self.client.delete(collection_name=target, points_selector=PointIdsList(points=[point_id]), wait=True)
+            except Exception:
+                self.client.delete(collection_name=target, points_selector=[point_id], wait=True)
+        except Exception as error:
+            raise ProductionAdapterError(f"failed to delete atom {atom_version_id} from Qdrant {target}: {error}") from error
+
+    def verify_atom_absent(self, atom_version_id: str, *, revision: str) -> bool:
+        target = revision if "--rev-" in revision else self.revision_collection(revision)
+        point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"trace:qdrant:{atom_version_id}:{revision}"))
+        try:
+            res = self.client.retrieve(collection_name=target, ids=[point_id])
+            return len(res) == 0
+        except Exception as error:
+            raise ProductionAdapterError(f"failed to verify absence of atom {atom_version_id} in Qdrant {target}: {error}") from error
+
     def activate_revision(self, revision: str, *, alias: str | None = None) -> None:
         """Atomically move the query alias after successful parity checks."""
 
@@ -4260,6 +4573,7 @@ class QdrantDenseIndex:
 
     def rollback_revision(self, revision: str, *, alias: str | None = None) -> None:
         self.activate_revision(revision, alias=alias)
+
 
 
 class NatsJetStreamPublisher:
