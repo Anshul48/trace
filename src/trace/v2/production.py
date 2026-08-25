@@ -763,9 +763,10 @@ class PostgresEventStore:
                 cursor.execute("DELETE FROM trace_affinity_edges WHERE left_atom_version_id=%s OR right_atom_version_id=%s", (atom_version_id, atom_version_id))
                 cursor.execute("DELETE FROM trace_evidence_anchors WHERE source_atom_version_id=%s", (atom_version_id,))
                 cursor.execute(
-                    "UPDATE trace_edge_versions SET status='tombstoned',properties=jsonb_build_object('erasure_receipt_id',%s) WHERE source_node_id=%s OR target_node_id=%s",
+                    "UPDATE trace_edge_versions SET status='tombstoned',properties=jsonb_build_object('erasure_receipt_id',%s::text) WHERE source_node_id=%s OR target_node_id=%s",
                     (receipt["receipt_id"], source["node_id"], source["node_id"]),
                 )
+
                 cursor.execute(
                     """WITH doomed AS (
                            SELECT projection_object_id FROM trace_projection_objects
