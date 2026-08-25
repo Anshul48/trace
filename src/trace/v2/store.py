@@ -1406,6 +1406,10 @@ class SqliteEventStore:
             current = self._current_source_lifecycle_conn(conn, atom_version_id)
             if current is None:
                 raise NotFoundError(f"source lifecycle for {atom_version_id} was not found")
+            if current.get("state") == "redacted_purged":
+                return self._source_lifecycle_row(
+                    conn.execute("SELECT * FROM source_lifecycle WHERE atom_version_id=?", (atom_version_id,)).fetchone()
+                ) | {"event_offset": current.get("changed_event_offset", 0)}
             source = conn.execute(
                 "SELECT nv.content_hash,n.workspace_id,nv.node_id FROM node_versions nv JOIN nodes n ON n.node_id=nv.node_id WHERE nv.atom_version_id=?",
                 (atom_version_id,),

@@ -171,6 +171,50 @@ class TemporalRevocationTests(unittest.TestCase):
             ).fetchone()[0]
         self.assertEqual(remaining, 0)
 
+    def test_repeat_erasure_is_idempotent_and_returns_original_receipt(self) -> None:
+        source = self._ingest("source to be erased multiple times")
+        first = self.store.erase_source(
+            source["atom_version_id"], signing_key="test-signing-key", actor="compliance", reason="gdpr"
+        )
+        second = self.store.erase_source(
+            source["atom_version_id"], signing_key="test-signing-key", actor="compliance", reason="gdpr"
+        )
+        self.assertEqual(first["erasure_receipt"]["receipt_id"], second["erasure_receipt"]["receipt_id"])
+        self.assertEqual(first["erasure_receipt"]["signature"], second["erasure_receipt"]["signature"])
+        self.assertEqual(first["event_offset"], second["event_offset"])
+        self.assertEqual(second["state"], "redacted_purged")
+
+    def test_service_erasure_deletes_raw_object_from_object_store(self) -> None:
+        import os
+        import tempfile
+        from trace.v2.models import SourceErasureRequest
+        from trace.v2.service import LocalPrivateObjectStore, TraceService
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            object_store = LocalPrivateObjectStore(tmpdir)
+            put_res = object_store.put_text("confidential attachment content", "text/plain", workspace_id="alpha")
+            object_key = put_res["object_key"]
+            self.assertTrue((Path(tmpdir) / object_key).exists())
+
+            source = self._ingest("atom with attachment")
+            # Link attachment object_key to node properties
+            self.store.edit_node(
+                node_id=source["node_id"],
+                content="atom with attachment",
+                properties={"object_key": object_key},
+                actor="test",
+            )
+            atom_ver_id = self.store.get_node(source["node_id"])["atom_version_id"]
+
+            os.environ["TRACE_ERASURE_SIGNING_KEY"] = "test-signing-key"
+            try:
+                service = TraceService(self.store, object_store)
+                res = service.erase_source(atom_ver_id, SourceErasureRequest(actor="compliance", reason="erasure"))
+                self.assertEqual(res["state"], "redacted_purged")
+                self.assertFalse((Path(tmpdir) / object_key).exists())
+            finally:
+                os.environ.pop("TRACE_ERASURE_SIGNING_KEY", None)
+
     def test_historical_release_identity_and_missing_history_fail_closed(self) -> None:
         self._ingest("release identity evidence")
         planned = self.store.create_cortex_release(workspace_id="alpha", actor="release-controller")

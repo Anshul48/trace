@@ -112,6 +112,19 @@ class LocalPrivateObjectStore:
     def put_text(self, text: str, media_type: str, **kwargs: Any) -> dict[str, Any]:
         return self.put_bytes(text.encode("utf-8"), media_type, **kwargs)
 
+    def get_bytes(self, object_key: str) -> bytes:
+        target = self.root / object_key
+        if not target.exists():
+            raise NotFoundError(f"object {object_key} was not found")
+        return target.read_bytes()
+
+    def delete_object(self, object_key: str) -> dict[str, Any]:
+        target = self.root / object_key
+        if target.exists():
+            target.unlink()
+            return {"deleted": True, "object_key": object_key}
+        return {"deleted": False, "object_key": object_key, "status": "already_deleted"}
+
 
 class TraceService:
     """The only application layer used by the V2 HTTP API and SDK.
@@ -689,12 +702,36 @@ class TraceService:
         signing_key = os.environ.get("TRACE_ERASURE_SIGNING_KEY")
         if not signing_key:
             raise InvariantViolation("TRACE_ERASURE_SIGNING_KEY is required for compliance erasure")
-        return eraser(
+
+        object_key_to_delete = None
+        if self.object_store and hasattr(self.object_store, "delete_object"):
+            try:
+                atoms = getattr(self.store, "atom_versions", lambda ids: [])([atom_version_id])
+                if atoms:
+                    props = atoms[0].get("properties") or {}
+                    object_key_to_delete = props.get("object_key")
+                    attachment_id = props.get("attachment_id")
+                    if not object_key_to_delete and attachment_id and hasattr(self.store, "get_attachment"):
+                        att = self.store.get_attachment(attachment_id)
+                        if att:
+                            object_key_to_delete = att.get("object_key")
+            except Exception:
+                pass
+
+        result = eraser(
             atom_version_id,
             signing_key=signing_key,
             actor=request.actor,
             reason=request.reason,
         )
+
+        if object_key_to_delete and self.object_store and hasattr(self.object_store, "delete_object"):
+            try:
+                self.object_store.delete_object(object_key_to_delete)
+            except Exception:
+                pass
+
+        return result
 
     def split_node(self, node_id: str, request: SplitRequest) -> list[dict[str, Any]]:
         before = self.store.get_node(node_id)

@@ -580,6 +580,8 @@ class PostgresEventStore:
                 current = self._pg_lifecycle_row(self._cursor_mapping(cursor, cursor.fetchone()))
                 if current is None:
                     raise NotFoundError(f"source lifecycle for {atom_version_id} was not found")
+                if current.get("state") == "redacted_purged":
+                    return current | {"event_offset": current.get("changed_event_offset", 0)}
             receipt_payload = {
                 "receipt_id": str(uuid.uuid4()), "atom_version_id": atom_version_id,
                 "workspace_id": source["workspace_id"], "original_content_hash": source["content_hash"],
@@ -3844,6 +3846,20 @@ class S3ObjectStore:
             "get_object", Params={"Bucket": self.bucket, "Key": object_key}, ExpiresIn=max(1, min(expires_seconds, 86_400))
         )
 
+    def get_bytes(self, object_key: str) -> bytes:
+        try:
+            response = self.client.get_object(Bucket=self.bucket, Key=object_key)
+            return response["Body"].read()
+        except Exception as error:
+            raise NotFoundError(f"object {object_key} was not found in bucket {self.bucket}") from error
+
+    def delete_object(self, object_key: str) -> dict[str, Any]:
+        try:
+            self.client.delete_object(Bucket=self.bucket, Key=object_key)
+            return {"deleted": True, "object_key": object_key, "bucket": self.bucket}
+        except Exception as error:
+            raise ProductionAdapterError(f"failed to delete object {object_key} from bucket {self.bucket}") from error
+
 
 class GcsObjectStore:
     """Private GCS attachment store for the Mumbai profile.
@@ -3891,6 +3907,21 @@ class GcsObjectStore:
     def signed_get_url(self, object_key: str, *, expires_seconds: int = 300) -> str:
         bucket = self.client.bucket(self.bucket_name)
         return bucket.blob(object_key).generate_signed_url(expiration=max(1, min(expires_seconds, 86_400)), method="GET")
+
+    def get_bytes(self, object_key: str) -> bytes:
+        bucket = self.client.bucket(self.bucket_name)
+        blob = bucket.blob(object_key)
+        if not blob.exists():
+            raise NotFoundError(f"object {object_key} was not found in bucket {self.bucket_name}")
+        return blob.download_as_bytes()
+
+    def delete_object(self, object_key: str) -> dict[str, Any]:
+        bucket = self.client.bucket(self.bucket_name)
+        blob = bucket.blob(object_key)
+        if blob.exists():
+            blob.delete()
+            return {"deleted": True, "object_key": object_key, "bucket": self.bucket_name}
+        return {"deleted": False, "object_key": object_key, "status": "already_deleted"}
 
 
 class OpenSearchLexicalIndex:
