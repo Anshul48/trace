@@ -1231,6 +1231,7 @@ class PostgresEventStore:
         node = self._cursor_mapping(cursor, cursor.fetchone())
         if not node:
             raise NotFoundError(f"node {node_id} was not found")
+        node["node_id"] = str(node["node_id"])
         return node
 
     def _pg_node_version(self, cursor: Any, node_id: str, as_of_event: int | None = None) -> dict[str, Any]:
@@ -1242,6 +1243,8 @@ class PostgresEventStore:
         version = self._cursor_mapping(cursor, cursor.fetchone())
         if not version:
             raise NotFoundError(f"node {node_id} has no version at requested time")
+        version["atom_version_id"] = str(version["atom_version_id"])
+        version["node_id"] = str(version["node_id"])
         return version
 
     def get_node(self, node_id: str, as_of_event: int | None = None) -> dict[str, Any]:

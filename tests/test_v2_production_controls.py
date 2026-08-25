@@ -119,6 +119,8 @@ class RecordingPgCursor:
     def __init__(self, name: str | None) -> None:
         self.name = name
         self.executions: list[tuple[str, object]] = []
+        self.description: list[tuple[str]] = []
+        self.fetchone_result: object = None
 
     def __enter__(self):  # type: ignore[no-untyped-def]
         return self
@@ -132,6 +134,9 @@ class RecordingPgCursor:
     def fetchmany(self, size: int) -> list[object]:
         del size
         return []
+
+    def fetchone(self) -> object:
+        return self.fetchone_result
 
 
 class RecordingPgConnection:
@@ -176,6 +181,30 @@ class ProductionControlTests(unittest.TestCase):
             self.assertEqual(regular.executions[0][1], ("alpha",))
         for named in (connection.cursors[1], connection.cursors[3]):
             self.assertNotIn("set_config", named.executions[0][0])
+
+    def test_postgres_node_boundaries_normalize_uuid_identifiers(self) -> None:
+        store = PostgresEventStore(connection_factory=lambda: RecordingPgConnection())
+        node_id = uuid.uuid4()
+        atom_version_id = uuid.uuid4()
+
+        node_cursor = RecordingPgCursor(None)
+        node_cursor.description = [
+            ("node_id",), ("workspace_id",), ("facets",), ("security",), ("created_event_offset",),
+        ]
+        node_cursor.fetchone_result = (node_id, "alpha", ["atom"], {"visibility": "private"}, 1)
+        node = store._pg_node(node_cursor, str(node_id))
+
+        version_cursor = RecordingPgCursor(None)
+        version_cursor.description = [
+            ("atom_version_id",), ("node_id",), ("version",), ("content",),
+            ("properties",), ("content_hash",), ("created_event_offset",),
+        ]
+        version_cursor.fetchone_result = (atom_version_id, node_id, 1, "content", {}, "hash", 2)
+        version = store._pg_node_version(version_cursor, str(node_id))
+
+        self.assertEqual(node["node_id"], str(node_id))
+        self.assertEqual(version["node_id"], str(node_id))
+        self.assertEqual(version["atom_version_id"], str(atom_version_id))
 
     def test_jobs_are_idempotent_and_retryable(self) -> None:
         first = self.service.submit_job(JobSubmitRequest(
