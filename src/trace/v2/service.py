@@ -737,47 +737,46 @@ class TraceService:
             raise NotFoundError(f"atom version {atom_version_id} was not found")
 
         workspace_id = atom["workspace_id"]
+        with self.workspace_scope(workspace_id):
+            # Check if operation already completed for this workspace and atom
+            existing_op = None
+            if hasattr(self.store, "get_erasure_operation"):
+                existing_op = self.store.get_erasure_operation(workspace_id, atom_version_id)
 
-        # Check if operation already completed for this workspace and atom
-        existing_op = None
-        if hasattr(self.store, "get_erasure_operation"):
-            existing_op = self.store.get_erasure_operation(workspace_id, atom_version_id)
+            if existing_op and existing_op.get("state") == "completed":
+                return {
+                    "state": "redacted_purged",
+                    "atom_version_id": atom_version_id,
+                    "workspace_id": workspace_id,
+                    "erasure_receipt": existing_op["erasure_receipt"],
+                    "event_offset": existing_op.get("event_offset", 0),
+                }
 
-        if existing_op and existing_op.get("state") == "completed":
-            return {
-                "state": "redacted_purged",
-                "atom_version_id": atom_version_id,
-                "workspace_id": workspace_id,
-                "erasure_receipt": existing_op["erasure_receipt"],
-                "event_offset": existing_op.get("event_offset", 0),
-            }
+            # Resolve raw-object key
+            props = atom.get("properties") or {}
+            object_key = props.get("object_key")
+            attachment_id = props.get("attachment_id")
+            if not object_key and attachment_id and hasattr(self.store, "get_attachment"):
+                try:
+                    att = self.store.get_attachment(attachment_id)
+                    if att:
+                        object_key = att.get("object_key")
+                except Exception as err:
+                    raise InvariantViolation(f"failed to resolve attachment {attachment_id} object key: {err}") from err
 
-        # Resolve raw-object key
-        props = atom.get("properties") or {}
-        object_key = props.get("object_key")
-        attachment_id = props.get("attachment_id")
-        if not object_key and attachment_id and hasattr(self.store, "get_attachment"):
+            external_targets: list[dict[str, Any]] = []
+            if object_key:
+                external_targets.append({"type": "object_store", "target": object_key})
+
+            lexical_idx = getattr(self.retrieval_engine, "lexical_index", None)
+            dense_idx = getattr(self.retrieval_engine, "dense_index", None)
+
+            # Erasure applies to every immutable index revision that may still
+            # retain this atom, not only to the currently active aliases. The
+            # repository query is intentionally unbounded by release-list paging:
+            # compliance cannot leave an older superseded revision readable.
             try:
-                att = self.store.get_attachment(attachment_id)
-                if att:
-                    object_key = att.get("object_key")
-            except Exception as err:
-                raise InvariantViolation(f"failed to resolve attachment {attachment_id} object key: {err}") from err
-
-        external_targets: list[dict[str, Any]] = []
-        if object_key:
-            external_targets.append({"type": "object_store", "target": object_key})
-
-        lexical_idx = getattr(self.retrieval_engine, "lexical_index", None)
-        dense_idx = getattr(self.retrieval_engine, "dense_index", None)
-
-        # Erasure applies to every immutable index revision that may still
-        # retain this atom, not only to the currently active aliases. The
-        # repository query is intentionally unbounded by release-list paging:
-        # compliance cannot leave an older superseded revision readable.
-        try:
-            revision_loader = getattr(self.store, "cortex_component_revisions", None)
-            with self.workspace_scope(workspace_id):
+                revision_loader = getattr(self.store, "cortex_component_revisions", None)
                 if not callable(revision_loader):
                     raise InvariantViolation(
                         "the configured repository cannot enumerate external index revisions for erasure"
@@ -786,101 +785,101 @@ class TraceService:
                     workspace_id,
                     ["lexical_index", "dense_index"],
                 )
-        except Exception as err:
-            raise InvariantViolation(
-                f"compliance erasure failed (incomplete): could not enumerate external revisions: {err}"
-            ) from err
-        if lexical_idx is not None:
-            external_targets.extend(
-                {"type": "opensearch", "target": revision}
-                for revision in revisions.get("lexical_index", [])
+            except Exception as err:
+                raise InvariantViolation(
+                    f"compliance erasure failed (incomplete): could not enumerate external revisions: {err}"
+                ) from err
+            if lexical_idx is not None:
+                external_targets.extend(
+                    {"type": "opensearch", "target": revision}
+                    for revision in revisions.get("lexical_index", [])
+                )
+            if dense_idx is not None:
+                external_targets.extend(
+                    {"type": "qdrant", "target": revision}
+                    for revision in revisions.get("dense_index", [])
+                )
+            external_targets = [
+                dict(item)
+                for item in {
+                    (str(target["type"]), str(target["target"])): target
+                    for target in external_targets
+                }.values()
+            ]
+
+
+            # 2. Create or acquire erasure operation (sets state to pending / read-denial hold)
+            op = self.store.create_or_acquire_erasure_operation(
+                workspace_id=workspace_id,
+                atom_version_id=atom_version_id,
+                object_key=object_key,
+                external_targets=external_targets,
             )
-        if dense_idx is not None:
-            external_targets.extend(
-                {"type": "qdrant", "target": revision}
-                for revision in revisions.get("dense_index", [])
-            )
-        external_targets = [
-            dict(item)
-            for item in {
-                (str(target["type"]), str(target["target"])): target
-                for target in external_targets
-            }.values()
-        ]
+            operation_id = op["operation_id"]
 
-
-        # 2. Create or acquire erasure operation (sets state to pending / read-denial hold)
-        op = self.store.create_or_acquire_erasure_operation(
-            workspace_id=workspace_id,
-            atom_version_id=atom_version_id,
-            object_key=object_key,
-            external_targets=external_targets,
-        )
-        operation_id = op["operation_id"]
-
-        try:
-            # 3. External absence deletion & verification (FAIL-CLOSED)
-            # 3a. Object store
-            if object_key:
-                delete_object = getattr(self.object_store, "delete_object", None)
-                verify_object_absent = getattr(self.object_store, "verify_object_absent", None)
-                if not callable(delete_object) or not callable(verify_object_absent):
-                    raise RuntimeError(
-                        "configured object store lacks required delete and absence-verification capabilities"
-                    )
-                delete_object(object_key)
-                is_absent = verify_object_absent(object_key)
-                if not is_absent:
-                    raise RuntimeError(f"object store verification failed: object {object_key} is still present")
-
-            # 3b. Lexical index
-            lexical_targets = [target for target in external_targets if target.get("type") == "opensearch"]
-            if lexical_targets:
-                delete_atom = getattr(lexical_idx, "delete_atom", None)
-                verify_atom_absent = getattr(lexical_idx, "verify_atom_absent", None)
-                if not callable(delete_atom) or not callable(verify_atom_absent):
-                    raise RuntimeError(
-                        "configured lexical index lacks required delete and absence-verification capabilities"
-                    )
-                for target in lexical_targets:
-                    rev = target["target"]
-                    delete_atom(atom_version_id, revision=rev)
-                    if not verify_atom_absent(atom_version_id, revision=rev):
-                        raise RuntimeError(f"lexical index revision {rev} verification failed: atom {atom_version_id} still present")
-
-            # 3c. Dense index
-            dense_targets = [target for target in external_targets if target.get("type") == "qdrant"]
-            if dense_targets:
-                delete_atom = getattr(dense_idx, "delete_atom", None)
-                verify_atom_absent = getattr(dense_idx, "verify_atom_absent", None)
-                if not callable(delete_atom) or not callable(verify_atom_absent):
-                    raise RuntimeError(
-                        "configured dense index lacks required delete and absence-verification capabilities"
-                    )
-                for target in dense_targets:
-                    rev = target["target"]
-                    delete_atom(atom_version_id, revision=rev)
-                    if not verify_atom_absent(atom_version_id, revision=rev):
-                        raise RuntimeError(f"dense index revision {rev} verification failed: atom {atom_version_id} still present")
-
-            # Update state to external_absence_verified
-            self.store.update_erasure_operation_state(operation_id, state="external_absence_verified")
-
-            # 4. Finalize database state in ONE transaction
-            result = self.store.finalize_erasure_operation(
-                operation_id=operation_id,
-                signing_key=signing_key,
-                actor=request.actor,
-                reason=request.reason,
-            )
-            return result
-
-        except Exception as err:
             try:
-                self.store.update_erasure_operation_state(operation_id, state="retryable_failure", failure_detail=str(err))
-            except Exception:
-                pass
-            raise InvariantViolation(f"compliance erasure failed (incomplete): {err}") from err
+                # 3. External absence deletion & verification (FAIL-CLOSED)
+                # 3a. Object store
+                if object_key:
+                    delete_object = getattr(self.object_store, "delete_object", None)
+                    verify_object_absent = getattr(self.object_store, "verify_object_absent", None)
+                    if not callable(delete_object) or not callable(verify_object_absent):
+                        raise RuntimeError(
+                            "configured object store lacks required delete and absence-verification capabilities"
+                        )
+                    delete_object(object_key)
+                    is_absent = verify_object_absent(object_key)
+                    if not is_absent:
+                        raise RuntimeError(f"object store verification failed: object {object_key} is still present")
+
+                # 3b. Lexical index
+                lexical_targets = [target for target in external_targets if target.get("type") == "opensearch"]
+                if lexical_targets:
+                    delete_atom = getattr(lexical_idx, "delete_atom", None)
+                    verify_atom_absent = getattr(lexical_idx, "verify_atom_absent", None)
+                    if not callable(delete_atom) or not callable(verify_atom_absent):
+                        raise RuntimeError(
+                            "configured lexical index lacks required delete and absence-verification capabilities"
+                        )
+                    for target in lexical_targets:
+                        rev = target["target"]
+                        delete_atom(atom_version_id, revision=rev)
+                        if not verify_atom_absent(atom_version_id, revision=rev):
+                            raise RuntimeError(f"lexical index revision {rev} verification failed: atom {atom_version_id} still present")
+
+                # 3c. Dense index
+                dense_targets = [target for target in external_targets if target.get("type") == "qdrant"]
+                if dense_targets:
+                    delete_atom = getattr(dense_idx, "delete_atom", None)
+                    verify_atom_absent = getattr(dense_idx, "verify_atom_absent", None)
+                    if not callable(delete_atom) or not callable(verify_atom_absent):
+                        raise RuntimeError(
+                            "configured dense index lacks required delete and absence-verification capabilities"
+                        )
+                    for target in dense_targets:
+                        rev = target["target"]
+                        delete_atom(atom_version_id, revision=rev)
+                        if not verify_atom_absent(atom_version_id, revision=rev):
+                            raise RuntimeError(f"dense index revision {rev} verification failed: atom {atom_version_id} still present")
+
+                # Update state to external_absence_verified
+                self.store.update_erasure_operation_state(operation_id, state="external_absence_verified")
+
+                # 4. Finalize database state in ONE transaction
+                result = self.store.finalize_erasure_operation(
+                    operation_id=operation_id,
+                    signing_key=signing_key,
+                    actor=request.actor,
+                    reason=request.reason,
+                )
+                return result
+
+            except Exception as err:
+                try:
+                    self.store.update_erasure_operation_state(operation_id, state="retryable_failure", failure_detail=str(err))
+                except Exception:
+                    pass
+                raise InvariantViolation(f"compliance erasure failed (incomplete): {err}") from err
 
 
     def split_node(self, node_id: str, request: SplitRequest) -> list[dict[str, Any]]:

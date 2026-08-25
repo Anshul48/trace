@@ -841,6 +841,7 @@ class PostgresEventStore:
             return self.delegate.get_erasure_operation_by_atom(atom_version_id)
         with self.connection() as conn:
             with conn.cursor() as cursor:
+                self._set_workspace(cursor)
                 cursor.execute(
                     "SELECT * FROM trace_erasure_operations WHERE atom_version_id=%s",
                     (str(atom_version_id),),
@@ -919,6 +920,7 @@ class PostgresEventStore:
             return self.delegate.update_erasure_operation_state(operation_id, state, failure_detail)
         with self.connection() as conn:
             with conn.cursor() as cursor:
+                self._set_workspace(cursor)
                 cursor.execute(
                     "UPDATE trace_erasure_operations SET state=%s, failure_detail=%s, updated_at=NOW() WHERE operation_id=%s",
                     (state, failure_detail, str(operation_id)),
@@ -938,6 +940,7 @@ class PostgresEventStore:
             raise InvariantViolation("compliance erasure requires a configured signing key")
         with self.connection() as conn:
             with conn.cursor() as cursor:
+                self._set_workspace(cursor)
                 cursor.execute("SELECT * FROM trace_erasure_operations WHERE operation_id=%s FOR UPDATE", (str(operation_id),))
                 op = self._cursor_mapping(cursor, cursor.fetchone())
                 if not op:
