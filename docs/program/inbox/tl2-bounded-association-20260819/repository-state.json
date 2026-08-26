@@ -1,0 +1,48 @@
+{
+  "contract_version": "1.0",
+  "recorded_at_utc": "2026-08-23T08:09:38.3508241Z",
+  "task_id": "tl2-bounded-association-20260819",
+  "session": "S2",
+  "canonical_checkout": {
+    "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+    "branch": "main",
+    "head_commit": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+    "status": "clean tracked tree with protected untracked paths",
+    "protected_untracked_paths": [
+      "benchmarks/protocols/",
+      "benchmarks/registry/",
+      "docs/dev/SCALE_ROLE.md",
+      "docs/program/"
+    ]
+  },
+  "l1_source_worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1",
+    "branch": "feat/l1-candidate-active-lifecycle",
+    "head_commit": "7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+    "status": "not clean: untracked scripts/profile_tl3_graph_budgets.py",
+    "action": "read-only inspection only"
+  },
+  "tl2_worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-tl2",
+    "branch": "feat/s2-tl2-bounded-graph",
+    "path_preflight": "created and clean",
+    "lease_id": "lease-s2-tl2-bounded-graph-20260823"
+  },
+  "worktree_inventory_after_lease": [
+    "C:/Users/anshu/OneDrive/Documents/Code/Utilities/trace-lite @ fe66a9e main",
+    "C:/Users/anshu/AppData/Local/trace-verifier-worktrees/v1b-tl-lifecycle-20260819 @ 7ff40dc",
+    "C:/Users/anshu/AppData/Local/trace-worktrees/trace-lite-l1 @ 7ff40dc",
+    "C:/Users/anshu/AppData/Local/trace-worktrees/trace-lite-tl2 @ 7ff40dc (clean; exclusive TL2 lease)"
+  ],
+  "trace_control_checkout": {
+    "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "status": "dirty user/control-plane snapshot; protected and not used as product base"
+  },
+  "runtime": {
+    "python": "3.12.0",
+    "uv": "0.12.2 (46ead6098 2026-08-05 x86_64-pc-windows-msvc)",
+    "git": "2.52.0.windows.1",
+    "network_provider_data_authority": "none",
+    "capacity": "CimInstance/fsutil access denied; capacity not independently available in sandbox"
+  }
+}

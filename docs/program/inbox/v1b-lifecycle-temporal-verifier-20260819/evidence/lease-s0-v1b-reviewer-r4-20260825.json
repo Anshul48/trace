@@ -1,0 +1,27 @@
+{
+  "contract_version": "2.0",
+  "lease_id": "lease-s0-v1b-reviewer-r4-20260825",
+  "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+  "sub_gate": "Gate-V1b-Overall",
+  "component": "program",
+  "created_at_utc": "2026-08-25T09:00:00.0000000Z",
+  "expires_at_utc": "2026-08-26T23:59:59.0000000Z",
+  "owner": "S0 Final V1b-R4 Independent Read-Only Evidence Reviewer",
+  "reviewer_id": "v1b-r4-reviewer-20260825",
+  "state": "assigned",
+  "scope": {
+    "allowed_read_paths": [
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-r4-graph-20260825",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-r4-temporal-20260825",
+      "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence"
+    ],
+    "allowed_write_paths": [
+      "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence/v1b_r4_reviewer_acceptance_manifest.json",
+      "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence/v1b_r4_reviewer_acceptance.sig",
+      "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence/v1b_r4_reviewer_public_key.hex"
+    ],
+    "may_alter_evidence": false,
+    "may_modify_code": false
+  },
+  "claim_limit": "Read-only independent evidence review and cryptographic Ed25519 attestation of Gate V1b sub-gates only."
+}

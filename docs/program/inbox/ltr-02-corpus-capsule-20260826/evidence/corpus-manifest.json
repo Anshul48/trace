@@ -1,0 +1,51 @@
+{
+  "manifest_title": "Trace 100K Real Corpus Capsule Manifest (Exact Cryptographic Hashing)",
+  "contract_version": "2.0",
+  "generated_at_utc": "2026-08-26T12:25:00Z",
+  "synthetic_data_used": false,
+  "fallback_paths_used": false,
+  "sources": [
+    {
+      "dataset": "musique",
+      "records_count": 101962,
+      "size_bytes": 175616958,
+      "license": "CC BY 4.0",
+      "corpus_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c",
+      "relative_path": "musique/corpus.jsonl"
+    },
+    {
+      "dataset": "beir-fiqa",
+      "records_count": 57600,
+      "size_bytes": 79447079,
+      "license": "CC BY-NC-SA 4.0",
+      "corpus_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce",
+      "relative_path": "beir-fiqa/corpus.jsonl"
+    },
+    {
+      "dataset": "beir-scifact",
+      "records_count": 5183,
+      "size_bytes": 11011729,
+      "license": "CC BY-NC 4.0",
+      "corpus_sha256": "08af2db965a8fd04ad1c4bf03ed5ba91e742c0cbefcb10afc256681084504ff8",
+      "relative_path": "beir-scifact/corpus.jsonl"
+    },
+    {
+      "dataset": "beir-nfcorpus",
+      "records_count": 3633,
+      "size_bytes": 8071970,
+      "license": "CC BY-SA 4.0",
+      "corpus_sha256": "f5bfa0bb46b2d592fdddc62e419e5dbf9d2f6f5deabb70745d45fc32573854b9",
+      "relative_path": "beir-nfcorpus/corpus.jsonl"
+    },
+    {
+      "dataset": "multihop-rag",
+      "records_count": 609,
+      "size_bytes": 6860726,
+      "license": "ODC-By v1.0",
+      "corpus_sha256": "7228d82f926c41a1d742baeffbf1fb4ae5a14e04f405c045aaf9a5da3281f53a",
+      "relative_path": "multihop-rag/corpus.jsonl"
+    }
+  ],
+  "total_available_records": 168987,
+  "status": "APPROVED"
+}

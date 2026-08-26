@@ -1,0 +1,64 @@
+# Copy into the task inbox as input-manifest.yaml before a mutable task starts.
+# Fill all REQUIRED fields from current evidence. Keep raw data and secrets
+# outside Git; record only safe locations, opaque IDs, and hashes here.
+
+manifest_version: "1.0"
+task:
+  task_id: REQUIRED
+  dag_node: REQUIRED
+  packet_sha256: REQUIRED
+  prepared_at_utc: REQUIRED
+  prepared_by: coordinator-or-human
+  state: prepared
+
+program_inputs:
+  charter_sha256: REQUIRED
+  invariants_sha256: REQUIRED
+  dag_sha256: REQUIRED
+  foundation_release_sha256: REQUIRED
+  global_context_sha256: REQUIRED
+  accepted_decisions: []
+  known_risks: []
+
+components:
+  - name: trace-lite|trace|trace-bench
+    root: safe-absolute-or-worktree-path
+    identity_kind: git_commit|tree_manifest|other-approved-identity
+    identity: REQUIRED
+    branch_or_label: REQUIRED
+    dirty_state: clean|dirty|unknown
+    dirty_state_note: REQUIRED
+    allowed_paths: []
+    protected_paths: []
+
+external_inputs:
+  datasets: []
+  providers: []
+  services: []
+  credentials_required: false
+  network_authority: none|explicit-packet-authority
+
+evaluation:
+  mode: unit|regression|exploratory|fault|certification|not_applicable
+  evaluator_identity: REQUIRED-or-not-applicable
+  query_pack_identity: REQUIRED-or-not-applicable
+  judgment_pack_identity: REQUIRED-or-not-applicable
+  prohibited_fallbacks: []
+  expected_negative_cases: []
+
+execution:
+  worktree: REQUIRED-for-mutable-task
+  timeout_budget: REQUIRED
+  allowed_operations: []
+  forbidden_operations: []
+  verifier_task_id: REQUIRED-or-not-applicable
+
+outputs:
+  handoff_path: REQUIRED
+  evidence_index_path: REQUIRED
+  expected_artifacts: []
+
+approval:
+  human_authority_reference: REQUIRED
+  unresolved_decisions: []
+  preparation_notes: REQUIRED

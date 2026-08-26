@@ -1,0 +1,92 @@
+{
+  "contract_version": "3.0",
+  "lease_id": "lease-v1b-r5-temporal-successor-final2-20260825",
+  "gate": "V1b-Trace-temporal",
+  "created_at_utc": "2026-08-25T12:06:40.2967945+00:00",
+  "expires_at_utc": "2026-08-26T12:06:40.2967945+00:00",
+  "authority": "Program owner explicitly authorized closing Gate V1b in the active 2026-08-25 session.",
+  "owner": "R5 isolated temporal and live-infrastructure verifier",
+  "candidate": {
+    "commit": "c79dcd2556f3bc64fe2e5ab9fac3c33e52c628a6",
+    "tree": "eee9174f843ba02cdfa66100d0799a61a9313c20",
+    "parent": "39d3a169cdf5c29ede9331ce8143927f25a62c89",
+    "lock_sha256": "109bac3908efd851627b2290897744819076cce4c2f5e08799119399e8686b4a",
+    "rationale": "Final successor maps stable and opaque SourceInput provenance safely inside strict OpenSearch revisions, on top of RLS streaming, historical authorization, revision, and erasure repairs."
+  },
+  "verifier_asset": {
+    "path": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence/r5/temporal_verifier.py",
+    "sha256": "f1ed03e790ac3737529c5def0f08023548572319cbf6ffda3cf6cf611d7d12d2"
+  },
+  "provision_asset": {
+    "path": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence/r5/provision_environment.py",
+    "sha256": "84c17a88af5cbf42fc40d90057dda23a3605b353d555b1dacabc0d5f0ae36b60"
+  },
+  "secret_generator_asset": {
+    "path": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence/r5/generate_runtime_secrets.py",
+    "sha256": "bff88ffc1ef609672db2674ad8cedc79675d1957641cecfff3b55f6490ec9bb2"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\final-worktrees\\temporal-r5-final2",
+    "venv_executable": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\final-worktrees\\temporal-r5-final2\\.venv\\Scripts\\python.exe",
+    "cache_path": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\final-cache\\temporal-r5-final2",
+    "provision_path": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\provision\\temporal-r5-final2",
+    "provision_manifest_sha256": "7e59d6a277efa74633b2ed441646d3f8c40a0f542bc0638bc03e3b3711517ed2",
+    "scratch_path": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\scratch\\temporal-r5-final2",
+    "result_path": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\results\\temporal-r5-final2"
+  },
+  "secrets": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\runtime-secrets\\temporal-r5-final2.json",
+    "sha256": "2b53349f0afe1a0e5c044cd493efa00458e34578ae0ac1bece6078ad74fcefb7"
+  },
+  "database": {
+    "name": "trace_r5_final2_20260825",
+    "admin_role": "trace_r5_final2_admin",
+    "migration_role": "trace_r5_final2_migration",
+    "runtime_role": "trace_r5_final2_app"
+  },
+  "docker": {
+    "run_id": "v1b-r5-temporal-final2-20260825",
+    "label": "trace.v1b.run",
+    "network": "v1b-r5-temporal-final2-20260825-net",
+    "volumes": {
+      "postgres": "v1b-r5-temporal-final2-20260825-postgres",
+      "opensearch": "v1b-r5-temporal-final2-20260825-opensearch",
+      "qdrant": "v1b-r5-temporal-final2-20260825-qdrant",
+      "minio": "v1b-r5-temporal-final2-20260825-minio"
+    },
+    "services": {
+      "postgres": {
+        "container": "v1b-r5-temporal-final2-20260825-postgres",
+        "image": "postgres@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+        "host_port": 15432
+      },
+      "opensearch": {
+        "container": "v1b-r5-temporal-final2-20260825-opensearch",
+        "image": "opensearchproject/opensearch@sha256:72fe2fc84be8295906b8efca020b46c58ed45c8da60cd9b8b49e1991e38e89a4",
+        "host_port": 19200
+      },
+      "qdrant": {
+        "container": "v1b-r5-temporal-final2-20260825-qdrant",
+        "image": "qdrant/qdrant@sha256:419d72603f5346ee22ffc4606bdb7beb52fcb63077766fab678e6622ba247366",
+        "host_port": 16333
+      },
+      "minio": {
+        "container": "v1b-r5-temporal-final2-20260825-minio",
+        "image": "minio/minio@sha256:a1ea29fa28355559ef137d71fc570e508a214ec84ff8083e39bc5428980b015e",
+        "host_port": 19000
+      }
+    }
+  },
+  "object_store": {
+    "bucket": "v1b-r5-temporal-final2-20260825",
+    "prefix": "v1b-r5-temporal-final2-20260825/run/"
+  },
+  "constraints": {
+    "may_repair_candidate": false,
+    "may_change_policy": false,
+    "network": "loopback-only during verification; registry and package access ended before admission",
+    "fault_injection": "run-labelled disposable Qdrant and OpenSearch containers only",
+    "outcome_on_pass": "needs_review"
+  },
+  "claim_limit": "V1b temporal, revocation, PostgreSQL/RLS, external-index, promotion-fault, and object-erasure behavior on disposable local services only; no deployment, cloud, TLS, NATS, Redis, model-gateway, scale, quality, SOTA, or promotion claim."
+}

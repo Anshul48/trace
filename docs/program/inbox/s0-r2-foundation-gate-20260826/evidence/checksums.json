@@ -1,0 +1,14 @@
+{
+  "evidence/foundation_gate_review_record.json": {
+    "sha256": "304c5d01b618bc5d4c690f1fdf4b0b058e2eb45d6f984478ecf189a273c72a17",
+    "size_bytes": 1039
+  },
+  "evidence/reconciliation_matrix.md": {
+    "sha256": "adc75bd95483aeaccc4118a06cee44ddade472d1f6b2c7ec4a5ddff41867d671",
+    "size_bytes": 1055
+  },
+  "evidence/subagent-verification-receipts.json": {
+    "sha256": "f5caff344f4e216ec19c4be0502c5d21fa395664ea13c2514c92b0c4bcba9383",
+    "size_bytes": 712
+  }
+}

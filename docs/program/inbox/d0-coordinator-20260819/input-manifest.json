@@ -1,0 +1,42 @@
+{
+  "contract_version": "1.0",
+  "task_id": "d0-coordinator-20260819",
+  "session": "S0",
+  "role": "Coordinator / Control-Plane Owner",
+  "authority_level": "C0",
+  "timestamp_utc": "2026-08-19T07:00:00Z",
+  "governing_documents": [
+    "docs/program/launch/implementation-wave/README.md",
+    "docs/program/launch/implementation-wave/00_GLOBAL_CONTEXT.md",
+    "docs/program/launch/implementation-wave/01_SESSION_PROTOCOL.md",
+    "docs/program/launch/implementation-wave/02_WAVE_AND_GATE_MATRIX.md",
+    "docs/program/launch/implementation-wave/04_SUBAGENT_RULES.md",
+    "docs/program/launch/implementation-wave/10_S0_COORDINATOR.md"
+  ],
+  "preceding_handoffs": [
+    "docs/program/inbox/f0a-e1-refresh-20260819/handoff.md",
+    "docs/program/inbox/f0b-d1-refresh-20260819/handoff.md",
+    "docs/program/inbox/f0c-repository-boundary-20260819/handoff.md",
+    "docs/program/inbox/t1-trace-cortex-release-audit/handoff.md",
+    "docs/program/inbox/v0-verifier-plan-20260819/handoff.md"
+  ],
+  "components": {
+    "trace_lite": {
+      "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "commit": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+      "branch": "main"
+    },
+    "trace": {
+      "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "commit": "c855bb06532b3b52b25f0bea969d2677e5049065",
+      "branch": "main"
+    },
+    "trace_bench": {
+      "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\Utilities\\trace-bench",
+      "status": "unversioned_tree_pending_b0_git_init"
+    },
+    "raw_data_root": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data"
+    }
+  }
+}

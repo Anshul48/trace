@@ -1,0 +1,166 @@
+{
+  "contract_version": "1.0",
+  "record_id": "trace-lite-f0c-20260819",
+  "captured_at_utc": "2026-08-19T04:45:00Z",
+  "captured_by": "trace_lite_engineer",
+  "component": "trace-lite",
+  "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+  "identity": {
+    "kind": "git",
+    "remote_or_archive": "git@github.com:Anshul48/trace-lite.git",
+    "branch": "main",
+    "commit": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+    "tag": null,
+    "content_manifest_sha256": null,
+    "identity_is_certifying": false
+  },
+  "working_state": {
+    "clean": false,
+    "tracked_modified_count": 0,
+    "tracked_diff_sha256": null,
+    "untracked_path_list_sha256": "793075dc20d2660da284b606fa8acffb50e59acb921e2f28652dc13b302eec04",
+    "classified_paths": [
+      {
+        "path": "benchmarks/protocols/README.md",
+        "state": "untracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Benchmark protocol documentation in Trace-Lite."
+      },
+      {
+        "path": "benchmarks/protocols/templates/GATE_100K_REPORT_TEMPLATE.md",
+        "state": "untracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "100K gate report protocol template."
+      },
+      {
+        "path": "benchmarks/protocols/templates/QUERY_CLASS_PROTOCOL_TEMPLATE.md",
+        "state": "untracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Query class protocol template."
+      },
+      {
+        "path": "benchmarks/protocols/templates/RELEASE_MANIFEST_TEMPLATE.yaml",
+        "state": "untracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Release manifest template."
+      },
+      {
+        "path": "benchmarks/registry/README.md",
+        "state": "untracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Benchmark registry overview."
+      },
+      {
+        "path": "benchmarks/registry/templates/DATASET_MANIFEST_TEMPLATE.json",
+        "state": "untracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Dataset manifest template."
+      },
+      {
+        "path": "benchmarks/registry/templates/DATASET_RECORD_TEMPLATE.md",
+        "state": "untracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Dataset admission record template."
+      },
+      {
+        "path": "docs/program/AGENT_CONTEXT_MAP.md",
+        "state": "untracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Local agent context map referencing canonical program pack."
+      },
+      {
+        "path": "docs/program/BETA_WORKSTREAM.md",
+        "state": "untracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Trace-Lite Beta workstream brief."
+      },
+      {
+        "path": "docs/program/PROGRAM_REFERENCE.md",
+        "state": "untracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Local pointer to canonical Trace program pack."
+      },
+      {
+        "path": "docs/program/README.md",
+        "state": "untracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Trace-Lite local program README."
+      }
+    ]
+  },
+  "source_inventory": {
+    "include_rules": ["src/", "tests/", "benchmarks/", "docs/", "pyproject.toml"],
+    "exclude_rules": [
+      ".pytest_cache/",
+      "__pycache__/",
+      "*.egg-info/",
+      "results/",
+      ".coverage"
+    ],
+    "inventory_sha256": null
+  },
+  "integration_boundaries": [
+    {
+      "consumer": "trace-bench",
+      "producer": "trace-lite",
+      "path_or_import": "trace_lite.retrieval / trace_lite.engines",
+      "pin_status": "unpinned",
+      "notes": "External trace-bench references Trace-Lite via Python import path; requires P-007/P-008 resolution."
+    },
+    {
+      "consumer": "trace-lite",
+      "producer": "trace-lite",
+      "path_or_import": "src/trace_lite/engines/benchmark.py",
+      "pin_status": "internal_legacy",
+      "notes": "Legacy internal benchmark engine; non-certifying, fail-open behavior; internal unit/regression use only."
+    },
+    {
+      "consumer": "trace-lite",
+      "producer": "trace-lite",
+      "path_or_import": "src/trace_lite/engines/graph.py",
+      "pin_status": "internal",
+      "notes": "Frequent-term all-pairs co-occurrence is an observed scaling blocker; belongs to TL2 after P-002."
+    },
+    {
+      "consumer": "trace-lite",
+      "producer": "trace-lite",
+      "path_or_import": "src/trace_lite/cortex/forest.py:graph_edges",
+      "pin_status": "internal_unversioned",
+      "notes": "graph_edges lacks build_id column; stale edges survive across rebuilds. L1 candidate/active isolation scope."
+    }
+  ],
+  "safe_mutation_base": {
+    "available": true,
+    "commit": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+    "reason": "Git commit is clean of tracked modifications. Mutable tasks must lease a dedicated worktree and leave the live tree untouched."
+  },
+  "packet_disposition": [
+    {
+      "packet_id": "L1",
+      "status": "scoped",
+      "reason": "Requires isolated worktree lease at commit fe66a9e, explicit allowed paths, input manifest, and independent verifier assignment."
+    },
+    {
+      "packet_id": "TL2",
+      "status": "blocked",
+      "reason": "Blocked on L1 completion and human acceptance of P-002 (graph degree/PPR budgets)."
+    },
+    {
+      "packet_id": "TL3",
+      "status": "blocked",
+      "reason": "Blocked on L1 lifecycle implementation."
+    }
+  ],
+  "claim_boundary": "Observed boundary record only; no behavior or reproducibility certification."
+}

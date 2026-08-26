@@ -1,0 +1,7 @@
+{
+  "session": "Wave R2 (Remediated Real 100K Scale Gate)",
+  "timestamp_utc": "2026-08-26T13:57:00Z",
+  "runner_file": "scripts/run_100k_scale_gate.py",
+  "runner_sha256": "231d13ad054b4e9a78377fe945544d0d75e4ccd2261741a0ea6e63e786716d45",
+  "clean_execution": true
+}

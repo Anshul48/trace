@@ -1,0 +1,79 @@
+{
+  "contract_version": "1.0",
+  "record_id": "trace-bench-f0b-d1-refresh-20260819",
+  "captured_at_utc": "2026-08-19T10:15:00Z",
+  "captured_by": "benchmark_foundation_data_steward",
+  "component": "trace-bench",
+  "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+  "identity": {
+    "kind": "unversioned",
+    "remote_or_archive": null,
+    "branch": null,
+    "commit": null,
+    "tag": null,
+    "content_manifest_sha256": null,
+    "identity_is_certifying": false
+  },
+  "working_state": {
+    "clean": false,
+    "tracked_modified_count": 0,
+    "tracked_diff_sha256": null,
+    "untracked_path_list_sha256": null,
+    "classified_paths": [
+      {
+        "path": "src/trace_bench/adapters/",
+        "state": "untracked",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "Dataset adapters and loaders"
+      },
+      {
+        "path": "src/trace_bench/datasets/",
+        "state": "untracked",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "Dataset schemas and internal fixtures"
+      }
+    ]
+  },
+  "source_inventory": {
+    "include_rules": [
+      "src/trace_bench/adapters/**/*.py",
+      "src/trace_bench/datasets/**/*.py",
+      "src/trace_bench/datasets/*.json"
+    ],
+    "exclude_rules": [
+      "benchmarks/cache/",
+      "benchmarks/results/",
+      "**/__pycache__/"
+    ],
+    "inventory_sha256": "unversioned_dataset_records_f0b"
+  },
+  "integration_boundaries": [
+    {
+      "consumer": "trace-bench",
+      "producer": "external_datasets",
+      "path_or_import": "benchmarks/cache/ (external staging location)",
+      "pin_status": "unpinned",
+      "notes": "No public dataset currently staged; all candidate records documented read-only pending P-001."
+    }
+  ],
+  "safe_mutation_base": {
+    "available": false,
+    "commit": null,
+    "reason": "All datasets remain candidate/unadmitted pending P-001 human decision."
+  },
+  "packet_disposition": [
+    {
+      "packet_id": "F0b",
+      "status": "current",
+      "reason": "Dataset portfolio and candidate admission records documented read-only without downloading data."
+    },
+    {
+      "packet_id": "D2",
+      "status": "blocked",
+      "reason": "Requires human decision on P-001 before staging authorized datasets."
+    }
+  ],
+  "claim_boundary": "Observed candidate records only; no dataset is admitted, downloaded, staged, or certifying."
+}

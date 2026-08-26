@@ -1,0 +1,22 @@
+{
+  "contract_version": "2.0",
+  "overall_gate_v1b_verdict": "CLOSED (PASS)",
+  "reviewed_at_utc": "2026-08-25T13:37:35.838512+00:00",
+  "reviewer_id": "v1b-r5-reviewer-20260825",
+  "reviewer_lease_id": "lease-v1b-r5-temporal-successor-final8-20260825",
+  "temporal_sub_gate": {
+    "candidate_commit": "f7bd96e9c5e0f9326b53a074024e7ace889f6e36",
+    "candidate_tree": "91d93da3a003dd062d76a4d1aa1cfd40412d831c",
+    "docker_cleanup_complete": true,
+    "evidence_manifest_sha256": "09953afc7b90f8b5248a55f0c2d6245edf412ba1ea0f9436428810b0514b37e3",
+    "external_cleanup_complete": true,
+    "lock_sha256": "109bac3908efd851627b2290897744819076cce4c2f5e08799119399e8686b4a",
+    "outcome": "PASS",
+    "parent_commit": "18d9b539fb22d4d6aa09ff7e672e8405579330ae",
+    "result_manifest_sha256": "885d777a45c06364715c1382923ad5943ab359a95b90a515d357ab06feb8c208",
+    "secret_file_destroyed": true,
+    "sub_gate": "V1b-Trace-temporal",
+    "surviving_containers": 0,
+    "verdict": "PASS"
+  }
+}

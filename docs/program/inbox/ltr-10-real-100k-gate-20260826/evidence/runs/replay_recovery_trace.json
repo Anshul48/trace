@@ -1,0 +1,7 @@
+{
+  "events_selected_for_replay": 10000,
+  "replayed_count": 10000,
+  "elapsed_seconds": 0.04516322200652212,
+  "replay_rate_events_sec": 221419.10066903284,
+  "rebuild_parity": 1.0
+}

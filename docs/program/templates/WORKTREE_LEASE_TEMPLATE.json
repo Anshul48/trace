@@ -1,0 +1,49 @@
+{
+  "contract_version": "1.0",
+  "lease_id": "<stable-id>",
+  "packet_id": "<packet-id>",
+  "component": "<trace-lite|trace|trace-bench>",
+  "created_at_utc": "<RFC3339 UTC>",
+  "expires_at_utc": "<RFC3339 UTC or review checkpoint>",
+  "owner": "<worker/session identity>",
+  "base": {
+    "repository_root": "<canonical root>",
+    "commit": "<immutable clean base>",
+    "repository_state_record": "<path>",
+    "base_clean_verified": true
+  },
+  "worktree": {
+    "path": "<new isolated path>",
+    "branch": "<packet-scoped branch>",
+    "clean_on_creation": true,
+    "exclusive": true
+  },
+  "scope": {
+    "allowed_paths": ["<path>"],
+    "forbidden_paths": ["<path>"],
+    "may_run_networked_commands": false,
+    "may_download_data": false,
+    "may_call_provider": false
+  },
+  "prohibited_operations": [
+    "merge",
+    "rebase",
+    "reset",
+    "clean",
+    "stash",
+    "delete user-owned source",
+    "modify evaluator threshold after observing result"
+  ],
+  "recovery": {
+    "predecessor_release_or_state": "<identity>",
+    "rollback_statement": "<safe rollback>",
+    "external_side_effects": "<none or compensation>"
+  },
+  "verifier": {
+    "required": true,
+    "separate_worktree": true,
+    "packet_id": "<V1a or V1b>"
+  },
+  "release_state": "prepared|assigned|released|expired|revoked",
+  "release_notes": "<coordinator closes lease after verified handoff>"
+}

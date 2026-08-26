@@ -1,0 +1,65 @@
+{
+  "contract_version": "1.0",
+  "record_id": "<component>-<packet>-<timestamp>",
+  "captured_at_utc": "<RFC3339 UTC>",
+  "captured_by": "<role/worker>",
+  "component": "<trace-lite|trace|trace-bench|program-control-plane>",
+  "canonical_root": "<absolute path>",
+  "identity": {
+    "kind": "git|content_manifest|unversioned",
+    "remote_or_archive": "<redacted URL or null>",
+    "branch": "<branch or null>",
+    "commit": "<commit or null>",
+    "tag": "<tag or null>",
+    "content_manifest_sha256": "<digest or null>",
+    "identity_is_certifying": false
+  },
+  "working_state": {
+    "clean": false,
+    "tracked_modified_count": 0,
+    "tracked_diff_sha256": "<digest or null>",
+    "untracked_path_list_sha256": "<digest or null>",
+    "classified_paths": [
+      {
+        "path": "<relative path>",
+        "state": "tracked_modified|untracked|ignored",
+        "classification": "user_code|migration|documentation|generated|cache|results|unknown",
+        "protected": true,
+        "notes": "<why this must not be touched>"
+      }
+    ]
+  },
+  "source_inventory": {
+    "include_rules": ["<rules>"],
+    "exclude_rules": [
+      ".pytest_cache/",
+      "__pycache__/",
+      "*.egg-info/",
+      "results/",
+      "<raw data cache>"
+    ],
+    "inventory_sha256": "<digest>"
+  },
+  "integration_boundaries": [
+    {
+      "consumer": "<component>",
+      "producer": "<component>",
+      "path_or_import": "<exact anchor>",
+      "pin_status": "pinned|unpinned|unknown",
+      "notes": "<risk or action>"
+    }
+  ],
+  "safe_mutation_base": {
+    "available": false,
+    "commit": "<accepted clean base or null>",
+    "reason": "<why>"
+  },
+  "packet_disposition": [
+    {
+      "packet_id": "<packet>",
+      "status": "current|stale|blocked",
+      "reason": "<specific mismatch>"
+    }
+  ],
+  "claim_boundary": "Observed boundary record only; no behavior or reproducibility certification."
+}

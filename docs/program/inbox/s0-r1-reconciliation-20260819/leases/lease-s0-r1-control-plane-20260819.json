@@ -1,0 +1,33 @@
+{
+  "contract_version": "1.0",
+  "lease_id": "lease-s0-r1-control-plane-20260819",
+  "packet_id": "s0-r1-reconciliation-20260819",
+  "component": "program-control-plane",
+  "created_at_utc": "2026-08-19T12:40:55.1070524Z",
+  "expires_at_utc": "2026-08-20T12:40:55.1070524Z",
+  "owner": "S0 Coordinator / Codex",
+  "worktree": {
+    "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "write_root": "docs/program",
+    "exclusive_control_plane_writer": true
+  },
+  "base": {
+    "trace_head_commit": "c855bb06532b3b52b25f0bea969d2677e5049065",
+    "pre_write_control_plane_file_count": 213,
+    "pre_write_control_plane_tree_sha256": "1213c046efda3b66b67939cb6a88bea2d80bb41618f2f731a40dd00daf8a72d7"
+  },
+  "scope": {
+    "allowed_paths": [
+      "docs/program/FOUNDATION_STATUS.md",
+      "docs/program/07_RISK_REGISTER.md",
+      "docs/program/COMPONENT_REGISTRY.md",
+      "docs/program/CONTROL_PLANE_LOCK.json",
+      "docs/program/inbox/s0-r1-reconciliation-20260819/"
+    ],
+    "forbidden_paths": ["src/", "tests/", "migrations/", "benchmarks/", "trace-lite/", "trace-bench/", "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\"],
+    "network": false,
+    "provider": false,
+    "data_download": false
+  },
+  "release_rule": "Close after R1 handoff and post-write control-plane snapshot are hashed; do not reuse for later S0 sessions."
+}

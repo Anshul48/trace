@@ -1,0 +1,109 @@
+{
+  "contract_version": "1.0",
+  "record_id": "trace-bench-b1-e2a-repository-state-20260819",
+  "packet_id": "b1-e2a-fail-closed-runner",
+  "captured_at_utc": "2026-08-19T07:20:00Z",
+  "captured_by": "benchmark_foundation_evaluation_engineer",
+  "session": "S1",
+  "component": "trace-bench",
+  "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+  "identity": {
+    "kind": "git",
+    "remote_or_archive": null,
+    "branch": "main",
+    "base_commit": "51c639edf39fee49818710ae2e9246c4ebb29e98",
+    "head_commit": "0b01de5e49dcb18d43876b0b6004da58b35b72aa",
+    "tag": "v0.1.0-foundation",
+    "content_manifest_sha256": "7603803ffc6537b84e67daa1b8d526a04cd173dc6c081089d947b0a3f93bc075",
+    "identity_is_certifying": false
+  },
+  "lease": {
+    "lease_id": "lease-s1-b0-b1-20260819",
+    "lease_path": "docs/program/inbox/d0-coordinator-20260819/leases/lease-s1-b0-b1.json",
+    "valid_until_utc": "2026-08-20T07:00:00Z"
+  },
+  "working_state": {
+    "clean": true,
+    "tracked_modified_count": 0,
+    "tracked_diff_sha256": null,
+    "untracked_path_list_sha256": null,
+    "classified_paths": [
+      {
+        "path": "src/trace_bench/",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "Fail-closed runner, datasets, metrics, and adapters"
+      },
+      {
+        "path": "tests/",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "Negative test matrix and unit harness"
+      },
+      {
+        "path": "SOURCE_MANIFEST.json",
+        "state": "tracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Pinned source manifest for 42 baseline files"
+      },
+      {
+        "path": "pyproject.toml",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "Package build definition"
+      },
+      {
+        "path": ".gitignore",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "Git ignore rules"
+      }
+    ]
+  },
+  "source_inventory": {
+    "include_rules": [
+      "pyproject.toml",
+      "README.md",
+      "SOURCE_MANIFEST.json",
+      ".gitignore",
+      "src/trace_bench/**/*.py",
+      "src/trace_bench/datasets/*.json",
+      "tests/**/*.py",
+      "tests/fixtures/*.json"
+    ],
+    "exclude_rules": [
+      ".pytest_cache/",
+      "**/__pycache__/",
+      "*.egg-info/",
+      "benchmarks/results/",
+      "benchmarks/cache/"
+    ],
+    "inventory_sha256": "7603803ffc6537b84e67daa1b8d526a04cd173dc6c081089d947b0a3f93bc075",
+    "tracked_file_count": 44
+  },
+  "integration_boundaries": [
+    {
+      "consumer": "trace-bench",
+      "producer": "trace-lite",
+      "path_or_import": "src/trace_bench/baselines/trace_retriever.py:L35 (from trace_lite import TraceLite)",
+      "pin_status": "unpinned",
+      "notes": "Runtime adapter integration guarded by fail-closed execution modes"
+    }
+  ],
+  "safe_mutation_base": {
+    "available": true,
+    "commit": "51c639edf39fee49818710ae2e9246c4ebb29e98",
+    "reason": "Clean foundation baseline commit tagged v0.1.0-foundation"
+  },
+  "protected_roots": [
+    "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data"
+  ],
+  "claim_boundary": "Observed repository state record for B0/B1 completion. B1.1 supersedes identity alignment prior to V1a."
+}

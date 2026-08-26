@@ -1,0 +1,12 @@
+{
+  "packet_id": "ltr-04-runner-integrity-20260826",
+  "contract_version": "1.0",
+  "created_at_utc": "2026-08-26T06:22:00Z",
+  "role": "S5 Independent Verifier",
+  "target_runner": "scripts/run_100k_scale_gate.py",
+  "preceding_packets": [
+    "ltr-02-corpus-capsule-20260826",
+    "ltr-03-canonical-runner-20260826"
+  ],
+  "status": "passed_and_attested"
+}

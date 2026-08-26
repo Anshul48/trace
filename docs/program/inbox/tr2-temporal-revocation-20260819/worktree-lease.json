@@ -1,0 +1,78 @@
+{
+  "contract_version": "1.0",
+  "lease_id": "lease-s3-tr2-temporal-revocation-20260823",
+  "packet_id": "tr2-temporal-revocation-20260819",
+  "component": "trace",
+  "created_at_utc": "2026-08-23T08:03:58Z",
+  "expires_at_utc": "2026-08-24T08:03:58Z",
+  "owner": "Codex Session 7 / S3 TR2 Temporal and Revocation Implementation",
+  "base": {
+    "repository_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "protected_user_head": "c855bb06532b3b52b25f0bea969d2677e5049065",
+    "implementation_base_commit": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+    "implementation_base_source_manifest_sha256": "a8e9edf50b1c1567c307ec8261e5b6f7d0711f064488fa63831ecb12e4fed7e2",
+    "base_commit_subject": "feat(cortex): implement unified Cortex Release lifecycle root (DEC-P-003 Option A)"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr2-s3-20260823",
+    "branch": "feat/tr2-temporal-revocation-20260823",
+    "clean_on_creation": true,
+    "exclusive": true,
+    "creation_required": false,
+    "verified_head": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+    "verified_status": "clean"
+  },
+  "scope": {
+    "allowed_paths": [
+      "src/trace/v2/api.py",
+      "src/trace/v2/migrations.py",
+      "src/trace/v2/models.py",
+      "src/trace/v2/production.py",
+      "src/trace/v2/repository.py",
+      "src/trace/v2/retrieval.py",
+      "src/trace/v2/service.py",
+      "src/trace/v2/store.py",
+      "migrations/006_temporal_revocation.sql",
+      "tests/test_v2_temporal_revocation.py"
+    ],
+    "packet_local_paths": [
+      "docs/program/inbox/tr2-temporal-revocation-20260819/"
+    ],
+    "may_run_networked_commands": false,
+    "may_download_data": false,
+    "may_call_provider": false
+  },
+  "forbidden_paths": [
+    "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr1",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-trace-release-20260819",
+    "docs/program/CONTROL_PLANE_LOCK.json",
+    "docs/program/06_DECISION_LOG.md",
+    "docs/program/07_RISK_REGISTER.md",
+    "src/trace/v1/",
+    "trace-lite/",
+    "trace-bench/"
+  ],
+  "prohibited_operations": [
+    "mutate the protected dirty user checkout",
+    "reuse or mutate lease-s3-t0-tr1-20260819",
+    "rewrite migrations 001-005 destructively",
+    "invent or weaken P-004 semantics",
+    "use network, providers, fallback data, mock data, or synthetic certification data",
+    "claim PostgreSQL/RLS/external-index/deployment/100K readiness"
+  ],
+  "recovery": {
+    "rollback_statement": "Remove only the TR2 worktree after preserving the packet handoff and commit identity; do not touch protected worktrees.",
+    "external_side_effects": "none expected"
+  },
+  "verifier": {
+    "required": true,
+    "separate_worktree": true,
+    "verifier_id": "pending-coordinator-fresh-v1b-trace-temporal",
+    "input_manifest_required": true,
+    "implementation_commit": "0a91b278a414756da260b15c5cb9daddb5e9aac2",
+    "input_manifest_path": "docs/program/inbox/tr2-temporal-revocation-20260819/evidence/v1b-input-manifest.json"
+  },
+  "implementation_completed_at_utc": "2026-08-23T08:58:24.2327937Z",
+  "state": "implementation_complete_verification_pending"
+}

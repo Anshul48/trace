@@ -1,0 +1,85 @@
+{
+  "contract_version": "1.0",
+  "snapshot_id": "v1b-r2-closure-20260825",
+  "generated_at_utc": "2026-08-25T05:45:00Z",
+  "scope": "All regular files recursively under docs/program excluding this lock file.",
+  "normalization": {
+    "relative_path_separator": "/",
+    "line_format": "<relative-path>:<lowercase-sha256>",
+    "sort": "ordinal ascending relative path",
+    "join": "LF",
+    "encoding": "UTF-8 without BOM"
+  },
+  "file_count": 337,
+  "tree_sha256": "32c5030d1b7cce97b66cadf8efea0163ef38f6eadc6b6ea21742e28b9e8b57b2",
+  "core_documents": [
+    {
+      "path": "00_CHARTER.md",
+      "sha256": "db42eab310a0046cdfcf7dc5cb3bfce619ceb63fb4617e8ed61cd0a024b38853"
+    },
+    {
+      "path": "01_INVARIANTS.md",
+      "sha256": "c4ae23f62f548c00f6dad1e0864ab36ddc8ae57c288146931234dcfaf1cb0a61"
+    },
+    {
+      "path": "02_EXECUTION_DAG.md",
+      "sha256": "4cfbf66d55ca0937f4ebad4c33a6cb0e0926f3f90f6e808f25ec390e2c2eaa41"
+    },
+    {
+      "path": "03_SHARED_CONTRACTS.md",
+      "sha256": "7dfb71cf21ffd1dbf74874ba66723d0d65bf8d20f5cdd299c902a799f53429db"
+    },
+    {
+      "path": "04_EVALUATION_PROTOCOL.md",
+      "sha256": "814151e76d4dce3e72f878dd2ff159f553126fd5bbe28b90bb7ae373acfe8846"
+    },
+    {
+      "path": "05_PROMOTION_RUBRIC.md",
+      "sha256": "013b05989581c919513a916177ee8f16f59f3e672d61c960a4472e5be49ab848"
+    },
+    {
+      "path": "06_DECISION_LOG.md",
+      "sha256": "f07f346a7c1f0b2c8822576b6faedb0bd5b59d45193b42b763c9512fa1128b1d"
+    },
+    {
+      "path": "07_RISK_REGISTER.md",
+      "sha256": "564bdc8eb9595b830c742a98c9a3127f9a9083ae3e556ec76d2c6c84b942c97b"
+    },
+    {
+      "path": "COMPONENT_REGISTRY.md",
+      "sha256": "57d4b8be7172811ed712a6a17ce7662d643b535e76950ec72da55150b0d9bda2"
+    },
+    {
+      "path": "FOUNDATION_GATE_DOSSIER.md",
+      "sha256": "3fb062e16ceb12a29306882b8dc937c9854eb44a5e38397bfbcb8ca9e76a2e6e"
+    },
+    {
+      "path": "FOUNDATION_RELEASE.md",
+      "sha256": "f408ea3b82e2ac7466695cc6e7ef4b6902a6da7baf14d2ea9091658df8b23f6e"
+    },
+    {
+      "path": "FOUNDATION_STATUS.md",
+      "sha256": "e5bcd80f6ded3219c65617ecd2bd4cf085c51c9aa5679c46fbdd1e5a4fb10ae9"
+    },
+    {
+      "path": "README.md",
+      "sha256": "8e71f1269e958bb0eaafc63a3918a7a224c2fdf45e485f935344fdc9cd5e98cd"
+    },
+    {
+      "path": "SESSION_OPERATING_MANUAL.md",
+      "sha256": "bff5bac0ade859e0c7dd9093fe4dc4a5d2eb9ea8097e6f38844a82dc6c87ec54"
+    }
+  ],
+  "component_observations": {
+    "trace_lite_git": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1; L1 worktree 7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+    "trace_git": "c855bb06532b3b52b25f0bea969d2677e5049065; protected dirty user snapshot; TR1 worktree 454c5aed2200796ac9874e4fbe6e099bdb53f830",
+    "trace_bench_identity": "0b01de5e49dcb18d43876b0b6004da58b35b72aa; untracked uv.lock; B1 handoff full hash mismatch",
+    "d2a_metadata_root": "872102e2edfa41954f80dd55ce592a4bdfa5937ce2c58aec6480aa094504c2df"
+  },
+  "verification_rule": "Before assigning a mutable packet, recompute this tree hash or create a new control-plane snapshot. A mismatch requires packet refresh; it is not proof that the change is wrong.",
+  "supersedes": {
+    "snapshot_id": "foundation-control-plane-20260819-initial",
+    "file_count": 103,
+    "tree_sha256": "c65926092d2dc7b4472dd1ac4da2af853b2fd8a24ecd93c9b748bd37c16df2f5"
+  }
+}

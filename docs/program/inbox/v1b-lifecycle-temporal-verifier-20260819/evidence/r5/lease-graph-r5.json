@@ -1,0 +1,39 @@
+{
+  "contract_version": "3.0",
+  "lease_id": "lease-v1b-r5-graph-custody-20260825",
+  "gate": "V1b-TL-graph",
+  "created_at_utc": "2026-08-25T10:47:22.6673289Z",
+  "expires_at_utc": "2026-08-26T10:47:22.6673289Z",
+  "authority": "Program owner explicitly authorized closing Gate V1b in the active 2026-08-25 session.",
+  "owner": "R5 isolated graph verifier",
+  "candidate": {
+    "commit": "f6e533fa17e9970e0b14a525b077d33cd5563103",
+    "tree": "f6267e74f095aec3f84c7205e50867ddee7d60a0",
+    "parent": "3e7e9f0ee460e3af75f3935343f6d6f2089f9f7c",
+    "lock_sha256": "d9ee9d52ad540b6f45a158b04447f43464af4fe992ff31db364fe181f5cffacf",
+    "rationale": "Narrow fail-closed successor: depth-four traversal with reachable work now returns bounded_incomplete; exact-depth leaves remain complete."
+  },
+  "verifier_asset": {
+    "path": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence/r5/graph_verifier.py",
+    "sha256": "a755f90ed46d5c22a4bf6ac9a435cb29aa8ec3cee468de450a715287da624196"
+  },
+  "provision_asset": {
+    "path": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence/r5/provision_environment.py",
+    "sha256": "2e2357620e8f8e5d29cd4f9e5e9d1dd52b1a0be552b37579f711dfcd28d494d5"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\final-worktrees\\graph-custody",
+    "venv_executable": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\final-worktrees\\graph-custody\\.venv\\Scripts\\python.exe",
+    "cache_path": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\final-cache\\graph-custody",
+    "provision_path": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\provision\\graph-custody",
+    "scratch_path": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\scratch\\graph-r5-custody",
+    "result_path": "C:\\Users\\anshu\\AppData\\Local\\trace-v1b-r5-20260825\\results\\graph-r5-custody"
+  },
+  "constraints": {
+    "may_repair_candidate": false,
+    "may_change_policy": false,
+    "network": "disabled during verification",
+    "outcome_on_pass": "needs_review"
+  },
+  "claim_limit": "V1b bounded graph behavior only. The 100K fixture is adversarial engineering evidence, not retrieval quality, public-data, scale certification, SOTA, deployment, or promotion evidence."
+}

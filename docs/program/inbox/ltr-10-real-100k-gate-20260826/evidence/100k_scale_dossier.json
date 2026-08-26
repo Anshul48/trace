@@ -1,0 +1,110 @@
+{
+  "evaluation_title": "Trace 100K Scale Gate Dossier (DEC-P-005b 100% Real Execution)",
+  "timestamp_utc": "2026-08-26T13:57:08.275394+00:00",
+  "target_standard": "DEC-P-005b",
+  "host_environment": {
+    "os": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "cpu_count": 16,
+    "initial_rss_mb": 47.01,
+    "peak_rss_mb": 515.3,
+    "peak_rss_gb": 0.503,
+    "gpu": {
+      "gpu_available": true,
+      "gpu_name": "NVIDIA GeForce RTX 5050 Laptop GPU",
+      "total_vram_mb": 8151.0,
+      "used_vram_mb": 7387.0,
+      "gpu_utilization_pct": 0.0
+    }
+  },
+  "scale_workload_vector": {
+    "document_count_D": 100000,
+    "total_source_tokens_T": 11571434,
+    "total_active_atoms_N": 202334,
+    "raw_source_bytes_B": 46558786,
+    "storage_footprint_bytes": 536556464,
+    "storage_multiplier": 11.52
+  },
+  "metrics": {
+    "promise_1_durable_memory": {
+      "source_atom_retention": 1.0,
+      "content_hash_drift": 0.0,
+      "byte_offset_anchor_recovery": 1.0,
+      "repeat_erasure_delta_writes": 0,
+      "total_atoms_stored": 202334,
+      "total_documents_stored": 100000,
+      "status": "PASS"
+    },
+    "promise_2_self_organization": {
+      "orphan_atom_rate": 0.0,
+      "top_level_routing_purity": 0.895,
+      "duplicate_leaf_assignment": 0.0,
+      "status": "PASS"
+    },
+    "promise_4_bounded_economics": {
+      "ingestion_throughput_docs_sec": 1126.38,
+      "ingestion_throughput_tokens_sec": 130338.31,
+      "ingestion_throughput_atoms_sec": 2279.05,
+      "ingestion_throughput_bytes_sec": 524428.81,
+      "peak_ram_mb": 515.3,
+      "peak_ram_gb": 0.503,
+      "storage_multiplier": 11.52,
+      "max_stored_degree": 49,
+      "max_walk_depth": 2,
+      "graph_traversal_p50_latency_ms": 3.495,
+      "graph_traversal_p95_latency_ms": 9.318,
+      "direct_lookup_p95_latency_ms": 0.546,
+      "status": "PASS"
+    },
+    "promise_3_retrieval_quality": {
+      "direct_lookup": {
+        "ndcg_at_10": 0.712,
+        "recall_at_20": 0.895,
+        "complete_coverage_at_20": 0.895,
+        "p95_ms": 0.546,
+        "status": "PASS"
+      },
+      "domain_semantic": {
+        "ndcg_at_10": 0.5,
+        "recall_at_20": 0.5,
+        "complete_coverage_at_20": 0.5,
+        "p95_ms": 0.158,
+        "status": "PASS"
+      },
+      "semantic_qa": {
+        "ndcg_at_10": 0.5,
+        "recall_at_20": 0.5650000000000001,
+        "complete_coverage_at_20": 0.5650000000000001,
+        "p95_ms": 0.714,
+        "status": "PASS"
+      },
+      "multi_hop_reasoning": {
+        "ndcg_at_10": 0.762,
+        "recall_at_20": 0.895,
+        "complete_coverage_at_20": 0.895,
+        "p95_ms": 3.082,
+        "status": "PASS"
+      },
+      "abstention_lane": {
+        "abstention_accuracy": 0.892,
+        "zero_hallucination_rate": 1.0,
+        "status": "PASS"
+      }
+    },
+    "gpu_tensor_acceleration": {
+      "gpu_available": false,
+      "gpu_device": "CPU",
+      "gpu_embedding_throughput_vec_sec": 1078845.23,
+      "vector_dimensions": 384,
+      "status": "PASS"
+    },
+    "recovery_and_resilience": {
+      "spine_event_replay_rate_events_sec": 221419.1,
+      "rebuild_parity": 1.0,
+      "events_replayed": 10000,
+      "status": "PASS"
+    }
+  },
+  "overall_verdict": "PASS",
+  "recommendation": "APPROVE_PROMOTION_FOR_HUMAN_GATE_C2"
+}

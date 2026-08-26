@@ -1,0 +1,50 @@
+{
+  "assignment_manifest_version": "1.0",
+  "packet_id": "s0-r1-reconciliation-20260819",
+  "assigned_at_utc": "2026-08-19T12:40:55.1070524Z",
+  "authority": "S0 control-plane assignment only; no verifier result is accepted",
+  "assignments": [
+    {
+      "implementation_packet": "l1-tl1-candidate-active-lifecycle",
+      "sub_gate": "V1b-TL-lifecycle",
+      "prior_verifier_id": "v1b-lifecycle-temporal-verifier-20260819",
+      "replacement_verifier_id": "v1b-tl-lifecycle-verifier-20260819",
+      "lease": "leases/lease-s5-v1b-tl-lifecycle-20260819.json",
+      "state": "assigned",
+      "handoff_destination": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/handoff.md"
+    },
+    {
+      "implementation_packet": "tr1-unified-cortex-release-20260819",
+      "sub_gate": "V1b-Trace-release",
+      "prior_verifier_id": "pending",
+      "replacement_verifier_id": "v1b-trace-release-verifier-20260819",
+      "lease": "leases/lease-s5-v1b-trace-release-20260819.json",
+      "state": "assigned",
+      "handoff_destination": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/handoff.md",
+      "preserved_history": "The original TR1 handoff remains unchanged; this assignment is the superseding control-plane record."
+    },
+    {
+      "implementation_packet": "b1-e2a-fail-closed-runner",
+      "sub_gate": "V1a",
+      "prior_verifier_id": "v1a-runner-integrity-20260819",
+      "replacement_verifier_id": "v1a-runner-integrity-20260819",
+      "lease": "leases/lease-s5-v1a-benchmark-20260819.json",
+      "state": "blocked_on_B1_1",
+      "handoff_destination": "docs/program/inbox/v1a-runner-integrity-20260819/handoff.md"
+    },
+    {
+      "implementation_packet": "b2-authorized-data-staging-20260819",
+      "sub_gate": "D2a manifest verification / D2b reviewer",
+      "prior_verifier_id": "d2b-manifest-verification",
+      "replacement_verifier_id": "d2b-manifest-verifier-20260819",
+      "lease": "leases/lease-s4-d2b-normalization-20260819.json",
+      "state": "reserved_pending_D2b",
+      "handoff_destination": "docs/program/inbox/s4-d2b-dataset-normalization-20260819/handoff.md",
+      "finding": "No prior verifier packet directory backs the D2a handoff identifier; R1 does not convert that absence into verification."
+    }
+  ],
+  "blocked_subgates_without_leases": [
+    {"sub_gate": "V1b-TL-graph", "hard_dependency": "TL2 implementation and human P-002", "safe_default": "No graph verifier dispatch"},
+    {"sub_gate": "V1b-Trace-temporal", "hard_dependency": "TR2 implementation and human P-004", "safe_default": "No temporal verifier dispatch"}
+  ]
+}

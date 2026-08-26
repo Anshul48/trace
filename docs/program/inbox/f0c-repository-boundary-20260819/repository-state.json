@@ -1,0 +1,52 @@
+{
+  "contract_version": "1.0",
+  "record_id": "f0c-consolidated-repository-boundary-20260819",
+  "captured_at_utc": "2026-08-19T04:37:30Z",
+  "captured_by": "coordinator",
+  "component": "all_foundation_components",
+  "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+  "summary": {
+    "trace_lite": {
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "identity_kind": "git",
+      "commit": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+      "branch": "main",
+      "remote": "git@github.com:Anshul48/trace-lite.git",
+      "tracked_modified_count": 0,
+      "untracked_count": 11,
+      "clean_mutation_base_available": true,
+      "base_commit": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+      "status": "clean_tracked_dirty_untracked_protected"
+    },
+    "trace": {
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "identity_kind": "git",
+      "commit": "c855bb06532b3b52b25f0bea969d2677e5049065",
+      "branch": "main",
+      "remote": "https://github.com/Anshul48/trace.git",
+      "tracked_modified_count": 26,
+      "tracked_diff_sha256": "dbc213b9cd609f35562891f789dbc1daaef762ddf2f81030847529be756089ae",
+      "untracked_path_list_sha256": "3b406fa08deb2847770656ffdf2e3908a079547250ac6af90b21d98cd709afa5",
+      "clean_mutation_base_available": false,
+      "status": "dirty_user_snapshot_protected"
+    },
+    "trace_bench": {
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+      "identity_kind": "unversioned",
+      "git_present": false,
+      "file_count": 41,
+      "content_manifest_sha256": "739d7f42fb40c9234b716f5a30aa9e0acd224c4e486e24f95e4afa8f1ca36f1e",
+      "clean_mutation_base_available": false,
+      "status": "unversioned_non_certifying_protected"
+    },
+    "program_control_plane": {
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace\\docs\\program",
+      "snapshot_id": "foundation-control-plane-20260819-initial",
+      "tree_sha256": "c65926092d2dc7b4472dd1ac4da2af853b2fd8a24ecd93c9b748bd37c16df2f5",
+      "file_count": 103,
+      "status": "locked"
+    }
+  },
+  "protected_paths_policy": "No reset, clean, checkout, stash, move, delete, or commit on any existing user-owned modified or untracked paths in Trace, Trace-Lite, or trace-bench.",
+  "claim_boundary": "Consolidated repository boundary and dirty-state record only. No software implementation, data admission, or certification claim."
+}

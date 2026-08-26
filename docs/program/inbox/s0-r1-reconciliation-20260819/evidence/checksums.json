@@ -1,0 +1,34 @@
+{
+  "manifest_version": "1.0",
+  "manifest_id": "s0-r1-final-artifact-checksums-20260819",
+  "generated_at_utc": "2026-08-19T12:52:06.8794096Z",
+  "algorithm": "SHA-256",
+  "excluded_from_this_manifest": [
+    "docs/program/inbox/s0-r1-reconciliation-20260819/evidence/checksums.json",
+    "docs/program/CONTROL_PLANE_LOCK.json"
+  ],
+  "artifacts": [
+    {"path": "docs/program/07_RISK_REGISTER.md", "sha256": "b87e737e35a97ada487430db4f1ed92cd4a8d3fb3775a481e91bb8c5047cfb2c", "size_bytes": 10730},
+    {"path": "docs/program/COMPONENT_REGISTRY.md", "sha256": "57d4b8be7172811ed712a6a17ce7662d643b535e76950ec72da55150b0d9bda2", "size_bytes": 6723},
+    {"path": "docs/program/FOUNDATION_STATUS.md", "sha256": "1fb2de1f822ed72a3bee7bdbe0c24eff165a09f264e546eb0e44f88d710a390f", "size_bytes": 7390},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/assignments/verifier-assignments.json", "sha256": "65f99c666246b8861b19e690fbf723708bbd6b8db96d89c9b02d92f7ef30b2f7", "size_bytes": 2613},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/commands.md", "sha256": "39852f6ff97d33f1be4775f58b0683fe2b44fe44cb58df30c20a12025d218461", "size_bytes": 5602},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/evidence/downstream-packet-classification.md", "sha256": "5ccbb3a669c3a24478e63c3a55a93811c5b60fbdeecfa4ad5cb437a74e4401cc", "size_bytes": 4069},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/evidence/README.md", "sha256": "5045c3f8cc735397b11a7d5e87d5548e3b0259ce4b3cfef23d01a2f9c12fd896", "size_bytes": 978},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/evidence/risk-state.md", "sha256": "98fac181ab035a223520892b5d0e625ea1632e93ede323dbcc70683d3a89d0d1", "size_bytes": 3117},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/evidence/source-identity-manifest.json", "sha256": "144f7efa60ff242302b57c9bcee8e2791a4cb62394d1b87eabcc8b030cda02a6", "size_bytes": 4811},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/evidence/status-board.md", "sha256": "386da309b2c665258a26a5f4d43d7f2b78a13feb5e3584f01e71392bd412efbf", "size_bytes": 5284},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/handoff.md", "sha256": "08a3e4a0b4e9a41e89efe10803899253571e2970eb2899b6a026cd9eec116845", "size_bytes": 10475},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/input-manifest.json", "sha256": "430b164fca4541844aa0d467732378cc112f65e7cf13d244e171cd54a81971e9", "size_bytes": 8885},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/leases/lease-s0-r1-control-plane-20260819.json", "sha256": "1e7d13a5069caf2829a3ce45f4544468ca7635450791b7a984fff9c37642bd34", "size_bytes": 1374},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/leases/lease-s1-b1-1-benchmark-identity-20260819.json", "sha256": "49e7eab68cfa3a08c5e454a339a0c40b6e5c414a6d7e095b025d4f680b9b2c6c", "size_bytes": 1947},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/leases/lease-s4-d2b-normalization-20260819.json", "sha256": "508685c032b5b57eed7fcc976d2869a9cad31eb571075cc587737fa4d1ad3a43", "size_bytes": 2398},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/leases/lease-s5-v1a-benchmark-20260819.json", "sha256": "8c53d87ae83c5e3b86161b2dbfb11f5c7ba8d06f53cfd783774b246253c5b960", "size_bytes": 1780},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/leases/lease-s5-v1b-tl-lifecycle-20260819.json", "sha256": "31ca2d06d8b974d6ff2e46d2a0f5c4ca7b1fe1649b749fe0d8214bb1a1e5db95", "size_bytes": 1747},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/leases/lease-s5-v1b-trace-release-20260819.json", "sha256": "c39a20f99129b780d6ad38c9bd64f9511b069d7b0e01d25cfd756f5991bed4dc", "size_bytes": 1910},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/packet.md", "sha256": "b0d6cab731d2b13d5caac485344f20668bbbe0aa2eecaa4e4461f89d82eb5f86", "size_bytes": 2914},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/repository-state.json", "sha256": "6931fcba3ea3b78594bd1650e536f281143bcfc76eb9b82a74e700f0bfbb4003", "size_bytes": 4517},
+    {"path": "docs/program/inbox/s0-r1-reconciliation-20260819/verification.md", "sha256": "50a8da9efcbd4c043adbf4677e506c33a3d4d53a0d8e84d3e9348dd1f4855dbc", "size_bytes": 1800}
+  ],
+  "self_hash_policy": "This manifest is not self-referential; its own hash is covered by the control-plane tree hash."
+}

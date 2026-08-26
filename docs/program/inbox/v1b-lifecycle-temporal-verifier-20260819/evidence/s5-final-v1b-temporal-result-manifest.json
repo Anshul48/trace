@@ -1,0 +1,45 @@
+{
+  "manifest_version": "1.0",
+  "manifest_id": "s5-final-v1b-temporal-result-20260825",
+  "generated_at_utc": "2026-08-25T05:04:00.0000000Z",
+  "sub_gate": "V1b-Trace-temporal",
+  "verifier_id": "v1b-final-temporal-verifier-20260825",
+  "lease_id": "lease-s5-v1b-final-temporal-20260825",
+  "input_manifest": {
+    "path": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence/s5-final-v1b-temporal-input-manifest.json",
+    "sha256": "57c8f47d297c7de5b271a61f7806dd2edab6f68013e76f5ad9c2de1ebf6eeca4"
+  },
+  "source": {
+    "commit": "37b601c15b81aefb3edf1f47df57e12dfe96ffbf",
+    "parent": "ec2370120cebfb799efa69163e3ab8ddae6271e7",
+    "worktree": "build/v1b-tr2-bootstrap-repair-20260824",
+    "status": "clean"
+  },
+  "result": {
+    "root": "/mnt/c/Users/anshu/AppData/Local/trace-verifier-results/v1b-final-temporal-20260825",
+    "receipt": "/mnt/c/Users/anshu/AppData/Local/trace-verifier-results/v1b-final-temporal-20260825/temporal-receipt.json",
+    "receipt_sha256": "2588091e435955b1d05d2553f1d529ae0d85a1b8876a32f887fb02b398f63d04",
+    "bundle_checksums_sha256": "3cb07a4a90fae13dae812d3c015b674ea474139886eb293ec51b1f6ea917300c",
+    "manifest_scope": "Full test suite logs, raw migration idempotence logs, and temporal contract verification"
+  },
+  "environment": {
+    "python_version": "3.12.3",
+    "pydantic_version": "2.13.4",
+    "pydantic_core_version": "2.46.4",
+    "fastapi_version": "0.115.14",
+    "python_multipart_version": "0.0.32",
+    "pytest_version": "9.1.1",
+    "network": true
+  },
+  "matrix": {
+    "static_passed": 3,
+    "static_failed": 0,
+    "static_total": 3,
+    "runtime_passed": 60,
+    "runtime_failed": 0,
+    "runtime_total": 60,
+    "full_subgate_status": "pass",
+    "blocked_reasons": []
+  },
+  "claim_boundary": "C1 temporal/revocation contract, migration bootstrap hash partition idempotence, lifecycle isolation, and API upload route verification complete."
+}

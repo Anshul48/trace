@@ -1,0 +1,40 @@
+{
+  "contract_version": "1.0",
+  "manifest_id": "f0c-repository-boundary-20260819-inputs",
+  "packet_id": "F0c",
+  "state": "prepared",
+  "authority": {
+    "may_edit_product_code": false,
+    "may_edit_program_docs": true,
+    "may_download_data": false,
+    "may_call_provider": false,
+    "may_run_certification": false,
+    "may_create_worktree": false
+  },
+  "components": [
+    {
+      "name": "trace-lite",
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "identity_kind": "git_commit_observed",
+      "commit_or_manifest": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1"
+    },
+    {
+      "name": "trace",
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "identity_kind": "git_commit_observed_dirty_snapshot",
+      "commit_or_manifest": "c855bb06532b3b52b25f0bea969d2677e5049065"
+    },
+    {
+      "name": "trace-bench",
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+      "identity_kind": "unversioned",
+      "commit_or_manifest": null
+    }
+  ],
+  "required_templates": [
+    "REPOSITORY_STATE_TEMPLATE.json",
+    "FOUNDATION_INPUT_MANIFEST_TEMPLATE.json"
+  ],
+  "known_open_decisions": ["P-007", "P-008"],
+  "claim_boundary": "Boundary/dirty-state observation only. No worktree or mutation authority is granted."
+}

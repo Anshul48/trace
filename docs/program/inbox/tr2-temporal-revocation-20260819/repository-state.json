@@ -1,0 +1,55 @@
+{
+  "packet_id": "tr2-temporal-revocation-20260819",
+  "captured_at_utc": "2026-08-23T08:03:58Z",
+  "repository": {
+    "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "branch": "main",
+    "head": "c855bb06532b3b52b25f0bea969d2677e5049065",
+    "upstream": "origin/main",
+    "ahead": 3,
+    "behind": 0,
+    "status": "protected_dirty_user_snapshot",
+    "tracked_modified_records": 26,
+    "untracked_records": 324,
+    "status_capture_sha256": "e96b7cee3745e9b9af6539ef358330772df2b0c249b8a614fd1cac4e1193b328"
+  },
+  "implementation_base": {
+    "commit": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+    "parent": "5626bde7bc4086f5d9a4f96dae8e1d04a1191936",
+    "source_tree_manifest_sha256": "a8e9edf50b1c1567c307ec8261e5b6f7d0711f064488fa63831ecb12e4fed7e2",
+    "dependency_lock_sha256_at_clean_454_worktree": "8e17ba533ea59c3695105925835fe87b38c7ad088d59e7d28812f6093f81a7d9"
+  },
+  "protected_worktrees": [
+    {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr1",
+      "head": "ffbf51813e3cfd0bd69774132376a00ec1bfefdc",
+      "status": "dirty_uv_lock_and_not_handoff_head",
+      "lease": "lease-s3-t0-tr1-20260819",
+      "action": "preserved_untouched"
+    },
+    {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-trace-release-20260819",
+      "head": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+      "status": "clean_read_only_verifier_worktree",
+      "action": "preserved_untouched"
+    }
+  ],
+  "control_plane": {
+    "snapshot_path": "docs/program/CONTROL_PLANE_LOCK.json",
+    "snapshot_sha256": "76c16601f720a56ba02163db0ecdcd0449904c991df0204c748db8073efe316e",
+    "declared_file_count": 277,
+    "declared_tree_sha256": "5d14e190b5837d549d238276443bc0afd5e193e30e3bbc0d99b892b7052907c8",
+    "live_recomputed_file_count": 287,
+    "live_recomputed_tree_sha256": "7e20508508b2c66b23dd0288b73b01be576368536cb5abae4022aad962a4ab5e",
+    "status": "snapshot_drift_recorded_core_documents_match",
+    "action": "do_not_edit_global_control_plane"
+  },
+  "worktrees": {
+    "requested_new_path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr2-s3-20260823",
+    "requested_new_path_preflight_exists": false,
+    "created": true,
+    "head": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+    "branch": "feat/tr2-temporal-revocation-20260823",
+    "status": "clean"
+  }
+}

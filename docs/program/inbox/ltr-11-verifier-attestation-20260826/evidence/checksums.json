@@ -1,0 +1,10 @@
+{
+  "evidence/verifier-attestation.json": {
+    "sha256": "df6bfb86a07c141032a38ecedcafe11b65b5a8a8f8144a03f3552ead8303810f",
+    "size_bytes": 946
+  },
+  "evidence/verifier_attestation_receipt.json": {
+    "sha256": "f2086368dfdad9544ca9cfbe7e587402c21e8b22a8d2cf5b1e214fbfdf230da6",
+    "size_bytes": 793
+  }
+}

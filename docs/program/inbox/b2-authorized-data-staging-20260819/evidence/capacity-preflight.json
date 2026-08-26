@@ -1,0 +1,75 @@
+{
+  "capacity_preflight_version": "1.0",
+  "packet_id": "b2-authorized-data-staging-20260819",
+  "evaluated_at_utc": "2026-08-19T07:25:41.997603+00:00",
+  "staging_root": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data",
+  "host_volume_preflight": {
+    "target_drive": "C:\\",
+    "total_disk_capacity_bytes": 1021821579264,
+    "total_disk_capacity_gb": 951.65,
+    "pre_acquisition_used_bytes": 628254416896,
+    "pre_acquisition_used_gb": 585.11,
+    "pre_acquisition_free_headroom_bytes": 393567162368,
+    "pre_acquisition_free_headroom_gb": 366.54
+  },
+  "staged_datasets_summary": {
+    "total_staged_datasets": 7,
+    "total_staged_files": 84,
+    "total_staged_bytes": 1523873356,
+    "total_staged_mb": 1453.28,
+    "total_staged_gb": 1.419,
+    "compressed_archive_download_bytes": 1288490188,
+    "compressed_archive_download_gb": 1.2,
+    "datasets": {
+      "beir-scifact": {
+        "file_count": 12,
+        "size_bytes": 12838733,
+        "size_mb": 12.24,
+        "role": "Direct claim verification (CC BY-NC 4.0 / Apache 2.0)"
+      },
+      "beir-nfcorpus": {
+        "file_count": 13,
+        "size_bytes": 12572932,
+        "size_mb": 11.99,
+        "role": "Medical domain retrieval (CC BY-SA 4.0 / Apache 2.0)"
+      },
+      "beir-fiqa": {
+        "file_count": 13,
+        "size_bytes": 77017521,
+        "size_mb": 73.45,
+        "role": "Financial QA retrieval (Research evaluation license / Apache 2.0)"
+      },
+      "bright": {
+        "file_count": 18,
+        "size_bytes": 392814334,
+        "size_mb": 374.62,
+        "role": "Coding & Math reasoning (CC BY 4.0)"
+      },
+      "multihop-rag": {
+        "file_count": 8,
+        "size_bytes": 11992137,
+        "size_mb": 11.44,
+        "role": "Multi-doc multi-hop QA (ODC-By v1.0)"
+      },
+      "musique": {
+        "file_count": 8,
+        "size_bytes": 271545020,
+        "size_mb": 258.97,
+        "role": "Compositional multi-hop QA (CC BY 4.0)"
+      },
+      "bigann": {
+        "file_count": 12,
+        "size_bytes": 745092679,
+        "size_mb": 710.58,
+        "role": "Vector-scale operations lane ONLY per DEC-P-001 (CC0 1.0 Universal)"
+      }
+    }
+  },
+  "post_staging_headroom": {
+    "post_staging_free_headroom_bytes": 392043288902,
+    "post_staging_free_headroom_gb": 365.12,
+    "headroom_utilization_percent": 0.387,
+    "headroom_status": "ADEQUATE_HEADROOM_CONFIRMED",
+    "resource_starvation_risk": "NONE"
+  }
+}

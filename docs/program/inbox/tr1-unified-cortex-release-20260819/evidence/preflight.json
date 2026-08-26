@@ -1,0 +1,55 @@
+{
+  "contract_version": "1.0",
+  "record_id": "trace-tr1-preflight-20260819",
+  "packet_id": "tr1-unified-cortex-release-20260819",
+  "captured_at_utc": "2026-08-19T06:50:00Z",
+  "captured_by": "trace_v2_cortex_release_owner",
+  "session": "S3",
+  "environment": {
+    "platform": "Microsoft Windows NT 10.0.26200.0",
+    "git": "2.52.0.windows.1",
+    "python": "3.12.11",
+    "uv": "0.12.2"
+  },
+  "preflight_checks": {
+    "lease_validation": {
+      "passed": true,
+      "lease_id": "lease-s3-t0-tr1-20260819",
+      "lease_path": "docs/program/inbox/d0-coordinator-20260819/leases/lease-s3-t0-tr1.json",
+      "valid_until_utc": "2026-08-20T07:00:00Z"
+    },
+    "worktree_isolation": {
+      "passed": true,
+      "worktree_path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr1",
+      "branch": "feat/tr1-unified-cortex-release",
+      "base_snapshot_commit": "5626bde7bc4086f5d9a4f96dae8e1d04a1191936",
+      "canonical_dirty_checkout_protected": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace"
+    },
+    "decision_prerequisites": {
+      "passed": true,
+      "decisions_verified": ["P-003"],
+      "status": "DEC-P-003 Option A (Unified Cortex Release Root with Carried-Forward Components) accepted"
+    },
+    "migration_immutability": {
+      "passed": true,
+      "protected_migrations": [
+        "migrations/001_initial_spine.sql",
+        "migrations/002_projection_control_plane.sql",
+        "migrations/003_v2_foundation.sql",
+        "migrations/004_cortex_projection_control_plane.sql"
+      ],
+      "action": "New migration 005_cortex_unified_release_lifecycle.sql is strictly forward-only"
+    }
+  },
+  "authority_boundary": {
+    "may_edit_product_code": true,
+    "allowed_worktree": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr1",
+    "may_edit_program_docs": false,
+    "may_download_data": false,
+    "may_call_provider": false,
+    "may_run_certification": false,
+    "target_action": "TR1 Unified Cortex Release implementation in isolated worktree"
+  },
+  "preflight_result": "passed",
+  "claim_boundary": "Preflight check verified for S3 TR1 execution under lease lease-s3-t0-tr1-20260819."
+}

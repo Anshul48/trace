@@ -1,0 +1,54 @@
+{
+  "contract_version": "1.0",
+  "record_id": "trace-bench-b1-e2a-preflight-20260819",
+  "packet_id": "b1-e2a-fail-closed-runner",
+  "captured_at_utc": "2026-08-19T07:04:00Z",
+  "captured_by": "benchmark_foundation_evaluation_engineer",
+  "session": "S1",
+  "environment": {
+    "platform": "Microsoft Windows NT 10.0.26200.0",
+    "git": "2.52.0.windows.1",
+    "python": "3.12.0",
+    "uv": "0.12.2"
+  },
+  "preflight_checks": {
+    "lease_validation": {
+      "passed": true,
+      "lease_id": "lease-s1-b0-b1-20260819",
+      "lease_path": "docs/program/inbox/d0-coordinator-20260819/leases/lease-s1-b0-b1.json",
+      "valid_until_utc": "2026-08-20T07:00:00Z"
+    },
+    "source_tree_inspection": {
+      "passed": true,
+      "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+      "exists": true,
+      "git_initialized": false,
+      "raw_file_count": 41,
+      "content_manifest_sha256": "739d7f42fb40c9234b716f5a30aa9e0acd224c4e486e24f95e4afa8f1ca36f1e"
+    },
+    "decision_prerequisites": {
+      "passed": true,
+      "decisions_verified": ["P-007", "P-008"],
+      "status": "P-007 (Git bootstrap) and P-008 (canonical runner designation) accepted by human owner"
+    },
+    "protected_roots": {
+      "passed": true,
+      "roots": [
+        "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+        "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+        "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data"
+      ]
+    }
+  },
+  "authority_boundary": {
+    "may_edit_product_code": true,
+    "allowed_repository": "trace-bench",
+    "may_edit_program_docs": false,
+    "may_download_data": false,
+    "may_call_provider": false,
+    "may_run_certification": false,
+    "target_action": "B0 in-place git init and B1 fail-closed runner implementation"
+  },
+  "preflight_result": "passed",
+  "claim_boundary": "Preflight check verified for S1 B0/B1 execution under lease lease-s1-b0-b1-20260819."
+}

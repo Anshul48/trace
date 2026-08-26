@@ -1,0 +1,6 @@
+{
+  "session": "Wave R2 (Remediated Verifier Attestation)",
+  "timestamp_utc": "2026-08-26T13:58:00Z",
+  "verifier_script": "scripts/verify_100k_scale_gate.py",
+  "verified_clean": true
+}

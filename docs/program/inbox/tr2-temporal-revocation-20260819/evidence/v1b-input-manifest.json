@@ -1,0 +1,55 @@
+{
+  "manifest_version": "1.0",
+  "manifest_id": "tr2-s3-v1b-temporal-20260823",
+  "generated_at_utc": "2026-08-23T08:58:24.2327937Z",
+  "claim_level": "C1",
+  "packet_id": "tr2-temporal-revocation-20260819",
+  "session": "S3 / Codex Session 7",
+  "lease": {
+    "lease_id": "lease-s3-tr2-temporal-revocation-20260823",
+    "worktree": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr2-s3-20260823",
+    "branch": "feat/tr2-temporal-revocation-20260823",
+    "base_commit": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+    "implementation_commit": "0a91b278a414756da260b15c5cb9daddb5e9aac2",
+    "implementation_tree": "0a492ca4c3f2310a123577cfa96cc72bdc2c0257"
+  },
+  "contract": {
+    "decision_path": "docs/program/inbox/tr2-temporal-revocation-20260819/decision.md",
+    "decision_sha256": "d4ea0969d4af2e698f5838de0598e17aa40a66a6d1712c0b47496811b527333c",
+    "option": "A_full_bitemporal_first_class_revocation_historical_release_selection",
+    "prompt_sha256": "dcddbfe30e77a839ed29eb5550a671f935761aa4dd5027037c60712e3ec5dbb1",
+    "packet_sha256": "5d53abc5a90abf8716e3a492a0c803c608e70d6ae23f7f342e6994e9ad1ce4bb",
+    "tr1_handoff_sha256": "26aa4f01c4665d28ddc00066a27fa7ad23ad28f55444ff0274c0fff762200481"
+  },
+  "artifacts": {
+    "migration": {
+      "path": "migrations/006_temporal_revocation.sql",
+      "sha256": "018de7e501009799ba249679dc6c3e027a230efd01fafe17de2bb56d01f7270c"
+    },
+    "focused_tests": {
+      "path": "tests/test_v2_temporal_revocation.py",
+      "sha256": "0a2c72d7dd65e02cd3c4fbf41c7b1d8277c909a866cdacb7355d6dbd74efd56e"
+    },
+    "sqlite_evidence": "docs/program/inbox/tr2-temporal-revocation-20260819/evidence/sqlite-evidence-sample.json"
+  },
+  "verification_commands": [
+    "PYTHONPATH=src .venv\\Scripts\\python.exe -m unittest tests.test_v2_temporal_revocation -v",
+    "PYTHONPATH=src .venv\\Scripts\\python.exe -m unittest discover -s tests -p 'test_v2*.py' -v",
+    "PYTHONDONTWRITEBYTECODE=1 python AST parse of src and V2 tests",
+    "git diff --check"
+  ],
+  "required_independent_checks": [
+    "Fresh verifier worktree based on implementation_commit; verifier must not repair the candidate.",
+    "Independent SQLite replay/temporal fault matrix and evidence-bundle identity checks.",
+    "PostgreSQL migration apply, RLS tenant isolation, and PostgreSQL lifecycle/replay checks, or an explicit blocked receipt.",
+    "Revision-aware OpenSearch/Qdrant historical selection checks, or an explicit blocked receipt.",
+    "Review of raw object-store erasure lifecycle and erasure idempotency before promotion."
+  ],
+  "forbidden": [
+    "network or providers",
+    "protected dirty checkout",
+    "expired TR1 lease/worktree",
+    "global control-plane documents",
+    "deployment, PostgreSQL, RLS, external-index, 100K, or certification claims"
+  ]
+}

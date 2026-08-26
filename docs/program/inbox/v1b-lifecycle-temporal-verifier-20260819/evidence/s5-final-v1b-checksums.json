@@ -1,0 +1,36 @@
+{
+  "manifest_version": "1.0",
+  "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+  "session": "S5 / Session 8",
+  "generated_at_utc": "2026-08-25T05:05:00.0000000Z",
+  "self_excluded": true,
+  "handoff": {
+    "path": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/handoff.md",
+    "sha256": "bfc14f558da44b324e0eee1b1cdfa47eaf7ce67004d9c383a843fa46186c8561"
+  },
+  "accepted_inputs": {
+    "tl2_handoff_sha256": "1046630c0356380aa15bc58a4b4fbc17a59eb7d41d5532c6ee17dae5afd2bf7f",
+    "tl2_input_manifest_sha256": "8da0074be85dedf6c371b681a94847c5921d33310cfb6e0069750a1bd7463b29",
+    "p002_decision_sha256": "ed4e8bb93e614169279f568eab5690280168de7b4339dc21f7638cc2acc8a129",
+    "tr2_handoff_sha256": "80ccfbdee094f2c006eadd72e8dd0096e0195e51a6b96c0159b0c760ada4c0c2",
+    "tr2_packet_v1b_input_manifest_sha256": "65c8ac4df07244a8ba0ad25dabeeb47054d0181d9fce3e861cf201287fe4eb79",
+    "p004_decision_sha256": "d4ea0969d4af2e698f5838de0598e17aa40a66a6d1712c0b47496811b527333c"
+  },
+  "session_artifacts": {
+    "execution_note_sha256": "d010bb2b70c01d831c5899c1001c3abac91f52f779b53a2a9b9f17704aac612b",
+    "graph_lease_sha256": "7d7e2796c8b0082e54878c299a6888f2a5b6ff74858a13eeb80c995fd4308b54",
+    "temporal_lease_sha256": "d2b6db44220ed84896bbf105785485c4ad919d92e6077c16bdc42508261a671b",
+    "graph_input_manifest_sha256": "1829357473aae60d8b41436adae3c40a4f44f34600492d0a28d36d54ddce38a7",
+    "temporal_input_manifest_sha256": "57c8f47d297c7de5b271a61f7806dd2edab6f68013e76f5ad9c2de1ebf6eeca4",
+    "graph_result_manifest_sha256": "ede959ad0826a28cb1acbd921db9ceb74e0f219dbc00c3ab937454cf0aea04ae",
+    "temporal_result_manifest_sha256": "29ac27cde463f5dc7fb274590de2138970e79d3fa636d55605e402bc9f338333",
+    "graph_commands_sha256": "df9aeb53cdd8cd9e2deb27bd01fff651d22515af624e792edbdb374f7cd367ad",
+    "temporal_commands_sha256": "90758ae9b4518be20e07c33ca8b32a488d84919c5e36cb8d716325a6a2ed8bf9",
+    "graph_verifier_sha256": "079326bc7384344857d043e38185f2d4968812f7e9a8ffd6c12396832c9402fd",
+    "temporal_verifier_sha256": "e62acfcffe70f1e3c2e9326664a0a92dea3886f6f89b57ff2dea231ca7e0d1df"
+  },
+  "external_results": {
+    "graph_receipt_sha256": "ef1931adeba7ac1e860d9c5659bed38c5311e7f2abb3510ee50a26d05e8438b4",
+    "temporal_receipt_sha256": "c321d4a5db4c8396d8dbf7b90cc2bce93dd8884527b19798a2cb88fe531cad12"
+  }
+}

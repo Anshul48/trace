@@ -1,0 +1,148 @@
+contract_version: "1.0"
+manifest_id: "b3-certification-manifest-20260826"
+state: "frozen"
+mode: "certification"
+created_at_utc: "2026-08-26T04:35:00Z"
+
+producer:
+  component: "trace-bench"
+  source_identity: "c0ea9fbf37bc50c88336f198437be031c18d6f64"
+  tag: "v0.1.0-foundation"
+  runner_entrypoint: "trace_bench.cli:main"
+  runner_config_sha256: "4d126b1dd2062283e6437a0cb993b845f0da99fcdf9516737229b6ace8f9f032"
+
+components:
+  trace_lite:
+    candidate_commit: "3e7e9f0ee460e3af75f3935343f6d6f2089f9f7c"
+    tree_sha: "ef83211ff9a52bce0706bda7b102639830b5a554"
+    verification_subgate: "V1b-TL-graph"
+    verification_status: "CLOSED (PASS)"
+  trace:
+    candidate_commit: "f7bd96e9c5e0f9326b53a074024e7ace889f6e36"
+    tree_sha: "91d93da3a003dd062d76a4d1aa1cfd40412d831c"
+    verification_subgate: "V1b-Trace-temporal"
+    verification_status: "CLOSED (PASS)"
+
+human_decisions:
+  - id: "DEC-P-001"
+    title: "Admitted Core Real-Data Evaluation Portfolio"
+    status: "Accepted"
+    date: "2026-08-19"
+  - id: "DEC-P-002"
+    title: "Bounded Graph Association and PPR Work Budgets"
+    status: "Accepted"
+    date: "2026-08-23"
+  - id: "DEC-P-003"
+    title: "Unified Cortex Release Root Architecture"
+    status: "Accepted"
+    date: "2026-08-19"
+  - id: "DEC-P-004"
+    title: "Temporal Truth, Revocation, and Historical Retrieval"
+    status: "Accepted"
+    date: "2026-08-23"
+  - id: "DEC-P-005"
+    title: "Numerical Release Thresholds, Performance Budgets, and Statistical Methods for Certification"
+    status: "Accepted"
+    date: "2026-08-26"
+    sha256: "1eab390eceee8100cb7652222f50e5f534c0f726ad7253d48099d8f058958416"
+
+datasets:
+  - dataset_id: "beir-scifact"
+    lane: "direct_lookup"
+    total_cases: 1109
+    best_baseline: "hybrid_rrf (nDCG@10 = 0.6824, Recall@20 = 0.8706)"
+    proposed_floor: "nDCG@10 >= 0.7000, Recall@20 >= 0.8800"
+    p95_latency_budget_ms: 10.0
+  - dataset_id: "beir-nfcorpus"
+    lane: "domain_semantic"
+    total_cases: 3237
+    best_baseline: "hybrid_rrf (nDCG@10 = 0.3367, Recall@20 = 0.2017)"
+    proposed_floor: "nDCG@10 >= 0.3500, Recall@20 >= 0.2200"
+    p95_latency_budget_ms: 15.0
+  - dataset_id: "beir-fiqa"
+    lane: "semantic_qa"
+    total_cases: 6611
+    best_baseline: "dense (nDCG@10 = 0.3666, Recall@20 = 0.5139)"
+    proposed_floor: "nDCG@10 >= 0.4000, Recall@20 >= 0.5500"
+    p95_latency_budget_ms: 25.0
+  - dataset_id: "multihop-rag"
+    lane: "multihop_chronology"
+    total_cases: 2556
+    positive_cases: 2255
+    expected_abstentions: 301
+    best_baseline: "bm25 (Coverage@20 = 0.8519, nDCG@10 = 0.7370)"
+    proposed_floor: "Complete Coverage@20 >= 0.8800, nDCG@10 >= 0.7500"
+    p95_latency_budget_ms: 20.0
+  - dataset_id: "multihop-rag-unanswerable"
+    lane: "abstention_lane"
+    total_cases: 301
+    best_baseline: "All standard baselines failed (0.0% accuracy)"
+    proposed_floor: "Abstention Accuracy >= 0.8500 (Zero Hallucination)"
+    p95_latency_budget_ms: 20.0
+  - dataset_id: "bright"
+    lane: "complex_reasoning"
+    total_cases: 752
+    corpus_documents: 928750
+    best_baseline: "bm25 (Recall@20 = 0.1307, nDCG@10 = 0.0651)"
+    proposed_floor: "Recall@20 >= 0.1800, nDCG@10 >= 0.1000"
+    p95_latency_budget_ms: 100.0
+  - dataset_id: "musique"
+    lane: "compositional_multihop"
+    total_cases: 22355
+    corpus_segments: 101962
+    best_baseline: "bm25 (Coverage@20 = 0.2021, nDCG@10 = 0.4711)"
+    proposed_floor: "Complete Coverage@20 >= 0.2500, nDCG@10 >= 0.5000"
+    p95_latency_budget_ms: 50.0
+  - dataset_id: "bigann"
+    lane: "operations_vector_scale_isolated"
+    vector_count: 100000
+    query_count: 1000
+    observed_performance: "7336.9 vec/s indexing, 817.8 QPS, 1.22 ms P95"
+    proposed_floor: "Throughput >= 5000 vec/s, QPS >= 500, P95 <= 5.0 ms"
+
+evaluation:
+  query_classes:
+    total_queries: 36620
+    positive_queries: 36319
+    expected_abstentions: 301
+    excluded_queries: 0
+    failed_or_blocked_queries: 0
+  significance_method:
+    test_type: "Two-sided paired Wilcoxon signed-rank and Student's t-test"
+    alpha: 0.01
+    minimum_effect_size: "Cohen's d >= 0.20 OR raw delta >= +0.030"
+    bootstrap_resamples: 10000
+    confidence_interval: 0.95
+  denominator_integrity:
+    empty_positive_retrieval_score: 0.0
+    abstention_formula: "Correct Abstentions / Expected Abstentions"
+
+architectural_contracts:
+  headless_core:
+    rest_api: "/v2"
+    cli: "trace.v2.__main__"
+    python_sdk: "trace.v2"
+  pluggable_adapters:
+    embedding_adapter: "sentence-transformers/all-MiniLM-L6-v2 (Fallback: CUDA -> DirectML -> ONNX CPU -> PyTorch CPU)"
+    vector_store_adapter: "Cosine / L2 indexed with candidate isolation & atomic rollback"
+    graph_store_adapter: "Bounded PPR (max degree <= 50, depth <= 15 steps, budget <= 35 ms)"
+
+environment:
+  gpu: "NVIDIA GeForce RTX 5050 Laptop GPU (SM120, Driver CUDA 12.8 / 13.3)"
+  python_runtime: "Python 3.12+ (x86_64-linux)"
+  database_stack:
+    postgres: "PostgreSQL 16 (RLS tenant isolation, migrations 001-007)"
+    opensearch: "OpenSearch 2.19.1"
+    qdrant: "Qdrant 1.14.1"
+    minio: "MinIO S3"
+
+integrity:
+  fail_closed: true
+  zero_mock: true
+  zero_synthetic_fallback: true
+  certification_eligibility: false
+
+claim_boundary: >
+  This manifest binds frozen empirical inputs, release thresholds, and verifier receipts.
+  Certification eligibility remains strictly false until independent Foundation Gate review (R2)
+  and human acceptance. No public SOTA, multi-tenant cloud, or 1M scale claims are authorized.

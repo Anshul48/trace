@@ -1,0 +1,10 @@
+{
+  "evidence/1m_capacity_and_cost_model.json": {
+    "sha256": "40417b57b0db4dc4c1136c2ff943e54920e117e97217a5ce0b68230455de99cf",
+    "size_bytes": 1312
+  },
+  "evidence/1m_pilot_architecture_plan.md": {
+    "sha256": "8db4637d0232683f9659b3ba87b5ed500a8d84256e92e9b48bc44dadf448cda9",
+    "size_bytes": 5676
+  }
+}

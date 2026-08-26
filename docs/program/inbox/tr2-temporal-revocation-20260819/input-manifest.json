@@ -1,0 +1,73 @@
+{
+  "manifest_version": "1.0",
+  "manifest_id": "tr2-s3-input-20260823",
+  "generated_at_utc": "2026-08-23T08:03:58Z",
+  "claim_level": "C0",
+  "session": "S3",
+  "packet_id": "tr2-temporal-revocation-20260819",
+  "prompt_inputs": [
+    {
+      "path": "docs/program/launch/implementation-wave/next-wave-session-prompts/00_SHARED_BOOTSTRAP.md",
+      "sha256": "521c09d41efc81c72dfd54e2d509b7cb41d352ecf1d3795977cee0c919590a93"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/next-wave-session-prompts/07_S3_TR2.md",
+      "sha256": "dcddbfe30e77a839ed29eb5550a671f935761aa4dd5027037c60712e3ec5dbb1"
+    }
+  ],
+  "control_inputs": [
+    {
+      "path": "docs/program/CONTROL_PLANE_LOCK.json",
+      "sha256": "76c16601f720a56ba02163db0ecdcd0449904c991df0204c748db8073efe316e"
+    },
+    {
+      "path": "docs/program/06_DECISION_LOG.md",
+      "sha256": "4cdbd8abcfd17fdd6f1038044c78fa5f744c20542d254ac5630f9f2a06e814aa"
+    },
+    {
+      "path": "docs/program/07_RISK_REGISTER.md",
+      "sha256": "153a2fb6bc17cd4e65d44ab6b77484a6eef6cb58511d2b26156b2e3807c74cda"
+    },
+    {
+      "path": "docs/program/COMPONENT_REGISTRY.md",
+      "sha256": "57d4b8be7172811ed712a6a17ce7662d643b535e76950ec72da55150b0d9bda2"
+    }
+  ],
+  "decision": {
+    "path": "docs/program/inbox/tr2-temporal-revocation-20260819/decision.md",
+    "sha256": "d4ea0969d4af2e698f5838de0598e17aa40a66a6d1712c0b47496811b527333c",
+    "status": "accepted_human_decision",
+    "option": "A_full_bitemporal_first_class_revocation_historical_release_selection"
+  },
+  "named_inputs": [
+    {
+      "path": "docs/program/inbox/tr2-temporal-revocation-20260819/packet.md",
+      "sha256": "5d53abc5a90abf8716e3a492a0c803c608e70d6ae23f7f342e6994e9ad1ce4bb"
+    },
+    {
+      "path": "docs/program/inbox/tr1-unified-cortex-release-20260819/handoff.md",
+      "sha256": "26aa4f01c4665d28ddc00066a27fa7ad23ad28f55444ff0274c0fff762200481"
+    }
+  ],
+  "source": {
+    "repository_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "base_commit": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+    "base_source_tree_manifest_sha256": "a8e9edf50b1c1567c307ec8261e5b6f7d0711f064488fa63831ecb12e4fed7e2",
+    "dependency_lock_sha256": "8e17ba533ea59c3695105925835fe87b38c7ad088d59e7d28812f6093f81a7d9",
+    "user_checkout_head": "c855bb06532b3b52b25f0bea969d2677e5049065",
+    "user_checkout_status": "protected_dirty_user_snapshot"
+  },
+  "verification_target": {
+    "next_dependency": "V1b-Trace-temporal",
+    "verifier_id": "pending-coordinator-fresh-v1b-trace-temporal",
+    "required_fresh_verifier_lease": true,
+    "required_inputs": [
+      "TR2 implementation commit",
+      "additive migration checksum",
+      "temporal test command and raw result",
+      "SQLite evidence samples",
+      "fresh verifier worktree based on TR2 commit",
+      "PostgreSQL/RLS/external-index capability receipt or explicit blocked result"
+    ]
+  }
+}

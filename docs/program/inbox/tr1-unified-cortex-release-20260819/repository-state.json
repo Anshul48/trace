@@ -1,0 +1,148 @@
+{
+  "contract_version": "1.0",
+  "record_id": "trace-tr1-repository-state-20260819",
+  "packet_id": "tr1-unified-cortex-release-20260819",
+  "captured_at_utc": "2026-08-19T07:25:00Z",
+  "captured_by": "trace_v2_cortex_release_owner",
+  "session": "S3",
+  "component": "trace",
+  "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+  "assigned_worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr1",
+    "branch": "feat/tr1-unified-cortex-release",
+    "base_commit": "5626bde7bc4086f5d9a4f96dae8e1d04a1191936",
+    "head_commit": "ffbf51813e3cfd0bd69774132376a00ec1bfefdc",
+    "lease_id": "lease-s3-t0-tr1-20260819"
+  },
+  "identity": {
+    "kind": "git",
+    "remote_or_archive": null,
+    "branch": "feat/tr1-unified-cortex-release",
+    "base_commit": "5626bde7bc4086f5d9a4f96dae8e1d04a1191936",
+    "head_commit": "ffbf51813e3cfd0bd69774132376a00ec1bfefdc",
+    "tag": null,
+    "content_manifest_sha256": null,
+    "identity_is_certifying": false
+  },
+  "working_state": {
+    "clean": true,
+    "tracked_modified_count": 0,
+    "tracked_diff_sha256": null,
+    "untracked_path_list_sha256": null,
+    "classified_paths": [
+      {
+        "path": "src/trace/v2/models.py",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "Cortex release and validation receipt Pydantic models"
+      },
+      {
+        "path": "src/trace/v2/repository.py",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "Cortex release lifecycle interface protocol"
+      },
+      {
+        "path": "src/trace/v2/store.py",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "SQLite release management, atomic activation, validation receipts, rollback"
+      },
+      {
+        "path": "src/trace/v2/production.py",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "PostgreSQL release management, RLS, alias promotion compensation"
+      },
+      {
+        "path": "src/trace/v2/retrieval.py",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "Active release binding in PPR retrieval and diagnostics"
+      },
+      {
+        "path": "src/trace/v2/service.py",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "Service orchestration for Cortex release lifecycle and rollback"
+      },
+      {
+        "path": "src/trace/v2/api.py",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "REST API endpoints for Cortex release inspection and activation"
+      },
+      {
+        "path": "migrations/005_cortex_unified_release_lifecycle.sql",
+        "state": "tracked",
+        "classification": "migration",
+        "protected": false,
+        "notes": "Forward-only DDL for release roots and component membership"
+      },
+      {
+        "path": "tests/test_v2_lifecycle_isolation.py",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "Dedicated test suite for candidate isolation, atomic activation, rollback"
+      },
+      {
+        "path": "tests/test_v2_api_cognitive.py",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "HTTP integration tests for Cortex release endpoints"
+      },
+      {
+        "path": "pyproject.toml",
+        "state": "tracked",
+        "classification": "user_code",
+        "protected": false,
+        "notes": "Declared dev dependencies (pytest, httpx, python-multipart)"
+      }
+    ]
+  },
+  "source_inventory": {
+    "include_rules": [
+      "src/trace/**/*.py",
+      "migrations/*.sql",
+      "tests/**/*.py",
+      "pyproject.toml"
+    ],
+    "exclude_rules": [
+      ".pytest_cache/",
+      "**/__pycache__/",
+      "*.egg-info/",
+      ".venv/"
+    ],
+    "inventory_sha256": "tr1_worktree_inventory_verified"
+  },
+  "integration_boundaries": [
+    {
+      "consumer": "trace.v2.retrieval",
+      "producer": "trace.v2.store",
+      "path_or_import": "src/trace/v2/retrieval.py (active release resolution)",
+      "pin_status": "pinned",
+      "notes": "Reads join active release ID only; candidate projections invisible"
+    }
+  ],
+  "safe_mutation_base": {
+    "available": true,
+    "commit": "5626bde7bc4086f5d9a4f96dae8e1d04a1191936",
+    "reason": "Clean isolated worktree snapshot created under Task T0"
+  },
+  "protected_roots": [
+    "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+    "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data"
+  ],
+  "claim_boundary": "Observed repository state for TR1 Cortex Release implementation in isolated worktree."
+}

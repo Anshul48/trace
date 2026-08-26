@@ -1,0 +1,112 @@
+{
+  "contract_version": "1.0",
+  "record_id": "trace-bench-f0a-e1-refresh-20260819",
+  "captured_at_utc": "2026-08-19T10:15:00Z",
+  "captured_by": "benchmark_foundation_evaluation_engineer",
+  "component": "trace-bench",
+  "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+  "identity": {
+    "kind": "unversioned",
+    "remote_or_archive": null,
+    "branch": null,
+    "commit": null,
+    "tag": null,
+    "content_manifest_sha256": null,
+    "identity_is_certifying": false
+  },
+  "working_state": {
+    "clean": false,
+    "tracked_modified_count": 0,
+    "tracked_diff_sha256": null,
+    "untracked_path_list_sha256": null,
+    "classified_paths": [
+      {
+        "path": "pyproject.toml",
+        "state": "untracked",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "Package build configuration"
+      },
+      {
+        "path": "src/trace_bench/",
+        "state": "untracked",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "Harness source tree"
+      },
+      {
+        "path": "tests/",
+        "state": "untracked",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "Test harness and fixtures"
+      },
+      {
+        "path": "benchmarks/results/",
+        "state": "untracked",
+        "classification": "results",
+        "protected": false,
+        "notes": "Local execution artifacts (run_20260818_125704.*)"
+      },
+      {
+        "path": ".pytest_cache/",
+        "state": "untracked",
+        "classification": "cache",
+        "protected": false,
+        "notes": "Pytest cache"
+      }
+    ]
+  },
+  "source_inventory": {
+    "include_rules": [
+      "pyproject.toml",
+      "README.md",
+      "src/trace_bench/**/*.py",
+      "src/trace_bench/datasets/*.json",
+      "tests/**/*.py",
+      "tests/fixtures/*.json"
+    ],
+    "exclude_rules": [
+      ".pytest_cache/",
+      "**/__pycache__/",
+      "*.egg-info/",
+      "benchmarks/results/",
+      "benchmarks/cache/"
+    ],
+    "inventory_sha256": "unversioned_tree_f0a_audited"
+  },
+  "integration_boundaries": [
+    {
+      "consumer": "trace-bench",
+      "producer": "trace-lite",
+      "path_or_import": "src/trace_bench/baselines/trace_retriever.py:L35 (from trace_lite import TraceLite)",
+      "pin_status": "unpinned",
+      "notes": "Dynamic import from python environment without version or commit assertion"
+    },
+    {
+      "consumer": "trace-bench",
+      "producer": "trace-lite",
+      "path_or_import": "src/trace_bench/baselines/trace_retriever.py:L36 (from trace_lite.adapters import MockLLMAdapter)",
+      "pin_status": "unpinned",
+      "notes": "Injects MockLLMAdapter into TraceLite runtime for baseline traversal"
+    }
+  ],
+  "safe_mutation_base": {
+    "available": false,
+    "commit": null,
+    "reason": "trace-bench has no Git repository identity and is non-certifying until P-007 and P-008 are decided."
+  },
+  "packet_disposition": [
+    {
+      "packet_id": "F0a",
+      "status": "current",
+      "reason": "Re-anchored to moved unversioned trace-bench root and current Trace-Lite checkout."
+    },
+    {
+      "packet_id": "B1",
+      "status": "blocked",
+      "reason": "Requires human decision on P-007 (source identity) and P-008 (canonical runner boundary) before mutable preparation."
+    }
+  ],
+  "claim_boundary": "Observed boundary record only; no behavior or reproducibility certification."
+}

@@ -1,0 +1,43 @@
+{
+  "manifest_version": "1.0",
+  "manifest_id": "s5-final-v1b-graph-result-20260825",
+  "generated_at_utc": "2026-08-25T05:02:00.0000000Z",
+  "sub_gate": "V1b-TL-graph",
+  "verifier_id": "v1b-final-graph-verifier-20260825",
+  "lease_id": "lease-s5-v1b-final-graph-20260825",
+  "input_manifest": {
+    "path": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence/s5-final-v1b-graph-input-manifest.json",
+    "sha256": "1829357473aae60d8b41436adae3c40a4f44f34600492d0a28d36d54ddce38a7"
+  },
+  "source": {
+    "commit": "3e7e9f0ee460e3af75f3935343f6d6f2089f9f7c",
+    "tree": "ef83211ff9a52bce0706bda7b102639830b5a554",
+    "worktree": "/mnt/c/Users/anshu/AppData/Local/trace-worktrees/trace-lite-tl2",
+    "status": "clean"
+  },
+  "result": {
+    "root": "/mnt/c/Users/anshu/AppData/Local/trace-verifier-results/v1b-final-graph-20260825",
+    "receipt": "/mnt/c/Users/anshu/AppData/Local/trace-verifier-results/v1b-final-graph-20260825/tl-receipt.json",
+    "receipt_sha256": "a750d1df511c0bc0884173c9674ed7e6f598d1027052160280fe195d970353a5",
+    "bundle_checksums_sha256": "fc179a6136d859187ec982cf4f58c734005cf392f694e9f564756543b1aa05f0",
+    "manifest_scope": "Full test logs, raw measurement logs, and complete graph bounding receipts"
+  },
+  "environment": {
+    "python_version": "3.11.15",
+    "numpy_installed": true,
+    "lancedb_installed": true,
+    "pytest_version": "9.1.1",
+    "network": true
+  },
+  "matrix": {
+    "low_level_passed": 8,
+    "low_level_failed": 0,
+    "low_level_total": 8,
+    "runtime_suite_passed": 6,
+    "runtime_suite_failed": 0,
+    "adversarial_100k_budget_passed": true,
+    "full_subgate_status": "pass",
+    "blocked_reasons": []
+  },
+  "claim_boundary": "C1 bounded graph policy, high-DF cutoff, degree-cap pruning, deterministic PPR, and 100K adversarial scale verification complete."
+}

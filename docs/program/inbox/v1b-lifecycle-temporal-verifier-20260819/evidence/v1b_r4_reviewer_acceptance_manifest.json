@@ -1,0 +1,23 @@
+{
+  "contract_version": "2.0",
+  "graph_sub_gate": {
+    "candidate_commit": "3e7e9f0ee460e3af75f3935343f6d6f2089f9f7c",
+    "candidate_tree": "ef83211ff9a52bce0706bda7b102639830b5a554",
+    "items_verified": 8,
+    "manifest_sha256": "2e42b767eba2d5ec6f7d294ab17d95f9e3d26f87944415db2a8106b6273afa9a",
+    "sub_gate": "V1b-TL-graph",
+    "verdict": "PASS"
+  },
+  "overall_gate_v1b_verdict": "CLOSED (PASS)",
+  "reviewed_at_utc": "2026-08-25T09:43:54.662353+00:00",
+  "reviewer_id": "v1b-r4-reviewer-20260825",
+  "reviewer_lease_id": "lease-s0-v1b-reviewer-r4-20260825",
+  "temporal_sub_gate": {
+    "candidate_commit": "2804e29b9b1acb3dae60659483338d53a3bc8bce",
+    "candidate_tree": "8b75ed4530c748fc9757ae33e6d1e2931122fb88",
+    "items_verified": 15,
+    "manifest_sha256": "c38557b937e73e6fea45a2e7f49883a81fd979d12a061a5d9af7dcfa7c425861",
+    "sub_gate": "V1b-Trace-temporal",
+    "verdict": "PASS"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "contract_version": "1.0",
+  "lease_id": "lease-s5-v1b-final-graph-20260823",
+  "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+  "sub_gate": "V1b-TL-graph",
+  "component": "trace-lite",
+  "created_at_utc": "2026-08-23T09:15:39.4781808Z",
+  "expires_at_utc": "2026-08-24T09:15:39.4781808Z",
+  "owner": "S5 Final V1b Independent Verifier",
+  "verifier_id": "v1b-final-graph-verifier-20260823",
+  "state": "assigned",
+  "base": {
+    "implementation_worktree": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-tl2",
+    "commit": "3e7e9f0ee460e3af75f3935343f6d6f2089f9f7c",
+    "status": "clean at preflight"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-final-graph-20260823",
+    "branch": "detached",
+    "clean_on_creation": true,
+    "exclusive": true,
+    "scratch_path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-final-graph-20260823",
+    "result_path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-final-graph-20260823",
+    "environment_path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-envs\\v1b-final-graph-20260823"
+  },
+  "scope": {
+    "allowed_paths": [
+      "verifier checkout read-only",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-final-graph-20260823",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-final-graph-20260823",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-envs\\v1b-final-graph-20260823",
+      "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence"
+    ],
+    "forbidden_paths": [
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-tl2",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "network/providers/raw data",
+      "implementation-owned databases/caches/results"
+    ],
+    "may_repair_candidate": false,
+    "may_choose_policy": false
+  },
+  "claim_limit": "Independent graph verification only; no temporal, PostgreSQL/RLS, external-index, deployment, certification, SOTA, 100K, or promotion claim."
+}

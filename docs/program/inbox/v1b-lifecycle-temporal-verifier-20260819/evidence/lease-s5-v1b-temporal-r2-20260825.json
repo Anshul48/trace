@@ -1,0 +1,53 @@
+{
+  "contract_version": "2.0",
+  "lease_id": "lease-s5-v1b-temporal-r2-20260825",
+  "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+  "sub_gate": "V1b-Trace-temporal",
+  "component": "trace",
+  "created_at_utc": "2026-08-25T06:00:00.0000000Z",
+  "expires_at_utc": "2026-08-26T23:59:59.0000000Z",
+  "owner": "S5 Final V1b-R2 Independent Temporal & Infrastructure Verifier",
+  "verifier_id": "v1b-r2-temporal-verifier-20260825",
+  "state": "assigned",
+  "candidate": {
+    "commit": "6577847af37c7ccb1edd03ba5905a0396a1f1e28",
+    "tree_sha256": "95212391484c0884687f2078c1f2ca80627a0313",
+    "parent_commit": "37b601c15b81aefb3edf1f47df57e12dfe96ffbf",
+    "rationale": "Legalizes PostgreSQL 16 hash-partition bootstrap, pins dependencies, implements raw object store erasure, and ensures repeat-erasure idempotency",
+    "status": "clean detached candidate"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-r2-temporal-20260825",
+    "branch": "detached",
+    "clean_on_creation": true,
+    "exclusive": true,
+    "scratch_path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-r2-temporal-20260825",
+    "result_path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-r2-temporal-20260825",
+    "venv_executable": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-r2-temporal-20260825\\.venv\\Scripts\\python.exe"
+  },
+  "docker_resources": {
+    "postgres_container": "v1b-r2-postgres-20260825",
+    "postgres_image": "postgres@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+    "opensearch_container": "v1b-r2-opensearch-20260825",
+    "opensearch_image": "opensearchproject/opensearch@sha256:72fe2fc84be8295906b8efca020b46c58ed45c8da60cd9b8b49e1991e38e89a4",
+    "qdrant_container": "v1b-r2-qdrant-20260825",
+    "qdrant_image": "qdrant/qdrant@sha256:419d72603f5346ee22ffc4606bdb7beb52fcb63077766fab678e6622ba247366",
+    "minio_container": "v1b-r2-minio-20260825",
+    "minio_image": "minio/minio@sha256:a1ea29fa28355559ef137d71fc570e508a214ec84ff8083e39bc5428980b015e"
+  },
+  "scope": {
+    "allowed_paths": [
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-r2-temporal-20260825",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-r2-temporal-20260825",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-r2-temporal-20260825"
+    ],
+    "forbidden_paths": [
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "network/providers/raw data"
+    ],
+    "may_repair_candidate": false,
+    "may_choose_policy": false
+  },
+  "claim_limit": "Independent temporal revocation and live infrastructure integration verification only; no full 100K certification, public SOTA, or production promotion claim."
+}

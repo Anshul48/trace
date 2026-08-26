@@ -1,0 +1,11 @@
+{
+  "packet_id": "tl2-bounded-association-20260819",
+  "recorded_at_utc": "2026-08-23T08:54:20.0334550Z",
+  "handoff_sha256": "1046630c0356380aa15bc58a4b4fbc17a59eb7d41d5532c6ee17dae5afd2bf7f",
+  "input_manifest_sha256": "8da0074be85dedf6c371b681a94847c5921d33310cfb6e0069750a1bd7463b29",
+  "measurement_receipt_sha256": "c4f99b0ef4fae3a4de8990632fb8ae7fad9d42701df71c012215f83ecf012fb3",
+  "implementation_commit": "3e7e9f0ee460e3af75f3935343f6d6f2089f9f7c",
+  "graph_policy_sha256": "5cb3ac89fefa03f6e3c015aa76b14cd4f60457b2a5f82b89cd9d032cd41fc4c1",
+  "default_config_fingerprint": "43b640943d1fb3ce1e7042b53ce6ce6a590a979190a212e4304c69222f5ac1c2",
+  "verifier_receipt": "pending: v1b-lifecycle-temporal-verifier-20260819"
+}

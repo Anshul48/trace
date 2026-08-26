@@ -1,0 +1,155 @@
+{
+  "contract_version": "1.0",
+  "packet_id": "s0-r1-reconciliation-20260819",
+  "session": "S0",
+  "role": "Coordinator / Control-Plane Owner",
+  "authority_level": "C0",
+  "state": "in_progress",
+  "started_utc": "2026-08-19T12:40:55.1070524Z",
+  "scope": {
+    "allowed_write_paths": [
+      "docs/program/FOUNDATION_STATUS.md",
+      "docs/program/07_RISK_REGISTER.md",
+      "docs/program/COMPONENT_REGISTRY.md",
+      "docs/program/CONTROL_PLANE_LOCK.json",
+      "docs/program/inbox/s0-r1-reconciliation-20260819/"
+    ],
+    "read_only_component_roots": [
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data"
+    ],
+    "forbidden_authority": [
+      "product code",
+      "migrations",
+      "tests",
+      "benchmark source",
+      "raw data",
+      "provider configuration",
+      "provider calls",
+      "P-002",
+      "P-004",
+      "P-005"
+    ]
+  },
+  "pre_write_control_plane_snapshot": {
+    "scope": "All regular files recursively under docs/program excluding CONTROL_PLANE_LOCK.json",
+    "file_count": 213,
+    "tree_sha256": "1213c046efda3b66b67939cb6a88bea2d80bb41618f2f731a40dd00daf8a72d7",
+    "computed_before_packet_files_and_global_updates": true
+  },
+  "previous_control_plane_lock": {
+    "snapshot_id": "foundation-control-plane-20260819-initial",
+    "file_count": 103,
+    "tree_sha256": "c65926092d2dc7b4472dd1ac4da2af853b2fd8a24ecd93c9b748bd37c16df2f5",
+    "status": "stale_against_live_tree"
+  },
+  "governing_documents": [
+    {"path": "docs/program/launch/implementation-wave/README.md", "sha256": "dfcd67950b1252700c3bf878fcca7d5cc0f2652ae02a916c62b051b0c0a82286"},
+    {"path": "docs/program/launch/implementation-wave/00_GLOBAL_CONTEXT.md", "sha256": "0b1d8863b884dabec0d156c76d0e8764cc9c6b2c03ce45784abb64b116050f3b"},
+    {"path": "docs/program/launch/implementation-wave/01_SESSION_PROTOCOL.md", "sha256": "3e06526e81ae77037e4fb9d896c3320fee77d813d19bf1df20895ed6c807610e"},
+    {"path": "docs/program/launch/implementation-wave/02_WAVE_AND_GATE_MATRIX.md", "sha256": "4f588ae50085b4199da465babd98b5dad0785f07e34e9597038304290047eefc"},
+    {"path": "docs/program/launch/implementation-wave/03_HANDOFF_TEMPLATE.md", "sha256": "c890c3bad8251212ee9d846f254bf3e2aee770a6af57066277c47c606df31458"},
+    {"path": "docs/program/launch/implementation-wave/04_SUBAGENT_RULES.md", "sha256": "65e4cdd1627d83dc6300c4a24af91e5a7341ead125be51e531ce298b804c5551"},
+    {"path": "docs/program/launch/implementation-wave/10_S0_COORDINATOR.md", "sha256": "910f759aaf0524a5cb364beceea8a4074f9bf40f2c00bf1ba004f0e8abb17fb7"},
+    {"path": "docs/program/launch/implementation-wave/next-wave-session-prompts/01_S0_R1_RECONCILIATION.md", "sha256": "39a7adbba09bd18831a1070eac2b9fb378b57253b16e57c96330f615031bd290"},
+    {"path": "docs/program/06_DECISION_LOG.md", "sha256": "24cad218860406d03a00ac2ad5c8d83cade9d95a897c0676570235d706560dda"},
+    {"path": "docs/program/07_RISK_REGISTER.md", "sha256": "ca57d8589b5da429503f4acf9749949649ebadaecedb7ccde39cc7a6cc4a4d45"},
+    {"path": "docs/program/FOUNDATION_STATUS.md", "sha256": "f58ffbb5c2bedf9229068f566ab7339c3c7c7bcd162397ebcd938ff3cf078976"},
+    {"path": "docs/program/COMPONENT_REGISTRY.md", "sha256": "e5543fa2481ab6e42d0c01bae2a39054244b345893fd4c8ef9733cebd166858a"},
+    {"path": "docs/program/CONTROL_PLANE_LOCK.json", "sha256": "c390a77ef2ebffc5f2d3514607e08a1d4d37440a0051512aaa7ea2310b45fbad"}
+  ],
+  "prior_packet_inputs": [
+    {"path": "docs/program/inbox/b1-e2a-fail-closed-runner/handoff.md", "sha256": "a01338ddd4a11cbdb54f72f6f668ef28dfa5a74196a68a669f2e85e7f8491712"},
+    {"path": "docs/program/inbox/l1-tl1-candidate-active-lifecycle/handoff.md", "sha256": "1898e3699af8f6ef18937f75821b849eb707f8c0ed419cda510be1978d400841"},
+    {"path": "docs/program/inbox/tr1-unified-cortex-release-20260819/handoff.md", "sha256": "26aa4f01c4665d28ddc00066a27fa7ad23ad28f55444ff0274c0fff762200481"},
+    {"path": "docs/program/inbox/b2-authorized-data-staging-20260819/handoff.md", "sha256": "78ccdae7d022ce8bd2c91a44dd6feb878006f787da2464794e6daf19cb98821f"},
+    {"path": "docs/program/inbox/v0-verifier-plan-20260819/handoff.md", "sha256": "2efa3ebb9d85eaefc69b96dbbaf9394b587e4564e7b4e57b355a195a203a78ff"},
+    {"path": "docs/program/inbox/v1a-runner-integrity-20260819/packet.md", "sha256": "71af667f8c5a16b6e258eab60c8d7a7e8f30daa8c64d1f8eda78c3bc3899f5e6"},
+    {"path": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/packet.md", "sha256": "2d30107a3782717a952972d7816bf42baf320a6bbd0de74cd5f7ebd65f7e7eae"},
+    {"path": "docs/program/inbox/v1-v1a-integrity-verifier/packet.md", "sha256": "0f50b0610364ceeae5f31263347f3fd165478d1ec9998ed7530e108000c9178d"}
+  ],
+  "components": {
+    "trace": {
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "branch": "main",
+      "head_commit": "c855bb06532b3b52b25f0bea969d2677e5049065",
+      "status": "dirty_user_snapshot_protected",
+      "tracked_modified_count": 26,
+      "status_entry_count": 31,
+      "tracked_diff_git_object_id": "2b1decc7860e4ee5be553dd6a09e134e30df6af7",
+      "untracked_list_git_object_id": "319bc715936fd71cc87ab4b0b2a82fa32e64bc5d",
+      "untracked_protected_surfaces": [
+        "docs/program/",
+        "migrations/004_cortex_projection_control_plane.sql",
+        "src/trace/v2/__main__.py",
+        "src/trace/v2/cortex.py",
+        "tests/test_v2_cortex_controls.py"
+      ],
+      "implementation_worktree": {
+        "path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr1",
+        "branch": "feat/tr1-unified-cortex-release",
+        "head_commit": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+        "status": "clean"
+      }
+    },
+    "trace_lite": {
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "branch": "main",
+      "head_commit": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+      "status": "clean_tracked_untracked_protected",
+      "status_entry_count": 3,
+      "untracked_list_git_object_id": "4bcb0a6b89176039d4a446d84f2d3fd0ccc6edaa",
+      "implementation_worktree": {
+        "path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1",
+        "branch": "feat/l1-candidate-active-lifecycle",
+        "head_commit": "7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+        "status": "clean"
+      }
+    },
+    "trace_bench": {
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+      "branch": "main",
+      "head_commit": "0b01de5e49dcb18d43876b0b6004da58b35b72aa",
+      "parent_commit": "51c639edf39fee49818710ae2e9246c4ebb29e98",
+      "tag_description": "v0.1.0-foundation-1-g0b01de5",
+      "tracked_file_count": 44,
+      "status": "tracked_clean_with_untracked_lock",
+      "untracked_paths": ["uv.lock"],
+      "uv_lock_sha256": "fd4bbc4107d965f570493afb2a425b0482363b126532d023744e0a7d46745c50",
+      "source_manifest_path": "SOURCE_MANIFEST.json",
+      "source_manifest_sha256": "7603803ffc6537b84e67daa1b8d526a04cd173dc6c081089d947b0a3f93bc075",
+      "source_manifest_composite_sha256": "90f9829a10681fb90c770f87681cc2748588c0809e54362a7807b7cfb13f1bbd",
+      "untracked_list_git_object_id": "c2c09610dbdf83446a2cb1058506878c427eb770",
+      "b1_handoff_claimed_head_commit": "0b01de5c88c7df9452b4507ae86d655f2f5fcfa1",
+      "b1_handoff_claimed_head_exists": false,
+      "v1a_identity_state": "blocked_pending_b1_1_lock_resolution"
+    },
+    "d2a_external_data": {
+      "root": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data",
+      "portfolio_manifest": "docs/program/inbox/b2-authorized-data-staging-20260819/evidence/portfolio-staging-manifest.json",
+      "portfolio_manifest_sha256": "4e594992929c233ec4c95ad0541c09ae54a4e4e0b2d34c48d5ca910dcb0d41c5",
+      "metadata_root_sha256": "872102e2edfa41954f80dd55ce592a4bdfa5937ce2c58aec6480aa094504c2df",
+      "metadata_file_count": 35,
+      "dataset_directory_count": 7,
+      "total_file_count": 85,
+      "total_bytes": 1523873466,
+      "live_metadata_matches_portfolio_manifest": true,
+      "independent_verifier_packet_present": false,
+      "handoff_verifier_identifier": "d2b-manifest-verification"
+    }
+  },
+  "program_reconciliation": {
+    "program_label": "implementation_complete / independent_verification_pending",
+    "deferred_decisions": ["P-002", "P-004", "P-005"],
+    "v1b_subgates": {
+      "V1b-TL-lifecycle": "executable_pending_verifier_run",
+      "V1b-Trace-release": "executable_pending_verifier_run",
+      "V1b-TL-graph": "blocked_on_TL2_and_P-002",
+      "V1b-Trace-temporal": "blocked_on_TR2_and_P-004"
+    }
+  },
+  "no_product_data_provider_mutation_before_r1_outputs": true,
+  "subagents": []
+}

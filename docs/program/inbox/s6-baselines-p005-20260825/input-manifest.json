@@ -1,0 +1,27 @@
+{
+  "program_docs": {
+    "00_GLOBAL_CONTEXT": "0b1d8863b884dabec0d156c76d0e8764cc9c6b2c03ce45784abb64b116050f3b",
+    "01_SESSION_PROTOCOL": "3e06526e81ae77037e4fb9d896c3320fee77d813d19bf1df20895ed6c807610e",
+    "02_WAVE_AND_GATE_MATRIX": "4f588ae50085b4199da465babd98b5dad0785f07e34e9597038304290047eefc",
+    "03_HANDOFF_TEMPLATE": "c890c3bad8251212ee9d846f254bf3e2aee770a6af57066277c47c606df31458",
+    "04_SUBAGENT_RULES": "65e4cdd1627d83dc6300c4a24af91e5a7341ead125be51e531ce298b804c5551",
+    "09_S6_BASELINES_P005": "942ad532e2369fa9526e9c829755468a0c23f68aec52d4d54c0defcad5cec52f",
+    "06_DECISION_LOG": "f07f346a7c1f0b2c8822576b6faedb0bd5b59d45193b42b763c9512fa1128b1d",
+    "FOUNDATION_STATUS": "344a3a91917d2c7b2ce7069728ff534fe6bc8e58f0d92e6c65ebd943ee0a4618"
+  },
+  "prerequisite_handoffs": {
+    "v1a_runner_integrity": "47c17783508e8ab2d15323af2bf96f9955099096be8190c369d5ab05311881ba",
+    "d2b_normalization": "a54bdca43a73c1c00d393092e4d2298f3ea42a13547ae50ca677968728e9a4f9",
+    "v1b_temporal_verifier": "cfab549b964a37c22984c01c73285c23d1072645ebdc50717bd2313b79cfbfa6",
+    "b1_1_benchmark_identity": "abbee58abe0c700fa2dcb18c597dffeb721c601d1cf53aea268055dd3d7065b7"
+  },
+  "admitted_dataset_manifests": {
+    "beir-scifact": "9b25fdb0c6e4858b1979764bb9ed92fa13ebc4f1cb624e55681b6b1592682948",
+    "beir-nfcorpus": "f77da3ca178f1872653982e4a053368971ea7cb361b797ee9f6d218402a0b9ec",
+    "beir-fiqa": "ba411173113a6d1aa668e54c52c9fab9111ca5bc33f91f71795c9a87e4b3f519",
+    "bright": "74a1acc7f3a1331a4d3b75ca5922e37369c3a2bd8bcc8c1bc30db47aa8f5425a",
+    "multihop-rag": "448d12eee12d55d89bf7e9470e125fd494ccc381675fa8936ad4160eba4b0013",
+    "musique": "43f3397d8aa2ff339190c49e799e437fa749712ba4268a383cde5add7e5f300c",
+    "bigann": "dd0964f5f79f2f093292bc29d750a9f5dc49a323c9ffd4a2f9905649ee912210"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "contract_version": "1.0",
+  "record_id": "d0-coordinator-preflight-20260819",
+  "packet_id": "d0-coordinator-20260819",
+  "captured_at_utc": "2026-08-19T07:00:00Z",
+  "captured_by": "coordinator_control_plane_owner",
+  "session": "S0",
+  "environment": {
+    "platform": "Microsoft Windows NT 10.0.26200.0",
+    "powershell": "5.1.26100.9168",
+    "git": "2.52.0.windows.1",
+    "python": "3.12.0",
+    "uv": "0.12.2"
+  },
+  "preflight_checks": {
+    "trace_working_tree": {
+      "passed": true,
+      "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "head_commit": "c855bb06532b3b52b25f0bea969d2677e5049065",
+      "status": "dirty_user_snapshot_protected",
+      "tracked_modified_count": 26,
+      "untracked_surfaces_count": 5,
+      "action": "protected_no_direct_mutation"
+    },
+    "trace_lite_working_tree": {
+      "passed": true,
+      "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "head_commit": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+      "status": "clean_tracked",
+      "untracked_surfaces_count": 3,
+      "action": "protected_isolated_worktree_required"
+    },
+    "trace_bench_source_tree": {
+      "passed": true,
+      "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+      "status": "unversioned_ready_for_b0_init",
+      "file_count": 41,
+      "content_manifest_sha256": "739d7f42fb40c9234b716f5a30aa9e0acd224c4e486e24f95e4afa8f1ca36f1e",
+      "action": "b0_git_bootstrap_in_place"
+    },
+    "data_staging_capacity": {
+      "passed": true,
+      "staging_path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data",
+      "drive": "C:",
+      "available_free_gb": 370.14,
+      "required_minimum_gb": 50.0,
+      "action": "sufficient_capacity_confirmed"
+    },
+    "decision_log_reconciliation": {
+      "passed": true,
+      "decisions_accepted": ["P-001", "P-003", "P-007", "P-008"],
+      "decisions_pending": ["P-002", "P-004", "P-005", "P-006"]
+    },
+    "leases_provisioned": {
+      "passed": true,
+      "leases": [
+        "lease-s1-b0-b1-20260819",
+        "lease-s2-l1-20260819",
+        "lease-s3-t0-tr1-20260819",
+        "lease-s4-d2a-20260819"
+      ]
+    }
+  },
+  "authority_boundary": {
+    "may_edit_product_code": false,
+    "may_edit_program_docs": true,
+    "may_download_data": false,
+    "may_call_provider": false,
+    "may_run_certification": false,
+    "may_issue_leases": true
+  },
+  "preflight_result": "passed",
+  "claim_boundary": "D0 control-plane preflight verified. Wave 1 implementation sessions authorized under isolated leases."
+}

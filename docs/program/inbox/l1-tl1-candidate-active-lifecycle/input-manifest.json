@@ -1,0 +1,24 @@
+{
+  "contract_version": "1.0",
+  "task_id": "l1-tl1-candidate-active-lifecycle",
+  "session": "S2",
+  "role": "S2 — Trace-Lite Lifecycle Owner",
+  "authority_level": "C1",
+  "timestamp_utc": "2026-08-19T07:05:00Z",
+  "lease_id": "lease-s2-l1-20260819",
+  "governing_documents": [
+    "docs/program/launch/implementation-wave/00_GLOBAL_CONTEXT.md",
+    "docs/program/launch/implementation-wave/01_SESSION_PROTOCOL.md",
+    "docs/program/launch/implementation-wave/04_SUBAGENT_RULES.md",
+    "docs/program/launch/implementation-wave/12_S2_TRACE_LITE.md",
+    "docs/program/launch/implementation-wave/03_HANDOFF_TEMPLATE.md"
+  ],
+  "base": {
+    "repository_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+    "commit": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1",
+    "branch": "feat/l1-candidate-active-lifecycle"
+  }
+}

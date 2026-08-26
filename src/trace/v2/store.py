@@ -188,45 +188,72 @@ class SqliteEventStore:
         self._memory_connection: sqlite3.Connection | None = None
         if self.path != ":memory:":
             Path(self.path).parent.mkdir(parents=True, exist_ok=True)
+            self._persistent_connection = sqlite3.connect(self.path, timeout=60, isolation_level=None, check_same_thread=False)
+            self._persistent_connection.row_factory = sqlite3.Row
+            self._persistent_connection.execute("PRAGMA foreign_keys = ON")
+            self._persistent_connection.execute("PRAGMA journal_mode = WAL")
+            self._persistent_connection.execute("PRAGMA synchronous = NORMAL")
+            self._persistent_connection.execute("PRAGMA cache_size = -64000")
+            self._persistent_connection.execute("PRAGMA temp_store = MEMORY")
+            self._memory_connection = None
         else:
             # A normal ``sqlite3.connect(':memory:')`` call creates a new
             # database per connection.  Keeping this single private connection
             # makes the embedded adapter behave correctly in unit tests too.
             self._memory_connection = sqlite3.connect(":memory:", timeout=30, isolation_level=None, check_same_thread=False)
             self._memory_connection.row_factory = sqlite3.Row
+            self._memory_connection.execute("PRAGMA foreign_keys = ON")
+            self._persistent_connection = self._memory_connection
         self._lock = threading.RLock()
+        self._transaction_depth = 0
         self.initialize()
 
     def _connect(self) -> sqlite3.Connection:
-        connection = self._memory_connection
-        if connection is None:
-            connection = sqlite3.connect(self.path, timeout=30, isolation_level=None)
-            connection.row_factory = sqlite3.Row
-        connection.execute("PRAGMA foreign_keys = ON")
-        connection.execute("PRAGMA journal_mode = WAL")
-        return connection
+        if self._persistent_connection is None:
+            if self.path == ":memory:":
+                self._persistent_connection = sqlite3.connect(":memory:", timeout=30, isolation_level=None, check_same_thread=False)
+                self._persistent_connection.row_factory = sqlite3.Row
+                self._persistent_connection.execute("PRAGMA foreign_keys = ON")
+            else:
+                self._persistent_connection = sqlite3.connect(self.path, timeout=60, isolation_level=None, check_same_thread=False)
+                self._persistent_connection.row_factory = sqlite3.Row
+                self._persistent_connection.execute("PRAGMA foreign_keys = ON")
+                self._persistent_connection.execute("PRAGMA journal_mode = WAL")
+                self._persistent_connection.execute("PRAGMA synchronous = NORMAL")
+        return self._persistent_connection
 
     @contextmanager
     def transaction(self) -> Iterator[sqlite3.Connection]:
         with self._lock:
             connection = self._connect()
-            try:
+            is_outer = (self._transaction_depth == 0)
+            if is_outer:
                 connection.execute("BEGIN IMMEDIATE")
+            self._transaction_depth += 1
+            try:
                 yield connection
-                connection.commit()
+                if is_outer:
+                    connection.commit()
             except Exception:
-                connection.rollback()
+                if is_outer:
+                    try:
+                        connection.rollback()
+                    except Exception:
+                        pass
                 raise
             finally:
-                if connection is not self._memory_connection:
-                    connection.close()
+                self._transaction_depth -= 1
 
     def close(self) -> None:
-        """Release an in-memory connection explicitly when its owner is done."""
+        """Release the database connection explicitly when its owner is done."""
 
         with self._lock:
-            if self._memory_connection is not None:
-                self._memory_connection.close()
+            if self._persistent_connection is not None:
+                try:
+                    self._persistent_connection.close()
+                except Exception:
+                    pass
+                self._persistent_connection = None
                 self._memory_connection = None
 
     def initialize(self) -> None:

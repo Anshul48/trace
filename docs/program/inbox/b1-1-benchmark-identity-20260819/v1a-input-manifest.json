@@ -1,0 +1,67 @@
+{
+  "contract_version": "1.0",
+  "manifest_id": "v1a-b1-1-inputs-dcd32396-20260820",
+  "packet_id": "v1a-runner-integrity-20260819",
+  "created_at_utc": "2026-08-20T02:19:30.6469566Z",
+  "source": {
+    "component": "trace-bench",
+    "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+    "implementation_worktree": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-bench-b11-20260819",
+    "branch": "feat/b1-identity-refresh-20260819",
+    "commit": "dcd32396f6430e6865176f053a3ce57112db6df3",
+    "parent_b1_commit": "0b01de5e49dcb18d43876b0b6004da58b35b72aa",
+    "status": "clean",
+    "historical_b1_preserved": true
+  },
+  "source_manifest": {
+    "path": "SOURCE_MANIFEST.json",
+    "sha256_lf_clone": "b0d58be58ed76fd67942cc6ab5b4346057a5ec27986199b6f91757a53591031b",
+    "composite_sha256": "3c3b4a6fd30127654e387401b9f64191a700e21fbc78b732fe8b3fb99c353c55",
+    "manifest_entries": 44,
+    "git_tracked_files_including_manifest": 45,
+    "self_excluded": true
+  },
+  "dependency_lock": {
+    "path": "uv.lock",
+    "sha256": "fd4bbc4107d965f570493afb2a425b0482363b126532d023744e0a7d46745c50",
+    "size_bytes": 265239,
+    "uv": "0.12.2 (46ead6098 2026-08-05 x86_64-pc-windows-msvc)",
+    "python": "3.12.0",
+    "platform": "Windows x86_64-pc-windows-msvc",
+    "lock_version": 1,
+    "revision": 3,
+    "package_count": 72,
+    "requires_python": ">=3.11"
+  },
+  "package_metadata": {
+    "path": "pyproject.toml",
+    "sha256": "6e04c7b19ec204ae15ebbfbd5421062985e5234e8564e6d61207df632e371437",
+    "name": "trace-bench",
+    "version": "0.1.0",
+    "requires_python": ">=3.11",
+    "install_mode": "non_editable_wheel",
+    "optional_extra": "dev"
+  },
+  "verification": {
+    "clean_clone": "C:\\Users\\anshu\\AppData\\Local\\Temp\\trace-bench-b11-20260820\\clone-final",
+    "clone_status": "clean",
+    "core_autocrlf": false,
+    "lock_check": "pass",
+    "test_command": "uv run --locked --no-sync python -m pytest -q -o pythonpath= --basetemp C:\\Users\\anshu\\AppData\\Local\\Temp\\trace-bench-b11-20260820\\pytest-basetemp-final",
+    "test_count": 26,
+    "passed": 26,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 75.01,
+    "import_origin": "C:\\Users\\anshu\\AppData\\Local\\Temp\\trace-bench-b11-20260820\\venv-final\\Lib\\site-packages\\trace_bench\\__init__.py"
+  },
+  "prohibited_activity": {
+    "dataset_download": false,
+    "provider_call": false,
+    "certification_run": false,
+    "trace_modified": false,
+    "trace_lite_modified": false,
+    "fallback_or_substitute_used": false
+  },
+  "verifier_instruction": "V1a must use this exact commit and manifest, a separate verifier lease, and an independent clean environment. B1.1 does not certify the runner or release gates."
+}

@@ -1,0 +1,9 @@
+{
+  "packet_id": "s7-real-100k-20260826",
+  "session": "Session 12",
+  "role": "S7 Scale & Performance Owner",
+  "created_at_utc": "2026-08-26T04:45:00Z",
+  "foundation_gate_review_id": "foundation-gate-r2-20260826",
+  "corpus_documents": 100000,
+  "status": "COMPLETE"
+}

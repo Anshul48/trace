@@ -38,3 +38,6 @@ output/
 .verify_phase1_build/
 .verify_phase1_venv/
 tests/.phase1_tmp/
+
+# Temporary verification worktrees
+.v1b-r5/

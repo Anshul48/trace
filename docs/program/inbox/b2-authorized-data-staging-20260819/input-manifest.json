@@ -1,0 +1,67 @@
+{
+  "contract_version": "1.0",
+  "packet_id": "b2-authorized-data-staging-20260819",
+  "session": "S4",
+  "role": "Real-Data Steward and Staging Owner",
+  "lease_id": "lease-s4-d2a-20260819",
+  "created_at_utc": "2026-08-19T07:26:19.515089+00:00",
+  "admission_authority": {
+    "decision_id": "DEC-P-001",
+    "description": "Admitted core real-data portfolio: BEIR (SciFact, NFCorpus, FiQA), BRIGHT (coding/math), MultiHop-RAG, MuSiQue, BigANN/SIFT1M (vector-scale only)"
+  },
+  "staging_root": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data",
+  "source_registrations": {
+    "beir-scifact": {
+      "source_repo": "https://huggingface.co/datasets/BeIR/scifact",
+      "qrels_repo": "https://huggingface.co/datasets/BeIR/scifact-qrels",
+      "upstream": "https://github.com/allenai/scifact",
+      "license": "CC BY-NC 4.0 / Apache 2.0"
+    },
+    "beir-nfcorpus": {
+      "source_repo": "https://huggingface.co/datasets/BeIR/nfcorpus",
+      "qrels_repo": "https://huggingface.co/datasets/BeIR/nfcorpus-qrels",
+      "upstream": "https://www.cl.uni-heidelberg.de/statnlpgroup/nfcorpus/",
+      "license": "CC BY-SA 4.0 / Apache 2.0"
+    },
+    "beir-fiqa": {
+      "source_repo": "https://huggingface.co/datasets/BeIR/fiqa",
+      "qrels_repo": "https://huggingface.co/datasets/BeIR/fiqa-qrels",
+      "upstream": "https://sites.google.com/view/fiqa/",
+      "license": "Research evaluation license / Apache 2.0"
+    },
+    "bright": {
+      "source_repo": "https://huggingface.co/datasets/xlangai/BRIGHT",
+      "upstream": "https://github.com/xlang-ai/BRIGHT",
+      "admitted_subsets": [
+        "leetcode",
+        "stackoverflow",
+        "pony",
+        "aops",
+        "theoremqa_questions",
+        "theoremqa_theorems"
+      ],
+      "license": "CC BY 4.0"
+    },
+    "multihop-rag": {
+      "source_repo": "https://huggingface.co/datasets/yixuantt/MultiHopRAG",
+      "upstream": "https://github.com/yixuantt/MultiHop-RAG",
+      "license": "ODC-By v1.0"
+    },
+    "musique": {
+      "source_repo": "https://huggingface.co/datasets/dgslibisey/MuSiQue",
+      "upstream": "https://github.com/StonyBrookNLP/musique",
+      "license": "CC BY 4.0"
+    },
+    "bigann": {
+      "source_repo": "https://huggingface.co/datasets/fzliu/sift1m",
+      "upstream": "http://corpus-texmex.irisa.fr/",
+      "admitted_role": "Vector-scale operations lane ONLY per DEC-P-001",
+      "license": "CC0 1.0 Universal"
+    }
+  },
+  "runtime_environment": {
+    "python": "3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)]",
+    "platform": "win32",
+    "tls_enforcement": "Strict TLS verification (verify=True)"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+  "algorithm": "sha256",
+  "generated_utc": "2026-08-20T02:43:36.4181305Z",
+  "self_excluded": true,
+  "files": [
+    {
+      "path": "input-manifest.json",
+      "sha256": "fc4fa633c52c339ba1581e0744d002ef5afe99694dabe461230285435aec35b1"
+    },
+    {
+      "path": "repository-state.json",
+      "sha256": "f74e073a4a2f3a26c924f8d3c2c7d2e83e0b911041f27578483c09b9d3c4f83a"
+    },
+    {
+      "path": "commands.md",
+      "sha256": "0db7901e0f7f82a5462ec0b931fc98fa7d4cc47dc92ba06f35d6557f7927a49c"
+    },
+    {
+      "path": "evidence/execution-note.md",
+      "sha256": "fdb912f03ee2a43134b4fc8d31555ea2d37acbdcf4f0c82c900b0ac2d8ffdded"
+    },
+    {
+      "path": "evidence/environment.json",
+      "sha256": "81d2b590f921165534657f8914d906fa776953761ac09b3975c336c39683c7e6"
+    },
+    {
+      "path": "evidence/verification.md",
+      "sha256": "b3ba055509e0218ebe7f2c4e815a1a4134dfa0341a98766ec6a7af3c258e7223"
+    },
+    {
+      "path": "evidence/reports/tl_independent_lifecycle.py",
+      "sha256": "513859189fa8ae023120ae3cc0aa0106394289aa9ec48b789e66386573f3fae6"
+    },
+    {
+      "path": "evidence/reports/tl-receipt.json",
+      "sha256": "c84e6537bb61d400d92e0ad34c68a6aac4595cd1a50ebf2a80b411d766526d57"
+    },
+    {
+      "path": "evidence/reports/trace_independent_release.py",
+      "sha256": "25bcd4deb2d96af2067bc8734e1416c6759cfec21dc85b1a07affc0a2aaaa7e7"
+    },
+    {
+      "path": "evidence/reports/trace-receipt.json",
+      "sha256": "ce0fd12dc611ec5c3af52aeefa1983a13ecbe370f456689cdfb115bab8d2b432"
+    },
+    {
+      "path": "handoff.md",
+      "sha256": "8cc0e4f2ab76e27c8df8fef39123964719e24a0b7cc597f897b072d811e9a1ab"
+    }
+  ]
+}

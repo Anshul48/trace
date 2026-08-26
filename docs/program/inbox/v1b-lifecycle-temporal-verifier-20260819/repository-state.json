@@ -1,0 +1,56 @@
+{
+  "state_version": "1.0",
+  "captured_at_utc": "2026-08-20T02:19:18.9324392Z",
+  "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+  "protected_trace_user_checkout": {
+    "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "branch": "main",
+    "head": "c855bb06532b3b52b25f0bea969d2677e5049065",
+    "status": "dirty; 26 tracked modifications and 5 untracked surfaces; protected"
+  },
+  "protected_trace_lite_user_checkout": {
+    "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+    "branch": "main",
+    "head": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+    "status": "tracked clean; protected untracked program/protocol surfaces"
+  },
+  "implementation_worktrees": [
+    {
+      "root": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1",
+      "branch": "feat/l1-candidate-active-lifecycle",
+      "head": "7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+      "status": "clean",
+      "lease": "lease-s2-l1-20260819"
+    },
+    {
+      "root": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr1",
+      "branch": "feat/tr1-unified-cortex-release",
+      "head": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+      "status": "clean",
+      "lease": "implementation handoff identity; verifier uses separate lease"
+    }
+  ],
+  "verifier_paths_at_preflight": {
+    "tl_worktree": "absent",
+    "tl_scratch": "absent",
+    "trace_worktree": "absent",
+    "trace_scratch": "absent"
+  },
+  "leases": [
+    {
+      "path": "docs/program/inbox/s0-r1-reconciliation-20260819/leases/lease-s5-v1b-tl-lifecycle-20260819.json",
+      "lease_id": "lease-s5-v1b-tl-lifecycle-20260819",
+      "verifier_id": "v1b-tl-lifecycle-verifier-20260819",
+      "expires_at_utc": "2026-08-20T12:40:55.1070524Z",
+      "state": "assigned"
+    },
+    {
+      "path": "docs/program/inbox/s0-r1-reconciliation-20260819/leases/lease-s5-v1b-trace-release-20260819.json",
+      "lease_id": "lease-s5-v1b-trace-release-20260819",
+      "verifier_id": "v1b-trace-release-verifier-20260819",
+      "expires_at_utc": "2026-08-20T12:40:55.1070524Z",
+      "state": "assigned"
+    }
+  ],
+  "claim_boundary": "Local lifecycle contract only; graph, temporal, PostgreSQL/RLS, external-index, deployment, and distributed recovery claims remain unsupported unless directly exercised."
+}

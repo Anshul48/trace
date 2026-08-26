@@ -1,0 +1,32 @@
+{
+  "packet_id": "tl2-bounded-association-20260819",
+  "session": "S2",
+  "recorded_at_utc": "2026-08-23T08:09:38.3508241Z",
+  "objective": "Implement only the accepted P-002 bounded association and PPR contract in a fresh Trace-Lite worktree.",
+  "base_commit": "7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+  "canonical_checkout_preserved": true,
+  "expired_l1_worktree_reused": false,
+  "new_worktree_path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-tl2",
+  "new_worktree_path_preflight": "created clean at base commit",
+  "decision_sha256": "ed4e8bb93e614169279f568eab5690280168de7b4339dc21f7638cc2acc8a129",
+  "control_plane": {
+    "snapshot_id": "gate-a-p002-p004-20260823",
+    "core_hashes_match": true,
+    "whole_tree_match": false,
+    "drift": "10 packet-local files written after the snapshot; no global control-plane edits by this session"
+  },
+  "runtime": {
+    "python": "3.12.0",
+    "uv": "0.12.2 (46ead6098 2026-08-05 x86_64-pc-windows-msvc)",
+    "git": "2.52.0.windows.1",
+    "provider": "none",
+    "network": false,
+    "data": "no external corpus; deterministic adversarial budget fixture only"
+  },
+  "scratch": {
+    "root": "C:\\Users\\anshu\\AppData\\Local\\trace-scratch\\s2-tl2-bounded-graph-20260823",
+    "results": "C:\\Users\\anshu\\AppData\\Local\\trace-results\\s2-tl2-bounded-graph-20260823",
+    "database_policy": "fresh per-test paths under scratch root"
+  },
+  "capacity": "not available: Windows logical-disk queries denied by sandbox; process working set observed at 75,517,952 bytes during preflight"
+}

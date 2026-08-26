@@ -1,0 +1,15 @@
+{
+  "receipt_id": "rcpt-ltr04-preflight-20260826",
+  "contract_version": "1.0",
+  "generated_at_utc": "2026-08-26T06:23:00Z",
+  "verifier_role": "S5 Independent Verifier",
+  "runner_checks": {
+    "module_resolution": "PASS",
+    "fail_closed_manifest_check": "PASS",
+    "kernel_proc_rss_telemetry": "PASS",
+    "calibration_1k": "PASS (468.9 docs/s, 48.2 MB RSS, PPR P95 = 1.48 ms)",
+    "calibration_10k": "PASS (467.8 docs/s, 81.2 MB RSS, PPR P95 = 1.49 ms)",
+    "calibration_25k": "PASS (463.9 docs/s, 131.2 MB RSS, PPR P95 = 1.49 ms)"
+  },
+  "verdict": "VERIFIED_PASS"
+}

@@ -1,0 +1,8 @@
+{
+  "packet_id": "ltr-11-verifier-attestation-20260826",
+  "session": "Wave R2 (Remediated Verifier Attestation)",
+  "role": "S5 Independent Scale Verifier",
+  "created_at_utc": "2026-08-26T13:58:00Z",
+  "audited_dossier_sha256": "9941639b9c0b04ae659d48745da333fed42a9dd1367849c7ef4cd2b9c8aad0cb",
+  "attestation_status": "CLOSED (PASS)"
+}

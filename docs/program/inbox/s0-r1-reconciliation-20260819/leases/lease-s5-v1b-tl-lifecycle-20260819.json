@@ -1,0 +1,34 @@
+{
+  "contract_version": "1.0",
+  "lease_id": "lease-s5-v1b-tl-lifecycle-20260819",
+  "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+  "sub_gate": "V1b-TL-lifecycle",
+  "component": "trace-lite",
+  "created_at_utc": "2026-08-19T12:40:55.1070524Z",
+  "expires_at_utc": "2026-08-20T12:40:55.1070524Z",
+  "owner": "S5 Independent Verifier",
+  "verifier_id": "v1b-tl-lifecycle-verifier-20260819",
+  "state": "assigned",
+  "base": {
+    "implementation_worktree": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1",
+    "commit": "7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+    "status": "clean"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-tl-lifecycle-20260819",
+    "branch": "verify/v1b-tl-lifecycle-20260819",
+    "clean_on_creation": true,
+    "exclusive": true,
+    "scratch_path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-tl-lifecycle-20260819"
+  },
+  "scope": {
+    "allowed_paths": ["verifier checkout read-only", "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-tl-lifecycle-20260819\\"],
+    "forbidden_paths": ["C:\\Users\\anshu\\AppData\\Local\\trace-lite\\", "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite\\", "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1\\", "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace\\"],
+    "may_run_networked_commands": false,
+    "may_download_data": false,
+    "may_call_provider": false,
+    "may_repair_candidate": false
+  },
+  "handoff_destination": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/handoff.md",
+  "claim_limit": "Local lifecycle contract only; no graph, temporal, PostgreSQL, RLS, or distributed claim."
+}

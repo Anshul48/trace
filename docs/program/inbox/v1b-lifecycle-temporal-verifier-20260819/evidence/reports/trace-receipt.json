@@ -1,0 +1,987 @@
+{
+  "backend": "Trace SQLite local store with deterministic in-process adapters",
+  "base_commit": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+  "cases": [
+    {
+      "case": "candidate_isolation_and_same_pair",
+      "duration_ms": 18.084,
+      "observation": {
+        "candidate_edge": [
+          {
+            "affinity_edge_id": "8804c5d1-41f3-4e1d-aa52-33ed18fb349a",
+            "created_event_offset": 21,
+            "embedding_revision": null,
+            "expires_at": "2999-01-01T00:00:00+00:00",
+            "index_revision": null,
+            "left_atom_version_id": "b30143a7-d095-4010-a4db-8b4193a7f590",
+            "pair_key": "b30143a7-d095-4010-a4db-8b4193a7f590:ddb8985a-f54a-423b-a5cc-8778d0d256d9",
+            "projection_run_id": null,
+            "release_id": "e3ed0f40-be6d-4b59-96e3-17857bf3b57c",
+            "right_atom_version_id": "ddb8985a-f54a-423b-a5cc-8778d0d256d9",
+            "score": 0.95,
+            "signal": {
+              "provider": "candidate"
+            },
+            "status": "active",
+            "updated_at": "2026-08-20T02:35:42.569138+00:00",
+            "workspace_id": "alpha"
+          }
+        ],
+        "candidate_priors": {
+          "ddb8985a-f54a-423b-a5cc-8778d0d256d9": [
+            {
+              "activation_prior_id": "cc716651-851a-468d-b7ec-5ac1f60f5de9",
+              "atom_version_id": "ddb8985a-f54a-423b-a5cc-8778d0d256d9",
+              "created_event_offset": 22,
+              "expires_at": null,
+              "prior_kind": "pin",
+              "provenance": {},
+              "release_id": "e3ed0f40-be6d-4b59-96e3-17857bf3b57c",
+              "score": 0.8,
+              "updated_at": "2026-08-20T02:35:42.570167+00:00",
+              "workspace_id": "alpha"
+            }
+          ]
+        },
+        "candidate_release_id": "e3ed0f40-be6d-4b59-96e3-17857bf3b57c",
+        "ordinary_edge": [
+          {
+            "affinity_edge_id": "189ec01b-6f8e-48b8-b48a-6727926442ec",
+            "created_event_offset": 19,
+            "embedding_revision": null,
+            "expires_at": "2999-01-01T00:00:00+00:00",
+            "index_revision": null,
+            "left_atom_version_id": "b30143a7-d095-4010-a4db-8b4193a7f590",
+            "pair_key": "b30143a7-d095-4010-a4db-8b4193a7f590:ddb8985a-f54a-423b-a5cc-8778d0d256d9",
+            "projection_run_id": null,
+            "release_id": "58d884f8-f17c-422c-b316-13b12f86a8ff",
+            "right_atom_version_id": "ddb8985a-f54a-423b-a5cc-8778d0d256d9",
+            "score": 0.6,
+            "signal": {
+              "provider": "active"
+            },
+            "status": "active",
+            "updated_at": "2026-08-20T02:35:42.568613+00:00",
+            "workspace_id": "alpha"
+          }
+        ],
+        "ordinary_priors": {},
+        "predecessor_release_id": "58d884f8-f17c-422c-b316-13b12f86a8ff",
+        "projection_hash": "cf60d578c448aee20768480b7fba457bbd80f579bb68f4363ed542abef573c60",
+        "source_hash": "f2297d62532a170ad00b9692bb47fbb603e52654c7afd2511fab535b80e1fea8"
+      },
+      "status": "pass"
+    },
+    {
+      "case": "validation_and_atomic_handover",
+      "duration_ms": 10.441,
+      "observation": {
+        "active_after": {
+          "activated_at": "2026-08-20T02:35:42.581243+00:00",
+          "code_revision": "trace-v2-cortex",
+          "components": [
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "activation_priors",
+              "component_revision": "activation_priors-5",
+              "created_at": "2026-08-20T02:35:42.581243+00:00",
+              "input_checksum": "c97289eb900d129dd1549501e51586527ce14223917d2967b5af613197f561df",
+              "metadata": {},
+              "release_id": "bac4db68-87bb-4d84-8d37-4fcb166b0394",
+              "source_watermark": 5,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "affinity",
+              "component_revision": "affinity-5",
+              "created_at": "2026-08-20T02:35:42.581243+00:00",
+              "input_checksum": "7f1a1d28b8f591f4cfe9de4c703a914b8d834d8940124a57f4933e62bf3447da",
+              "metadata": {},
+              "release_id": "bac4db68-87bb-4d84-8d37-4fcb166b0394",
+              "source_watermark": 5,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "dense_index",
+              "component_revision": "dense_index-5",
+              "created_at": "2026-08-20T02:35:42.581243+00:00",
+              "input_checksum": "775421604ace96cd115221cbd427b13ef44eac67f7937d8e7eb02cebd88c8dca",
+              "metadata": {},
+              "release_id": "bac4db68-87bb-4d84-8d37-4fcb166b0394",
+              "source_watermark": 5,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "hierarchy",
+              "component_revision": "hierarchy-5",
+              "created_at": "2026-08-20T02:35:42.581243+00:00",
+              "input_checksum": "6bba384598010bd76d2eacbb4ab381a4f33f58bdd8ff61933d6ec7efe39c7cbc",
+              "metadata": {},
+              "release_id": "bac4db68-87bb-4d84-8d37-4fcb166b0394",
+              "source_watermark": 5,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "lexical_index",
+              "component_revision": "lexical_index-5",
+              "created_at": "2026-08-20T02:35:42.581243+00:00",
+              "input_checksum": "16fffee93670af66b52befe51f62346fb9096fd3c4cdb7b66f4af6920d01cbf9",
+              "metadata": {},
+              "release_id": "bac4db68-87bb-4d84-8d37-4fcb166b0394",
+              "source_watermark": 5,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            }
+          ],
+          "created_at": "2026-08-20T02:35:42.581243+00:00",
+          "failure_detail": null,
+          "parent_release_id": "1553cc78-ec29-4a35-9455-b3f6173a0e03",
+          "policy_revision": "cognitive-policy-v1",
+          "policy_snapshot_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "release_id": "bac4db68-87bb-4d84-8d37-4fcb166b0394",
+          "retired_at": null,
+          "spine_event_watermark": 5,
+          "status": "active",
+          "superseded_at": null,
+          "validation_receipt": {
+            "evaluator_manifest_id": null,
+            "parity": {},
+            "passed": true,
+            "policy": {},
+            "provenance": {},
+            "structural": {},
+            "validated_at": null
+          },
+          "workspace_id": "alpha"
+        },
+        "building_activation_error": "cannot activate cortex release in status 'building'; must be 'validated'",
+        "failed_activation_error": "cannot activate cortex release in status 'failed'; must be 'validated'",
+        "failed_candidate_id": "3b5d9ef5-896f-4238-bf9e-624970a7e2e8",
+        "predecessor_after": {
+          "activated_at": "2026-08-20T02:35:42.579698+00:00",
+          "code_revision": "trace-v2-cortex",
+          "components": [
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "activation_priors",
+              "component_revision": "activation_priors-0",
+              "created_at": "2026-08-20T02:35:42.578181+00:00",
+              "input_checksum": "a272cfd9e20ce4f4f0fd24f66284ea304a1b1cf4ee8370a0255063a2ca686b32",
+              "metadata": {},
+              "release_id": "1553cc78-ec29-4a35-9455-b3f6173a0e03",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "affinity",
+              "component_revision": "affinity-0",
+              "created_at": "2026-08-20T02:35:42.578181+00:00",
+              "input_checksum": "01d9e6e74c1f441e8721714906fe092bd425f362c20e12ecb1729492de5a31b8",
+              "metadata": {},
+              "release_id": "1553cc78-ec29-4a35-9455-b3f6173a0e03",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "dense_index",
+              "component_revision": "dense_index-0",
+              "created_at": "2026-08-20T02:35:42.578181+00:00",
+              "input_checksum": "054c260ca8260fe38faed69ebd9a3a7ecbc15b693c11aea62a8108a11dff270d",
+              "metadata": {},
+              "release_id": "1553cc78-ec29-4a35-9455-b3f6173a0e03",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "hierarchy",
+              "component_revision": "hierarchy-0",
+              "created_at": "2026-08-20T02:35:42.578181+00:00",
+              "input_checksum": "f6672fa33ce8ce5709b25f2b1b8c8eb6110a6893c0511f3d301842e021189003",
+              "metadata": {},
+              "release_id": "1553cc78-ec29-4a35-9455-b3f6173a0e03",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "lexical_index",
+              "component_revision": "lexical_index-0",
+              "created_at": "2026-08-20T02:35:42.578181+00:00",
+              "input_checksum": "f6e491ce7c2a341a68dd27df72d4bea1b96b465fca81925d7cd6297de081d6d0",
+              "metadata": {},
+              "release_id": "1553cc78-ec29-4a35-9455-b3f6173a0e03",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            }
+          ],
+          "created_at": "2026-08-20T02:35:42.578181+00:00",
+          "failure_detail": null,
+          "parent_release_id": null,
+          "policy_revision": "v0",
+          "policy_snapshot_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "release_id": "1553cc78-ec29-4a35-9455-b3f6173a0e03",
+          "retired_at": null,
+          "spine_event_watermark": 0,
+          "status": "superseded",
+          "superseded_at": "2026-08-20T02:35:42.581243+00:00",
+          "validation_receipt": {
+            "evaluator_manifest_id": null,
+            "parity": {},
+            "passed": true,
+            "policy": {},
+            "provenance": {},
+            "structural": {},
+            "validated_at": null
+          },
+          "workspace_id": "alpha"
+        },
+        "predecessor_release_id": "1553cc78-ec29-4a35-9455-b3f6173a0e03",
+        "successor_release_id": "bac4db68-87bb-4d84-8d37-4fcb166b0394"
+      },
+      "status": "pass"
+    },
+    {
+      "case": "atomic_activation_crash_and_restart",
+      "duration_ms": 252.375,
+      "observation": {
+        "active_after_fault": {
+          "activated_at": "2026-08-20T02:35:42.730394+00:00",
+          "code_revision": "trace-v2-cortex",
+          "components": [
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "activation_priors",
+              "component_revision": "activation_priors-0",
+              "created_at": "2026-08-20T02:35:42.701494+00:00",
+              "input_checksum": "a272cfd9e20ce4f4f0fd24f66284ea304a1b1cf4ee8370a0255063a2ca686b32",
+              "metadata": {},
+              "release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "affinity",
+              "component_revision": "affinity-0",
+              "created_at": "2026-08-20T02:35:42.701494+00:00",
+              "input_checksum": "01d9e6e74c1f441e8721714906fe092bd425f362c20e12ecb1729492de5a31b8",
+              "metadata": {},
+              "release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "dense_index",
+              "component_revision": "dense_index-0",
+              "created_at": "2026-08-20T02:35:42.701494+00:00",
+              "input_checksum": "054c260ca8260fe38faed69ebd9a3a7ecbc15b693c11aea62a8108a11dff270d",
+              "metadata": {},
+              "release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "hierarchy",
+              "component_revision": "hierarchy-0",
+              "created_at": "2026-08-20T02:35:42.701494+00:00",
+              "input_checksum": "f6672fa33ce8ce5709b25f2b1b8c8eb6110a6893c0511f3d301842e021189003",
+              "metadata": {},
+              "release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "lexical_index",
+              "component_revision": "lexical_index-0",
+              "created_at": "2026-08-20T02:35:42.701494+00:00",
+              "input_checksum": "f6e491ce7c2a341a68dd27df72d4bea1b96b465fca81925d7cd6297de081d6d0",
+              "metadata": {},
+              "release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            }
+          ],
+          "created_at": "2026-08-20T02:35:42.701494+00:00",
+          "failure_detail": null,
+          "parent_release_id": null,
+          "policy_revision": "v0",
+          "policy_snapshot_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+          "retired_at": null,
+          "spine_event_watermark": 0,
+          "status": "active",
+          "superseded_at": null,
+          "validation_receipt": {
+            "evaluator_manifest_id": null,
+            "parity": {},
+            "passed": true,
+            "policy": {},
+            "provenance": {},
+            "structural": {},
+            "validated_at": null
+          },
+          "workspace_id": "alpha"
+        },
+        "active_after_restart": {
+          "activated_at": "2026-08-20T02:35:42.730394+00:00",
+          "code_revision": "trace-v2-cortex",
+          "components": [
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "activation_priors",
+              "component_revision": "activation_priors-0",
+              "created_at": "2026-08-20T02:35:42.701494+00:00",
+              "input_checksum": "a272cfd9e20ce4f4f0fd24f66284ea304a1b1cf4ee8370a0255063a2ca686b32",
+              "metadata": {},
+              "release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "affinity",
+              "component_revision": "affinity-0",
+              "created_at": "2026-08-20T02:35:42.701494+00:00",
+              "input_checksum": "01d9e6e74c1f441e8721714906fe092bd425f362c20e12ecb1729492de5a31b8",
+              "metadata": {},
+              "release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "dense_index",
+              "component_revision": "dense_index-0",
+              "created_at": "2026-08-20T02:35:42.701494+00:00",
+              "input_checksum": "054c260ca8260fe38faed69ebd9a3a7ecbc15b693c11aea62a8108a11dff270d",
+              "metadata": {},
+              "release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "hierarchy",
+              "component_revision": "hierarchy-0",
+              "created_at": "2026-08-20T02:35:42.701494+00:00",
+              "input_checksum": "f6672fa33ce8ce5709b25f2b1b8c8eb6110a6893c0511f3d301842e021189003",
+              "metadata": {},
+              "release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "lexical_index",
+              "component_revision": "lexical_index-0",
+              "created_at": "2026-08-20T02:35:42.701494+00:00",
+              "input_checksum": "f6e491ce7c2a341a68dd27df72d4bea1b96b465fca81925d7cd6297de081d6d0",
+              "metadata": {},
+              "release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            }
+          ],
+          "created_at": "2026-08-20T02:35:42.701494+00:00",
+          "failure_detail": null,
+          "parent_release_id": null,
+          "policy_revision": "v0",
+          "policy_snapshot_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+          "retired_at": null,
+          "spine_event_watermark": 0,
+          "status": "active",
+          "superseded_at": null,
+          "validation_receipt": {
+            "evaluator_manifest_id": null,
+            "parity": {},
+            "passed": true,
+            "policy": {},
+            "provenance": {},
+            "structural": {},
+            "validated_at": null
+          },
+          "workspace_id": "alpha"
+        },
+        "candidate_after_fault": {
+          "activated_at": null,
+          "code_revision": "trace-v2-cortex",
+          "components": [
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "activation_priors",
+              "component_revision": "activation_priors-3",
+              "created_at": "2026-08-20T02:35:42.755082+00:00",
+              "input_checksum": "17033af8e3ba1effcf421e2e60e4204c6ba5e9d3af18635b02c805e593b7b3fa",
+              "metadata": {},
+              "release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "affinity",
+              "component_revision": "affinity-3",
+              "created_at": "2026-08-20T02:35:42.755082+00:00",
+              "input_checksum": "4188cc49e5cc21332e9de32e615d8625d6792f67a0153b7f49e19db99faadda6",
+              "metadata": {},
+              "release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "dense_index",
+              "component_revision": "dense_index-3",
+              "created_at": "2026-08-20T02:35:42.755082+00:00",
+              "input_checksum": "bca64cd5014b1f1b1ae0485decec78a2c05491c036a8d4bd3801446ae82c340e",
+              "metadata": {},
+              "release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "hierarchy",
+              "component_revision": "hierarchy-3",
+              "created_at": "2026-08-20T02:35:42.755082+00:00",
+              "input_checksum": "7a8ba90f5c27fa07ec22a12d7fbbb26729705e1e9b0eb0dd81fab2aab03d8c81",
+              "metadata": {},
+              "release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "lexical_index",
+              "component_revision": "lexical_index-3",
+              "created_at": "2026-08-20T02:35:42.755082+00:00",
+              "input_checksum": "6080d8e1e93e7b521827ab15df0dee5e4355b8082da3a6be10dd121cd129a7c1",
+              "metadata": {},
+              "release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            }
+          ],
+          "created_at": "2026-08-20T02:35:42.755082+00:00",
+          "failure_detail": null,
+          "parent_release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+          "policy_revision": "cognitive-policy-v1",
+          "policy_snapshot_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+          "retired_at": null,
+          "spine_event_watermark": 3,
+          "status": "validated",
+          "superseded_at": null,
+          "validation_receipt": {
+            "evaluator_manifest_id": null,
+            "parity": {},
+            "passed": true,
+            "policy": {},
+            "provenance": {},
+            "structural": {},
+            "validated_at": null
+          },
+          "workspace_id": "alpha"
+        },
+        "candidate_release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+        "fault": "independent simulated crash after pointer SQL",
+        "predecessor_release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+        "replay_activation": {
+          "activated_at": "2026-08-20T02:35:42.829629+00:00",
+          "code_revision": "trace-v2-cortex",
+          "components": [
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "activation_priors",
+              "component_revision": "activation_priors-3",
+              "created_at": "2026-08-20T02:35:42.755082+00:00",
+              "input_checksum": "17033af8e3ba1effcf421e2e60e4204c6ba5e9d3af18635b02c805e593b7b3fa",
+              "metadata": {},
+              "release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "affinity",
+              "component_revision": "affinity-3",
+              "created_at": "2026-08-20T02:35:42.755082+00:00",
+              "input_checksum": "4188cc49e5cc21332e9de32e615d8625d6792f67a0153b7f49e19db99faadda6",
+              "metadata": {},
+              "release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "dense_index",
+              "component_revision": "dense_index-3",
+              "created_at": "2026-08-20T02:35:42.755082+00:00",
+              "input_checksum": "bca64cd5014b1f1b1ae0485decec78a2c05491c036a8d4bd3801446ae82c340e",
+              "metadata": {},
+              "release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "hierarchy",
+              "component_revision": "hierarchy-3",
+              "created_at": "2026-08-20T02:35:42.755082+00:00",
+              "input_checksum": "7a8ba90f5c27fa07ec22a12d7fbbb26729705e1e9b0eb0dd81fab2aab03d8c81",
+              "metadata": {},
+              "release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "lexical_index",
+              "component_revision": "lexical_index-3",
+              "created_at": "2026-08-20T02:35:42.755082+00:00",
+              "input_checksum": "6080d8e1e93e7b521827ab15df0dee5e4355b8082da3a6be10dd121cd129a7c1",
+              "metadata": {},
+              "release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            }
+          ],
+          "created_at": "2026-08-20T02:35:42.755082+00:00",
+          "failure_detail": null,
+          "parent_release_id": "aaaad26f-adb0-4ef5-bb49-07466282854c",
+          "policy_revision": "cognitive-policy-v1",
+          "policy_snapshot_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "release_id": "7f08b50d-198d-4082-81fc-bab442828f9f",
+          "retired_at": null,
+          "spine_event_watermark": 3,
+          "status": "active",
+          "superseded_at": null,
+          "validation_receipt": {
+            "evaluator_manifest_id": null,
+            "parity": {},
+            "passed": true,
+            "policy": {},
+            "provenance": {},
+            "structural": {},
+            "validated_at": null
+          },
+          "workspace_id": "alpha"
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "case": "pointer_rollback_and_workspace_isolation",
+      "duration_ms": 16.513,
+      "observation": {
+        "beta_release_ids": [
+          "c3867dfd-2ad3-4f42-a66e-82d3b064bffb"
+        ],
+        "cross_workspace_error": "cannot rollback: workspace has no active cortex release",
+        "initial_release_id": "4f1fe141-984e-4a7f-8ad1-1649e8f22cbb",
+        "rollback": {
+          "activated_at": "2026-08-20T02:35:42.845618+00:00",
+          "code_revision": "trace-v2-cortex",
+          "components": [
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "activation_priors",
+              "component_revision": "activation_priors-0",
+              "created_at": "2026-08-20T02:35:42.842454+00:00",
+              "input_checksum": "a272cfd9e20ce4f4f0fd24f66284ea304a1b1cf4ee8370a0255063a2ca686b32",
+              "metadata": {},
+              "release_id": "4f1fe141-984e-4a7f-8ad1-1649e8f22cbb",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "affinity",
+              "component_revision": "affinity-0",
+              "created_at": "2026-08-20T02:35:42.842454+00:00",
+              "input_checksum": "01d9e6e74c1f441e8721714906fe092bd425f362c20e12ecb1729492de5a31b8",
+              "metadata": {},
+              "release_id": "4f1fe141-984e-4a7f-8ad1-1649e8f22cbb",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "dense_index",
+              "component_revision": "dense_index-0",
+              "created_at": "2026-08-20T02:35:42.842454+00:00",
+              "input_checksum": "054c260ca8260fe38faed69ebd9a3a7ecbc15b693c11aea62a8108a11dff270d",
+              "metadata": {},
+              "release_id": "4f1fe141-984e-4a7f-8ad1-1649e8f22cbb",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "hierarchy",
+              "component_revision": "hierarchy-0",
+              "created_at": "2026-08-20T02:35:42.842454+00:00",
+              "input_checksum": "f6672fa33ce8ce5709b25f2b1b8c8eb6110a6893c0511f3d301842e021189003",
+              "metadata": {},
+              "release_id": "4f1fe141-984e-4a7f-8ad1-1649e8f22cbb",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "lexical_index",
+              "component_revision": "lexical_index-0",
+              "created_at": "2026-08-20T02:35:42.842454+00:00",
+              "input_checksum": "f6e491ce7c2a341a68dd27df72d4bea1b96b465fca81925d7cd6297de081d6d0",
+              "metadata": {},
+              "release_id": "4f1fe141-984e-4a7f-8ad1-1649e8f22cbb",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            }
+          ],
+          "created_at": "2026-08-20T02:35:42.842454+00:00",
+          "failure_detail": null,
+          "parent_release_id": null,
+          "policy_revision": "v0",
+          "policy_snapshot_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "release_id": "4f1fe141-984e-4a7f-8ad1-1649e8f22cbb",
+          "retired_at": null,
+          "spine_event_watermark": 0,
+          "status": "active",
+          "superseded_at": null,
+          "validation_receipt": {
+            "evaluator_manifest_id": null,
+            "parity": {},
+            "passed": true,
+            "policy": {},
+            "provenance": {},
+            "structural": {},
+            "validated_at": null
+          },
+          "workspace_id": "alpha"
+        },
+        "successor_release_id": "5c10c824-3aba-48ae-9bb6-0fb00ed1a934"
+      },
+      "status": "pass"
+    },
+    {
+      "case": "external_promotion_compensation",
+      "duration_ms": 13.234,
+      "observation": {
+        "active_after_failure": {
+          "activated_at": "2026-08-20T02:35:42.861765+00:00",
+          "code_revision": "trace-v2-cortex",
+          "components": [
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "activation_priors",
+              "component_revision": "activation_priors-0",
+              "created_at": "2026-08-20T02:35:42.860728+00:00",
+              "input_checksum": "a272cfd9e20ce4f4f0fd24f66284ea304a1b1cf4ee8370a0255063a2ca686b32",
+              "metadata": {},
+              "release_id": "838c32ac-10b4-4ce4-af0f-d5b49ba91dff",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "affinity",
+              "component_revision": "affinity-0",
+              "created_at": "2026-08-20T02:35:42.860728+00:00",
+              "input_checksum": "01d9e6e74c1f441e8721714906fe092bd425f362c20e12ecb1729492de5a31b8",
+              "metadata": {},
+              "release_id": "838c32ac-10b4-4ce4-af0f-d5b49ba91dff",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "dense_index",
+              "component_revision": "dense_index-0",
+              "created_at": "2026-08-20T02:35:42.860728+00:00",
+              "input_checksum": "054c260ca8260fe38faed69ebd9a3a7ecbc15b693c11aea62a8108a11dff270d",
+              "metadata": {},
+              "release_id": "838c32ac-10b4-4ce4-af0f-d5b49ba91dff",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "hierarchy",
+              "component_revision": "hierarchy-0",
+              "created_at": "2026-08-20T02:35:42.860728+00:00",
+              "input_checksum": "f6672fa33ce8ce5709b25f2b1b8c8eb6110a6893c0511f3d301842e021189003",
+              "metadata": {},
+              "release_id": "838c32ac-10b4-4ce4-af0f-d5b49ba91dff",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "lexical_index",
+              "component_revision": "lexical_index-0",
+              "created_at": "2026-08-20T02:35:42.860728+00:00",
+              "input_checksum": "f6e491ce7c2a341a68dd27df72d4bea1b96b465fca81925d7cd6297de081d6d0",
+              "metadata": {},
+              "release_id": "838c32ac-10b4-4ce4-af0f-d5b49ba91dff",
+              "source_watermark": 0,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            }
+          ],
+          "created_at": "2026-08-20T02:35:42.860728+00:00",
+          "failure_detail": null,
+          "parent_release_id": null,
+          "policy_revision": "v0",
+          "policy_snapshot_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "release_id": "838c32ac-10b4-4ce4-af0f-d5b49ba91dff",
+          "retired_at": null,
+          "spine_event_watermark": 0,
+          "status": "active",
+          "superseded_at": null,
+          "validation_receipt": {
+            "evaluator_manifest_id": null,
+            "parity": {},
+            "passed": true,
+            "policy": {},
+            "provenance": {},
+            "structural": {},
+            "validated_at": null
+          },
+          "workspace_id": "alpha"
+        },
+        "error": "external index alias promotion failed: alias promotion unavailable for alpha/1526cd9d-a4f6-4250-86bc-9794db5dac1e",
+        "failed_candidate_id": "1526cd9d-a4f6-4250-86bc-9794db5dac1e",
+        "failed_release": {
+          "activated_at": null,
+          "code_revision": "trace-v2-cortex",
+          "components": [
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "activation_priors",
+              "component_revision": "activation_priors-3",
+              "created_at": "2026-08-20T02:35:42.863364+00:00",
+              "input_checksum": "17033af8e3ba1effcf421e2e60e4204c6ba5e9d3af18635b02c805e593b7b3fa",
+              "metadata": {},
+              "release_id": "1526cd9d-a4f6-4250-86bc-9794db5dac1e",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "affinity",
+              "component_revision": "affinity-3",
+              "created_at": "2026-08-20T02:35:42.863364+00:00",
+              "input_checksum": "4188cc49e5cc21332e9de32e615d8625d6792f67a0153b7f49e19db99faadda6",
+              "metadata": {},
+              "release_id": "1526cd9d-a4f6-4250-86bc-9794db5dac1e",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "dense_index",
+              "component_revision": "dense_index-3",
+              "created_at": "2026-08-20T02:35:42.863364+00:00",
+              "input_checksum": "bca64cd5014b1f1b1ae0485decec78a2c05491c036a8d4bd3801446ae82c340e",
+              "metadata": {},
+              "release_id": "1526cd9d-a4f6-4250-86bc-9794db5dac1e",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "hierarchy",
+              "component_revision": "hierarchy-3",
+              "created_at": "2026-08-20T02:35:42.863364+00:00",
+              "input_checksum": "7a8ba90f5c27fa07ec22a12d7fbbb26729705e1e9b0eb0dd81fab2aab03d8c81",
+              "metadata": {},
+              "release_id": "1526cd9d-a4f6-4250-86bc-9794db5dac1e",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            },
+            {
+              "carried_forward_from_release_id": null,
+              "component_kind": "lexical_index",
+              "component_revision": "lexical_index-3",
+              "created_at": "2026-08-20T02:35:42.863364+00:00",
+              "input_checksum": "6080d8e1e93e7b521827ab15df0dee5e4355b8082da3a6be10dd121cd129a7c1",
+              "metadata": {},
+              "release_id": "1526cd9d-a4f6-4250-86bc-9794db5dac1e",
+              "source_watermark": 3,
+              "validation_status": "validated",
+              "workspace_id": "alpha"
+            }
+          ],
+          "created_at": "2026-08-20T02:35:42.863364+00:00",
+          "failure_detail": "External index alias promotion failed: alias promotion unavailable for alpha/1526cd9d-a4f6-4250-86bc-9794db5dac1e",
+          "parent_release_id": "838c32ac-10b4-4ce4-af0f-d5b49ba91dff",
+          "policy_revision": "cognitive-policy-v1",
+          "policy_snapshot_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "release_id": "1526cd9d-a4f6-4250-86bc-9794db5dac1e",
+          "retired_at": null,
+          "spine_event_watermark": 3,
+          "status": "failed",
+          "superseded_at": null,
+          "validation_receipt": {
+            "evaluator_manifest_id": null,
+            "parity": {},
+            "passed": true,
+            "policy": {},
+            "provenance": {},
+            "structural": {},
+            "validated_at": null
+          },
+          "workspace_id": "alpha"
+        },
+        "predecessor_release_id": "838c32ac-10b4-4ce4-af0f-d5b49ba91dff"
+      },
+      "status": "pass"
+    },
+    {
+      "case": "source_watermark_and_read_identity",
+      "duration_ms": 40.189,
+      "observation": {
+        "active_release_id": "dd0b05e8-314d-4068-ba2a-34afc35f7398",
+        "bundle_diagnostics": {
+          "activation": {
+            "applied": false,
+            "reason": "profile_disabled"
+          },
+          "active_cortex_release": {
+            "code_revision": "trace-v2-cortex",
+            "policy_revision": "v0",
+            "release_id": "dd0b05e8-314d-4068-ba2a-34afc35f7398",
+            "spine_event_watermark": 9
+          },
+          "active_cortex_release_id": "dd0b05e8-314d-4068-ba2a-34afc35f7398",
+          "colbert_enabled": false,
+          "colbert_provider": null,
+          "deep_applied": false,
+          "deep_degraded": false,
+          "deep_navigator": null,
+          "deep_trace": null,
+          "dense_index": null,
+          "dense_provider": "hashing-dense-v1",
+          "graph_applied": false,
+          "hierarchy_applied": false,
+          "index_degradation": {
+            "hot_candidates": 0,
+            "provider_failures": {}
+          },
+          "lexical_index": null,
+          "lexical_provider": "bm25-okapi-v1",
+          "reranker_provider": null,
+          "stage_counts": {
+            "atoms": 1,
+            "dense": 1,
+            "fused": 1,
+            "hierarchy": 0,
+            "lexical": 1
+          }
+        },
+        "ordinary_read_diagnostics": {
+          "activation": {
+            "applied": false,
+            "reason": "profile_disabled"
+          },
+          "active_cortex_release": {
+            "code_revision": "trace-v2-cortex",
+            "policy_revision": "v0",
+            "release_id": "dd0b05e8-314d-4068-ba2a-34afc35f7398",
+            "spine_event_watermark": 9
+          },
+          "active_cortex_release_id": "dd0b05e8-314d-4068-ba2a-34afc35f7398",
+          "colbert_enabled": false,
+          "colbert_provider": null,
+          "deep_applied": false,
+          "deep_degraded": false,
+          "deep_navigator": null,
+          "deep_trace": null,
+          "dense_index": null,
+          "dense_provider": "hashing-dense-v1",
+          "graph_applied": false,
+          "hierarchy_applied": false,
+          "index_degradation": {
+            "hot_candidates": 0,
+            "provider_failures": {}
+          },
+          "lexical_index": null,
+          "lexical_provider": "bm25-okapi-v1",
+          "reranker_provider": null,
+          "stage_counts": {
+            "atoms": 1,
+            "dense": 1,
+            "fused": 1,
+            "hierarchy": 0,
+            "lexical": 1
+          }
+        },
+        "release_watermark": 9,
+        "source_hash": "8dbd739f8ff40bb031a14d702f2106551d01ba39d9292d56412d8cdd61f37b83",
+        "watermark_after_source_arrival": 22
+      },
+      "status": "pass"
+    }
+  ],
+  "claim_level": "C1",
+  "summary": {
+    "failed": 0,
+    "passed": 6,
+    "total": 6
+  },
+  "verifier_id": "v1b-trace-release-verifier-20260819"
+}

@@ -1,0 +1,21 @@
+{
+  "runner_script": "scripts/run_100k_scale_gate.py",
+  "script_sha256": "computed_on_freeze",
+  "capabilities": [
+    "streaming_corpus_ingestion",
+    "kernel_proc_rss_telemetry",
+    "gpu_vram_telemetry",
+    "bounded_graph_ppr_evaluation",
+    "multi_lane_retrieval_evaluation",
+    "spine_event_replay_recovery_drill",
+    "hash_covered_dossier_generation"
+  ],
+  "fail_closed_triggers": [
+    "missing_corpus_data_root",
+    "schema_mismatch",
+    "unbounded_graph_degree",
+    "memory_cap_breach",
+    "incomplete_recovery_parity"
+  ],
+  "status": "APPROVED"
+}

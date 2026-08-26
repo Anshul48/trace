@@ -1,0 +1,9 @@
+{
+  "packet_id": "ltr-01-decision-brief-p005b-20260826",
+  "contract_version": "1.0",
+  "created_at_utc": "2026-08-26T06:13:00Z",
+  "role": "Lead Architect / S6 Evaluator",
+  "preceding_packet_id": "ltr-00-reconciliation-20260826",
+  "governing_document": "docs/program/PROPOSED_P005B_LARGE_TOKEN_RETRIEVAL_PLAN.md",
+  "status": "submitted"
+}

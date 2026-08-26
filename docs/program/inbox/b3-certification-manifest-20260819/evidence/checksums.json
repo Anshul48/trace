@@ -1,0 +1,14 @@
+{
+  "evidence/b3_certification_manifest.json": {
+    "sha256": "36e8138a10911702b8ee7414d42c415007fd063136bd1ccfb1415c06758cdfde",
+    "size_bytes": 6404
+  },
+  "evidence/b3_certification_manifest.yaml": {
+    "sha256": "d3ec2eda955e2da9810407eb53e2e463cc5cbc5b43c88ffe963e7fe67bad0959",
+    "size_bytes": 5483
+  },
+  "evidence/subagent-verification-receipts.json": {
+    "sha256": "d79ce6ac87802516cacbe5f18df5814d5bc1ac28958ce0be6a58fc1500d0d849",
+    "size_bytes": 1400
+  }
+}

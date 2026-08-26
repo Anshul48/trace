@@ -1,0 +1,56 @@
+{
+  "contract_version": "1.0",
+  "recorded_at_utc": "2026-08-19T07:00:00Z",
+  "task_id": "d0-coordinator-20260819",
+  "session": "S0",
+  "components": {
+    "trace_lite": {
+      "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "branch": "main",
+      "commit": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+      "status": "clean_tracked",
+      "untracked_paths_protected": [
+        "benchmarks/protocols/",
+        "benchmarks/registry/",
+        "docs/program/"
+      ],
+      "clean_base_for_l1": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1"
+    },
+    "trace": {
+      "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "branch": "main",
+      "commit": "c855bb06532b3b52b25f0bea969d2677e5049065",
+      "status": "dirty_user_snapshot",
+      "tracked_modified_count": 26,
+      "untracked_surfaces_protected": [
+        "docs/program/",
+        "migrations/004_cortex_projection_control_plane.sql",
+        "src/trace/v2/__main__.py",
+        "src/trace/v2/cortex.py",
+        "tests/test_v2_cortex_controls.py"
+      ],
+      "immutable_base_action": "T0 snapshot required before TR1 mutation"
+    },
+    "trace_bench": {
+      "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+      "status": "unversioned_source_tree",
+      "file_count": 41,
+      "content_manifest_sha256": "739d7f42fb40c9234b716f5a30aa9e0acd224c4e486e24f95e4afa8f1ca36f1e",
+      "target_action": "B0 Git bootstrap in-place per P-007"
+    },
+    "raw_data_staging": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data",
+      "status": "external_non_git_staging",
+      "free_space_gb": 370.14,
+      "admitted_portfolio": [
+        "beir-scifact",
+        "beir-nfcorpus",
+        "beir-fiqa",
+        "bright-coding-math",
+        "multihop-rag",
+        "musique",
+        "bigann-sift1m-ops-only"
+      ]
+    }
+  }
+}

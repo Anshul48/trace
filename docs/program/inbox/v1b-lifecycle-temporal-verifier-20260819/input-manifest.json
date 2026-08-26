@@ -1,0 +1,114 @@
+{
+  "manifest_version": "1.0",
+  "manifest_id": "v1b-s5-input-20260820",
+  "generated_at_utc": "2026-08-20T02:19:18.9324392Z",
+  "claim_level": "C0",
+  "session": "S5",
+  "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+  "prompt": {
+    "path": "docs/program/launch/implementation-wave/next-wave-session-prompts/03_S5_INITIAL_V1B.md",
+    "sha256": "1695917f35307ce4b6dd240cd53604e914c3e0b3902bfd4daf9adb6c5f5010a6"
+  },
+  "control_documents": [
+    {
+      "path": "docs/program/launch/implementation-wave/README.md",
+      "sha256": "dfcd67950b1252700c3bf878fcca7d5cc0f2652ae02a916c62b051b0c0a82286"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/00_GLOBAL_CONTEXT.md",
+      "sha256": "0b1d8863b884dabec0d156c76d0e8764cc9c6b2c03ce45784abb64b116050f3b"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/01_SESSION_PROTOCOL.md",
+      "sha256": "3e06526e81ae77037e4fb9d896c3320fee77d813d19bf1df20895ed6c807610e"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/02_WAVE_AND_GATE_MATRIX.md",
+      "sha256": "4f588ae50085b4199da465babd98b5dad0785f07e34e9597038304290047eefc"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/03_HANDOFF_TEMPLATE.md",
+      "sha256": "c890c3bad8251212ee9d846f254bf3e2aee770a6af57066277c47c606df31458"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/04_SUBAGENT_RULES.md",
+      "sha256": "65e4cdd1627d83dc6300c4a24af91e5a7341ead125be51e531ce298b804c5551"
+    },
+    {
+      "path": "docs/program/FOUNDATION_STATUS.md",
+      "sha256": "1fb2de1f822ed72a3bee7bdbe0c24eff165a09f264e546eb0e44f88d710a390f"
+    },
+    {
+      "path": "docs/program/CONTROL_PLANE_LOCK.json",
+      "sha256": "2e3f86bae1f34848ab8f0fc32bde0d7f80cbbaf59834c3c63515dafae86bdf50"
+    }
+  ],
+  "named_inputs": [
+    {
+      "path": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/packet.md",
+      "sha256": "2d30107a3782717a952972d7816bf42baf320a6bbd0de74cd5f7ebd65f7e7eae"
+    },
+    {
+      "path": "docs/program/inbox/l1-tl1-candidate-active-lifecycle/handoff.md",
+      "sha256": "1898e3699af8f6ef18937f75821b849eb707f8c0ed419cda510be1978d400841"
+    },
+    {
+      "path": "docs/program/inbox/tr1-unified-cortex-release-20260819/handoff.md",
+      "sha256": "26aa4f01c4665d28ddc00066a27fa7ad23ad28f55444ff0274c0fff762200481"
+    },
+    {
+      "path": "docs/program/inbox/s0-r1-reconciliation-20260819/handoff.md",
+      "sha256": "08a3e4a0b4e9a41e89efe10803899253571e2970eb2899b6a026cd9eec116845"
+    },
+    {
+      "path": "docs/program/inbox/s0-r1-reconciliation-20260819/evidence/source-identity-manifest.json",
+      "sha256": "144f7efa60ff242302b57c9bcee8e2791a4cb62394d1b87eabcc8b030cda02a6"
+    }
+  ],
+  "sub_gates": {
+    "v1b_tl_lifecycle": {
+      "verifier_id": "v1b-tl-lifecycle-verifier-20260819",
+      "lease_id": "lease-s5-v1b-tl-lifecycle-20260819",
+      "implementation_root": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1",
+      "implementation_commit": "7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+      "implementation_branch": "feat/l1-candidate-active-lifecycle",
+      "implementation_status": "clean",
+      "dependency_lock_sha256": "d9ee9d52ad540b6f45a158b04447f43464af4fe992ff31db364fe181f5cffacf",
+      "lease_expires_utc": "2026-08-20T12:40:55.1070524Z",
+      "verifier_root": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-tl-lifecycle-20260819",
+      "scratch_root": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-tl-lifecycle-20260819"
+    },
+    "v1b_trace_release": {
+      "verifier_id": "v1b-trace-release-verifier-20260819",
+      "lease_id": "lease-s5-v1b-trace-release-20260819",
+      "implementation_root": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr1",
+      "implementation_commit": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+      "implementation_branch": "feat/tr1-unified-cortex-release",
+      "implementation_status": "clean",
+      "dependency_lock_sha256": "811c384a590968df7e73f74e4bfc01d4d995834db8443921ed20261d3d0aefc9",
+      "lease_expires_utc": "2026-08-20T12:40:55.1070524Z",
+      "verifier_root": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-trace-release-20260819",
+      "scratch_root": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-trace-release-20260819"
+    }
+  },
+  "protected_roots": {
+    "trace_user_checkout": {
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "head": "c855bb06532b3b52b25f0bea969d2677e5049065",
+      "status": "protected_dirty_user_snapshot"
+    },
+    "trace_lite_user_checkout": {
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "head": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+      "status": "protected_user_checkout"
+    }
+  },
+  "environment": {
+    "utc_capture": "2026-08-20T02:19:18.9324392Z",
+    "python": "3.12.0",
+    "uv": "0.12.2 (46ead6098 2026-08-05 x86_64-pc-windows-msvc)",
+    "network": "forbidden by both leases",
+    "provider": "not used",
+    "database": "fresh isolated local stores only; PostgreSQL/RLS and external indexes require separate evidence"
+  }
+}

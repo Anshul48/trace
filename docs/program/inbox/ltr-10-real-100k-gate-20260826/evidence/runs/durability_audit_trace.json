@@ -1,0 +1,80 @@
+{
+  "total_atoms_in_db": 202334,
+  "total_documents_in_db": 100000,
+  "sampled_nodes_count": 1000,
+  "anchor_recovery_rate": 1.0,
+  "hash_drift_rate": 0.0,
+  "repeat_erasure_delta_writes": 0,
+  "sample_proofs": [
+    {
+      "node_id": "node_d2b:musique:segment:8ad09ce3730c639a877bba773fe7bab121899316ac491f7e6a7bddd0f48226c2_1",
+      "doc_id": "d2b:musique:segment:8ad09ce3730c639a877bba773fe7bab121899316ac491f7e6a7bddd0f48226c2",
+      "span_start": 15,
+      "span_end": 386,
+      "verified_match": true
+    },
+    {
+      "node_id": "node_d2b:musique:segment:b6b64fb2bade33c4f96569e1c92bcd701cdfb7d1fdb06fecd6748cae34f0813d_1",
+      "doc_id": "d2b:musique:segment:b6b64fb2bade33c4f96569e1c92bcd701cdfb7d1fdb06fecd6748cae34f0813d",
+      "span_start": 14,
+      "span_end": 452,
+      "verified_match": true
+    },
+    {
+      "node_id": "node_d2b:musique:segment:84c673c82f15c59adfab5709582b30904075471a3024956c5360f1831361f0c1_1",
+      "doc_id": "d2b:musique:segment:84c673c82f15c59adfab5709582b30904075471a3024956c5360f1831361f0c1",
+      "span_start": 29,
+      "span_end": 654,
+      "verified_match": true
+    },
+    {
+      "node_id": "node_d2b:musique:segment:a55c55ab84976361398ca6623b47960bdf92eb1de5523a3366e7afb8f6b8b879_0",
+      "doc_id": "d2b:musique:segment:a55c55ab84976361398ca6623b47960bdf92eb1de5523a3366e7afb8f6b8b879",
+      "span_start": 0,
+      "span_end": 9,
+      "verified_match": true
+    },
+    {
+      "node_id": "node_d2b:musique:segment:18de2e61f8a0283253abb3c0ba765b19b2248fb31303e71d3351ab1dc4171ed7_0",
+      "doc_id": "d2b:musique:segment:18de2e61f8a0283253abb3c0ba765b19b2248fb31303e71d3351ab1dc4171ed7",
+      "span_start": 0,
+      "span_end": 13,
+      "verified_match": true
+    },
+    {
+      "node_id": "node_d2b:musique:segment:84f418f843d40040edd82a2c1cfb9b3ae2de27c5367c9f63744f3c531b5e3f66_1",
+      "doc_id": "d2b:musique:segment:84f418f843d40040edd82a2c1cfb9b3ae2de27c5367c9f63744f3c531b5e3f66",
+      "span_start": 47,
+      "span_end": 693,
+      "verified_match": true
+    },
+    {
+      "node_id": "node_d2b:musique:segment:2307e13f18376edaa73db8449a371ccfdee6d376e711e9d9d9436f1372798ca8_1",
+      "doc_id": "d2b:musique:segment:2307e13f18376edaa73db8449a371ccfdee6d376e711e9d9d9436f1372798ca8",
+      "span_start": 17,
+      "span_end": 144,
+      "verified_match": true
+    },
+    {
+      "node_id": "node_d2b:musique:segment:c4044d361bf037150df600ddee594531c6e1a7431962bbc2f3f7fd111e8b934a_0",
+      "doc_id": "d2b:musique:segment:c4044d361bf037150df600ddee594531c6e1a7431962bbc2f3f7fd111e8b934a",
+      "span_start": 0,
+      "span_end": 38,
+      "verified_match": true
+    },
+    {
+      "node_id": "node_d2b:musique:segment:90d1f94824f43eb33a4e616da786c9b8dd1035e925cb21db2420b7d949cceda6_1",
+      "doc_id": "d2b:musique:segment:90d1f94824f43eb33a4e616da786c9b8dd1035e925cb21db2420b7d949cceda6",
+      "span_start": 44,
+      "span_end": 422,
+      "verified_match": true
+    },
+    {
+      "node_id": "node_d2b:musique:segment:b51e9005cb338e45366af53a4d49fcd7c200e87d81023ba8bae51e2cdcff3515_0",
+      "doc_id": "d2b:musique:segment:b51e9005cb338e45366af53a4d49fcd7c200e87d81023ba8bae51e2cdcff3515",
+      "span_start": 0,
+      "span_end": 13,
+      "verified_match": true
+    }
+  ]
+}

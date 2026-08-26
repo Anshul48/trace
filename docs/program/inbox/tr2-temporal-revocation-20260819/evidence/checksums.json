@@ -1,0 +1,33 @@
+{
+  "checksum_version": "1.0",
+  "packet_id": "tr2-temporal-revocation-20260819",
+  "implementation": {
+    "base_commit": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+    "head_commit": "0a91b278a414756da260b15c5cb9daddb5e9aac2",
+    "head_tree": "0a492ca4c3f2310a123577cfa96cc72bdc2c0257"
+  },
+  "contract_inputs": {
+    "decision_sha256": "d4ea0969d4af2e698f5838de0598e17aa40a66a6d1712c0b47496811b527333c",
+    "packet_sha256": "5d53abc5a90abf8716e3a492a0c803c608e70d6ae23f7f342e6994e9ad1ce4bb",
+    "tr1_handoff_sha256": "26aa4f01c4665d28ddc00066a27fa7ad23ad28f55444ff0274c0fff762200481",
+    "packet_input_manifest_sha256": "5b4f489d88b8fa696d9bc1f40a98e4c948c461743050a4c7d76ce8ca9667a692",
+    "base_source_manifest_sha256": "a8e9edf50b1c1567c307ec8261e5b6f7d0711f064488fa63831ecb12e4fed7e2",
+    "dependency_lock_sha256": "8e17ba533ea59c3695105925835fe87b38c7ad088d59e7d28812f6093f81a7d9"
+  },
+  "implementation_files": {
+    "migrations/006_temporal_revocation.sql": "018de7e501009799ba249679dc6c3e027a230efd01fafe17de2bb56d01f7270c",
+    "tests/test_v2_temporal_revocation.py": "0a2c72d7dd65e02cd3c4fbf41c7b1d8277c909a866cdacb7355d6dbd74efd56e"
+  },
+  "packet_files": {
+    "handoff.md": "80ccfbdee094f2c006eadd72e8dd0096e0195e51a6b96c0159b0c760ada4c0c2",
+    "commands.md": "2ae0e5b6d40056b4fbe111fba323d668f922d15d909a924b3f9711953545fa4a",
+    "worktree-lease.json": "eb28b76cd05154cc9712681e3bda5c218b05bc0472fb506537a1391f4116ae36",
+    "evidence/sqlite-evidence-sample.json": "d5e4e75664eaf27c71d576730a8c90fa8c6fd2f67b8f51a9fc5c0237b507a43e",
+    "evidence/v1b-input-manifest.json": "65c8ac4df07244a8ba0ad25dabeeb47054d0181d9fce3e861cf201287fe4eb79"
+  },
+  "notes": [
+    "The handoff and V1b manifest hashes are companion values; this file is not self-hashed.",
+    "Decision and prior handoff hashes were recomputed from the protected packet checkout.",
+    "PostgreSQL/RLS/external-index capability was unavailable and is recorded as blocked, not passed."
+  ]
+}

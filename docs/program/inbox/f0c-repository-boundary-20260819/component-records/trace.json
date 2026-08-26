@@ -1,0 +1,152 @@
+{
+  "contract_version": "1.0",
+  "record_id": "trace-f0c-20260819",
+  "captured_at_utc": "2026-08-19T04:37:30Z",
+  "captured_by": "coordinator",
+  "component": "trace",
+  "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+  "identity": {
+    "kind": "git",
+    "remote_or_archive": "https://github.com/Anshul48/trace.git",
+    "branch": "main",
+    "commit": "c855bb06532b3b52b25f0bea969d2677e5049065",
+    "tag": null,
+    "content_manifest_sha256": null,
+    "identity_is_certifying": false
+  },
+  "working_state": {
+    "clean": false,
+    "tracked_modified_count": 26,
+    "tracked_diff_sha256": "dbc213b9cd609f35562891f789dbc1daaef762ddf2f81030847529be756089ae",
+    "untracked_path_list_sha256": "3b406fa08deb2847770656ffdf2e3908a079547250ac6af90b21d98cd709afa5",
+    "classified_paths": [
+      {
+        "path": "docs/program/",
+        "state": "untracked",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Canonical Program Control Plane pack."
+      },
+      {
+        "path": "migrations/004_cortex_projection_control_plane.sql",
+        "state": "untracked",
+        "classification": "migration",
+        "protected": true,
+        "notes": "Proposed V2 Cortex control plane migration; deployment state unknown, protected."
+      },
+      {
+        "path": "src/trace/v2/__main__.py",
+        "state": "untracked",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "V2 entrypoint implementation."
+      },
+      {
+        "path": "src/trace/v2/cortex.py",
+        "state": "untracked",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "V2 cortex logic snapshot."
+      },
+      {
+        "path": "tests/test_v2_cortex_controls.py",
+        "state": "untracked",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "V2 cortex controls test suite."
+      },
+      {
+        "path": "src/trace/v2/store.py",
+        "state": "tracked_modified",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "Extensive V2 store implementation (+1358 lines)."
+      },
+      {
+        "path": "src/trace/v2/service.py",
+        "state": "tracked_modified",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "Extensive V2 service implementation (+1605 lines)."
+      },
+      {
+        "path": "src/trace/v2/production.py",
+        "state": "tracked_modified",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "V2 production controls (+1072 lines)."
+      },
+      {
+        "path": "src/trace/v2/retrieval.py",
+        "state": "tracked_modified",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "V2 retrieval logic (+456 lines)."
+      },
+      {
+        "path": "src/trace/v2/models.py",
+        "state": "tracked_modified",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "V2 data models (+127 lines)."
+      },
+      {
+        "path": "uv.lock",
+        "state": "tracked_modified",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "Dependency lockfile (+1355 lines)."
+      }
+    ]
+  },
+  "source_inventory": {
+    "include_rules": ["src/", "tests/", "migrations/", "benchmarks/", "docs/", "pyproject.toml"],
+    "exclude_rules": [
+      ".pytest_cache/",
+      "__pycache__/",
+      "*.egg-info/",
+      "results/",
+      ".coverage"
+    ],
+    "inventory_sha256": null
+  },
+  "integration_boundaries": [
+    {
+      "consumer": "trace-bench",
+      "producer": "trace",
+      "path_or_import": "src/trace/v2",
+      "pin_status": "unpinned",
+      "notes": "trace-bench references Trace adapters; require P-007/P-008."
+    },
+    {
+      "consumer": "trace",
+      "producer": "trace",
+      "path_or_import": "src/trace/v2/cortex.py",
+      "pin_status": "untracked_snapshot",
+      "notes": "Proposed Cortex controls; T1 audits release boundary; TR1 implements unified release after P-003."
+    }
+  ],
+  "safe_mutation_base": {
+    "available": false,
+    "commit": null,
+    "reason": "Trace working tree is a dirty user snapshot (26 tracked modified files, 5 untracked surfaces). Direct mutation is prohibited. Clean base commit c855bb0 exists in Git, but any mutable task requires human acceptance of base and an isolated worktree lease."
+  },
+  "packet_disposition": [
+    {
+      "packet_id": "T1",
+      "status": "ready",
+      "reason": "Read-only audit of current Cortex Release state and P-003/P-004 migration alternatives."
+    },
+    {
+      "packet_id": "TR1",
+      "status": "blocked",
+      "reason": "Blocked on T1 audit handoff and human acceptance of P-003 (unified Cortex Release schema)."
+    },
+    {
+      "packet_id": "TR2",
+      "status": "blocked",
+      "reason": "Blocked on TR1 completion and human acceptance of P-004 (temporal/revocation semantics)."
+    }
+  ],
+  "claim_boundary": "Observed boundary record only; no behavior or reproducibility certification."
+}

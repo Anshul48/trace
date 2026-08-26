@@ -1,0 +1,38 @@
+{
+  "packet_id": "b3-certification-manifest-20260819",
+  "session": "Session 10",
+  "role": "S6 Evaluation & Promotion Owner",
+  "created_at_utc": "2026-08-26T04:37:00Z",
+  "inputs": {
+    "decisions_log": {
+      "path": "docs/program/06_DECISION_LOG.md",
+      "decisions_bound": [
+        "DEC-P-001",
+        "DEC-P-002",
+        "DEC-P-003",
+        "DEC-P-004",
+        "DEC-P-005"
+      ]
+    },
+    "p005_decision_brief": {
+      "path": "docs/program/inbox/s6-baselines-p005-20260825/evidence/p005-decision-brief.md",
+      "sha256": "1eab390eceee8100cb7652222f50e5f534c0f726ad7253d48099d8f058958416"
+    },
+    "runner_v1a_receipt": {
+      "path": "docs/program/inbox/v1a-runner-integrity-20260819/evidence/v1a_acceptance_manifest.json",
+      "runner_commit": "c0ea9fbf37bc50c88336f198437be031c18d6f64"
+    },
+    "temporal_v1b_receipt": {
+      "path": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence/r5/v1b_r5_reviewer_acceptance_manifest.json",
+      "candidate_commit": "f7bd96e9c5e0f9326b53a074024e7ace889f6e36"
+    },
+    "graph_v1b_receipt": {
+      "path": "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence/r5/adversarial_budget_100k.log",
+      "candidate_commit": "3e7e9f0ee460e3af75f3935343f6d6f2089f9f7c"
+    },
+    "d2b_datasets_normalized": {
+      "path": "docs/program/inbox/s4-d2b-dataset-normalization-20260819/",
+      "admitted_count": 7
+    }
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "contract_version": "1.0",
+  "record_id": "trace-bench-f0c-20260819",
+  "captured_at_utc": "2026-08-19T04:37:30Z",
+  "captured_by": "coordinator",
+  "component": "trace-bench",
+  "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+  "identity": {
+    "kind": "unversioned",
+    "remote_or_archive": null,
+    "branch": null,
+    "commit": null,
+    "tag": null,
+    "content_manifest_sha256": "739d7f42fb40c9234b716f5a30aa9e0acd224c4e486e24f95e4afa8f1ca36f1e",
+    "identity_is_certifying": false
+  },
+  "working_state": {
+    "clean": false,
+    "tracked_modified_count": 0,
+    "tracked_diff_sha256": null,
+    "untracked_path_list_sha256": null,
+    "classified_paths": [
+      {
+        "path": "pyproject.toml",
+        "state": "unversioned_file",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "Package configuration."
+      },
+      {
+        "path": "README.md",
+        "state": "unversioned_file",
+        "classification": "documentation",
+        "protected": true,
+        "notes": "Benchmark suite documentation."
+      },
+      {
+        "path": "src/trace_bench/",
+        "state": "unversioned_tree",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "Benchmark harness, adapters, baselines, generators, metrics, and runner."
+      },
+      {
+        "path": "tests/",
+        "state": "unversioned_tree",
+        "classification": "user_code",
+        "protected": true,
+        "notes": "Harness tests and test fixtures."
+      },
+      {
+        "path": ".pytest_cache/",
+        "state": "unversioned_dir",
+        "classification": "cache",
+        "protected": false,
+        "notes": "Excluded from source identity."
+      },
+      {
+        "path": "src/trace_bench.egg-info/",
+        "state": "unversioned_dir",
+        "classification": "generated",
+        "protected": false,
+        "notes": "Excluded from source identity."
+      }
+    ]
+  },
+  "source_inventory": {
+    "include_rules": [
+      "pyproject.toml",
+      "README.md",
+      "src/trace_bench/**",
+      "tests/**"
+    ],
+    "exclude_rules": [
+      ".pytest_cache/",
+      "__pycache__/",
+      "src/trace_bench.egg-info/",
+      "results/",
+      "data/"
+    ],
+    "inventory_file_count": 41,
+    "inventory_sha256": "739d7f42fb40c9234b716f5a30aa9e0acd224c4e486e24f95e4afa8f1ca36f1e"
+  },
+  "integration_boundaries": [
+    {
+      "consumer": "trace-bench",
+      "producer": "trace-lite",
+      "path_or_import": "src/trace_bench/baselines/trace_retriever.py",
+      "pin_status": "unpinned",
+      "notes": "TraceRetriever adapter dynamically imports Trace-Lite; requires P-007/P-008."
+    },
+    {
+      "consumer": "trace-bench",
+      "producer": "trace-bench",
+      "path_or_import": "src/trace_bench/runner.py",
+      "pin_status": "internal",
+      "notes": "Runner has mock/default/fallback paths; B1 must implement fail-closed certification mode."
+    }
+  ],
+  "safe_mutation_base": {
+    "available": false,
+    "commit": null,
+    "reason": "trace-bench has no Git repository identity. P-007 must decide repository governance vs. content-manifest archive policy before mutable work."
+  },
+  "packet_disposition": [
+    {
+      "packet_id": "F0a",
+      "status": "ready",
+      "reason": "Read-only evaluation audit against current trace-bench files and Trace-Lite benchmark code."
+    },
+    {
+      "packet_id": "B1",
+      "status": "scoped",
+      "reason": "Blocked pending F0a handoff and human acceptance of P-007 and P-008."
+    },
+    {
+      "packet_id": "B2",
+      "status": "blocked",
+      "reason": "Blocked on F0b handoff, source-specific authority, and human acceptance of P-001."
+    },
+    {
+      "packet_id": "B3",
+      "status": "blocked",
+      "reason": "Blocked on B1, B2, and human acceptance of P-005."
+    }
+  ],
+  "claim_boundary": "Observed boundary record only; no behavior or reproducibility certification."
+}

@@ -1,0 +1,36 @@
+{
+  "captured_at_utc": "2026-08-20T02:37:30.7853716Z",
+  "host": {
+    "python_executable": "C:\\Program Files\\Python312\\python.exe",
+    "python": "3.12.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "sqlite": "3.42.0",
+    "numpy": "2.5.0rc1",
+    "pydantic": "2.13.4",
+    "fastapi": "0.136.3",
+    "httpx": "0.28.1",
+    "torch": "2.12.0.dev20260408+cu128",
+    "uv": "0.12.2 (46ead6098 2026-08-05 x86_64-pc-windows-msvc)"
+  },
+  "module_availability": {
+    "pytest": false,
+    "lancedb": false,
+    "pyarrow": true,
+    "psycopg": false,
+    "opensearchpy": false,
+    "qdrant_client": false
+  },
+  "tl_clean_environment": {
+    "command": "uv run --offline --locked --project <TL verifier worktree> --extra dev --extra ui python -c \"import sys; import trace_lite; print(sys.version); print(trace_lite.__file__)\"",
+    "result": "blocked",
+    "detail": "uv could not provision torch==2.13.0 because the wheel was not cached and network connectivity is forbidden by the lease"
+  },
+  "execution_boundary": {
+    "network": false,
+    "provider_calls": false,
+    "data_downloads": false,
+    "postgresql_or_rls": false,
+    "external_index_positive_promotion": false,
+    "implementation_worktree_writes": false
+  }
+}

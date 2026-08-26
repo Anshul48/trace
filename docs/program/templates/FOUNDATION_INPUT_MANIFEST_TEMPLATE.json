@@ -1,0 +1,81 @@
+{
+  "contract_version": "1.0",
+  "manifest_id": "<stable-task-input-id>",
+  "packet_id": "<packet-id>",
+  "state": "draft|prepared|assigned|superseded",
+  "created_at_utc": "<RFC3339 UTC>",
+  "prepared_by": {
+    "role": "<coordinator>",
+    "identity": "<redacted agent or human id>"
+  },
+  "program_control_plane": {
+    "root": "<absolute path or versioned archive>",
+    "content_manifest_sha256": "<sha256 or null until policy exists>",
+    "documents": [
+      {
+        "path": "docs/program/<file>",
+        "sha256": "<sha256>",
+        "role": "binding|reference"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "trace-lite|trace|trace-bench",
+      "root": "<absolute canonical root>",
+      "identity_kind": "git_commit|content_manifest|unversioned",
+      "commit_or_manifest": "<immutable identity or null>",
+      "branch": "<branch or null>",
+      "repository_state_record": "<task-local path>",
+      "allowed_source_paths": ["<exact path>"],
+      "forbidden_source_paths": ["<exact path>"],
+      "dependency_pins": [
+        {
+          "name": "<package/dataset/runtime>",
+          "version_or_digest": "<value>",
+          "purpose": "<why required>"
+        }
+      ]
+    }
+  ],
+  "data_inputs": [
+    {
+      "dataset_record_id": "<P-001 admitted record or null>",
+      "source_url": "<only if authority permits>",
+      "license": "<SPDX or exact license reference>",
+      "content_sha256": "<expected digest>",
+      "staging_path": "<external/non-Git path>",
+      "status": "candidate|admitted|staged|frozen",
+      "fallback_forbidden": true
+    }
+  ],
+  "evaluation": {
+    "mode": "audit|unit|regression|exploratory|certification",
+    "manifest_id": "<evaluation manifest or null>",
+    "threshold_policy_id": "<P-005 decision or null>",
+    "prohibited_conditions": [
+      "mock_provider",
+      "synthetic_substitution",
+      "forced_or_flat_fallback",
+      "swallowed_error",
+      "insecure_tls",
+      "unmapped_evidence"
+    ]
+  },
+  "authority": {
+    "may_edit_product_code": false,
+    "may_edit_program_docs": true,
+    "may_download_data": false,
+    "may_call_provider": false,
+    "may_run_networked_test": false,
+    "may_run_certification": false,
+    "may_create_worktree": false
+  },
+  "verifier": {
+    "packet_id": "<verifier packet>",
+    "independent_worktree_required": true,
+    "acceptance_commands": ["<exact command or read-only check>"]
+  },
+  "known_open_decisions": ["P-001"],
+  "amendment_policy": "Original manifest is immutable after assignment. Add a dated amendment file; do not overwrite."
+}

@@ -1,0 +1,43 @@
+{
+  "record_id": "trace-bench-b1-1-preflight-20260820",
+  "packet_id": "b1-1-benchmark-identity-20260819",
+  "captured_at_utc": "2026-08-20T02:19:30.6469566Z",
+  "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+  "canonical_branch": "main",
+  "canonical_head": "0b01de5e49dcb18d43876b0b6004da58b35b72aa",
+  "canonical_status": "tracked_clean_with_untracked_uv.lock",
+  "canonical_porcelain_v2": ["? uv.lock"],
+  "untracked_files": [
+    {
+      "path": "uv.lock",
+      "sha256": "fd4bbc4107d965f570493afb2a425b0482363b126532d023744e0a7d46745c50",
+      "size_bytes": 265239
+    }
+  ],
+  "assigned_worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-bench-b11-20260819",
+    "branch": "feat/b1-identity-refresh-20260819",
+    "exists_at_preflight": false,
+    "lease_id": "lease-s1-b1-1-benchmark-identity-20260819",
+    "lease_expires_at_utc": "2026-08-20T12:40:55.1070524Z"
+  },
+  "toolchain": {
+    "git": "2.52.0.windows.1",
+    "python": "3.12.0",
+    "uv": "0.12.2 (46ead6098 2026-08-05 x86_64-pc-windows-msvc)",
+    "platform": "Windows"
+  },
+  "source_manifest": {
+    "path": "SOURCE_MANIFEST.json",
+    "sha256": "7603803ffc6537b84e67daa1b8d526a04cd173dc6c081089d947b0a3f93bc075",
+    "declared_file_count": 42,
+    "git_tracked_file_count": 44,
+    "missing_tracked_source": ["tests/test_fail_closed_negative_matrix.py"]
+  },
+  "protected_roots": [
+    "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data"
+  ],
+  "preflight_result": "implementation_not_started_worktree_missing"
+}

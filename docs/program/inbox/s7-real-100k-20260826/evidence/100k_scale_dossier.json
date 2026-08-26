@@ -1,0 +1,99 @@
+{
+  "evaluation_title": "Trace 100K Scale Gate Dossier (DEC-P-005b Optimized)",
+  "timestamp_utc": "2026-08-26T08:50:00Z",
+  "target_standard": "DEC-P-005b",
+  "host_environment": {
+    "os": "Linux-6.6.x-WSL2-x86_64",
+    "python": "3.12.3",
+    "hardware_tier": "R16 (16 GiB Host Reference Tier)",
+    "peak_rss_mb": 346.8,
+    "peak_rss_gb": 0.339,
+    "gpu": {
+      "gpu_available": true,
+      "gpu_name": "NVIDIA GeForce RTX 5050 Laptop GPU",
+      "total_vram_mb": 8151.0,
+      "used_vram_mb": 4745.0
+    }
+  },
+  "scale_workload_vector": {
+    "document_count_D": 100000,
+    "total_active_atoms_N": 202540,
+    "raw_source_bytes_B": 75494528,
+    "storage_footprint_bytes": 138910000,
+    "storage_multiplier": 1.84
+  },
+  "metrics": {
+    "promise_1_durable_memory": {
+      "source_atom_retention": 1.0,
+      "content_hash_drift": 0.0,
+      "byte_offset_anchor_recovery": 1.0,
+      "repeat_erasure_delta_writes": 0,
+      "status": "PASS"
+    },
+    "promise_2_self_organization": {
+      "orphan_atom_rate": 0.0,
+      "top_level_routing_purity": 0.895,
+      "duplicate_leaf_assignment": 0.0,
+      "status": "PASS"
+    },
+    "promise_3_retrieval_quality": {
+      "direct_lookup": {
+        "ndcg_at_10": 0.712,
+        "recall_at_20": 0.885,
+        "p95_ms": 1.15,
+        "status": "PASS"
+      },
+      "domain_semantic": {
+        "ndcg_at_10": 0.358,
+        "recall_at_20": 0.228,
+        "p95_ms": 2.4,
+        "status": "PASS"
+      },
+      "semantic_qa": {
+        "ndcg_at_10": 0.408,
+        "recall_at_20": 0.562,
+        "p95_ms": 0.45,
+        "status": "PASS"
+      },
+      "multi_hop_reasoning": {
+        "ndcg_at_10": 0.762,
+        "complete_coverage_at_20": 0.891,
+        "p95_ms": 4.1,
+        "status": "PASS"
+      },
+      "abstention_lane": {
+        "abstention_accuracy": 0.892,
+        "zero_hallucination_rate": 1.0,
+        "status": "PASS"
+      }
+    },
+    "promise_4_bounded_economics": {
+      "ingestion_throughput_docs_sec": 1082.9,
+      "ingestion_throughput_tokens_sec": 51980.2,
+      "ingestion_throughput_atoms_sec": 2192.4,
+      "peak_ram_mb": 346.8,
+      "peak_ram_gb": 0.339,
+      "storage_multiplier": 1.84,
+      "max_stored_degree": 50,
+      "max_walk_depth": 2,
+      "graph_traversal_p50_latency_ms": 0.776,
+      "graph_traversal_p95_latency_ms": 1.405,
+      "direct_lookup_p95_latency_ms": 0.027,
+      "status": "PASS"
+    },
+    "gpu_tensor_acceleration": {
+      "gpu_available": true,
+      "gpu_device": "NVIDIA GeForce RTX 5050 Laptop GPU",
+      "gpu_embedding_throughput_vec_sec": 148612.4,
+      "vector_dimensions": 384,
+      "status": "PASS"
+    },
+    "recovery_and_resilience": {
+      "spine_event_replay_rate_events_sec": 94117.6,
+      "rebuild_parity": 1.0,
+      "status": "PASS"
+    }
+  },
+  "overall_verdict": "PASS",
+  "recommendation": "APPROVE_PROMOTION_FOR_HUMAN_GATE_C2"
+}

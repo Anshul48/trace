@@ -1,0 +1,86 @@
+{
+  "contract_version": "1.0",
+  "manifest_id": "s4-d2b-inputs-20260820-030001z",
+  "packet_id": "s4-d2b-dataset-normalization-20260819",
+  "session": "S4",
+  "status": "completed_candidate",
+  "created_at_utc": "2026-08-20T03:00:01Z",
+  "authority_level": "C3",
+  "source_repository": {
+    "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "branch": "main",
+    "commit": "c855bb06532b3b52b25f0bea969d2677e5049065",
+    "dirty_snapshot_protected": true,
+    "product_code_mutation": false
+  },
+  "b1_1_contract": {
+    "handoff_path": "docs/program/inbox/b1-1-benchmark-identity-20260819/handoff.md",
+    "handoff_sha256": "abbee58abe0c700fa2dcb18c597dffeb721c601d1cf53aea268055dd3d7065b7",
+    "implementation_commit": "dcd32396f6430e6865176f053a3ce57112db6df3",
+    "parent_commit": "0b01de5e49dcb18d43876b0b6004da58b35b72aa",
+    "source_manifest_sha256": "3c3b4a6fd30127654e387401b9f64191a700e21fbc78b732fe8b3fb99c353c55",
+    "source_manifest_file_sha256": "ac5005f80cf66b76ad302ad7070773f1d3bdedc1d04f06cf9ab4ede433efb95a",
+    "dataset_schema_path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-bench-b11-20260819\\src\\trace_bench\\datasets\\schema.py",
+    "dataset_schema_sha256": "a08918851cdeb32badbc2e732608d61763c3befd303291724fa86064218ae831",
+    "independent_v1a_verification": "pending"
+  },
+  "data_inputs": {
+    "raw_root": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data",
+    "raw_metadata_root_sha256_expected": "872102e2edfa41954f80dd55ce592a4bdfa5937ce2c58aec6480aa094504c2df",
+    "portfolio_manifest_path": "docs/program/inbox/b2-authorized-data-staging-20260819/evidence/portfolio-staging-manifest.json",
+    "portfolio_manifest_sha256": "4e594992929c233ec4c95ad0541c09ae54a4e4e0b2d34c48d5ca910dcb0d41c5",
+    "d2a_handoff_sha256": "78ccdae7d022ce8bd2c91a44dd6feb878006f787da2464794e6daf19cb98821f",
+    "datasets": [
+      "beir-scifact",
+      "beir-nfcorpus",
+      "beir-fiqa",
+      "bright",
+      "multihop-rag",
+      "musique",
+      "bigann"
+    ],
+    "raw_file_count_observed": 85,
+    "raw_total_bytes_observed": 1523873466,
+    "downloads_authorized": false,
+    "provider_calls_authorized": false
+  },
+  "mapping_policy": {
+    "native_ids_preserved": true,
+    "namespace_prefix": "d2b",
+    "document_level_evidence_allowed": true,
+    "atom_ids_created": false,
+    "atom_mapping_status": "deferred_until_named_ingest_chunking_artifact",
+    "unsupported_evidence_is_explicit": true,
+    "synthetic_substitution_forbidden": true
+  },
+  "normalizer": {
+    "path": "docs/program/inbox/s4-d2b-dataset-normalization-20260819/evidence/normalize_d2b.py",
+    "sha256": "0000893590ab24bb64a62879047c0a34e1c74d13ba4806cec135b1f08523bd05",
+    "runtime": "CPython 3.12 with pyarrow",
+    "network": false,
+    "verifier_path": "docs/program/inbox/s4-d2b-dataset-normalization-20260819/evidence/verify_d2b.py",
+    "verifier_sha256": "8ae581d5719a85eda0355744c98acbdfc30b7f1b941edcf609db77371588c74a"
+  },
+  "lease": {
+    "lease_path": "docs/program/inbox/s0-r1-reconciliation-20260819/leases/lease-s4-d2b-normalization-20260819.json",
+    "lease_id": "lease-s4-d2b-normalization-20260819",
+    "expires_at_utc": "2026-08-20T12:40:55.1070524Z",
+    "allowed_output_root": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\normalized\\d2b-20260819",
+    "verifier_scratch_root": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\verification\\d2b-20260819",
+    "network": false,
+    "raw_mutation": false
+  },
+  "acceptance": {
+    "required": [
+      "schema validation against B1.1-compatible manifest shape",
+      "native ID uniqueness and split leakage checks",
+      "duplicate and malformed-record accounting",
+      "license and retention review",
+      "raw hash verification",
+      "reversible query-to-judgment-to-source mapping",
+      "round-trip samples for every dataset",
+      "clean-output reproduction with matching hashes"
+    ],
+    "claim_boundary": "S4 does not certify retrieval quality, SOTA, or release thresholds"
+  }
+}

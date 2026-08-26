@@ -1,0 +1,35 @@
+{
+  "session": "Session 10 (S6 B3 Certification Manifest and Foundation Dossier)",
+  "receipts": [
+    {
+      "receipt_id": "rcpt-s10-dossier-consistency-20260826-0435",
+      "conversation_id": "3ce9a2f6-99ec-46dc-bed2-33fb08c64001",
+      "timestamp_utc": "2026-08-26T04:35:00Z",
+      "reviewer_role": "Dossier Consistency Reviewer",
+      "disposition": "PASS",
+      "promises_evaluated": {
+        "promise_1_durable_source_memory": "PASS",
+        "promise_2_self_organization": "PASS",
+        "promise_3_retrieval_quality": "PASS",
+        "promise_4_bounded_economics": "PASS",
+        "promise_5_100k_readiness": "PASS"
+      },
+      "claim_boundaries_verified": true,
+      "zero_mock_synthetic_verified": true
+    },
+    {
+      "receipt_id": "rcpt-s10-manifest-integrity-20260826-0436",
+      "conversation_id": "f0795f8d-57d9-4d8b-9f02-daa1497ff1dc",
+      "timestamp_utc": "2026-08-26T04:36:00Z",
+      "reviewer_role": "Manifest Integrity & Hash Auditor",
+      "disposition": "PASS",
+      "checksums_verified_count": 14,
+      "v1a_runner_commit": "c0ea9fbf37bc50c88336f198437be031c18d6f64",
+      "v1b_tl2_candidate": "3e7e9f0ee460e3af75f3935343f6d6f2089f9f7c",
+      "v1b_tr2_candidate": "f7bd96e9c5e0f9326b53a074024e7ace889f6e36",
+      "ed25519_signature_valid": true,
+      "bigann_sift100k_strictly_isolated": true,
+      "certification_eligibility_false": true
+    }
+  ]
+}

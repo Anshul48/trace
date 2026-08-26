@@ -1,0 +1,23 @@
+{
+  "session": "Session 11 (S0 R2 Foundation Gate Review)",
+  "receipts": [
+    {
+      "receipt_id": "rcpt-s11-dag-claim-boundary-20260826",
+      "conversation_id": "037ae728-86df-40c1-82b7-bb3ccc3e7c95",
+      "timestamp_utc": "2026-08-26T04:38:45Z",
+      "reviewer_role": "DAG & Claim-Boundary Auditor",
+      "disposition": "PASS",
+      "checks_passed": 4,
+      "checks_failed": 0
+    },
+    {
+      "receipt_id": "rcpt-s11-evidence-chain-20260826",
+      "conversation_id": "1c8b474d-e0bc-4b32-b2d1-a6b9459c681e",
+      "timestamp_utc": "2026-08-26T04:40:00Z",
+      "reviewer_role": "Evidence-Chain Auditor",
+      "disposition": "PASS",
+      "checks_passed": 42,
+      "checks_failed": 0
+    }
+  ]
+}

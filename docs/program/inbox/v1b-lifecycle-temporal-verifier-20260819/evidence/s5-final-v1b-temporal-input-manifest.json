@@ -1,0 +1,62 @@
+{
+  "manifest_version": "1.0",
+  "manifest_id": "s5-final-v1b-temporal-input-20260823",
+  "generated_at_utc": "2026-08-23T09:15:39.4781808Z",
+  "session": "S5 / Session 8",
+  "sub_gate": "V1b-Trace-temporal",
+  "verifier_id": "v1b-final-temporal-verifier-20260823",
+  "lease_id": "lease-s5-v1b-final-temporal-20260823",
+  "implementation": {
+    "root": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-final-temporal-20260823",
+    "commit": "0a91b278a414756da260b15c5cb9daddb5e9aac2",
+    "parent": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+    "tree": "0a492ca4c3f2310a123577cfa96cc72bdc2c0257",
+    "source_handoff": "docs/program/inbox/tr2-temporal-revocation-20260819/handoff.md",
+    "source_handoff_sha256": "80ccfbdee094f2c006eadd72e8dd0096e0195e51a6b96c0159b0c760ada4c0c2",
+    "source_v1b_input_manifest": "docs/program/inbox/tr2-temporal-revocation-20260819/evidence/v1b-input-manifest.json",
+    "source_v1b_input_manifest_sha256": "65c8ac4df07244a8ba0ad25dabeeb47054d0181d9fce3e861cf201287fe4eb79",
+    "source_checksums": "docs/program/inbox/tr2-temporal-revocation-20260819/evidence/checksums.json",
+    "source_checksums_sha256": "d418c1a9a65599356ac8eff6df028a36f3bcad272884fb96205c3e878cbfc324",
+    "named_implementation_worktree_observed_head": "0cd7ca8a4d269f0f412527b14718a9ec47e09e9e",
+    "named_implementation_worktree_drift": true
+  },
+  "contract": {
+    "decision_path": "docs/program/inbox/tr2-temporal-revocation-20260819/decision.md",
+    "decision_sha256": "d4ea0969d4af2e698f5838de0598e17aa40a66a6d1712c0b47496811b527333c",
+    "prompt_sha256": "dcddbfe30e77a839ed29eb5550a671f935761aa4dd5027037c60712e3ec5dbb1",
+    "packet_sha256": "5d53abc5a90abf8716e3a492a0c803c608e70d6ae23f7f342e6994e9ad1ce4bb",
+    "tr1_handoff_sha256": "26aa4f01c4665d28ddc00066a27fa7ad23ad28f55444ff0274c0fff762200481"
+  },
+  "governing_documents": {
+    "shared_bootstrap_sha256": "521c09d41efc81c72dfd54e2d509b7cb41d352ecf1d3795977cee0c919590a93",
+    "final_prompt_sha256": "e9b950c9d410abafa28b210a19ac78dfb3ef78742bcefddb680ec2a50dc406ff",
+    "session_protocol_sha256": "3e06526e81ae77037e4fb9d896c3320fee77d813d19bf1df20895ed6c807610e",
+    "gate_matrix_sha256": "4f588ae50085b4199da465babd98b5dad0785f07e34e9597038304290047eefc",
+    "handoff_template_sha256": "c890c3bad8251212ee9d846f254bf3e2aee770a6af57066277c47c606df31458",
+    "subagent_rules_sha256": "65e4cdd1627d83dc6300c4a24af91e5a7341ead125be51e531ce298b804c5551",
+    "foundation_status_sha256": "b645dd6ac8b0741aa0fbacd62c3f7e3d899c0399158c81e03001655e1bcab20a",
+    "control_plane_lock_sha256": "76c16601f720a56ba02163db0ecdcd0449904c991df0204c748db8073efe316e",
+    "decision_log_sha256": "4cdbd8abcfd17fdd6f1038044c78fa5f744c20542d254ac5630f9f2a06e814aa",
+    "risk_register_sha256": "153a2fb6bc17cd4e65d44ab6b77484a6eef6cb58511d2b26156b2e3807c74cda"
+  },
+  "isolated_resources": {
+    "environment": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-envs\\v1b-final-temporal-20260823",
+    "cache": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-final-temporal-20260823\\uv-cache",
+    "scratch": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-final-temporal-20260823",
+    "result_root": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-final-temporal-20260823",
+    "database": "fresh databases below scratch only",
+    "network": false,
+    "providers": false
+  },
+  "matrix": [
+    "system/event-time reconstruction",
+    "valid-time half-open intervals and unknown/partial precision",
+    "revision/supersession and contradiction retention",
+    "revocation/tombstone/redaction and current policy",
+    "privacy erasure and non-content audit metadata",
+    "historical authorization and as_of_event release selection",
+    "missing historical projection fail-closed behavior",
+    "evidence-bundle release/source-revision identity"
+  ],
+  "claim_boundary": "Independent local temporal evidence only; PostgreSQL/RLS, external-index, deployment, raw object-store erasure, historical completeness, certification, and scale remain blocked unless directly exercised."
+}

@@ -1,0 +1,147 @@
+{
+  "contract_version": "1.0",
+  "task_id": "tl2-bounded-association-20260819",
+  "session": "S2",
+  "role": "S2 - Trace-Lite bounded graph implementation",
+  "authority_level": "C1",
+  "started_utc": "2026-08-23T08:09:38.3508241Z",
+  "decision": {
+    "path": "docs/program/inbox/tl2-bounded-association-20260819/decision.md",
+    "sha256": "ed4e8bb93e614169279f568eab5690280168de7b4339dc21f7638cc2acc8a129",
+    "status": "accepted human decision"
+  },
+  "governing_documents": [
+    {
+      "path": "docs/program/launch/implementation-wave/next-wave-session-prompts/00_SHARED_BOOTSTRAP.md",
+      "sha256": "521c09d41efc81c72dfd54e2d509b7cb41d352ecf1d3795977cee0c919590a93"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/next-wave-session-prompts/06_S2_TL2.md",
+      "sha256": "e5901b917014fe1ca9f5fe148066f457594dbbb70795e335a1366f1c87f7d042"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/01_SESSION_PROTOCOL.md",
+      "sha256": "3e06526e81ae77037e4fb9d896c3320fee77d813d19bf1df20895ed6c807610e"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/04_SUBAGENT_RULES.md",
+      "sha256": "65e4cdd1627d83dc6300c4a24af91e5a7341ead125be51e531ce298b804c5551"
+    },
+    {
+      "path": "docs/program/06_DECISION_LOG.md",
+      "sha256": "4cdbd8abcfd17fdd6f1038044c78fa5f744c20542d254ac5630f9f2a06e814aa"
+    },
+    {
+      "path": "docs/program/07_RISK_REGISTER.md",
+      "sha256": "153a2fb6bc17cd4e65d44ab6b77484a6eef6cb58511d2b26156b2e3807c74cda"
+    },
+    {
+      "path": "docs/program/CONTROL_PLANE_LOCK.json",
+      "sha256": "76c16601f720a56ba02163db0ecdcd0449904c991df0204c748db8073efe316e"
+    },
+    {
+      "path": "docs/program/inbox/tl2-bounded-association-20260819/packet.md",
+      "sha256": "1da7b4c07234ad89b2debe48279e520a76b04646a163b87a3894f22435bc21ea"
+    },
+    {
+      "path": "docs/program/inbox/l1-tl1-candidate-active-lifecycle/handoff.md",
+      "sha256": "1898e3699af8f6ef18937f75821b849eb707f8c0ed419cda510be1978d400841"
+    }
+  ],
+  "base": {
+    "repository_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+    "source_commit": "7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+    "source_commit_verified": true,
+    "parent_l1_commit": "7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+    "dependency_files": {
+      "pyproject.toml": "161d81800a677b731e349f8d93bdc070f6763da519fce692c0bfec8d8051af15",
+      "uv.lock": "d9ee9d52ad540b6f45a158b04447f43464af4fe992ff31db364fe181f5cffacf"
+    }
+  },
+  "implementation": {
+    "worktree": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-tl2",
+    "branch": "feat/s2-tl2-bounded-graph",
+    "head_commit": "3e7e9f0ee460e3af75f3935343f6d6f2089f9f7c",
+    "status_after_commit": "clean",
+    "graph_policy_sha256": "5cb3ac89fefa03f6e3c015aa76b14cd4f60457b2a5f82b89cd9d032cd41fc4c1",
+    "default_config_fingerprint": "43b640943d1fb3ce1e7042b53ce6ce6a590a979190a212e4304c69222f5ac1c2",
+    "artifact_sha256": {
+      "src/trace_lite/engines/graph.py": "6a257d2ed835d7678bbe6d691da77a745028152055c250e09af1146c13b662b0",
+      "src/trace_lite/engines/lattice.py": "9a8ecb9f806882df60a81eecfb5c76b3585cf6eefc479e2afe1a1a88429b8419",
+      "src/trace_lite/cortex/forest.py": "2a47ed0587b7430bc9882f4c7826a446e49a70e54ddbe4fc5c2ce097abca6ca0",
+      "src/trace_lite/cortex/manifest.py": "5cf61823d20ba6d98390a34cbbf27e868aabc92d69e0cd5f2b64fb4f4e6aeef4",
+      "src/trace_lite/db.py": "656434f86c164378cac3ec1ec7b87312163c43f8b710c2860e27be816a1669be",
+      "src/trace_lite/engines/raptor.py": "84a24e460f5ccb58a7457394d845650b68322c574bc4726904e081d2dea1ff2a",
+      "src/trace_lite/engines/__init__.py": "bc8e835425d235a3954a99e53f75b185b495721d477b90fc88ff5af80a10da3a",
+      "src/trace_lite/cli.py": "ec1b1d76bdd0479cb806b34404547e5141164d938faa8527d6a9ffbb7dbb1db4",
+      "src/trace_lite/visualizer/serializers.py": "ea41ed57d590dbdc0001a524941c789575f0ea5b06e49ad76669092507f8498d",
+      "tests/test_graph.py": "3e56dd074561adc66f937f69922f8cd6608bccbd6fc067d305afbd2c4ec9ad0f",
+      "tests/test_tl2_bounded_graph.py": "854def119493f028203ead46d623012a87e41cd7551eb68e46666eb0b889f3de",
+      "scripts/measure_tl2_bounded_graph.py": "be57d87ef9b3531bd74c35b49c0ffd3b43c3c0ffbed4431eb56a160ead198e3a"
+    }
+  },
+  "predecessor": {
+    "handoff": "l1-tl1-candidate-active-lifecycle",
+    "head_commit": "7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+    "expired_lease": "lease-s2-l1-20260819",
+    "expired_worktree": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1",
+    "expired_worktree_status": "untracked scripts/profile_tl3_graph_budgets.py; not reused or mutated"
+  },
+  "control_plane": {
+    "snapshot_id": "gate-a-p002-p004-20260823",
+    "snapshot_tree_sha256": "5d14e190b5837d549d238276443bc0afd5e193e30e3bbc0d99b892b7052907c8",
+    "recomputed_file_count": 287,
+    "snapshot_file_count": 277,
+    "recomputed_tree_sha256": "b8f4220173928834f6cdf04dea109f4b0b976926406fc39d0e0579777eeaa72f",
+    "whole_tree_match": false,
+    "drift_boundary": "10 packet-local files created by other lanes after the lock timestamp; core decision/risk/registry hashes match",
+    "worker_action": "record only; do not edit CONTROL_PLANE_LOCK.json or other global control-plane documents"
+  },
+  "scope": {
+    "allowed_product_paths": [
+      "src/trace_lite/engines/graph.py",
+      "src/trace_lite/engines/lattice.py",
+      "src/trace_lite/engines/raptor.py",
+      "src/trace_lite/engines/__init__.py",
+      "src/trace_lite/cortex/forest.py",
+      "src/trace_lite/cortex/manifest.py",
+      "src/trace_lite/db.py",
+      "src/trace_lite/visualizer/serializers.py",
+      "src/trace_lite/cli.py",
+      "tests/test_graph.py",
+      "tests/test_lifecycle.py",
+      "tests/test_tl2_bounded_graph.py",
+      "scripts/measure_tl2_bounded_graph.py"
+    ],
+    "forbidden_product_paths": [
+      "src/trace_lite/spine/",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench"
+    ],
+    "network": false,
+    "providers": false,
+    "raw_data": false,
+    "subagents": "none"
+  },
+  "external_paths": {
+    "scratch_root": "C:\\Users\\anshu\\AppData\\Local\\trace-scratch\\s2-tl2-bounded-graph-20260823",
+    "results_root": "C:\\Users\\anshu\\AppData\\Local\\trace-results\\s2-tl2-bounded-graph-20260823",
+    "test_databases": "under scratch_root only"
+  },
+  "measurement": {
+    "receipt_path": "C:\\Users\\anshu\\AppData\\Local\\Temp\\trace-s2-tl2-100k-receipt-final-v2.json",
+    "receipt_sha256": "c4f99b0ef4fae3a4de8990632fb8ae7fad9d42701df71c012215f83ecf012fb3",
+    "fixture": "deterministic generated 100000-atom high-DF adversarial fixture",
+    "claim_boundary": "C1 engineering evidence only; not public retrieval, SOTA, 100K certification, activation, or promotion"
+  },
+  "packet_evidence": {
+    "handoff_path": "docs/program/inbox/tl2-bounded-association-20260819/evidence/handoff.md",
+    "checksums_path": "docs/program/inbox/tl2-bounded-association-20260819/evidence/checksums.json",
+    "commands_log_path": "docs/program/inbox/tl2-bounded-association-20260819/commands.md",
+    "measurement_receipt_path": "docs/program/inbox/tl2-bounded-association-20260819/evidence/measurement-receipt.md",
+    "verifier_input_manifest": "docs/program/inbox/tl2-bounded-association-20260819/input-manifest.json",
+    "verification_state": "implementation complete; independent V1b graph verification pending"
+  }
+}

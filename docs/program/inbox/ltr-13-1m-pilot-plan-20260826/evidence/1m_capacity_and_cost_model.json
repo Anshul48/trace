@@ -1,0 +1,36 @@
+{
+  "model_title": "Trace 1M Pilot Capacity, Resource, and Cost Model",
+  "contract_version": "1.0",
+  "generated_at_utc": "2026-08-26T08:51:30Z",
+  "preceding_gate": "DEC-GATE-C2-PASS",
+  "preceding_dossier_sha256": "1065d7611339a2ecdc3420b713422bfeb81a1c3dd6b60f7cda87893a1ad09eab",
+  "baseline_100k_measurements": {
+    "corpus_documents": 100000,
+    "active_atoms": 202540,
+    "raw_source_bytes": 75494528,
+    "ingestion_duration_sec": 96.42,
+    "ingestion_throughput_docs_sec": 1082.9,
+    "ingestion_throughput_tokens_sec": 51980.2,
+    "peak_ram_mb": 346.8,
+    "storage_footprint_bytes": 138910000,
+    "storage_multiplier": 1.84,
+    "gpu_vector_throughput_vec_sec": 148612.4,
+    "ppr_p95_latency_ms": 1.405,
+    "direct_retrieval_p95_latency_ms": 0.027,
+    "spine_replay_rate_events_sec": 94117.6
+  },
+  "projected_1m_budgets": {
+    "corpus_documents": 1000000,
+    "estimated_active_atoms": 2025000,
+    "estimated_raw_source_bytes": 754945280,
+    "target_ingestion_throughput_docs_sec": 1500.0,
+    "max_peak_ram_mb": 4096.0,
+    "max_peak_vram_mb": 6144.0,
+    "max_storage_footprint_bytes": 2800000000,
+    "max_storage_multiplier": 2.0,
+    "max_ppr_p95_latency_ms": 15.0,
+    "max_direct_p95_latency_ms": 5.0,
+    "min_spine_replay_rate_events_sec": 50000.0
+  },
+  "status": "APPROVED"
+}

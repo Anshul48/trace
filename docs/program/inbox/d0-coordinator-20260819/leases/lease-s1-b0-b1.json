@@ -1,0 +1,55 @@
+{
+  "contract_version": "1.0",
+  "lease_id": "lease-s1-b0-b1-20260819",
+  "packet_id": "b0-git-bootstrap / b1-e2a-fail-closed-runner",
+  "component": "trace-bench",
+  "created_at_utc": "2026-08-19T07:00:00Z",
+  "expires_at_utc": "2026-08-20T07:00:00Z",
+  "owner": "S1 Benchmark Foundation Owner",
+  "base": {
+    "repository_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+    "content_manifest_sha256": "739d7f42fb40c9234b716f5a30aa9e0acd224c4e486e24f95e4afa8f1ca36f1e",
+    "initial_action": "B0 in-place git init and annotated foundation tag"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+    "branch": "main",
+    "clean_on_creation": true,
+    "exclusive": true
+  },
+  "scope": {
+    "allowed_paths": [
+      "src/trace_bench/",
+      "tests/",
+      "pyproject.toml",
+      ".gitignore",
+      "README.md",
+      "benchmarks/"
+    ],
+    "forbidden_paths": [
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite\\",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace\\",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\"
+    ],
+    "may_run_networked_commands": false,
+    "may_download_data": false,
+    "may_call_provider": false
+  },
+  "prohibited_operations": [
+    "modify Trace or Trace-Lite source code",
+    "download raw dataset archives",
+    "invoke live external LLM providers in B0/B1",
+    "delete existing benchmark caches or results without ignore rules",
+    "alter verification thresholds without human decision"
+  ],
+  "recovery": {
+    "rollback_statement": "If B0/B1 fails, remove .git from trace-bench or checkout initial baseline commit.",
+    "external_side_effects": "none"
+  },
+  "verifier": {
+    "required": true,
+    "separate_worktree": true,
+    "packet_id": "v1a-runner-integrity-20260819"
+  },
+  "release_state": "assigned"
+}

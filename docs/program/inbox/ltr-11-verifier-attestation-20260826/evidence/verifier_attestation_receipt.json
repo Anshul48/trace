@@ -1,0 +1,21 @@
+{
+  "attestation_title": "S5 Independent Verification Attestation for Real 100K Scale Gate",
+  "contract_version": "2.0",
+  "reviewed_at_utc": "2026-08-26T13:58:00Z",
+  "reviewer_role": "S5 Independent Scale Verifier",
+  "verified_input_dossier_sha256": "9941639b9c0b04ae659d48745da333fed42a9dd1367849c7ef4cd2b9c8aad0cb",
+  "audit_disposition": "PASS",
+  "verified_invariants": {
+    "corpus_provenance_validated": true,
+    "source_atom_retention": 1.0,
+    "offset_anchor_recovery": 1.0,
+    "content_hash_drift": 0.0,
+    "repeat_erasure_delta_writes": 0,
+    "max_stored_graph_degree": 49,
+    "graph_traversal_p95_ms": 9.318,
+    "direct_lookup_p95_ms": 0.546,
+    "spine_event_replay_parity": 1.0,
+    "peak_rss_mb": 515.3
+  },
+  "recommendation": "APPROVE_PROMOTION_FOR_HUMAN_GATE_C2"
+}

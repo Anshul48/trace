@@ -1,0 +1,51 @@
+{
+  "preflight_version": "1.0",
+  "packet_id": "b2-authorized-data-staging-20260819",
+  "session": "S4",
+  "role": "Real-Data Steward and Staging Owner",
+  "role_title": "Data Staging Steward",
+  "authority_level": "C3",
+  "lease_id": "lease-s4-d2a-20260819",
+  "evaluated_at_utc": "2026-08-19T07:00:00Z",
+  "admission_authority": {
+    "decision_id": "DEC-P-001",
+    "description": "Human decision DEC-P-001 admitting core real-data portfolio: BEIR (SciFact, NFCorpus, FiQA), BRIGHT (coding/math), MultiHop-RAG, MuSiQue, BigANN/SIFT1M (vector-scale operations lane only)",
+    "synthetic_substitution_allowed": false,
+    "unadmitted_candidate_status": {
+      "RFC_corpora": "deferred",
+      "LongMemEval": "deferred",
+      "HiChunk": "deferred"
+    }
+  },
+  "staging_boundary": {
+    "staging_root": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data",
+    "git_committed_raw_data": false,
+    "external_storage_verified": true
+  },
+  "network_and_tls_settings": {
+    "tls_enforcement": "Strict TLS verification enforced (verify=True)",
+    "strict_certificate_validation": true,
+    "insecure_retry_allowed": false,
+    "plain_http_fallback_allowed": false,
+    "allowed_source_hosts": [
+      "huggingface.co",
+      "raw.githubusercontent.com",
+      "corpus-texmex.irisa.fr",
+      "ftp.irisa.fr",
+      "github.com"
+    ]
+  },
+  "runtime_environment": {
+    "python_version": "3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)]",
+    "platform": "win32",
+    "pyarrow_version": "24.0.0"
+  },
+  "preflight_checks": {
+    "admission_authority_verified": true,
+    "staging_root_writeable": true,
+    "tls_policy_enforced": true,
+    "network_boundary_configured": true,
+    "zero_mock_policy_active": true
+  },
+  "status": "PASSED"
+}

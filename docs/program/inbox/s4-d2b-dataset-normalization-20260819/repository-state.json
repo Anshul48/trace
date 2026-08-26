@@ -1,0 +1,42 @@
+{
+  "contract_version": "1.0",
+  "packet_id": "s4-d2b-dataset-normalization-20260819",
+  "captured_at_utc": "2026-08-20T03:00:01Z",
+  "repository": {
+    "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "branch": "main",
+    "commit": "c855bb06532b3b52b25f0bea969d2677e5049065",
+    "status": "dirty_user_snapshot_protected",
+    "product_code_changes_in_packet": false
+  },
+  "raw_root": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data",
+    "metadata_file_count": 85,
+    "total_bytes": 1523873466,
+    "metadata_root_sha256_from_lease": "872102e2edfa41954f80dd55ce592a4bdfa5937ce2c58aec6480aa094504c2df",
+    "portfolio_manifest_sha256": "4e594992929c233ec4c95ad0541c09ae54a4e4e0b2d34c48d5ca910dcb0d41c5"
+  },
+  "capacity": {
+    "drive": "C:",
+    "total_bytes": 1021821579264,
+    "free_bytes": 391809900544,
+    "used_bytes": 630011678720,
+    "observed_at_utc": "2026-08-20T03:00:01Z"
+  },
+  "protected_paths": [
+    "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+    "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\beir-scifact\\raw",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\beir-nfcorpus\\raw",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\beir-fiqa\\raw",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\bright\\raw",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\multihop-rag\\raw",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\musique\\raw",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\bigann\\raw"
+  ],
+  "allowed_external_paths": [
+    "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\normalized\\d2b-20260819",
+    "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\verification\\d2b-20260819"
+  ]
+}

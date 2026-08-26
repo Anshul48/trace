@@ -1,0 +1,21 @@
+{
+  "contract_version": "2.0",
+  "lease_id": "lease-s0-v1b-reviewer-r2-20260825",
+  "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+  "role": "v1b-evidence-reviewer",
+  "created_at_utc": "2026-08-25T06:00:00.0000000Z",
+  "expires_at_utc": "2026-08-26T23:59:59.0000000Z",
+  "owner": "S0 V1b-R2 Independent Evidence Reviewer",
+  "verifier_id": "v1b-r2-reviewer-20260825",
+  "state": "assigned",
+  "mandate": {
+    "tasks": [
+      "Validate lease admission checks and candidate commit/tree/parent identities",
+      "Validate cheap candidate-capability preflight execution",
+      "Verify write-once raw logs and required per-service artifacts (Docker inspect, migration ledger, RLS queries, OpenSearch responses, Qdrant responses, MinIO absence proof, Docker cleanup)",
+      "Verify complete evidence manifest SHA-256 digests and checksum ledger",
+      "Generate and cryptographically sign the formal reviewer acceptance manifest"
+    ]
+  },
+  "claim_limit": "Independent review only; coordinator cannot mark Gate V1b closed without the signed reviewer acceptance manifest."
+}

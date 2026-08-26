@@ -1,0 +1,27 @@
+{
+  "capture": "local SQLite live probe after commit 0a91b278a414756da260b15c5cb9daddb5e9aac2",
+  "valid_time": {
+    "interval": ["2024-01-01T00:00:00+00:00", "2024-02-01T00:00:00+00:00"],
+    "inside": {"visible": true, "lifecycle_state": "active", "policy_result": "allowed"},
+    "half_open_boundary": {"visible": false, "exclusion_reason": "valid_time_outside_interval"}
+  },
+  "revocation": {
+    "requested_before_event": 5,
+    "historical_visibility": false,
+    "historical_lifecycle_state": "active",
+    "current_lifecycle_state": "revoked",
+    "exclusion_reason": "current_lifecycle_revoked",
+    "policy_result": "denied"
+  },
+  "release": {
+    "release_id": "789c9c68-1653-44bf-865d-6353f9bbf25b",
+    "activated_event_offset": 9,
+    "spine_event_watermark": 5,
+    "component_kinds": ["activation_priors", "affinity", "dense_index", "hierarchy", "lexical_index"]
+  },
+  "erasure": {
+    "state": "redacted_purged",
+    "receipt_id": "f0bbbaec-ea7c-47b9-ac4e-1d2d838d0d6e",
+    "content_after": ""
+  }
+}

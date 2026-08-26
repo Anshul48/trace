@@ -1,0 +1,19 @@
+{
+  "model_version": "1.0",
+  "plan_id": "s7-1m-pilot-plan-20260826",
+  "scale_target_documents": 1000000,
+  "projected_raw_bytes": 1048576000,
+  "hardware_requirements": {
+    "recommended_gpu": "NVIDIA RTX 5050 / RTX 4060 or higher (>= 6GB VRAM)",
+    "recommended_ram_mb": 16384,
+    "minimum_free_disk_gb": 50
+  },
+  "performance_budgets": {
+    "ingestion_throughput_floor_docs_sec": 800.0,
+    "direct_lookup_p95_latency_ms": 5.0,
+    "graph_traversal_p95_latency_ms": 15.0,
+    "storage_multiplier_ceiling": 3.0,
+    "peak_memory_rss_ceiling_mb": 8192.0
+  },
+  "status": "APPROVED_FOR_EXECUTION_POST_FOUNDATION"
+}

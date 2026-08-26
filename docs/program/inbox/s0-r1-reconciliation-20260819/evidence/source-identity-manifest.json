@@ -1,0 +1,102 @@
+{
+  "manifest_version": "1.0",
+  "manifest_id": "s0-r1-source-identities-20260819",
+  "generated_at_utc": "2026-08-19T12:40:55.1070524Z",
+  "claim_level": "C0",
+  "components": [
+    {
+      "id": "trace",
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "identity_kind": "git_dirty_snapshot",
+      "branch": "main",
+      "head_commit": "c855bb06532b3b52b25f0bea969d2677e5049065",
+      "tracked_modified_count": 26,
+      "untracked_surface_count": 5,
+      "tracked_diff_git_object_id": "2b1decc7860e4ee5be553dd6a09e134e30df6af7",
+      "untracked_list_git_object_id": "319bc715936fd71cc87ab4b0b2a82fa32e64bc5d",
+      "status": "protected_dirty_user_snapshot",
+      "safe_mutation_base": "none; T0/TR1 implementation worktree remains separate"
+    },
+    {
+      "id": "trace-lite-user",
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "identity_kind": "git_protected_user_checkout",
+      "branch": "main",
+      "head_commit": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+      "tracked_status": "clean",
+      "untracked_surface_count": 3,
+      "untracked_list_git_object_id": "4bcb0a6b89176039d4a446d84f2d3fd0ccc6edaa",
+      "status": "protected_user_checkout"
+    },
+    {
+      "id": "trace-lite-l1",
+      "root": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1",
+      "identity_kind": "git_clean_implementation_worktree",
+      "branch": "feat/l1-candidate-active-lifecycle",
+      "head_commit": "7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+      "status": "clean",
+      "handoff": "docs/program/inbox/l1-tl1-candidate-active-lifecycle/handoff.md"
+    },
+    {
+      "id": "trace-tr1",
+      "root": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr1",
+      "identity_kind": "git_clean_implementation_worktree",
+      "branch": "feat/tr1-unified-cortex-release",
+      "head_commit": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+      "status": "clean",
+      "handoff": "docs/program/inbox/tr1-unified-cortex-release-20260819/handoff.md",
+      "verifier_assignment_replacement": "v1b-trace-release-verifier-20260819"
+    },
+    {
+      "id": "trace-bench",
+      "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+      "identity_kind": "git_source_with_untracked_dependency_lock",
+      "branch": "main",
+      "head_commit": "0b01de5e49dcb18d43876b0b6004da58b35b72aa",
+      "parent_commit": "51c639edf39fee49818710ae2e9246c4ebb29e98",
+      "tracked_file_count": 44,
+      "source_manifest_sha256": "7603803ffc6537b84e67daa1b8d526a04cd173dc6c081089d947b0a3f93bc075",
+      "source_manifest_composite_sha256": "90f9829a10681fb90c770f87681cc2748588c0809e54362a7807b7cfb13f1bbd",
+      "uv_lock_sha256": "fd4bbc4107d965f570493afb2a425b0482363b126532d023744e0a7d46745c50",
+      "untracked_paths": ["uv.lock"],
+      "b1_handoff_head_commit": "0b01de5c88c7df9452b4507ae86d655f2f5fcfa1",
+      "b1_handoff_head_exists": false,
+      "status": "identity_blocker_for_V1a",
+      "required_successor": "B1.1 clean identity refresh"
+    },
+    {
+      "id": "d2a-data",
+      "root": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data",
+      "identity_kind": "external_manifest_root",
+      "dataset_directory_count": 7,
+      "file_count": 85,
+      "total_bytes": 1523873466,
+      "portfolio_manifest_sha256": "4e594992929c233ec4c95ad0541c09ae54a4e4e0b2d34c48d5ca910dcb0d41c5",
+      "metadata_root_sha256": "872102e2edfa41954f80dd55ce592a4bdfa5937ce2c58aec6480aa094504c2df",
+      "status": "D2a_metadata_matches_live_external_files"
+    }
+  ],
+  "identity_findings": [
+    {
+      "id": "R1-ID-001",
+      "state": "blocked",
+      "finding": "B1 handoff full head commit does not exist in the live trace-bench repository; the live commit shares only the short prefix.",
+      "affected_packets": ["V1a", "B1.1"],
+      "safe_default": "Do not dispatch V1a against the old handoff identity. Preserve B1 commit and untracked uv.lock until B1.1 resolves the source/dependency identity."
+    },
+    {
+      "id": "R1-ID-002",
+      "state": "contained",
+      "finding": "All seven D2a portfolio metadata files match the live external metadata records; no independent D2a verifier packet was found.",
+      "affected_packets": ["D2a", "D2b"],
+      "safe_default": "Keep raw data immutable and permit D2b only after the final B1.1 manifest/schema contract is published."
+    },
+    {
+      "id": "R1-ID-003",
+      "state": "contained",
+      "finding": "L1 and TR1 implementation worktrees are clean at their handoff commits and are not reused for verifier work.",
+      "affected_packets": ["V1b-TL-lifecycle", "V1b-Trace-release"],
+      "safe_default": "Create separate verifier worktrees and external scratch roots from those exact commits."
+    }
+  ]
+}

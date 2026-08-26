@@ -1,0 +1,42 @@
+{
+  "contract_version": "2.0",
+  "decision": "ACCEPTED",
+  "reviewed_at_utc": "2026-08-25T06:22:59.459803+00:00",
+  "reviewer_lease_id": "lease-s0-v1b-reviewer-r2-20260825",
+  "graph_verification": {
+    "lease_id": "lease-s5-v1b-graph-r2-20260825",
+    "candidate_commit": "3e7e9f0ee460e3af75f3935343f6d6f2089f9f7c",
+    "candidate_tree": "ef83211ff9a52bce0706bda7b102639830b5a554",
+    "result_bundle_manifest_sha256": "0e9ef3fae67a631acc2545b0490dce70ad7eeb66a752a903cede98f92796a770",
+    "pytest_suite": "34 passed, 0 failed",
+    "100k_workload_breaches": 0,
+    "status": "PASS"
+  },
+  "temporal_infrastructure_verification": {
+    "lease_id": "lease-s5-v1b-temporal-r2-20260825",
+    "candidate_commit": "6577847af37c7ccb1edd03ba5905a0396a1f1e28",
+    "candidate_tree": "95212391484c0884687f2078c1f2ca80627a0313",
+    "candidate_parent": "37b601c15b81aefb3edf1f47df57e12dfe96ffbf",
+    "result_bundle_manifest_sha256": "3c7ff14f9e6468b00ad18f9088cff48406c522c5dccd83438858573481639ee8",
+    "preflight_checks": "PASS",
+    "pytest_suite": "62 passed, 0 failed",
+    "postgres_migrations_ledger": "revisions 1-6 verified",
+    "postgres_partitions": "16 partitions verified, default partition absent",
+    "postgres_rls_isolation": "0 cross-tenant leakage under non-superuser trace_app role",
+    "opensearch_revision_rollback": "indexing verified, rollback index absent",
+    "qdrant_revision_rollback": "vector search verified, rollback collection absent",
+    "minio_erasure_absence_proof": "HTTP 404 confirmed absent, repeat erasure idempotent",
+    "docker_cleanup": "0 surviving containers",
+    "status": "PASS"
+  },
+  "gate_status": {
+    "gate": "V1b-R2",
+    "blocker_removed": true,
+    "downstream_authorizations": {
+      "foundation_gate": "NOT_AUTHORIZED",
+      "session_9": "NOT_AUTHORIZED",
+      "p_005": "NOT_AUTHORIZED",
+      "scale_work": "NOT_AUTHORIZED"
+    }
+  }
+}

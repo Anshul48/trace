@@ -1,0 +1,59 @@
+{
+  "receipts": [
+    {
+      "receipt_type": "s6_baseline_distributions_verification_receipt",
+      "receipt_id": "rcpt-s6-stats-audit-20260826-0335",
+      "conversation_id": "e742f1ed-6051-453d-8ef0-e4bcf948c8e8",
+      "timestamp_utc": "2026-08-26T03:35:00Z",
+      "reviewer_role": "Query-Class & Statistics Reviewer",
+      "audit_disposition": "PASS",
+      "denominator_integrity": {
+        "total_queries_audited": 36620,
+        "positive_queries_audited": 36319,
+        "expected_abstentions_audited": 301,
+        "excluded_queries": 0,
+        "failed_or_blocked_queries": 0,
+        "empty_retrieval_cases_scored_zero": 200,
+        "isolated_vector_operations": 100000
+      },
+      "statistical_tests": {
+        "beir_fiqa_dense_vs_bm25": {
+          "delta_ndcg10": 0.13543,
+          "p_value": 1.1e-164,
+          "cohens_d": 0.482
+        },
+        "beir_scifact_hybrid_vs_bm25": {
+          "delta_ndcg10": 0.01448,
+          "p_value": 0.00075,
+          "cohens_d": 0.101
+        },
+        "beir_nfcorpus_hybrid_vs_bm25": {
+          "delta_ndcg10": 0.03582,
+          "p_value": 4.7e-16,
+          "cohens_d": 0.180
+        },
+        "multihop_rag_bm25_vs_hipporag": {
+          "delta_ndcg10": 0.51429,
+          "p_value": 1.0e-250,
+          "cohens_d": 1.542
+        }
+      }
+    },
+    {
+      "receipt_type": "s6_manifest_provenance_verification_receipt",
+      "receipt_id": "receipt-s6-manifest-provenance-20260826",
+      "conversation_id": "019e19b3-1df5-4e20-95dc-9315a2ee598b",
+      "timestamp_utc": "2026-08-26T03:26:00Z",
+      "reviewer_role": "Manifest & Provenance Reviewer",
+      "verification_status": "PASS",
+      "invariant_verifications": {
+        "zero_mock_or_synthetic_fallback": true,
+        "bigann_sift1m_isolation": true,
+        "non_editable_wheel_provenance": true,
+        "dataset_hash_commitments": true,
+        "certification_eligibility_false": true,
+        "headless_core_adapter_specifications": true
+      }
+    }
+  ]
+}

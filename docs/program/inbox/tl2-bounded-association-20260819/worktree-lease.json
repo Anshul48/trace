@@ -1,0 +1,66 @@
+{
+  "contract_version": "1.0",
+  "lease_id": "lease-s2-tl2-bounded-graph-20260823",
+  "packet_id": "tl2-bounded-association-20260819",
+  "component": "trace-lite",
+  "created_at_utc": "2026-08-23T08:09:38.3508241Z",
+  "expires_at_utc": "2026-08-24T08:09:38Z",
+  "owner": "Codex Session 6 / S2 TL2 bounded graph implementation",
+  "base": {
+    "repository_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+    "commit": "7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+    "base_clean_verified": true,
+    "source_worktree_note": "fresh worktree is created from committed L1 head; expired L1 worktree remains untouched"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-tl2",
+    "branch": "feat/s2-tl2-bounded-graph",
+    "clean_on_creation": true,
+    "exclusive": true,
+    "creation_command": "git -C C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite worktree add -b feat/s2-tl2-bounded-graph C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-tl2 7ff40dc46fe3d5e8eef31c485ed0337b8f71602d"
+  },
+  "scope": {
+    "allowed_paths": [
+      "src/trace_lite/engines/graph.py",
+      "src/trace_lite/engines/lattice.py",
+      "src/trace_lite/engines/raptor.py",
+      "src/trace_lite/engines/__init__.py",
+      "src/trace_lite/cortex/forest.py",
+      "src/trace_lite/db.py",
+      "src/trace_lite/visualizer/serializers.py",
+      "src/trace_lite/cli.py",
+      "tests/test_graph.py",
+      "tests/test_lifecycle.py",
+      "tests/test_tl2_bounded_graph.py",
+      "scripts/measure_tl2_bounded_graph.py"
+    ],
+    "forbidden_paths": [
+      "src/trace_lite/spine/",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench"
+    ],
+    "may_run_networked_commands": false,
+    "may_download_data": false,
+    "may_call_provider": false
+  },
+  "prohibited_operations": [
+    "mutate the canonical Trace-Lite checkout or expired L1 worktree",
+    "modify Spine modules or source truth",
+    "choose any policy value outside the accepted P-002 record",
+    "add a fallback, mock data path, provider, or network dependency",
+    "claim 100K certification, SOTA, promotion, or activation"
+  ],
+  "recovery": {
+    "rollback_statement": "Retain the committed implementation and remove only this fresh worktree through an explicitly reviewed recoverable operation; no user checkout or source data is deleted.",
+    "external_side_effects": "none"
+  },
+  "verifier": {
+    "required": true,
+    "separate_worktree": true,
+    "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+    "status": "pending independent graph verification"
+  },
+  "release_state": "in_progress"
+}

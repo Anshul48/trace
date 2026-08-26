@@ -1,0 +1,47 @@
+{
+  "contract_version": "1.0",
+  "lease_id": "lease-s5-v1b-final-temporal-20260823",
+  "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+  "sub_gate": "V1b-Trace-temporal",
+  "component": "trace",
+  "created_at_utc": "2026-08-23T09:15:39.4781808Z",
+  "expires_at_utc": "2026-08-24T09:15:39.4781808Z",
+  "owner": "S5 Final V1b Independent Verifier",
+  "verifier_id": "v1b-final-temporal-verifier-20260823",
+  "state": "assigned",
+  "base": {
+    "implementation_worktree": "exact commit object; named TR2 worktree drifted to 0cd7ca8a4d269f0f412527b14718a9ec47e09e9e",
+    "commit": "0a91b278a414756da260b15c5cb9daddb5e9aac2",
+    "parent": "454c5aed2200796ac9874e4fbe6e099bdb53f830",
+    "status": "exact commit checked out clean; named implementation path not reused"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-final-temporal-20260823",
+    "branch": "detached",
+    "clean_on_creation": true,
+    "exclusive": true,
+    "scratch_path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-final-temporal-20260823",
+    "result_path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-final-temporal-20260823",
+    "environment_path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-envs\\v1b-final-temporal-20260823"
+  },
+  "scope": {
+    "allowed_paths": [
+      "verifier checkout read-only",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-final-temporal-20260823",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-final-temporal-20260823",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-envs\\v1b-final-temporal-20260823",
+      "docs/program/inbox/v1b-lifecycle-temporal-verifier-20260819/evidence"
+    ],
+    "forbidden_paths": [
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr2-s3-20260823",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr1",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "network/providers/raw data",
+      "implementation-owned databases/caches/results"
+    ],
+    "may_repair_candidate": false,
+    "may_choose_policy": false
+  },
+  "claim_limit": "Independent temporal verification only; no graph, PostgreSQL/RLS, external-index, deployment, object-store erasure, certification, SOTA, 100K, or promotion claim."
+}

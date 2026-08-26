@@ -1,0 +1,15 @@
+{
+  "packet_id": "ltr-02-corpus-capsule-20260826",
+  "contract_version": "1.0",
+  "created_at_utc": "2026-08-26T06:20:00Z",
+  "role": "S4 Data Steward",
+  "admitted_corpora": [
+    "musique",
+    "beir-fiqa",
+    "beir-scifact",
+    "beir-nfcorpus",
+    "multihop-rag"
+  ],
+  "staging_root": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\normalized\\d2b-20260819\\repair-mq-roundtrip-20260820",
+  "status": "frozen_and_verified"
+}

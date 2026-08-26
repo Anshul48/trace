@@ -1,0 +1,112 @@
+{
+  "contract_version": "1.0",
+  "manifest_id": "b1-1-benchmark-identity-inputs-20260820",
+  "packet_id": "b1-1-benchmark-identity-20260819",
+  "created_at_utc": "2026-08-20T02:19:30.6469566Z",
+  "repository": {
+    "root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+    "branch": "main",
+    "head": "0b01de5e49dcb18d43876b0b6004da58b35b72aa",
+    "status": "tracked_clean_with_untracked_uv.lock",
+    "untracked": {
+      "path": "uv.lock",
+      "sha256": "fd4bbc4107d965f570493afb2a425b0482363b126532d023744e0a7d46745c50"
+    }
+  },
+  "lease": {
+    "path": "docs/program/inbox/s0-r1-reconciliation-20260819/leases/lease-s1-b1-1-benchmark-identity-20260819.json",
+    "sha256": "49e7eab68cfa3a08c5e454a339a0c40b6e5c414a6d7e095b025d4f680b9b2c6c",
+    "lease_id": "lease-s1-b1-1-benchmark-identity-20260819",
+    "worktree": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-bench-b11-20260819",
+    "branch": "feat/b1-identity-refresh-20260819",
+    "expires_at_utc": "2026-08-20T12:40:55.1070524Z"
+  },
+  "controlling_inputs": [
+    {
+      "path": "docs/program/launch/implementation-wave/next-wave-session-prompts/02_S1_B11_BENCHMARK_IDENTITY.md",
+      "sha256": "c01db10ca13812b1adaa4c936da9a33058b73836bf8d5c387668739731f13fdf"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/next-wave-session-prompts/00_SHARED_BOOTSTRAP.md",
+      "sha256": "521c09d41efc81c72dfd54e2d509b7cb41d352ecf1d3795977cee0c919590a93"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/README.md",
+      "sha256": "dfcd67950b1252700c3bf878fcca7d5cc0f2652ae02a916c62b051b0c0a82286"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/00_GLOBAL_CONTEXT.md",
+      "sha256": "0b1d8863b884dabec0d156c76d0e8764cc9c6b2c03ce45784abb64b116050f3b"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/01_SESSION_PROTOCOL.md",
+      "sha256": "3e06526e81ae77037e4fb9d896c3320fee77d813d19bf1df20895ed6c807610e"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/02_WAVE_AND_GATE_MATRIX.md",
+      "sha256": "4f588ae50085b4199da465babd98b5dad0785f07e34e9597038304290047eefc"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/03_HANDOFF_TEMPLATE.md",
+      "sha256": "c890c3bad8251212ee9d846f254bf3e2aee770a6af57066277c47c606df31458"
+    },
+    {
+      "path": "docs/program/launch/implementation-wave/04_SUBAGENT_RULES.md",
+      "sha256": "65e4cdd1627d83dc6300c4a24af91e5a7341ead125be51e531ce298b804c5551"
+    },
+    {
+      "path": "docs/program/SESSION_OPERATING_MANUAL.md",
+      "sha256": "bff5bac0ade859e0c7dd9093fe4dc4a5d2eb9ea8097e6f38844a82dc6c87ec54"
+    },
+    {
+      "path": "docs/program/COMPONENT_REGISTRY.md",
+      "sha256": "57d4b8be7172811ed712a6a17ce7662d643b535e76950ec72da55150b0d9bda2"
+    },
+    {
+      "path": "docs/program/06_DECISION_LOG.md",
+      "sha256": "24cad218860406d03a00ac2ad5c8d83cade9d95a897c0676570235d706560dda"
+    },
+    {
+      "path": "docs/program/07_RISK_REGISTER.md",
+      "sha256": "b87e737e35a97ada487430db4f1ed92cd4a8d3fb3775a481e91bb8c5047cfb2c"
+    },
+    {
+      "path": "docs/program/FOUNDATION_STATUS.md",
+      "sha256": "1fb2de1f822ed72a3bee7bdbe0c24eff165a09f264e546eb0e44f88d710a390f"
+    },
+    {
+      "path": "docs/program/inbox/s0-r1-reconciliation-20260819/handoff.md",
+      "sha256": "08a3e4a0b4e9a41e89efe10803899253571e2970eb2899b6a026cd9eec116845"
+    },
+    {
+      "path": "docs/program/inbox/b1-e2a-fail-closed-runner/handoff.md",
+      "sha256": "a01338ddd4a11cbdb54f72f6f668ef28dfa5a74196a68a669f2e85e7f8491712"
+    },
+    {
+      "path": "docs/program/inbox/b1-e2a-fail-closed-runner/packet.md",
+      "sha256": "b6f2492468274afcfcd62ab46724cda8ead8b12e918ea34e79b9cc1c2057638b"
+    }
+  ],
+  "source_inputs": {
+    "SOURCE_MANIFEST.json": "7603803ffc6537b84e67daa1b8d526a04cd173dc6c081089d947b0a3f93bc075",
+    "pyproject.toml": "6e04c7b19ec204ae15ebbfbd5421062985e5234e8564e6d61207df632e371437",
+    "README.md": "328adeabdc233272ddf9b1a91cb79472e3f8d790bc1d4619955de954e77612c6",
+    ".gitignore": "ea369959adfd9c8dd6bbea3b6a1580e7a7ff2f1fab1f41cb78bdb73d60e62848",
+    "uv.lock": "fd4bbc4107d965f570493afb2a425b0482363b126532d023744e0a7d46745c50"
+  },
+  "observed_manifest_coverage": {
+    "git_tracked_file_count": 44,
+    "manifest_declared_file_count": 42,
+    "manifest_self_excluded": true,
+    "tracked_source_missing_from_manifest": [
+      "tests/test_fail_closed_negative_matrix.py"
+    ]
+  },
+  "authority": {
+    "may_edit_product_code": false,
+    "may_edit_only_identity_paths": true,
+    "may_download_data": false,
+    "may_call_provider": false,
+    "may_run_certification": false
+  }
+}

@@ -1,0 +1,72 @@
+contract_version: "1.0"
+manifest_id: "<stable-id>"
+state: draft # draft | frozen | executed | invalidated
+mode: certification # unit | regression | exploratory | certification
+created_at_utc: "<RFC3339 UTC>"
+producer:
+  component: trace-bench
+  source_identity: "<git commit or P-007 content manifest>"
+  runner_entrypoint: "<module:callable or command>"
+  runner_config_sha256: "<sha256>"
+components:
+  trace_lite:
+    identity: "<commit/package digest>"
+  trace:
+    identity: "<commit/package digest>"
+datasets:
+  - dataset_record_id: "<P-001 admitted record>"
+    source_identity: "<version>"
+    raw_sha256: "<sha256>"
+    transform_manifest_sha256: "<sha256>"
+    query_pack_sha256: "<sha256>"
+    judgment_pack_sha256: "<sha256>"
+    evidence_manifest_sha256: "<sha256>"
+    local_staging_reference: "<non-Git path or opaque location>"
+evaluation:
+  query_classes: ["<class>"]
+  inclusion_exclusion_policy_sha256: "<sha256>"
+  metric_definitions_sha256: "<sha256>"
+  significance_method: "<P-005 frozen method>"
+  thresholds_policy_id: "<P-005 accepted decision>"
+systems:
+  - name: "<baseline/candidate>"
+    code_identity: "<commit>"
+    config_sha256: "<sha256>"
+    model_fingerprints: ["<provider/model/version>"]
+    embedding_fingerprints: ["<model/version>"]
+    hierarchy_graph_policy_sha256: "<sha256>"
+    retrieval_profile: "<...>"
+integrity:
+  required_preflight_checks:
+    - source_identity
+    - data_checksum
+    - license_record
+    - query_evidence_mapping
+    - provider_identity
+    - secure_transport
+    - no_mock
+    - no_synthetic_substitution
+    - no_forced_or_flat_fallback
+    - no_swallowed_stage_error
+  fail_closed: true
+  error_receipt_schema: ERROR_RECEIPT.schema.json
+  empty_result_policy: "Empty retrieval is scored outcome, never automatic abstention success."
+  abstention_policy: "Expected abstention has distinct correctness metrics; never perfect retrieval metrics."
+environment:
+  os: "<...>"
+  python_runtime: "<...>"
+  hardware: "<...>"
+  database_or_index_versions: "<...>"
+  network_policy: "<...>"
+execution:
+  random_seed_policy: "<...>"
+  warmup_policy: "<...>"
+  concurrency_policy: "<...>"
+  cold_warm_latency_capture: true
+  output_root: "<external/non-Git path>"
+retention:
+  result_manifest_sha256: "<after run>"
+  raw_result_policy: "<retention location/access>"
+claim_boundary: >
+  A run is non-certifying if a required preflight check, input pin, or
+  integrity assertion fails or is unavailable.

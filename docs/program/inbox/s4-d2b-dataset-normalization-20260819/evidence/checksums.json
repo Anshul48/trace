@@ -1,0 +1,142 @@
+{
+  "contract_version": "1.0",
+  "packet_id": "s4-d2b-dataset-normalization-20260819",
+  "generated_at_utc": "2026-08-20T05:20:49.6673028Z",
+  "note": "This packet-local file is excluded from its own file list.",
+  "files": {
+    "handoff.md": {
+      "sha256": "71b8f1a6f5354c93929cb8f42b59612889bb1f29743d224b43cb3254ba0cec3f",
+      "size_bytes": 275
+    },
+    "commands.md": {
+      "sha256": "36d3e085e5576b90bfd5d36d3dd6ebc2250f74b9c387128d5b783e0d4e2d3759",
+      "size_bytes": 4214
+    },
+    "input-manifest.json": {
+      "sha256": "7bace9c7b80c0589a09a0c9007f671b61af4a5b3e2973019d93bb309d3652b0c",
+      "size_bytes": 4039
+    },
+    "repository-state.json": {
+      "sha256": "d2e42b3a139701037df0961ab2bf3713635877e8834c5b926cb47cbf6a6b38e9",
+      "size_bytes": 1913
+    },
+    "verification.md": {
+      "sha256": "841c7c27fc55e11ad7df148cc687d2d0f0d87b4a64e09cd6d0f9a21ebed548f6",
+      "size_bytes": 4440
+    },
+    "evidence/execution-note.md": {
+      "sha256": "d06189d59ddd8f165fdb1664b06683a04dfb7de14127b4e96100ac18c26af1ca",
+      "size_bytes": 2184
+    },
+    "evidence/handoff.md": {
+      "sha256": "a54bdca43a73c1c00d393092e4d2298f3ea42a13547ae50ca677968728e9a4f9",
+      "size_bytes": 25611
+    },
+    "evidence/normalize_d2b.py": {
+      "sha256": "f43bd2ab7916c32e39c50b300b798048392d3ba64a4f877f63b7ef707de0f264",
+      "size_bytes": 81557
+    },
+    "evidence/reconcile_d2b.py": {
+      "sha256": "b24b83e3fe6b1859a1272586e56385a5bcfdd43fb1b4bce1bed7ddb72b45ba60",
+      "size_bytes": 19180
+    },
+    "evidence/reconciliation-note-20260820.md": {
+      "sha256": "f9d50468fcbdaa8a02bb09ad4a57a72b9ddbac7ffb0406626087a0db26e99352",
+      "size_bytes": 2759
+    },
+    "evidence/reconciliation-results-20260820.md": {
+      "sha256": "9ae227222f3319aa2ea6579f83f2f0aca354fe8417f365630f597cc943e57876",
+      "size_bytes": 6329
+    },
+    "evidence/musique-roundtrip-repair-20260820.md": {
+      "sha256": "ab51dc1b432f6ccaa6617ccc9fbc3085ec6147e82114d45c5c010d6c324b4130",
+      "size_bytes": 5239
+    },
+    "evidence/verify_d2b.py": {
+      "sha256": "8ae581d5719a85eda0355744c98acbdfc30b7f1b941edcf609db77371588c74a",
+      "size_bytes": 10885
+    }
+  },
+  "external_evidence": {
+    "candidate_checksums.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\normalized\\d2b-20260819\\checksums.json",
+      "sha256": "4c150a7827836c0ec41e02c302720d84ab0e83e859bf24c884a7bafc52907f5d",
+      "size_bytes": 17408
+    },
+    "candidate_run-manifest.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\normalized\\d2b-20260819\\run-manifest.json",
+      "sha256": "d7401a9624bef59b47c7985248215406175477c7f7b9c4a16970cc1b52a3fd39",
+      "size_bytes": 3226
+    },
+    "candidate_COMPLETED.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\normalized\\d2b-20260819\\COMPLETED.json",
+      "sha256": "c2d2081ce8bc475a93616975bd2b38281eb746ad9d3a9ab8e41020491d528998",
+      "size_bytes": 164
+    },
+    "owner-review-final.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\verification\\d2b-20260819\\owner-review-final-20260820.json",
+      "sha256": "62dc24e7d76ffc0a57a0b1d80b0a8571296d44a5c1969255b74d0b44ce9e00bd",
+      "size_bytes": 3889
+    },
+    "owner-review-initial-failure.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\verification\\d2b-20260819\\owner-review-initial-failure-20260820.json",
+      "sha256": "de5e68a28621ec26d3f969ebe9445271365263558c6aeba33ca8484fdab401e9",
+      "size_bytes": 16575853
+    },
+    "independent-replay-checksums.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\verification\\d2b-20260819\\independent-replay-20260820\\checksums.json",
+      "sha256": "4c150a7827836c0ec41e02c302720d84ab0e83e859bf24c884a7bafc52907f5d",
+      "size_bytes": 17408
+    },
+    "independent-replay-run-manifest.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\verification\\d2b-20260819\\independent-replay-20260820\\run-manifest.json",
+      "sha256": "d7401a9624bef59b47c7985248215406175477c7f7b9c4a16970cc1b52a3fd39",
+      "size_bytes": 3226
+    },
+    "independent-replay-COMPLETED.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\verification\\d2b-20260819\\independent-replay-20260820\\COMPLETED.json",
+      "sha256": "c2d2081ce8bc475a93616975bd2b38281eb746ad9d3a9ab8e41020491d528998",
+      "size_bytes": 164
+    },
+    "corrected-candidate-checksums.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\normalized\\d2b-20260819\\repair-mq-roundtrip-20260820\\checksums.json",
+      "sha256": "5d4241626cf34d510126c17a27fac8d1f82adc282dbe09c6c70cc93edcdaa559",
+      "size_bytes": 17408
+    },
+    "corrected-candidate-run-manifest.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\normalized\\d2b-20260819\\repair-mq-roundtrip-20260820\\run-manifest.json",
+      "sha256": "5ae0fbecffcb1f6a2fcc5b74f647cf8dbbc10ab86f616fdba88af7c6b3039806",
+      "size_bytes": 3244
+    },
+    "corrected-candidate-COMPLETED.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\normalized\\d2b-20260819\\repair-mq-roundtrip-20260820\\COMPLETED.json",
+      "sha256": "7c4e8ee8a5e2bd48256523dbe7740d837fa6af2e9621a75c3835b4f0546ec60f",
+      "size_bytes": 182
+    },
+    "corrected-candidate-musique-round-trip-samples.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\normalized\\d2b-20260819\\repair-mq-roundtrip-20260820\\musique\\round-trip-samples.json",
+      "sha256": "c71cb883636407bc774da147a3cdc394041657e35afbb5f9d04df4b6464ae65b",
+      "size_bytes": 3730
+    },
+    "corrected-replay-checksums.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\verification\\d2b-20260819\\repair-mq-roundtrip-replay-20260820\\checksums.json",
+      "sha256": "5d4241626cf34d510126c17a27fac8d1f82adc282dbe09c6c70cc93edcdaa559",
+      "size_bytes": 17408
+    },
+    "corrected-replay-run-manifest.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\verification\\d2b-20260819\\repair-mq-roundtrip-replay-20260820\\run-manifest.json",
+      "sha256": "5ae0fbecffcb1f6a2fcc5b74f647cf8dbbc10ab86f616fdba88af7c6b3039806",
+      "size_bytes": 3244
+    },
+    "corrected-replay-COMPLETED.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\verification\\d2b-20260819\\repair-mq-roundtrip-replay-20260820\\COMPLETED.json",
+      "sha256": "7c4e8ee8a5e2bd48256523dbe7740d837fa6af2e9621a75c3835b4f0546ec60f",
+      "size_bytes": 182
+    },
+    "corrected-owner-review.json": {
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\verification\\d2b-20260819\\owner-review-mq-repair-20260820.json",
+      "sha256": "62dc24e7d76ffc0a57a0b1d80b0a8571296d44a5c1969255b74d0b44ce9e00bd",
+      "size_bytes": 3889
+    }
+  }
+}

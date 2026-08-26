@@ -1,0 +1,67 @@
+{
+  "contract_version": "1.0",
+  "manifest_id": "v1a-independent-verifier-inputs-c0ea9fbf-20260825",
+  "packet_id": "v1a-runner-integrity-20260819",
+  "verifier_id": "v1a-runner-integrity-20260819",
+  "state": "verified",
+  "created_at_utc": "2026-08-25T13:20:00.000000Z",
+  "source": {
+    "component": "trace-bench",
+    "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+    "verifier_root": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1a-benchmark-20260819",
+    "commit": "c0ea9fbf37bc50c88336f198437be031c18d6f64",
+    "parent": "0b01de5e49dcb18d43876b0b6004da58b35b72aa",
+    "branch": "main",
+    "verifier_status": "clean",
+    "core_autocrlf": false,
+    "source_manifest_sha256_lf": "24e3c942227ab5203dfc324f83ed3eee4c5e4d2af784e23223b2f9f1f131b5cc",
+    "source_manifest_composite_sha256": "554555030a8ee6037b41aba3e163b616d1f43ef6b057cb98c7f9242271dad83f",
+    "uv_lock_sha256": "fd4bbc4107d965f570493afb2a425b0482363b126532d023744e0a7d46745c50",
+    "pyproject_sha256": "6e04c7b19ec204ae15ebbfbd5421062985e5234e8564e6d61207df632e371437",
+    "scale_evidence_plan_sha256": "7d929812588f23a9e7e7f6633719eb2be80667f587021ca70aa14cec2dfa0528"
+  },
+  "control_inputs": {
+    "b1_handoff": "docs/program/inbox/b1-1-benchmark-identity-20260819/handoff.md",
+    "b1_handoff_sha256": "abbee58abe0c700fa2dcbb18c597dffeb721c601d1cf53aea268055dd3d7065b7",
+    "b1_v1a_input_manifest": "docs/program/inbox/b1-1-benchmark-identity-20260819/v1a-input-manifest.json",
+    "b1_v1a_input_manifest_sha256": "0f3e83e7a38e493262453571c1e577750720abde97cdd901b1e75e7a28bc37b8",
+    "shared_bootstrap_sha256": "521c09d41efc81c72dfd54e2d509b7cb41d352ecf1d3795977cee0c919590a93",
+    "v1a_prompt_sha256": "a200512acbef9a896d202dc8db6dc1bfda2012902574f363f72949703ade14fb",
+    "independent_verifier_brief_sha256": "ff5714048d15bd7f23645866fe7d7e874ddfb609063292a941d1ad1f5154e8d3",
+    "lease_sha256": "8c53d87ae83c5e3b86161b2dbfb11f5c7ba8d06f53cfd783774b246253c5b960"
+  },
+  "lease": {
+    "lease_id": "lease-s5-v1a-benchmark-20260819",
+    "scratch_root": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1a-benchmark-20260819",
+    "networked_commands": false,
+    "dataset_download": false,
+    "provider_call": false,
+    "candidate_repair": false
+  },
+  "environment": {
+    "os": "Windows",
+    "python": "3.12.0",
+    "uv": "0.12.5 (210d1f678 2026-08-14 x86_64-pc-windows-msvc)",
+    "git": "2.52.0.windows.1",
+    "cache_root": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1a-benchmark-20260819\\uv-cache",
+    "environment_root": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1a-benchmark-20260819\\venv",
+    "import_origin": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1a-benchmark-20260819\\venv\\Lib\\site-packages\\trace_bench\\__init__.py"
+  },
+  "frozen_matrix": {
+    "required_cases": 26,
+    "negative_matrix_cases": 13,
+    "harness_baseline_cases": 13,
+    "passed": 26,
+    "failed": 0,
+    "duration_seconds": 202.39,
+    "status": "passed_cleanly"
+  },
+  "prohibited_activity": {
+    "network_used_during_verification": false,
+    "dataset_download": false,
+    "provider_call": false,
+    "certification_run": false,
+    "implementation_modified_by_verifier": false,
+    "fallback_or_substitute_used": false
+  }
+}

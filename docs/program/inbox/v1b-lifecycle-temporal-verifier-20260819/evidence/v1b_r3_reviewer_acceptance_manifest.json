@@ -1,0 +1,46 @@
+{
+  "contract_version": "2.0",
+  "docker_stack_audit": {
+    "health_checks_verified": true,
+    "host_loopback_only": "127.0.0.1",
+    "surviving_verifier_containers": 0
+  },
+  "graph_candidate": {
+    "adversarial_budget_100k_passed": true,
+    "boundary_cases_passed": 8,
+    "commit": "3e7e9f0ee460e3af75f3935343f6d6f2089f9f7c",
+    "item_count": 7,
+    "lease_id": "lease-s5-v1b-graph-r3-20260825",
+    "results_manifest_sha256": "aa28426962371f6a3e3afacbb115e4b66b5d5aacb705931e9ebfb3e0adbe9239",
+    "tests_passed": 34,
+    "tree_sha256": "ef83211ff9a52bce0706bda7b102639830b5a554"
+  },
+  "policy_attestations": {
+    "fail_closed_erasure_state_machine": true,
+    "isolated_frozen_worktrees_only": true,
+    "multi_index_release_rollback_compensation": true,
+    "p004_repeat_erasure_idempotent_zero_writes": true,
+    "strict_non_content_allow_list_receipt": true
+  },
+  "reviewed_at_utc": "2026-08-25T08:32:29.418872+00:00",
+  "reviewer_id": "v1b-r3-reviewer-20260825",
+  "reviewer_lease_id": "lease-s0-v1b-reviewer-r3-20260825",
+  "temporal_candidate": {
+    "commit": "2804e29b9b1acb3dae60659483338d53a3bc8bce",
+    "item_count": 8,
+    "lease_id": "lease-s5-v1b-temporal-r3-20260825",
+    "live_minio_erasure_fail_closed_verified": true,
+    "migrations_idempotent": true,
+    "promotion_fault_compensation_verified": true,
+    "repeat_erasure_zero_writes_verified": true,
+    "results_manifest_sha256": "55feb89b21894c273a437932f4bfdbb7d1ce6970afab73408105eeeb9c8110e5",
+    "tenant_rls_verified": true,
+    "tests_passed": 66,
+    "tree_sha256": "8b75ed4530c748fc9757ae33e6d1e2931122fb88"
+  },
+  "verdict": {
+    "gate_v1b_overall": "CLOSED (PASS)",
+    "sub_gate_v1b_tl_graph": "CLOSED (PASS)",
+    "sub_gate_v1b_trace_temporal": "CLOSED (PASS)"
+  }
+}

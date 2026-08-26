@@ -1,0 +1,26 @@
+{
+  "contract_version": "2.0",
+  "lease_id": "lease-s0-v1b-reviewer-r3-20260825",
+  "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+  "sub_gate": "V1b-Reviewer",
+  "component": "control-plane",
+  "created_at_utc": "2026-08-25T07:00:00.0000000Z",
+  "expires_at_utc": "2026-08-26T23:59:59.0000000Z",
+  "owner": "S0 Final V1b-R3 Independent Evidence Reviewer",
+  "reviewer_id": "v1b-r3-reviewer-20260825",
+  "state": "assigned",
+  "scope": {
+    "allowed_paths": [
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-r3-graph-20260825",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-r3-temporal-20260825",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace\\docs\\program\\inbox\\v1b-lifecycle-temporal-verifier-20260819\\evidence"
+    ],
+    "forbidden_paths": [
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace\\src",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite\\src"
+    ],
+    "may_mutate_code": false,
+    "may_author_claims": false
+  },
+  "claim_limit": "Read-only independent audit of Graph and Temporal verification evidence manifests, negative limit bounds, fault compensation, and cryptographic Ed25519 signing."
+}

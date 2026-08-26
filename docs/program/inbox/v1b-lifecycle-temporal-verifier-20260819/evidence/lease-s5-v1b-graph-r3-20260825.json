@@ -1,0 +1,42 @@
+{
+  "contract_version": "2.0",
+  "lease_id": "lease-s5-v1b-graph-r3-20260825",
+  "packet_id": "v1b-lifecycle-temporal-verifier-20260819",
+  "sub_gate": "V1b-TL-graph",
+  "component": "trace-lite",
+  "created_at_utc": "2026-08-25T07:00:00.0000000Z",
+  "expires_at_utc": "2026-08-26T23:59:59.0000000Z",
+  "owner": "S5 Final V1b-R3 Independent Graph Verifier",
+  "verifier_id": "v1b-r3-graph-verifier-20260825",
+  "state": "assigned",
+  "candidate": {
+    "commit": "3e7e9f0ee460e3af75f3935343f6d6f2089f9f7c",
+    "tree_sha256": "ef83211ff9a52bce0706bda7b102639830b5a554",
+    "status": "clean detached candidate"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-r3-graph-20260825",
+    "branch": "detached",
+    "clean_on_creation": true,
+    "exclusive": true,
+    "scratch_path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-r3-graph-20260825",
+    "result_path": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-r3-graph-20260825",
+    "venv_executable": "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-r3-graph-20260825\\.venv\\Scripts\\python.exe"
+  },
+  "scope": {
+    "allowed_paths": [
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-worktrees\\v1b-r3-graph-20260825",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-scratch\\v1b-r3-graph-20260825",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-verifier-results\\v1b-r3-graph-20260825"
+    ],
+    "forbidden_paths": [
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-tl2",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+      "network/providers/raw data"
+    ],
+    "may_repair_candidate": false,
+    "may_choose_policy": false
+  },
+  "claim_limit": "Independent graph boundedness and PPR engineering verification only; no temporal, PostgreSQL/RLS, external-index, deployment, certification, SOTA, 100K, or promotion claim."
+}

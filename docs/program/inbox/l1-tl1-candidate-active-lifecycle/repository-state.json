@@ -1,0 +1,21 @@
+{
+  "contract_version": "1.0",
+  "recorded_at_utc": "2026-08-19T11:35:00Z",
+  "task_id": "l1-tl1-candidate-active-lifecycle",
+  "session": "S2",
+  "worktree_path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-lite-l1",
+  "branch": "feat/l1-candidate-active-lifecycle",
+  "base_commit": "fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1",
+  "head_commit": "7ff40dc46fe3d5e8eef31c485ed0337b8f71602d",
+  "modified_files": [
+    "src/trace_lite/cortex/forest.py",
+    "src/trace_lite/cortex/manifest.py",
+    "src/trace_lite/cortex/vector_store.py",
+    "src/trace_lite/db.py"
+  ],
+  "created_files": [
+    "tests/test_cortex_lifecycle.py",
+    "tests/test_lifecycle.py"
+  ],
+  "protected_original_checkout": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite (clean & untouched)"
+}

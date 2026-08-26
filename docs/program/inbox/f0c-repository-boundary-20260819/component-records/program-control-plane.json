@@ -1,0 +1,57 @@
+{
+  "contract_version": "1.0",
+  "record_id": "program-control-plane-f0c-20260819",
+  "captured_at_utc": "2026-08-19T04:37:30Z",
+  "captured_by": "coordinator",
+  "component": "program-control-plane",
+  "canonical_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace\\docs\\program",
+  "identity": {
+    "kind": "content_manifest",
+    "remote_or_archive": null,
+    "branch": null,
+    "commit": null,
+    "tag": null,
+    "snapshot_id": "foundation-control-plane-20260819-initial",
+    "content_manifest_sha256": "c65926092d2dc7b4472dd1ac4da2af853b2fd8a24ecd93c9b748bd37c16df2f5",
+    "identity_is_certifying": false
+  },
+  "working_state": {
+    "clean": true,
+    "tracked_modified_count": 0,
+    "tracked_diff_sha256": null,
+    "untracked_path_list_sha256": null,
+    "classified_paths": []
+  },
+  "source_inventory": {
+    "include_rules": [
+      "docs/program/**"
+    ],
+    "exclude_rules": [
+      "docs/program/CONTROL_PLANE_LOCK.json"
+    ],
+    "inventory_file_count": 103,
+    "inventory_sha256": "c65926092d2dc7b4472dd1ac4da2af853b2fd8a24ecd93c9b748bd37c16df2f5"
+  },
+  "integration_boundaries": [
+    {
+      "consumer": "all_lanes",
+      "producer": "coordinator",
+      "path_or_import": "docs/program/",
+      "pin_status": "locked",
+      "notes": "Canonical control plane pack referenced by all session workers."
+    }
+  ],
+  "safe_mutation_base": {
+    "available": true,
+    "commit": null,
+    "reason": "Coordinator curates canonical documentation under reviewed workflow. No product code mutation."
+  },
+  "packet_disposition": [
+    {
+      "packet_id": "F0c",
+      "status": "in_progress",
+      "reason": "Recording current boundary facts and synthesis."
+    }
+  ],
+  "claim_boundary": "Control plane documentation record; does not certify software implementation."
+}

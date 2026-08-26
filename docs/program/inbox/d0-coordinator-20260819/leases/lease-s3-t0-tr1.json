@@ -1,0 +1,55 @@
+{
+  "contract_version": "1.0",
+  "lease_id": "lease-s3-t0-tr1-20260819",
+  "packet_id": "s3-t0-trace-snapshot / tr1-unified-cortex-release-20260819",
+  "component": "trace",
+  "created_at_utc": "2026-08-19T07:00:00Z",
+  "expires_at_utc": "2026-08-20T07:00:00Z",
+  "owner": "S3 Trace V2 Cortex Release Owner",
+  "base": {
+    "repository_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "dirty_user_commit": "c855bb06532b3b52b25f0bea969d2677e5049065",
+    "initial_action": "T0 creates clean isolated snapshot branch/commit before TR1"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr1",
+    "branch": "feat/tr1-unified-cortex-release",
+    "clean_on_creation": true,
+    "exclusive": true
+  },
+  "scope": {
+    "allowed_paths": [
+      "src/trace/v2/",
+      "migrations/004_cortex_projection_control_plane.sql",
+      "migrations/005_*.sql",
+      "tests/test_v2_cortex_controls.py",
+      "tests/test_v2_release_controls.py",
+      "tests/test_v2_lifecycle_isolation.py"
+    ],
+    "forbidden_paths": [
+      "docs/program/",
+      "src/trace/v1/",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite\\",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench\\"
+    ],
+    "may_run_networked_commands": false,
+    "may_download_data": false,
+    "may_call_provider": false
+  },
+  "prohibited_operations": [
+    "mutate original dirty user checkout in C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace",
+    "edit program control plane docs/program/",
+    "unilaterally choose P-004 temporal semantics",
+    "apply in-place destructive modifications to existing migrations 001-003"
+  ],
+  "recovery": {
+    "rollback_statement": "Discard worktree directory C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-tr1.",
+    "external_side_effects": "none"
+  },
+  "verifier": {
+    "required": true,
+    "separate_worktree": true,
+    "packet_id": "v1b-lifecycle-temporal-verifier-20260819"
+  },
+  "release_state": "assigned"
+}

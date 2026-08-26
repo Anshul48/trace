@@ -1,0 +1,18 @@
+{
+  "contract_version": "1.0",
+  "manifest_id": "v1-v1a-integrity-verifier-inputs",
+  "packet_id": "V1",
+  "state": "scoped",
+  "missing_preconditions": [
+    "V0 frozen negative matrix",
+    "B1 implementation handoff",
+    "separate clean verifier worktree",
+    "P-007/P-008-compliant evaluator identity"
+  ],
+  "authority": {
+    "may_edit_product_code": false,
+    "may_download_data": false,
+    "may_run_certification": false
+  },
+  "claim_boundary": "Verification not yet executable."
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Trace Foundation Fail-Closed Error Receipt",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "receipt_id",
+    "created_at_utc",
+    "run_id",
+    "mode",
+    "status",
+    "stage",
+    "reason_code",
+    "certification_eligible",
+    "safe_detail"
+  ],
+  "properties": {
+    "contract_version": { "type": "string", "const": "1.0" },
+    "receipt_id": { "type": "string", "minLength": 1 },
+    "created_at_utc": { "type": "string", "format": "date-time" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "mode": {
+      "type": "string",
+      "enum": ["unit", "regression", "exploratory", "certification"]
+    },
+    "status": { "type": "string", "const": "blocked" },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "preflight",
+        "source_identity",
+        "dataset",
+        "license",
+        "checksum",
+        "transform",
+        "provider",
+        "indexing",
+        "query",
+        "metric",
+        "result_write",
+        "transport",
+        "policy"
+      ]
+    },
+    "reason_code": {
+      "type": "string",
+      "enum": [
+        "MISSING_SOURCE_IDENTITY",
+        "UNPINNED_COMPONENT",
+        "MISSING_DATASET",
+        "LICENSE_UNRESOLVED",
+        "CHECKSUM_MISMATCH",
+        "MISSING_EVIDENCE_MAPPING",
+        "MOCK_PROVIDER_FORBIDDEN",
+        "SYNTHETIC_SUBSTITUTION_FORBIDDEN",
+        "FALLBACK_FORBIDDEN",
+        "EMPTY_RESULT_NOT_ABSTENTION",
+        "STAGE_ERROR",
+        "INSECURE_TLS_FORBIDDEN",
+        "UNAVAILABLE_PROVIDER",
+        "UNAVAILABLE_INDEX",
+        "INVALID_MANIFEST",
+        "POLICY_DENIED"
+      ]
+    },
+    "certification_eligible": { "type": "boolean", "const": false },
+    "safe_detail": { "type": "string", "minLength": 1 },
+    "correlation_id": { "type": "string" },
+    "component": { "type": "string" },
+    "source_anchor": { "type": "string" },
+    "exception_class": { "type": "string" },
+    "retry_guidance": { "type": "string" },
+    "artifact_references": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

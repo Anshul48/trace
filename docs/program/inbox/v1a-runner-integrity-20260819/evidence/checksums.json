@@ -1,0 +1,19 @@
+{
+  "packet_id": "v1a-runner-integrity-20260819",
+  "generated_at_utc": "2026-08-25T13:27:06.663371+00:00",
+  "artifacts": {
+    "input-manifest.json": "962f318b87f06d9be509416dfa75814c11a258edb2600bc428fd34c1e85008d7",
+    "commands.md": "a3ce87d453586ec552c213afd0f20ccfa8248f070bc20dcfbe9b7daf521415f8",
+    "verification.md": "2d795a493039907eb7c6ec190a89d5d63896f1ee1c846ea671a4444731eba99a",
+    "handoff.md": "47c17783508e8ab2d15323af2bf96f9955099096be8190c369d5ab05311881ba",
+    "evidence/execution-note.md": "8c528d8373cea54303dfa77f27e06e212a3aed392d1056484216474866f3ad2b",
+    "evidence/README.md": "211eb1941e3e2600fd891f3710423042ff197d8cb8e558d47aff89a9b6fdd80b"
+  },
+  "source": {
+    "commit": "c0ea9fbf37bc50c88336f198437be031c18d6f64",
+    "source_manifest_sha256_lf": "24e3c942227ab5203dfc324f83ed3eee4c5e4d2af784e23223b2f9f1f131b5cc",
+    "source_manifest_composite_sha256": "554555030a8ee6037b41aba3e163b616d1f43ef6b057cb98c7f9242271dad83f",
+    "uv_lock_sha256": "fd4bbc4107d965f570493afb2a425b0482363b126532d023744e0a7d46745c50",
+    "scale_evidence_plan_sha256": "7d929812588f23a9e7e7f6633719eb2be80667f587021ca70aa14cec2dfa0528"
+  }
+}

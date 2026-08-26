@@ -1,0 +1,34 @@
+{
+  "contract_version": "1.0",
+  "lease_id": "lease-s1-b1-1-benchmark-identity-20260819",
+  "packet_id": "b1-1-benchmark-identity-20260819",
+  "component": "trace-bench",
+  "created_at_utc": "2026-08-19T12:40:55.1070524Z",
+  "expires_at_utc": "2026-08-20T12:40:55.1070524Z",
+  "owner": "S1 Benchmark Identity Owner",
+  "state": "assigned",
+  "base": {
+    "repository_root": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench",
+    "source_observation_head": "0b01de5e49dcb18d43876b0b6004da58b35b72aa",
+    "source_observation_status": "tracked_clean_with_untracked_uv.lock",
+    "uv_lock_sha256": "fd4bbc4107d965f570493afb2a425b0482363b126532d023744e0a7d46745c50",
+    "required_successor_identity": "B1.1 must publish a new clean full commit and source/dependency manifest"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-worktrees\\trace-bench-b11-20260819",
+    "branch": "feat/b1-identity-refresh-20260819",
+    "clean_on_creation": true,
+    "exclusive": true,
+    "active_source_observation_root_read_only": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench"
+  },
+  "scope": {
+    "allowed_paths": ["uv.lock", "SOURCE_MANIFEST.json", "pyproject.toml", "README.md", ".gitignore"],
+    "forbidden_paths": ["src/", "tests/", "benchmarks/", "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite\\", "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace\\", "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\"],
+    "may_run_networked_commands": "dependency-resolution only, strict TLS; no datasets or providers",
+    "may_download_data": false,
+    "may_call_provider": false
+  },
+  "verifier": {"required": true, "packet_id": "v1a-runner-integrity-20260819"},
+  "handoff_destination": "docs/program/inbox/b1-1-benchmark-identity-20260819/handoff.md",
+  "safe_default": "Preserve historical B1 commit and all untracked files; do not run certification."
+}

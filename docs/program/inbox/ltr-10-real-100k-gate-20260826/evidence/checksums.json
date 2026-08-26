@@ -1,0 +1,26 @@
+{
+  "evidence/100k_scale_dossier.json": {
+    "sha256": "9941639b9c0b04ae659d48745da333fed42a9dd1367849c7ef4cd2b9c8aad0cb",
+    "size_bytes": 3324
+  },
+  "evidence/telemetry_timeseries.json": {
+    "sha256": "f7eb091f8774b6575d697de4f33edcf4a546059b6cb294b399aa96f88b1e9fa2",
+    "size_bytes": 13147
+  },
+  "evidence/runs/durability_audit_trace.json": {
+    "sha256": "f4a2287f5440522989ad6516a3c7d1afea907b7a0f3aa281dc3d54bf8d50703d",
+    "size_bytes": 3258
+  },
+  "evidence/runs/graph_walk_telemetry.jsonl": {
+    "sha256": "5aa7051d5636247d09ac2e0449eba28d3b72381f6278824b9d3274e95537c280",
+    "size_bytes": 16456
+  },
+  "evidence/runs/raw_query_evaluations.jsonl": {
+    "sha256": "f3116e530309b959de935de0ca0018d760ad3205b79186f0a81ada1686dc66e4",
+    "size_bytes": 202290
+  },
+  "evidence/runs/replay_recovery_trace.json": {
+    "sha256": "8daac0c3ad02073a1d02c2e85ccf69fbfb7c6bc0faad7d9f8e5e20d85684d4fb",
+    "size_bytes": 183
+  }
+}

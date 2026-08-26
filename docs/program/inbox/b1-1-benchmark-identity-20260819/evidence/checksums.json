@@ -1,0 +1,57 @@
+{
+  "algorithm": "sha256",
+  "packet_id": "b1-1-benchmark-identity-20260819",
+  "status": "final",
+  "files": [
+    {
+      "path": "../packet.md",
+      "sha256": "32e2deddf2227e73a241cc7735680331e01a2f4818e0a2787a3dd237ea334453",
+      "size_bytes": 2460
+    },
+    {
+      "path": "../input-manifest.json",
+      "sha256": "0dfc81a6eebeeed9e3bfed32bfa6c75139af5f59a6be4e939ef3711ee4aa12ad",
+      "size_bytes": 4695
+    },
+    {
+      "path": "../repository-state.json",
+      "sha256": "99178d87ae66f09e089a994a95d0bb2e5149441ec885059bec7a0be8abe2fcd5",
+      "size_bytes": 1706
+    },
+    {
+      "path": "../commands.md",
+      "sha256": "7c9f1317d4ccd55c393d2d4858eb8ece9585c6ba2112aabfd3930759f5d208ac",
+      "size_bytes": 4472
+    },
+    {
+      "path": "../verification.md",
+      "sha256": "be00ee2ea468a490675260e045ec443f8f9b12b441968346473c97d384319464",
+      "size_bytes": 3806
+    },
+    {
+      "path": "../handoff.md",
+      "sha256": "abbee58abe0c700fa2dcb18c597dffeb721c601d1cf53aea268055dd3d7065b7",
+      "size_bytes": 12851
+    },
+    {
+      "path": "../v1a-input-manifest.json",
+      "sha256": "0f3e83e7a38e493262453571c1e577750720abde97cdd901b1e75e7a28bc37b8",
+      "size_bytes": 2778
+    },
+    {
+      "path": "README.md",
+      "sha256": "51cccfb0e1f2cfd917a9175fea3d258dc16b30a9256a1ae73781d1fd97895bc9",
+      "size_bytes": 639
+    },
+    {
+      "path": "external:C:\\Users\\anshu\\AppData\\Local\\Temp\\trace-bench-b11-20260820\\clone-final\\SOURCE_MANIFEST.json",
+      "sha256": "b0d58be58ed76fd67942cc6ab5b4346057a5ec27986199b6f91757a53591031b",
+      "size_bytes": 8744
+    },
+    {
+      "path": "external:C:\\Users\\anshu\\AppData\\Local\\Temp\\trace-bench-b11-20260820\\clone-final\\uv.lock",
+      "sha256": "fd4bbc4107d965f570493afb2a425b0482363b126532d023744e0a7d46745c50",
+      "size_bytes": 265239
+    }
+  ]
+}

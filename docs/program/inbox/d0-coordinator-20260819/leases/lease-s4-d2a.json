@@ -1,0 +1,53 @@
+{
+  "contract_version": "1.0",
+  "lease_id": "lease-s4-d2a-20260819",
+  "packet_id": "s4-d2a-raw-data-acquisition",
+  "component": "raw-data-staging",
+  "created_at_utc": "2026-08-19T07:00:00Z",
+  "expires_at_utc": "2026-08-20T07:00:00Z",
+  "owner": "S4 Real-Data Steward and Staging Owner",
+  "base": {
+    "staging_root": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data",
+    "admitted_portfolio_decision": "DEC-P-001"
+  },
+  "worktree": {
+    "path": "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data",
+    "exclusive": true
+  },
+  "scope": {
+    "allowed_paths": [
+      "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\beir-scifact\\",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\beir-nfcorpus\\",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\beir-fiqa\\",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\bright\\",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\multihop-rag\\",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\musique\\",
+      "C:\\Users\\anshu\\AppData\\Local\\trace-bench-data\\bigann\\"
+    ],
+    "forbidden_paths": [
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench\\",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-lite\\",
+      "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace\\"
+    ],
+    "may_run_networked_commands": true,
+    "may_download_data": true,
+    "may_call_provider": false
+  },
+  "prohibited_operations": [
+    "modify any product code or benchmark code",
+    "commit raw data, archives, or caches to Git",
+    "use insecure TLS retries (verify=False)",
+    "synthesize artificial datasets on download failures",
+    "download unadmitted datasets without human decision"
+  ],
+  "recovery": {
+    "rollback_statement": "Purge unverified raw directories in C:\\Users\\anshu\\AppData\\Local\\trace-bench-data.",
+    "external_side_effects": "network download bytes only"
+  },
+  "verifier": {
+    "required": true,
+    "separate_worktree": false,
+    "packet_id": "d2b-manifest-verification"
+  },
+  "release_state": "assigned"
+}

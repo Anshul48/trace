@@ -1,0 +1,22 @@
+{
+  "session": "Session 12 (S7 Real 100K Scale Gate)",
+  "receipts": [
+    {
+      "receipt_id": "rcpt-s7-100k-scale-audit-20260826",
+      "timestamp_utc": "2026-08-26T04:45:00Z",
+      "reviewer_role": "Scale Telemetry & Output Auditor",
+      "disposition": "PASS",
+      "audited_metrics": {
+        "corpus_count": 100000,
+        "source_atom_retention": 1.0,
+        "orphan_atom_rate": 0.0,
+        "routing_purity": 0.892,
+        "ppr_p95_latency_ms": 1.537,
+        "max_stored_degree": 50,
+        "direct_lookup_p95_latency_ms": 0.026,
+        "replay_parity": 1.0,
+        "storage_multiplier": 1.85
+      }
+    }
+  ]
+}
