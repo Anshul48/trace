@@ -238,6 +238,8 @@ class EvidenceHierarchyBuilder:
         local_topic_size: int = 6,
         actor: str = "system",
         model_version: str = "extractive-hierarchy-v1",
+        model_id: str | None = None,
+        **kwargs: Any,
     ) -> HierarchyBuildResult:
         if os.environ.get("TRACE_PRODUCTION_MODE", "false").lower() == "true" and os.environ.get("TRACE_ALLOW_FULL_HIERARCHY_REBUILD", "false").lower() != "true":
             raise RuntimeError("full-workspace hierarchy rebuild is disabled in production; use build_delta during ingestion")

@@ -247,6 +247,7 @@ class HierarchyBuildRequest(BaseModel):
     local_topic_size: int = Field(default=6, ge=2, le=32)
     actor: str = "system"
     model_version: str = "extractive-hierarchy-v1"
+    model_id: str | None = Field(default=None, min_length=1, max_length=128)
 
 
 class SchemaProposalRequest(BaseModel):

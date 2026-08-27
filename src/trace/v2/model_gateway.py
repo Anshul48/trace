@@ -143,18 +143,52 @@ class RegisteredModel:
         }
 
 
+def _default_deepseek_flash_provider() -> str:
+    if "TRACE_LITELLM_DEEPSEEK_V4_FLASH" in os.environ:
+        return os.environ["TRACE_LITELLM_DEEPSEEK_V4_FLASH"]
+    if os.environ.get("DEEPINFRA_API_KEY"):
+        return "deepinfra/deepseek-ai/DeepSeek-V4-Flash"
+    return "deepseek/deepseek-v4-flash"
+
+
+def _default_deepseek_pro_provider() -> str:
+    if "TRACE_LITELLM_DEEPSEEK_V4_PRO" in os.environ:
+        return os.environ["TRACE_LITELLM_DEEPSEEK_V4_PRO"]
+    if os.environ.get("DEEPINFRA_API_KEY"):
+        return "deepinfra/deepseek-ai/DeepSeek-V4-Pro"
+    return "deepseek/deepseek-v4-pro"
+
+
 DEFAULT_MODEL_REGISTRY: tuple[RegisteredModel, ...] = (
     RegisteredModel(
         model_id="deepseek-v4-flash",
-        provider_model=os.environ.get("TRACE_LITELLM_DEEPSEEK_V4_FLASH", "deepseek/deepseek-v4-flash"),
-        purposes=frozenset({"deep_navigation", "synthesis", "schema_proposal"}),
+        provider_model=_default_deepseek_flash_provider(),
+        purposes=frozenset({"deep_navigation", "synthesis", "schema_proposal", "hierarchy_summary"}),
         tier="flash",
     ),
     RegisteredModel(
         model_id="deepseek-v4-pro",
-        provider_model=os.environ.get("TRACE_LITELLM_DEEPSEEK_V4_PRO", "deepseek/deepseek-v4-pro"),
-        purposes=frozenset({"deep_navigation", "synthesis", "schema_proposal"}),
+        provider_model=_default_deepseek_pro_provider(),
+        purposes=frozenset({"deep_navigation", "synthesis", "schema_proposal", "hierarchy_summary"}),
         tier="pro",
+    ),
+    RegisteredModel(
+        model_id="deepinfra/deepseek-ai/DeepSeek-V4-Flash",
+        provider_model="deepinfra/deepseek-ai/DeepSeek-V4-Flash",
+        purposes=frozenset({"deep_navigation", "synthesis", "schema_proposal", "hierarchy_summary"}),
+        tier="flash",
+    ),
+    RegisteredModel(
+        model_id="deepinfra/deepseek-ai/DeepSeek-V4-Pro",
+        provider_model="deepinfra/deepseek-ai/DeepSeek-V4-Pro",
+        purposes=frozenset({"deep_navigation", "synthesis", "schema_proposal", "hierarchy_summary"}),
+        tier="pro",
+    ),
+    RegisteredModel(
+        model_id="deepinfra/deepseek-ai/DeepSeek-V4-Flash-0731",
+        provider_model="deepinfra/deepseek-ai/DeepSeek-V4-Flash-0731",
+        purposes=frozenset({"deep_navigation", "synthesis", "schema_proposal", "hierarchy_summary"}),
+        tier="flash",
     ),
 )
 
@@ -266,7 +300,19 @@ class TraceModelGateway:
     def _registered(self, model_id: str, *, purpose: str) -> RegisteredModel:
         model = self.registry.get(model_id)
         if model is None:
-            raise ModelPolicyDenied("requested model is not registered")
+            known_prefixes = (
+                "deepinfra/", "deepseek/", "openai/", "anthropic/",
+                "ollama/", "azure/", "groq/", "together_ai/",
+            )
+            if self.policy.policy.allow_cloud and any(model_id.startswith(p) for p in known_prefixes):
+                model = RegisteredModel(
+                    model_id=model_id,
+                    provider_model=model_id,
+                    purposes=frozenset({"deep_navigation", "synthesis", "schema_proposal", "hierarchy_summary"}),
+                    tier="flash" if any(term in model_id.lower() for term in ("flash", "mini", "8b", "haiku", "small")) else "pro",
+                )
+            else:
+                raise ModelPolicyDenied("requested model is not registered")
         if purpose not in model.purposes:
             raise ModelPolicyDenied("registered model does not support this operation")
         if not model.supports_json:
@@ -315,6 +361,10 @@ class TraceModelGateway:
         base_url = os.environ.get("TRACE_MODEL_GATEWAY_URL") or os.environ.get("TRACE_LITELLM_BASE_URL")
         if base_url:
             options["api_base"] = base_url
+        if "api_key" not in kwargs:
+            api_key = os.environ.get("DEEPINFRA_API_KEY") or os.environ.get("TRACE_MODEL_API_KEY") or os.environ.get("OPENAI_API_KEY")
+            if api_key:
+                options["api_key"] = api_key
         return completion(**kwargs, **options)
 
     def _persist_audit(

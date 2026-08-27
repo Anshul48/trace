@@ -3084,7 +3084,14 @@ class TraceService:
             rendering = "Insufficient evidence in the selected bundle to produce a supported synthesis."
         elif model_id:
             if authorization_context is None:
-                raise PermissionError("a server-derived authorization context is required for model synthesis")
+                if self.settings.auth_required:
+                    raise PermissionError("a server-derived authorization context is required for model synthesis")
+                authorization_context = SimpleNamespace(
+                    workspace_id=bundle.get("workspace_id", "default"),
+                    subject="local",
+                    request_id=None,
+                    model_permissions=frozenset({"*", "model:pro"}),
+                )
             policy_revision = self._cloud_model_policy_revision(authorization_context.workspace_id)
             generated, model_audit = self.model_gateway.call_json(
                 context=authorization_context,

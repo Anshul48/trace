@@ -19,13 +19,24 @@ app = FastAPI(title="Trace private model gateway", docs_url=None, redoc_url=None
 
 
 def _registry() -> dict[str, str]:
-    flash = os.environ.get("TRACE_LITELLM_DEEPSEEK_V4_FLASH", "deepseek/deepseek-v4-flash")
-    pro = os.environ.get("TRACE_LITELLM_DEEPSEEK_V4_PRO", "deepseek/deepseek-v4-pro")
-    # Accept the canonical Trace provider names and an operator's configured
-    # LiteLLM aliases, while mapping both to the same server-owned target.
+    default_flash = (
+        "deepinfra/deepseek-ai/DeepSeek-V4-Flash"
+        if os.environ.get("DEEPINFRA_API_KEY")
+        else "deepseek/deepseek-v4-flash"
+    )
+    default_pro = (
+        "deepinfra/deepseek-ai/DeepSeek-V4-Pro"
+        if os.environ.get("DEEPINFRA_API_KEY")
+        else "deepseek/deepseek-v4-pro"
+    )
+    flash = os.environ.get("TRACE_LITELLM_DEEPSEEK_V4_FLASH", default_flash)
+    pro = os.environ.get("TRACE_LITELLM_DEEPSEEK_V4_PRO", default_pro)
+    # Accept canonical Trace names, DeepInfra paths, and operator aliases
     return {
         "deepseek/deepseek-v4-flash": flash,
         "deepseek/deepseek-v4-pro": pro,
+        "deepinfra/deepseek-ai/DeepSeek-V4-Flash": flash,
+        "deepinfra/deepseek-ai/DeepSeek-V4-Pro": pro,
         flash: flash,
         pro: pro,
     }
