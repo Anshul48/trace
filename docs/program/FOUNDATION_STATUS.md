@@ -28,7 +28,7 @@ This label means that the comprehensive [Foundation & Scale Audit Remediation Pl
 | **LTR-10** | `ltr-10-real-100k-gate-20260826` | **CLOSED (PASS)** | S7 Scale Owner | 100,000 real documents evaluated: 100% retention, 100% anchor recovery, 515 MB RAM, P95 PPR 9.3ms, raw telemetry retained. |
 | **LTR-11** | `ltr-11-verifier-attestation-20260826` | **CLOSED (PASS)** | S5 Verifier | Independent verification attestation sealed matching dossier SHA-256 `9941639b...`. |
 | **Gate C2** | `DEC-GATE-C2-PASS-REMEDIATED` | **APPROVED (Human Gate C2)** | Human Owner | Human Gate C2 formally certified, closed, and promoted (`DEC-GATE-C2-PASS-REMEDIATED`). |
-| **LTR-13** | `ltr-13-1m-pilot-plan-20260826` | **ready for re-anchoring**| S7 Scale Owner | Unblocked to anchor 1M Pilot Plan on certified 100K empirical numbers. |
+| **LTR-13** | `ltr-13-1m-pilot-plan-20260826` | **completed / re-anchored** | S7 Scale Owner | Capacity model and architecture plan fully synchronized with certified 100K metrics. |
 
 ## Human Decision Status
 

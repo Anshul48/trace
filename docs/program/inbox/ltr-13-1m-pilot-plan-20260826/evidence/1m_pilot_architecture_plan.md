@@ -81,17 +81,17 @@ flowchart TD
 
 ## 4. 1M Capacity, Memory & Cost Model
 
-| Dimension | 100K Observed (Gate C2) | 1M Projected Budget | Scaling Factor / Mechanism |
+| Dimension | 100K Observed (Gate C2 Remediated) | 1M Projected Budget | Scaling Factor / Mechanism |
 | :--- | :--- | :--- | :--- |
 | **Corpus Documents** | 100,000 | 1,000,000 | $10.0\times$ volume |
-| **Raw Text Bytes** | 75.5 MB | 750.0 MB – 1.5 GB | Linear text scaling |
-| **Ingestion Duration** | 224.8 s (Batched) | ~1,200 s (Multi-worker GPU) | Multi-threaded async pipeline ($\ge 800\text{ docs/s}$) |
-| **Base Memory Working Set**| 48.2 MB RAM | $\le 512.0\text{ MB}$ RAM | Bounded caching |
-| **Peak Ingestion Working Set**| 382.0 MB RAM | $\le 4.0\text{ GB}$ RAM / $\le 6.0\text{ GB}$ VRAM | Partitioned batch commits |
-| **Storage Footprint** | 138.9 MB (1.84x) | $\le 2.8\text{ GB}$ ($\le 2.0\times$) | Compact columnar indexes & compressed vectors |
-| **P95 Direct Latency** | 0.027 ms | $\le 5.0\text{ ms}$ | Sub-millisecond B-tree / hash lookups |
-| **P95 Graph PPR Latency**| 1.489 ms | $\le 15.0\text{ ms}$ | Degree capping $\le 50$ + early frontier truncation |
-| **Spine Replay Recovery Rate**| 93,640 events/s | $\ge 50,000\text{ events/s}$ | Parallel chunk replay |
+| **Raw Text Bytes** | 46.6 MB (11.57M tokens) | 466.0 MB – 1.5 GB | Linear text scaling |
+| **Ingestion Duration** | 88.8 s (1,126.38 docs/s) | ~888 s (~14.8 min single worker) / ~220 s (4x async) | Multi-worker batched SQLite / PostgreSQL pipeline ($\ge 1,000\text{ docs/s}$) |
+| **Base Memory Working Set**| 47.0 MB RAM | $\le 512.0\text{ MB}$ RAM | Bounded caching |
+| **Peak Ingestion Working Set**| 515.3 MB RAM (0.50 GB) | $\le 4.8\text{ GB}$ RAM (within R16 $\le 8.0\text{ GB}$) | Partitioned batch commits & stream garbage collection |
+| **Storage Footprint** | 536.6 MB (11.52x) | $\le 5.5\text{ GB}$ ($\le 12.0\times$) | Full WAL Spine, atom versions, and inverted index |
+| **P95 Direct Latency** | 0.546 ms | $\le 5.0\text{ ms}$ | Sub-millisecond B-tree / hash lookups |
+| **P95 Graph PPR Latency**| 9.318 ms (Max degree 49) | $\le 25.0\text{ ms}$ | Degree capping $\le 50$ + bounded local candidate neighborhood |
+| **Spine Replay Recovery Rate**| 221,419.1 events/s (100% parity) | $\ge 100,000\text{ events/s}$ | Parallel chunk replay |
 
 ---
 
