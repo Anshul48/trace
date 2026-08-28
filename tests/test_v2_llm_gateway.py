@@ -72,12 +72,18 @@ class TraceLLMGatewayTests(unittest.TestCase):
         self.assertEqual(model.provider_model, "deepinfra/deepseek-ai/DeepSeek-V4-Flash-0731")
         self.assertEqual(model.tier, "flash")
 
+        # OpenRouter model resolution
+        openrouter_model = gateway._registered("openrouter/deepseek/deepseek-chat", purpose="synthesis")
+        self.assertEqual(openrouter_model.provider_model, "openrouter/deepseek/deepseek-chat")
+
     def test_dynamic_provider_denied_when_cloud_disabled(self) -> None:
         gateway = TraceModelGateway(
             policy=ModelGatewayPolicy(ModelPolicy(allow_cloud=False)),
         )
         with self.assertRaises(ModelPolicyDenied):
             gateway._registered("deepinfra/custom-model", purpose="synthesis")
+        with self.assertRaises(ModelPolicyDenied):
+            gateway._registered("openrouter/deepseek/deepseek-chat", purpose="synthesis")
 
     def test_model_gateway_passes_api_key_and_options(self) -> None:
         captured_kwargs: dict = {}

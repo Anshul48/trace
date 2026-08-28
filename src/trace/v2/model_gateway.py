@@ -301,7 +301,7 @@ class TraceModelGateway:
         model = self.registry.get(model_id)
         if model is None:
             known_prefixes = (
-                "deepinfra/", "deepseek/", "openai/", "anthropic/",
+                "openrouter/", "deepinfra/", "deepseek/", "openai/", "anthropic/",
                 "ollama/", "azure/", "groq/", "together_ai/",
             )
             if self.policy.policy.allow_cloud and any(model_id.startswith(p) for p in known_prefixes):
@@ -362,7 +362,12 @@ class TraceModelGateway:
         if base_url:
             options["api_base"] = base_url
         if "api_key" not in kwargs:
-            api_key = os.environ.get("DEEPINFRA_API_KEY") or os.environ.get("TRACE_MODEL_API_KEY") or os.environ.get("OPENAI_API_KEY")
+            api_key = (
+                os.environ.get("OPENROUTER_API_KEY")
+                or os.environ.get("DEEPINFRA_API_KEY")
+                or os.environ.get("TRACE_MODEL_API_KEY")
+                or os.environ.get("OPENAI_API_KEY")
+            )
             if api_key:
                 options["api_key"] = api_key
         return completion(**kwargs, **options)
