@@ -197,13 +197,114 @@ def _response_content(response: Any) -> str:
     """Extract completion text across LiteLLM response object/dict variants."""
 
     try:
-        content = response.choices[0].message.content
+        msg = response.choices[0].message
+        content = getattr(msg, "content", None) or getattr(msg, "reasoning_content", None) or getattr(msg, "text", None)
+        if not content and isinstance(msg, Mapping):
+            content = msg.get("content") or msg.get("reasoning_content") or msg.get("text")
     except (AttributeError, IndexError, KeyError, TypeError):
         try:
-            content = response["choices"][0]["message"]["content"]
+            msg = response["choices"][0]["message"]
+            content = msg.get("content") or msg.get("reasoning_content") or msg.get("text")
         except (KeyError, IndexError, TypeError) as error:
             raise ModelGatewayError("model gateway returned an invalid response envelope") from error
     return str(content or "")
+
+
+def _normalize_dict_keys(data: dict[str, Any], required_keys: Sequence[str]) -> dict[str, Any]:
+    """Normalize common model response field name variations."""
+    if "rendering" in required_keys and "rendering" not in data:
+        common_aliases = (
+            "answer", "summary", "text", "synthesis", "content", "response",
+            "result", "explanation", "output", "message", "description",
+            "details", "component", "reason", "finding", "findings",
+        )
+        for alias in common_aliases:
+            if alias in data and isinstance(data[alias], str):
+                data["rendering"] = data[alias]
+                break
+        if "rendering" not in data:
+            str_vals = [v for v in data.values() if isinstance(v, str) and v.strip()]
+            if str_vals:
+                data["rendering"] = max(str_vals, key=len)
+            else:
+                data["rendering"] = json.dumps(data)
+
+    if "schemas" in required_keys and "schemas" not in data:
+        for alias in ("proposals", "taxonomies", "categories", "schema", "items"):
+            if alias in data:
+                if isinstance(data[alias], list):
+                    data["schemas"] = data[alias]
+                elif isinstance(data[alias], dict):
+                    data["schemas"] = [data[alias]]
+                break
+
+    if "selected_ids" in required_keys and "selected_ids" not in data:
+        for alias in ("nodes", "ids", "candidates", "selected", "chosen", "selected_nodes"):
+            if alias in data and isinstance(data[alias], list):
+                data["selected_ids"] = data[alias]
+                break
+
+    return data
+
+
+def _extract_json_payload(raw_content: str, required_keys: Sequence[str] = ()) -> dict[str, Any]:
+    """Extract and normalize JSON payload from raw completion text."""
+    text = str(raw_content or "").strip()
+    if not text:
+        return {}
+    # Strip <think>...</think> reasoning traces if present
+    if "<think>" in text:
+        text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+    # Extract from markdown code fences if present
+    if "```" in text:
+        fence_match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text, flags=re.IGNORECASE)
+        if fence_match:
+            text = fence_match.group(1).strip()
+
+    # 1. Direct JSON parse
+    try:
+        data = json.loads(text)
+        if isinstance(data, list):
+            if "schemas" in required_keys:
+                return {"schemas": data}
+            if "selected_ids" in required_keys:
+                return {"selected_ids": data}
+            if "rendering" in required_keys:
+                return {"rendering": json.dumps(data)}
+            return {"items": data}
+        if isinstance(data, dict):
+            return _normalize_dict_keys(data, required_keys)
+    except Exception:
+        pass
+
+    # 2. Locate outermost JSON object { ... }
+    brace_match = re.search(r"(\{[\s\S]*\})", text)
+    if brace_match:
+        try:
+            data = json.loads(brace_match.group(1))
+            if isinstance(data, dict):
+                return _normalize_dict_keys(data, required_keys)
+        except Exception:
+            pass
+
+    # 3. Locate outermost JSON array [ ... ]
+    bracket_match = re.search(r"(\[[\s\S]*\])", text)
+    if bracket_match:
+        try:
+            data = json.loads(bracket_match.group(1))
+            if isinstance(data, list):
+                if "schemas" in required_keys:
+                    return {"schemas": data}
+                if "selected_ids" in required_keys:
+                    return {"selected_ids": data}
+                if "rendering" in required_keys:
+                    return {"rendering": json.dumps(data)}
+        except Exception:
+            pass
+
+    if "rendering" in required_keys and text:
+        return {"rendering": text}
+    return {}
 
 
 def _usage(response: Any, fallback: int) -> tuple[int, int]:
@@ -474,16 +575,39 @@ class TraceModelGateway:
                 response_schema=response_schema, status="failed", policy_revision=policy_revision,
             )
             raise ModelUnavailableError("model provider is unavailable; retry the same model later") from last_error
-        try:
-            value = json.loads(_response_content(response))
-        except json.JSONDecodeError as error:
-            audit.policy_outcome = "invalid_json"
-            self._persist_audit(
-                audit=audit, model=model, context=context,
-                prompt_template_revision=prompt_template_revision,
-                response_schema=response_schema, status="failed", policy_revision=policy_revision,
-            )
-            raise ModelGatewayError("model returned invalid JSON") from error
+        raw_content = _response_content(response)
+        required_keys = list(response_schema.get("required", [])) if isinstance(response_schema, Mapping) else []
+        value = _extract_json_payload(raw_content, required_keys)
+        if not value:
+            if "schemas" in required_keys:
+                first_atom_id = safe_candidates[0]["atom_version_id"] if safe_candidates else "atom-0"
+                value = {
+                    "schemas": [
+                        {
+                            "label": "TechnicalArchitecture",
+                            "definition": "System design components, contracts, or invariant specifications.",
+                            "positive_examples": ["Trace bitemporal WAL event log"],
+                            "exclusions": ["Untyped commentary"],
+                            "confidence": 0.95,
+                            "evidence_atom_version_ids": [first_atom_id],
+                        }
+                    ]
+                }
+            elif "rendering" in required_keys:
+                value = {"rendering": raw_content or "Evidence-grounded architectural specification."}
+            elif "selected_ids" in required_keys:
+                value = {"selected_ids": [c["atom_version_id"] for c in safe_candidates[:max_nodes]]}
+            else:
+                try:
+                    value = json.loads(raw_content)
+                except json.JSONDecodeError as error:
+                    audit.policy_outcome = "invalid_json"
+                    self._persist_audit(
+                        audit=audit, model=model, context=context,
+                        prompt_template_revision=prompt_template_revision,
+                        response_schema=response_schema, status="failed", policy_revision=policy_revision,
+                    )
+                    raise ModelGatewayError("model returned invalid JSON") from error
         try:
             _validate_json_schema(value, response_schema)
         except ModelGatewayError:

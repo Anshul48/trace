@@ -1,26 +1,8 @@
 {
-  "evidence/100k_scale_dossier.json": {
-    "sha256": "9941639b9c0b04ae659d48745da333fed42a9dd1367849c7ef4cd2b9c8aad0cb",
-    "size_bytes": 3324
-  },
-  "evidence/telemetry_timeseries.json": {
-    "sha256": "f7eb091f8774b6575d697de4f33edcf4a546059b6cb294b399aa96f88b1e9fa2",
-    "size_bytes": 13147
-  },
-  "evidence/runs/durability_audit_trace.json": {
-    "sha256": "f4a2287f5440522989ad6516a3c7d1afea907b7a0f3aa281dc3d54bf8d50703d",
-    "size_bytes": 3258
-  },
-  "evidence/runs/graph_walk_telemetry.jsonl": {
-    "sha256": "5aa7051d5636247d09ac2e0449eba28d3b72381f6278824b9d3274e95537c280",
-    "size_bytes": 16456
-  },
-  "evidence/runs/raw_query_evaluations.jsonl": {
-    "sha256": "f3116e530309b959de935de0ca0018d760ad3205b79186f0a81ada1686dc66e4",
-    "size_bytes": 202290
-  },
-  "evidence/runs/replay_recovery_trace.json": {
-    "sha256": "8daac0c3ad02073a1d02c2e85ccf69fbfb7c6bc0faad7d9f8e5e20d85684d4fb",
-    "size_bytes": 183
-  }
+  "100k_scale_dossier.json": "e8d14d431f2b08c9741964241acbd460539ed886c77975aab79dc8c01bb215a6",
+  "telemetry_timeseries.json": "a94eb2e01c49ca165a1e1ccfc14f233789f2c866a672b64527ff9eb9fbbd23c0",
+  "runs/durability_audit_trace.json": "eac51c6e46f0571c0c7d1de65e2c847f153e0d48d3f2a0e9e41b266c461d270b",
+  "runs/graph_walk_telemetry.jsonl": "811cae64a8ad5191374bd4f5db3540281d0f44e32f1d15c5c38a4600f6ad94e4",
+  "runs/raw_query_evaluations.jsonl": "153ba66ce01108896f84ab4c1a32cc2e29645d91ca43fe73db63a91544ae6641",
+  "runs/replay_recovery_trace.json": "766c483506206fdf7b8fc78ee808465c72ba1431f16da044870ef2ecc11a9a1f"
 }

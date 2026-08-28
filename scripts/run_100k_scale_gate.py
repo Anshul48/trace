@@ -37,10 +37,8 @@ from typing import Any, Generator, Sequence
 # Ensure trace source is first on path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 src_path = str(ROOT_DIR / "src")
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
-
-
+sys.path.insert(0, src_path)
+sys.modules.pop("trace", None)
 
 from trace.v2.atomizer import atomize
 from trace.v2.cortex import ActivationEngine, ActivationEdge, ActivationWeights
