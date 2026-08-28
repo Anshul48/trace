@@ -1,0 +1,10 @@
+{
+  "checkpoint_name": "checkpoint_1m",
+  "created_at_utc": "2026-08-28T09:14:11.913693+00:00",
+  "target_documents": 1000000,
+  "total_atoms": 1000000,
+  "master_db_path": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/trace_master_spine.db",
+  "db_size_bytes": 593920,
+  "resumption_ready_for_10m": true,
+  "resumption_ready_for_100m": true
+}

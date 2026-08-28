@@ -313,7 +313,7 @@ class OneMillionScaleRunner:
                     e1, e2 = tokens[0], tokens[1]
                     if len(self.entity_adj[e1]) < 50:
                         self.entity_adj[e1].append(e2)
-                        self.graph_edges.append(ActivationEdge(source_id=e1, target_id=e2, weight=1.0))
+                        self.graph_edges.append(ActivationEdge(source_id=e1, target_id=e2, family="structural", weight=1.0))
 
         return batch_atoms, batch_tokens
 
@@ -346,11 +346,8 @@ class OneMillionScaleRunner:
         for ent in entities:
             t0 = time.perf_counter()
             _ = engine.activate(
-                seeds={ent: 1.0},
+                seed_scores={ent: 1.0},
                 edges=self.graph_edges[:10000],
-                max_iterations=10,
-                damping=0.85,
-                convergence_threshold=1e-4,
             )
             walk_latencies.append((time.perf_counter() - t0) * 1000.0)
 
