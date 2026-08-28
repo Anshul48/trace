@@ -1,0 +1,144 @@
+{
+  "attestation_title": "Level 1 Independent Verifier Attestation Receipt: 100K Scale Gate Production Repair Audit",
+  "contract_version": "2.0",
+  "attestation_timestamp_utc": "2026-08-28T13:35:00Z",
+  "verifier_role": "Independent Scale Verifier (Wave R1 / Level 1)",
+  "authority": "00_GLOBAL_CONTEXT_REPAIR_LOOP.md / SCALE_CERTIFICATION_RECOVERY_PLAN.md (L1-07) / Human Gate C2 Decision / DEC-P-005b",
+  "candidate_run_identity": {
+    "candidate_evidence_root": "benchmarks/runs/100k_scale_candidate",
+    "evaluation_title": "Trace 100K Scale Gate Dossier (Level 1 DEC-P-005b Production Execution)",
+    "run_timestamp_utc": "2026-08-28T13:31:53.022311+00:00",
+    "target_standard": "DEC-P-005b-CANDIDATE",
+    "execution_mode": "candidate",
+    "runner_script": "scripts/run_100k_scale_gate.py",
+    "runner_script_sha256": "1e06ad01acce231f03a01b5124e225764bc94e2b25a58deb5029fd61ae4d2c4b",
+    "git_commit_sha": "a2c25e05f31d0ecb81ecaaf4b08bb82739f1c17f",
+    "db_snapshot_sha256": "8ee8aa48e7261e49ed31a4771341f7c39a074c0b375249065ea50f7c40ea0c5e"
+  },
+  "candidate_evidence_digests": {
+    "100k_scale_dossier.json": "b1853667b2be647f9dfa356e6e64f29e09f0cc9c82d9ab1b76e038d206434804",
+    "candidate_manifest.json": "bd398829a31aa812fc531185a4a05c383dcdbccc67048ab9600fe4e7d68632f8",
+    "checksums.json": "396a1c544be60a480642f045940e68c2f727fa711db9a030095d11f72d667eb6",
+    "telemetry_timeseries.json": "a378b801788f1c17591a43f479c19077628561ed300e3b7fec6a567bec061b5e",
+    "runs/durability_audit_trace.json": "7d5e16c81a0ec43f3db869a958a413af781b273dc75a5beb7bb4aa695487b655",
+    "runs/graph_walk_telemetry.jsonl": "2ccd2d74e00d9e7f4b9b1123eaf374dbda4d0743e4ada39cab0171fe35105be9",
+    "runs/raw_query_evaluations.jsonl": "9de25733354409e08c5b605fffd44c90982149917e5c32bd0db8dde0af9d45d2",
+    "runs/replay_recovery_trace.json": "12d7f0d9c01bf2109b4da59c4b17ed7983496e6b3d345b166dfebf83f317d9d2"
+  },
+  "provenance_input_digests": {
+    "corpus_manifest.json": {
+      "path": "docs/program/inbox/l1-02-corpus-capsule-20260828/evidence/corpus_manifest.json",
+      "sha256": "f66193e884f7907e114764fffbf7943647e9d0fc35b8ac52a263aaaf7f204a75"
+    },
+    "queries_manifest.json": {
+      "path": "docs/program/inbox/l1-02-corpus-capsule-20260828/evidence/queries_manifest.json",
+      "sha256": "d4e552f925010585c20760fb188231c5edbd7e7dd48bb36d104db01449d5f3b9"
+    },
+    "repair_architecture_spec.md": {
+      "path": "docs/program/inbox/r1-01-repair-architecture-20260828/evidence/repair_architecture_spec.md",
+      "sha256": "0b3289acd0285f75e7ee8a9fd2a49ba388504c64c094abfb32aa61d2504d3192"
+    },
+    "test_scale_rebuild_integrity.py": {
+      "path": "tests/test_scale_rebuild_integrity.py",
+      "sha256": "d28162ea580c46001e9db191429a52714a0bae82a2b370fdf7dc063fbb9834f3"
+    }
+  },
+  "audited_scale_workload_vector": {
+    "document_count_D": 100000,
+    "total_source_tokens_T": 16277897,
+    "total_active_atoms_N": 228328,
+    "raw_source_bytes_B": 65454984,
+    "storage_footprint_bytes": 712916992,
+    "storage_footprint_mb": 679.89,
+    "storage_multiplier": 10.89
+  },
+  "verified_invariants": {
+    "corpus_provenance_validated": true,
+    "document_count_exact_100k": true,
+    "atom_count_exact_228328": true,
+    "deduplication_zero_collisions": true,
+    "source_atom_retention_rate": 1.0,
+    "content_hash_drift_rate": 0.0,
+    "byte_offset_anchor_recovery_rate": 1.0,
+    "byte_slice_proofs_count": 1000,
+    "repeat_erasure_delta_writes": 0,
+    "orphan_atom_rate": 0.0,
+    "top_level_routing_purity": 0.895,
+    "duplicate_leaf_assignment": 0.0,
+    "bounded_graph_max_degree": 10,
+    "bounded_graph_max_degree_compliant": true,
+    "graph_traversal_p50_latency_ms": 0.978,
+    "graph_traversal_p95_latency_ms": 1.959,
+    "graph_traversal_p95_latency_compliant": true,
+    "spine_events_committed": 100000,
+    "spine_events_replayed": 100000,
+    "spine_replay_rate_events_sec": 1376.4,
+    "rebuild_table_parity_match_all_6_tables": true,
+    "rebuild_parity_rate": 1.0,
+    "true_event_projection_rebuild_verified_in_code": true,
+    "zero_cross_db_table_copies_verified": true,
+    "unclamped_retrieval_scoring_verified": true,
+    "direct_lookup_ndcg_at_10": 0.3406,
+    "direct_lookup_recall_at_20": 0.3558,
+    "domain_semantic_ndcg_at_10": 0.1371,
+    "domain_semantic_recall_at_20": 0.0419,
+    "semantic_qa_ndcg_at_10": 0.0112,
+    "semantic_qa_recall_at_20": 0.0163,
+    "multi_hop_ndcg_at_10": 0.1206,
+    "multi_hop_recall_at_20": 0.1567,
+    "abstention_accuracy_rate": 0.955,
+    "zero_hallucination_rate": 0.0,
+    "peak_rss_mb": 1547.61,
+    "peak_rss_gb": 1.511,
+    "peak_rss_limit_compliant": true,
+    "storage_footprint_mb": 679.89,
+    "storage_multiplier_compliant": true
+  },
+  "rebuild_table_parity_details": {
+    "events": {
+      "source_count": 100000,
+      "replay_count": 100000,
+      "parity_match": true,
+      "source_hash": "1eae697844f2af2965144afcfbf1248dd5be79224ef25a1ae09c76d5ec7c7d5b",
+      "replay_hash": "1eae697844f2af2965144afcfbf1248dd5be79224ef25a1ae09c76d5ec7c7d5b"
+    },
+    "ingestions": {
+      "source_count": 100000,
+      "replay_count": 100000,
+      "parity_match": true,
+      "source_hash": "623df9d92d7be70c12ca7585ce709f7af9dd9d455a2cf5e3611606a064c2390f",
+      "replay_hash": "623df9d92d7be70c12ca7585ce709f7af9dd9d455a2cf5e3611606a064c2390f"
+    },
+    "nodes": {
+      "source_count": 228328,
+      "replay_count": 228328,
+      "parity_match": true,
+      "source_hash": "6d963e89a1564bef8fd5c87901e2ca0fc092781b3ab46057545355121ddc9631",
+      "replay_hash": "6d963e89a1564bef8fd5c87901e2ca0fc092781b3ab46057545355121ddc9631"
+    },
+    "node_versions": {
+      "source_count": 228328,
+      "replay_count": 228328,
+      "parity_match": true,
+      "source_hash": "70ad6d15ac71aba8a2a01df47d8de4f585bd8e675c557707ae67e11c1cd7fc20",
+      "replay_hash": "70ad6d15ac71aba8a2a01df47d8de4f585bd8e675c557707ae67e11c1cd7fc20"
+    },
+    "edge_versions": {
+      "source_count": 824743,
+      "replay_count": 824743,
+      "parity_match": true,
+      "source_hash": "3203f5cc2e3542961f2f3e555031e7eb087fe856557d67158895d5b56001180b",
+      "replay_hash": "3203f5cc2e3542961f2f3e555031e7eb087fe856557d67158895d5b56001180b"
+    },
+    "source_lifecycle": {
+      "source_count": 228328,
+      "replay_count": 228328,
+      "parity_match": true,
+      "source_hash": "2531c46cae5bdfe1e7ec9852dfc7049c988337b3c0ef26235663c6e676fb53b7",
+      "replay_hash": "2531c46cae5bdfe1e7ec9852dfc7049c988337b3c0ef26235663c6e676fb53b7"
+    }
+  },
+  "audit_disposition": "AUDIT_ACCEPTED_PRODUCTION_CANDIDATE",
+  "audit_verdict": "PASS_ALL_SCALE_GATE_INVARIANTS",
+  "recommendation": "PROCEED_TO_GATE_C2_RE_SUBMISSION"
+}

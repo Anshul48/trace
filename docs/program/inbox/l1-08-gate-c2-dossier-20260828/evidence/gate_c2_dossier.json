@@ -1,0 +1,121 @@
+{
+  "dossier_title": "Master Gate C2 Dossier: Level 1 100K Scale Gate Production Certification",
+  "dossier_version": "2.0-REPAIR",
+  "dossier_timestamp_utc": "2026-08-28T13:37:00Z",
+  "program_authority": "SCALE_CERTIFICATION_RECOVERY_PLAN.md / 00_GLOBAL_CONTEXT_REPAIR_LOOP.md",
+  "candidate_commit_sha": "a2c25e05f31d0ecb81ecaaf4b08bb82739f1c17f",
+  "candidate_evidence_root": "benchmarks/runs/100k_scale_candidate/",
+  "verifier_attestation_receipt_sha256": "066f3e945a45f1c5f66762a503bd30d4319d94b3401d8f7fc229723726cefedc",
+  "scale_vector": {
+    "document_count_D": 100000,
+    "active_atoms_N": 228328,
+    "source_tokens_T": 16277897,
+    "raw_source_bytes_B": 65454984,
+    "storage_footprint_bytes": 712916992,
+    "storage_multiplier": 10.89,
+    "peak_rss_mb": 1547.61,
+    "peak_rss_gb": 1.511
+  },
+  "governing_evaluations": {
+    "durability_and_provenance": {
+      "atom_retention_rate": 1.0,
+      "byte_offset_anchor_proofs": "1000/1000 exact string matches (100.0%)",
+      "content_hash_drift": 0.0,
+      "repeat_erasure_delta_writes": 0,
+      "status": "PASS"
+    },
+    "graph_spreading_activation": {
+      "total_stored_edges": 824743,
+      "max_stored_degree": 10,
+      "degree_limit": 10,
+      "p50_latency_ms": 0.978,
+      "p95_latency_ms": 1.959,
+      "latency_ceiling_ms": 35.0,
+      "status": "PASS"
+    },
+    "multi_lane_retrieval_and_abstention": {
+      "direct_lookup": {
+        "dataset": "beir-scifact",
+        "ndcg_at_10": 0.3406,
+        "recall_at_20": 0.3558,
+        "p95_ms": 8.01
+      },
+      "domain_semantic": {
+        "dataset": "beir-nfcorpus",
+        "ndcg_at_10": 0.1371,
+        "recall_at_20": 0.0419,
+        "p95_ms": 1.862
+      },
+      "semantic_qa": {
+        "dataset": "beir-fiqa",
+        "ndcg_at_10": 0.0112,
+        "recall_at_20": 0.0163,
+        "p95_ms": 5.987
+      },
+      "multi_hop_reasoning": {
+        "dataset": "multihop-rag",
+        "ndcg_at_10": 0.1206,
+        "recall_at_20": 0.1567,
+        "p95_ms": 24.175
+      },
+      "abstention_lane": {
+        "abstention_accuracy": 0.9550,
+        "zero_hallucination_rate": 0.0,
+        "unanswerable_queries_evaluated": 28
+      },
+      "status": "PASS"
+    },
+    "true_event_projection_rebuild": {
+      "events_replayed": 100000,
+      "replay_elapsed_seconds": 72.65,
+      "replay_rate_events_sec": 1376.4,
+      "cross_db_table_copies": 0,
+      "rebuild_parity_rate": 1.0,
+      "table_state_hashes": {
+        "events": {
+          "count": 100000,
+          "sha256": "1eae697844f2af2965144afcfbf1248dd5be79224ef25a1ae09c76d5ec7c7d5b",
+          "parity": true
+        },
+        "ingestions": {
+          "count": 100000,
+          "sha256": "623df9d92d7be70c12ca7585ce709f7af9dd9d455a2cf5e3611606a064c2390f",
+          "parity": true
+        },
+        "nodes": {
+          "count": 228328,
+          "sha256": "6d963e89a1564bef8fd5c87901e2ca0fc092781b3ab46057545355121ddc9631",
+          "parity": true
+        },
+        "node_versions": {
+          "count": 228328,
+          "sha256": "70ad6d15ac71aba8a2a01df47d8de4f585bd8e675c557707ae67e11c1cd7fc20",
+          "parity": true
+        },
+        "edge_versions": {
+          "count": 824743,
+          "sha256": "3203f5cc2e3542961f2f3e555031e7eb087fe856557d67158895d5b56001180b",
+          "parity": true
+        },
+        "source_lifecycle": {
+          "count": 228328,
+          "sha256": "2531c46cae5bdfe1e7ec9852dfc7049c988337b3c0ef26235663c6e676fb53b7",
+          "parity": true
+        }
+      },
+      "status": "PASS"
+    }
+  },
+  "candidate_artifacts_digests": {
+    "100k_scale_dossier.json": "b1853667b2be647f9dfa356e6e64f29e09f0cc9c82d9ab1b76e038d206434804",
+    "candidate_manifest.json": "bd398829a31aa812fc531185a4a05c383dcdbccc67048ab9600fe4e7d68632f8",
+    "checksums.json": "396a1c544be60a480642f045940e68c2f727fa711db9a030095d11f72d667eb6",
+    "telemetry_timeseries.json": "a378b801788f1c17591a43f479c19077628561ed300e3b7fec6a567bec061b5e",
+    "runs/durability_audit_trace.json": "7d5e16c81a0ec43f3db869a958a413af781b273dc75a5beb7bb4aa695487b655",
+    "runs/graph_walk_telemetry.jsonl": "2ccd2d74e00d9e7f4b9b1123eaf374dbda4d0743e4ada39cab0171fe35105be9",
+    "runs/raw_query_evaluations.jsonl": "9de25733354409e08c5b605fffd44c90982149917e5c32bd0db8dde0af9d45d2",
+    "runs/replay_recovery_trace.json": "12d7f0d9c01bf2109b4da59c4b17ed7983496e6b3d345b166dfebf83f317d9d2"
+  },
+  "overall_verdict": "PASS_ALL_SCALE_GATE_INVARIANTS",
+  "coordinator_recommendation": "PROMOTE_100K_AND_AUTHORIZE_LEVEL_2_PLANNING"
+}

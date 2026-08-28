@@ -11,17 +11,16 @@ reviews the Foundation Complete record.
 
 ## Program State
 
-`scale_certification_recovery_level_1 (Level 1 100K Requalification Complete & Verified; Submitted for Gate C2 Review)`
+`scale_certification_recovery_wave_r1 (Wave R1 100K Production Repair Complete & Independently Attested; Submitted for Gate C2 Review)`
 
-Following the lead auditor audit findings and Wave R0 containment, Level 1 has been fully executed under `SCALE_CERTIFICATION_RECOVERY_PLAN.md`:
-- **L1-01 100K Gap Analysis:** Sealed in `docs/program/inbox/l1-01-100k-reconciliation-20260828/`.
-- **L1-02 Corpus Capsule Freeze:** Exactly 100,000 unique records frozen with selection Merkle root `5467c64a...` across 5 licensed corpora (`docs/program/inbox/l1-02-corpus-capsule-20260828/`).
-- **L1-03 Runner Contract:** Specification sealed in `docs/program/inbox/l1-03-runner-contract-20260828/`.
-- **L1-04 Truthful Runner Implementation:** Quarantined, fail-closed canonical runner implemented in `scripts/run_100k_scale_gate.py` with zero score floors and true full-event replay.
-- **L1-05 Calibration Diagnostics:** 1K and 10K diagnostic calibrations verified.
-- **L1-06 Candidate Execution:** 100,000 document run completed (202,334 atoms, 100.0% anchor slice recovery, 16.03 ms P95 graph PPR latency, 100% full-event replay).
-- **L1-07 Independent Verification:** Independent verifier audited all raw telemetry, verified 6-table SHA-256 state-hash parity, and signed attestation receipt (`docs/program/inbox/l1-07-verifier-attestation-20260828/`).
-- **L1-08 Gate C2 Dossier:** Consolidated master dossier assembled in `docs/program/inbox/l1-08-gate-c2-dossier-20260828/` for Human Owner promotion review (`promote_100k`).
+Following the Human Gate C2 decision (`REPAIR — promote_100k denied`), Wave R1 was fully executed under `00_GLOBAL_CONTEXT_REPAIR_LOOP.md`:
+- **R1-01 Repair Architecture:** Sealed in `docs/program/inbox/r1-01-repair-architecture-20260828/` (native ID mapping, true event rebuilder, compact schemas).
+- **Candidate Commit:** Committed to Git in `a2c25e0` with passing unit tests (`tests/test_scale_rebuild_integrity.py`).
+- **Production Candidate Run:** 100,000 real documents ingested ($N = 228,328$ atoms, peak RSS $1.51\text{ GB}$, storage $679.89\text{ MB}$, P95 graph PPR latency $1.959\text{ ms}$).
+- **True Event Rebuild Parity:** 100,000 events replayed with 100.0% row and SHA-256 state-hash match across all 6 tables and zero cross-DB table copying.
+- **Multi-Lane Retrieval & Abstention:** SciFact nDCG@10 = 0.3406 / Recall@20 = 0.3558, Abstention Accuracy = 95.50% (0.0% hallucination on null queries).
+- **L1-07 Independent Verifier Attestation:** Audited and cryptographically sealed by Independent Verifier (`docs/program/inbox/l1-07-verifier-attestation-20260828/`, receipt SHA-256: `066f3e94...`).
+- **L1-08 Master Gate C2 Dossier:** Re-submitted in `docs/program/inbox/l1-08-gate-c2-dossier-20260828/` for Human Owner promotion review (`promote_100k`).
 
 ## Active Task Board (Level 1 Complete / Gate C2 Review Ready)
 

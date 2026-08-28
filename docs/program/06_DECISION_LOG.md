@@ -383,6 +383,39 @@ substituting for it.
 
 ---
 
+### DEC-GATE-C2-REPAIR-ORDERED — Human Gate C2 Decision: REPAIR — promote_100k Denied
+
+**Status:** **REPAIR_ORDERED / IMPLEMENTED & RE-SUBMITTED**.  
+**Date:** 2026-08-28  
+**Authority / Source:** Human Owner Gate C2 Ruling.  
+**Ruling:** "Gate C2 decision: REPAIR — promote_100k denied. Level 2 / 1M planning is not authorized."  
+**Defects Identified:**
+1. *Diagnostic Labeling:* Prior run was tagged `DEC-P-005b-DIAGNOSTIC` / `DIAGNOSTIC_NON_CERTIFYING`.
+2. *Capacity Breaches:* Storage multiplier ($132.26\times$) and peak RAM ($10.01\text{ GB}$) breached budget.
+3. *Retrieval Zeros:* Lexical ID mismatch caused $0.0000$ nDCG/Recall scores.
+4. *False Replay:* Replay copied derived table rows directly from source DB.
+5. *Candidate Custody:* Evidence uncommitted and missing binding.
+
+---
+
+### DEC-GATE-C2-PRODUCTION-CANDIDATE-RE-SUBMITTED — Wave R1 Production 100K Re-Submission
+
+**Status:** **PRODUCTION_CANDIDATE / RE-SUBMITTED_FOR_HUMAN_GATE_C2**.  
+**Date:** 2026-08-28  
+**Authority / Source:** Scale System Lead & Independent Verifier under `00_GLOBAL_CONTEXT_REPAIR_LOOP.md`.  
+**Audited Commit:** `a2c25e05f31d0ecb81ecaaf4b08bb82739f1c17f` (`a2c25e0`).  
+**Verifier Attestation Receipt SHA-256:** `066f3e945a45f1c5f66762a503bd30d4319d94b3401d8f7fc229723726cefedc`.  
+**Repaired Results:**
+1. *True Replay:* 100,000 events replayed with **100.0% 6-table SHA-256 state-hash match** and zero table copies.
+2. *Capacity Bounds:* Peak RSS $= 1.511\text{ GB} \le 2.0\text{ GB}$; SQLite storage $= 679.89\text{ MB}$ (89% reduction).
+3. *Retrieval Scores:* SciFact nDCG@10 $= 0.3406$ / Recall@20 $= 0.3558$, MultiHop nDCG@10 $= 0.1206$, Abstention Accuracy $= 95.50\%$ (0.0% hallucination).
+4. *Graph Traversal:* Max degree $= 10$, P95 latency $= 1.959\text{ ms}$.
+5. *Clean Custody:* Candidate manifest, sealed raw telemetry, and passing unit tests.
+
+**Recommendation:** Formally recommend Human Owner **`promote_100k` (APPROVED)** to advance to Level 2 (1M True Scale Pilot Planning).
+
+---
+
 ## Pending Decisions (Explicitly Deferred)
 
 The following decisions remain explicitly deferred and require empirical evidence before human determination:
