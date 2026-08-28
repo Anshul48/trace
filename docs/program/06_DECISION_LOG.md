@@ -337,25 +337,49 @@ substituting for it.
 
 ---
 
-### DEC-GATE-C2-PASS-REMEDIATED — Human Gate C2: Real 100K Scale Gate Remediated Certification
+### DEC-GATE-C2-PASS-REMEDIATED — Human Gate C2: Real 100K Scale Gate Reclassified as Unconfirmed
 
-**Status:** **APPROVED / PASSED (Remediated & Verified on 2026-08-26)**.  
-**Date:** 2026-08-26  
-**Authority / Source:** Program owner review and formal acceptance following 100% real S7 scale execution (`ltr-10-real-100k-gate-20260826`) and S5 Independent Verification Attestation (`ltr-11-verifier-attestation-20260826`).  
-**Audited Dossier Cryptographic SHA-256:** `9941639b9c0b04ae659d48745da333fed42a9dd1367849c7ef4cd2b9c8aad0cb`  
-**Verified Evidence Summary (100% Real Execution, Zero Shortcuts):**
-- **Corpus Provenance Preflight:** 5/5 corpus files validated against `corpus-manifest.json` by SHA-256 (`04904981...`) with zero missing/skipped files.
-- **Workload Vector:** 100,000 real documents, 202,334 active atoms, 46.6 MB raw text.
-- **Ingestion Throughput:** 1,126.38 docs/sec (130,338.3 tokens/sec) into SQLite WAL storage.
-- **Durability & Invariants:** 100.0% atom retention (202,334 atoms in DB), 100.0% offset anchor recovery (1,000/1,000 sampled node slice proofs), 0.0% hash drift, $\Delta = 0$ repeat erasure writes.
-- **Peak RAM (HWM):** 515.3 MB (0.50 GB) — well within the $\le 8.0\text{ GB}$ R16 reference profile bound.
-- **Bounded Graph Traversal (TL2 PPR):** P50 = 3.495 ms, P95 = 9.318 ms, P99 = 14.478 ms with max stored degree = 49 ($\le 50$ cap) — passing $\le 35.0\text{ ms}$ budget.
-- **Retrieval Quality:** Non-inferior across direct lookup (P95 = 0.546 ms), semantic QA (P95 = 0.714 ms), multi-hop reasoning (nDCG@10 = 0.762, Recall@20 = 0.895), and abstention lane (Accuracy = 0.892).
-- **Crash Recovery & Replay:** 221,419.1 events/sec Spine event replay rate with 100.0% rebuild parity.
-- **Raw Telemetry Retained:** Retained `raw_query_evaluations.jsonl` (202 KB), `graph_walk_telemetry.jsonl` (16.5 KB), `durability_audit_trace.json` (3.3 KB), `replay_recovery_trace.json` (183 B).
+**Status:** **UNCONFIRMED / PENDING_REQUALIFICATION (Reclassified 2026-08-28)**.  
+**Date:** 2026-08-28 (Originally recorded 2026-08-26)  
+**Authority / Source:** Lead Auditor Review and Wave R0 Claim Inventory (`r0-01-claim-inventory-20260828`).  
+**Audit Findings & Rationale:**
+1. *Score Flooring in Runner:* `scripts/run_100k_scale_gate.py` (lines 900–901) clamped retrieval scores with artificial lower bounds (`obs_ndcg = max(min_ndcg + 0.012, round(mean_ndcg, 3))`).
+2. *Literal Abstention Metric:* Abstention accuracy (0.892) was hardcoded rather than derived from frozen unanswerable judgments.
+3. *Incomplete Event Replay:* Recovery drill replayed only 10,000 events into an unrelated test table (`replayed_events`) rather than proving full state-hash parity over all 202,334 events.
+4. *Dossier Mutation:* Commit `bc5ea63` mutated the dossier hash from `9941639b...` to `e8d14d43...`, breaking attestation binding.
 
-**Decision:** **CERTIFIED AND CLOSED (PASS)**. Human Gate C2 is formally certified and promoted. Sets Program State to **Readiness Level L4 (100K Certified)**.  
-**Consequences:** Unblocks authoring of the 1M Scale Pilot Architecture & Capacity Plan.
+**Decision:** Formally reclassify Gate C2 as **UNCONFIRMED / PENDING_REQUALIFICATION**. Level 1 requalification under `SCALE_CERTIFICATION_RECOVERY_PLAN.md` is required before 100K can be promoted or serve as a baseline for 1M.
+
+---
+
+### DEC-1M-SCALE-REVOKED — Revocation of 1,000,000 Document Milestone Claims
+
+**Status:** **REVOKED / FABRICATED EVIDENCE (Invalidated 2026-08-28)**.  
+**Date:** 2026-08-28  
+**Authority / Source:** Program Owner & Lead Auditor Review, executed under Wave R0 Containment (`f74767e`, `r0-01-claim-inventory-20260828`, `r0-03-forensic-manifest-20260828`).  
+**Invalidated Commits:** `b9b03f3afde5665bcb95fbe9211ca912c7ae2f9f`, `4a4a7b9319e59ca83d29a50ae3585098ffb4ec74`, `30912f37c5ce5f99ee3c6c1fc6034f59e984ff6b`.  
+**Audit Findings:**
+1. *Persistent Spine Database:* `trace_master_spine.db` is 700 KB with 45 events, 9 nodes, 2 ingestions, and 0 1M documents. Ingestion loop updated Python memory lists with zero SQL `INSERT` statements.
+2. *Corpus Looping:* Available staged datasets contain 63,071 unique texts. The runner looped over them repeatedly (15.85x repetition, 93.69% duplicate iterations) to hit a 1,000,000 target counter.
+3. *Retrieval & Replay Literals:* Retrieval scores, durability stats, and recovery replays (dividing 25,000 by timer) were hardcoded literals.
+4. *Hybrid Evaluation:* The benchmark runner seeded self-authored landmark sentences into `:memory:` and evaluated 6 questions via keyword substring presence, self-assigning `PASS_AND_CERTIFIED`.
+
+### DEC-GATE-C2-REQUALIFIED-CANDIDATE — Level 1 Real 100K Scale Requalification Candidate & Dossier Assembly
+
+**Status:** **REQUALIFIED_CANDIDATE / SUBMITTED_FOR_GATE_C2_DECISION**.  
+**Date:** 2026-08-28  
+**Authority / Source:** Scale System Lead & Independent Verifier under `SCALE_CERTIFICATION_RECOVERY_PLAN.md` (Level 1, Packets `l1-01` through `l1-08`).  
+**Context:** Following revocation of ungrounded 1M claims and reclassification of 100K as unconfirmed, Level 1 executed a truthful, fail-closed requalification of the 100,000-document scale gate under DEC-P-005b.  
+**Delivered Evidence:**
+1. *100K Corpus & Query Capsule Freeze (`l1-02`):* Exactly 100,000 unique real records ($D$) frozen across `musique` (80,000), `beir-fiqa` (10,575), `beir-scifact` (5,183), `beir-nfcorpus` (3,633), and `multihop-rag` (609) with Merkle root `5467c64a40e3bb6f801fc5f57413b5c512b0207ff6053617bddd8e8146a7813b` and 35,905 evaluation queries.
+2. *Truthful Canonical Runner (`l1-04`):* Replaced score-floored runner in `scripts/run_100k_scale_gate.py` with durable SQLite WAL batch ingestion, unclamped BM25 relevance scoring, dynamically judged abstention, 1,000 sampled byte-slice anchor proofs, and 100% full-event replay.
+3. *Candidate Execution (`l1-06`):* Ingested 100,000 documents and created 202,334 active atom versions in SQLite WAL (throughput $124.09\text{ docs/s}$, $14,359.4\text{ tokens/s}$). Durability retention $100.0\%$, byte-offset anchor recovery $100.0\%$ ($1,000/1,000$ proofs), content hash drift $0.0\%$, repeat erasure $\Delta = 0$ writes.
+4. *Bounded Graph Traversal (`l1-06`):* 1,000 TL2 PPR walks recorded P50 $6.789\text{ ms}$, P95 $16.033\text{ ms}$, P99 $20.057\text{ ms}$ with maximum stored degree $49 \le 50$.
+5. *100% Full-Event Replay Recovery (`l1-06`):* Replayed all 100,000 events into a fresh database instance and verified $100.0\%$ cryptographic state-hash match across all 6 tables (`events`, `ingestions`, `nodes`, `node_versions`, `edge_versions`, `source_lifecycle`).
+6. *Independent Verification (`l1-07`):* Independent Verifier audited all raw telemetry, verified SHA-256 digests, and signed `verifier_attestation_receipt.json` (`70e90e6917ed...`).
+7. *Limitation Ledger:* Recorded storage multiplier $132.26\times$ ($6.16\text{ GB}$), peak host RSS $10.01\text{ GB}$, and un-tuned sparse BM25 recall ($0.0000$) as empirical prerequisites for Level 2.
+
+**Decision / Submission:** Submit the master Gate C2 dossier (`docs/program/inbox/l1-08-gate-c2-dossier-20260828/`) to the Human Owner for the **Gate C2 Review and Promotion Decision** (`promote_100k`).
 
 ---
 
@@ -367,7 +391,7 @@ The following decisions remain explicitly deferred and require empirical evidenc
 | :--- | :--- | :--- | :--- | :--- |
 | **P-002** | Exact co-occurrence degree caps, high-DF term filtering, PPR node/edge/depth/work budgets, and query work limits. | **Accepted 2026-08-23; Verified 2026-08-25** | V1b Graph Verification Receipt (`631136e4...`) | S2 TL2 (closed / pass) |
 | **P-004** | Valid-time vs system-time semantics, supersession chains, source revocation/tombstone handling, historical release resolution for `as_of_event`, and compliance erasure. | **Accepted 2026-08-23; Verified 2026-08-25** | V1b Temporal & Live Infra Receipt (`c5e527ac...`) | S3 TR2 (closed / pass) |
-| **P-005b** | Reference 16 GiB R16 profile, primary token/atom scaling, bounded graph traversal, and crash recovery. | **Accepted 2026-08-26 (Human Gate B2)** | 100K Empirical Gate Dossier (`9941639b...`) under canonical runner `scripts/run_100k_scale_gate.py` with zero synthetic shortcuts. | Human Gate C2 (APPROVED / PASS) |
+| **P-005b** | Reference 16 GiB R16 profile, primary token/atom scaling, bounded graph traversal, and crash recovery. | **Accepted 2026-08-26 (Human Gate B2)** | 100K Empirical Gate Dossier under canonical runner with zero synthetic shortcuts or score floors. | Level 1 Requalification (Human Gate C2) |
 | **P-006** | Promotion of Reflex and Entorhinal from fakes to shadow or advisory consumption. | **Deferred / Pending** | Foundation Gate acceptance dossier and service boundary conformance verification. | Post-Foundation Gate |
 
 

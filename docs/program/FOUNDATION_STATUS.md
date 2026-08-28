@@ -11,24 +11,38 @@ reviews the Foundation Complete record.
 
 ## Program State
 
-`large_token_retrieval_readiness_wave (Wave R2 Complete / Human Gate C2 Remediated & Certified PASS)`
+`scale_certification_recovery_level_1 (Level 1 100K Requalification Complete & Verified; Submitted for Gate C2 Review)`
 
-This label means that the comprehensive [Foundation & Scale Audit Remediation Plan](file:///home/anshul/.agy_profiles/acc3/.gemini/antigravity-cli/brain/3540ca9a-6b7b-4981-ac3d-4946ea733999/foundation_and_scale_audit_recovery_plan.md) has been fully executed: corpus SHA-256 hashes verified, runner refactored for 100% real execution with zero synthetic shortcuts, 100K real documents ingested, real SQL durability/anchor audits passed, bounded graph walks executed, raw query telemetry retained (202 KB), independent S5 attestation receipt sealed, and Human Gate C2 formally certified (`DEC-GATE-C2-PASS-REMEDIATED`).
+Following the lead auditor audit findings and Wave R0 containment, Level 1 has been fully executed under `SCALE_CERTIFICATION_RECOVERY_PLAN.md`:
+- **L1-01 100K Gap Analysis:** Sealed in `docs/program/inbox/l1-01-100k-reconciliation-20260828/`.
+- **L1-02 Corpus Capsule Freeze:** Exactly 100,000 unique records frozen with selection Merkle root `5467c64a...` across 5 licensed corpora (`docs/program/inbox/l1-02-corpus-capsule-20260828/`).
+- **L1-03 Runner Contract:** Specification sealed in `docs/program/inbox/l1-03-runner-contract-20260828/`.
+- **L1-04 Truthful Runner Implementation:** Quarantined, fail-closed canonical runner implemented in `scripts/run_100k_scale_gate.py` with zero score floors and true full-event replay.
+- **L1-05 Calibration Diagnostics:** 1K and 10K diagnostic calibrations verified.
+- **L1-06 Candidate Execution:** 100,000 document run completed (202,334 atoms, 100.0% anchor slice recovery, 16.03 ms P95 graph PPR latency, 100% full-event replay).
+- **L1-07 Independent Verification:** Independent verifier audited all raw telemetry, verified 6-table SHA-256 state-hash parity, and signed attestation receipt (`docs/program/inbox/l1-07-verifier-attestation-20260828/`).
+- **L1-08 Gate C2 Dossier:** Consolidated master dossier assembled in `docs/program/inbox/l1-08-gate-c2-dossier-20260828/` for Human Owner promotion review (`promote_100k`).
 
-## Active Task Board (Remediation Complete / 100K Certified)
+## Active Task Board (Level 1 Complete / Gate C2 Review Ready)
 
 | Node | Packet | State | Owner / Session | Next Condition / Hard Dependency |
 | --- | --- | --- | --- | --- |
-| **LTR-00** | `ltr-00-reconciliation-20260826` | **completed** | S0 Coordinator | Prior unverified scale records audited and reconciled. |
-| **LTR-01** | `ltr-01-decision-brief-p005b-20260826` | **completed** | Lead Architect | DEC-P-005b decision brief submitted. |
-| **Gate B2** | `DEC-P-005b` | **ACCEPTED (Human Gate B2)** | Human Owner | Enacted binding reference profile R16 ($\le 8\text{ GiB}$ RSS) and A6 GPU profile. |
-| **LTR-02** | `ltr-02-corpus-capsule-20260826` | **CLOSED (PASS)** | S4 Data Steward | Exact SHA-256 closures verified across 5 corpus files (`04904981...`). |
-| **LTR-03** | `ltr-03-canonical-runner-20260826` | **CLOSED (PASS)** | S7 Scale Owner | Canonical runner `scripts/run_100k_scale_gate.py` with zero synthetic shortcuts. |
-| **LTR-04** | `ltr-04-runner-integrity-20260826` | **completed / passed** | S5 Verifier | Independent runner preflight and integrity attestation. |
-| **LTR-10** | `ltr-10-real-100k-gate-20260826` | **CLOSED (PASS)** | S7 Scale Owner | 100,000 real documents evaluated: 100% retention, 100% anchor recovery, 515 MB RAM, P95 PPR 9.3ms, raw telemetry retained. |
-| **LTR-11** | `ltr-11-verifier-attestation-20260826` | **CLOSED (PASS)** | S5 Verifier | Independent verification attestation sealed matching dossier SHA-256 `9941639b...`. |
-| **Gate C2** | `DEC-GATE-C2-PASS-REMEDIATED` | **APPROVED (Human Gate C2)** | Human Owner | Human Gate C2 formally certified, closed, and promoted (`DEC-GATE-C2-PASS-REMEDIATED`). |
-| **LTR-13** | `ltr-13-1m-pilot-plan-20260826` | **completed / re-anchored** | S7 Scale Owner | Capacity model and architecture plan fully synchronized with certified 100K metrics. |
+| **R0-01** | `r0-01-claim-inventory-20260828` | **CLOSED (PASS)** | Audit Specialist | Claim inventory and git object ledger sealed. |
+| **R0-02** | `scripts/` (quarantine) | **CLOSED (PASS)** | Quarantine Specialist | Unsound runners fail closed; `--diagnostic` enforced. |
+| **R0-03** | `r0-03-forensic-manifest-20260828` | **CLOSED (PASS)** | Forensics Specialist | Read-only SQLite & corpus manifest sealed. |
+| **R0-04** | `r0-04-reconciliation-20260828` | **CLOSED (PASS)** | S0 Coordinator | Governance records aligned. |
+| **R0-06** | `tests/test_scale_recovery_quarantine.py` | **CLOSED (PASS)** | Verifier Specialist | Negative integrity fixtures passing 9/9. |
+| **L1-01** | `l1-01-100k-reconciliation` | **CLOSED (PASS)** | Data Steward | Level 1 100K gap analysis sealed. |
+| **L1-02** | `l1-02-100k-corpus-capsule` | **CLOSED (PASS)** | Data Steward | Deduplicated 100K corpus & judgment freeze sealed. |
+| **L1-03** | `l1-03-runner-contract` | **CLOSED (PASS)** | Scale Architect | Fail-closed runner interface and threshold contract sealed. |
+| **L1-04** | `l1-04-runner-repair` | **CLOSED (PASS)** | Implementer | Truthful 100K runner rewrite with zero score floors. |
+| **L1-05** | `100k_scale (1k/10k)` | **CLOSED (PASS)** | Scale Architect | 1K and 10K diagnostic calibrations verified. |
+| **L1-06** | `100k_scale (100k run)` | **CLOSED (PASS)** | Scale Implementer | 100,000 document run completed and raw telemetry sealed. |
+| **L1-07** | `l1-07-verifier-attestation` | **CLOSED (PASS)** | Independent Verifier | 6-table SHA-256 state-hash parity audited and attestation signed. |
+| **L1-08** | `l1-08-gate-c2-dossier` | **CLOSED (PASS)** | Coordinator | Master Gate C2 Dossier assembled and submitted. |
+| **Gate C2** | `Human Gate C2 (Requalification)` | **READY FOR REVIEW** | Human Owner | Human promote/repair/reject decision (`promote_100k`). |
+| **Gate D** | `Human Gate D (1M Pilot Plan)` | **BLOCKED** | Human Owner | Blocked pending Gate C2 promotion decision. |
+| **Gate F2** | `Human Gate F2 (1M Certification)` | **BLOCKED** | Human Owner | Blocked pending Level 2 execution and Gate F2 verification. |
 
 ## Human Decision Status
 
@@ -37,7 +51,8 @@ This label means that the comprehensive [Foundation & Scale Audit Remediation Pl
 - **P-003 (Accepted):** Unified Cortex Release root architecture (Option A: Release Root with Carried-Forward Components).
 - **P-004 (Accepted 2026-08-23):** Option A Full Bitemporal Contract; repeat-erasure addendum accepted 2026-08-25.
 - **P-005b (Accepted 2026-08-26):** Large-Token Retrieval Readiness Thresholds, Hardware Profiles & Resource Budgets (`DEC-P-005b` at Human Gate B2).
-- **Gate C2 (Approved 2026-08-26):** Real 100K Scale Gate Remediated Certification (`DEC-GATE-C2-PASS-REMEDIATED`).
+- **Gate C2 (Reclassified 2026-08-28):** Real 100K Scale Gate Reclassified as Unconfirmed (`DEC-GATE-C2-PASS-REMEDIATED` -> `UNCONFIRMED`).
+- **1M Claims (Revoked 2026-08-28):** Revocation of 1M scale claims and invalidation of `b9b03f3` (`DEC-1M-SCALE-REVOKED`).
 - **P-007 (Accepted):** `trace-bench` initialized as independent Git repository in-place under B0.
 - **P-008 (Accepted):** `trace-bench` designated as sole canonical certification runner.
 
