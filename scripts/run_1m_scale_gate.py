@@ -394,7 +394,7 @@ class LeanSpineDatabase:
             atom_bytes = content_utf8[span_start:span_end]
             atom_hash = hashlib.sha256(atom_bytes).hexdigest()
 
-            nodes_rows.append((node_id, atom.text[:64], "atom", stream_seq))
+            nodes_rows.append((node_id, atom.content[:64], "atom", stream_seq))
             node_versions_rows.append((
                 atom_ver_id,
                 node_id,
@@ -402,7 +402,7 @@ class LeanSpineDatabase:
                 atom_hash,
                 span_start,
                 span_end,
-                atom.text,
+                atom.content,
             ))
             source_lifecycle_rows.append((
                 atom_ver_id,
