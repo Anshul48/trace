@@ -1,9 +1,9 @@
 # Wave R1: 100K Scale Gate Production Repair Architecture Specification
 
-> **Author:** Scale Architect & Implementer (Wave R1)  
-> **Target Standard:** DEC-P-005b / Level 1 Production Certification Standard  
-> **Date:** 2026-08-28T13:15:00Z  
-> **Status:** **APPROVED & IMPLEMENTED**  
+> **Author:** Scale Architect & Implementer (Wave R1)
+> **Target Standard:** DEC-P-005b / Level 1 Production Certification Standard
+> **Date:** 2026-08-28T13:15:00Z
+> **Status:** **APPROVED & IMPLEMENTED**
 > **Reference Authority:** `docs/program/00_GLOBAL_CONTEXT_REPAIR_LOOP.md`, `docs/program/SCALE_CERTIFICATION_RECOVERY_PLAN.md`
 
 ---

@@ -1,12 +1,12 @@
 # Staging & Checksum Verification Receipt
 
-**Execution Timestamp:** 2026-08-19T07:25:41.970188+00:00  
-**Staging Root:** `C:\Users\anshu\AppData\Local\trace-bench-data`  
-**Admission Authority:** `DEC-P-001`  
-**Overall Result:** ALL 7 DATASETS PASSED  
-**Total Datasets Evaluated:** 7  
-**Passed:** 7  
-**Failed:** 0  
+**Execution Timestamp:** 2026-08-19T07:25:41.970188+00:00
+**Staging Root:** `C:\Users\anshu\AppData\Local\trace-bench-data`
+**Admission Authority:** `DEC-P-001`
+**Overall Result:** ALL 7 DATASETS PASSED
+**Total Datasets Evaluated:** 7
+**Passed:** 7
+**Failed:** 0
 
 ## Dataset Verification Breakdown
 

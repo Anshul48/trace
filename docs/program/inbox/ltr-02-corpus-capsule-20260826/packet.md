@@ -1,11 +1,11 @@
 # Packet LTR-02: Real 100K Corpus & Query Capsule
 
-> **Packet ID:** `ltr-02-corpus-capsule-20260826`  
-> **Session:** Wave R1 (Corpus Capsule & Data Normalization)  
-> **Role:** S4 Data Steward  
-> **Date:** 2026-08-26  
-> **Authority Level:** C2 (Corpus Capsule Assembly & Provenance Freezing)  
-> **Status:** **COMPLETE**  
+> **Packet ID:** `ltr-02-corpus-capsule-20260826`
+> **Session:** Wave R1 (Corpus Capsule & Data Normalization)
+> **Role:** S4 Data Steward
+> **Date:** 2026-08-26
+> **Authority Level:** C2 (Corpus Capsule Assembly & Provenance Freezing)
+> **Status:** **COMPLETE**
 
 ---
 

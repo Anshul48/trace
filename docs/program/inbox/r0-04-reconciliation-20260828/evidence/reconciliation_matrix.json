@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "packet_id": "r0-04-reconciliation-20260828",
+  "generated_at_utc": "2026-08-28T10:33:00Z",
+  "reconciliation_head": "f74767e22f9c2d7a5c1f0fe2098cd40748aaffe1",
+  "claims_reconciled": [
+    {
+      "claim_id": "CLAIM-1M-PERSISTENT-SPINE",
+      "claimed_state": "1,000,000 documents durably ingested into trace_master_spine.db in SQLite WAL",
+      "source_commit": "b9b03f3afde5665bcb95fbe9211ca912c7ae2f9f",
+      "forensic_finding": "DB file is 700,416 bytes (SHA-256: 18f76269...) containing exactly 45 events, 9 nodes, 2 ingestions, 0 1M documents. Ingestion loop updated Python lists with zero SQL insert.",
+      "reconciled_status": "REVOKED_FABRICATED",
+      "decision_reference": "DEC-1M-SCALE-REVOKED"
+    },
+    {
+      "claim_id": "CLAIM-1M-UNIQUE-CORPUS",
+      "claimed_state": "Zero-duplicate incremental 1M corpus across Enron, LKML, EDGAR, Wikipedia, MuSiQue",
+      "source_commit": "b9b03f3afde5665bcb95fbe9211ca912c7ae2f9f",
+      "forensic_finding": "Corpus contains exactly 63,071 unique distinct texts. Achieving 1M required 15.85x looping (93.69% synthetic repetition rate).",
+      "reconciled_status": "REVOKED_FABRICATED",
+      "decision_reference": "DEC-1M-SCALE-REVOKED"
+    },
+    {
+      "claim_id": "CLAIM-1M-SEALED-CHECKPOINT",
+      "claimed_state": "Cryptographically sealed checkpoint_1m.json enabling 10M/100M resumption",
+      "source_commit": "b9b03f3afde5665bcb95fbe9211ca912c7ae2f9f",
+      "forensic_finding": "Self-reported unhashed JSON claiming 593,920 byte DB size with no source watermark, event range, digest, or signature.",
+      "reconciled_status": "REVOKED_FABRICATED",
+      "decision_reference": "DEC-1M-SCALE-REVOKED"
+    },
+    {
+      "claim_id": "CLAIM-1M-HYBRID-COGNITIVE-PASS",
+      "claimed_state": "Trace Hybrid achieved PASS_AND_CERTIFIED across 6 multi-domain reasoning lanes",
+      "source_commit": "30912f37c5ce5f99ee3c6c1fc6034f59e984ff6b",
+      "forensic_finding": "Runner evaluated 6 self-authored landmark questions via keyword substring presence, defaulted to :memory: fallback, and self-certified.",
+      "reconciled_status": "REVOKED_FABRICATED",
+      "decision_reference": "DEC-1M-SCALE-REVOKED"
+    },
+    {
+      "claim_id": "CLAIM-100K-GATE-C2-CERTIFIED",
+      "claimed_state": "Human Gate C2 certified PASS under DEC-GATE-C2-PASS-REMEDIATED with 100K real documents",
+      "source_commit": "dcf4350c377fcb348d2813587b1c34a905a5a1f6",
+      "forensic_finding": "Runner script (scripts/run_100k_scale_gate.py) contains score flooring (lines 900-901), literal abstention score (0.892), partial replay of 10k/202k events into unrelated table, and mutated dossier SHA across commits.",
+      "reconciled_status": "UNCONFIRMED_DEFECTIVE",
+      "decision_reference": "DEC-100K-GATE-C2-UNCONFIRMED"
+    },
+    {
+      "claim_id": "CLAIM-RUNNERS-QUARANTINED",
+      "claimed_state": "Unsound runners fail closed and cannot emit certification verdicts",
+      "source_commit": "HEAD",
+      "forensic_finding": "R0-02 applied quarantine to run_1m_scale_gate.py, benchmark_1m_hybrid_comprehensive.py, and run_100k_scale_gate.py. R0-06 suite passed 9/9 tests.",
+      "reconciled_status": "CONTAINED_QUARANTINED",
+      "decision_reference": "DEC-P-008-QUARANTINE"
+    }
+  ]
+}

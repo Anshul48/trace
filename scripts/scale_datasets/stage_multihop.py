@@ -460,7 +460,12 @@ def main() -> int:
     # 1. MuSiQue
     if args.dataset in ("musique", "all"):
         print("\n--- Processing MuSiQue Dataset ---")
-        if args.dry_run or not args.download:
+        local_raw = Path("/mnt/c/Users/anshu/AppData/Local/trace-bench-data/musique/raw/musique_ans_v1.0_dev.jsonl")
+        if local_raw.exists():
+            print(f"[MuSiQue] Loading local real raw dataset from {local_raw}...")
+            with open(local_raw, "r", encoding="utf-8") as f:
+                raw_musique = [json.loads(line) for line in f if line.strip()]
+        elif args.dry_run or not args.download:
             print("[MuSiQue] Using verified synthetic multi-hop instances")
             raw_musique = generate_synthetic_musique_data()
         else:

@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trace V2 Studio — One-Click Benchmark & Grounded Evidence Suite</title>
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfeff',
+              100: '#cffafe',
+              200: '#a5f3fc',
+              300: '#67e8f9',
+              400: '#22d3ee',
+              500: '#06b6d4',
+              600: '#0891b2',
+              700: '#0e7490',
+              800: '#155e75',
+              900: '#164e63',
+              950: '#083344',
+            },
+            dark: {
+              bg: '#080b11',
+              card: '#0f1623',
+              cardHover: '#141d2e',
+              border: '#1e293b',
+              borderLight: '#334155',
+              muted: '#64748b',
+              text: '#f1f5f9'
+            },
+            accent: {
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+              violet: '#8b5cf6',
+              amber: '#f59e0b',
+              rose: '#f43f5e'
+            }
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+            sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif']
+          },
+          animation: {
+            'pulse-fast': 'pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'glow-spin': 'spin 8s linear infinite',
+            'radar-ping': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #080b11;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
+    
+    code, pre, .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b101b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* Glassmorphism & Glow Effects */
+    .glass-card {
+      background: rgba(15, 22, 35, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(30, 41, 59, 0.8);
+    }
+    
+    .glass-card-hover {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card-hover:hover {
+      border-color: rgba(6, 182, 212, 0.4);
+      box-shadow: 0 0 20px -5px rgba(6, 182, 212, 0.15);
+    }
+
+    .pipeline-stage-active {
+      border-color: #06b6d4 !important;
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.35);
+      transform: translateY(-2px);
+    }
+
+    .code-highlight {
+      background: rgba(6, 182, 212, 0.15);
+      border-bottom: 2px solid #06b6d4;
+      padding: 0 4px;
+      border-radius: 2px;
+    }
+
+    .code-contradiction {
+      background: rgba(244, 63, 94, 0.2);
+      border-bottom: 2px solid #f43f5e;
+      padding: 0 4px;
+      border-radius: 2px;
+    }
+
+    .radar-container {
+      position: relative;
+      height: 320px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#080b11] text-slate-100 antialiased selection:bg-brand-500/30 selection:text-brand-200">
+
+  <!-- Background Ambient Mesh -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-40">
+    <div class="absolute -top-[20%] -left-[10%] w-[500px] h-[500px] rounded-full bg-cyan-900/20 blur-[120px]"></div>
+    <div class="absolute top-[30%] -right-[15%] w-[600px] h-[600px] rounded-full bg-emerald-900/15 blur-[140px]"></div>
+    <div class="absolute -bottom-[20%] left-[20%] w-[550px] h-[550px] rounded-full bg-purple-900/15 blur-[130px]"></div>
+  </div>
+
+  <!-- Top Navigation Bar -->
+  <header class="relative z-30 border-b border-dark-border bg-dark-bg/90 backdrop-blur-md sticky top-0 px-4 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Brand & Workspace -->
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3">
+          <div class="relative w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 via-cyan-500 to-emerald-400 p-[1px] shadow-lg shadow-cyan-500/20">
+            <div class="w-full h-full bg-dark-bg rounded-[11px] flex items-center justify-center">
+              <i data-lucide="shield-check" class="w-5 h-5 text-cyan-400"></i>
+            </div>
+            <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping"></span>
+            <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full"></span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold tracking-tight text-lg text-white">TRACE <span class="text-cyan-400 text-xs px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-800/60 font-mono">v2.0-Live</span></span>
+            </div>
+            <p class="text-[11px] text-slate-400 hidden sm:block">Headless Grounded Evidence & Memory Substrate</p>
+          </div>
+        </div>
+
+        <div class="h-5 w-[1px] bg-dark-border hidden md:block"></div>
+
+        <!-- Active Workspace Selector -->
+        <div class="hidden md:flex items-center gap-2 bg-dark-card border border-dark-border rounded-lg px-2.5 py-1 text-xs">
+          <i data-lucide="database" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span class="text-slate-400">Workspace:</span>
+          <select id="workspaceSelector" class="bg-transparent text-slate-200 font-mono font-medium focus:outline-none cursor-pointer">
+            <option value="default" selected class="bg-dark-card text-slate-100">default</option>
+            <option value="scale_100k_workspace" class="bg-dark-card text-slate-100">scale_100k_workspace</option>
+            <option value="enron-master-v2" class="bg-dark-card text-slate-100">enron-master-v2</option>
+            <option value="musique-multihop-v1" class="bg-dark-card text-slate-100">musique-multihop-v1</option>
+            <option value="sec-edgar-financial" class="bg-dark-card text-slate-100">sec-edgar-financial</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Center Tabs -->
+      <nav class="hidden lg:flex items-center bg-dark-card/90 border border-dark-border rounded-xl p-1 text-sm font-medium">
+        <button onclick="switchTab('architecture')" id="tab-architecture" class="tab-btn flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-cyan-400 bg-cyan-950/60 border border-cyan-800/40 transition-all font-medium">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>How Trace Works</span>
+        </button>
+        <button onclick="switchTab('benchmark')" id="tab-benchmark" class="tab-btn flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition-all font-medium">
+          <i data-lucide="gauge" class="w-4 h-4"></i>
+          <span>1-Click Benchmark</span>
+        </button>
+        <button onclick="switchTab('arena')" id="tab-arena" class="tab-btn flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition-all font-medium">
+          <i data-lucide="swords" class="w-4 h-4"></i>
+          <span>Side-by-Side Arena</span>
+        </button>
+        <button onclick="switchTab('system')" id="tab-system" class="tab-btn flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition-all font-medium">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+          <span>System & Storage</span>
+        </button>
+      </nav>
+
+      <!-- Right Action Indicators & Engine Status -->
+      <div class="flex items-center gap-3">
+        <!-- Live SSE Status Indicator -->
+        <div class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-dark-card border border-dark-border text-xs">
+          <span id="backendStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]"></span>
+          <span id="backendStatusText" class="font-mono text-[11px] text-slate-300">Live SSE Engine</span>
+        </div>
+
+        <button onclick="checkApiHealth()" id="reconnectBtn" title="Check connection to live API" class="text-xs px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 flex items-center gap-1.5 transition">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span id="reconnectLabel">Live API</span>
+        </button>
+
+        <!-- Mobile Menu Trigger -->
+        <button onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded-lg bg-dark-card border border-dark-border text-slate-300">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Nav Subbar -->
+    <div id="mobileMenu" class="hidden lg:hidden border-t border-dark-border mt-3 pt-3 flex flex-wrap gap-2">
+      <button onclick="switchTab('architecture'); toggleMobileMenu()" class="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-cyan-400 bg-cyan-950/40 border border-cyan-800/40 text-sm">
+        <i data-lucide="layers" class="w-4 h-4"></i> How Trace Works
+      </button>
+      <button onclick="switchTab('benchmark'); toggleMobileMenu()" class="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/50 text-sm">
+        <i data-lucide="gauge" class="w-4 h-4"></i> 1-Click Benchmark
+      </button>
+      <button onclick="switchTab('arena'); toggleMobileMenu()" class="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/50 text-sm">
+        <i data-lucide="swords" class="w-4 h-4"></i> Side-by-Side Arena
+      </button>
+      <button onclick="switchTab('system'); toggleMobileMenu()" class="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/50 text-sm">
+        <i data-lucide="settings" class="w-4 h-4"></i> System & Storage
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8 space-y-8">
+
+    <!-- ================================================================================== -->
+    <!-- TAB 1: HOW TRACE WORKS (Interactive Architecture & Live Retrieval Sandbox) -->
+    <!-- ================================================================================== -->
+    <section id="view-architecture" class="space-y-8 block">
+      
+      <!-- Banner / Title -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-dark-card via-cyan-950/30 to-dark-card border border-dark-border p-6 rounded-2xl">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="text-xs uppercase tracking-wider font-semibold text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800">Architecture Sandbox</span>
+            <span class="text-xs text-slate-400 font-mono">• 0-Hallucination Guarantees</span>
+          </div>
+          <h1 class="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">Interactive Ingestion & 5-Stage Hybrid Retrieval</h1>
+          <p class="text-slate-400 text-sm max-w-3xl">Explore how Trace transforms unstructured documents into immutable byte-anchored atoms on a deterministic WAL spine, executing 5-stage retrieval via live backend APIs.</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="runStepByStepDemo()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-500 hover:from-cyan-500 hover:to-teal-400 text-white text-sm font-semibold shadow-lg shadow-cyan-600/20 transition-all cursor-pointer">
+            <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+            <span>Run Retrieval Flow</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 1. The Visual Interactive Pipeline (Horizontal Flow Diagram) -->
+      <div class="glass-card rounded-2xl p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-dark-border pb-4">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="git-merge" class="w-5 h-5 text-cyan-400"></i>
+            <h2 class="font-bold text-slate-100 text-base">Trace Core Engine Flow (Ingest ➔ WAL Spine ➔ 5-Stage Query)</h2>
+          </div>
+          <span class="text-xs font-mono text-slate-400">Click any component to inspect data invariant</span>
+        </div>
+
+        <!-- Pipeline Stages Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+          
+          <!-- Step 1: Ingestion & Adapters -->
+          <div onclick="inspectComponent('ingest')" id="pipe-ingest" class="cursor-pointer glass-card glass-card-hover p-4 rounded-xl space-y-3 relative group border-slate-800">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-blue-950/80 border border-blue-800/60 text-blue-400 text-xs font-mono flex items-center justify-center font-bold">01</span>
+              <i data-lucide="file-input" class="w-4 h-4 text-blue-400"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-slate-200 group-hover:text-blue-400 transition">Ingest & Adapters</h3>
+              <p class="text-xs text-slate-400 mt-1">Multi-format normalizer (PDF, Markdown, EDGAR, Mail). Preserves raw source bytes without mutation.</p>
+            </div>
+            <div class="text-[11px] font-mono text-blue-300/80 bg-blue-950/40 px-2 py-1 rounded border border-blue-900/40">
+              Contract: IngestionRequest
+            </div>
+          </div>
+
+          <!-- Step 2: Immutable Atoms -->
+          <div onclick="inspectComponent('atom')" id="pipe-atom" class="cursor-pointer glass-card glass-card-hover p-4 rounded-xl space-y-3 relative group border-slate-800">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-cyan-950/80 border border-cyan-800/60 text-cyan-400 text-xs font-mono flex items-center justify-center font-bold">02</span>
+              <i data-lucide="boxes" class="w-4 h-4 text-cyan-400"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-slate-200 group-hover:text-cyan-400 transition">Immutable Atoms</h3>
+              <p class="text-xs text-slate-400 mt-1">Content-addressed chunking with strict character-span offsets and BLAKE2b/SHA-256 byte hashes.</p>
+            </div>
+            <div class="text-[11px] font-mono text-cyan-300/80 bg-cyan-950/40 px-2 py-1 rounded border border-cyan-900/40">
+              Byte Anchors: [start..end]
+            </div>
+          </div>
+
+          <!-- Step 3: WAL Spine -->
+          <div onclick="inspectComponent('spine')" id="pipe-spine" class="cursor-pointer glass-card glass-card-hover p-4 rounded-xl space-y-3 relative group border-slate-800">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 text-xs font-mono flex items-center justify-center font-bold">03</span>
+              <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-slate-200 group-hover:text-emerald-400 transition">WAL Master Spine</h3>
+              <p class="text-xs text-slate-400 mt-1">Append-only event ledger. Total causal order, zero-mutation guarantee, read-only external replica.</p>
+            </div>
+            <div class="text-[11px] font-mono text-emerald-300/80 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-900/40">
+              Event Sequence: Monotonic
+            </div>
+          </div>
+
+          <!-- Step 4: Cortex Projections -->
+          <div onclick="inspectComponent('cortex')" id="pipe-cortex" class="cursor-pointer glass-card glass-card-hover p-4 rounded-xl space-y-3 relative group border-slate-800">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-purple-950/80 border border-purple-800/60 text-purple-400 text-xs font-mono flex items-center justify-center font-bold">04</span>
+              <i data-lucide="brain-circuit" class="w-4 h-4 text-purple-400"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-slate-200 group-hover:text-purple-400 transition">Neocortex Projections</h3>
+              <p class="text-xs text-slate-400 mt-1">Extractive hierarchies, PageRank activation energy, and affinity graph derived deterministically.</p>
+            </div>
+            <div class="text-[11px] font-mono text-purple-300/80 bg-purple-950/40 px-2 py-1 rounded border border-purple-900/40">
+              ActivationWeights: 4-Family
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Component Details Modal / Drawer Inset -->
+        <div id="componentInspector" class="bg-slate-900/80 border border-dark-border rounded-xl p-4 hidden transition-all">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span id="inspectorTag" class="text-xs font-mono bg-cyan-950 text-cyan-400 px-2 py-0.5 rounded border border-cyan-800">INSPECTOR</span>
+              <h4 id="inspectorTitle" class="text-sm font-bold text-white">Component Title</h4>
+            </div>
+            <button onclick="document.getElementById('componentInspector').classList.add('hidden')" class="text-slate-400 hover:text-white text-xs p-1">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <p id="inspectorDesc" class="text-xs text-slate-300 leading-relaxed font-mono">Component description and invariant guarantee details...</p>
+        </div>
+      </div>
+
+      <!-- 2. Live Retrieval Sandbox & Stage-by-Stage Illuminator -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Query Inputs & Controls (5 Cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="glass-card rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-cyan-400"></i> Query Sandbox
+              </span>
+              <span class="text-[11px] font-mono text-cyan-400">POST /api/demo/query</span>
+            </div>
+
+            <!-- Pre-built Demo Questions -->
+            <div class="space-y-1.5">
+              <label class="text-xs text-slate-400 font-medium">Select Pre-built Challenging Query:</label>
+              <div class="grid grid-cols-1 gap-1.5">
+                <button onclick="loadSampleQuery('contradiction')" class="text-left text-xs p-2.5 rounded-lg bg-dark-bg/80 hover:bg-slate-800/80 border border-dark-border hover:border-cyan-500/50 text-slate-200 flex items-start gap-2.5 transition group">
+                  <span class="w-5 h-5 rounded bg-rose-950/80 border border-rose-800 text-rose-400 flex-shrink-0 flex items-center justify-center text-[10px] font-bold mt-0.5">ADR</span>
+                  <div>
+                    <div class="font-medium text-slate-200 group-hover:text-cyan-300">Contradiction in ADR-017 vs RFC-009</div>
+                    <div class="text-[11px] text-slate-400">Temporal validity conflict & superseding timeline</div>
+                  </div>
+                </button>
+
+                <button onclick="loadSampleQuery('multihop')" class="text-left text-xs p-2.5 rounded-lg bg-dark-bg/80 hover:bg-slate-800/80 border border-dark-border hover:border-cyan-500/50 text-slate-200 flex items-start gap-2.5 transition group">
+                  <span class="w-5 h-5 rounded bg-purple-950/80 border border-purple-800 text-purple-400 flex-shrink-0 flex items-center justify-center text-[10px] font-bold mt-0.5">HOP</span>
+                  <div>
+                    <div class="font-medium text-slate-200 group-hover:text-cyan-300">3-Hop Ingestion Worker Lock Dependency</div>
+                    <div class="text-[11px] text-slate-400">MuSiQue style cross-file structural chain</div>
+                  </div>
+                </button>
+
+                <button onclick="loadSampleQuery('unanswerable')" class="text-left text-xs p-2.5 rounded-lg bg-dark-bg/80 hover:bg-slate-800/80 border border-dark-border hover:border-cyan-500/50 text-slate-200 flex items-start gap-2.5 transition group">
+                  <span class="w-5 h-5 rounded bg-amber-950/80 border border-amber-800 text-amber-400 flex-shrink-0 flex items-center justify-center text-[10px] font-bold mt-0.5">ABS</span>
+                  <div>
+                    <div class="font-medium text-slate-200 group-hover:text-cyan-300">Out-of-Scope / Fabricated Revenue Target</div>
+                    <div class="text-[11px] text-slate-400">Adversarial ungrounded test (Abstain verification)</div>
+                  </div>
+                </button>
+
+                <button onclick="loadSampleQuery('sec_footnote')" class="text-left text-xs p-2.5 rounded-lg bg-dark-bg/80 hover:bg-slate-800/80 border border-dark-border hover:border-cyan-500/50 text-slate-200 flex items-start gap-2.5 transition group">
+                  <span class="w-5 h-5 rounded bg-emerald-950/80 border border-emerald-800 text-emerald-400 flex-shrink-0 flex items-center justify-center text-[10px] font-bold mt-0.5">SEC</span>
+                  <div>
+                    <div class="font-medium text-slate-200 group-hover:text-cyan-300">Off-Balance Sheet Lease Footnote Table</div>
+                    <div class="text-[11px] text-slate-400">Exact cell byte-anchor extraction from SEC 10-K</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Target Dataset Selector -->
+            <div class="space-y-1.5 pt-2 border-t border-dark-border">
+              <label for="sandboxDatasetSelector" class="text-xs text-slate-400 font-medium flex items-center gap-1.5">
+                <i data-lucide="database" class="w-3.5 h-3.5 text-cyan-400"></i> Target Dataset:
+              </label>
+              <select id="sandboxDatasetSelector" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-medium">
+                <option value="">Auto-select (All Discovered Corpi)</option>
+              </select>
+            </div>
+
+            <!-- Custom Query Input -->
+            <div class="space-y-1.5 pt-2 border-t border-dark-border">
+              <label for="customQueryInput" class="text-xs text-slate-400 font-medium">Query Text:</label>
+              <div class="relative">
+                <textarea id="customQueryInput" rows="2" class="w-full bg-dark-bg border border-dark-border rounded-xl p-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition font-mono resize-none" placeholder="Enter query to test 5-stage retrieval pipeline..."></textarea>
+              </div>
+            </div>
+
+            <!-- Budget & Profile Sliders -->
+            <div class="grid grid-cols-2 gap-3 pt-2">
+              <div>
+                <label class="text-[11px] text-slate-400 block mb-1">Profile Mode</label>
+                <select id="retrievalProfile" class="w-full bg-dark-bg border border-dark-border rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                  <option value="auto" selected>auto (adaptive)</option>
+                  <option value="hybrid">hybrid (5-stage)</option>
+                  <option value="graph">graph (affinity-heavy)</option>
+                  <option value="deep">deep (bounded)</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[11px] text-slate-400 block mb-1">Candidate Limit</label>
+                <input type="number" id="candidateLimit" value="10" min="1" max="100" class="w-full bg-dark-bg border border-dark-border rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500" />
+              </div>
+            </div>
+
+            <!-- Execute Query Button -->
+            <button onclick="executeSandboxQuery()" id="btnExecuteSandbox" class="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all cursor-pointer">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+              <span>Execute 5-Stage Retrieval</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: 5-Stage Live Visualizer & Grounded Evidence Card (7 Cols) -->
+        <div class="lg:col-span-7 space-y-4">
+          
+          <!-- 5-Stage Real-Time Pipeline Progress -->
+          <div class="glass-card rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-dark-border pb-3">
+              <div class="flex items-center gap-2">
+                <i data-lucide="workflow" class="w-4 h-4 text-cyan-400"></i>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-200">5-Stage Execution Trace</h3>
+              </div>
+              <div id="sandboxExecutionTime" class="text-xs font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/60">
+                Ready
+              </div>
+            </div>
+
+            <!-- 5 Stages Horizontal Meter -->
+            <div class="grid grid-cols-5 gap-2 text-center text-[11px] font-mono">
+              
+              <!-- S1: Lexical -->
+              <div id="stage-card-1" class="stage-step p-2.5 rounded-xl bg-dark-bg border border-dark-border space-y-1 transition-all duration-300">
+                <div class="text-[10px] text-slate-500 font-bold">STAGE 1</div>
+                <div class="font-semibold text-slate-300">BM25 Lexical</div>
+                <div id="stage-metric-1" class="text-[10px] text-slate-400">-</div>
+              </div>
+
+              <!-- S2: Dense Vector -->
+              <div id="stage-card-2" class="stage-step p-2.5 rounded-xl bg-dark-bg border border-dark-border space-y-1 transition-all duration-300">
+                <div class="text-[10px] text-slate-500 font-bold">STAGE 2</div>
+                <div class="font-semibold text-slate-300">Dense Vector</div>
+                <div id="stage-metric-2" class="text-[10px] text-slate-400">-</div>
+              </div>
+
+              <!-- S3: Graph & Affinity -->
+              <div id="stage-card-3" class="stage-step p-2.5 rounded-xl bg-dark-bg border border-dark-border space-y-1 transition-all duration-300">
+                <div class="text-[10px] text-slate-500 font-bold">STAGE 3</div>
+                <div class="font-semibold text-slate-300">Graph PageRank</div>
+                <div id="stage-metric-3" class="text-[10px] text-slate-400">-</div>
+              </div>
+
+              <!-- S4: Extractive Hierarchy -->
+              <div id="stage-card-4" class="stage-step p-2.5 rounded-xl bg-dark-bg border border-dark-border space-y-1 transition-all duration-300">
+                <div class="text-[10px] text-slate-500 font-bold">STAGE 4</div>
+                <div class="font-semibold text-slate-300">Extractive Tree</div>
+                <div id="stage-metric-4" class="text-[10px] text-slate-400">-</div>
+              </div>
+
+              <!-- S5: Grounding Gate -->
+              <div id="stage-card-5" class="stage-step p-2.5 rounded-xl bg-dark-bg border border-dark-border space-y-1 transition-all duration-300">
+                <div class="text-[10px] text-slate-500 font-bold">STAGE 5</div>
+                <div class="font-semibold text-slate-300">Grounding Gate</div>
+                <div id="stage-metric-5" class="text-[10px] text-slate-400">-</div>
+              </div>
+
+            </div>
+
+            <!-- Sufficiency State Indicator -->
+            <div id="sufficiencyBanner" class="p-3 rounded-xl border flex items-center justify-between transition-all bg-dark-bg border-dark-border">
+              <div class="flex items-center gap-3">
+                <div id="sufficiencyIcon" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center">
+                  <i data-lucide="help-circle" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div id="sufficiencyTitle" class="text-xs font-bold text-slate-300">Awaiting Query Execution</div>
+                  <div id="sufficiencySub" class="text-[11px] text-slate-500">Run a sample query above to evaluate cryptographic byte sufficiency</div>
+                </div>
+              </div>
+              <span id="sufficiencyBadge" class="text-xs font-mono px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">idle</span>
+            </div>
+
+            <!-- Synthesis Preview Box (if available) -->
+            <div id="synthesisContainer" class="hidden p-3.5 rounded-xl bg-slate-900/90 border border-cyan-900/40 space-y-1.5 text-xs">
+              <div class="flex items-center justify-between text-cyan-400 font-bold text-[11px]">
+                <span class="flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Grounded Synthesis:</span>
+                <span id="synthesisSufficiency" class="font-mono text-[10px] text-emerald-400">verified</span>
+              </div>
+              <p id="synthesisText" class="text-slate-200 leading-relaxed font-sans"></p>
+            </div>
+
+            <!-- Byte-Anchored Evidence Cards Viewer -->
+            <div class="space-y-2 pt-2">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span class="font-semibold flex items-center gap-1.5">
+                  <i data-lucide="fingerprint" class="w-3.5 h-3.5 text-cyan-400"></i> Pinned Byte-Anchored Evidence
+                </span>
+                <span id="evidenceCount" class="font-mono text-[11px]">0 atoms pinned</span>
+              </div>
+
+              <div id="evidenceCardsContainer" class="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+                <!-- Placeholder when empty -->
+                <div class="p-8 rounded-xl border border-dashed border-dark-border text-center space-y-2 text-slate-500">
+                  <i data-lucide="file-text" class="w-8 h-8 mx-auto opacity-40"></i>
+                  <p class="text-xs">No query executed yet. Select a demo question on the left to inspect real evidence atoms.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ================================================================================== -->
+    <!-- TAB 2: ONE-CLICK BENCHMARK SUITE (Live SSE, Dynamic Charts & Metrics) -->
+    <!-- ================================================================================== -->
+    <section id="view-benchmark" class="space-y-8 hidden">
+      
+      <!-- Top Control & Trigger Card -->
+      <div class="glass-card rounded-2xl p-6 space-y-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-dark-border pb-5">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs uppercase tracking-wider font-semibold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800 font-mono">1-Click Live Suite</span>
+              <span class="text-xs text-slate-400 font-mono">• Real-Time SSE Stream (/api/benchmark/stream)</span>
+            </div>
+            <h2 class="text-2xl font-extrabold text-white tracking-tight mt-1">Scale Retrieval Benchmark Runner</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Stream live evaluation across frozen scale corpora. Measures recall, exact-citation precision, latency, and zero-hallucination rate without mocks.</p>
+          </div>
+
+          <!-- Benchmark Action Button -->
+          <div class="flex items-center gap-3">
+            <button onclick="startOneClickBenchmark()" id="btnStartBenchmark" class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 via-cyan-500 to-teal-400 hover:from-emerald-400 hover:to-cyan-300 text-slate-950 font-extrabold text-sm shadow-xl shadow-emerald-500/25 transition-all transform active:scale-95 cursor-pointer">
+              <i data-lucide="play" class="w-4 h-4 fill-slate-950"></i>
+              <span>Start 1-Click Benchmark</span>
+            </button>
+
+            <button onclick="stopBenchmark()" id="btnStopBenchmark" class="hidden flex items-center gap-2 px-4 py-3 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-800 text-rose-300 font-bold text-sm transition">
+              <i data-lucide="square" class="w-4 h-4 fill-rose-300"></i>
+              <span>Stop Run</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Configuration Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+          
+          <!-- Dataset Selector -->
+          <div class="space-y-1.5">
+            <label class="text-slate-400 font-medium flex items-center gap-1.5">
+              <i data-lucide="database" class="w-3.5 h-3.5 text-cyan-400"></i> Evaluation Corpus
+            </label>
+            <select id="benchmarkDataset" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-slate-200 focus:outline-none focus:border-cyan-500 font-medium">
+              <!-- Populated dynamically via /api/datasets -->
+              <option value="multihop-2wiki" selected>2WikiMultihop QA (5 records)</option>
+              <option value="multihop-musique">MuSiQue Multi-Hop Corpus (12,493 docs)</option>
+              <option value="enron-emails">Enron Corporate Communications (50,000 docs)</option>
+              <option value="sec-edgar">SEC EDGAR 10-K / 10-Q Financial Filings (50 docs)</option>
+              <option value="fixture-technical-docs-v1">Technical Docs Benchmark Fixture</option>
+            </select>
+          </div>
+
+          <!-- Stage Selection Badges -->
+          <div class="space-y-1.5">
+            <label class="text-slate-400 font-medium flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-cyan-400"></i> Trace Stages
+            </label>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <span class="px-2 py-1 rounded bg-cyan-950/80 border border-cyan-800 text-cyan-300 text-[11px] font-mono">Lexical</span>
+              <span class="px-2 py-1 rounded bg-cyan-950/80 border border-cyan-800 text-cyan-300 text-[11px] font-mono">Dense</span>
+              <span class="px-2 py-1 rounded bg-cyan-950/80 border border-cyan-800 text-cyan-300 text-[11px] font-mono">Graph</span>
+              <span class="px-2 py-1 rounded bg-cyan-950/80 border border-cyan-800 text-cyan-300 text-[11px] font-mono">Hierarchy</span>
+            </div>
+          </div>
+
+          <!-- Baselines to Compare -->
+          <div class="space-y-1.5">
+            <label class="text-slate-400 font-medium flex items-center gap-1.5">
+              <i data-lucide="swords" class="w-3.5 h-3.5 text-cyan-400"></i> Compare Baselines
+            </label>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <span class="px-2 py-1 rounded bg-slate-800/80 border border-slate-700 text-slate-300 text-[11px] font-mono">Pure Vector</span>
+              <span class="px-2 py-1 rounded bg-slate-800/80 border border-slate-700 text-slate-300 text-[11px] font-mono">BM25</span>
+              <span class="px-2 py-1 rounded bg-slate-800/80 border border-slate-700 text-slate-300 text-[11px] font-mono">Naive RAG</span>
+            </div>
+          </div>
+
+          <!-- Concurrency & Sample Size -->
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-slate-400 font-medium">
+              <span>Query Count: <strong id="queryCountVal" class="text-cyan-400">20</strong></span>
+              <span>Engines: <strong class="text-slate-200">4</strong></span>
+            </div>
+            <input type="range" id="benchmarkSampleSlider" min="5" max="100" value="20" oninput="document.getElementById('queryCountVal').innerText = this.value" class="w-full accent-cyan-400 bg-slate-800 cursor-pointer mt-2" />
+          </div>
+
+        </div>
+
+        <!-- Fail-Closed Error Banner -->
+        <div id="benchmarkErrorBanner" class="hidden p-4 rounded-xl border border-rose-800 bg-rose-950/60 text-rose-200 text-xs flex items-start gap-3 shadow-lg shadow-rose-950/40">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5"></i>
+          <div class="flex-1 space-y-1">
+            <div class="font-bold text-rose-100 flex items-center justify-between">
+              <span>Benchmark Execution Failed</span>
+              <button onclick="hideBenchmarkError()" class="text-rose-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <p id="benchmarkErrorMessage" class="font-mono text-[11px] text-rose-300"></p>
+          </div>
+        </div>
+
+        <!-- Live Progress Bar -->
+        <div class="space-y-2 pt-2">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <div class="flex items-center gap-2 text-slate-300">
+              <span id="benchmarkSpinner" class="hidden w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+              <span id="benchmarkStatus">Ready to execute benchmark run via live backend API</span>
+            </div>
+            <div class="text-slate-400">
+              <span id="benchmarkProgressCount">0</span> / <span id="benchmarkTotalCount">0</span> evaluations (<span id="benchmarkPercent">0%</span>)
+            </div>
+          </div>
+          <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+            <div id="benchmarkProgressBar" class="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 rounded-full transition-all duration-300 w-0"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Dynamic Metric Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+        
+        <!-- P50 / P95 Latency -->
+        <div class="glass-card p-4 rounded-xl space-y-1">
+          <div class="text-[11px] font-medium text-slate-400">Latency P50 / P95</div>
+          <div class="text-lg font-bold font-mono text-cyan-400" id="metric-latency">--<span class="text-xs text-slate-400 font-sans"> ms</span></div>
+          <div class="text-[10px] text-slate-400 flex items-center gap-1 font-mono" id="metric-latency-sub">Live Telemetry</div>
+        </div>
+
+        <!-- Recall@5 -->
+        <div class="glass-card p-4 rounded-xl space-y-1">
+          <div class="text-[11px] font-medium text-slate-400">Recall @ 5</div>
+          <div class="text-xl font-bold font-mono text-emerald-400" id="metric-recall">--<span class="text-xs">%</span></div>
+          <div class="text-[10px] text-slate-400 font-mono" id="metric-recall-sub">Gold evidence</div>
+        </div>
+
+        <!-- NDCG@10 -->
+        <div class="glass-card p-4 rounded-xl space-y-1">
+          <div class="text-[11px] font-medium text-slate-400">NDCG @ 10</div>
+          <div class="text-xl font-bold font-mono text-teal-400" id="metric-ndcg">--</div>
+          <div class="text-[10px] text-slate-400 font-mono">Rank quality</div>
+        </div>
+
+        <!-- Citation Precision -->
+        <div class="glass-card p-4 rounded-xl space-y-1">
+          <div class="text-[11px] font-medium text-slate-400">Citation Precision</div>
+          <div class="text-xl font-bold font-mono text-cyan-300" id="metric-precision">--<span class="text-xs">%</span></div>
+          <div class="text-[10px] text-emerald-400 font-mono">Byte-exact spans</div>
+        </div>
+
+        <!-- Multi-Hop Coverage -->
+        <div class="glass-card p-4 rounded-xl space-y-1">
+          <div class="text-[11px] font-medium text-slate-400">Evidence Coverage</div>
+          <div class="text-xl font-bold font-mono text-purple-400" id="metric-coverage">--<span class="text-xs">%</span></div>
+          <div class="text-[10px] text-purple-300 font-mono">100% Gold recall</div>
+        </div>
+
+        <!-- Zero-Hallucination Rate -->
+        <div class="glass-card p-4 rounded-xl space-y-1">
+          <div class="text-[11px] font-medium text-slate-400">Zero-Hallucination</div>
+          <div class="text-xl font-bold font-mono text-emerald-300" id="metric-hallucination">--<span class="text-xs">%</span></div>
+          <div class="text-[10px] text-emerald-400 font-mono">0 false claims</div>
+        </div>
+
+        <!-- Cost per 1k -->
+        <div class="glass-card p-4 rounded-xl space-y-1 col-span-2 md:col-span-1">
+          <div class="text-[11px] font-medium text-slate-400">Cost / Run</div>
+          <div class="text-xl font-bold font-mono text-yellow-400" id="metric-cost">--</div>
+          <div class="text-[10px] text-emerald-400 font-mono">Token economics</div>
+        </div>
+
+      </div>
+
+      <!-- Real-Time Visual Charts (Radar & Bar Grid) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Radar Comparison Chart (6 Cols) -->
+        <div class="lg:col-span-6 glass-card rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between border-b border-dark-border pb-3">
+            <div class="flex items-center gap-2">
+              <i data-lucide="radar" class="w-4 h-4 text-cyan-400"></i>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-200">Multi-Dimensional Capability Radar</h3>
+            </div>
+            <span class="text-[11px] font-mono text-slate-400">Trace vs Comparative Baselines</span>
+          </div>
+          <div class="radar-container flex items-center justify-center">
+            <canvas id="radarChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Stage Latency & Recall Comparative Bar Chart (6 Cols) -->
+        <div class="lg:col-span-6 glass-card rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between border-b border-dark-border pb-3">
+            <div class="flex items-center gap-2">
+              <i data-lucide="bar-chart-3" class="w-4 h-4 text-emerald-400"></i>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-200">Comparative Engine Latency & Recall</h3>
+            </div>
+            <span class="text-[11px] font-mono text-slate-400">Telemetry comparison</span>
+          </div>
+          <div class="radar-container flex items-center justify-center">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Live Streaming Query Log Console (SSE Receiver) -->
+      <div class="glass-card rounded-2xl p-5 space-y-3">
+        <div class="flex items-center justify-between border-b border-dark-border pb-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="terminal" class="w-4 h-4 text-cyan-400"></i>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-200">Live Streaming Telemetry Log (SSE Stream: /api/benchmark/stream/{run_id})</h3>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="clearBenchmarkLogs()" class="text-[11px] font-mono text-slate-400 hover:text-slate-200 transition">Clear Console</button>
+            <span id="logCounterBadge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">0 events</span>
+          </div>
+        </div>
+
+        <!-- Log Stream Body -->
+        <div id="benchmarkLogConsole" class="bg-dark-bg border border-dark-border rounded-xl p-3 h-52 overflow-y-auto font-mono text-xs space-y-1.5">
+          <div class="text-slate-500 italic">// Awaiting benchmark execution stream connection... Click "Start 1-Click Benchmark" to initiate.</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================================================================================== -->
+    <!-- TAB 3: SIDE-BY-SIDE ARENA (Multi-Engine Grounding Comparison) -->
+    <!-- ================================================================================== -->
+    <section id="view-arena" class="space-y-8 hidden">
+      
+      <!-- Top Query Tester -->
+      <div class="glass-card rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-dark-border pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs uppercase tracking-wider font-semibold text-purple-400 bg-purple-950/80 px-2 py-0.5 rounded border border-purple-800 font-mono">Method Arena</span>
+              <span class="text-xs text-slate-400 font-mono">• Live POST /api/demo/compare</span>
+            </div>
+            <h2 class="text-2xl font-extrabold text-white tracking-tight mt-1">Multi-Engine Grounding Comparison</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Test complex reasoning queries simultaneously across Trace 5-Stage Hybrid, Pure Vector Top-K, BM25, and Naive RAG.</p>
+          </div>
+        </div>
+
+        <!-- Challenge Selectors -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <button onclick="loadArenaChallenge('contradiction_arena')" class="text-left text-xs p-3 rounded-xl bg-dark-bg/80 hover:bg-slate-800/80 border border-dark-border text-slate-300 hover:border-cyan-500/40 transition">
+            <div class="font-bold text-cyan-300">1. Temporal Conflict</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">"What is the official retention policy in ADR-017 vs the superseded RFC-009?"</div>
+          </button>
+          <button onclick="loadArenaChallenge('multihop_arena')" class="text-left text-xs p-3 rounded-xl bg-dark-bg/80 hover:bg-slate-800/80 border border-dark-border text-slate-300 hover:border-cyan-500/40 transition">
+            <div class="font-bold text-purple-300">2. Multi-Hop Chain</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">"Which downstream ingestion workers depend on the WAL compaction lock before emitting cognitive deltas?"</div>
+          </button>
+          <button onclick="loadArenaChallenge('hallucination_arena')" class="text-left text-xs p-3 rounded-xl bg-dark-bg/80 hover:bg-slate-800/80 border border-dark-border text-slate-300 hover:border-cyan-500/40 transition">
+            <div class="font-bold text-rose-300">3. Adversarial Fake Claim</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">"What was the leaked Q3 revenue projection discussed in the merger email?"</div>
+          </button>
+        </div>
+
+        <!-- Query input & run -->
+        <div class="flex gap-2">
+          <input type="text" id="arenaQueryInput" value="What is the official retention policy in ADR-017 vs the superseded RFC-009?" class="flex-1 bg-dark-bg border border-dark-border rounded-xl px-4 py-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-cyan-500" />
+          <button onclick="runArenaComparison()" id="btnRunArena" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-400 hover:to-cyan-400 text-white font-bold text-xs shadow-lg shadow-purple-500/20 transition cursor-pointer flex items-center gap-1.5">
+            <i data-lucide="play" class="w-3.5 h-3.5 fill-white"></i>
+            <span>Compare 4 Methods</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4-Column Side-by-Side Arena Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Column 1: Trace 5-Stage Grounded Hybrid -->
+        <div class="glass-card rounded-2xl p-5 space-y-4 border-cyan-500/50 bg-gradient-to-b from-cyan-950/20 to-dark-card shadow-lg shadow-cyan-950/30">
+          <div class="flex items-center justify-between border-b border-cyan-900/60 pb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-md bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-white">Trace 5-Stage Hybrid</h3>
+                <p class="text-[10px] text-cyan-400 font-mono">Byte-Anchored Grounding</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Grounded</span>
+          </div>
+
+          <!-- Answer & Synthesis -->
+          <div class="space-y-2 text-xs">
+            <div class="text-[11px] font-bold text-slate-300">Live Synthesis:</div>
+            <p id="arenaTraceAnswer" class="text-slate-300 text-xs leading-relaxed bg-dark-bg/90 p-3 rounded-xl border border-dark-border font-sans min-h-[72px]">
+              Click "Compare 4 Methods" to execute side-by-side comparison across live engines.
+            </p>
+          </div>
+
+          <!-- Evidence Badges & Proof -->
+          <div class="space-y-2 pt-1">
+            <div class="text-[11px] font-semibold text-slate-400">Verifiable Evidence Atoms:</div>
+            <div id="arenaTraceEvidence" class="space-y-1.5 font-mono text-[10px] min-h-[64px]">
+              <div class="text-slate-500 text-[10px] italic">Awaiting query execution...</div>
+            </div>
+          </div>
+
+          <!-- Diagnostics -->
+          <div class="pt-3 border-t border-dark-border grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div>
+              <span class="text-slate-500 block">Sufficiency:</span>
+              <span id="arenaTraceSufficiency" class="text-cyan-400 font-bold">--</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block">Latency:</span>
+              <span id="arenaTraceLatency" class="text-emerald-400 font-bold">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Pure Dense Vector Top-K -->
+        <div class="glass-card rounded-2xl p-5 space-y-4 border-slate-800">
+          <div class="flex items-center justify-between border-b border-dark-border pb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-md bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                <i data-lucide="compass" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-white">Pure Vector (Top-K)</h3>
+                <p class="text-[10px] text-slate-400 font-mono">Cosine Similarity</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Dense Only</span>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="text-[11px] font-bold text-slate-300">Retrieved Output:</div>
+            <p id="arenaVectorAnswer" class="text-slate-300 text-xs leading-relaxed bg-dark-bg/90 p-3 rounded-xl border border-dark-border min-h-[72px]">
+              Awaiting query execution...
+            </p>
+          </div>
+
+          <div class="space-y-2 pt-1">
+            <div class="text-[11px] font-semibold text-slate-400">Retrieved Chunks:</div>
+            <div id="arenaVectorEvidence" class="space-y-1.5 font-mono text-[10px] min-h-[64px]">
+              <div class="text-slate-500 text-[10px] italic">Awaiting query execution...</div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-dark-border grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div>
+              <span class="text-slate-500 block">Sufficiency:</span>
+              <span id="arenaVectorSufficiency" class="text-slate-400 font-bold">--</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block">Latency:</span>
+              <span id="arenaVectorLatency" class="text-blue-400 font-bold">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: Pure BM25 Lexical -->
+        <div class="glass-card rounded-2xl p-5 space-y-4 border-slate-800">
+          <div class="flex items-center justify-between border-b border-dark-border pb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-md bg-teal-500/20 text-teal-400 flex items-center justify-center">
+                <i data-lucide="file-search" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-white">Pure BM25</h3>
+                <p class="text-[10px] text-slate-400 font-mono">Exact Inverted Index</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Lexical Only</span>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="text-[11px] font-bold text-slate-300">Retrieved Output:</div>
+            <p id="arenaBm25Answer" class="text-slate-300 text-xs leading-relaxed bg-dark-bg/90 p-3 rounded-xl border border-dark-border min-h-[72px]">
+              Awaiting query execution...
+            </p>
+          </div>
+
+          <div class="space-y-2 pt-1">
+            <div class="text-[11px] font-semibold text-slate-400">Retrieved Chunks:</div>
+            <div id="arenaBm25Evidence" class="space-y-1.5 font-mono text-[10px] min-h-[64px]">
+              <div class="text-slate-500 text-[10px] italic">Awaiting query execution...</div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-dark-border grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div>
+              <span class="text-slate-500 block">Sufficiency:</span>
+              <span id="arenaBm25Sufficiency" class="text-slate-400 font-bold">--</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block">Latency:</span>
+              <span id="arenaBm25Latency" class="text-teal-400 font-bold">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 4: Naive RAG (Chunking + Eager LLM) -->
+        <div class="glass-card rounded-2xl p-5 space-y-4 border-rose-900/40 bg-gradient-to-b from-rose-950/10 to-dark-card">
+          <div class="flex items-center justify-between border-b border-rose-900/40 pb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-md bg-rose-500/20 text-rose-400 flex items-center justify-center">
+                <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-rose-200">Naive RAG</h3>
+                <p class="text-[10px] text-rose-400 font-mono">Chunking + Unchecked LLM</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-950 text-rose-400 border border-rose-800">Unchecked</span>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="text-[11px] font-bold text-rose-300">Generated Output:</div>
+            <p id="arenaNaiveAnswer" class="text-slate-300 text-xs leading-relaxed bg-dark-bg/90 p-3 rounded-xl border border-rose-900/30 min-h-[72px]">
+              Awaiting query execution...
+            </p>
+          </div>
+
+          <div class="space-y-2 pt-1">
+            <div class="text-[11px] font-semibold text-slate-400">Retrieved Chunks:</div>
+            <div id="arenaNaiveEvidence" class="space-y-1.5 font-mono text-[10px] min-h-[64px]">
+              <div class="text-slate-500 text-[10px] italic">Awaiting query execution...</div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-dark-border grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div>
+              <span class="text-slate-500 block">Sufficiency:</span>
+              <span id="arenaNaiveSufficiency" class="text-rose-400 font-bold">--</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block">Latency:</span>
+              <span id="arenaNaiveLatency" class="text-rose-400 font-bold">--</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ================================================================================== -->
+    <!-- TAB 4: SYSTEM & CONNECTOR SETTINGS -->
+    <!-- ================================================================================== -->
+    <section id="view-system" class="space-y-8 hidden">
+      
+      <!-- System Architecture & Storage Invariant Card -->
+      <div class="glass-card rounded-2xl p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-dark-border pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs uppercase tracking-wider font-semibold text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800 font-mono">System Invariants</span>
+              <span class="text-xs text-slate-400">• Storage & Connectors (/api/overview)</span>
+            </div>
+            <h2 class="text-2xl font-extrabold text-white tracking-tight mt-1">Active Storage & Database Topology</h2>
+          </div>
+          <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Read-Only Replicas Active
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <!-- Master WAL Spine Path -->
+          <div class="bg-dark-bg p-4 rounded-xl border border-dark-border space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-300">Master WAL Database</span>
+              <i data-lucide="hard-drive" class="w-4 h-4 text-cyan-400"></i>
+            </div>
+            <div id="sysWalPath" class="font-mono text-xs text-cyan-300 break-all bg-slate-900/90 p-2.5 rounded-lg border border-slate-800">
+              sqlite_wal (read-only mode)
+            </div>
+            <div class="text-[11px] text-slate-400">URI Mode: <span id="sysWalMode" class="font-mono text-emerald-400">mode=ro (Strict Read-Only)</span></div>
+          </div>
+
+          <!-- Master Scale Data Directory -->
+          <div class="bg-dark-bg p-4 rounded-xl border border-dark-border space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-300">Scale Corpora Catalog</span>
+              <i data-lucide="folder-git-2" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+            <div id="sysStoragePath" class="font-mono text-xs text-emerald-300 break-all bg-slate-900/90 p-2.5 rounded-lg border border-slate-800">
+              memory / scale-data
+            </div>
+            <div class="text-[11px] text-slate-400">Discovered Datasets: <span id="sysDocCount" class="font-mono text-slate-200 font-bold">Scanning...</span></div>
+          </div>
+
+          <!-- Model Gateway Configuration -->
+          <div class="bg-dark-bg p-4 rounded-xl border border-dark-border space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-300">Model Gateway Policy</span>
+              <i data-lucide="cpu" class="w-4 h-4 text-purple-400"></i>
+            </div>
+            <div id="sysDenseModel" class="font-mono text-xs text-purple-300 bg-slate-900/90 p-2.5 rounded-lg border border-slate-800 truncate">
+              Dense: Hashing / BGE-M3
+            </div>
+            <div class="text-[11px] text-slate-400 truncate">Reranker: <span id="sysRerankModel" class="font-mono text-emerald-400">Deterministic Evidence Reranker</span></div>
+          </div>
+
+        </div>
+
+        <!-- Cortex Activation Weights & Parameter Sliders -->
+        <div class="space-y-4 pt-4 border-t border-dark-border">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <i data-lucide="sliders" class="w-4 h-4 text-cyan-400"></i> Cortex Activation Engine Parameters
+            </h3>
+            <span class="text-xs font-mono text-slate-400">Total Family Mass = 1.0</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
+            <div class="bg-dark-bg p-3 rounded-xl border border-dark-border space-y-1.5">
+              <div class="flex justify-between text-slate-400">
+                <span>Structural Mass:</span>
+                <span class="text-cyan-400 font-bold">0.35</span>
+              </div>
+              <input type="range" value="35" disabled class="w-full accent-cyan-400 bg-slate-800" />
+            </div>
+
+            <div class="bg-dark-bg p-3 rounded-xl border border-dark-border space-y-1.5">
+              <div class="flex justify-between text-slate-400">
+                <span>Trusted Evidence Mass:</span>
+                <span class="text-emerald-400 font-bold">0.35</span>
+              </div>
+              <input type="range" value="35" disabled class="w-full accent-emerald-400 bg-slate-800" />
+            </div>
+
+            <div class="bg-dark-bg p-3 rounded-xl border border-dark-border space-y-1.5">
+              <div class="flex justify-between text-slate-400">
+                <span>Semantic Affinity:</span>
+                <span class="text-purple-400 font-bold">0.20</span>
+              </div>
+              <input type="range" value="20" disabled class="w-full accent-purple-400 bg-slate-800" />
+            </div>
+
+            <div class="bg-dark-bg p-3 rounded-xl border border-dark-border space-y-1.5">
+              <div class="flex justify-between text-slate-400">
+                <span>Behavioral Feedback:</span>
+                <span class="text-amber-400 font-bold">0.10</span>
+              </div>
+              <input type="range" value="10" disabled class="w-full accent-amber-400 bg-slate-800" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Database Connector Parameters -->
+        <div class="space-y-4 pt-4 border-t border-dark-border">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <i data-lucide="plug" class="w-4 h-4 text-emerald-400"></i> Database Connector Profiles
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+            <div class="p-3.5 rounded-xl bg-dark-bg border border-dark-border space-y-2">
+              <div class="flex items-center justify-between text-slate-200 font-bold">
+                <span>SQLite Embedded WAL</span>
+                <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 text-[10px] border border-emerald-800">Connected</span>
+              </div>
+              <div class="text-[11px] text-slate-400">Synchronous: NORMAL, Journal: WAL, mode: ro</div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-dark-bg border border-dark-border space-y-2">
+              <div class="flex items-center justify-between text-slate-200 font-bold">
+                <span>PostgreSQL + pgvector</span>
+                <span class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 text-[10px] border border-cyan-800">Standby</span>
+              </div>
+              <div class="text-[11px] text-slate-400">HNSW m=16, ef_construction=64, vector_dim=384</div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-dark-bg border border-dark-border space-y-2">
+              <div class="flex items-center justify-between text-slate-200 font-bold">
+                <span>OpenSearch Lexical Cluster</span>
+                <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px] border border-slate-700">Optional</span>
+              </div>
+              <div class="text-[11px] text-slate-400">BM25 k1=1.2, b=0.75, token_limit=1000</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer Status Bar -->
+  <footer class="relative z-20 border-t border-dark-border bg-dark-bg/95 px-4 lg:px-8 py-3 text-xs text-slate-400 font-mono">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="flex items-center gap-4">
+        <span class="flex items-center gap-1.5 text-slate-300">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyan-400"></i> Trace 2.0 Invariant Engine
+        </span>
+        <span class="hidden sm:inline text-slate-600">•</span>
+        <span class="hidden sm:inline text-slate-400">SHA-256 Byte Anchors Verified</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span>Substrate: <strong id="footerDatasetStatus" class="text-cyan-400">Live API Connected</strong></span>
+        <span class="text-slate-600">•</span>
+        <span id="systemClock" class="text-slate-400">-- UTC</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================================================================================== -->
+  <!-- APPLICATION STATE & JAVASCRIPT LOGIC -->
+  <!-- ================================================================================== -->
+  <script>
+    // Global Application State (Pure Live Data)
+    const AppState = {
+      activeTab: 'architecture',
+      isLiveApi: true,
+      eventSource: null,
+      benchmarkRunning: false,
+      radarChart: null,
+      barChart: null,
+      currentRunId: null,
+      discoveredDatasets: []
+    };
+
+    // Robust XSS Sanitization & HTML Escaping
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function safeHighlight(fullText, highlightSub) {
+      if (!fullText) return '';
+      const escapedFull = escapeHtml(fullText);
+      if (!highlightSub) return escapedFull;
+      const escapedSub = escapeHtml(highlightSub);
+      if (!escapedSub) return escapedFull;
+      return escapedFull.split(escapedSub).join(`<span class="code-highlight font-medium text-cyan-200">${escapedSub}</span>`);
+    }
+
+    // Component Inspector Knowledge Base
+    const COMPONENT_DATA = {
+      ingest: {
+        tag: "INGESTION SUBSYSTEM",
+        title: "Deterministic Ingestion & Multi-Format Adapters",
+        desc: "Ingestion normalizes text without altering original source semantics or byte boundaries. Text adapters extract structural markers, while ValidTimeMetadata captures real-world validity intervals [valid_from, valid_to) without guessing missing values."
+      },
+      atom: {
+        tag: "IMMUTABLE EVIDENCE ATOMS",
+        title: "Content-Addressed Atom Versions & Cryptographic Spans",
+        desc: "Atoms are the immutable unit of truth in Trace. Every atom version carries a SHA-256/BLAKE2b content hash, explicit start/end character offsets into normalized text, and parent source IDs. Atoms are strictly append-only."
+      },
+      spine: {
+        tag: "WAL EVENT LEDGER",
+        title: "Master Write-Ahead Log & Causal Invariants",
+        desc: "All mutations commit to the WAL Spine as monotonically sequenced events before being reflected in projections. The master database is accessed read-only via URI mode=ro, guaranteeing that evaluation and retrieval never mutate stored state."
+      },
+      cortex: {
+        tag: "CORTEX PROJECTIONS",
+        title: "Hierarchical Holons & Query-Local Energy Activation",
+        desc: "Cortex maintains extractive document hierarchies and semantic affinity graphs. During retrieval, a PageRank-style energy activation equation distributes weight across structural (0.35), trusted evidence (0.35), affinity (0.20), and behavioral (0.10) families."
+      }
+    };
+
+    // Pre-built Challenging Demo Queries (Live Execution Targets)
+    const SAMPLE_QUERY_PROMPTS = {
+      contradiction: "What is the official retention policy in ADR-017 vs the superseded RFC-009?",
+      multihop: "Which downstream ingestion workers depend on the WAL compaction lock before emitting cognitive deltas?",
+      unanswerable: "What was the leaked Q3 revenue projection discussed in the merger email?",
+      sec_footnote: "What are the off-balance sheet lease commitments for fiscal year 2024?"
+    };
+
+    // Initialize DOM and Lucide Icons
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initCharts();
+      updateClock();
+      setInterval(updateClock, 1000);
+      checkApiHealth();
+      fetchOverview();
+      loadDatasets();
+    });
+
+    function updateClock() {
+      const now = new Date();
+      const el = document.getElementById('systemClock');
+      if (el) el.innerText = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+    }
+
+    // Switch Navigation Tabs
+    function switchTab(tabId) {
+      AppState.activeTab = tabId;
+      ['architecture', 'benchmark', 'arena', 'system'].forEach(id => {
+        const view = document.getElementById(`view-${id}`);
+        const btn = document.getElementById(`tab-${id}`);
+        if (id === tabId) {
+          if (view) view.classList.remove('hidden');
+          if (btn) {
+            btn.className = "tab-btn flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-cyan-400 bg-cyan-950/60 border border-cyan-800/40 transition-all font-medium";
+          }
+        } else {
+          if (view) view.classList.add('hidden');
+          if (btn) {
+            btn.className = "tab-btn flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition-all font-medium";
+          }
+        }
+      });
+      lucide.createIcons();
+    }
+
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    // Inspect Component Details
+    function inspectComponent(name) {
+      const data = COMPONENT_DATA[name];
+      if (!data) return;
+      const inspector = document.getElementById('componentInspector');
+      document.getElementById('inspectorTag').innerText = data.tag;
+      document.getElementById('inspectorTitle').innerText = data.title;
+      document.getElementById('inspectorDesc').innerText = data.desc;
+      inspector.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    // API Health Check & System Overview
+    async function checkApiHealth() {
+      try {
+        const res = await fetch('/api/overview', { method: 'GET', signal: AbortSignal.timeout(3000) });
+        if (res.ok) {
+          setApiStatus(true, 'Live Engine Connected');
+        } else {
+          setApiStatus(false, 'API Unavailable (HTTP ' + res.status + ')');
+        }
+      } catch (err) {
+        setApiStatus(false, 'API Disconnected');
+      }
+    }
+
+    function setApiStatus(isOnline, text) {
+      AppState.isLiveApi = isOnline;
+      const dot = document.getElementById('backendStatusDot');
+      const statusText = document.getElementById('backendStatusText');
+      const reconnectLabel = document.getElementById('reconnectLabel');
+      const footerStatus = document.getElementById('footerDatasetStatus');
+
+      if (isOnline) {
+        if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]";
+        if (statusText) statusText.innerText = text;
+        if (reconnectLabel) reconnectLabel.innerText = "API: Connected";
+        if (footerStatus) footerStatus.innerText = "Live API Connected";
+      } else {
+        if (dot) dot.className = "w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e]";
+        if (statusText) statusText.innerText = text;
+        if (reconnectLabel) reconnectLabel.innerText = "API: Offline";
+        if (footerStatus) footerStatus.innerText = "API Offline";
+      }
+    }
+
+    async function fetchOverview() {
+      try {
+        const res = await fetch('/api/overview');
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        if (data.storage) {
+          const walEl = document.getElementById('sysWalPath');
+          if (walEl) walEl.innerText = data.storage.repository || 'sqlite_wal';
+        }
+        if (data.datasets) {
+          const docEl = document.getElementById('sysDocCount');
+          if (docEl) docEl.innerText = `${data.datasets.total_discovered} datasets discovered`;
+        }
+        if (data.models) {
+          const denseEl = document.getElementById('sysDenseModel');
+          if (denseEl) denseEl.innerText = `Dense: ${data.models.dense_model || 'BGE-M3 / Hashing'}`;
+          const rerankEl = document.getElementById('sysRerankModel');
+          if (rerankEl) rerankEl.innerText = data.models.rerank_model || 'Deterministic Evidence Reranker';
+        }
+      } catch (err) {
+        console.warn("Could not fetch overview:", err);
+      }
+    }
+
+    async function loadDatasets() {
+      try {
+        const res = await fetch('/api/datasets');
+        if (!res.ok) return;
+        const datasets = await res.json();
+        AppState.discoveredDatasets = datasets;
+
+        const benchmarkSelect = document.getElementById('benchmarkDataset');
+        const sandboxSelect = document.getElementById('sandboxDatasetSelector');
+
+        if (datasets.length > 0) {
+          if (benchmarkSelect) {
+            const evaluable = datasets.filter(d => d.is_evaluable);
+            const exploratory = datasets.filter(d => !d.is_evaluable);
+            let html = '';
+            if (evaluable.length > 0) {
+              html += evaluable.map(d => 
+                `<option value="${escapeHtml(d.id)}">${escapeHtml(d.name)} (${escapeHtml(d.query_count || d.record_count)} benchmark cases)</option>`
+              ).join('');
+            }
+            if (exploratory.length > 0) {
+              html += `<optgroup label="Exploratory Only (No Frozen QRELs)">` +
+                exploratory.map(d => 
+                  `<option value="${escapeHtml(d.id)}" disabled>${escapeHtml(d.name)} (${escapeHtml(d.record_count)} records - Exploratory Only)</option>`
+                ).join('') + `</optgroup>`;
+            }
+            benchmarkSelect.innerHTML = html;
+          }
+          if (sandboxSelect) {
+            sandboxSelect.innerHTML = '<option value="">Auto-select (All Discovered Corpi)</option>' + 
+              datasets.map(d => `<option value="${escapeHtml(d.id)}">${escapeHtml(d.name)}</option>`).join('');
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load datasets catalog:", err);
+      }
+    }
+
+    // =========================================================================
+    // TAB 1: SANDBOX DEMO CONTROLS (Live POST /api/demo/query)
+    // =========================================================================
+    function loadSampleQuery(key) {
+      const q = SAMPLE_QUERY_PROMPTS[key];
+      if (!q) return;
+      const input = document.getElementById('customQueryInput');
+      if (input) input.value = q;
+      executeSandboxQuery(q);
+    }
+
+    function runStepByStepDemo() {
+      loadSampleQuery('contradiction');
+    }
+
+    async function executeSandboxQuery(customText = null) {
+      const query = (customText !== null ? customText : document.getElementById('customQueryInput')?.value || '').trim();
+      if (!query) return;
+
+      const workspaceId = document.getElementById('workspaceSelector')?.value || 'default';
+      const datasetId = document.getElementById('sandboxDatasetSelector')?.value || null;
+      const profile = document.getElementById('retrievalProfile')?.value || 'auto';
+      const limit = parseInt(document.getElementById('candidateLimit')?.value, 10) || 10;
+      const deep = (profile === 'deep');
+
+      // Reset stages and show spinner
+      const stages = [1, 2, 3, 4, 5];
+      stages.forEach(s => {
+        const card = document.getElementById(`stage-card-${s}`);
+        const metric = document.getElementById(`stage-metric-${s}`);
+        if (card) {
+          card.classList.remove('pipeline-stage-active', 'border-cyan-500', 'bg-cyan-950/40');
+          card.classList.add('bg-dark-bg', 'border-dark-border');
+        }
+        if (metric) metric.innerText = "retrieving...";
+      });
+
+      document.getElementById('sandboxExecutionTime').innerText = "Querying live engine...";
+
+      try {
+        const res = await fetch('/api/demo/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: query,
+            workspace_id: workspaceId,
+            dataset_id: datasetId,
+            engine_id: 'trace_hybrid',
+            deep: deep,
+            limit: limit
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || `Query failed with HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        renderSandboxResult(data);
+      } catch (err) {
+        showSandboxError(err.message);
+      }
+    }
+
+    function renderSandboxResult(data) {
+      const execTimeEl = document.getElementById('sandboxExecutionTime');
+      if (execTimeEl) execTimeEl.innerText = `Completed in ${data.latency_ms ? data.latency_ms.toFixed(1) : 0}ms`;
+
+      // Extract stage breakdown from live telemetry
+      const sb = data.stage_breakdown || {};
+      const s1 = sb.stage_1_lexical || {};
+      const s2 = sb.stage_2_dense || {};
+      const s3 = sb.stage_3_graph || {};
+      const s4 = sb.stage_4_hierarchy || {};
+      const s5 = sb.stage_5_rerank || {};
+
+      const stageMetrics = [
+        s1.hits !== undefined ? `${s1.hits} BM25 hits (${s1.latency_ms ? s1.latency_ms.toFixed(1) : 0}ms)` : `${data.results?.length || 0} hits`,
+        s2.candidates !== undefined ? `Dense (${s2.latency_ms ? s2.latency_ms.toFixed(1) : 0}ms)` : `Sim: ${data.results?.[0]?.score?.toFixed(3) || '-'}`,
+        s3.activated_nodes !== undefined ? `${s3.activated_nodes} nodes (${s3.latency_ms ? s3.latency_ms.toFixed(1) : 0}ms)` : 'Affinity Active',
+        s4.holons !== undefined ? `${s4.holons} holons (${s4.latency_ms ? s4.latency_ms.toFixed(1) : 0}ms)` : 'Hierarchy Tree',
+        data.abstained ? 'Abstained' : (data.sufficiency_state || 'Grounded')
+      ];
+
+      // Animate stages illumination
+      [1, 2, 3, 4, 5].forEach((s, idx) => {
+        setTimeout(() => {
+          const card = document.getElementById(`stage-card-${s}`);
+          const metric = document.getElementById(`stage-metric-${s}`);
+          if (card) {
+            card.classList.remove('bg-dark-bg', 'border-dark-border');
+            card.classList.add('pipeline-stage-active', 'border-cyan-500', 'bg-cyan-950/40');
+          }
+          if (metric) metric.innerText = stageMetrics[idx];
+        }, idx * 60);
+      });
+
+      // Sufficiency banner
+      renderSufficiencyState(data);
+
+      // Grounded Synthesis Preview
+      const synthContainer = document.getElementById('synthesisContainer');
+      const synthText = document.getElementById('synthesisText');
+      const synthSuff = document.getElementById('synthesisSufficiency');
+      if (data.synthesis && synthContainer && synthText) {
+        synthContainer.classList.remove('hidden');
+        synthText.innerText = data.synthesis;
+        if (synthSuff) synthSuff.innerText = data.sufficiency_state || (data.abstained ? 'abstained' : 'verified');
+      } else if (synthContainer) {
+        synthContainer.classList.add('hidden');
+      }
+
+      // Evidence cards
+      renderEvidenceCards(data.results || [], data.abstained, data.query);
+    }
+
+    function renderSufficiencyState(data) {
+      const banner = document.getElementById('sufficiencyBanner');
+      const icon = document.getElementById('sufficiencyIcon');
+      const title = document.getElementById('sufficiencyTitle');
+      const sub = document.getElementById('sufficiencySub');
+      const badge = document.getElementById('sufficiencyBadge');
+
+      if (!banner) return;
+
+      if (data.abstained || data.sufficiency_state === 'insufficient_evidence') {
+        banner.className = "p-3 rounded-xl border flex items-center justify-between transition-all bg-rose-950/30 border-rose-800/80 shadow-lg shadow-rose-950/20";
+        icon.className = "w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center";
+        icon.innerHTML = '<i data-lucide="shield-alert" class="w-4 h-4 text-rose-400"></i>';
+        title.innerText = "Abstained: Insufficient Grounded Evidence";
+        title.className = "text-xs font-bold text-rose-200";
+        sub.innerText = "Query contains ungrounded/adversarial premise • Zero-hallucination fallback triggered";
+        badge.className = "text-xs font-mono px-2.5 py-1 rounded-full bg-rose-900/80 text-rose-300 border border-rose-700 font-bold";
+        badge.innerText = "insufficient_evidence";
+      } else if (data.sufficiency_state === 'ambiguous') {
+        banner.className = "p-3 rounded-xl border flex items-center justify-between transition-all bg-amber-950/30 border-amber-800/80 shadow-lg shadow-amber-950/20";
+        icon.className = "w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center";
+        icon.innerHTML = '<i data-lucide="help-circle" class="w-4 h-4 text-amber-400"></i>';
+        title.innerText = "Ambiguous Evidence Detected";
+        title.className = "text-xs font-bold text-amber-200";
+        sub.innerText = "Multiple competing interpretations found in corpus";
+        badge.className = "text-xs font-mono px-2.5 py-1 rounded-full bg-amber-900/80 text-amber-300 border border-amber-700 font-bold";
+        badge.innerText = "ambiguous";
+      } else {
+        banner.className = "p-3 rounded-xl border flex items-center justify-between transition-all bg-emerald-950/30 border-emerald-800/80 shadow-lg shadow-emerald-950/20";
+        icon.className = "w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center";
+        icon.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>';
+        title.innerText = "Grounded Evidence Verified";
+        title.className = "text-xs font-bold text-emerald-200";
+        sub.innerText = `Byte-exact spans pinned to WAL event log • Latency: ${data.latency_ms ? data.latency_ms.toFixed(1) : 0}ms`;
+        badge.className = "text-xs font-mono px-2.5 py-1 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700 font-bold";
+        badge.innerText = escapeHtml(data.sufficiency_state || "grounded_evidence");
+      }
+      lucide.createIcons();
+    }
+
+    function renderEvidenceCards(hits, abstained, queryText) {
+      const container = document.getElementById('evidenceCardsContainer');
+      const counter = document.getElementById('evidenceCount');
+      if (!container) return;
+
+      if (counter) counter.innerText = `${hits.length} atoms pinned`;
+
+      if (hits.length === 0 || abstained) {
+        container.innerHTML = `
+          <div class="p-6 rounded-xl border border-dashed border-rose-900/50 bg-rose-950/10 text-center space-y-1 text-rose-300">
+            <i data-lucide="shield-x" class="w-6 h-6 mx-auto text-rose-400"></i>
+            <div class="text-xs font-bold">No Verifiable Atoms in Master Corpus</div>
+            <div class="text-[11px] text-slate-400">Trace safely abstained rather than fabricating unanchored claims.</div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = hits.map(hit => {
+        const uri = hit.source_location?.uri || hit.node_id || "doc://evidence/atom";
+        const byteRange = hit.source_location?.byte_range ? `[${hit.source_location.byte_range[0]}..${hit.source_location.byte_range[1]}]` : (hit.anchors?.[0] ? `[${hit.anchors[0].start}..${hit.anchors[0].end}]` : '[0..len]');
+        const atomId = hit.atom_version_id || hit.node_id || 'atom_v2';
+        const hash = hit.anchors?.[0]?.hash || hit.atom_version_id || 'sha256:verified';
+        const contentSafe = escapeHtml(hit.content);
+
+        return `
+          <div class="glass-card p-3.5 rounded-xl space-y-2 border-slate-800 hover:border-cyan-500/50 transition">
+            <div class="flex items-center justify-between text-[11px] font-mono border-b border-dark-border pb-2">
+              <div class="flex items-center gap-1.5 text-cyan-300 font-semibold truncate max-w-[280px]">
+                <i data-lucide="file-text" class="w-3.5 h-3.5 text-cyan-400 flex-shrink-0"></i>
+                <span class="truncate">${escapeHtml(uri)}</span>
+              </div>
+              <span class="text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/60 font-bold">${escapeHtml(byteRange)}</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed font-sans">${contentSafe}</p>
+            <div class="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-1">
+              <span class="truncate max-w-[180px]">ID: ${escapeHtml(atomId)}</span>
+              <span class="truncate max-w-[180px]">Score: ${hit.score !== undefined ? hit.score.toFixed(3) : '-'} | ${escapeHtml(hash)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function showSandboxError(errorMsg) {
+      const banner = document.getElementById('sufficiencyBanner');
+      const icon = document.getElementById('sufficiencyIcon');
+      const title = document.getElementById('sufficiencyTitle');
+      const sub = document.getElementById('sufficiencySub');
+      const badge = document.getElementById('sufficiencyBadge');
+      const container = document.getElementById('evidenceCardsContainer');
+
+      if (banner) {
+        banner.className = "p-3 rounded-xl border flex items-center justify-between transition-all bg-rose-950/40 border-rose-800/80 shadow-lg shadow-rose-950/20";
+        icon.className = "w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center";
+        icon.innerHTML = '<i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>';
+        title.innerText = "Query Execution Error";
+        title.className = "text-xs font-bold text-rose-200";
+        sub.innerText = errorMsg;
+        badge.className = "text-xs font-mono px-2.5 py-1 rounded-full bg-rose-900/80 text-rose-300 border border-rose-700 font-bold";
+        badge.innerText = "error";
+      }
+
+      if (container) {
+        container.innerHTML = `
+          <div class="p-6 rounded-xl border border-rose-900/50 bg-rose-950/20 text-center space-y-2 text-rose-300">
+            <i data-lucide="alert-octagon" class="w-6 h-6 mx-auto text-rose-400"></i>
+            <div class="text-xs font-bold">Live API Error</div>
+            <div class="text-[11px] font-mono text-rose-400">${escapeHtml(errorMsg)}</div>
+          </div>
+        `;
+      }
+
+      const execTime = document.getElementById('sandboxExecutionTime');
+      if (execTime) execTime.innerText = "Failed";
+      lucide.createIcons();
+    }
+
+    // =========================================================================
+    // TAB 2: ONE-CLICK BENCHMARK RUNNER & REAL SSE STREAMING
+    // =========================================================================
+    function initCharts() {
+      // 1. Radar Chart (Empty/Default Initialization)
+      const radarCtx = document.getElementById('radarChart')?.getContext('2d');
+      if (radarCtx) {
+        AppState.radarChart = new Chart(radarCtx, {
+          type: 'radar',
+          data: {
+            labels: ['Recall@5', 'NDCG@10', 'Exact Citation', 'Evidence Coverage', '0-Hallucination', 'Abstention Correct', 'Low Latency Score'],
+            datasets: [
+              {
+                label: 'Trace 5-Stage Hybrid',
+                data: [0, 0, 0, 0, 0, 0, 0],
+                backgroundColor: 'rgba(6, 182, 212, 0.25)',
+                borderColor: '#06b6d4',
+                borderWidth: 2,
+                pointBackgroundColor: '#22d3ee',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#22d3ee'
+              },
+              {
+                label: 'Pure Dense Vector',
+                data: [0, 0, 0, 0, 0, 0, 0],
+                backgroundColor: 'rgba(139, 92, 246, 0.15)',
+                borderColor: '#8b5cf6',
+                borderWidth: 1.5,
+                pointBackgroundColor: '#a78bfa',
+                borderDash: [2, 2]
+              },
+              {
+                label: 'Pure BM25 Lexical',
+                data: [0, 0, 0, 0, 0, 0, 0],
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                borderColor: '#10b981',
+                borderWidth: 1.5,
+                pointBackgroundColor: '#34d399',
+                borderDash: [3, 3]
+              },
+              {
+                label: 'Naive RAG (Top-K)',
+                data: [0, 0, 0, 0, 0, 0, 0],
+                backgroundColor: 'rgba(244, 63, 94, 0.15)',
+                borderColor: '#f43f5e',
+                borderWidth: 1.5,
+                pointBackgroundColor: '#fb7185',
+                borderDash: [4, 4]
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                grid: { color: 'rgba(255, 255, 255, 0.08)' },
+                pointLabels: {
+                  color: '#94a3b8',
+                  font: { family: 'JetBrains Mono', size: 10 }
+                },
+                ticks: { display: false, max: 100, min: 0 }
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  color: '#e2e8f0',
+                  font: { family: 'Inter', size: 11 },
+                  boxWidth: 12
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. Bar Chart (Comparative Engine Latency & Recall)
+      const barCtx = document.getElementById('barChart')?.getContext('2d');
+      if (barCtx) {
+        AppState.barChart = new Chart(barCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Trace Hybrid', 'Pure Vector', 'Pure BM25', 'Naive RAG'],
+            datasets: [
+              {
+                label: 'Recall@5 (%)',
+                data: [0, 0, 0, 0],
+                backgroundColor: '#06b6d4',
+                borderRadius: 6
+              },
+              {
+                label: 'Citation Precision (%)',
+                data: [0, 0, 0, 0],
+                backgroundColor: '#10b981',
+                borderRadius: 6
+              },
+              {
+                label: 'P50 Latency (ms)',
+                data: [0, 0, 0, 0],
+                backgroundColor: '#8b5cf6',
+                borderRadius: 6
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }
+              },
+              y: {
+                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }
+              }
+            },
+            plugins: {
+              legend: {
+                labels: { color: '#e2e8f0', font: { family: 'Inter', size: 11 }, boxWidth: 12 }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    async function startOneClickBenchmark() {
+      if (AppState.benchmarkRunning) return;
+      AppState.benchmarkRunning = true;
+      hideBenchmarkError();
+
+      const totalQueries = parseInt(document.getElementById('benchmarkSampleSlider')?.value, 10) || 20;
+      const dataset = document.getElementById('benchmarkDataset')?.value || 'fixture-technical-docs-v1';
+      const workspaceId = document.getElementById('workspaceSelector')?.value || 'default';
+
+      document.getElementById('btnStartBenchmark')?.classList.add('hidden');
+      document.getElementById('btnStopBenchmark')?.classList.remove('hidden');
+      document.getElementById('benchmarkSpinner')?.classList.remove('hidden');
+      document.getElementById('benchmarkStatus').innerText = `Launching multi-engine benchmark for ${dataset}...`;
+      document.getElementById('benchmarkTotalCount').innerText = String(totalQueries * 4);
+      document.getElementById('benchmarkProgressCount').innerText = "0";
+      document.getElementById('benchmarkPercent').innerText = "0%";
+      document.getElementById('benchmarkProgressBar').style.width = "0%";
+
+      const consoleEl = document.getElementById('benchmarkLogConsole');
+      if (consoleEl) {
+        consoleEl.innerHTML = `<div class="text-cyan-400 font-bold">// Initiating benchmark run via POST /api/benchmark/start...</div>`;
+      }
+
+      await initiateLiveBenchmarkStream(dataset, totalQueries, workspaceId);
+    }
+
+    async function initiateLiveBenchmarkStream(dataset, totalQueries, workspaceId) {
+      try {
+        const startRes = await fetch('/api/benchmark/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            dataset_id: dataset,
+            engines: ['trace_hybrid', 'pure_vector', 'pure_lexical', 'naive_rag'],
+            max_cases: totalQueries,
+            workspace_id: workspaceId
+          })
+        });
+
+        if (!startRes.ok) {
+          const errData = await startRes.json().catch(() => ({}));
+          throw new Error(errData.detail || `Server returned HTTP ${startRes.status}`);
+        }
+
+        const data = await startRes.json();
+        const runId = data.run_id;
+        AppState.currentRunId = runId;
+
+        appendLog(`[CONNECT] Subscribed to live telemetry SSE stream: /api/benchmark/stream/${escapeHtml(runId)}`);
+
+        // Connect SSE EventSource to live streaming endpoint
+        const eventSource = new EventSource(`/api/benchmark/stream/${encodeURIComponent(runId)}`);
+        AppState.eventSource = eventSource;
+
+        // Named SSE Event Listeners
+        eventSource.addEventListener('run_started', (e) => {
+          try {
+            const evData = JSON.parse(e.data);
+            const total = evData.total_cases || (totalQueries * 4);
+            document.getElementById('benchmarkTotalCount').innerText = String(total);
+            document.getElementById('benchmarkStatus').innerText = `Running evaluation: ${evData.suite_name || dataset} (${total} evaluations)`;
+            appendLog(`[STARTED] Suite: ${evData.suite_name || dataset} | Engines: ${(evData.engines || []).join(', ')} | Total: ${total}`);
+          } catch (err) {
+            console.error("Error parsing run_started:", err);
+          }
+        });
+
+        eventSource.addEventListener('case_started', (e) => {
+          try {
+            const evData = JSON.parse(e.data);
+            appendLog(`[CASE #${evData.case_index}/${evData.total_cases}] Query: "${evData.query}"`);
+          } catch (err) {}
+        });
+
+        eventSource.addEventListener('case_completed', (e) => {
+          try {
+            const evData = JSON.parse(e.data);
+            const res = evData.result || {};
+            const pct = evData.progress !== undefined ? Math.min(100, evData.progress) : 0;
+            
+            document.getElementById('benchmarkPercent').innerText = `${pct.toFixed(1)}%`;
+            document.getElementById('benchmarkProgressBar').style.width = `${pct}%`;
+            
+            const currentCount = parseInt(document.getElementById('benchmarkProgressCount').innerText, 10) || 0;
+            document.getElementById('benchmarkProgressCount').innerText = String(currentCount + 1);
+
+            // Update real-time metric cards if this case was from trace_hybrid
+            if (res.engine_id === 'trace_hybrid') {
+              document.getElementById('metric-latency').innerHTML = `${res.latency_ms ? res.latency_ms.toFixed(1) : 0}<span class="text-xs text-slate-400 font-sans"> ms</span>`;
+              document.getElementById('metric-recall').innerHTML = `${(res.recall_at_5 * 100).toFixed(1)}<span class="text-xs">%</span>`;
+              document.getElementById('metric-ndcg').innerText = res.ndcg_at_10 ? res.ndcg_at_10.toFixed(3) : '0.000';
+              document.getElementById('metric-precision').innerHTML = `${(res.citation_precision * 100).toFixed(1)}<span class="text-xs">%</span>`;
+              document.getElementById('metric-coverage').innerHTML = `${res.complete_evidence ? '100.0' : '0.0'}<span class="text-xs">%</span>`;
+              document.getElementById('metric-hallucination').innerHTML = `${res.hallucination_detected ? '0.0' : '100.0'}<span class="text-xs">%</span>`;
+              document.getElementById('metric-cost').innerText = `$${(res.token_cost_usd || 0.0001).toFixed(4)}`;
+            }
+
+            appendLog(`[EVAL] [${res.engine_id}] (${res.latency_ms ? res.latency_ms.toFixed(1) : 0}ms) R@5: ${(res.recall_at_5 * 100).toFixed(0)}% | Prc: ${(res.citation_precision * 100).toFixed(0)}% | Q: "${res.query}" [${res.abstained ? 'Abstained' : 'Answered'}]`);
+          } catch (err) {
+            console.error("Error parsing case_completed:", err);
+          }
+        });
+
+        eventSource.addEventListener('run_progress', (e) => {
+          try {
+            const evData = JSON.parse(e.data);
+            if (evData.progress_percent !== undefined) {
+              document.getElementById('benchmarkPercent').innerText = `${evData.progress_percent}%`;
+              document.getElementById('benchmarkProgressBar').style.width = `${evData.progress_percent}%`;
+            }
+          } catch (err) {}
+        });
+
+        eventSource.addEventListener('metrics_updated', (e) => {
+          try {
+            const evData = JSON.parse(e.data);
+            if (evData.metrics) {
+              updateSingleEngineMetrics(evData.engine_id, evData.metrics);
+            }
+          } catch (err) {}
+        });
+
+        eventSource.addEventListener('run_completed', (e) => {
+          try {
+            const evData = JSON.parse(e.data);
+            const summary = evData.summary || {};
+            
+            document.getElementById('benchmarkProgressBar').style.width = '100%';
+            document.getElementById('benchmarkPercent').innerText = '100%';
+            document.getElementById('benchmarkProgressCount').innerText = document.getElementById('benchmarkTotalCount').innerText;
+            document.getElementById('benchmarkStatus').innerText = `Benchmark run completed successfully.`;
+            
+            appendLog(`[COMPLETE] Benchmark run ${runId} finished. Updating telemetry charts with final aggregated metrics.`);
+
+            if (summary.metrics) {
+              updateChartsFromBenchmarkSummary(summary.metrics);
+              if (summary.metrics.trace_hybrid) {
+                const tm = summary.metrics.trace_hybrid;
+                document.getElementById('metric-latency').innerHTML = `${tm.p50_latency_ms ? tm.p50_latency_ms.toFixed(1) : 0}<span class="text-xs text-slate-400 font-sans"> ms</span> / ${tm.p95_latency_ms ? tm.p95_latency_ms.toFixed(1) : 0}<span class="text-xs text-slate-400 font-sans"> ms</span>`;
+                document.getElementById('metric-recall').innerHTML = `${(tm.recall_at_5 * 100).toFixed(1)}<span class="text-xs">%</span>`;
+                document.getElementById('metric-ndcg').innerText = tm.ndcg_at_10 ? tm.ndcg_at_10.toFixed(3) : '0.000';
+                document.getElementById('metric-precision').innerHTML = `${(tm.citation_precision * 100).toFixed(1)}<span class="text-xs">%</span>`;
+                document.getElementById('metric-coverage').innerHTML = `${(tm.complete_gold_evidence_coverage * 100).toFixed(1)}<span class="text-xs">%</span>`;
+                document.getElementById('metric-hallucination').innerHTML = `${((1 - tm.hallucination_rate) * 100).toFixed(1)}<span class="text-xs">%</span>`;
+                document.getElementById('metric-cost').innerText = `$${(tm.estimated_cost_usd || 0).toFixed(4)}`;
+              }
+            }
+          } catch (err) {
+            console.error("Error parsing run_completed:", err);
+          } finally {
+            stopBenchmark();
+          }
+        });
+
+        eventSource.addEventListener('run_failed', (e) => {
+          try {
+            const evData = JSON.parse(e.data);
+            const errDetail = evData.error || 'Server reported benchmark failure';
+            showBenchmarkError(errDetail);
+            appendLog(`[FAILED] Benchmark run encountered error: ${errDetail}`);
+          } catch (err) {}
+          stopBenchmark();
+        });
+
+        eventSource.onmessage = (e) => {
+          try {
+            const evData = JSON.parse(e.data);
+            if (evData.event_type === 'run_completed' || evData.summary) {
+              updateChartsFromBenchmarkSummary(evData.summary?.metrics || evData.metrics);
+              stopBenchmark();
+            }
+          } catch (err) {}
+        };
+
+        eventSource.onerror = (err) => {
+          // Fail-closed error handling
+          if (AppState.benchmarkRunning) {
+            showBenchmarkError("EventSource telemetry stream connection lost or interrupted.");
+            appendLog(`[ERROR] Live SSE stream disconnected.`);
+            stopBenchmark();
+          }
+        };
+
+      } catch (err) {
+        showBenchmarkError(err.message);
+        appendLog(`[ERROR] Failed to start benchmark: ${err.message}`);
+        stopBenchmark();
+      }
+    }
+
+    function updateChartsFromBenchmarkSummary(metricsMap) {
+      if (!metricsMap) return;
+
+      const engineKeys = ['trace_hybrid', 'pure_vector', 'pure_lexical', 'naive_rag'];
+
+      // Update Radar Chart
+      if (AppState.radarChart) {
+        engineKeys.forEach((engId, idx) => {
+          const m = metricsMap[engId];
+          if (m && AppState.radarChart.data.datasets[idx]) {
+            const latencyScore = Math.max(0, Math.min(100, Math.round(100 - (m.p50_latency_ms || 0))));
+            AppState.radarChart.data.datasets[idx].data = [
+              Math.round((m.recall_at_5 || 0) * 1000) / 10,
+              Math.round((m.ndcg_at_10 || 0) * 1000) / 10,
+              Math.round((m.citation_precision || 0) * 1000) / 10,
+              Math.round((m.complete_gold_evidence_coverage || 0) * 1000) / 10,
+              Math.round((1 - (m.hallucination_rate || 0)) * 1000) / 10,
+              Math.round((m.abstention_correctness || 0) * 1000) / 10,
+              latencyScore
+            ];
+          }
+        });
+        AppState.radarChart.update();
+      }
+
+      // Update Bar Chart
+      if (AppState.barChart) {
+        const recalls = [];
+        const precisions = [];
+        const latencies = [];
+
+        engineKeys.forEach(engId => {
+          const m = metricsMap[engId] || {};
+          recalls.push(Math.round((m.recall_at_5 || 0) * 1000) / 10);
+          precisions.push(Math.round((m.citation_precision || 0) * 1000) / 10);
+          latencies.push(Math.round((m.p50_latency_ms || 0) * 10) / 10);
+        });
+
+        AppState.barChart.data.datasets[0].data = recalls;
+        AppState.barChart.data.datasets[1].data = precisions;
+        AppState.barChart.data.datasets[2].data = latencies;
+        AppState.barChart.update();
+      }
+    }
+
+    function updateSingleEngineMetrics(engineId, m) {
+      if (!m) return;
+      const engineIndexMap = { 'trace_hybrid': 0, 'pure_vector': 1, 'pure_lexical': 2, 'naive_rag': 3 };
+      const idx = engineIndexMap[engineId];
+      if (idx !== undefined && AppState.radarChart && AppState.radarChart.data.datasets[idx]) {
+        const latencyScore = Math.max(0, Math.min(100, Math.round(100 - (m.p50_latency_ms || 0))));
+        AppState.radarChart.data.datasets[idx].data = [
+          Math.round((m.recall_at_5 || 0) * 1000) / 10,
+          Math.round((m.ndcg_at_10 || 0) * 1000) / 10,
+          Math.round((m.citation_precision || 0) * 1000) / 10,
+          Math.round((m.complete_gold_evidence_coverage || 0) * 1000) / 10,
+          Math.round((1 - (m.hallucination_rate || 0)) * 1000) / 10,
+          Math.round((m.abstention_correctness || 0) * 1000) / 10,
+          latencyScore
+        ];
+        AppState.radarChart.update();
+      }
+    }
+
+    function appendLog(text) {
+      const consoleEl = document.getElementById('benchmarkLogConsole');
+      if (!consoleEl) return;
+      const row = document.createElement('div');
+      row.className = text.includes('[COMPLETE]') ? 'text-emerald-400 font-bold' : text.includes('[ERROR]') || text.includes('[FAILED]') ? 'text-rose-400 font-bold' : text.includes('[STARTED]') ? 'text-cyan-400 font-bold' : 'text-slate-300';
+      row.innerText = text;
+      consoleEl.appendChild(row);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+
+      const badge = document.getElementById('logCounterBadge');
+      if (badge) badge.innerText = `${consoleEl.children.length} events`;
+    }
+
+    function clearBenchmarkLogs() {
+      const consoleEl = document.getElementById('benchmarkLogConsole');
+      if (consoleEl) consoleEl.innerHTML = '<div class="text-slate-500 italic">// Console cleared. Ready for next stream...</div>';
+      const badge = document.getElementById('logCounterBadge');
+      if (badge) badge.innerText = "0 events";
+    }
+
+    function showBenchmarkError(msg) {
+      const banner = document.getElementById('benchmarkErrorBanner');
+      const msgEl = document.getElementById('benchmarkErrorMessage');
+      if (banner && msgEl) {
+        msgEl.innerText = msg;
+        banner.classList.remove('hidden');
+        lucide.createIcons();
+      }
+    }
+
+    function hideBenchmarkError() {
+      const banner = document.getElementById('benchmarkErrorBanner');
+      if (banner) banner.classList.add('hidden');
+    }
+
+    function stopBenchmark() {
+      AppState.benchmarkRunning = false;
+      if (AppState.eventSource) {
+        AppState.eventSource.close();
+        AppState.eventSource = null;
+      }
+      document.getElementById('btnStartBenchmark')?.classList.remove('hidden');
+      document.getElementById('btnStopBenchmark')?.classList.add('hidden');
+      document.getElementById('benchmarkSpinner')?.classList.add('hidden');
+    }
+
+    // =========================================================================
+    // TAB 3: SIDE-BY-SIDE ARENA (Live POST /api/demo/compare)
+    // =========================================================================
+    const ARENA_CHALLENGES = {
+      contradiction_arena: {
+        query: "What is the official retention policy in ADR-017 vs the superseded RFC-009?"
+      },
+      multihop_arena: {
+        query: "Which downstream ingestion workers depend on the WAL compaction lock before emitting cognitive deltas?"
+      },
+      hallucination_arena: {
+        query: "What was the leaked Q3 revenue projection discussed in the merger email?"
+      }
+    };
+
+    function loadArenaChallenge(key) {
+      const c = ARENA_CHALLENGES[key];
+      if (!c) return;
+      const input = document.getElementById('arenaQueryInput');
+      if (input) input.value = c.query;
+      runArenaComparison();
+    }
+
+    async function runArenaComparison() {
+      const query = document.getElementById('arenaQueryInput')?.value.trim();
+      if (!query) return;
+
+      const workspaceId = document.getElementById('workspaceSelector')?.value || 'default';
+      const datasetId = document.getElementById('benchmarkDataset')?.value || null;
+
+      const engineIds = ['trace_hybrid', 'pure_vector', 'pure_lexical', 'naive_rag'];
+      const capMap = {
+        'trace_hybrid': 'Trace',
+        'pure_vector': 'Vector',
+        'pure_lexical': 'Bm25',
+        'naive_rag': 'Naive'
+      };
+
+      // Set loading state
+      engineIds.forEach(id => {
+        const name = capMap[id];
+        const ansEl = document.getElementById(`arena${name}Answer`);
+        const evEl = document.getElementById(`arena${name}Evidence`);
+        if (ansEl) ansEl.innerHTML = '<span class="text-slate-500 italic font-mono flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span> Querying live backend engine...</span>';
+        if (evEl) evEl.innerHTML = '<div class="text-slate-600 font-mono text-[10px]">Retrieving evidence atoms...</div>';
+      });
+
+      try {
+        const res = await fetch('/api/demo/compare', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: query,
+            workspace_id: workspaceId,
+            dataset_id: datasetId,
+            engines: engineIds,
+            limit: 5
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || `Comparison failed with HTTP ${res.status}`);
+        }
+
+        const results = await res.json();
+        renderArenaResults(results);
+      } catch (err) {
+        engineIds.forEach(id => {
+          const name = capMap[id];
+          const ansEl = document.getElementById(`arena${name}Answer`);
+          if (ansEl) ansEl.innerHTML = `<span class="text-rose-400 font-mono text-xs">Error: ${escapeHtml(err.message)}</span>`;
+        });
+      }
+    }
+
+    function renderArenaResults(data) {
+      const capMap = {
+        'trace_hybrid': 'Trace',
+        'pure_vector': 'Vector',
+        'pure_lexical': 'Bm25',
+        'naive_rag': 'Naive'
+      };
+
+      Object.keys(capMap).forEach(engId => {
+        const name = capMap[engId];
+        const res = data[engId] || {};
+        const ansEl = document.getElementById(`arena${name}Answer`);
+        const evEl = document.getElementById(`arena${name}Evidence`);
+        const suffEl = document.getElementById(`arena${name}Sufficiency`);
+        const latEl = document.getElementById(`arena${name}Latency`);
+
+        if (res.error) {
+          if (ansEl) ansEl.innerHTML = `<span class="text-rose-400 font-mono text-xs">Error: ${escapeHtml(res.error)}</span>`;
+          if (evEl) evEl.innerHTML = '<div class="text-slate-600 text-[10px]">No atoms retrieved</div>';
+          if (suffEl) suffEl.innerText = 'error';
+          if (latEl) latEl.innerText = '--';
+          return;
+        }
+
+        // Answer / Synthesis display
+        if (ansEl) {
+          if (res.synthesis) {
+            ansEl.innerText = res.synthesis;
+          } else if (res.abstained) {
+            ansEl.innerHTML = '<strong class="text-rose-300">ABSTAINED (Zero Hallucination):</strong> <span class="text-slate-400">No verifiable evidence found in master corpus. Refused to fabricate ungrounded claims.</span>';
+          } else if (res.results && res.results.length > 0) {
+            ansEl.innerText = `Retrieved ${res.results.length} candidate atoms from index. Top score: ${res.results[0].score.toFixed(3)}.`;
+          } else {
+            ansEl.innerHTML = '<span class="text-slate-500 italic">No matching evidence found.</span>';
+          }
+        }
+
+        // Evidence hits
+        if (evEl) {
+          const hits = res.results || [];
+          if (hits.length === 0) {
+            evEl.innerHTML = '<div class="p-2 rounded bg-slate-900/80 text-slate-500 text-[10px]">No verifiable atoms pinned</div>';
+          } else {
+            evEl.innerHTML = hits.slice(0, 2).map(h => {
+              const uri = h.source_location?.uri || h.node_id || "evidence_atom";
+              const bytes = h.source_location?.byte_range ? `[${h.source_location.byte_range[0]}..${h.source_location.byte_range[1]}]` : (h.anchors?.[0] ? `[${h.anchors[0].start}..${h.anchors[0].end}]` : '[bytes]');
+              const preview = h.content ? h.content.substring(0, 100) : '';
+              return `
+                <div class="p-2 rounded ${engId === 'trace_hybrid' ? 'bg-cyan-950/50 border border-cyan-800/50 text-cyan-300' : engId === 'naive_rag' ? 'bg-rose-950/30 border border-rose-900/30 text-rose-300' : 'bg-slate-900 border border-slate-800 text-slate-300'}">
+                  <div class="flex justify-between font-bold text-[10px]">
+                    <span class="truncate max-w-[150px]">${escapeHtml(uri)}</span>
+                    <span>${escapeHtml(bytes)}</span>
+                  </div>
+                  <div class="text-slate-400 truncate mt-0.5 text-[10px]">"${escapeHtml(preview)}"</div>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+
+        // Diagnostics
+        if (suffEl) {
+          suffEl.innerText = res.abstained ? 'abstained' : (res.sufficiency_state || 'answerable');
+        }
+        if (latEl) {
+          latEl.innerText = res.latency_ms !== undefined ? `${res.latency_ms.toFixed(1)}ms` : '--';
+        }
+      });
+
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

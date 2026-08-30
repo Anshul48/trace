@@ -1,8 +1,8 @@
 # Read/Write Map — Trace Cortex Projections, Lifecycle, and Temporal Truth
 
-> **Task ID:** T1  
-> **Component:** Trace V2  
-> **Status:** Static Code & Schema Audit Finding (Read-Only)  
+> **Task ID:** T1
+> **Component:** Trace V2
+> **Status:** Static Code & Schema Audit Finding (Read-Only)
 > **Governing Invariants:** Invariant 1 (Truth vs Projection), Invariant 2 (Candidate Isolation), Invariant 5 (Graph/Semantic Boundaries)
 
 ---

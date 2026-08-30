@@ -1,8 +1,8 @@
 # Handoff: T1 — Trace Cortex Release Audit and Architecture Alternatives
 
-> **Task ID:** T1  
-> **Status:** completed (read-only audit and decision preparation)  
-> **Role:** Trace Foundation Engineer  
+> **Task ID:** T1
+> **Status:** completed (read-only audit and decision preparation)
+> **Role:** Trace Foundation Engineer
 > **One-Sentence Result:** Completed comprehensive read-only audit of Trace V2 projection lifecycle, candidate isolation, and temporal semantics; mapped all 8 storage/retrieval subsystems; and prepared decision inputs and successor outlines for P-003 and P-004 without modifying product code or applying unapproved migrations.
 
 ---

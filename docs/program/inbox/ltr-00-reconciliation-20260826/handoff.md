@@ -1,8 +1,8 @@
 # LTR-00 Handoff
 
-> **Role:** S0 Program Coordinator / Auditor  
-> **Session:** Wave R0  
-> **Status:** **COMPLETE**  
+> **Role:** S0 Program Coordinator / Auditor
+> **Session:** Wave R0
+> **Status:** **COMPLETE**
 
 ## Status Summary
 

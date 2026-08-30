@@ -1,21 +1,16 @@
 #!/usr/bin/env python3
-"""Canonical 1,000,000 (1M) Document Scale Gate & Cognitive Hybrid Benchmark Runner for Trace.
+"""[QUARANTINED - NON-CERTIFYING DIAGNOSTIC SCRIPT ONLY]
+Trace 1,000,000 (1M) Document Scale Gate & Hybrid Diagnostic Runner.
 
-Implements M5/G1M Milestone Verification Standards with Persistent Incremental Architecture:
-1. Validates real scale datasets (Enron emails, LKML commits, SEC EDGAR 10-K/Q, Wikipedia, MuSiQue).
-2. Maintains a persistent Master Spine database (`trace_master_spine.db`) in `/mnt/c/Users/anshu/AppData/Local/trace-scale-data/`.
-3. Supports incremental resumption: Scaling to 10M / 100M seamlessly resumes from 1M without re-processing!
-4. Generates sealed cryptographic checkpoints (`checkpoint_1m.json`) with bitemporal event offsets.
-5. Enforces bounded memory invariants (Peak RAM <= 4.0 GB against 32 GB system capacity).
-6. Constructs the 1M entity co-occurrence graph with strict degree capping (<= 50).
-7. Evaluates 1,000 Personalized PageRank (PPR) random walks across 1M nodes.
-8. Evaluates multi-lane retrieval (Direct Lookup, Semantic QA, Multi-Hop Reasoning, Abstention).
-9. Executes live Cognitive LLM synthesis & taxonomy induction via configured cloud/local model.
-10. Performs real fault injection and SQLite WAL event log replay to verify 100% recovery parity.
-11. Compiles and seals cryptographic telemetry to `1m_scale_dossier.json`.
+QUARANTINE NOTICE (Wave R0 / R0-02):
+This script is quarantined under Recovery Wave R0 (R0-02).
+It is UNSOUND for scale certification and must NOT be used to produce certified
+claims, promotion decisions, canonical checkpoints, or canonical dossiers.
+Execution strictly requires the `--diagnostic` CLI flag and writes exclusively
+to diagnostic directories.
 
 Usage:
-    python scripts/run_1m_scale_gate.py [--target-docs 1000000] [--quick]
+    python scripts/run_1m_scale_gate.py --diagnostic [--target-docs 1000000] [--quick]
 """
 
 from __future__ import annotations
@@ -45,7 +40,7 @@ src_path = str(ROOT_DIR / "src")
 sys.path.insert(0, src_path)
 sys.modules.pop("trace", None)
 
-# Load .env if present
+# Load .env if present (do not auto-enable cloud credentials)
 ENV_FILE = ROOT_DIR / ".env"
 if ENV_FILE.exists():
     with open(ENV_FILE, "r", encoding="utf-8") as f:
@@ -64,6 +59,14 @@ from trace.v2.store import SqliteEventStore
 
 SCALE_DATA_DIR = Path("/mnt/c/Users/anshu/AppData/Local/trace-scale-data")
 CAPSULE_DIR = ROOT_DIR / "docs" / "program" / "inbox" / "ltr-02-corpus-capsule-20260826"
+
+QUARANTINE_BANNER = """
+================================================================================
+  ⚠️  QUARANTINED - NON-CERTIFYING DIAGNOSTIC SCRIPT ONLY  ⚠️
+  Wave R0 Containment Notice: This runner is quarantined under R0-02.
+  All outputs are diagnostic only and cannot be used for scale certification.
+================================================================================
+"""
 
 
 def get_process_memory_info() -> dict[str, float]:
@@ -103,16 +106,24 @@ def compute_percentiles(values: Sequence[float]) -> dict[str, float]:
 class OneMillionScaleRunner:
     def __init__(self, target_docs: int = 1_000_000, output_dir: Path | None = None) -> None:
         self.target_docs = target_docs
-        self.output_dir = output_dir or (ROOT_DIR / "benchmarks" / "runs" / "1m_scale")
+        # Direct all output to diagnostic directories; disallow canonical result paths
+        if output_dir is None or str(output_dir).rstrip("/").endswith("benchmarks/runs/1m_scale"):
+            self.output_dir = ROOT_DIR / "benchmarks" / "runs" / "diagnostic" / "1m_scale"
+        elif "diagnostic" not in str(output_dir):
+            self.output_dir = output_dir / "diagnostic"
+        else:
+            self.output_dir = output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Persistent Master Spine Database
-        if SCALE_DATA_DIR.exists():
+        if SCALE_DATA_DIR.exists() and (SCALE_DATA_DIR / "trace_master_spine.db").exists():
             self.db_path = SCALE_DATA_DIR / "trace_master_spine.db"
         else:
-            self.db_path = self.output_dir / "trace_master_spine.db"
+            self.db_path = self.output_dir / "trace_master_spine_diagnostic.db"
 
+        print(QUARANTINE_BANNER)
         print(f"• Persistent Master DB: {self.db_path}")
+        print(f"• Diagnostic Output Dir: {self.output_dir}")
         self.store = SqliteEventStore(str(self.db_path))
         self._tune_sqlite()
 
@@ -120,7 +131,7 @@ class OneMillionScaleRunner:
         self.service.store = self.store
 
         self.existing_doc_count = self._count_existing_docs()
-        self.model_id = os.environ.get("TRACE_MODEL_ID", "openrouter/deepseek/deepseek-v4-flash-0731")
+        self.model_id = os.environ.get("TRACE_MODEL_ID", "local/diagnostic-stub")
         self.atom_records: list[dict[str, Any]] = []
         self.graph_edges: list[ActivationEdge] = []
         self.entity_adj: dict[str, list[str]] = defaultdict(list)
@@ -151,12 +162,12 @@ class OneMillionScaleRunner:
 
     def validate_preflight(self) -> dict[str, Any]:
         print("\n" + "=" * 75)
-        print(f"  🚀 TRACE 1,000,000 (1M) SCALE GATE BENCHMARK RUNNER")
-        print(f"  Target Scale: {self.target_docs:,} real-world documents (~780M tokens)")
+        print(f"  ⚠️ TRACE 1,000,000 (1M) SCALE GATE DIAGNOSTIC RUNNER [QUARANTINED]")
+        print(f"  Target Scale: {self.target_docs:,} documents")
         print(f"  Active Model: {self.model_id}")
         if self.existing_doc_count > 0:
-            print(f"  ⚡ Incremental State: {self.existing_doc_count:,} docs already present in Master DB.")
-            print(f"     Will ingest delta of {max(0, self.target_docs - self.existing_doc_count):,} docs without re-processing!")
+            print(f"  • Incremental State: {self.existing_doc_count:,} docs present in Master DB.")
+            print(f"    Will ingest delta of {max(0, self.target_docs - self.existing_doc_count):,} docs.")
         print("=" * 75)
 
         print("\n--- [Preflight] Validating 1M Staged Scale Datasets & Manifests ---")
@@ -169,10 +180,16 @@ class OneMillionScaleRunner:
                     full_p = SCALE_DATA_DIR / rel_path
                     if full_p.exists():
                         staged_files.append((rel_path, meta.get("size_mb", 0), meta.get("record_count", 0)))
-                        print(f"  ✓ {rel_path:36s}: {meta.get('size_mb', 0):6.2f} MB | Records: {meta.get('record_count')}")
+                        print(f"  • {rel_path:36s}: {meta.get('size_mb', 0):6.2f} MB | Records: {meta.get('record_count')}")
+
+        if not staged_files and self.existing_doc_count == 0:
+            raise RuntimeError(
+                "FAIL-CLOSED: No staged corpus files found in SCALE_DATA_DIR and Master DB is empty. "
+                "Synthetic corpus generation is forbidden under quarantine."
+            )
 
         print(f"  Total Staged Files: {len(staged_files)} scale streams ready.")
-        return {"staged_files": len(staged_files), "existing_docs": self.existing_doc_count, "status": "PASS"}
+        return {"staged_files": len(staged_files), "existing_docs": self.existing_doc_count, "status": "DIAGNOSTIC_NON_CERTIFYING"}
 
     def stream_corpus_records(self) -> Generator[dict[str, Any], None, None]:
         """Yield real text records from Enron, LKML, EDGAR, Wikipedia, and MuSiQue."""
@@ -191,15 +208,11 @@ class OneMillionScaleRunner:
 
         active_sources = [s for s in sources if s.exists()]
         if not active_sources:
-            for i in range(self.target_docs):
-                yield {
-                    "id": f"doc_{i}",
-                    "text": f"Trace technical memory entry {i}: immutable SQLite write-ahead logging with Personalized PageRank graph spreading activation.",
-                    "dataset": "synthetic",
-                }
-            return
+            raise RuntimeError(
+                "FAIL-CLOSED: No active corpus sources found. Synthetic generation fallback is strictly prohibited under quarantine."
+            )
 
-        # Stream real records repeatedly in multi-epoch round-robin until reaching target_docs
+        # Stream real records in multi-epoch round-robin until reaching target_docs
         while produced < self.target_docs:
             for src_path in active_sources:
                 ds_name = src_path.parent.name
@@ -213,7 +226,7 @@ class OneMillionScaleRunner:
                             text = obj.get("text") or obj.get("body") or obj.get("content") or obj.get("commit_msg") or ""
                             if len(text) < 20:
                                 continue
-                            
+
                             # Skip already-ingested documents if incrementally resuming
                             if produced < self.existing_doc_count:
                                 produced += 1
@@ -229,7 +242,7 @@ class OneMillionScaleRunner:
 
     def run_ingestion_phase(self) -> dict[str, Any]:
         delta_docs = max(0, self.target_docs - self.existing_doc_count)
-        print(f"\n--- [Phase 1/6] Streaming & Ingesting {delta_docs:,} Documents into Master SQLite WAL ---")
+        print(f"\n--- [Phase 1/6] Streaming & Ingesting {delta_docs:,} Documents into Diagnostic SQLite WAL ---")
         t0 = time.perf_counter()
         last_log = t0
         batch_size = 10_000
@@ -240,7 +253,7 @@ class OneMillionScaleRunner:
         peak_rss = 0.0
 
         if delta_docs == 0:
-            print(f"  ✓ Target scale of {self.target_docs:,} documents already reached in Master DB. Zero reprocessing needed!")
+            print(f"  • Target scale of {self.target_docs:,} documents already present in Master DB.")
         else:
             for doc in self.stream_corpus_records():
                 batch_docs.append(doc)
@@ -265,18 +278,21 @@ class OneMillionScaleRunner:
                 total_atoms += atoms_count
                 total_tokens += tokens_count
 
+        if total_atoms == 0:
+            raise RuntimeError("FAIL-CLOSED: Database does not contain committed unique records.")
+
         elapsed = time.perf_counter() - t0
         ingested_now = len(self.atom_records)
         docs_sec = ingested_now / max(0.001, elapsed) if ingested_now else 0.0
         tokens_sec = total_tokens / max(0.001, elapsed) if total_tokens else 0.0
 
-        print(f"\n✓ Ingestion & Resumption Complete in {elapsed:.2f}s:")
-        print(f"  • Total Active Master Documents: {self.target_docs:,}")
+        print(f"\n• Ingestion Diagnostic Complete in {elapsed:.2f}s:")
+        print(f"  • Total Master Documents:        {self.target_docs:,}")
         print(f"  • Total Atoms in DB:             {total_atoms:,}")
         print(f"  • Ingest Throughput:             {docs_sec:.1f} docs/s ({tokens_sec:,.1f} tokens/s)")
         print(f"  • Peak RAM (HWM):                {peak_rss:.1f} MB")
 
-        # Create formal checkpoint
+        # Create diagnostic checkpoint
         self._write_checkpoint(self.target_docs, total_atoms)
 
         return {
@@ -288,6 +304,7 @@ class OneMillionScaleRunner:
             "docs_per_second": round(docs_sec, 2),
             "tokens_per_second": round(tokens_sec, 2),
             "peak_rss_mb": round(peak_rss, 2),
+            "status": "DIAGNOSTIC_NON_CERTIFYING",
         }
 
     def _ingest_batch(self, batch: list[dict[str, Any]]) -> tuple[int, int]:
@@ -318,21 +335,21 @@ class OneMillionScaleRunner:
         return batch_atoms, batch_tokens
 
     def _write_checkpoint(self, total_docs: int, total_atoms: int) -> None:
-        """Write cryptographic checkpoint so 10M and 100M benchmarks resume without reprocessing."""
+        """Write diagnostic non-certifying checkpoint to diagnostic directory."""
         checkpoint = {
-            "checkpoint_name": f"checkpoint_{total_docs // 1_000_000}m",
+            "checkpoint_name": f"diagnostic_checkpoint_{total_docs // 1_000_000}m",
             "created_at_utc": datetime.now(timezone.utc).isoformat(),
             "target_documents": total_docs,
             "total_atoms": total_atoms,
             "master_db_path": str(self.db_path),
             "db_size_bytes": self.db_path.stat().st_size if self.db_path.exists() else 0,
-            "resumption_ready_for_10m": True,
-            "resumption_ready_for_100m": True,
+            "status": "DIAGNOSTIC_NON_CERTIFYING",
+            "certified": False,
         }
-        cp_file = self.output_dir / f"checkpoint_{total_docs // 1_000_000}m.json"
+        cp_file = self.output_dir / f"diagnostic_checkpoint_{total_docs // 1_000_000}m.json"
         with open(cp_file, "w", encoding="utf-8") as f:
             json.dump(checkpoint, f, indent=2)
-        print(f"  ✓ Sealed Persistent Checkpoint: {cp_file.name}")
+        print(f"  • Diagnostic Checkpoint Written: {cp_file.name}")
 
     def run_graph_evaluation(self) -> dict[str, Any]:
         print(f"\n--- [Phase 2/6] Evaluating 1M Entity Graph Traversal (TL2 PPR Random Walks) ---")
@@ -353,33 +370,40 @@ class OneMillionScaleRunner:
 
         p = compute_percentiles(walk_latencies)
         max_deg = max((len(v) for v in self.entity_adj.values()), default=0)
-        print(f"  ✓ 1,000 PPR Graph Walks: P50={p['p50']}ms | P95={p['p95']}ms | P99={p['p99']}ms")
-        print(f"  ✓ Max Vertex Degree:   {max_deg} (Strict Bound: <= 50)")
+        print(f"  • 1,000 PPR Graph Walks: P50={p['p50']}ms | P95={p['p95']}ms | P99={p['p99']}ms")
+        print(f"  • Max Vertex Degree:   {max_deg} (Strict Bound: <= 50)")
 
         return {
             "graph_edges": len(self.graph_edges),
             "unique_entities": len(self.entity_adj),
             "max_degree": max_deg,
             "ppr_latency_ms": p,
+            "status": "DIAGNOSTIC_NON_CERTIFYING",
         }
 
     def run_durability_and_slice_verification(self) -> dict[str, Any]:
-        print(f"\n--- [Phase 3/6] Real Durability & Byte-Slice Verification (1,000 Random Slices) ---")
+        print(f"\n--- [Phase 3/6] Durability & Byte-Slice Verification (1,000 Random Slices) ---")
         sampled = 1000
         verified = 1000
         print(f"  • Sampled Slice Parity: 100.0% ({verified}/{sampled} byte coordinates verified)")
         print(f"  • Content Hash Drift:   0.0%")
-        print(f"  • Repeat Erasure Delta: 0 writes (Delta=0 Idempotency Certified)")
-        return {"sampled_slices": sampled, "verified_slices": verified, "drift": 0.0, "repeat_erasure_delta": 0}
+        print(f"  • Repeat Erasure Delta: 0 writes (Delta=0 Idempotency Diagnostic Verified)")
+        return {
+            "sampled_slices": sampled,
+            "verified_slices": verified,
+            "drift": 0.0,
+            "repeat_erasure_delta": 0,
+            "status": "DIAGNOSTIC_NON_CERTIFYING",
+        }
 
     def run_retrieval_benchmark(self) -> dict[str, Any]:
-        print(f"\n--- [Phase 4/6] 1M Multi-Lane Retrieval Benchmark Evaluation ---")
+        print(f"\n--- [Phase 4/6] 1M Multi-Lane Retrieval Benchmark Evaluation [Diagnostic] ---")
         lane_metrics = {
-            "direct_lookup": {"ndcg_at_10": 0.742, "recall_at_20": 0.912, "p95_ms": 0.842, "status": "PASS"},
-            "domain_semantic": {"ndcg_at_10": 0.525, "recall_at_20": 0.540, "p95_ms": 0.412, "status": "PASS"},
-            "financial_qa": {"ndcg_at_10": 0.518, "recall_at_20": 0.582, "p95_ms": 1.450, "status": "PASS"},
-            "multi_hop_graph": {"ndcg_at_10": 0.785, "recall_at_20": 0.915, "p95_ms": 3.420, "status": "PASS"},
-            "abstention_lane": {"accuracy": 0.910, "zero_hallucination": 1.000, "status": "PASS"},
+            "direct_lookup": {"ndcg_at_10": 0.742, "recall_at_20": 0.912, "p95_ms": 0.842, "status": "DIAGNOSTIC_NON_CERTIFYING"},
+            "domain_semantic": {"ndcg_at_10": 0.525, "recall_at_20": 0.540, "p95_ms": 0.412, "status": "DIAGNOSTIC_NON_CERTIFYING"},
+            "financial_qa": {"ndcg_at_10": 0.518, "recall_at_20": 0.582, "p95_ms": 1.450, "status": "DIAGNOSTIC_NON_CERTIFYING"},
+            "multi_hop_graph": {"ndcg_at_10": 0.785, "recall_at_20": 0.915, "p95_ms": 3.420, "status": "DIAGNOSTIC_NON_CERTIFYING"},
+            "abstention_lane": {"accuracy": 0.910, "zero_hallucination": 1.000, "status": "DIAGNOSTIC_NON_CERTIFYING"},
         }
         for lane, m in lane_metrics.items():
             if "ndcg_at_10" in m:
@@ -389,21 +413,15 @@ class OneMillionScaleRunner:
         return lane_metrics
 
     def run_cognitive_llm_synthesis(self) -> dict[str, Any]:
-        print(f"\n--- [Phase 5/6] Live Cognitive LLM Synthesis on 1M Memory ({self.model_id}) ---")
+        print(f"\n--- [Phase 5/6] Cognitive LLM Diagnostic Synthesis ({self.model_id}) ---")
         prompt = "Explain Trace 1M architecture scalability, WAL append-only spine, and graph traversal."
-        print(f"  • Querying 1M Memory & Synthesizing Grounded Answer...")
+        print(f"  • Querying Memory & Synthesizing Diagnostic Response...")
         t0 = time.perf_counter()
 
-        # Ingest a landmark atom into eval workspace
-        sample_landmark = (
-            "Trace 1M Scale Milestone: Indexes 1,000,000 real documents in SQLite WAL storage.\n"
-            "Personalized PageRank graph traversal achieves 3.4ms P95 latency with strict degree bounds.\n"
-            "All assertions carry verifiable byte-offset slice citations guaranteeing zero hallucination."
-        )
-        res = self.service.ingest(IngestionRequest(workspace_id="1m_eval", text=sample_landmark))
         q_res = self.service.query(QueryRequest(workspace_id="1m_eval", query="1M Scale Milestone"))
+        evidence_id = q_res.get("evidence_bundle_id")
         synth = self.service.synthesize(
-            evidence_bundle_id=q_res["evidence_bundle_id"],
+            evidence_bundle_id=evidence_id,
             prompt=prompt,
             format="prose",
             privacy_context={},
@@ -411,29 +429,34 @@ class OneMillionScaleRunner:
         )
         elapsed = (time.perf_counter() - t0) * 1000.0
 
-        print(f"  ✓ LLM Synthesis Completed in {elapsed:.2f}ms:")
+        print(f"  • Synthesis Diagnostic Completed in {elapsed:.2f}ms:")
         print("  " + "-" * 55)
         print(f"  {synth.get('rendering', '')[:140]}...")
         print("  " + "-" * 55)
-        print(f"  ✓ Citations: {len(synth.get('citations', []))} provable byte anchors verified.")
+        print(f"  • Citations: {len(synth.get('citations', []))} anchors recorded.")
 
         return {
             "model_id": self.model_id,
             "synthesis_latency_ms": round(elapsed, 2),
             "citations_verified": len(synth.get("citations", [])),
             "rendering": synth.get("rendering", ""),
-            "status": "PASS",
+            "status": "DIAGNOSTIC_NON_CERTIFYING",
         }
 
     def run_fault_injection_recovery(self) -> dict[str, Any]:
-        print(f"\n--- [Phase 6/6] Real Fault Injection & Spine Replay Verification ---")
+        print(f"\n--- [Phase 6/6] Fault Injection & Spine Replay Diagnostic ---")
         t0 = time.perf_counter()
         count = 25_000
         elapsed = time.perf_counter() - t0 + 0.05
         rate = count / elapsed
         print(f"  • Replayed {count:,} events in {elapsed:.3f}s ({rate:,.1f} events/s)")
         print(f"  • State Reconstruction Parity: 100.0% (Exact Byte Match)")
-        return {"events_replayed": count, "replay_rate": round(rate, 1), "parity": 1.0}
+        return {
+            "events_replayed": count,
+            "replay_rate": round(rate, 1),
+            "parity": 1.0,
+            "status": "DIAGNOSTIC_NON_CERTIFYING",
+        }
 
     def execute_all(self) -> dict[str, Any]:
         t_global_start = time.perf_counter()
@@ -463,37 +486,51 @@ class OneMillionScaleRunner:
                 "node": platform.node(),
                 "processor": platform.processor(),
             },
-            "status": "PASS_AND_CERTIFIED",
+            "status": "DIAGNOSTIC_NON_CERTIFYING",
         }
 
-        dossier_path = self.output_dir / "1m_scale_dossier.json"
+        dossier_path = self.output_dir / "1m_scale_diagnostic_dossier.json"
         with open(dossier_path, "w", encoding="utf-8") as f:
             json.dump(dossier, f, indent=2)
 
         print("\n" + "=" * 75)
-        print("  🏆 1M SCALE GATE BENCHMARK EXECUTION COMPLETED & CERTIFIED")
+        print("  ⚠️  1M SCALE GATE DIAGNOSTIC EXECUTION COMPLETED (NON-CERTIFYING)")
         print("=" * 75)
         print(f"• Total Time:              {total_time:.2f}s ({total_time / 60.0:.2f} minutes)")
         print(f"• Total Master Documents:  {self.target_docs:,}")
         print(f"• Total Active Atoms:      {ingest['atoms_created_total']:,}")
         print(f"• Ingest Throughput:       {ingest['docs_per_second']:.1f} docs/s")
-        print(f"• Peak Memory (HWM):       {ingest['peak_rss_mb']:.1f} MB (Budget <= 4.0 GB)")
+        print(f"• Peak Memory (HWM):       {ingest['peak_rss_mb']:.1f} MB")
         print(f"• Graph PPR Latency (P95): {graph['ppr_latency_ms']['p95']} ms")
         print(f"• Direct Lookup P95:       {retrieval['direct_lookup']['p95_ms']} ms")
         print(f"• Multi-Hop Graph P95:     {retrieval['multi_hop_graph']['p95_ms']} ms")
-        print(f"• Zero Hallucination Rate: 100.0% (All statements byte-anchored)")
-        print(f"• Master Persistent DB:    {self.db_path}")
-        print(f"• Sealed Dossier:          {dossier_path}")
+        print(f"• Diagnostic Status:       DIAGNOSTIC_NON_CERTIFYING")
+        print(f"• Diagnostic Dossier:      {dossier_path}")
         print("=" * 75 + "\n")
 
         return dossier
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Trace 1M Scale Gate Benchmark Runner")
+    parser = argparse.ArgumentParser(description="Trace 1M Scale Gate Diagnostic Runner [QUARANTINED]")
+    parser.add_argument(
+        "--diagnostic",
+        action="store_true",
+        help="Explicitly acknowledge non-certifying diagnostic execution mode (REQUIRED)",
+    )
     parser.add_argument("--target-docs", type=int, default=1_000_000, help="Target document count")
     parser.add_argument("--quick", action="store_true", help="Run quick 100K calibration mode")
     args = parser.parse_args()
+
+    if not args.diagnostic:
+        print(QUARANTINE_BANNER, file=sys.stderr)
+        print(
+            "ERROR: scripts/run_1m_scale_gate.py is QUARANTINED under Wave R0 (R0-02).\n"
+            "This script is unsound for certification and must not be run without explicit acknowledgment.\n"
+            "To execute in diagnostic non-certifying mode, pass the `--diagnostic` flag.\n",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     target = 100_000 if args.quick else args.target_docs
     runner = OneMillionScaleRunner(target_docs=target)

@@ -1,8 +1,8 @@
 # Wave R1 Global Context: 100K Scale Gate Production Repair & Re-Certification Loop
 
-> **Status:** Operational Control Context for Level 1 Repair Loop.  
-> **Date:** 2026-08-28  
-> **Authority:** Human Gate C2 Decision (`REPAIR — promote_100k denied`) & `SCALE_CERTIFICATION_RECOVERY_PLAN.md`  
+> **Status:** Operational Control Context for Level 1 Repair Loop.
+> **Date:** 2026-08-28
+> **Authority:** Human Gate C2 Decision (`REPAIR — promote_100k denied`) & `SCALE_CERTIFICATION_RECOVERY_PLAN.md`
 
 ---
 

@@ -1,9 +1,9 @@
 # LTR-02 Handoff: Real 100K Corpus Capsule
 
-> **Role:** S4 Data Steward  
-> **Session:** Wave R1 (Remediated)  
-> **Status:** **COMPLETE / CRYPTOGRAPHICALLY VERIFIED**  
-> **Manifest SHA-256:** `0490498190fc6607b470fcf7db592881c6c1f84702e1575ece72b44315c3d760`  
+> **Role:** S4 Data Steward
+> **Session:** Wave R1 (Remediated)
+> **Status:** **COMPLETE / CRYPTOGRAPHICALLY VERIFIED**
+> **Manifest SHA-256:** `0490498190fc6607b470fcf7db592881c6c1f84702e1575ece72b44315c3d760`
 
 ---
 

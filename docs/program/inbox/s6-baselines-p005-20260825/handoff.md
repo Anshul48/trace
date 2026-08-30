@@ -1,11 +1,11 @@
 # S6 Baselines and P-005 Decision Brief Handoff
 
-> **Role:** Evaluation & Promotion Owner (S6)  
-> **Session:** Session 9 (Real Baselines and P-005 Decision Brief)  
-> **Packet ID:** `s6-baselines-p005-20260825`  
-> **Date:** 2026-08-26  
-> **Authority Level:** C3 (Empirical Real-Data Baseline Evidence / Decision Proposal)  
-> **Status:** **COMPLETE / READY FOR HUMAN GATE B**  
+> **Role:** Evaluation & Promotion Owner (S6)
+> **Session:** Session 9 (Real Baselines and P-005 Decision Brief)
+> **Packet ID:** `s6-baselines-p005-20260825`
+> **Date:** 2026-08-26
+> **Authority Level:** C3 (Empirical Real-Data Baseline Evidence / Decision Proposal)
+> **Status:** **COMPLETE / READY FOR HUMAN GATE B**
 
 ---
 

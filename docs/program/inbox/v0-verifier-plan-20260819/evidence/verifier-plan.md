@@ -1,9 +1,9 @@
 # Independent Verification Plan: V1a and V1b
 
-> **Packet:** V0 — Independent Verifier Plan and Packet-Integrity Review  
-> **Role:** Independent Verifier / Integration Reviewer  
-> **Status:** Immutable Verification Plan (Frozen for V1a and V1b Execution)  
-> **Evidence Level:** Observed planning and negative matrix definition (No runtime certification claim)  
+> **Packet:** V0 — Independent Verifier Plan and Packet-Integrity Review
+> **Role:** Independent Verifier / Integration Reviewer
+> **Status:** Immutable Verification Plan (Frozen for V1a and V1b Execution)
+> **Evidence Level:** Observed planning and negative matrix definition (No runtime certification claim)
 > **Governing Documents:** `01_INVARIANTS.md`, `03_SHARED_CONTRACTS.md`, `04_EVALUATION_PROTOCOL.md`, `FOUNDATION_RELEASE.md`, `FOUNDATION_GATE_DOSSIER.md`, `ERROR_RECEIPT.schema.json`
 
 ---
@@ -21,8 +21,8 @@ The Independent Verifier operates strictly outside the implementation lanes. In 
 
 ## 2. Part A: Immutable Evaluator Fail-Closed Integrity Matrix (V1a)
 
-**Target Component:** `trace-bench` (or canonical certification runner per P-008)  
-**Execution Node:** V1a (dispatched in clean verifier worktree after B1 handoff)  
+**Target Component:** `trace-bench` (or canonical certification runner per P-008)
+**Execution Node:** V1a (dispatched in clean verifier worktree after B1 handoff)
 **Output Standard:** All negative cases must yield `status: "blocked"`, `certification_eligible: false`, and conform to `ERROR_RECEIPT.schema.json`.
 
 | Case ID | Category & Trigger | Precondition & Injected Fault | Expected Stage | Expected Reason Code | Expected Status & Certification Eligibility | Retained Evidence Artifacts | Future Verifier Execution Command |
@@ -49,8 +49,8 @@ The Independent Verifier operates strictly outside the implementation lanes. In 
 
 ## 3. Part B: Lifecycle, Rollback, Candidate-Leakage, and Temporal Fault Matrix (V1b)
 
-**Target Components:** `trace-lite` (L1/TL2/TL3) and `trace` (T1/TR1/TR2)  
-**Execution Node:** V1b (dispatched in clean verifier worktrees following relevant implementation handoffs)  
+**Target Components:** `trace-lite` (L1/TL2/TL3) and `trace` (T1/TR1/TR2)
+**Execution Node:** V1b (dispatched in clean verifier worktrees following relevant implementation handoffs)
 **Sub-Gate Separation:**
 - `V1b-TL-Lifecycle`: Trace-Lite candidate/active isolation, crash, rollback, provenance (L1)
 - `V1b-TL-Graph`: Trace-Lite bounded association, degree/DF caps, PPR work budgets (TL2 / P-002)

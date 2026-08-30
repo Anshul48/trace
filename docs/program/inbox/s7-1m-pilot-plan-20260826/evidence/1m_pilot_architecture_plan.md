@@ -1,10 +1,10 @@
 # S7 1M Scale Pilot Architecture & Execution Plan
 
-> **Role:** Scale & Performance Owner (S7)  
-> **Session:** Session 13 (S7 1M Pilot Plan)  
-> **Date:** 2026-08-26  
-> **Authority Level:** C3 (Scale Architecture & Capacity Planning)  
-> **Preceding Gate:** Human Gate C (100K Empirical Gate Approval)  
+> **Role:** Scale & Performance Owner (S7)
+> **Session:** Session 13 (S7 1M Pilot Plan)
+> **Date:** 2026-08-26
+> **Authority Level:** C3 (Scale Architecture & Capacity Planning)
+> **Preceding Gate:** Human Gate C (100K Empirical Gate Approval)
 
 ---
 

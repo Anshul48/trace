@@ -9,7 +9,15 @@ import os
 import sys
 from pathlib import Path
 
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 sys.path.insert(0, str(Path(__file__).parent / "src"))
+
 
 from trace.v2.models import IngestionRequest
 from trace.v2.service import TraceService
@@ -44,8 +52,76 @@ def main() -> None:
     release_gate = commands.add_parser("release-gate", help="evaluate measured load, restore, security, quality, and rollout evidence")
     release_gate.add_argument("evidence", type=Path)
     migrate = commands.add_parser("migrate", help="initialize the selected production repository")
+    studio = commands.add_parser("studio", help="launch the interactive Trace Benchmark & Live Demo Studio")
+    studio.add_argument("--host", default="127.0.0.1")
+    studio.add_argument("--port", type=int, default=8501)
+    studio.add_argument("--open-browser", action="store_true", help="open web browser automatically")
+    benchmark_cmd = commands.add_parser("benchmark-suite", help="run one-click headless benchmark evaluation across datasets")
+    benchmark_cmd.add_argument("--dataset", default="fixture-technical-docs-v1", help="dataset ID or 'all'")
+    benchmark_cmd.add_argument("--engines", default="trace_hybrid,pure_vector,pure_lexical,naive_rag", help="comma-separated engine IDs")
+    benchmark_cmd.add_argument("--max-cases", type=int, default=50, help="max cases to evaluate")
+    benchmark_cmd.add_argument("--output-json", type=Path, help="optional path to save report JSON")
 
     arguments = parser.parse_args()
+    if arguments.command == "studio":
+        import threading
+        import webbrowser
+        import uvicorn
+        from trace.v2.api import create_app
+
+        app = create_app()
+        url = f"http://{arguments.host}:{arguments.port}/studio"
+        print("=" * 72)
+        print("  🧠 TRACE ONE-CLICK BENCHMARK & LIVE DEMO STUDIO")
+        print(f"  • Studio UI:  {url}")
+        print(f"  • API Docs:   http://{arguments.host}:{arguments.port}/docs")
+        print("=" * 72)
+
+        if arguments.open_browser:
+            def _open():
+                import time
+                time.sleep(1.0)
+                webbrowser.open(url)
+            threading.Thread(target=_open, daemon=True).start()
+
+        uvicorn.run(app, host=arguments.host, port=arguments.port, reload=False)
+        return
+
+    if arguments.command == "benchmark-suite":
+        from trace.v2.studio.engine import BenchmarkCoordinator, DatasetCatalog
+
+        service = TraceService.from_environment()
+        catalog = DatasetCatalog()
+        coordinator = BenchmarkCoordinator(service=service, catalog=catalog)
+
+        dataset_id = arguments.dataset
+        engine_ids = [e.strip() for e in arguments.engines.split(",") if e.strip()]
+        print(f"Running benchmark on dataset: {dataset_id} with engines: {engine_ids}")
+
+        report = asyncio.run(coordinator.run_benchmark(
+            dataset_id=dataset_id,
+            engine_ids=engine_ids,
+            max_cases=arguments.max_cases,
+        ))
+
+        print("\n" + "=" * 76)
+        print(f"  📊 BENCHMARK EVALUATION RESULTS ({report.get('dataset_id')})")
+        print("=" * 76)
+        metrics = report.get("metrics", {})
+        for eng, m in metrics.items():
+            print(f"  • [{eng.upper()}]:")
+            print(f"      Recall@5: {m.get('recall_at_5', 0.0):.2f} | Recall@20: {m.get('recall_at_20', 0.0):.2f} | NDCG@10: {m.get('ndcg_at_10', 0.0):.2f}")
+            print(f"      Evidence Coverage: {m.get('complete_gold_evidence_coverage', 0.0)*100:.1f}% | Citation Precision: {m.get('citation_precision', 0.0)*100:.1f}%")
+            print(f"      Abstention Accuracy: {m.get('abstention_correctness', 0.0)*100:.1f}% | Hallucination: {m.get('hallucination_rate', 0.0)*100:.1f}%")
+            print(f"      P95 Latency: {m.get('p95_latency_ms', 0.0):.1f}ms | Token Cost: ${m.get('total_token_cost_usd', 0.0):.4f}")
+            print("  " + "-" * 74)
+
+        if arguments.output_json:
+            arguments.output_json.write_text(json.dumps(report, indent=2), encoding="utf-8")
+            print(f"Report saved to {arguments.output_json}")
+        return
+
+
     if arguments.command == "serve":
         import uvicorn
 

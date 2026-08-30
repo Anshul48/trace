@@ -21,7 +21,11 @@ classifiers = [
 # The Phase 1 SDK and CLI use only the Python standard library. In particular,
 # installation does not require a server, Docker, account, model, or telemetry
 # dependency.
-dependencies = []
+dependencies = [
+    "jsonschema>=4.20",
+    "psutil>=5.9",
+    "pydantic>=2.10,<3",
+]
 
 [project.scripts]
 trace = "trace_local.cli:main"
@@ -57,6 +61,8 @@ test = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
     "litellm>=1.0",
+    "jsonschema>=4.20",
+    "psutil>=5.9",
 ]
 
 [tool.setuptools.packages.find]

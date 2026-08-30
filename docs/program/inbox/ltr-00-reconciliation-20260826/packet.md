@@ -1,11 +1,11 @@
 # Packet LTR-00: Scale Gate Truth & Provenance Reconciliation
 
-> **Packet ID:** `ltr-00-reconciliation-20260826`  
-> **Session:** Wave R0 (Reconciliation)  
-> **Role:** S0 Program Coordinator / Verifier Auditor  
-> **Date:** 2026-08-26  
-> **Authority Level:** C2 (Read-only Reconciliation & Boundary Setting)  
-> **Status:** **COMPLETE (Audited)**  
+> **Packet ID:** `ltr-00-reconciliation-20260826`
+> **Session:** Wave R0 (Reconciliation)
+> **Role:** S0 Program Coordinator / Verifier Auditor
+> **Date:** 2026-08-26
+> **Authority Level:** C2 (Read-only Reconciliation & Boundary Setting)
+> **Status:** **COMPLETE (Audited)**
 
 ---
 

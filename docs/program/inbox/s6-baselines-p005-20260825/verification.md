@@ -1,9 +1,9 @@
 # Verification Record — S6 Real Baselines and P-005 Decision Brief
 
-**Session:** Session 9 (S6)  
-**Packet ID:** `s6-baselines-p005-20260825`  
-**Date:** 2026-08-26  
-**Status:** `VERIFIED PASS` (C3 Authority Level / Decision Proposal)  
+**Session:** Session 9 (S6)
+**Packet ID:** `s6-baselines-p005-20260825`
+**Date:** 2026-08-26
+**Status:** `VERIFIED PASS` (C3 Authority Level / Decision Proposal)
 
 ## 1. Verification Summary
 

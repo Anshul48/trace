@@ -1,9 +1,9 @@
 # Decision Brief P-005b: Large-Token Retrieval Readiness Thresholds
 
-> **Decision Subject:** DEC-P-005b (Numerical Release Thresholds, Hardware Profiles, and Capacity Accounting)  
-> **Human Gate:** Human Gate B2  
-> **Authority Level:** C3 (Proposal Submitted for Formal Human Owner Approval)  
-> **Date:** 2026-08-26  
+> **Decision Subject:** DEC-P-005b (Numerical Release Thresholds, Hardware Profiles, and Capacity Accounting)
+> **Human Gate:** Human Gate B2
+> **Authority Level:** C3 (Proposal Submitted for Formal Human Owner Approval)
+> **Date:** 2026-08-26
 
 ---
 

@@ -34,6 +34,8 @@ promotion, scale, and consumer adoption remain sequential gates.
 | [02_EXECUTION_DAG.md](02_EXECUTION_DAG.md) | Dependency-ordered stages and gates. |
 | [FOUNDATION_RELEASE.md](FOUNDATION_RELEASE.md) | Finite baseline-release scope and Foundation Complete gate. |
 | [FOUNDATION_STATUS.md](FOUNDATION_STATUS.md) | Current starter-packet state and decision blockers. |
+| [SCALE_CERTIFICATION_RECOVERY_PLAN.md](SCALE_CERTIFICATION_RECOVERY_PLAN.md) | Draft, planning-only route to requalify 100K before a separately verified 1M pilot. |
+| [SCALE_100K_TO_1M_EXECUTION_PLAN.md](SCALE_100K_TO_1M_EXECUTION_PLAN.md) | Detailed execution amendment from the failed R2.1 measurement state through truthful Gate C2, Gate D, and Gate F2. |
 | [03_SHARED_CONTRACTS.md](03_SHARED_CONTRACTS.md) | Evidence, release, task, and handoff contracts. |
 | [04_EVALUATION_PROTOCOL.md](04_EVALUATION_PROTOCOL.md) | Real-data evaluation and scale proof boundary. |
 | [05_PROMOTION_RUBRIC.md](05_PROMOTION_RUBRIC.md) | Criteria for promoting an experimental mechanism. |

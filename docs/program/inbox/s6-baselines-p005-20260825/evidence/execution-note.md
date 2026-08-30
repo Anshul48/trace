@@ -1,9 +1,10 @@
 # Execution Note — S6 Real Baselines and P-005 Decision Brief
 
-**Date:** 2026-08-25  
-**Operator:** S6 Evaluation Owner / Antigravity Codex  
-**Lease:** lease-s6-baselines-p005-20260825  
-**Base Commit:** c0ea9fbf37bc50c88336f198437be031c18d6f64 (trace-bench) / 7bd96e9c5e0f9326b53a074024e7ace889f6e36 (trace)  
+**Date:** 2026-08-25
+**Operator:** S6 Evaluation Owner / Antigravity Codex
+**Lease:** lease-s6-baselines-p005-20260825
+**Base Commit:** c0ea9fbf37bc50c88336f198437be031c18d6f64 (trace-bench) /
+7bd96e9c5e0f9326b53a074024e7ace889f6e36 (trace)
 
 ## Plan of Action
 

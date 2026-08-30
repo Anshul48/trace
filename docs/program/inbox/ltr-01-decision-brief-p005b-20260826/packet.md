@@ -1,11 +1,11 @@
 # Packet LTR-01: DEC-P-005b Large-Token Retrieval Readiness Decision Brief
 
-> **Packet ID:** `ltr-01-decision-brief-p005b-20260826`  
-> **Session:** Wave R0 (Reconciliation & Governance)  
-> **Role:** Lead Architect / S6 Evaluator  
-> **Date:** 2026-08-26  
-> **Authority Level:** C3 (Proposal for Formal Human Gate B2 Adoption)  
-> **Status:** **COMPLETE / SUBMITTED TO OWNER**  
+> **Packet ID:** `ltr-01-decision-brief-p005b-20260826`
+> **Session:** Wave R0 (Reconciliation & Governance)
+> **Role:** Lead Architect / S6 Evaluator
+> **Date:** 2026-08-26
+> **Authority Level:** C3 (Proposal for Formal Human Gate B2 Adoption)
+> **Status:** **COMPLETE / SUBMITTED TO OWNER**
 
 ---
 

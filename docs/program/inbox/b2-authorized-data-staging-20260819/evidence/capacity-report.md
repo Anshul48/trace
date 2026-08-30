@@ -1,8 +1,8 @@
 # Staging Capacity Preflight & Allocation Report
 
-**Timestamp:** 2026-08-19T07:25:41.997603+00:00  
-**Target Drive:** `C:\`  
-**Staging Directory:** `C:\Users\anshu\AppData\Local\trace-bench-data`  
+**Timestamp:** 2026-08-19T07:25:41.997603+00:00
+**Target Drive:** `C:\`
+**Staging Directory:** `C:\Users\anshu\AppData\Local\trace-bench-data`
 
 ## Host Volume Free Space & Headroom Summary
 

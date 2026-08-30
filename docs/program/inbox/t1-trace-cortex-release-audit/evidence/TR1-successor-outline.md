@@ -1,8 +1,8 @@
 # TR1 Successor Outline — Unified Trace Cortex Release Lifecycle Implementation
 
-> **Proposed Task ID:** TR1  
-> **Role:** Trace Engineer  
-> **Status:** Proposed Successor Packet Outline (Do NOT execute or mutate code in T1)  
+> **Proposed Task ID:** TR1
+> **Role:** Trace Engineer
+> **Status:** Proposed Successor Packet Outline (Do NOT execute or mutate code in T1)
 > **Prerequisites:** T1 Audit Handoff, Accepted Human Decision on P-003, Clean Worktree Lease
 
 ---

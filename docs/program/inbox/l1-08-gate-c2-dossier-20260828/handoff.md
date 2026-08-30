@@ -1,11 +1,11 @@
 # Handoff: Level 1 Gate C2 Dossier (Wave R1 Production Re-Submission)
 
-> **From:** Coordinator & Scale System Lead  
-> **To:** Human Owner / Program Authority  
-> **Date:** 2026-08-28T13:37:00Z  
-> **Status:** Sealed & Formally Submitted for Review  
-> **Candidate Commit:** `a2c25e05f31d0ecb81ecaaf4b08bb82739f1c17f` (`a2c25e0`)  
-> **Verifier Attestation Receipt SHA-256:** `066f3e945a45f1c5f66762a503bd30d4319d94b3401d8f7fc229723726cefedc`  
+> **From:** Coordinator & Scale System Lead
+> **To:** Human Owner / Program Authority
+> **Date:** 2026-08-28T13:37:00Z
+> **Status:** Sealed & Formally Submitted for Review
+> **Candidate Commit:** `a2c25e05f31d0ecb81ecaaf4b08bb82739f1c17f` (`a2c25e0`)
+> **Verifier Attestation Receipt SHA-256:** `066f3e945a45f1c5f66762a503bd30d4319d94b3401d8f7fc229723726cefedc`
 
 ---
 

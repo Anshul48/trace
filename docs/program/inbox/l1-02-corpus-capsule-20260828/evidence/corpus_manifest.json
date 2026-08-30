@@ -1,0 +1,208 @@
+{
+  "manifest_title": "Trace 100K Real Corpus Capsule Manifest (Exact Cryptographic Hashing)",
+  "contract_version": "2.0",
+  "generated_at_utc": "2026-08-28T10:41:26Z",
+  "target_unique_documents_d": 100000,
+  "total_raw_text_bytes": 65394921,
+  "selection_merkle_root_sha256": "38d1a1cf980d447edef7bfaa1ebc4d06129386a82bdd2c6f724f45d8624fc530",
+  "synthetic_data_used": false,
+  "in_memory_fallback_used": false,
+  "base_data_root": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820",
+  "selection_policy": "Deterministic zero-indexed contiguous prefix slicing [0:N] per dataset",
+  "datasets": [
+    {
+      "dataset_name": "musique",
+      "formal_title": "MuSiQue: Multihop Questions via Single-hop Question Composition",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "available_records": 101962,
+      "selected_records_d": 80047,
+      "selection_range": "[0, 80047)",
+      "selected_text_bytes": 37343384,
+      "corpus_file": {
+        "relative_path": "musique/corpus.jsonl",
+        "size_bytes": 175616958,
+        "sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c"
+      },
+      "supporting_files": {
+        "corpus_offsets": {
+          "relative_path": "musique/corpus-offsets.jsonl",
+          "size_bytes": 20541771,
+          "sha256": "1b61911006fac1189d13067b2af825e8c4b6c14817c61650f628c7c6c26475c7"
+        },
+        "native_id_maps": {
+          "relative_path": "musique/native-id-maps.jsonl",
+          "size_bytes": 147830790,
+          "sha256": "800f7fb9a32c24ec3335cb8349c488aead49d3e01803e031ef931ab17782e61c"
+        },
+        "source_documents": {
+          "relative_path": "musique/source-documents.jsonl",
+          "size_bytes": 45509496,
+          "sha256": "f224f871eabcb7698b42bce23f92ff71dd55bb3535892acffacdbb38704543fb"
+        },
+        "provenance": {
+          "relative_path": "musique/provenance.json",
+          "size_bytes": 2541,
+          "sha256": "48e7caac7981029e1736015c1f362bf132a6e0e10e3bab8a70036427ec2bbfaa"
+        }
+      }
+    },
+    {
+      "dataset_name": "beir-fiqa",
+      "formal_title": "Financial Opinion Mining and Question Answering (FiQA-2018 / BEIR)",
+      "license": "CC BY-NC-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "available_records": 57600,
+      "selected_records_d": 10575,
+      "selection_range": "[0, 10575)",
+      "selected_text_bytes": 8141714,
+      "corpus_file": {
+        "relative_path": "beir-fiqa/corpus.jsonl",
+        "size_bytes": 79447079,
+        "sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce"
+      },
+      "supporting_files": {
+        "corpus_offsets": {
+          "relative_path": "beir-fiqa/corpus-offsets.jsonl",
+          "size_bytes": 11768237,
+          "sha256": "02bc46359cb274c307d8e7111b08f64789a83e791a2790479c5480e4edeb78e3"
+        },
+        "native_id_maps": {
+          "relative_path": "beir-fiqa/native-id-maps.jsonl",
+          "size_bytes": 26214463,
+          "sha256": "acb48c2ded9d6ccdc4bd4e1b6d6eb080df9c2a867ab1337733841243b2e2d500"
+        },
+        "source_documents": {
+          "relative_path": "beir-fiqa/source-documents.jsonl",
+          "size_bytes": 27039414,
+          "sha256": "2c282009dc2c2591388798209c71d1324650046973867dc94440659679008961"
+        },
+        "provenance": {
+          "relative_path": "beir-fiqa/provenance.json",
+          "size_bytes": 3362,
+          "sha256": "cc382b575fa29873fa868e69c0187298f54b210d01b7f0a5cf2808e3bb75861a"
+        }
+      }
+    },
+    {
+      "dataset_name": "beir-scifact",
+      "formal_title": "SciFact: Scientific Claim Verification (BEIR)",
+      "license": "CC BY-NC 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "available_records": 5183,
+      "selected_records_d": 5183,
+      "selection_range": "[0, 5183)",
+      "selected_text_bytes": 7777523,
+      "corpus_file": {
+        "relative_path": "beir-scifact/corpus.jsonl",
+        "size_bytes": 11011729,
+        "sha256": "08af2db965a8fd04ad1c4bf03ed5ba91e742c0cbefcb10afc256681084504ff8"
+      },
+      "supporting_files": {
+        "corpus_offsets": {
+          "relative_path": "beir-scifact/corpus-offsets.jsonl",
+          "size_bytes": 1059903,
+          "sha256": "23b7281cb2220ab2f42822d781750524ec46cdf4ad30fce524db564355063a19"
+        },
+        "native_id_maps": {
+          "relative_path": "beir-scifact/native-id-maps.jsonl",
+          "size_bytes": 2628615,
+          "sha256": "d8f1bb288c8d4d857a83e665c37ca5bcc67bb24cccf454cdd40f940a3b133120"
+        },
+        "source_documents": {
+          "relative_path": "beir-scifact/source-documents.jsonl",
+          "size_bytes": 2998342,
+          "sha256": "644137d26a91051e92858fdc70868f93cf3cea8813077cc3f80226b479339f66"
+        },
+        "provenance": {
+          "relative_path": "beir-scifact/provenance.json",
+          "size_bytes": 3280,
+          "sha256": "cb21e1b6f24b1a274efa8faa112760d5e1949f38bcaed690296f4270bac310b0"
+        }
+      }
+    },
+    {
+      "dataset_name": "beir-nfcorpus",
+      "formal_title": "NFCorpus: Medical Information Retrieval (BEIR)",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "available_records": 3633,
+      "selected_records_d": 3633,
+      "selection_range": "[0, 3633)",
+      "selected_text_bytes": 5718118,
+      "corpus_file": {
+        "relative_path": "beir-nfcorpus/corpus.jsonl",
+        "size_bytes": 8071970,
+        "sha256": "f5bfa0bb46b2d592fdddc62e419e5dbf9d2f6f5deabb70745d45fc32573854b9"
+      },
+      "supporting_files": {
+        "corpus_offsets": {
+          "relative_path": "beir-nfcorpus/corpus-offsets.jsonl",
+          "size_bytes": 745922,
+          "sha256": "85740fcfbf49c6b92688b5294dcfd7e293ed702d58413c6dfc0754e70892d848"
+        },
+        "native_id_maps": {
+          "relative_path": "beir-nfcorpus/native-id-maps.jsonl",
+          "size_bytes": 2898881,
+          "sha256": "f54cfd7d0eff7dbcbec32c8e697cba14a6a9f081e2002f5f655f0308f0e98eea"
+        },
+        "source_documents": {
+          "relative_path": "beir-nfcorpus/source-documents.jsonl",
+          "size_bytes": 2098074,
+          "sha256": "429c2c2abb698f50e995400765bf4576511963e43544f875cbe38e4efae3cfa4"
+        },
+        "provenance": {
+          "relative_path": "beir-nfcorpus/provenance.json",
+          "size_bytes": 3428,
+          "sha256": "5d25fb11f187f53346cc2934b1e571b19d7f869a606114598d2b717af9eac51c"
+        }
+      }
+    },
+    {
+      "dataset_name": "multihop-rag",
+      "formal_title": "MultiHop-RAG: Benchmarking Retrieval-Augmented Generation for Multi-hop Queries",
+      "license": "ODC-By v1.0",
+      "license_url": "https://opendatacommons.org/licenses/by/1-0/",
+      "available_records": 609,
+      "selected_records_d": 609,
+      "selection_range": "[0, 609)",
+      "selected_text_bytes": 6414182,
+      "corpus_file": {
+        "relative_path": "multihop-rag/corpus.jsonl",
+        "size_bytes": 6860726,
+        "sha256": "7228d82f926c41a1d742baeffbf1fb4ae5a14e04f405c045aaf9a5da3281f53a"
+      },
+      "supporting_files": {
+        "corpus_offsets": {
+          "relative_path": "multihop-rag/corpus-offsets.jsonl",
+          "size_bytes": 123920,
+          "sha256": "e99f072f728565df7a139c5175fb76329872fa576daea8ad655c8e6a20b19d7f"
+        },
+        "native_id_maps": {
+          "relative_path": "multihop-rag/native-id-maps.jsonl",
+          "size_bytes": 1969876,
+          "sha256": "61ca02af352d9734fa9821482025dea5376d43454c9b81e0a161989c7e137c97"
+        },
+        "source_documents": {
+          "relative_path": "multihop-rag/source-documents.jsonl",
+          "size_bytes": 351191,
+          "sha256": "e25959b039a6a9943fdc394639068b671f1a88eefe26212e5eab1b563e971afd"
+        },
+        "provenance": {
+          "relative_path": "multihop-rag/provenance.json",
+          "size_bytes": 2354,
+          "sha256": "8a57cbee3a88d4e7facbf2e9e71014919dd71fbfcfe5cf1d6ce1fb4d82983513"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "datasets_count": 5,
+    "available_records_pool": 168987,
+    "frozen_selected_documents_d": 100000,
+    "unique_native_document_keys": 100000,
+    "total_text_bytes": 65394921,
+    "total_corpus_files_bytes": 281008462
+  },
+  "status": "FROZEN_APPROVED"
+}

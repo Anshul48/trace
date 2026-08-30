@@ -1,8 +1,8 @@
 # Commands Log — D0 Coordinator Task
 
-> Task ID: `d0-coordinator-20260819`  
-> Date: 2026-08-19  
-> Role: S0 Coordinator / Control-Plane Owner  
+> Task ID: `d0-coordinator-20260819`
+> Date: 2026-08-19
+> Role: S0 Coordinator / Control-Plane Owner
 
 ## Commands Run
 

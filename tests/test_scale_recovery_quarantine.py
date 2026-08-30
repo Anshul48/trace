@@ -21,7 +21,6 @@ SCRIPTS_DIR = ROOT_DIR / "scripts"
 QUARANTINED_SCRIPTS = [
     SCRIPTS_DIR / "run_1m_scale_gate.py",
     SCRIPTS_DIR / "benchmark_1m_hybrid_comprehensive.py",
-    SCRIPTS_DIR / "run_100k_scale_gate.py",
 ]
 
 
@@ -36,18 +35,25 @@ def test_quarantined_scripts_exist() -> None:
     [
         "run_1m_scale_gate.py",
         "benchmark_1m_hybrid_comprehensive.py",
-        "run_100k_scale_gate.py",
     ],
 )
 def test_script_fails_without_diagnostic_flag(script_name: str) -> None:
     """Every quarantined script must exit with code 1 when invoked without --diagnostic."""
     script_path = SCRIPTS_DIR / script_name
+    env = dict(os.environ)
+    if "PYTHONPATH" in env:
+        env["PYTHONPATH"] = str(ROOT_DIR / "src") + os.pathsep + env["PYTHONPATH"]
+    else:
+        env["PYTHONPATH"] = str(ROOT_DIR / "src")
     result = subprocess.run(
         [sys.executable, str(script_path)],
         capture_output=True,
         text=True,
         timeout=45,
+        env=env,
     )
+
+
     assert result.returncode == 1, f"{script_name} must exit with code 1 without --diagnostic"
     combined_output = result.stdout + result.stderr
     assert "QUARANTINED" in combined_output, f"{script_name} must display quarantine banner/notice"
@@ -147,18 +153,23 @@ def test_quarantined_scripts_do_not_target_canonical_result_paths(tmp_path: Path
     assert "diagnostic" in str(runner_1m.output_dir)
     assert str(runner_1m.output_dir) != str(ROOT_DIR / "benchmarks" / "runs" / "1m_scale")
 
-    # 2. Check 100K Runner output isolation
+    # 2. Check 100K Runner diagnostic output isolation
     spec_100k = importlib.util.spec_from_file_location("run_100k_scale_gate", SCRIPTS_DIR / "run_100k_scale_gate.py")
     assert spec_100k is not None and spec_100k.loader is not None
     mod_100k = importlib.util.module_from_spec(spec_100k)
     spec_100k.loader.exec_module(mod_100k)
 
-    canonical_inbox = ROOT_DIR / "docs" / "program" / "inbox" / "ltr-10-real-100k-gate-20260826" / "evidence"
+    manifest_file = tmp_path / "manifest.json"
+    manifest_file.write_text(json.dumps({"manifest_title": "Test Manifest", "total_unique_documents": 10}), encoding="utf-8")
+
     runner_100k = mod_100k.Scale100KRunner(
-        manifest_path=tmp_path / "manifest.json",
+        manifest_path=manifest_file,
         data_root=tmp_path / "data",
-        output_dir=canonical_inbox,
+        mode="diagnostic",
+        output_dir=None,
         target_count=10,
+        force_overwrite=True,
+        allow_unlocked_policy=True,
     )
     assert "diagnostic" in str(runner_100k.output_dir)
-    assert str(runner_100k.output_dir) != str(canonical_inbox)
+    assert "100k_scale" in str(runner_100k.output_dir)

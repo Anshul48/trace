@@ -22,9 +22,9 @@ verifier_id: "pending"
 
 ## 2. Summary
 
-Task T0 froze the dirty user working tree into an immutable base commit `5626bde7bc4086f5d9a4f96dae8e1d04a1191936` in an isolated worktree at `C:\Users\anshu\AppData\Local\trace-worktrees\trace-tr1`, preserving the user's original checkout completely clean and unmutated. 
-Task TR1 implemented the unified Cortex Release root per DEC-P-003 Option A across SQLite and PostgreSQL, introducing `trace_cortex_releases` and `trace_cortex_release_components` with atomic active pointers, validation receipt gating, candidate visibility isolation, predecessor release retention, rollback controls, and external index promotion compensation. 
-All 52 unit, API, foundation, cortex, and lifecycle isolation tests pass with zero regressions. 
+Task T0 froze the dirty user working tree into an immutable base commit `5626bde7bc4086f5d9a4f96dae8e1d04a1191936` in an isolated worktree at `C:\Users\anshu\AppData\Local\trace-worktrees\trace-tr1`, preserving the user's original checkout completely clean and unmutated.
+Task TR1 implemented the unified Cortex Release root per DEC-P-003 Option A across SQLite and PostgreSQL, introducing `trace_cortex_releases` and `trace_cortex_release_components` with atomic active pointers, validation receipt gating, candidate visibility isolation, predecessor release retention, rollback controls, and external index promotion compensation.
+All 52 unit, API, foundation, cortex, and lifecycle isolation tests pass with zero regressions.
 The comprehensive P-004 Decision Brief covering temporal, revocation, and historical release semantics is included in Section 10 below.
 
 ---

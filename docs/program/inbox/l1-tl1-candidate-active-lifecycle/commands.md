@@ -1,8 +1,8 @@
 # Commands Log — S2 Trace-Lite Lifecycle Owner
 
-> Task ID: `l1-tl1-candidate-active-lifecycle`  
-> Role: S2 — Trace-Lite Lifecycle Owner  
-> Worktree: `C:\Users\anshu\AppData\Local\trace-worktrees\trace-lite-l1`  
+> Task ID: `l1-tl1-candidate-active-lifecycle`
+> Role: S2 — Trace-Lite Lifecycle Owner
+> Worktree: `C:\Users\anshu\AppData\Local\trace-worktrees\trace-lite-l1`
 
 ## Execution Record
 

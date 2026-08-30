@@ -1,0 +1,600 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Trace Wave R2.2 Scale Certification Policy Schema",
+  "description": "Formal JSON Schema specifying strict schema validation for Trace Wave R2.2 Level 1 Scale Certification Policy Lockfiles (Defects #3, #4, #5 Remediation).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "policy_id",
+    "target_standard",
+    "governance_status",
+    "scale",
+    "retrieval",
+    "abstention",
+    "storage",
+    "memory",
+    "graph",
+    "durability",
+    "resilience",
+    "statistical_methods",
+    "raw_text_denominator_bytes",
+    "max_storage_multiplier",
+    "max_storage_bytes"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_standard": {
+      "type": "string",
+      "minLength": 1
+    },
+    "governance_status": {
+      "type": "string",
+      "enum": [
+        "PROPOSED_AWAITING_HUMAN_GATE",
+        "PROPOSED_POLICY_REPAIR_REQUIRED",
+        "PENDING_HUMAN_APPROVAL",
+        "CANONICAL_FROZEN",
+        "PROPOSED_REPAIR",
+        "FORMAL_REPAIR_QUALIFICATION_LOCKED"
+      ]
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "governance": {
+      "type": "object",
+      "required": [
+        "authority",
+        "status",
+        "effective_date_utc",
+        "claim_level",
+        "decision_references",
+        "description"
+      ],
+      "properties": {
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PROPOSED_AWAITING_HUMAN_GATE",
+            "PROPOSED_POLICY_REPAIR_REQUIRED",
+            "PENDING_HUMAN_APPROVAL",
+            "CANONICAL_FROZEN",
+            "PROPOSED_REPAIR",
+            "FORMAL_REPAIR_QUALIFICATION_LOCKED"
+          ]
+        },
+        "effective_date_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "claim_level": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "raw_text_denominator_bytes": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Exact byte count of raw uncompressed benchmark corpus text."
+    },
+    "max_storage_multiplier": {
+      "type": "number",
+      "minimum": 0.0,
+      "description": "Maximum allowed multiplier for total hot database storage relative to raw text."
+    },
+    "max_storage_bytes": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Strict maximum byte cap for active database storage on disk (multiplier * raw_text_denominator_bytes)."
+    },
+    "scale": {
+      "type": "object",
+      "required": [
+        "required_document_count_D",
+        "target_scale_description",
+        "synthetic_data_allowed",
+        "in_memory_fallback_allowed"
+      ],
+      "properties": {
+        "required_document_count_D": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "target_scale_description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "synthetic_data_allowed": {
+          "type": "boolean"
+        },
+        "in_memory_fallback_allowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "retrieval": {
+      "type": "object",
+      "required": [
+        "direct_lookup",
+        "domain_semantic",
+        "semantic_qa",
+        "multi_hop_reasoning"
+      ],
+      "properties": {
+        "direct_lookup": {
+          "type": "object",
+          "required": [
+            "dataset",
+            "description",
+            "min_ndcg10",
+            "min_recall20",
+            "max_p95_ms"
+          ],
+          "properties": {
+            "dataset": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "min_ndcg10": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "min_recall20": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "max_p95_ms": {
+              "type": "number",
+              "minimum": 0.0
+            }
+          }
+        },
+        "domain_semantic": {
+          "type": "object",
+          "required": [
+            "dataset",
+            "description",
+            "min_ndcg10",
+            "min_recall20",
+            "max_p95_ms"
+          ],
+          "properties": {
+            "dataset": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "min_ndcg10": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "min_recall20": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "max_p95_ms": {
+              "type": "number",
+              "minimum": 0.0
+            }
+          }
+        },
+        "semantic_qa": {
+          "type": "object",
+          "required": [
+            "dataset",
+            "description",
+            "min_ndcg10",
+            "min_recall20",
+            "max_p95_ms"
+          ],
+          "properties": {
+            "dataset": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "min_ndcg10": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "min_recall20": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "max_p95_ms": {
+              "type": "number",
+              "minimum": 0.0
+            }
+          }
+        },
+        "multi_hop_reasoning": {
+          "type": "object",
+          "required": [
+            "dataset",
+            "description",
+            "min_ndcg10",
+            "min_coverage20",
+            "max_p95_ms"
+          ],
+          "properties": {
+            "dataset": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "min_ndcg10": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "min_coverage20": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "max_p95_ms": {
+              "type": "number",
+              "minimum": 0.0
+            }
+          }
+        }
+      }
+    },
+    "abstention": {
+      "type": "object",
+      "required": [
+        "min_zero_hallucination_rate",
+        "min_abstention_accuracy",
+        "required_null_queries",
+        "unlabeled_retrieval_path_required",
+        "leakage_prevention_rule"
+      ],
+      "properties": {
+        "min_zero_hallucination_rate": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "min_abstention_accuracy": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "required_null_queries": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "unlabeled_retrieval_path_required": {
+          "type": "boolean"
+        },
+        "leakage_prevention_rule": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "storage": {
+      "type": "object",
+      "required": [
+        "max_storage_multiplier",
+        "max_storage_bytes",
+        "target_storage_bytes",
+        "raw_text_denominator_bytes",
+        "raw_text_denominator_baseline_bytes",
+        "policy_on_durable_spine_vs_derived_projections",
+        "spine_vs_projections_policy"
+      ],
+      "properties": {
+        "max_storage_multiplier": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "max_storage_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "target_storage_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "raw_text_denominator_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "raw_text_denominator_baseline_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "policy_on_durable_spine_vs_derived_projections": {
+          "type": "string",
+          "minLength": 1
+        },
+        "spine_vs_projections_policy": {
+          "type": "object",
+          "required": [
+            "accounting_scope",
+            "definition",
+            "durable_spine_mandate",
+            "derived_projections_mandate",
+            "included_hot_artifacts",
+            "excluded_offline_artifacts"
+          ],
+          "properties": {
+            "accounting_scope": {
+              "type": "string",
+              "minLength": 1
+            },
+            "definition": {
+              "type": "string",
+              "minLength": 1
+            },
+            "durable_spine_mandate": {
+              "type": "string",
+              "minLength": 1
+            },
+            "derived_projections_mandate": {
+              "type": "string",
+              "minLength": 1
+            },
+            "included_hot_artifacts": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            },
+            "excluded_offline_artifacts": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          }
+        }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "required": [
+        "max_peak_ram_gb",
+        "reference_host_profile",
+        "accounting_mechanism",
+        "zero_oom_enforcement"
+      ],
+      "properties": {
+        "max_peak_ram_gb": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "reference_host_profile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "accounting_mechanism": {
+          "type": "string",
+          "minLength": 1
+        },
+        "zero_oom_enforcement": {
+          "type": "boolean"
+        }
+      }
+    },
+    "graph": {
+      "type": "object",
+      "required": [
+        "max_stored_degree",
+        "max_traversal_p95_ms",
+        "traversal_algorithm",
+        "max_walk_depth",
+        "telemetry_emission_required"
+      ],
+      "properties": {
+        "max_stored_degree": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_traversal_p95_ms": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "traversal_algorithm": {
+          "type": "string",
+          "minLength": 1
+        },
+        "max_walk_depth": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "telemetry_emission_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "durability": {
+      "type": "object",
+      "required": [
+        "min_atom_retention",
+        "max_hash_drift",
+        "min_anchor_recovery",
+        "max_repeat_erasure_delta",
+        "anchor_proof_samples"
+      ],
+      "properties": {
+        "min_atom_retention": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "max_hash_drift": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "min_anchor_recovery": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "max_repeat_erasure_delta": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "anchor_proof_samples": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "resilience": {
+      "type": "object",
+      "required": [
+        "min_rebuild_parity",
+        "replay_scope",
+        "verification_tables"
+      ],
+      "properties": {
+        "min_rebuild_parity": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "replay_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verification_tables": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "statistical_methods": {
+      "type": "object",
+      "required": [
+        "bootstrap_resamples",
+        "bootstrap_ci_level",
+        "bootstrap_seed",
+        "significance_alpha"
+      ],
+      "properties": {
+        "bootstrap_resamples": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bootstrap_ci_level": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "bootstrap_seed": {
+          "type": "integer"
+        },
+        "significance_alpha": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "hypothesis_tests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "practical_effect_size_floor_delta": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "denominator_integrity": {
+          "type": "object",
+          "required": [
+            "strict_cohort_separation",
+            "empty_retrieval_scored_as_zero",
+            "prohibited_actions"
+          ],
+          "properties": {
+            "strict_cohort_separation": {
+              "type": "boolean"
+            },
+            "empty_retrieval_scored_as_zero": {
+              "type": "boolean"
+            },
+            "prohibited_actions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          }
+        }
+      }
+    },
+    "statistical_method": {
+      "type": "object"
+    }
+  }
+}

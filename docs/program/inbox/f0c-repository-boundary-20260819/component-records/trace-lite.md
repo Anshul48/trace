@@ -1,9 +1,9 @@
 # F0c Trace-Lite Component Record
 
-> **Status:** Current observed record as of 2026-08-19.  
-> **Captured by:** Trace-Lite Foundation Engineer (read-only boundary capture).  
-> **Component:** Trace-Lite Beta Reference Implementation  
-> **Canonical Root:** `C:\Users\anshu\OneDrive\Documents\Code\Utilities\trace-lite`  
+> **Status:** Current observed record as of 2026-08-19.
+> **Captured by:** Trace-Lite Foundation Engineer (read-only boundary capture).
+> **Component:** Trace-Lite Beta Reference Implementation
+> **Canonical Root:** `C:\Users\anshu\OneDrive\Documents\Code\Utilities\trace-lite`
 
 ---
 

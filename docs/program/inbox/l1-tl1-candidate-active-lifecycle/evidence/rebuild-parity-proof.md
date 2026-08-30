@@ -1,8 +1,8 @@
 # Trace-Lite Provenance and Rebuild Parity Proof (TL3)
 
-> **Status:** Empirical Parity Proof & Provenance Verification  
-> **Prepared by:** Worker B (Trace-Lite Empirical Profiler)  
-> **Target:** Foundation Hardening Wave — Lifecycle & Rebuild Verification  
+> **Status:** Empirical Parity Proof & Provenance Verification
+> **Prepared by:** Worker B (Trace-Lite Empirical Profiler)
+> **Target:** Foundation Hardening Wave — Lifecycle & Rebuild Verification
 > **Raw Evidence Artifact:** `docs/program/inbox/l1-tl1-candidate-active-lifecycle/evidence/tl3-empirical-measurements.json`
 
 ---

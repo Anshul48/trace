@@ -1,14 +1,14 @@
 # Decision Brief P-005: Empirical Baselines and Proposed Release Thresholds
 
-> **Decision Subject:** DEC-P-005 (Numerical Release Thresholds, Performance Budgets, and Statistical Methods for Certification)  
-> **Human Gate:** Human Gate B  
-> **Authority Level:** C3 (Proposal Only — Awaiting Human Owner Formal Approval)  
-> **Evaluation & Promotion Owner (S6):** S6 Implementation Wave Coordinator  
-> **Date:** 2026-08-26  
-> **Runner Commit:** `trace-bench` @ `c0ea9fbf37bc50c88336f198437be031c18d6f64`  
-> **Dataset Staging:** Gate D2b (`d2b-20260819/repair-mq-roundtrip-20260820`)  
-> **Hardware Acceleration:** NVIDIA GeForce RTX 5050 Laptop GPU (SM120, CUDA 12.8 / 13.3)  
-> **Certification Eligibility:** `false` (Strictly non-certified until Human Gate B approval and B3 dossier assembly)  
+> **Decision Subject:** DEC-P-005 (Numerical Release Thresholds, Performance Budgets, and Statistical Methods for Certification)
+> **Human Gate:** Human Gate B
+> **Authority Level:** C3 (Proposal Only — Awaiting Human Owner Formal Approval)
+> **Evaluation & Promotion Owner (S6):** S6 Implementation Wave Coordinator
+> **Date:** 2026-08-26
+> **Runner Commit:** `trace-bench` @ `c0ea9fbf37bc50c88336f198437be031c18d6f64`
+> **Dataset Staging:** Gate D2b (`d2b-20260819/repair-mq-roundtrip-20260820`)
+> **Hardware Acceleration:** NVIDIA GeForce RTX 5050 Laptop GPU (SM120, CUDA 12.8 / 13.3)
+> **Certification Eligibility:** `false` (Strictly non-certified until Human Gate B approval and B3 dossier assembly)
 
 ---
 

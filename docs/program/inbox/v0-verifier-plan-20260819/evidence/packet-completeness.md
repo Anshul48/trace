@@ -1,9 +1,9 @@
 # Foundation Packet Completeness & Integrity Review
 
-> **Packet:** V0 — Independent Verifier Plan and Packet-Integrity Review  
-> **Role:** Independent Verifier / Integration Reviewer  
-> **Scope:** Audit of Foundation Packets: F0a, F0b, F0c, B1, L1, T1, V1 (V1a/V1b)  
-> **Status:** Completed Review  
+> **Packet:** V0 — Independent Verifier Plan and Packet-Integrity Review
+> **Role:** Independent Verifier / Integration Reviewer
+> **Scope:** Audit of Foundation Packets: F0a, F0b, F0c, B1, L1, T1, V1 (V1a/V1b)
+> **Status:** Completed Review
 > **Evidence Level:** Observed static packet inspection (Planning & Governance baseline)
 
 ---

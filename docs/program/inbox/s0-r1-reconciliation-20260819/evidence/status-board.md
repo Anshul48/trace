@@ -1,7 +1,7 @@
 # R1 Reconciled Status Board
 
-**Reconciled at:** 2026-08-19T12:40:55.1070524Z  
-**Program label:** `implementation_complete / independent_verification_pending`  
+**Reconciled at:** 2026-08-19T12:40:55.1070524Z
+**Program label:** `implementation_complete / independent_verification_pending`
 **Authority:** C0 control-plane reconciliation; no gate acceptance or human
 decision was exercised.
 

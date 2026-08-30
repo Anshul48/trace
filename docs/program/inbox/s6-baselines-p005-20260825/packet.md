@@ -18,7 +18,8 @@ Execute reproducible, fail-closed baseline evaluations across all admitted real 
 - Strict fail-closed execution: zero mock LLM/provider substitution, strict TLS, non-editable wheel imports.
 - Maintain separate capability lanes: direct lookup, semantic retrieval, multi-hop reasoning, chronology, abstention, organization, and operations/vector scale.
 - BigANN / SIFT1M vector scale results remain strictly isolated as an operations lane and are NEVER blended into text retrieval quality metrics.
-- S6 proposes, but does NOT approve, P-005 release thresholds. Certification eligibility remains alse until human approval at Human Gate B and B3 dossier assembly.
+- S6 proposes, but does NOT approve, P-005 release thresholds. Certification eligibility remains
+alse until human approval at Human Gate B and B3 dossier assembly.
 - Preserve source truth, native IDs, exact offsets, and denominator distinctions (positive queries, expected abstentions, exclusions, failures).
 
 ## 3. Admitted Portfolio Scope
@@ -37,7 +38,8 @@ Execute reproducible, fail-closed baseline evaluations across all admitted real 
 - dense: Bi-Encoder Dense Retrieval (sentence-transformers/all-MiniLM-L6-v2)
 - hybrid_rrf: Reciprocal Rank Fusion of BM25 + Dense
 - hipporag_ppr: Graph-based Personalized PageRank Retrieval
-- lat_hierarchy: Clustered Hierarchical Index Retrieval
+-
+lat_hierarchy: Clustered Hierarchical Index Retrieval
 - nn_scale: High-throughput Vector Indexing & Nearest Neighbor Search (SIFT1M)
 
 ## 5. Required Deliverables

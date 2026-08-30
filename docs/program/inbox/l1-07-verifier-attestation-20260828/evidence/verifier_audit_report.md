@@ -1,20 +1,20 @@
 # Level 1 Independent Verifier Audit Report: 100K Scale Gate Production Repair Audit
 
-> **Auditor Role:** Independent Scale Verifier (Wave R1 / Level 1)  
-> **Session / Target:** Wave R1 (100K Scale Gate Production Repair & Certification Re-Entry)  
-> **Packet ID:** `l1-07-verifier-attestation-20260828`  
-> **Date:** 2026-08-28T13:35:00Z  
-> **Authority Level:** Level 1 Independent Verification & Cryptographic Attestation  
-> **Governing Authorities:**  
-> - `docs/program/00_GLOBAL_CONTEXT_REPAIR_LOOP.md` (Five Non-Negotiable Exit Criteria)  
-> - `docs/program/SCALE_CERTIFICATION_RECOVERY_PLAN.md` (Sections 4.2, 4.3, 5.2, 5.4)  
-> - Human Gate C2 Decision (`REPAIR — promote_100k denied`)  
-> - `docs/program/06_DECISION_LOG.md` (DEC-P-005b)  
-> **Candidate Evidence Root:** `benchmarks/runs/100k_scale_candidate/`  
-> **Candidate Dossier SHA-256:** `b1853667b2be647f9dfa356e6e64f29e09f0cc9c82d9ab1b76e038d206434804`  
-> **Candidate Manifest SHA-256:** `bd398829a31aa812fc531185a4a05c383dcdbccc67048ab9600fe4e7d68632f8`  
-> **Candidate Git Commit:** `a2c25e05f31d0ecb81ecaaf4b08bb82739f1c17f` (`a2c25e0`)  
-> **Audit Disposition:** **AUDIT_ACCEPTED_PRODUCTION_CANDIDATE**  
+> **Auditor Role:** Independent Scale Verifier (Wave R1 / Level 1)
+> **Session / Target:** Wave R1 (100K Scale Gate Production Repair & Certification Re-Entry)
+> **Packet ID:** `l1-07-verifier-attestation-20260828`
+> **Date:** 2026-08-28T13:35:00Z
+> **Authority Level:** Level 1 Independent Verification & Cryptographic Attestation
+> **Governing Authorities:**
+> - `docs/program/00_GLOBAL_CONTEXT_REPAIR_LOOP.md` (Five Non-Negotiable Exit Criteria)
+> - `docs/program/SCALE_CERTIFICATION_RECOVERY_PLAN.md` (Sections 4.2, 4.3, 5.2, 5.4)
+> - Human Gate C2 Decision (`REPAIR — promote_100k denied`)
+> - `docs/program/06_DECISION_LOG.md` (DEC-P-005b)
+> **Candidate Evidence Root:** `benchmarks/runs/100k_scale_candidate/`
+> **Candidate Dossier SHA-256:** `b1853667b2be647f9dfa356e6e64f29e09f0cc9c82d9ab1b76e038d206434804`
+> **Candidate Manifest SHA-256:** `bd398829a31aa812fc531185a4a05c383dcdbccc67048ab9600fe4e7d68632f8`
+> **Candidate Git Commit:** `a2c25e05f31d0ecb81ecaaf4b08bb82739f1c17f` (`a2c25e0`)
+> **Audit Disposition:** **AUDIT_ACCEPTED_PRODUCTION_CANDIDATE**
 > **Audit Verdict:** **PASS_ALL_SCALE_GATE_INVARIANTS** (Fully Meets Production Certification Requirements)
 
 ---
@@ -197,6 +197,6 @@ Based on the forensic audit, mathematical re-computation, code inspection, and c
 4. Memory and storage limits are strictly satisfied (Peak RSS = $1.51\text{ GB} \le 2.0\text{ GB}$; DB size = $679.89\text{ MB}$).
 5. The candidate run complies with all Level 1 requirements of DEC-P-005b and `SCALE_CERTIFICATION_RECOVERY_PLAN.md`.
 
-**Audit Disposition:** `AUDIT_ACCEPTED_PRODUCTION_CANDIDATE`  
-**Audit Verdict:** `PASS_ALL_SCALE_GATE_INVARIANTS`  
+**Audit Disposition:** `AUDIT_ACCEPTED_PRODUCTION_CANDIDATE`
+**Audit Verdict:** `PASS_ALL_SCALE_GATE_INVARIANTS`
 **Recommendation:** **PROCEED TO GATE C2 RE-SUBMISSION (L1-08)** for final Human Gate C2 review.

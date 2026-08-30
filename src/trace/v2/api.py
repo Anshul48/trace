@@ -967,6 +967,8 @@ def create_app(service: TraceService | None = None) -> FastAPI:
         return {"items": [event.model_dump(mode="json") for event in selected[:page_limit]], "limit": page_limit, "next_page_token": next_token}
 
     app.include_router(router)
+    from .studio.routes import studio_router
+    app.include_router(studio_router)
 
     @app.exception_handler(TraceStoreError)
     async def store_exception_handler(_: Request, error: TraceStoreError) -> JSONResponse:

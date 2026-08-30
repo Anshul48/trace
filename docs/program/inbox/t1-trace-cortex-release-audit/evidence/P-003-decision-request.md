@@ -1,9 +1,9 @@
 # Decision Request: P-003
 
-> **State:** proposed  
-> **Decision owner:** Human program owner  
-> **Prepared by:** Trace Foundation Engineer  
-> **Date Prepared:** 2026-08-19  
+> **State:** proposed
+> **Decision owner:** Human program owner
+> **Prepared by:** Trace Foundation Engineer
+> **Date Prepared:** 2026-08-19
 > **Related Packet:** T1 (Audit) -> TR1 (Implementation)
 
 ---
@@ -44,7 +44,7 @@ Choose the canonical architectural pattern and schema for **unified Trace Cortex
 
 ## 5. Recommendation
 
-**Recommend Option A.**  
+**Recommend Option A.**
 Option A establishes strict candidate isolation (satisfying Invariant 2) and atomic multi-component rollback while preserving the sub-second incremental ingestion and delta-update performance necessary for the 100K gate.
 
 ---
@@ -52,9 +52,9 @@ Option A establishes strict candidate isolation (satisfying Invariant 2) and ato
 ## 6. Human Decision Record
 
 - **Decision:** `<pending human review: Option A | Option B | Deferred>`
-- **Rationale:** 
-- **Constraints / Amendments:** 
-- **Date:** 
-- **Approved Successor Packets Only:** 
+- **Rationale:**
+- **Constraints / Amendments:**
+- **Date:**
+- **Approved Successor Packets Only:**
 
 *(Do not treat this recommendation as accepted until completed and signed by the human owner.)*

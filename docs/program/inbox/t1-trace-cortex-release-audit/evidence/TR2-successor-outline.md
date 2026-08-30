@@ -1,8 +1,8 @@
 # TR2 Successor Outline — Temporal Truth, Source Lifecycle, and Revocation Baseline
 
-> **Proposed Task ID:** TR2  
-> **Role:** Trace Engineer  
-> **Status:** Proposed Successor Packet Outline (Do NOT execute or mutate code in T1)  
+> **Proposed Task ID:** TR2
+> **Role:** Trace Engineer
+> **Status:** Proposed Successor Packet Outline (Do NOT execute or mutate code in T1)
 > **Prerequisites:** TR1 Implementation Handoff, Accepted Human Decision on P-004, Clean Worktree Lease
 
 ---

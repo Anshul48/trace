@@ -1,7 +1,7 @@
 # F0c Execution Commands Log
 
-> **Role:** Coordinator & Trace-Lite Foundation Engineer (read-only boundary capture)  
-> **Date:** 2026-08-19  
+> **Role:** Coordinator & Trace-Lite Foundation Engineer (read-only boundary capture)
+> **Date:** 2026-08-19
 
 ## 1. Trace Repository Inspection
 

@@ -1,10 +1,10 @@
 # F0c — Trace Component Record
 
-> **Contract Version:** 1.0  
-> **Record ID:** trace-f0c-20260819  
-> **Captured At:** 2026-08-19T04:41:00Z  
-> **Captured By:** Trace Foundation Engineer  
-> **Component:** Trace  
+> **Contract Version:** 1.0
+> **Record ID:** trace-f0c-20260819
+> **Captured At:** 2026-08-19T04:41:00Z
+> **Captured By:** Trace Foundation Engineer
+> **Component:** Trace
 > **Canonical Root:** `C:\Users\anshu\OneDrive\Documents\Code\Utilities\trace`
 
 ---

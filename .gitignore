@@ -41,3 +41,6 @@ tests/.phase1_tmp/
 
 # Temporary verification worktrees
 .v1b-r5/
+
+# Benchmark runs and artifacts
+benchmarks/runs/

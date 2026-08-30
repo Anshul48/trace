@@ -1,9 +1,9 @@
 # Commands Log — S3 Trace V2 Cortex Release Owner
 
-> Task ID: `tr1-unified-cortex-release-20260819`  
-> Role: S3 — Trace V2 Cortex Release Owner / Worker A Hardening  
-> Worktree: `C:\Users\anshu\AppData\Local\trace-worktrees\trace-tr1`  
-> Lease: `docs/program/inbox/d0-coordinator-20260819/leases/lease-s3-t0-tr1.json`  
+> Task ID: `tr1-unified-cortex-release-20260819`
+> Role: S3 — Trace V2 Cortex Release Owner / Worker A Hardening
+> Worktree: `C:\Users\anshu\AppData\Local\trace-worktrees\trace-tr1`
+> Lease: `docs/program/inbox/d0-coordinator-20260819/leases/lease-s3-t0-tr1.json`
 
 ---
 

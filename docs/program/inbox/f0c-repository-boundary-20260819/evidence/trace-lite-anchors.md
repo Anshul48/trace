@@ -1,9 +1,9 @@
 # Trace-Lite Architectural Anchors & Lifecycle Evidence
 
-> **Role:** Trace-Lite Foundation Engineer  
-> **Packet:** F0c (`f0c-repository-boundary-20260819`)  
-> **Base Identity:** Git Commit `fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1` on `main`  
-> **Date:** 2026-08-19  
+> **Role:** Trace-Lite Foundation Engineer
+> **Packet:** F0c (`f0c-repository-boundary-20260819`)
+> **Base Identity:** Git Commit `fe66a9eefc8372f7cc021c864d26e62a9d6cc9c1` on `main`
+> **Date:** 2026-08-19
 
 ---
 

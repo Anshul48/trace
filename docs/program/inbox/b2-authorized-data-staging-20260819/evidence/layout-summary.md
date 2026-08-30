@@ -1,9 +1,9 @@
 # Real-Data Portfolio Layout and Schema Observation Summary
 
-**DAG Node:** B2 / D2a  
-**Admission Authority:** DEC-P-001  
-**Staging Root:** `C:\Users\anshu\AppData\Local\trace-bench-data`  
-**Generated At:** 2026-08-19  
+**DAG Node:** B2 / D2a
+**Admission Authority:** DEC-P-001
+**Staging Root:** `C:\Users\anshu\AppData\Local\trace-bench-data`
+**Generated At:** 2026-08-19
 
 ## 1. Portfolio Overview
 

@@ -1,8 +1,8 @@
 # Commands Log — T1 Trace Cortex Release Audit
 
-> **Task ID:** T1  
-> **Session:** Trace Foundation  
-> **Environment:** Windows PowerShell / Python 3.12  
+> **Task ID:** T1
+> **Session:** Trace Foundation
+> **Environment:** Windows PowerShell / Python 3.12
 > **Execution Mode:** Strictly Read-Only (No code modification, no database mutation, no benchmark execution)
 
 ---

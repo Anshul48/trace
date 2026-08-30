@@ -1,9 +1,9 @@
 # Handoff: trace-program-research-01 (S1 Research)
 
-> **Task ID:** `trace-program-research-01`  
-> **Role:** Research Analyst  
-> **DAG Nodes:** `R1`, `P-002`, `P-003`, `P-004`  
-> **Status:** `completed` (ready for coordinator synthesis and human decision review)  
+> **Task ID:** `trace-program-research-01`
+> **Role:** Research Analyst
+> **DAG Nodes:** `R1`, `P-002`, `P-003`, `P-004`
+> **Status:** `completed` (ready for coordinator synthesis and human decision review)
 
 ---
 

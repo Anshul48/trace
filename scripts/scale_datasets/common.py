@@ -56,7 +56,7 @@ def create_trace_record(
     """Create a normalized Trace Phase 1 record compliant with phase1-record.schema.json."""
     content_hash = compute_sha256(content)
     meta = metadata.copy() if metadata else {}
-    
+
     # Enrich metadata with standard provenance fields if not present
     if "estimated_tokens" not in meta:
         meta["estimated_tokens"] = estimate_tokens(content)

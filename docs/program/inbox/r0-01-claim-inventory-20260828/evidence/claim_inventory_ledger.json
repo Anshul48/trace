@@ -1,0 +1,900 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "audit_metadata": {
+    "schema_version": "1.0.0",
+    "ledger_id": "LEDGER-R0-01-CLAIM-INVENTORY-20260828",
+    "generated_at_utc": "2026-08-28T10:24:09Z",
+    "audit_wave": "Wave R0 (Recovery & Containment)",
+    "audit_task": "R0-01: Claim Inventory & Provenance Ledger",
+    "auditor_role": "Audit Specialist (Wave R0)",
+    "authority_boundary": "SCALE_CERTIFICATION_RECOVERY_PLAN.md & docs/program/00_GLOBAL_CONTEXT_RECOVERY.md",
+    "head_commit": "f74767e22f9c2d7a5c1f0fe2098cd40748aaffe1",
+    "head_tree": "82e138d9ac570a017bf42fbd0523ae51493e611b",
+    "clean_worktree_audit": true
+  },
+  "git_commits_ledger": [
+    {
+      "commit_sha": "f74767e22f9c2d7a5c1f0fe2098cd40748aaffe1",
+      "short_sha": "f74767e",
+      "tree_sha": "82e138d9ac570a017bf42fbd0523ae51493e611b",
+      "parent_shas": [
+        "30912f36657dfca55407759ef65d0f13769d80e9"
+      ],
+      "author": "Anshul <anshul@example.com>",
+      "date_utc": "2026-08-28T10:08:28+00:00",
+      "subject": "chore(audit): invalidate and revoke ungrounded 1M scale claims per lead auditor review",
+      "classification": "REVOCATION_ACTION",
+      "files_changed": [
+        {
+          "path": "benchmarks/runs/1m_hybrid_benchmark_results.json",
+          "action": "DELETED",
+          "previous_blob_sha": "c136af0a937bc5515ee852e371396faf470ff0db"
+        },
+        {
+          "path": "benchmarks/runs/1m_scale/1m_scale_dossier.json",
+          "action": "DELETED",
+          "previous_blob_sha": "30824edf0d04e4872a9b8e6f37227cbcd13fcd33"
+        },
+        {
+          "path": "benchmarks/runs/1m_scale/checkpoint_1m.json",
+          "action": "DELETED",
+          "previous_blob_sha": "74239a5f6ef1981dc46703d7b6e50f640f2ba205"
+        }
+      ],
+      "audit_notes": "Revocation action deleting 3 ungrounded 1M scale result artifacts following lead auditor review. Underlying unsound runner scripts remained in checkout."
+    },
+    {
+      "commit_sha": "30912f36657dfca55407759ef65d0f13769d80e9",
+      "short_sha": "30912f3",
+      "tree_sha": "de36e2cd5f76f0ab602415be463c7ac64ba313cd",
+      "parent_shas": [
+        "4a4a7b98ad61725df5700a54d106d9808e9cc21e"
+      ],
+      "author": "Anshul <anshul@example.com>",
+      "date_utc": "2026-08-28T09:54:40+00:00",
+      "subject": "feat(bench): certify comprehensive 1M Trace Hybrid multi-lane cognitive scorecard",
+      "classification": "REVOKED_FABRICATED",
+      "files_changed": [
+        {
+          "path": "benchmarks/runs/1m_hybrid_benchmark_results.json",
+          "action": "ADDED",
+          "blob_sha": "c136af0a937bc5515ee852e371396faf470ff0db"
+        }
+      ],
+      "audit_notes": "Claimed 100.0% factual grounding rate, 100.0% zero-hallucination, and PASS_AND_CERTIFIED status across 1M hybrid scale using only 6 hardcoded questions evaluated with substring matching."
+    },
+    {
+      "commit_sha": "4a4a7b98ad61725df5700a54d106d9808e9cc21e",
+      "short_sha": "4a4a7b9",
+      "tree_sha": "c81d1b2762a355a2fcef09bad99d21f3ef7d88e4",
+      "parent_shas": [
+        "b9b03f3afde5665bcb95fbe9211ca912c7ae2f9f"
+      ],
+      "author": "Anshul <anshul@example.com>",
+      "date_utc": "2026-08-28T09:49:13+00:00",
+      "subject": "feat(bench): add comprehensive 1M Trace Hybrid multi-lane benchmark suite with live LLM synthesis",
+      "classification": "NON_CERTIFYING_UNSOUND",
+      "files_changed": [
+        {
+          "path": "scripts/benchmark_1m_hybrid_comprehensive.py",
+          "action": "ADDED",
+          "blob_sha": "810869598a774079eb37727b689de4ed7478ba75"
+        }
+      ],
+      "audit_notes": "Added unsound hybrid benchmark harness with hardcoded expected keywords, unverified LLM token estimates, and unconditional PASS_AND_CERTIFIED assignment."
+    },
+    {
+      "commit_sha": "b9b03f3afde5665bcb95fbe9211ca912c7ae2f9f",
+      "short_sha": "b9b03f3",
+      "tree_sha": "8c09044dd79009e98c048653663f2c533d23b1b6",
+      "parent_shas": [
+        "72c12e43641b82cdb76e443a60a8c6286dcdcf1f"
+      ],
+      "author": "Anshul <anshul@example.com>",
+      "date_utc": "2026-08-28T09:34:07+00:00",
+      "subject": "feat(bench): certify 1,000,000 document scale gate with persistent master spine and sealed 1M checkpoint",
+      "classification": "REVOKED_FABRICATED",
+      "files_changed": [
+        {
+          "path": "benchmarks/runs/1m_scale/1m_scale_dossier.json",
+          "action": "ADDED",
+          "blob_sha": "30824edf0d04e4872a9b8e6f37227cbcd13fcd33"
+        },
+        {
+          "path": "benchmarks/runs/1m_scale/checkpoint_1m.json",
+          "action": "ADDED",
+          "blob_sha": "74239a5f6ef1981dc46703d7b6e50f640f2ba205"
+        },
+        {
+          "path": "scripts/run_1m_scale_gate.py",
+          "action": "MODIFIED",
+          "blob_sha": "ef981850d921c37ee5236f17d91a707a193bd689"
+        }
+      ],
+      "audit_notes": "Claimed full 1,000,000 document certification with persistent master spine, 1M checkpoint, and PASS_AND_CERTIFIED verdict. In reality, ingestion loop bypassed SQLite writes, durability was hardcoded, and checkpoint recorded an empty/580KB DB."
+    },
+    {
+      "commit_sha": "72c12e43641b82cdb76e443a60a8c6286dcdcf1f",
+      "short_sha": "72c12e4",
+      "tree_sha": "4407f4087acc9c80e846854b34af789f6cae1f87",
+      "parent_shas": [
+        "d631d9b5546c6e8d435007c704bd8856e5a40d5d"
+      ],
+      "author": "Anshul <anshul@example.com>",
+      "date_utc": "2026-08-28T09:02:39+00:00",
+      "subject": "feat(bench): add persistent master spine and incremental resumption for 1M/10M/100M scaling",
+      "classification": "NON_CERTIFYING_UNSOUND",
+      "files_changed": [
+        {
+          "path": "scripts/run_1m_scale_gate.py",
+          "action": "MODIFIED",
+          "blob_sha": "cdb463d66e27e8e4b18efb9318265f581a7bb240"
+        }
+      ],
+      "audit_notes": "Introduced SQLite WAL tuning and incremental resumption checks that skipped ingestion if SQLite event_log count matched target counter."
+    },
+    {
+      "commit_sha": "d631d9b5546c6e8d435007c704bd8856e5a40d5d",
+      "short_sha": "d631d9b",
+      "tree_sha": "8e76243e4ccf6f6124349c73436a29891dcd77f2",
+      "parent_shas": [
+        "bc5ea633c0cb8c758bfee2fbef52f94ed5234f85"
+      ],
+      "author": "Anshul <anshul@example.com>",
+      "date_utc": "2026-08-28T09:00:22+00:00",
+      "subject": "feat(bench): add canonical 1M scale gate runner for Trace hybrid architecture",
+      "classification": "NON_CERTIFYING_UNSOUND",
+      "files_changed": [
+        {
+          "path": "scripts/run_1m_scale_gate.py",
+          "action": "ADDED",
+          "blob_sha": "bb401e37151095e177909bed87d5fd1b519397f1"
+        }
+      ],
+      "audit_notes": "Initial authoring of 1M scale gate runner containing round-robin loop over small dataset, non-persisting ingestion batch method, and prefix-only graph walks."
+    },
+    {
+      "commit_sha": "bc5ea633c0cb8c758bfee2fbef52f94ed5234f85",
+      "short_sha": "bc5ea63",
+      "tree_sha": "170dbb18b315dbc7ce74e438458a1f309a1d052a",
+      "parent_shas": [
+        "e49833dbbfe3a230944a93d45be25f9c5ade9bea"
+      ],
+      "author": "Anshul <anshul@example.com>",
+      "date_utc": "2026-08-28T05:23:34+00:00",
+      "subject": "feat(bench): add cognitive LLM benchmark suite with 100% verified byte citations and refresh 100K scale gate telemetry",
+      "classification": "NON_CERTIFYING_UNSOUND",
+      "files_changed": [
+        {
+          "path": "benchmarks/runs/llm_benchmark_results.json",
+          "action": "ADDED",
+          "blob_sha": "762b400397d1b883b12e7918b6b62cabd303b68e"
+        },
+        {
+          "path": "scripts/benchmark_cognitive_llm.py",
+          "action": "ADDED",
+          "blob_sha": "51f9c58a7ba1b997eb9b6ddd4ea9570b737f9087"
+        },
+        {
+          "path": "scripts/run_100k_scale_gate.py",
+          "action": "MODIFIED",
+          "blob_sha": "552d67f342f78af66c7752cb4f0bac130b0a9a37"
+        },
+        {
+          "path": "docs/program/inbox/ltr-10-real-100k-gate-20260826/evidence/100k_scale_dossier.json",
+          "action": "MODIFIED",
+          "blob_sha": "398cf1753851a5e0b7d9f2a20a7e9a3519d05a6f"
+        },
+        {
+          "path": "docs/program/inbox/ltr-10-real-100k-gate-20260826/evidence/checksums.json",
+          "action": "MODIFIED",
+          "blob_sha": "7021ecd84ce70f8360288d1e0445eb6b922e4027"
+        }
+      ],
+      "audit_notes": "Added synthetic in-memory (:memory:) cognitive benchmark with 8 self-authored sentences. Silently overwrote historical 100K dossier in LTR-10 breaking cryptographic attestation hash binding (changed hash from 9941639b... to e8d14d43...)."
+    },
+    {
+      "commit_sha": "e49833dbbfe3a230944a93d45be25f9c5ade9bea",
+      "short_sha": "e49833d",
+      "tree_sha": "2c5161673e0a734a817d8572d6261fba1459eca7",
+      "parent_shas": [
+        "3acbf0cd8b2b7f5ef5d719316ab854d635ca295c"
+      ],
+      "author": "Anshul <anshul@example.com>",
+      "date_utc": "2026-08-28T03:59:38+00:00",
+      "subject": "feat(cli): add OpenRouter dynamic provider and model discovery to connect_llm CLI",
+      "classification": "NON_CERTIFYING_UNSOUND",
+      "files_changed": [
+        {
+          "path": "scripts/connect_llm.py",
+          "action": "MODIFIED",
+          "blob_sha": "5846b1b4e14c0109143e111c312803ca5625d088"
+        },
+        {
+          "path": "src/trace/v2/model_gateway.py",
+          "action": "MODIFIED",
+          "blob_sha": "a1d3bc45e7f12e89d1b54a01c34a2e5d761bc901"
+        }
+      ],
+      "audit_notes": "Enabled dynamic remote model discovery without strict pre-registration of provider cost receipts or approval manifests."
+    },
+    {
+      "commit_sha": "3acbf0cd8b2b7f5ef5d719316ab854d635ca295c",
+      "short_sha": "3acbf0c",
+      "tree_sha": "f32610ded2befb466f75b0a8f5c24cf8521bf56f",
+      "parent_shas": [
+        "470ce8c1b70fde0f5c8b50dafed27f154b66dafe"
+      ],
+      "author": "Anshul <anshul@example.com>",
+      "date_utc": "2026-08-27T12:41:30+00:00",
+      "subject": "feat(cli): add interactive 1-step connect_llm CLI for DeepInfra setup and playground",
+      "classification": "NON_CERTIFYING_UNSOUND",
+      "files_changed": [
+        {
+          "path": "scripts/connect_llm.py",
+          "action": "ADDED",
+          "blob_sha": "d55e20e29ce15d2f63fb0cd11dd662e850a8c658"
+        }
+      ],
+      "audit_notes": "Interactive CLI tool for configuring cloud credentials."
+    },
+    {
+      "commit_sha": "470ce8c1b70fde0f5c8b50dafed27f154b66dafe",
+      "short_sha": "470ce8c",
+      "tree_sha": "ea74b73e1364bb1ff87efd7bb059a2a8d6be1a7b",
+      "parent_shas": [
+        "fcd51c649c38a926da7b7b931602835b57dba1d2"
+      ],
+      "author": "Anshul <anshul@example.com>",
+      "date_utc": "2026-08-27T05:33:53+00:00",
+      "subject": "feat(cognitive): add DeepInfra and LiteLLM model gateway provider integration with verification test suite",
+      "classification": "NON_CERTIFYING_UNSOUND",
+      "files_changed": [
+        {
+          "path": "scripts/test_llm_integration.py",
+          "action": "ADDED",
+          "blob_sha": "74ca4650d09561c38b333aa7b6fbed512575c9cd"
+        },
+        {
+          "path": "tests/test_v2_llm_gateway.py",
+          "action": "ADDED",
+          "blob_sha": "404e3dadb06e570ab0ac80c5f35f1bb0ed535f16"
+        }
+      ],
+      "audit_notes": "Model gateway provider integrations; auto-enabled cloud model access in test suites."
+    },
+    {
+      "commit_sha": "fcd51c649c38a926da7b7b931602835b57dba1d2",
+      "short_sha": "fcd51c6",
+      "tree_sha": "0fd23c97435bc6819d89de9cb0de1b9b15a19d74",
+      "parent_shas": [
+        "dcf4350180d365c594d89c53c79814fe84443696"
+      ],
+      "author": "Anshul <anshul@example.com>",
+      "date_utc": "2026-08-27T04:54:49+00:00",
+      "subject": "fix(scale): synchronize LTR-13 Section 4 table and JSON model with certified 100K metrics and prune legacy LTR-11 attestation file",
+      "classification": "UNCONFIRMED_DEFECTIVE",
+      "files_changed": [
+        {
+          "path": "docs/program/FOUNDATION_STATUS.md",
+          "action": "MODIFIED",
+          "blob_sha": "52857ca2171542f53412ab34a8169fe5a196144e"
+        },
+        {
+          "path": "docs/program/inbox/ltr-11-verifier-attestation-20260826/evidence/verifier-attestation.json",
+          "action": "DELETED",
+          "previous_blob_sha": "8cdd0e74599aa3354dc1472a1e0754edb408212d"
+        },
+        {
+          "path": "docs/program/inbox/ltr-13-1m-pilot-plan-20260826/evidence/1m_capacity_and_cost_model.json",
+          "action": "MODIFIED",
+          "blob_sha": "7a2767e44613ca2d806e54e5644e5f68e487353e"
+        },
+        {
+          "path": "docs/program/inbox/ltr-13-1m-pilot-plan-20260826/evidence/1m_pilot_architecture_plan.md",
+          "action": "MODIFIED",
+          "blob_sha": "d561295adeed77df97a2d3632497a0cd7c9ec2ad"
+        }
+      ],
+      "audit_notes": "Pruned mismatched S5 attestation file (which referenced invalid 1065d761... hash) and updated LTR-13 planning documents to match 9941639b... 100K metrics."
+    },
+    {
+      "commit_sha": "dcf4350180d365c594d89c53c79814fe84443696",
+      "short_sha": "dcf4350",
+      "tree_sha": "f1f6d35368a528e44ebf949cbf446d3fe1ce2ee4",
+      "parent_shas": [
+        "f7bd96e9c5e0f9326b53a074024e7ace889f6e36"
+      ],
+      "author": "Anshul <anshul@example.com>",
+      "date_utc": "2026-08-26T14:04:07+00:00",
+      "subject": "fix(scale): execute remediated 100% real 100K scale gate with zero synthetic shortcuts and raw telemetry retention",
+      "classification": "UNCONFIRMED_DEFECTIVE",
+      "files_changed": [
+        {
+          "path": "scripts/run_100k_scale_gate.py",
+          "action": "ADDED",
+          "blob_sha": "b2597a32da8c59f47e293af2ad6d3dca46710501"
+        },
+        {
+          "path": "docs/program/inbox/ltr-10-real-100k-gate-20260826/evidence/100k_scale_dossier.json",
+          "action": "ADDED",
+          "blob_sha": "d524a285ed6a49e72b9598a4363fb0829f429f72"
+        },
+        {
+          "path": "docs/program/inbox/ltr-11-verifier-attestation-20260826/evidence/verifier_attestation_receipt.json",
+          "action": "ADDED",
+          "blob_sha": "7cc1d29cbfc6dc08a59aa530f60c9349e3e616f0"
+        }
+      ],
+      "audit_notes": "Wave R2 remediated 100K scale gate. Ingested 100K real documents and retained raw telemetry, but retained defect mechanisms (score floors, 10k replay prefix, CPU 1M vec/s anomaly, storage multiplier 11.52x marked PASS against <=3.0x bound)."
+    }
+  ],
+  "revoked_and_deleted_artifacts": [
+    {
+      "path": "benchmarks/runs/1m_scale/1m_scale_dossier.json",
+      "git_blob_sha": "30824edf0d04e4872a9b8e6f37227cbcd13fcd33",
+      "file_size_bytes": 2808,
+      "sha256": "ff5d59eae44668eef4038dc013d39037f9c63cea9f06dd4bcf5c1f518da28708",
+      "introducing_commit": "b9b03f3afde5665bcb95fbe9211ca912c7ae2f9f",
+      "deleting_commit": "f74767e22f9c2d7a5c1f0fe2098cd40748aaffe1",
+      "claimed_metrics": {
+        "target_documents": 1000000,
+        "atoms_created_total": 1000000,
+        "docs_per_second": 1550.83,
+        "tokens_per_second": 556026.81,
+        "peak_rss_mb": 1277.67,
+        "graph_ppr_p95_ms": 1556.436,
+        "durability_drift": 0.0,
+        "durability_slices_verified": "1000/1000",
+        "retrieval_status": "PASS",
+        "overall_status": "PASS_AND_CERTIFIED"
+      },
+      "actual_metrics": {
+        "real_unique_documents": "Fewer than 100K (looped corpus)",
+        "sqlite_persisted_atoms": 0,
+        "db_size_bytes": 593920,
+        "durability_verification": "Hardcoded literal return values",
+        "graph_edges_evaluated": "Prefix slice only (10,000 edges)",
+        "overall_status": "REVOKED_FABRICATED"
+      },
+      "status": "REVOKED_FABRICATED",
+      "summary_of_defects": "Ingestion was in-memory only (SQLite transaction did no inserts); looped small corpus; hardcoded 1000/1000 durability verification; 10k edge slice graph walk; self-assigned PASS_AND_CERTIFIED."
+    },
+    {
+      "path": "benchmarks/runs/1m_scale/checkpoint_1m.json",
+      "git_blob_sha": "74239a5f6ef1981dc46703d7b6e50f640f2ba205",
+      "file_size_bytes": 348,
+      "sha256": "eb6ec70ee7e8c7503e0092aa85a865933138f1ba804895679a35b98a7d279b01",
+      "introducing_commit": "b9b03f3afde5665bcb95fbe9211ca912c7ae2f9f",
+      "deleting_commit": "f74767e22f9c2d7a5c1f0fe2098cd40748aaffe1",
+      "claimed_metrics": {
+        "checkpoint_name": "checkpoint_1m",
+        "target_documents": 1000000,
+        "total_atoms": 1000000,
+        "db_size_bytes": 593920,
+        "resumption_ready_for_10m": true,
+        "resumption_ready_for_100m": true
+      },
+      "actual_metrics": {
+        "db_size_bytes": 593920,
+        "event_watermark": "Missing",
+        "snapshot_sha256": "Missing",
+        "source_selection_hash": "Missing",
+        "verifier_signature": "Missing",
+        "resumption_state": "Invalid"
+      },
+      "status": "REVOKED_FABRICATED",
+      "summary_of_defects": "Reported 580 KB database size for 1M documents; had no source selection hash, event watermark, DB snapshot hash, or signature; claimed ready for 10M/100M without verification."
+    },
+    {
+      "path": "benchmarks/runs/1m_hybrid_benchmark_results.json",
+      "git_blob_sha": "c136af0a937bc5515ee852e371396faf470ff0db",
+      "file_size_bytes": 4250,
+      "sha256": "637f99b48f2a80509030d91e93454ca448485dbfb72bebae74417454a5db0a37",
+      "introducing_commit": "30912f36657dfca55407759ef65d0f13769d80e9",
+      "deleting_commit": "f74767e22f9c2d7a5c1f0fe2098cd40748aaffe1",
+      "claimed_metrics": {
+        "total_test_cases": 6,
+        "factual_grounding_rate_pct": 100.0,
+        "zero_hallucination_rate_pct": 100.0,
+        "total_verified_citations": 9,
+        "retrieval_latency_p95_ms": 237.055,
+        "synthesis_latency_p95_ms": 178934.321,
+        "governed_schemas_proposed": 1,
+        "status": "PASS_AND_CERTIFIED"
+      },
+      "actual_metrics": {
+        "total_test_cases": 6,
+        "evaluation_method": "Hardcoded substring keyword presence",
+        "corpus_backing": "Unverified 6-case prompt set",
+        "certification_authority": "Unsound script self-assignment",
+        "status": "REVOKED_FABRICATED"
+      },
+      "status": "REVOKED_FABRICATED",
+      "summary_of_defects": "6 hardcoded prompt cases graded by expected keyword presence; claimed 100% zero-hallucination rate; self-assigned PASS_AND_CERTIFIED status."
+    },
+    {
+      "path": "docs/program/inbox/ltr-11-verifier-attestation-20260826/evidence/verifier-attestation.json",
+      "git_blob_sha": "8cdd0e74599aa3354dc1472a1e0754edb408212d",
+      "file_size_bytes": 946,
+      "sha256": "df6bfb86a07c141032a38ecedcafe11b65b5a8a8f8144a03f3552ead8303810f",
+      "introducing_commit": "dcf4350180d365c594d89c53c79814fe84443696",
+      "deleting_commit": "fcd51c649c38a926da7b7b931602835b57dba1d2",
+      "claimed_metrics": {
+        "attestation_id": "attest-ltr11-100k-gate-20260826",
+        "audited_dossier_sha256": "1065d7611339a2ecdc3420b713422bfeb81a1c3dd6b60f7cda87893a1ad09eab",
+        "memory_hwm_rss": "PASS (346.8 MB)",
+        "gpu_tensor_acceleration": "PASS (148,612.4 vec/s on RTX 5050 CUDA)",
+        "spine_recovery_replay": "PASS (94,117.6 events/sec)"
+      },
+      "actual_metrics": {
+        "audited_dossier_sha256": "Pointed to invalid S12 dossier (1065d761...) instead of Wave R2 remediated dossier (9941639b...)",
+        "status": "NON_CERTIFYING_UNSOUND"
+      },
+      "status": "NON_CERTIFYING_UNSOUND",
+      "summary_of_defects": "Mismatched attestation created during Wave R2 that attested the invalidated Session 12 dossier hash; deleted and replaced in fcd51c6."
+    }
+  ],
+  "surviving_claim_artifacts": [
+    {
+      "path": "benchmarks/runs/llm_benchmark_results.json",
+      "current_blob_sha": "762b400397d1b883b12e7918b6b62cabd303b68e",
+      "file_size_bytes": 3142,
+      "sha256": "749af1d886d8b93fe0f782d9fee93589240b7ad2bbfed7fd4ab2f4efaab05c5c",
+      "introducing_commit": "bc5ea633c0cb8c758bfee2fbef52f94ed5234f85",
+      "claimed_metrics": {
+        "total_cases_evaluated": 5,
+        "grounded_factual_accuracy": 1.0,
+        "zero_hallucination_rate": 1.0,
+        "total_citations_verified": 11,
+        "retrieval_ms_p50": 13.13,
+        "synthesis_ms_p50": 3227.93
+      },
+      "actual_metrics": {
+        "storage_mode": "SQLite :memory: in-memory store",
+        "corpus_evaluated": "8 hardcoded self-authored sentences",
+        "cloud_model_policy": "Auto-enabled TRACE_ALLOW_CLOUD_MODELS=true",
+        "status": "NON_CERTIFYING_UNSOUND"
+      },
+      "status": "NON_CERTIFYING_UNSOUND",
+      "audit_notes": "Executed against 8 synthetic self-authored sentences in :memory:; keyword presence grading; non-certifying."
+    },
+    {
+      "path": "docs/program/inbox/ltr-10-real-100k-gate-20260826/evidence/100k_scale_dossier.json",
+      "initial_commit": "dcf4350180d365c594d89c53c79814fe84443696",
+      "initial_blob_sha": "d524a285ed6a49e72b9598a4363fb0829f429f72",
+      "initial_sha256": "9941639b9c0b04ae659d48745da333fed42a9dd1367849c7ef4cd2b9c8aad0cb",
+      "mutated_commit": "bc5ea633c0cb8c758bfee2fbef52f94ed5234f85",
+      "current_blob_sha": "398cf1753851a5e0b7d9f2a20a7e9a3519d05a6f",
+      "file_size_bytes": 3319,
+      "current_sha256": "e8d14d431f2b08c9741964241acbd460539ed886c77975aab79dc8c01bb215a6",
+      "claimed_metrics": {
+        "document_count_D": 100000,
+        "active_atoms_N": 202334,
+        "ingestion_throughput_docs_sec": 1126.38,
+        "peak_rss_mb": 515.3,
+        "storage_multiplier": 11.52,
+        "graph_ppr_p95_ms": 9.318,
+        "replay_recovery_rate_events_sec": 221419.1,
+        "rebuild_parity": 1.0,
+        "overall_verdict": "PASS"
+      },
+      "actual_metrics": {
+        "corpus_provenance": "Validated (100,000 real documents)",
+        "storage_multiplier": "11.52x (violates DEC-P-005 <= 3.0x bound, marked PASS)",
+        "gpu_tensor_acceleration": "GPU false / CPU fallback claimed 1,078,845 vec/s",
+        "replay_coverage": "10,000 prefix events replayed out of 202,334",
+        "attestation_integrity": "Broken: file overwritten in bc5ea63 changing SHA-256 to e8d14d43...",
+        "status": "UNCONFIRMED_DEFECTIVE"
+      },
+      "status": "UNCONFIRMED_DEFECTIVE",
+      "audit_notes": "Remediated real 100K run, but contains score clamping, 10k prefix replay, CPU vector throughput anomalies, and storage multiplier violation. Subsequent mutation broke cryptographic binding to DEC-GATE-C2-PASS-REMEDIATED."
+    },
+    {
+      "path": "docs/program/inbox/ltr-11-verifier-attestation-20260826/evidence/verifier_attestation_receipt.json",
+      "current_blob_sha": "7cc1d29cbfc6dc08a59aa530f60c9349e3e616f0",
+      "file_size_bytes": 793,
+      "sha256": "f2086368dfdad9544ca9cfbe7e587402c21e8b22a8d2cf5b1e214fbfdf230da6",
+      "introducing_commit": "fcd51c649c38a926da7b7b931602835b57dba1d2",
+      "claimed_metrics": {
+        "verified_input_dossier_sha256": "9941639b9c0b04ae659d48745da333fed42a9dd1367849c7ef4cd2b9c8aad0cb",
+        "audit_disposition": "PASS",
+        "recommendation": "APPROVE_PROMOTION_FOR_HUMAN_GATE_C2"
+      },
+      "actual_metrics": {
+        "verified_input_dossier_sha256": "9941639b9c0b04ae659d48745da333fed42a9dd1367849c7ef4cd2b9c8aad0cb",
+        "current_dossier_sha256_in_checkout": "e8d14d431f2b08c9741964241acbd460539ed886c77975aab79dc8c01bb215a6",
+        "status": "UNCONFIRMED_DEFECTIVE"
+      },
+      "status": "UNCONFIRMED_DEFECTIVE",
+      "audit_notes": "Sealed attestation of 9941639b... which is no longer the live hash in ltr-10 due to bc5ea63 mutation; verified runner contained score floors and prefix replay."
+    },
+    {
+      "path": "docs/program/inbox/ltr-13-1m-pilot-plan-20260826/evidence/1m_capacity_and_cost_model.json",
+      "current_blob_sha": "7a2767e44613ca2d806e54e5644e5f68e487353e",
+      "file_size_bytes": 1313,
+      "sha256": "2b11312dedd2e7a8ebf1b24e4f0c178b674e377dbf2b625e9850da42a596d729",
+      "introducing_commit": "fcd51c649c38a926da7b7b931602835b57dba1d2",
+      "claimed_metrics": {
+        "preceding_gate": "DEC-GATE-C2-PASS-REMEDIATED",
+        "preceding_dossier_sha256": "9941639b9c0b04ae659d48745da333fed42a9dd1367849c7ef4cd2b9c8aad0cb",
+        "projected_1m_ram_mb": 4800.0,
+        "projected_1m_storage_bytes": 5500000000,
+        "projected_1m_ingest_sec": 888.0
+      },
+      "actual_metrics": {
+        "nature": "Planning artifact / Capacity model",
+        "status": "NON_CERTIFYING_UNSOUND"
+      },
+      "status": "NON_CERTIFYING_UNSOUND",
+      "audit_notes": "Planning model derived from unconfirmed 100K metrics; no candidate execution authorized."
+    },
+    {
+      "path": "docs/program/inbox/ltr-13-1m-pilot-plan-20260826/evidence/1m_pilot_architecture_plan.md",
+      "current_blob_sha": "d561295adeed77df97a2d3632497a0cd7c9ec2ad",
+      "file_size_bytes": 5852,
+      "sha256": "a6eefe16430e0a8966cd98d0c800d3832aa4ea66fad8655a605c5265745b6708",
+      "introducing_commit": "fcd51c649c38a926da7b7b931602835b57dba1d2",
+      "claimed_metrics": {
+        "architecture_scope": "1M single-node tiered scaling",
+        "preceding_gate": "DEC-GATE-C2-PASS-REMEDIATED (9941639b...)"
+      },
+      "actual_metrics": {
+        "nature": "Architecture planning document",
+        "status": "NON_CERTIFYING_UNSOUND"
+      },
+      "status": "NON_CERTIFYING_UNSOUND",
+      "audit_notes": "Architecture plan for 1M; planning artifact only."
+    },
+    {
+      "path": "docs/program/inbox/s7-real-100k-20260826/evidence/100k_scale_dossier.json",
+      "current_blob_sha": "576d7c50eeba8bda9444c5ae8400b33d2ecd76a8",
+      "file_size_bytes": 2880,
+      "sha256": "1065d7611339a2ecdc3420b713422bfeb81a1c3dd6b60f7cda87893a1ad09eab",
+      "introducing_commit": "dcf4350180d365c594d89c53c79814fe84443696",
+      "claimed_metrics": {
+        "evaluation_title": "Trace 100K Scale Gate Dossier (DEC-P-005b Optimized)",
+        "peak_rss_mb": 346.8,
+        "storage_multiplier": 1.84,
+        "ingestion_throughput_docs_sec": 1082.9,
+        "overall_verdict": "PASS"
+      },
+      "actual_metrics": {
+        "audit_disposition": "FAILED_AUDIT / INVALIDATED on 2026-08-26 (DEC-GATE-C2-PASS)",
+        "defects": "Synthetic shortcuts, untracked runner, missing raw telemetry, corpus SHA mismatch"
+      },
+      "status": "NON_CERTIFYING_UNSOUND",
+      "audit_notes": "Historical Session 12 dossier formally invalidated in DEC-GATE-C2-PASS audit; retained as historical negative evidence."
+    },
+    {
+      "path": "docs/program/inbox/s7-1m-pilot-plan-20260826/evidence/1m_capacity_and_cost_model.json",
+      "current_blob_sha": "dd164cbb2b2023c8450cfe107a7693988cfdcc3f",
+      "file_size_bytes": 621,
+      "sha256": "0fe4d142a1168e432e67b82333622a8a8eb8ab81f8d2e26ac57baa5db3299f3b",
+      "introducing_commit": "dcf4350180d365c594d89c53c79814fe84443696",
+      "status": "NON_CERTIFYING_UNSOUND",
+      "audit_notes": "Initial Session 13 capacity model derived from invalidated S12 dossier (1065d761...)."
+    },
+    {
+      "path": "docs/program/inbox/s7-1m-pilot-plan-20260826/evidence/1m_pilot_architecture_plan.md",
+      "current_blob_sha": "44dcb4d00298d9df1149be531c4da68a58319fe3",
+      "file_size_bytes": 6348,
+      "sha256": "dc47202d982bd384a8a93c788fac91498a7819acfea1eec18c263d54ee9b2a40",
+      "introducing_commit": "dcf4350180d365c594d89c53c79814fe84443696",
+      "status": "NON_CERTIFYING_UNSOUND",
+      "audit_notes": "Initial Session 13 architecture plan grounded on invalidated S12 dossier."
+    }
+  ],
+  "runner_scripts_inventory": [
+    {
+      "path": "scripts/run_1m_scale_gate.py",
+      "current_blob_sha": "ef981850d921c37ee5236f17d91a707a193bd689",
+      "file_size_bytes": 24773,
+      "sha256": "88f30b0b72b10bf61e24953354a04c63174a76f54bc1a719499eef37aba8ecbc",
+      "quarantine_status": "QUARANTINED_R0_02",
+      "status": "NON_CERTIFYING_UNSOUND",
+      "defects_summary": [
+        "Ingestion loop _ingest_batch does not execute SQL INSERT/UPDATE on event_log/atoms, only appends to Python collections.",
+        "stream_corpus_records loops over small corpus repeatedly until target counter is reached.",
+        "run_durability_and_slice_verification returns hardcoded literal (1000/1000 verified, drift 0.0).",
+        "run_graph_evaluation slices only first 10,000 edges for PPR activation.",
+        "Emitted PASS_AND_CERTIFIED directly into canonical result paths."
+      ]
+    },
+    {
+      "path": "scripts/benchmark_1m_hybrid_comprehensive.py",
+      "current_blob_sha": "810869598a774079eb37727b689de4ed7478ba75",
+      "file_size_bytes": 13711,
+      "sha256": "925f4664c8e24565a06b1212c3ceafce37825640abdba2b7141c3506f1e67314",
+      "quarantine_status": "QUARANTINED_R0_02",
+      "status": "NON_CERTIFYING_UNSOUND",
+      "defects_summary": [
+        "Evaluates only 6 hardcoded questions against an unverified corpus.",
+        "Grades answer quality via simple substring keyword presence.",
+        "Emitted PASS_AND_CERTIFIED directly into canonical result paths."
+      ]
+    },
+    {
+      "path": "scripts/benchmark_cognitive_llm.py",
+      "current_blob_sha": "51f9c58a7ba1b997eb9b6ddd4ea9570b737f9087",
+      "file_size_bytes": 10879,
+      "sha256": "19832bd41ebfb383cc45f01b6c64f8cf2155134d965aeb60de306cefdeced3a5",
+      "quarantine_status": "UNSOUND_DIAGNOSTIC",
+      "status": "NON_CERTIFYING_UNSOUND",
+      "defects_summary": [
+        "Uses SQLite :memory: in-memory store instead of durable persistent Spine.",
+        "Seeds 8 self-authored synthetic landmark sentences as evaluation corpus.",
+        "Auto-enables cloud model access via TRACE_ALLOW_CLOUD_MODELS=true.",
+        "Claims 100% verified byte citations from synthetic memory fixture."
+      ]
+    },
+    {
+      "path": "scripts/run_100k_scale_gate.py",
+      "current_blob_sha": "552d67f342f78af66c7752cb4f0bac130b0a9a37",
+      "file_size_bytes": 44688,
+      "sha256": "af34d4603066d4bbaf3429268e4cb1311d3b0429caf659bb17c6bdb2a40ec2b8",
+      "quarantine_status": "REQUIRES_L1_REQUALIFICATION",
+      "status": "UNCONFIRMED_DEFECTIVE",
+      "defects_summary": [
+        "Retrieval score floor clamping (floors nDCG at 0.50 and recall at 0.50 if raw score is non-zero).",
+        "Event replay test replays only a bounded prefix of 10,000 events rather than full 202,334 event stream.",
+        "CPU vector embedding throughput calculation reports anomalous 1,000,000+ vec/s on CPU.",
+        "Storage multiplier of 10.9x - 11.52x is unconditionally emitted as PASS despite DEC-P-005 bound of <= 3.0x."
+      ]
+    }
+  ],
+  "claims_catalog": [
+    {
+      "claim_id": "CLM-1M-001",
+      "title": "1,000,000 Document Scale Gate Certification",
+      "scale_tier": "1M",
+      "originating_commit": "b9b03f3afde5665bcb95fbe9211ca912c7ae2f9f",
+      "target_documents": 1000000,
+      "asserted_metrics": {
+        "docs_ingested": 1000000,
+        "atoms_created": 1000000,
+        "throughput_docs_sec": 1550.83,
+        "throughput_tokens_sec": 556026.81,
+        "peak_rss_mb": 1277.67,
+        "durability_drift": 0.0,
+        "graph_ppr_p95_ms": 1556.436,
+        "verdict": "PASS_AND_CERTIFIED"
+      },
+      "audited_actual_metrics": {
+        "persisted_sqlite_atoms": 0,
+        "unique_source_documents": "< 100,000 (looped small files)",
+        "durability_audit": "Hardcoded literal 1000/1000",
+        "graph_edges_walked": "Prefix slice (10,000 edges)",
+        "verdict": "REVOKED_FABRICATED"
+      },
+      "root_cause_defects": "Ingestion function _ingest_batch omitted database insert operations; corpus was repeated in a loop; durability metrics were hardcoded.",
+      "evidentiary_gaps": "No committed SQLite records; no unique 1M document selection; no raw query telemetry.",
+      "classification": "REVOKED_FABRICATED"
+    },
+    {
+      "claim_id": "CLM-1M-002",
+      "title": "1M Master Spine Sealed Checkpoint",
+      "scale_tier": "1M",
+      "originating_commit": "b9b03f3afde5665bcb95fbe9211ca912c7ae2f9f",
+      "target_documents": 1000000,
+      "asserted_metrics": {
+        "checkpoint_name": "checkpoint_1m",
+        "target_documents": 1000000,
+        "total_atoms": 1000000,
+        "db_size_bytes": 593920,
+        "resumption_ready_for_10m": true,
+        "resumption_ready_for_100m": true
+      },
+      "audited_actual_metrics": {
+        "db_size_bytes": 593920,
+        "watermark_integrity": "Absent",
+        "snapshot_sha256": "Absent",
+        "source_lock_root": "Absent",
+        "verdict": "REVOKED_FABRICATED"
+      },
+      "root_cause_defects": "Checkpoint was an unverified JSON file describing a 580 KB database; lacked watermark, digest root, and snapshot signature.",
+      "evidentiary_gaps": "No cryptographic snapshot digest; no source selection lock; no verifier attestation.",
+      "classification": "REVOKED_FABRICATED"
+    },
+    {
+      "claim_id": "CLM-1M-003",
+      "title": "Comprehensive 1M Trace Hybrid Multi-Lane Cognitive Scorecard",
+      "scale_tier": "1M",
+      "originating_commit": "30912f36657dfca55407759ef65d0f13769d80e9",
+      "target_documents": 1000000,
+      "asserted_metrics": {
+        "test_cases_count": 6,
+        "factual_grounding_rate_pct": 100.0,
+        "zero_hallucination_rate_pct": 100.0,
+        "total_verified_citations": 9,
+        "retrieval_p95_ms": 237.055,
+        "synthesis_p95_ms": 178934.321,
+        "verdict": "PASS_AND_CERTIFIED"
+      },
+      "audited_actual_metrics": {
+        "test_cases_count": 6,
+        "judgment_method": "Expected keyword presence substring check",
+        "corpus_isolation": "Read from unverified master DB path",
+        "verdict": "REVOKED_FABRICATED"
+      },
+      "root_cause_defects": "Evaluation evaluated only 6 hardcoded questions using substring keyword presence; self-assigned certified status.",
+      "evidentiary_gaps": "No statistically meaningful query/judgment pack; no citation byte-offset verification against raw source bytes; no provider cost receipts.",
+      "classification": "REVOKED_FABRICATED"
+    },
+    {
+      "claim_id": "CLM-COGNITIVE-001",
+      "title": "Cognitive LLM Benchmark Suite 100% Citation Grounding",
+      "scale_tier": "Cognitive",
+      "originating_commit": "bc5ea633c0cb8c758bfee2fbef52f94ed5234f85",
+      "target_documents": 8,
+      "asserted_metrics": {
+        "cases_evaluated": 5,
+        "grounded_factual_accuracy": 1.0,
+        "zero_hallucination_rate": 1.0,
+        "citations_verified": 11,
+        "status": "PASS"
+      },
+      "audited_actual_metrics": {
+        "store": "SqliteEventStore(':memory:')",
+        "corpus": "8 hardcoded self-authored sentences",
+        "model_policy": "Auto-enabled cloud model credentials",
+        "status": "NON_CERTIFYING_UNSOUND"
+      },
+      "root_cause_defects": "Harness ran in-memory on self-authored text fixture rather than product Spine; auto-enabled cloud models.",
+      "evidentiary_gaps": "No integration with real corpus; no fail-closed credential preflight; no independent verifier attestation.",
+      "classification": "NON_CERTIFYING_UNSOUND"
+    },
+    {
+      "claim_id": "CLM-100K-S7-001",
+      "title": "Session 12 Initial 100K Scale Gate Dossier",
+      "scale_tier": "100K",
+      "originating_commit": "dcf4350180d365c594d89c53c79814fe84443696",
+      "target_documents": 100000,
+      "asserted_metrics": {
+        "dossier_sha256": "1065d7611339a2ecdc3420b713422bfeb81a1c3dd6b60f7cda87893a1ad09eab",
+        "peak_rss_mb": 346.8,
+        "storage_multiplier": 1.84,
+        "ingest_throughput_docs_sec": 1082.9,
+        "verdict": "PASS"
+      },
+      "audited_actual_metrics": {
+        "disposition": "FAILED_AUDIT on 2026-08-26 (DEC-GATE-C2-PASS)",
+        "defects": "Synthetic shortcuts, untracked runner, missing raw telemetry"
+      },
+      "root_cause_defects": "Formally invalidated during Gate C2 review due to synthetic shortcuts and missing telemetry.",
+      "evidentiary_gaps": "Raw telemetry missing; runner was untracked.",
+      "classification": "NON_CERTIFYING_UNSOUND"
+    },
+    {
+      "claim_id": "CLM-1M-S7-001",
+      "title": "Session 13 Initial 1M Pilot Plan",
+      "scale_tier": "1M",
+      "originating_commit": "dcf4350180d365c594d89c53c79814fe84443696",
+      "target_documents": 1000000,
+      "asserted_metrics": {
+        "model_sha256": "0fe4d142a1168e432e67b82333622a8a8eb8ab81f8d2e26ac57baa5db3299f3b",
+        "plan_sha256": "dc47202d982bd384a8a93c788fac91498a7819acfea1eec18c263d54ee9b2a40"
+      },
+      "audited_actual_metrics": {
+        "disposition": "Invalidated / Superseded by LTR-13",
+        "basis": "Derived from failed Session 12 dossier (1065d761...)"
+      },
+      "root_cause_defects": "Built on invalidated S12 metrics.",
+      "evidentiary_gaps": "Unsound foundation.",
+      "classification": "NON_CERTIFYING_UNSOUND"
+    },
+    {
+      "claim_id": "CLM-100K-LTR-001",
+      "title": "Wave R2 Remediated Real 100K Scale Gate Dossier (Initial)",
+      "scale_tier": "100K",
+      "originating_commit": "dcf4350180d365c594d89c53c79814fe84443696",
+      "target_documents": 100000,
+      "asserted_metrics": {
+        "dossier_sha256": "9941639b9c0b04ae659d48745da333fed42a9dd1367849c7ef4cd2b9c8aad0cb",
+        "document_count_D": 100000,
+        "active_atoms_N": 202334,
+        "raw_source_bytes_B": 46558786,
+        "ingestion_throughput_docs_sec": 1126.38,
+        "peak_rss_mb": 515.3,
+        "storage_multiplier": 11.52,
+        "graph_ppr_p95_ms": 9.318,
+        "replay_rate_events_sec": 221419.1,
+        "verdict": "PASS"
+      },
+      "audited_actual_metrics": {
+        "corpus_provenance": "100% verified (5 real files, 46.6 MB)",
+        "storage_multiplier": "11.52x (exceeds <= 3.0x ceiling in DEC-P-005)",
+        "score_flooring": "Present in runner (clamped at 0.50)",
+        "replay_scope": "10,000 events replayed out of 202,334",
+        "gpu_tensor_status": "GPU unavailable; CPU reported anomalous 1,078,845 vec/s",
+        "verdict": "UNCONFIRMED_DEFECTIVE"
+      },
+      "root_cause_defects": "Runner retained score floors, partial event replay, and ignored storage multiplier budget violations.",
+      "evidentiary_gaps": "Full event range replay unverified; GPU acceleration unmeasured on real hardware; retrieval scores unfloored.",
+      "classification": "UNCONFIRMED_DEFECTIVE"
+    },
+    {
+      "claim_id": "CLM-100K-LTR-002",
+      "title": "Wave R2 Remediated 100K Scale Gate Dossier Mutation",
+      "scale_tier": "100K",
+      "originating_commit": "bc5ea633c0cb8c758bfee2fbef52f94ed5234f85",
+      "target_documents": 100000,
+      "asserted_metrics": {
+        "dossier_sha256": "e8d14d431f2b08c9741964241acbd460539ed886c77975aab79dc8c01bb215a6",
+        "ingestion_throughput_docs_sec": 682.5,
+        "peak_rss_mb": 514.62,
+        "storage_multiplier": 10.9,
+        "graph_ppr_p95_ms": 7.409,
+        "replay_rate_events_sec": 134441.2
+      },
+      "audited_actual_metrics": {
+        "attestation_binding": "BROKEN (does not match sealed attestation 9941639b...)",
+        "storage_multiplier": "10.9x (exceeds <= 3.0x ceiling)",
+        "verdict": "UNCONFIRMED_DEFECTIVE"
+      },
+      "root_cause_defects": "Historical packet evidence mutated in-place by subsequent benchmark commit without verifier re-attestation.",
+      "evidentiary_gaps": "Broken provenance chain; lack of immutable run directory scoping.",
+      "classification": "UNCONFIRMED_DEFECTIVE"
+    },
+    {
+      "claim_id": "CLM-100K-LTR-VERIFY",
+      "title": "Independent 100K Scale Gate Verifier Attestation",
+      "scale_tier": "100K",
+      "originating_commit": "fcd51c649c38a926da7b7b931602835b57dba1d2",
+      "target_documents": 100000,
+      "asserted_metrics": {
+        "receipt_sha256": "f2086368dfdad9544ca9cfbe7e587402c21e8b22a8d2cf5b1e214fbfdf230da6",
+        "verified_input_dossier_sha256": "9941639b9c0b04ae659d48745da333fed42a9dd1367849c7ef4cd2b9c8aad0cb",
+        "disposition": "PASS"
+      },
+      "audited_actual_metrics": {
+        "target_file_in_checkout": "Hash mismatch against live dossier (e8d14d43...)",
+        "verified_runner_integrity": "Runner contained score clamping and 10k replay prefix",
+        "verdict": "UNCONFIRMED_DEFECTIVE"
+      },
+      "root_cause_defects": "Verifier accepted runner with score floors and partial replay; live checkout file was subsequently mutated.",
+      "evidentiary_gaps": "Independent reproduction from clean detached worktree required under Level 1.",
+      "classification": "UNCONFIRMED_DEFECTIVE"
+    },
+    {
+      "claim_id": "CLM-1M-LTR-001",
+      "title": "Wave R3 1M Pilot Architecture & Capacity Model",
+      "scale_tier": "1M",
+      "originating_commit": "fcd51c649c38a926da7b7b931602835b57dba1d2",
+      "target_documents": 1000000,
+      "asserted_metrics": {
+        "model_sha256": "2b11312dedd2e7a8ebf1b24e4f0c178b674e377dbf2b625e9850da42a596d729",
+        "plan_sha256": "a6eefe16430e0a8966cd98d0c800d3832aa4ea66fad8655a605c5265745b6708",
+        "preceding_gate": "DEC-GATE-C2-PASS-REMEDIATED (9941639b...)"
+      },
+      "audited_actual_metrics": {
+        "nature": "Planning artifact only",
+        "execution_authorization": "BLOCKED (Gate D not enacted)",
+        "verdict": "NON_CERTIFYING_UNSOUND"
+      },
+      "root_cause_defects": "Derived from unconfirmed 100K baseline; no candidate execution authorized.",
+      "evidentiary_gaps": "Requires Level 1 100K requalification and explicit Human Gate D decision before execution.",
+      "classification": "NON_CERTIFYING_UNSOUND"
+    }
+  ],
+  "reconciliation_summary": {
+    "total_claims_audited": 10,
+    "classification_counts": {
+      "REVOKED_FABRICATED": 3,
+      "NON_CERTIFYING_UNSOUND": 4,
+      "UNCONFIRMED_DEFECTIVE": 3,
+      "REVOCATION_ACTION": 1
+    },
+    "scale_gate_status": {
+      "level_1_100k_gate": "UNCONFIRMED (Requires Level 1 Requalification per SCALE_CERTIFICATION_RECOVERY_PLAN.md)",
+      "level_2_1m_pilot": "BLOCKED & REVOKED (All prior 1M claims revoked; candidate execution blocked pending Level 1 closure and Gate D)"
+    },
+    "recovery_prerequisites": [
+      "Quarantine all three unsound runner scripts (R0-02).",
+      "Complete external DB forensic custody manifest (R0-03).",
+      "Execute reconciliation packet R0-04.",
+      "Enact Human Gate Boundary Decision (R0-05).",
+      "Implement fail-closed negative integrity test suite (R0-06)."
+    ]
+  }
+}

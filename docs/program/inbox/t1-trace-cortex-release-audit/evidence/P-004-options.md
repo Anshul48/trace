@@ -1,8 +1,8 @@
 # P-004 Options — Temporal Semantics, Source Lifecycle, and Revocation Contract
 
-> **Task ID:** T1  
-> **Topic:** Decision P-004 Temporal and Revocation Inputs  
-> **Status:** Design Alternatives for Human Decision (Do NOT unilaterally choose)  
+> **Task ID:** T1
+> **Topic:** Decision P-004 Temporal and Revocation Inputs
+> **Status:** Design Alternatives for Human Decision (Do NOT unilaterally choose)
 > **Governing Invariants:** Invariant 1 (Truth vs Projection), Invariant 3 (Evidence and Provenance), Invariant 6 (Operational Boundaries)
 
 ---

@@ -1,16 +1,16 @@
 # Work Packet Handoff: L1-07 -> L1-08 (Gate C2 Dossier Re-Submission)
 
-> **Handoff ID:** `l1-07-handoff-20260828`  
-> **Source Packet:** `l1-07-verifier-attestation-20260828`  
-> **Target Packet:** `l1-08-gate-c2-dossier-20260828`  
-> **From Role:** Independent Scale Verifier (Wave R1 / Level 1)  
-> **To Role:** Coordinator & Scale Evaluator  
-> **Date:** 2026-08-28T13:35:00Z  
-> **Status:** **COMPLETED & SEALED**  
-> **Authority:**  
-> - `docs/program/00_GLOBAL_CONTEXT_REPAIR_LOOP.md` (Five Non-Negotiable Exit Criteria)  
-> - `docs/program/SCALE_CERTIFICATION_RECOVERY_PLAN.md` (Sections 5.2, 5.4, 7)  
-> - Human Gate C2 Decision (`REPAIR — promote_100k denied`)  
+> **Handoff ID:** `l1-07-handoff-20260828`
+> **Source Packet:** `l1-07-verifier-attestation-20260828`
+> **Target Packet:** `l1-08-gate-c2-dossier-20260828`
+> **From Role:** Independent Scale Verifier (Wave R1 / Level 1)
+> **To Role:** Coordinator & Scale Evaluator
+> **Date:** 2026-08-28T13:35:00Z
+> **Status:** **COMPLETED & SEALED**
+> **Authority:**
+> - `docs/program/00_GLOBAL_CONTEXT_REPAIR_LOOP.md` (Five Non-Negotiable Exit Criteria)
+> - `docs/program/SCALE_CERTIFICATION_RECOVERY_PLAN.md` (Sections 5.2, 5.4, 7)
+> - Human Gate C2 Decision (`REPAIR — promote_100k denied`)
 > - `docs/program/06_DECISION_LOG.md` (DEC-P-005b)
 
 ---
@@ -56,7 +56,7 @@ All Five Non-Negotiable Exit Criteria and Level 1 invariants have been verified:
 
 ## 4. Disposition & Unblocked Next Actions
 
-- **Audit Disposition:** **AUDIT_ACCEPTED_PRODUCTION_CANDIDATE**  
-- **Audit Verdict:** **PASS_ALL_SCALE_GATE_INVARIANTS**  
-- **Unblocked Action:** Progression to **L1-08 (Gate C2 Dossier Re-Submission & Human Owner Review)**.  
+- **Audit Disposition:** **AUDIT_ACCEPTED_PRODUCTION_CANDIDATE**
+- **Audit Verdict:** **PASS_ALL_SCALE_GATE_INVARIANTS**
+- **Unblocked Action:** Progression to **L1-08 (Gate C2 Dossier Re-Submission & Human Owner Review)**.
 - **Governance Constraint:** The Gate C2 Dossier must present this independent verification receipt, audit report, and sealed candidate evidence to the Human Owner for the final `promote_100k` decision.

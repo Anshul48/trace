@@ -3,11 +3,26 @@
 The package deliberately has no dependency on the legacy Trace document pipeline.
 """
 
-from .api import create_app
-from .repository import AttachmentStore, DenseIndex, LexicalIndex, Repository
-from .production import OpenSearchLexicalIndex, PostgresEventStore, QdrantDenseIndex, S3ObjectStore
-from .service import TraceService
-from .store import SqliteEventStore
+try:
+    from .api import create_app
+except ImportError:
+    create_app = None
+try:
+    from .repository import AttachmentStore, DenseIndex, LexicalIndex, Repository
+except ImportError:
+    AttachmentStore = DenseIndex = LexicalIndex = Repository = None
+try:
+    from .production import OpenSearchLexicalIndex, PostgresEventStore, QdrantDenseIndex, S3ObjectStore
+except ImportError:
+    OpenSearchLexicalIndex = PostgresEventStore = QdrantDenseIndex = S3ObjectStore = None
+try:
+    from .service import TraceService
+except ImportError:
+    TraceService = None
+try:
+    from .store import SqliteEventStore
+except ImportError:
+    SqliteEventStore = None
 
 __all__ = [
     "create_app", "SqliteEventStore", "PostgresEventStore", "S3ObjectStore",

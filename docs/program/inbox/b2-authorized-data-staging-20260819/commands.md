@@ -1,9 +1,9 @@
 # Execution Commands Log — S4 Real-Data Staging (B2 / D2a)
 
-**Session:** S4  
-**Packet:** `b2-authorized-data-staging-20260819`  
-**Lease ID:** `lease-s4-d2a-20260819`  
-**Date:** 2026-08-19  
+**Session:** S4
+**Packet:** `b2-authorized-data-staging-20260819`
+**Lease ID:** `lease-s4-d2a-20260819`
+**Date:** 2026-08-19
 
 ## 1. System & Capacity Preflight
 ```powershell

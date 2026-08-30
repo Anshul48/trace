@@ -1,8 +1,8 @@
 # Handoff: V0 — Independent Verifier Plan and Packet-Integrity Review
 
-> **Role:** Independent Verifier / Integration Reviewer  
-> **Packet:** V0 (`v0-verifier-plan-20260819`)  
-> **Date:** 2026-08-19  
+> **Role:** Independent Verifier / Integration Reviewer
+> **Packet:** V0 (`v0-verifier-plan-20260819`)
+> **Date:** 2026-08-19
 > **Governing Documents:** `docs/program/launch/05_INDEPENDENT_VERIFIER.md`, `01_INVARIANTS.md`, `SESSION_OPERATING_MANUAL.md`, `04_EVALUATION_PROTOCOL.md`, `FOUNDATION_GATE_DOSSIER.md`
 
 ---

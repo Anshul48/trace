@@ -1,8 +1,8 @@
 # P-003 Options — Unified Trace Cortex Release Schema and Lifecycle
 
-> **Task ID:** T1  
-> **Topic:** Decision P-003 Architectural Options  
-> **Status:** Design Alternatives for Human Decision (Do NOT unilaterally choose)  
+> **Task ID:** T1
+> **Topic:** Decision P-003 Architectural Options
+> **Status:** Design Alternatives for Human Decision (Do NOT unilaterally choose)
 > **Governing Invariants:** Invariant 2 (Candidate Isolation), Invariant 3 (Evidence and Provenance), Invariant 12 (Compatibility and Migration)
 
 ---
@@ -64,7 +64,7 @@ CREATE TABLE trace_cortex_releases (
     retired_at TIMESTAMPTZ,
     failure_detail TEXT
 );
-CREATE INDEX trace_cortex_releases_active 
+CREATE INDEX trace_cortex_releases_active
     ON trace_cortex_releases(workspace_id, status, activated_at DESC);
 
 -- Component Membership Manifest
@@ -85,12 +85,12 @@ CREATE TABLE trace_cortex_release_components (
 -- Affinity: Scoped by release_id (or component_revision)
 ALTER TABLE trace_affinity_edges ADD COLUMN release_id UUID REFERENCES trace_cortex_releases(release_id);
 -- Unique per (workspace, release, pair)
-CREATE UNIQUE INDEX trace_affinity_edges_release_pair 
+CREATE UNIQUE INDEX trace_affinity_edges_release_pair
     ON trace_affinity_edges(workspace_id, release_id, pair_key);
 
 -- Activation Priors: Scoped by release_id
 ALTER TABLE trace_activation_priors ADD COLUMN release_id UUID REFERENCES trace_cortex_releases(release_id);
-CREATE UNIQUE INDEX trace_activation_priors_release_kind 
+CREATE UNIQUE INDEX trace_activation_priors_release_kind
     ON trace_activation_priors(workspace_id, release_id, atom_version_id, prior_kind);
 ```
 
@@ -126,8 +126,8 @@ To implement the chosen model in TR1 safely without breaking existing data or di
 3. **Active-Read Selector Protocol:**
    - All retrieval operations (`hierarchy_frontier`, `affinity_neighbors`, `activation_priors`, `_lexical_scores`, `_dense_scores`) resolve the active `release_id` via:
      ```sql
-     SELECT release_id FROM trace_cortex_releases 
-     WHERE workspace_id = :workspace_id AND status = 'active' 
+     SELECT release_id FROM trace_cortex_releases
+     WHERE workspace_id = :workspace_id AND status = 'active'
      ORDER BY activated_at DESC LIMIT 1
      ```
    - Queries pass `release_id = :active_release_id` in their `WHERE` clauses.

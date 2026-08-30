@@ -1,9 +1,9 @@
 # P-002 Decision Brief — Bounded Graph Association & PPR Work Budgets
 
-> **Status:** Empirical measurement brief for human decision P-002.  
-> **Prepared by:** Worker B (Trace-Lite Empirical Profiler)  
-> **Scope:** Empirical measurements and bounded graph budgets for TL2 implementation.  
-> **Raw Evidence Artifact:** `docs/program/inbox/l1-tl1-candidate-active-lifecycle/evidence/tl3-empirical-measurements.json`  
+> **Status:** Empirical measurement brief for human decision P-002.
+> **Prepared by:** Worker B (Trace-Lite Empirical Profiler)
+> **Scope:** Empirical measurements and bounded graph budgets for TL2 implementation.
+> **Raw Evidence Artifact:** `docs/program/inbox/l1-tl1-candidate-active-lifecycle/evidence/tl3-empirical-measurements.json`
 
 ---
 

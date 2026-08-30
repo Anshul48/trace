@@ -132,7 +132,7 @@ def run_cognitive_llm_benchmark() -> dict[str, Any]:
 
     for idx, case in enumerate(test_cases, 1):
         print(f"\n  • Case {idx}/{len(test_cases)}: [{case['lane']}] '{case['query']}'")
-        
+
         # 1. Retrieval
         t_q0 = time.perf_counter()
         q_res = service.query(QueryRequest(

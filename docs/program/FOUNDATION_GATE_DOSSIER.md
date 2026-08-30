@@ -122,23 +122,23 @@ review_status: "accepted"
 
 ## 5. Foundation Complete Review Answers
 
-1. **Which components/revisions are included?**  
+1. **Which components/revisions are included?**
    `trace-bench` @ `c0ea9fbf`, Trace @ `f7bd96e9`, Trace-Lite @ `3e7e9f0e`.
-2. **Is trace-bench reproducible?**  
+2. **Is trace-bench reproducible?**
    Yes, verified under Gate V1a with 26/26 tests, locked dependencies, and non-editable wheel imports.
-3. **Can certification mode fail for prohibited fallbacks?**  
+3. **Can certification mode fail for prohibited fallbacks?**
    Yes, 13 negative matrix fail-closed tests prove immediate non-certifying failure.
-4. **Can candidate projections affect ordinary reads?**  
+4. **Can candidate projections affect ordinary reads?**
    No, candidate isolation is enforced via release scoping and verified in Gate V1b.
-5. **What prior active state survives failure?**  
+5. **What prior active state survives failure?**
    Predecessor release pointers remain intact; atomic rollbacks verified under container-loss fault injection.
-6. **What is verified regarding bitemporal truth and erasure?**  
+6. **What is verified regarding bitemporal truth and erasure?**
    As-of event routing, RLS isolation, MinIO object deletion (404), and SQL tuple $\Delta=0$ repeat-erasure verification.
-7. **Which datasets are staged?**  
+7. **Which datasets are staged?**
    All 7 normalized datasets (`beir-scifact`, `beir-nfcorpus`, `beir-fiqa`, `multihop-rag`, `bright`, `musique`, `bigann`).
-8. **Which databases/providers were independently verified?**  
+8. **Which databases/providers were independently verified?**
    PostgreSQL 16, OpenSearch 2.19.1, Qdrant 1.14.1, MinIO S3, NVIDIA RTX 5050 GPU (CUDA 12.8 / 13.3).
-9. **Which capabilities remain unsupported?**  
+9. **Which capabilities remain unsupported?**
    Unbounded multi-hop graph expansion, external API cloud embedding fallback in certification mode, and unverified 1M scale operations.
-10. **Which exact DAG nodes are unblocked?**  
+10. **Which exact DAG nodes are unblocked?**
     Session 11 (S0 R2 Foundation Gate Review) is unblocked to transition Program State to Readiness Level L4 (100K Ready).

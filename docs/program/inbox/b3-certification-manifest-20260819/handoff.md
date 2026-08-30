@@ -1,11 +1,11 @@
 # S6 B3 Certification Manifest & Foundation Dossier Handoff
 
-> **Role:** Evaluation & Promotion Owner (S6)  
-> **Session:** Session 10 (S6 B3 Certification Manifest and Foundation Dossier)  
-> **Packet ID:** `b3-certification-manifest-20260819`  
-> **Date:** 2026-08-26  
-> **Authority Level:** C3 (Certified Evidence Assembly & Dossier Packaging)  
-> **Status:** **COMPLETE / READY FOR FOUNDATION GATE REVIEW (S0 R2)**  
+> **Role:** Evaluation & Promotion Owner (S6)
+> **Session:** Session 10 (S6 B3 Certification Manifest and Foundation Dossier)
+> **Packet ID:** `b3-certification-manifest-20260819`
+> **Date:** 2026-08-26
+> **Authority Level:** C3 (Certified Evidence Assembly & Dossier Packaging)
+> **Status:** **COMPLETE / READY FOR FOUNDATION GATE REVIEW (S0 R2)**
 
 ---
 

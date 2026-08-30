@@ -1,8 +1,8 @@
 # Independent Verifier: Worktree, Environment, and Evidence Requirements
 
-> **Packet:** V0 — Independent Verifier Plan and Packet-Integrity Review  
-> **Role:** Independent Verifier / Integration Reviewer  
-> **Status:** Mandatory Verification Architecture Standard  
+> **Packet:** V0 — Independent Verifier Plan and Packet-Integrity Review
+> **Role:** Independent Verifier / Integration Reviewer
+> **Status:** Mandatory Verification Architecture Standard
 > **Governing Documents:** `01_INVARIANTS.md` (Invariants 7, 8), `SESSION_OPERATING_MANUAL.md` (Section 5), `04_EVALUATION_PROTOCOL.md`, `FOUNDATION_RELEASE.md`
 
 ---
