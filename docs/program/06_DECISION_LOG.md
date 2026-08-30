@@ -416,6 +416,27 @@ substituting for it.
 
 ---
 
+### DEC-GATE-C2-PASS-VERIFIED — Level 1 100K Scale Gate Formal Human Gate C2 Approval
+
+**Status:** **ACCEPTED / PROMOTED (`promote_100k`)**.
+**Date:** 2026-08-30
+**Authority / Source:** Human Owner Gate C2 Promotion Approval & Independent Verifier under `SCALE_CERTIFICATION_RECOVERY_PLAN.md` (Level 1, Wave R2.6 Candidate).
+**Audited Candidate:** `benchmarks/runs/100k_scale_candidate_wave_r2_6`
+**Candidate Git Commit:** `9c36215c2c4a4ce3ca7c54ad337fe2f61bd6e301` (Clean worktree, `git_clean: true`).
+**Verifier Receipt:** `benchmarks/runs/100k_scale_candidate_wave_r2_6/verifier_receipt_independent.json` (Attestation Token: `32dac1942d3241c37601b8ceb55b3153de576003b05ad0c4fa9671c2c58a7c51`).
+**Candidate Evidence Merkle Root:** `8aa55035fbaf90ad003468fa0a4017d2afb8a61a46d726916d9d2650bbb133d2`.
+**Audited Invariants & Verified Results:**
+1. *Strict 100,000 Unique Documents:* 100,000 distinct `doc_id`, 100,000 distinct `content_hash`, 100,000 distinct `payload_hash` committed to durable SQLite WAL.
+2. *100% 7-Table Full Replay Parity:* Complete state-hash match across `events` (100k), `ingestions` (100k), `nodes` (228,288), `node_versions` (228,288), `edge_versions` (824,121), `source_lifecycle` (228,288), and `node_fts` (100k). Zero missing rows, zero table copies.
+3. *100% Original-Source Anchor Proofs:* 1,000/1,000 sampled UTF-8 byte span slices verified against upstream raw dataset files.
+4. *Bounded Graph Economics:* Max stored degree $= 10 \le 10$, PPR P95 latency $= 1.803\text{ ms} \le 35.0\text{ ms}$.
+5. *Host Memory Envelope:* Peak RSS $= 0.835\text{ GiB} \le 8.0\text{ GiB}$.
+6. *Independent Custody:* Full blind candidate execution evaluated 7,457 queries (7,156 answerable, 301 unanswerable null queries) without ground truth leakage.
+
+**Decision:** Formally **PROMOTE** Level 1 100K Scale Gate (`promote_100k`). Authorize Level 2 (1,000,000 Document Scale Pilot) execution under Wave D, E, and F.
+
+---
+
 ## Pending Decisions (Explicitly Deferred)
 
 The following decisions remain explicitly deferred and require empirical evidence before human determination:

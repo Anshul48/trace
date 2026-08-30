@@ -1,0 +1,135 @@
+{
+  "manifest_title": "Trace 1,000,000 (1M) Real Document Corpus Capsule Manifest (Exact Cryptographic Hashing)",
+  "contract_version": "2.0.0",
+  "target_unique_documents_d": 1000000,
+  "base_100k_documents_count": 100000,
+  "delta_900k_documents_count": 900000,
+  "base_intersect_delta_count": 0,
+  "total_raw_text_bytes": 2014465744,
+  "base_raw_text_bytes": 65394921,
+  "delta_raw_text_bytes": 1949070823,
+  "base_merkle_root_sha256": "23b99dfe386a99aab8ad283d5d50636a898ba318480f5c460adb60a2e57e6e5b",
+  "delta_merkle_root_sha256": "9385407a3f90648675467b0a603b2494b3e0c3b72d1fdd4edb7304d7cc10dc30",
+  "union_merkle_root_sha256": "5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5",
+  "synthetic_data_used": false,
+  "in_memory_fallback_used": false,
+  "base_data_root": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820",
+  "bright_data_root": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright",
+  "scale_data_root": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data",
+  "selection_policy": "Deterministic zero-indexed contiguous prefix slicing with strict (doc_id, content_hash) deduplication",
+  "datasets_base": [
+    {
+      "dataset_name": "musique",
+      "partition": "base_100k",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "selected_records_d": 80047,
+      "selection_range": "[0, 80047)",
+      "selected_text_bytes": 37343384,
+      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
+      "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c"
+    },
+    {
+      "dataset_name": "beir-fiqa",
+      "partition": "base_100k",
+      "license": "CC BY-NC-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "selected_records_d": 10575,
+      "selection_range": "[0, 10575)",
+      "selected_text_bytes": 8141714,
+      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
+      "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce"
+    },
+    {
+      "dataset_name": "beir-scifact",
+      "partition": "base_100k",
+      "license": "CC BY-NC 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "selected_records_d": 5178,
+      "selection_range": "[0, 5183)",
+      "selected_text_bytes": 7777523,
+      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl",
+      "source_file_sha256": "08af2db965a8fd04ad1c4bf03ed5ba91e742c0cbefcb10afc256681084504ff8"
+    },
+    {
+      "dataset_name": "beir-nfcorpus",
+      "partition": "base_100k",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "selected_records_d": 3591,
+      "selection_range": "[0, 3633)",
+      "selected_text_bytes": 5718118,
+      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl",
+      "source_file_sha256": "f5bfa0bb46b2d592fdddc62e419e5dbf9d2f6f5deabb70745d45fc32573854b9"
+    },
+    {
+      "dataset_name": "multihop-rag",
+      "partition": "base_100k",
+      "license": "ODC-By v1.0",
+      "license_url": "https://opendatacommons.org/licenses/by/1-0/",
+      "selected_records_d": 609,
+      "selection_range": "[0, 609)",
+      "selected_text_bytes": 6414182,
+      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl",
+      "source_file_sha256": "7228d82f926c41a1d742baeffbf1fb4ae5a14e04f405c045aaf9a5da3281f53a"
+    }
+  ],
+  "datasets_delta": [
+    {
+      "dataset_name": "musique_delta",
+      "partition": "delta_900k",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "selected_records_d": 21915,
+      "selection_range": "[80047, 101962)",
+      "selected_text_bytes": 10138960,
+      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
+      "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c"
+    },
+    {
+      "dataset_name": "beir-fiqa_delta",
+      "partition": "delta_900k",
+      "license": "CC BY-NC-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "selected_records_d": 47015,
+      "selection_range": "[10575, 57600)",
+      "selected_text_bytes": 36130851,
+      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
+      "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce"
+    },
+    {
+      "dataset_name": "bright_delta",
+      "partition": "delta_900k",
+      "license": "CC BY-NC 4.0 / Apache-2.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "selected_records_d": 684431,
+      "selection_range": "[0, 684431)",
+      "selected_text_bytes": 678354057,
+      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
+      "source_file_sha256": "0ac9088e4dca7f910777bd7388bdc4e5281eb2f2c7339c89797ca8e498101b5b"
+    },
+    {
+      "dataset_name": "enron_delta",
+      "partition": "delta_900k",
+      "license": "Public Domain (FERC Enron Corpus)",
+      "license_url": "https://www.cs.cmu.edu/~./enron/",
+      "selected_records_d": 50000,
+      "selection_range": "[0, 50000)",
+      "selected_text_bytes": 124668874,
+      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl",
+      "source_file_sha256": "4f9cc47b7e00fd6a89ff6e420bc3933b3c474044b8ceeb9c6f41a2491b4b5e6d"
+    },
+    {
+      "dataset_name": "wikipedia_delta",
+      "partition": "delta_900k",
+      "license": "CC BY-SA 4.0 / GFDL",
+      "license_url": "https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_4.0_International_License",
+      "selected_records_d": 96639,
+      "selection_range": "[0, 96639)",
+      "selected_text_bytes": 1099778081,
+      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl",
+      "source_file_sha256": "a5acb6a96d32ac71705e8c5e41daeb6193ada9c198bdd0bfafc6bdb56f2a78a4"
+    }
+  ],
+  "status": "FROZEN_APPROVED"
+}
