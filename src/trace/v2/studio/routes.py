@@ -147,8 +147,12 @@ def sanitize_path(
         idx = norm.index("/scale-data/")
         return f"trace://scale/{norm[idx + len('/scale-data/'):]}"
 
+    # Determine if path is an absolute Windows or POSIX path
+    is_win_abs = len(norm) >= 2 and norm[1] == ":" and norm[0].isalpha()
+    is_posix_abs = norm.startswith("/")
+
     # Check relative to scale data dir
-    if scale_data_dir:
+    if scale_data_dir and not (is_win_abs and os.name != "nt"):
         try:
             p = Path(raw_str).resolve()
             sd = scale_data_dir.resolve()
@@ -159,7 +163,7 @@ def sanitize_path(
             pass
 
     # Check relative to repo root
-    if repo_root:
+    if repo_root and not (is_win_abs and os.name != "nt"):
         try:
             p = Path(raw_str).resolve()
             rr = repo_root.resolve()
@@ -167,10 +171,6 @@ def sanitize_path(
                 return p.relative_to(rr).as_posix()
         except Exception:
             pass
-
-    # Determine if path is an absolute Windows or POSIX path
-    is_win_abs = len(norm) >= 2 and norm[1] == ":" and norm[0].isalpha()
-    is_posix_abs = norm.startswith("/")
 
     # Fallback redaction for absolute OS paths
     if is_win_abs or is_posix_abs:

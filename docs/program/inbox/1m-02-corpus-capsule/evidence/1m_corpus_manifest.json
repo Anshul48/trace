@@ -102,8 +102,8 @@
       "partition": "delta_900k",
       "license": "CC BY-NC 4.0 / Apache-2.0",
       "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
-      "selected_records_d": 684431,
-      "selection_range": "[0, 684431)",
+      "selected_records_d": 643710,
+      "selection_range": "[0, 643710)",
       "selected_text_bytes": 678354057,
       "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
       "source_file_sha256": "0ac9088e4dca7f910777bd7388bdc4e5281eb2f2c7339c89797ca8e498101b5b"
@@ -124,11 +124,11 @@
       "partition": "delta_900k",
       "license": "CC BY-SA 4.0 / GFDL",
       "license_url": "https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_4.0_International_License",
-      "selected_records_d": 96639,
-      "selection_range": "[0, 96639)",
-      "selected_text_bytes": 1099778081,
+      "selected_records_d": 137360,
+      "selection_range": "[0, 137360)",
+      "selected_text_bytes": 1425430486,
       "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl",
-      "source_file_sha256": "a5acb6a96d32ac71705e8c5e41daeb6193ada9c198bdd0bfafc6bdb56f2a78a4"
+      "source_file_sha256": "ffe485442095c1f8a6bb141dc14deb4ca8ff9b78edecf15a2bda830825eb978d"
     }
   ],
   "status": "FROZEN_APPROVED"
