@@ -963,7 +963,7 @@ async def test_run_manifest_disk_persistence_and_loading(catalog: DatasetCatalog
         assert summary is not None
         assert summary["status"] == "completed"
         assert summary["signature"] is not None
-        assert summary["verified"] is True
+        assert summary.get("attestation") is None
         assert "environment" in summary
         assert summary["environment"]["python_version"]
         assert summary["environment"]["os"]

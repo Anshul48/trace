@@ -69,14 +69,17 @@
 
   <style>
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background-color: #080b11;
       color: #f1f5f9;
       overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
     
     code, pre, .font-mono {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
     /* Custom Scrollbar */
@@ -101,6 +104,7 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(30, 41, 59, 0.8);
+      border-radius: 1rem;
     }
     
     .glass-card-hover {
@@ -136,6 +140,25 @@
       height: 320px;
       width: 100%;
     }
+
+    /* Local Offline CSS Fallbacks (when Tailwind CDN is unavailable) */
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .grid { display: grid; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .justify-center { justify-content: center; }
+    .text-center { text-align: center; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cursor-pointer { cursor: pointer; }
+    .w-full { width: 100%; }
+    .h-full { height: 100%; }
+    .font-bold { font-weight: 700; }
+    .font-semibold { font-weight: 600; }
+    .font-medium { font-weight: 500; }
+    .transition-all { transition: all 0.2s ease; }
+    i[data-lucide] { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }
+    i[data-lucide] svg { width: 100%; height: 100%; stroke: currentColor; fill: none; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#080b11] text-slate-100 antialiased selection:bg-brand-500/30 selection:text-brand-200">
@@ -1227,9 +1250,67 @@
       sec_footnote: "What are the off-balance sheet lease commitments for fiscal year 2024?"
     };
 
+    // Embedded SVG Fallbacks for Offline Mode
+    const FALLBACK_ICONS = {
+      'shield-check': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+      'shield-alert': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+      'shield-x': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+      'database': '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>',
+      'layers': '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+      'gauge': '<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>',
+      'swords': '<polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/>',
+      'settings': '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+      'refresh-cw': '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/>',
+      'menu': '<line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/>',
+      'play': '<polygon points="5 3 19 12 5 21 5 3"/>',
+      'square': '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>',
+      'git-merge': '<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/>',
+      'file-input': '<path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="M2 15h10"/><path d="m9 18 3-3-3-3"/>',
+      'boxes': '<path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"/><path d="m7 16.5-4.74-2.85"/><path d="m7 16.5 5-3"/><path d="M7 16.5v5.17"/><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"/><path d="m17 16.5-5-3"/><path d="m17 16.5 4.74-2.85"/><path d="M17 16.5v5.17"/><path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"/><path d="M12 8 7.26 5.15"/><path d="m12 8 4.74-2.85"/><path d="M12 13.5V8"/>',
+      'brain-circuit': '<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M12 18v4"/><path d="M8 22h8"/>',
+      'x': '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+      'search': '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+      'sparkles': '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>',
+      'workflow': '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v3a3 3 0 0 0 3 3h6"/>',
+      'help-circle': '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+      'fingerprint': '<path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path d="M8.65 22c.21-.66.45-1.32.75-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/><path d="M12 10a2 2 0 0 0-2 2c0 1.07.15 2.14.45 3.17"/><path d="M12.5 18a6.5 6.5 0 0 0 6.5-6.5c0-1.2-.3-2.3-.84-3.26"/><path d="M15 15.5c-.3 1.1-.7 2.2-1.2 3.2"/><path d="M18 19c.4-1.2.7-2.4.9-3.7"/><path d="M22 12c0 2.2-.5 4.3-1.5 6.2"/>',
+      'file-text': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>',
+      'alert-octagon': '<polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+      'radar': '<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 4a6 6 0 1 0 6 6 6 6 0 0 0-6-6Zm0 4a2 2 0 1 0 2 2 2 2 0 0 0-2-2Z"/><path d="M12 2v20"/><path d="M2 12h20"/>',
+      'bar-chart-3': '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+      'terminal': '<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>',
+      'compass': '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
+      'file-search': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="11.5" cy="14.5" r="2.5"/><path d="m13.3 16.3 1.7 1.7"/>',
+      'alert-triangle': '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+      'hard-drive': '<line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/>',
+      'folder-git-2': '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><circle cx="12" cy="13" r="2"/><path d="M14 13h3"/><path d="M7 13h3"/>',
+      'cpu': '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3"/><path d="M15 1v3"/><path d="M9 20v3"/><path d="M15 20v3"/><path d="M20 9h3"/><path d="M20 14h3"/><path d="M1 9h3"/><path d="M1 14h3"/>',
+      'sliders': '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
+      'plug': '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>',
+      'check-circle': '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+    };
+
+    function safeCreateIcons() {
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        try {
+          window.lucide.createIcons();
+          return;
+        } catch (e) {
+          console.warn('Lucide icon renderer fallback:', e);
+        }
+      }
+      document.querySelectorAll('i[data-lucide]').forEach(el => {
+        const iconName = el.getAttribute('data-lucide');
+        const innerPath = FALLBACK_ICONS[iconName];
+        if (innerPath) {
+          el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${innerPath}</svg>`;
+        }
+      });
+    }
+
     // Initialize DOM and Lucide Icons
     document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
+      safeCreateIcons();
       initCharts();
       updateClock();
       setInterval(updateClock, 1000);
@@ -1262,7 +1343,7 @@
           }
         }
       });
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     function toggleMobileMenu() {
@@ -1279,7 +1360,7 @@
       document.getElementById('inspectorTitle').innerText = data.title;
       document.getElementById('inspectorDesc').innerText = data.desc;
       inspector.classList.remove('hidden');
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     // API Health Check & System Overview
@@ -1533,7 +1614,7 @@
         badge.className = "text-xs font-mono px-2.5 py-1 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700 font-bold";
         badge.innerText = escapeHtml(data.sufficiency_state || "grounded_evidence");
       }
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     function renderEvidenceCards(hits, abstained, queryText) {
@@ -1551,13 +1632,13 @@
             <div class="text-[11px] text-slate-400">Trace safely abstained rather than fabricating unanchored claims.</div>
           </div>
         `;
-        lucide.createIcons();
+        safeCreateIcons();
         return;
       }
 
       container.innerHTML = hits.map(hit => {
-        const uri = hit.source_location?.uri || hit.node_id || "doc://evidence/atom";
-        const byteRange = hit.source_location?.byte_range ? `[${hit.source_location.byte_range[0]}..${hit.source_location.byte_range[1]}]` : (hit.anchors?.[0] ? `[${hit.anchors[0].start}..${hit.anchors[0].end}]` : '[0..len]');
+        const uri = hit.source_location?.source_uri || hit.source_location?.uri || hit.node_id || "doc://evidence/atom";
+        const byteRange = hit.source_location?.byte_range ? `[${hit.source_location.byte_range[0]}..${hit.source_location.byte_range[1]}]` : (hit.anchors?.[0] ? `[${hit.anchors[0].source_start || hit.anchors[0].start}..${hit.anchors[0].source_end || hit.anchors[0].end}]` : (hit.source_location?.start !== undefined ? `[${hit.source_location.start}..${hit.source_location.end}]` : '[0..len]'));
         const atomId = hit.atom_version_id || hit.node_id || 'atom_v2';
         const hash = hit.anchors?.[0]?.hash || hit.atom_version_id || 'sha256:verified';
         const contentSafe = escapeHtml(hit.content);
@@ -1580,7 +1661,7 @@
         `;
       }).join('');
 
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     function showSandboxError(errorMsg) {
@@ -1614,13 +1695,15 @@
 
       const execTime = document.getElementById('sandboxExecutionTime');
       if (execTime) execTime.innerText = "Failed";
-      lucide.createIcons();
+      safeCreateIcons();
     }
 
     // =========================================================================
     // TAB 2: ONE-CLICK BENCHMARK RUNNER & REAL SSE STREAMING
     // =========================================================================
     function initCharts() {
+      if (typeof Chart === 'undefined') return;
+
       // 1. Radar Chart (Empty/Default Initialization)
       const radarCtx = document.getElementById('radarChart')?.getContext('2d');
       if (radarCtx) {
@@ -1830,21 +1913,21 @@
             document.getElementById('benchmarkPercent').innerText = `${pct.toFixed(1)}%`;
             document.getElementById('benchmarkProgressBar').style.width = `${pct}%`;
             
-            const currentCount = parseInt(document.getElementById('benchmarkProgressCount').innerText, 10) || 0;
-            document.getElementById('benchmarkProgressCount').innerText = String(currentCount + 1);
+            const currentCount = evData.completed_cases !== undefined ? evData.completed_cases : (parseInt(document.getElementById('benchmarkProgressCount').innerText, 10) || 0) + 1;
+            document.getElementById('benchmarkProgressCount').innerText = String(currentCount);
 
             // Update real-time metric cards if this case was from trace_hybrid
             if (res.engine_id === 'trace_hybrid') {
               document.getElementById('metric-latency').innerHTML = `${res.latency_ms ? res.latency_ms.toFixed(1) : 0}<span class="text-xs text-slate-400 font-sans"> ms</span>`;
-              document.getElementById('metric-recall').innerHTML = `${(res.recall_at_5 * 100).toFixed(1)}<span class="text-xs">%</span>`;
+              document.getElementById('metric-recall').innerHTML = `${((res.recall_at_5 || 0) * 100).toFixed(1)}<span class="text-xs">%</span>`;
               document.getElementById('metric-ndcg').innerText = res.ndcg_at_10 ? res.ndcg_at_10.toFixed(3) : '0.000';
-              document.getElementById('metric-precision').innerHTML = `${(res.citation_precision * 100).toFixed(1)}<span class="text-xs">%</span>`;
+              document.getElementById('metric-precision').innerHTML = `${((res.citation_precision || 0) * 100).toFixed(1)}<span class="text-xs">%</span>`;
               document.getElementById('metric-coverage').innerHTML = `${res.complete_evidence ? '100.0' : '0.0'}<span class="text-xs">%</span>`;
               document.getElementById('metric-hallucination').innerHTML = `${res.hallucination_detected ? '0.0' : '100.0'}<span class="text-xs">%</span>`;
               document.getElementById('metric-cost').innerText = `$${(res.token_cost_usd || 0.0001).toFixed(4)}`;
             }
 
-            appendLog(`[EVAL] [${res.engine_id}] (${res.latency_ms ? res.latency_ms.toFixed(1) : 0}ms) R@5: ${(res.recall_at_5 * 100).toFixed(0)}% | Prc: ${(res.citation_precision * 100).toFixed(0)}% | Q: "${res.query}" [${res.abstained ? 'Abstained' : 'Answered'}]`);
+            appendLog(`[EVAL] [${res.engine_id}] (${res.latency_ms ? res.latency_ms.toFixed(1) : 0}ms) R@5: ${((res.recall_at_5 || 0) * 100).toFixed(0)}% | Prc: ${((res.citation_precision || 0) * 100).toFixed(0)}% | Q: "${res.query}" [${res.abstained ? 'Abstained' : 'Answered'}]`);
           } catch (err) {
             console.error("Error parsing case_completed:", err);
           }
@@ -1853,9 +1936,14 @@
         eventSource.addEventListener('run_progress', (e) => {
           try {
             const evData = JSON.parse(e.data);
-            if (evData.progress_percent !== undefined) {
-              document.getElementById('benchmarkPercent').innerText = `${evData.progress_percent}%`;
-              document.getElementById('benchmarkProgressBar').style.width = `${evData.progress_percent}%`;
+            const pct = evData.progress !== undefined ? evData.progress : (evData.progress_percent !== undefined ? evData.progress_percent : 0);
+            document.getElementById('benchmarkPercent').innerText = `${pct}%`;
+            document.getElementById('benchmarkProgressBar').style.width = `${pct}%`;
+            if (evData.completed_cases !== undefined) {
+              document.getElementById('benchmarkProgressCount').innerText = String(evData.completed_cases);
+            }
+            if (evData.total_cases !== undefined) {
+              document.getElementById('benchmarkTotalCount').innerText = String(evData.total_cases);
             }
           } catch (err) {}
         });
@@ -1872,7 +1960,7 @@
         eventSource.addEventListener('run_completed', (e) => {
           try {
             const evData = JSON.parse(e.data);
-            const summary = evData.summary || {};
+            const summary = evData.summary || evData || {};
             
             document.getElementById('benchmarkProgressBar').style.width = '100%';
             document.getElementById('benchmarkPercent').innerText = '100%';
@@ -1881,16 +1969,17 @@
             
             appendLog(`[COMPLETE] Benchmark run ${runId} finished. Updating telemetry charts with final aggregated metrics.`);
 
-            if (summary.metrics) {
-              updateChartsFromBenchmarkSummary(summary.metrics);
-              if (summary.metrics.trace_hybrid) {
-                const tm = summary.metrics.trace_hybrid;
+            const metrics = summary.metrics || summary.metric_summaries;
+            if (metrics) {
+              updateChartsFromBenchmarkSummary(metrics);
+              if (metrics.trace_hybrid) {
+                const tm = metrics.trace_hybrid;
                 document.getElementById('metric-latency').innerHTML = `${tm.p50_latency_ms ? tm.p50_latency_ms.toFixed(1) : 0}<span class="text-xs text-slate-400 font-sans"> ms</span> / ${tm.p95_latency_ms ? tm.p95_latency_ms.toFixed(1) : 0}<span class="text-xs text-slate-400 font-sans"> ms</span>`;
-                document.getElementById('metric-recall').innerHTML = `${(tm.recall_at_5 * 100).toFixed(1)}<span class="text-xs">%</span>`;
+                document.getElementById('metric-recall').innerHTML = `${((tm.recall_at_5 || 0) * 100).toFixed(1)}<span class="text-xs">%</span>`;
                 document.getElementById('metric-ndcg').innerText = tm.ndcg_at_10 ? tm.ndcg_at_10.toFixed(3) : '0.000';
-                document.getElementById('metric-precision').innerHTML = `${(tm.citation_precision * 100).toFixed(1)}<span class="text-xs">%</span>`;
-                document.getElementById('metric-coverage').innerHTML = `${(tm.complete_gold_evidence_coverage * 100).toFixed(1)}<span class="text-xs">%</span>`;
-                document.getElementById('metric-hallucination').innerHTML = `${((1 - tm.hallucination_rate) * 100).toFixed(1)}<span class="text-xs">%</span>`;
+                document.getElementById('metric-precision').innerHTML = `${((tm.citation_precision || 0) * 100).toFixed(1)}<span class="text-xs">%</span>`;
+                document.getElementById('metric-coverage').innerHTML = `${((tm.complete_gold_evidence_coverage || 0) * 100).toFixed(1)}<span class="text-xs">%</span>`;
+                document.getElementById('metric-hallucination').innerHTML = `${((1 - (tm.hallucination_rate || 0)) * 100).toFixed(1)}<span class="text-xs">%</span>`;
                 document.getElementById('metric-cost').innerText = `$${(tm.estimated_cost_usd || 0).toFixed(4)}`;
               }
             }
@@ -1904,7 +1993,7 @@
         eventSource.addEventListener('run_failed', (e) => {
           try {
             const evData = JSON.parse(e.data);
-            const errDetail = evData.error || 'Server reported benchmark failure';
+            const errDetail = evData.error || (evData.data && evData.data.error) || 'Server reported benchmark failure';
             showBenchmarkError(errDetail);
             appendLog(`[FAILED] Benchmark run encountered error: ${errDetail}`);
           } catch (err) {}
@@ -1938,7 +2027,7 @@
     }
 
     function updateChartsFromBenchmarkSummary(metricsMap) {
-      if (!metricsMap) return;
+      if (!metricsMap || typeof Chart === 'undefined') return;
 
       const engineKeys = ['trace_hybrid', 'pure_vector', 'pure_lexical', 'naive_rag'];
 
@@ -1983,7 +2072,11 @@
     }
 
     function updateSingleEngineMetrics(engineId, m) {
-      if (!m) return;
+      if (!m || typeof Chart === 'undefined') return;
+      if (m.trace_hybrid || m.pure_vector || m.pure_lexical || m.naive_rag) {
+        updateChartsFromBenchmarkSummary(m);
+        return;
+      }
       const engineIndexMap = { 'trace_hybrid': 0, 'pure_vector': 1, 'pure_lexical': 2, 'naive_rag': 3 };
       const idx = engineIndexMap[engineId];
       if (idx !== undefined && AppState.radarChart && AppState.radarChart.data.datasets[idx]) {
@@ -2027,7 +2120,7 @@
       if (banner && msgEl) {
         msgEl.innerText = msg;
         banner.classList.remove('hidden');
-        lucide.createIcons();
+        safeCreateIcons();
       }
     }
 
@@ -2133,7 +2226,7 @@
 
       Object.keys(capMap).forEach(engId => {
         const name = capMap[engId];
-        const res = data[engId] || {};
+        const res = (data.comparisons && data.comparisons[engId]) || data[engId] || {};
         const ansEl = document.getElementById(`arena${name}Answer`);
         const evEl = document.getElementById(`arena${name}Evidence`);
         const suffEl = document.getElementById(`arena${name}Sufficiency`);
@@ -2154,7 +2247,7 @@
           } else if (res.abstained) {
             ansEl.innerHTML = '<strong class="text-rose-300">ABSTAINED (Zero Hallucination):</strong> <span class="text-slate-400">No verifiable evidence found in master corpus. Refused to fabricate ungrounded claims.</span>';
           } else if (res.results && res.results.length > 0) {
-            ansEl.innerText = `Retrieved ${res.results.length} candidate atoms from index. Top score: ${res.results[0].score.toFixed(3)}.`;
+            ansEl.innerText = `Retrieved ${res.results.length} candidate atoms from index. Top score: ${res.results[0].score !== undefined ? res.results[0].score.toFixed(3) : '-'}.`;
           } else {
             ansEl.innerHTML = '<span class="text-slate-500 italic">No matching evidence found.</span>';
           }
@@ -2167,8 +2260,8 @@
             evEl.innerHTML = '<div class="p-2 rounded bg-slate-900/80 text-slate-500 text-[10px]">No verifiable atoms pinned</div>';
           } else {
             evEl.innerHTML = hits.slice(0, 2).map(h => {
-              const uri = h.source_location?.uri || h.node_id || "evidence_atom";
-              const bytes = h.source_location?.byte_range ? `[${h.source_location.byte_range[0]}..${h.source_location.byte_range[1]}]` : (h.anchors?.[0] ? `[${h.anchors[0].start}..${h.anchors[0].end}]` : '[bytes]');
+              const uri = h.source_location?.source_uri || h.source_location?.uri || h.node_id || "evidence_atom";
+              const bytes = h.source_location?.byte_range ? `[${h.source_location.byte_range[0]}..${h.source_location.byte_range[1]}]` : (h.anchors?.[0] ? `[${h.anchors[0].source_start || h.anchors[0].start}..${h.anchors[0].source_end || h.anchors[0].end}]` : (h.source_location?.start !== undefined ? `[${h.source_location.start}..${h.source_location.end}]` : '[bytes]'));
               const preview = h.content ? h.content.substring(0, 100) : '';
               return `
                 <div class="p-2 rounded ${engId === 'trace_hybrid' ? 'bg-cyan-950/50 border border-cyan-800/50 text-cyan-300' : engId === 'naive_rag' ? 'bg-rose-950/30 border border-rose-900/30 text-rose-300' : 'bg-slate-900 border border-slate-800 text-slate-300'}">
@@ -2192,7 +2285,7 @@
         }
       });
 
-      lucide.createIcons();
+      safeCreateIcons();
     }
   </script>
 </body>

@@ -449,6 +449,7 @@ class Scale1MRunner:
 
         self.db_path = self.output_dir / "scale_1m.db"
         self.replay_db_path = self.output_dir / "scale_1m_replay.db"
+        self.resume = True
         self.db: LeanSpineDatabase | None = None
 
         self.policy: dict[str, Any] = {}
@@ -498,7 +499,7 @@ class Scale1MRunner:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.runs_dir.mkdir(parents=True, exist_ok=True)
 
-        if self.db_path.exists():
+        if self.db_path.exists() and not self.resume:
             print(f"Cleaning existing candidate database: {self.db_path}")
             for p in [self.db_path, Path(str(self.db_path) + "-wal"), Path(str(self.db_path) + "-shm")]:
                 if p.exists():
@@ -526,6 +527,14 @@ class Scale1MRunner:
 
         seen_doc_ids: set[str] = set()
         seen_content_hashes: set[str] = set()
+
+        if self.resume and self.db_path.exists():
+            cur.execute("SELECT doc_id, content_hash FROM ingestions")
+            for r in cur.fetchall():
+                seen_doc_ids.add(str(r[0]))
+                seen_content_hashes.add(str(r[1]))
+            docs_count = len(seen_doc_ids)
+            print(f"  [Resume Watermark] Loaded {docs_count:,} existing committed records from SQLite WAL.")
 
         all_datasets = (
             self.corpus_manifest.get("datasets_base", []) +
@@ -774,38 +783,31 @@ class Scale1MRunner:
         print(f"Graph Traversal Latency: P50={pct['p50']} ms, P95={pct['p95']} ms, P99={pct['p99']} ms, Mean={pct['mean']} ms ({walk_samples} walks)")
 
     def search_bm25_hybrid(self, query_text: str, top_k: int = 20) -> list[tuple[str, float]]:
-        q_tokens = tokenize(query_text)
-        if not q_tokens:
-            return [(doc_id, 0.0) for doc_id in self.ingested_doc_ids[:top_k]]
-
-        k1 = 1.2
-        b = 0.75
-        N = len(self.ingested_doc_ids)
-        scores: dict[str, float] = defaultdict(float)
-
-        for term in set(q_tokens):
-            postings = self.inverted_index.get(term, [])
-            if not postings:
-                continue
-            df = len(postings)
-            idf = math.log((N - df + 0.5) / (df + 0.5) + 1.0)
-
-            for doc_id, tf in postings:
-                doc_len = self.doc_lengths.get(doc_id, self.avg_doc_len)
-                num = tf * (k1 + 1)
-                denom = tf + k1 * (1 - b + b * (doc_len / self.avg_doc_len))
-                scores[doc_id] += idf * (num / denom)
-
-        ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-        if len(ranked) < top_k:
-            existing = {doc_id for doc_id, _ in ranked}
-            for did in self.ingested_doc_ids:
-                if did not in existing:
-                    ranked.append((did, 0.0))
-                if len(ranked) >= top_k:
-                    break
-
-        return ranked[:top_k]
+        conn = self.db.get_connection()
+        cur = conn.cursor()
+        try:
+            q_tokens = tokenize(query_text)
+            if not q_tokens:
+                cur.execute("SELECT doc_id FROM ingestions LIMIT ?", (top_k,))
+                return [(str(r[0]), 0.0) for r in cur.fetchall()]
+            match_str = " OR ".join(f'"{w}"' for w in q_tokens[:15])
+            try:
+                cur.execute("SELECT doc_id, -bm25(node_fts) FROM node_fts WHERE node_fts MATCH ? ORDER BY rank LIMIT ?", (match_str, top_k))
+                hits = [(str(r[0]), float(r[1])) for r in cur.fetchall()]
+            except Exception:
+                hits = []
+            if len(hits) < top_k:
+                existing = {did for did, _ in hits}
+                cur.execute("SELECT doc_id FROM ingestions LIMIT ?", (top_k * 2,))
+                for r in cur.fetchall():
+                    did = str(r[0])
+                    if did not in existing:
+                        hits.append((did, 0.0))
+                    if len(hits) >= top_k:
+                        break
+            return hits[:top_k]
+        finally:
+            conn.close()
 
     def evaluate_blind_queries(self) -> None:
         print(f"\n--- [Phase 3/5] Blind Query Evaluation ({len(self.blind_queries)} queries) ---")

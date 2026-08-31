@@ -132,10 +132,6 @@ def sanitize_path(
     raw_str = str(raw_path)
     norm = raw_str.replace("\\", "/")
 
-    # Determine if path is an absolute Windows or POSIX path
-    is_win_abs = len(norm) >= 2 and norm[1] == ":" and norm[0].isalpha()
-    is_posix_abs = norm.startswith("/")
-
     # Check relative to benchmarks directory
     if "/benchmarks/" in norm:
         idx = norm.index("/benchmarks/")
@@ -151,18 +147,8 @@ def sanitize_path(
         idx = norm.index("/scale-data/")
         return f"trace://scale/{norm[idx + len('/scale-data/'):]}"
 
-    # Check relative to repo root (only if not Windows-drive path on POSIX)
-    if repo_root and not is_win_abs:
-        try:
-            p = Path(raw_str).resolve()
-            rr = repo_root.resolve()
-            if p.is_relative_to(rr):
-                return p.relative_to(rr).as_posix()
-        except Exception:
-            pass
-
-    # Check relative to scale data dir (only if not Windows-drive path on POSIX)
-    if scale_data_dir and not is_win_abs:
+    # Check relative to scale data dir
+    if scale_data_dir:
         try:
             p = Path(raw_str).resolve()
             sd = scale_data_dir.resolve()
@@ -171,6 +157,20 @@ def sanitize_path(
                 return f"trace://scale/{rel}"
         except Exception:
             pass
+
+    # Check relative to repo root
+    if repo_root:
+        try:
+            p = Path(raw_str).resolve()
+            rr = repo_root.resolve()
+            if p.is_relative_to(rr):
+                return p.relative_to(rr).as_posix()
+        except Exception:
+            pass
+
+    # Determine if path is an absolute Windows or POSIX path
+    is_win_abs = len(norm) >= 2 and norm[1] == ":" and norm[0].isalpha()
+    is_posix_abs = norm.startswith("/")
 
     # Fallback redaction for absolute OS paths
     if is_win_abs or is_posix_abs:
@@ -393,6 +393,33 @@ async def start_benchmark(
     if not info:
         raise HTTPException(status_code=404, detail=f"Dataset '{payload.dataset_id}' not found")
 
+    # Synchronously check if dataset is evaluable and has frozen queries
+    if not info.is_evaluable or not info.has_queries:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Dataset '{payload.dataset_id}' ({info.name}) does not have frozen benchmark query judgments (QRELs) and cannot be used for benchmark evaluation.",
+        )
+
+    # Synchronously verify corpus and query SHA-256 hashes against catalog before launching
+    corpus_sha, query_sha = catalog.get_dataset_hashes(payload.dataset_id)
+    if info.sha256 and corpus_sha and info.sha256 != corpus_sha:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Corpus SHA-256 verification failed for dataset '{payload.dataset_id}' (expected {info.sha256}, got {corpus_sha})",
+        )
+    if info.query_sha256 and query_sha and info.query_sha256 != query_sha:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Query SHA-256 verification failed for dataset '{payload.dataset_id}' (expected {info.query_sha256}, got {query_sha})",
+        )
+
+    test_cases = catalog.load_test_cases(payload.dataset_id, limit=payload.max_cases)
+    if not test_cases:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Dataset '{payload.dataset_id}' ({info.name}) does not have frozen benchmark query judgments (QRELs) and cannot be used for benchmark evaluation.",
+        )
+
     run_id = f"bench-{uuid.uuid4().hex[:10]}"
     service = _get_service(request)
     coordinator = BenchmarkCoordinator(catalog=catalog, service=service)
@@ -516,7 +543,7 @@ async def demo_query(
         info = catalog.get_dataset(payload.dataset_id)
         if not info:
             raise HTTPException(status_code=404, detail=f"Dataset '{payload.dataset_id}' not found")
-        atoms = catalog.load_atoms_for_dataset(payload.dataset_id, limit=2000)
+        atoms = catalog.load_atoms_for_dataset(payload.dataset_id, limit=None)
     else:
         atoms = None
 
@@ -561,7 +588,7 @@ async def demo_compare(
         info = catalog.get_dataset(payload.dataset_id)
         if not info:
             raise HTTPException(status_code=404, detail=f"Dataset '{payload.dataset_id}' not found")
-        atoms = catalog.load_atoms_for_dataset(payload.dataset_id, limit=2000)
+        atoms = catalog.load_atoms_for_dataset(payload.dataset_id, limit=None)
     else:
         atoms = None
 

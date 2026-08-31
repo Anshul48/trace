@@ -794,8 +794,7 @@ class BenchmarkCoordinator:
                     result = await engine.query(
                         query_text,
                         workspace_id=workspace_id,
-                        atoms=atoms,
-                        out_of_scope=out_of_scope,
+                        atoms=atoms if getattr(engine, "service", None) is None else None,
                     )
 
                     retrieved_ids = [h.atom_version_id for h in result.results]
@@ -819,6 +818,7 @@ class BenchmarkCoordinator:
                         gold_ids=sorted(gold_ids),
                         retrieved_ids=retrieved_ids,
                         cited_ids=cited_ids,
+                        citations=result.citations,
                         recall_at_5=recall_5,
                         recall_at_20=recall_20,
                         ndcg_at_10=ndcg_10,

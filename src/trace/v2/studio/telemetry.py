@@ -130,6 +130,7 @@ class CaseExecutionResult(BaseModel):
     gold_ids: list[str] = Field(default_factory=list)
     retrieved_ids: list[str] = Field(default_factory=list)
     cited_ids: list[str] = Field(default_factory=list)
+    citations: list[dict[str, Any]] = Field(default_factory=list)
     recall_at_5: float = 0.0
     recall_at_20: float = 0.0
     ndcg_at_10: float = 0.0
@@ -164,8 +165,7 @@ class RunManifest(BaseModel):
     metric_summaries: dict[str, MetricSummary] = Field(default_factory=dict)
     deltas_vs_baseline: dict[str, dict[str, float]] = Field(default_factory=dict)
     signature: str | None = None
-    verified: bool = True
-    verification_metadata: dict[str, Any] = Field(default_factory=dict)
+    attestation: dict[str, Any] | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -431,8 +431,11 @@ class BenchmarkTelemetryManager:
         if summary:
             try:
                 self.persist_run(run_id, summary)
-            except Exception:
-                pass
+            except Exception as ex:
+                if run_id in self._runs:
+                    self._runs[run_id]["status"] = "failed"
+                    self._runs[run_id]["error"] = f"Failed to persist benchmark run manifest: {ex}"
+                raise
         return summary
 
     def persist_run(self, run_id: str, manifest_data: dict[str, Any] | None = None) -> Path:
@@ -482,8 +485,7 @@ class BenchmarkTelemetryManager:
                 "queries_sha256": data.get("queries_sha256"),
                 "environment": data.get("environment", {}),
                 "signature": data.get("signature"),
-                "verified": data.get("verified", True),
-                "verification_metadata": data.get("verification_metadata", {}),
+                "attestation": data.get("attestation"),
                 "metadata": data.get("metadata", {}),
             }
             raw_cases = data.get("case_results", data.get("cases", []))
@@ -585,13 +587,7 @@ class BenchmarkTelemetryManager:
             "metrics": metrics_dict,
             "deltas_vs_baseline": deltas,
             "signature": signature,
-            "verified": True,
-            "verification_metadata": {
-                "verifier_id": "trace-studio-integrity-v2",
-                "verified_at": completed_at or _now_iso(),
-                "integrity_status": "VALID",
-                "total_case_results": len(cases),
-            },
+            "attestation": run_info.get("attestation"),
             "metadata": run_info.get("metadata", {}),
         }
 

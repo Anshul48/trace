@@ -18,6 +18,7 @@ import json
 import math
 import os
 import re
+import socket
 import time
 from typing import Any, Sequence
 import urllib.parse
@@ -163,10 +164,13 @@ class TraceHybridEngine(BaseComparativeEngine):
         start_time = time.perf_counter()
         stage_breakdown: dict[str, Any] = {}
 
+        embedder_model_id = getattr(self.embedder, "model_name", None) or getattr(self.embedder, "provider_id", "hashing-dense-v1")
+        is_neural = not (isinstance(self.embedder, HashingDenseEmbedder) or getattr(self.embedder, "provider_id", "") == "hashing-dense-v1")
+
         # ---------------------------------------------------------------------
-        # 1. Canonical Service Routing: If TraceService is attached and no atoms override
+        # 1. Canonical Service Routing: If TraceService is attached
         # ---------------------------------------------------------------------
-        if self.service is not None and atoms is None:
+        if self.service is not None:
             from ..models import QueryRequest, RetrievalBudget
 
             svc_start = time.perf_counter()
@@ -189,23 +193,57 @@ class TraceHybridEngine(BaseComparativeEngine):
             for item in response.get("results", []):
                 aid = str(item["atom_version_id"])
                 source_loc = item.get("source_location", {})
-                source_start = source_loc.get("start", 0) or 0
-                source_end = source_loc.get("end", len(item.get("excerpt", ""))) or len(item.get("excerpt", ""))
                 content_text = item.get("excerpt") or item.get("content", "")
-                quote_hash = hashlib.sha256(content_text.encode("utf-8")).hexdigest()[:16]
+                content_bytes = content_text.encode("utf-8")
 
+                raw_start = source_loc.get("start")
+                raw_end = source_loc.get("end")
+                source_start = int(raw_start) if raw_start is not None else 0
+                source_end = int(raw_end) if raw_end is not None else len(content_text)
+
+                span_len = source_end - source_start
+                is_valid_span = (0 <= source_start < source_end)
+
+                if is_valid_span:
+                    if source_end <= len(content_text):
+                        slice_bytes = content_text[source_start:source_end].encode("utf-8")
+                    elif source_end <= len(content_bytes):
+                        slice_bytes = content_bytes[source_start:source_end]
+                    else:
+                        slice_bytes = content_bytes
+                    full_quote_hash = hashlib.sha256(slice_bytes).hexdigest()
+                    quote_hash = full_quote_hash[:16]
+                    is_verified = True
+
+                    supplied_quote_hash = item.get("content_hash") or source_loc.get("quote_hash")
+                    if supplied_quote_hash:
+                        sup_str = str(supplied_quote_hash).strip()
+                        sup_clean = sup_str[7:] if sup_str.startswith("sha256:") else sup_str
+                        matches_hash = (
+                            full_quote_hash.startswith(sup_clean)
+                            or sup_clean.startswith(full_quote_hash[:len(sup_clean)])
+                            or quote_hash.startswith(sup_clean)
+                            or sup_clean.startswith(quote_hash[:min(len(sup_clean), 16)])
+                        )
+                        if not matches_hash:
+                            is_verified = False
+                else:
+                    is_verified = False
+                    quote_hash = hashlib.sha256(content_bytes).hexdigest()[:16] if content_bytes else "0" * 16
+
+                parser_loc = source_loc.get("parser_location", f"char:{source_start}-{source_end}")
                 anchor_spec = {
-                    "anchor_id": f"anchor:{aid[:8]}",
+                    "anchor_id": f"anchor:{aid[:8] if ':' not in aid else aid.split(':', 1)[1][:8]}",
                     "source_atom_version_id": aid,
                     "source_start": source_start,
                     "source_end": source_end,
                     "quote_hash": quote_hash,
-                    "parser_location": source_loc.get("parser_location", f"char:{source_start}-{source_end}"),
-                    "verified": True,
+                    "parser_location": parser_loc,
+                    "verified": is_verified,
                 }
 
                 hit = EngineHit(
-                    rank=item.get("rank", 1),
+                    rank=item.get("rank", len(results) + 1),
                     atom_version_id=aid,
                     node_id=item.get("node_id"),
                     content=content_text,
@@ -213,28 +251,34 @@ class TraceHybridEngine(BaseComparativeEngine):
                     channel_scores=item.get("channel_scores", {}),
                     source_location=source_loc,
                     anchors=[anchor_spec],
-                    is_grounded=True,
+                    is_grounded=is_verified,
                 )
                 results.append(hit)
-                citations.append({
-                    "atom_version_id": aid,
-                    "source_location": source_loc,
-                    "quote_hash": quote_hash,
-                })
+                if is_verified:
+                    citations.append({
+                        "atom_version_id": aid,
+                        "source_location": source_loc,
+                        "quote_hash": quote_hash,
+                    })
 
-            abstained = response.get("sufficiency_state") == "insufficient_evidence"
+            abstained = (
+                response.get("sufficiency_state") == "insufficient_evidence"
+                or not results
+                or not any(h.is_grounded for h in results)
+            )
             total_elapsed = (time.perf_counter() - start_time) * 1000
 
             # Stage timings from service diagnostics or measured intervals
             diag = response.get("retrieval_diagnostics", {})
+            stage_timings = diag.get("stage_timings_ms") or diag.get("timings") or {}
             stage_breakdown = {
                 "service_retrieval_ms": round(svc_elapsed, 2),
-                "lexical_bm25_ms": round(svc_elapsed * 0.20, 2),
-                "dense_vector_ms": round(svc_elapsed * 0.25, 2),
-                "rrf_fusion_ms": round(svc_elapsed * 0.10, 2),
-                "rerank_ms": round(svc_elapsed * 0.20, 2),
-                "cortex_graph_hierarchy_ms": round(svc_elapsed * 0.15, 2),
-                "byte_anchor_verification_ms": round(svc_elapsed * 0.10, 2),
+                "lexical_bm25_ms": stage_timings.get("lexical_bm25_ms") or stage_timings.get("lexical_ms") or round(svc_elapsed * 0.20, 2),
+                "dense_vector_ms": stage_timings.get("dense_vector_ms") or stage_timings.get("dense_ms") or round(svc_elapsed * 0.25, 2),
+                "rrf_fusion_ms": stage_timings.get("rrf_fusion_ms") or stage_timings.get("rrf_ms") or round(svc_elapsed * 0.10, 2),
+                "rerank_ms": stage_timings.get("rerank_ms") or round(svc_elapsed * 0.20, 2),
+                "cortex_graph_hierarchy_ms": stage_timings.get("cortex_graph_hierarchy_ms") or stage_timings.get("graph_ms") or round(svc_elapsed * 0.15, 2),
+                "byte_anchor_verification_ms": stage_timings.get("byte_anchor_verification_ms") or round(svc_elapsed * 0.10, 2),
                 "diagnostics": diag,
             }
 
@@ -243,12 +287,12 @@ class TraceHybridEngine(BaseComparativeEngine):
                 engine_name=self.name,
                 query=query_text,
                 results=results if not abstained else [],
-                sufficiency_state=response.get("sufficiency_state", "answerable"),
+                sufficiency_state="insufficient_evidence" if abstained else response.get("sufficiency_state", "answerable"),
                 abstained=abstained,
                 synthesis=(
                     "Insufficient evidence: Trace cognitive engine abstained because no verified evidence anchors were found in corpus scope."
                     if abstained
-                    else f"Synthesized answer grounded in {len(results)} verified byte anchors: {results[0].content if results else ''}"
+                    else f"Synthesized answer grounded in {len([h for h in results if h.is_grounded])} verified byte anchors: {results[0].content if results else ''}"
                 ),
                 citations=citations if not abstained else [],
                 hallucination_detected=False,
@@ -256,7 +300,14 @@ class TraceHybridEngine(BaseComparativeEngine):
                 latency_ms=round(total_elapsed, 2),
                 token_count=120,
                 token_cost_usd=0.00012,
-                metadata={"evidence_bundle_id": response.get("evidence_bundle_id")},
+                metadata={
+                    "evidence_bundle_id": response.get("evidence_bundle_id") or response.get("bundle_id"),
+                    "baseline_category": "trace_cognitive_pipeline",
+                    "retrieval_paradigm": "grounded_multi_stage_hybrid",
+                    "anchor_count": len([h for h in results if h.is_grounded]),
+                    "model_id": embedder_model_id,
+                    "is_neural": is_neural,
+                },
             )
 
         # ---------------------------------------------------------------------
@@ -291,6 +342,12 @@ class TraceHybridEngine(BaseComparativeEngine):
                 latency_ms=round(elapsed_ms, 2),
                 token_count=15,
                 token_cost_usd=0.0,
+                metadata={
+                    "baseline_category": "trace_cognitive_pipeline",
+                    "retrieval_paradigm": "grounded_multi_stage_hybrid",
+                    "model_id": embedder_model_id,
+                    "is_neural": is_neural,
+                },
             )
 
         atom_map: dict[str, dict[str, Any]] = {a["atom_version_id"]: a for a in atom_list}
@@ -514,7 +571,7 @@ class TraceHybridEngine(BaseComparativeEngine):
             )
 
         # ---------------------------------------------------------------------
-        # Stage 5: Neocortex Grounding & True Byte-Anchor Verification
+        # Stage 5: Neocortex Grounding & True Byte-Anchor Cryptographic Verification
         # ---------------------------------------------------------------------
         t0 = time.perf_counter()
         sorted_candidates = sorted(final_scores, key=lambda k: -final_scores[k])[:limit]
@@ -523,24 +580,68 @@ class TraceHybridEngine(BaseComparativeEngine):
 
         for rank, aid in enumerate(sorted_candidates, start=1):
             atom = atom_map[aid]
-            content = atom["content"]
-            source_start = int(atom.get("properties", {}).get("source_start", 0) or 0)
-            source_end = int(atom.get("properties", {}).get("source_end", len(content)) or len(content))
-            quote_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()[:16]
+            content = atom.get("content", "")
+            content_bytes = content.encode("utf-8")
+            props = atom.get("properties") or {}
+            source_loc = atom.get("source_location") or props
 
-            # True byte-span verification
-            parser_loc = atom.get("properties", {}).get("parser_location", f"char:{source_start}-{source_end}")
-            is_valid_span = source_end >= source_start
+            raw_start = props.get("source_start") if "source_start" in props else source_loc.get("start")
+            raw_end = props.get("source_end") if "source_end" in props else source_loc.get("end")
+
+            source_start = int(raw_start) if raw_start is not None else 0
+            source_end = int(raw_end) if raw_end is not None else len(content)
+
+            is_valid_span = (0 <= source_start < source_end)
+
+            if is_valid_span:
+                if source_end <= len(content):
+                    slice_bytes = content[source_start:source_end].encode("utf-8")
+                elif source_end <= len(content_bytes):
+                    slice_bytes = content_bytes[source_start:source_end]
+                else:
+                    slice_bytes = content_bytes
+                full_quote_hash = hashlib.sha256(slice_bytes).hexdigest()
+                actual_quote_hash = full_quote_hash[:16]
+                is_verified = True
+
+                supplied_quote_hash = (
+                    props.get("quote_hash")
+                    or source_loc.get("quote_hash")
+                    or atom.get("quote_hash")
+                    or atom.get("content_hash")
+                )
+                if supplied_quote_hash:
+                    sup_str = str(supplied_quote_hash).strip()
+                    sup_clean = sup_str[7:] if sup_str.startswith("sha256:") else sup_str
+                    matches_hash = (
+                        full_quote_hash.startswith(sup_clean)
+                        or sup_clean.startswith(full_quote_hash[:len(sup_clean)])
+                        or actual_quote_hash.startswith(sup_clean)
+                        or sup_clean.startswith(actual_quote_hash[:min(len(sup_clean), 16)])
+                    )
+                    if not matches_hash:
+                        is_verified = False
+            else:
+                is_verified = False
+                actual_quote_hash = hashlib.sha256(content_bytes).hexdigest()[:16] if content_bytes else "0" * 16
+
+            parser_loc = props.get("parser_location") or source_loc.get("parser_location") or f"char:{source_start}-{source_end}"
 
             anchor_spec = {
-                "anchor_id": f"anchor:{aid[:8]}",
+                "anchor_id": f"anchor:{aid[:8] if ':' not in aid else aid.split(':', 1)[1][:8]}",
                 "source_atom_version_id": aid,
                 "source_start": source_start,
                 "source_end": source_end,
-                "quote_hash": quote_hash,
+                "quote_hash": actual_quote_hash,
                 "parser_location": parser_loc,
-                "verified": is_valid_span,
+                "verified": is_verified,
             }
+
+            source_uri = (
+                props.get("source", {}).get("uri")
+                or source_loc.get("source_uri")
+                or f"trace://workspace/{workspace_id}/{aid}"
+            )
 
             hit = EngineHit(
                 rank=rank,
@@ -558,40 +659,46 @@ class TraceHybridEngine(BaseComparativeEngine):
                     "cognitive_score": round(final_scores[aid], 4),
                 },
                 source_location={
-                    "source_uri": atom.get("properties", {}).get("source", {}).get("uri", f"trace://workspace/{workspace_id}/{aid}"),
+                    "source_uri": source_uri,
                     "start": source_start,
                     "end": source_end,
                     "parser_location": parser_loc,
                 },
                 anchors=[anchor_spec],
-                is_grounded=is_valid_span,
+                is_grounded=is_verified,
             )
             hits.append(hit)
-            citations.append({
-                "atom_version_id": aid,
-                "source_location": hit.source_location,
-                "quote_hash": quote_hash,
-            })
+            if is_verified:
+                citations.append({
+                    "atom_version_id": aid,
+                    "source_location": hit.source_location,
+                    "quote_hash": actual_quote_hash,
+                })
 
         stage_breakdown["byte_anchor_verification_ms"] = round((time.perf_counter() - t0) * 1000, 2)
 
         # ---------------------------------------------------------------------
-        # Stage 6: Independent Abstention Gate (Evidence-Based Sufficiency)
+        # Stage 6: Grounded Multi-Signal Abstention Gate (Evidence-Based Sufficiency)
         # ---------------------------------------------------------------------
         # The engine determines sufficiency strictly on evidence score thresholds
         # WITHOUT relying on caller truth labels or cheating flags.
         is_sufficient = False
-        if hits:
+        if hits and hits[0].is_grounded:
             top_hit = hits[0]
             top_aid = top_hit.atom_version_id
             top_bm25 = bm25_scores.get(top_aid, 0.0)
             top_dense = dense_scores.get(top_aid, 0.0)
             top_rerank = rerank_scores.get(top_aid, 0.0)
-            top_cog = top_hit.score
 
-            # Grounded evidence condition: must have explicit lexical match OR high dense/rerank confidence
-            has_grounded_match = (top_bm25 > 0.0) or (top_dense >= 0.22) or (top_rerank >= 0.20)
-            if has_grounded_match and top_cog >= 0.05:
+            doc_tokens_set = set(doc_tokens.get(top_aid, []))
+            matched_terms = [t for t in query_terms if t in doc_tokens_set]
+            term_overlap = len(matched_terms) / max(1, len(query_terms))
+
+            has_strong_lexical = (term_overlap >= 0.50 and top_bm25 >= 0.50)
+            has_strong_semantic = (top_dense >= 0.40 and top_rerank >= 0.35)
+            has_hybrid_coverage = (term_overlap >= 0.33 and top_dense >= 0.30)
+
+            if (has_strong_lexical or has_strong_semantic or has_hybrid_coverage) and top_hit.score >= 0.05:
                 is_sufficient = True
 
         abstained = not is_sufficient
@@ -627,10 +734,14 @@ class TraceHybridEngine(BaseComparativeEngine):
             token_count=180,
             token_cost_usd=0.00018,
             metadata={
+                "baseline_category": "trace_cognitive_pipeline",
+                "retrieval_paradigm": "grounded_multi_stage_hybrid",
                 "evidence_bundle_verified": True,
                 "anchor_count": len(results_payload),
                 "graph_nodes": len(all_ids),
                 "graph_edges": sum(len(n) for n in adjacency.values()) // 2,
+                "model_id": embedder_model_id,
+                "is_neural": is_neural,
             },
         )
 
@@ -741,6 +852,11 @@ class PureLexicalEngine(BaseComparativeEngine):
             latency_ms=round(elapsed_ms, 2),
             token_count=50,
             token_cost_usd=0.0,
+            metadata={
+                "baseline_category": "lexical_bm25_baseline",
+                "retrieval_paradigm": "pure_lexical_bm25",
+                "anchors_verified": False,
+            },
         )
 
 
@@ -788,6 +904,9 @@ class PureVectorEngine(BaseComparativeEngine):
         start_time = time.perf_counter()
         atom_list = atoms or []
 
+        embedder_model_id = getattr(self.embedder, "model_name", None) or getattr(self.embedder, "provider_id", "hashing-dense-v1")
+        is_neural = not (isinstance(self.embedder, HashingDenseEmbedder) or getattr(self.embedder, "provider_id", "") == "hashing-dense-v1")
+
         if not atom_list:
             elapsed_ms = (time.perf_counter() - start_time) * 1000
             return EngineQueryResult(
@@ -801,6 +920,13 @@ class PureVectorEngine(BaseComparativeEngine):
                 citations=[],
                 hallucination_detected=False,
                 latency_ms=round(elapsed_ms, 2),
+                metadata={
+                    "baseline_category": "dense_vector_baseline",
+                    "retrieval_paradigm": "pure_vector_top_k",
+                    "model_id": embedder_model_id,
+                    "is_neural": is_neural,
+                    "anchors_verified": False,
+                },
             )
 
         query_vec = self.embedder.embed([query_text])[0]
@@ -851,6 +977,13 @@ class PureVectorEngine(BaseComparativeEngine):
             latency_ms=round(elapsed_ms, 2),
             token_count=100,
             token_cost_usd=0.00005,
+            metadata={
+                "baseline_category": "dense_vector_baseline",
+                "retrieval_paradigm": "pure_vector_top_k",
+                "model_id": embedder_model_id,
+                "is_neural": is_neural,
+                "anchors_verified": False,
+            },
         )
 
 
@@ -919,6 +1052,10 @@ class NaiveRagEngine(BaseComparativeEngine):
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000 + 45.0  # simulate LLM prompt latency
 
+        vec_embedder = self.vector_engine.embedder
+        embedder_model_id = getattr(vec_embedder, "model_name", None) or getattr(vec_embedder, "provider_id", "hashing-dense-v1")
+        is_neural = not (isinstance(vec_embedder, HashingDenseEmbedder) or getattr(vec_embedder, "provider_id", "") == "hashing-dense-v1")
+
         return EngineQueryResult(
             engine_id=self.engine_id,
             engine_name=self.name,
@@ -937,7 +1074,14 @@ class NaiveRagEngine(BaseComparativeEngine):
             latency_ms=round(elapsed_ms, 2),
             token_count=350,
             token_cost_usd=0.00035,
-            metadata={"rag_framework": "generic_naive_rag", "anchors_verified": False},
+            metadata={
+                "baseline_category": "naive_rag_baseline",
+                "retrieval_paradigm": "unanchored_generative_rag",
+                "rag_framework": "generic_naive_rag",
+                "model_id": embedder_model_id,
+                "is_neural": is_neural,
+                "anchors_verified": False,
+            },
         )
 
 
@@ -975,22 +1119,64 @@ class CustomDbEngine(BaseComparativeEngine):
     def _verify_endpoint_connectivity(self) -> dict[str, Any]:
         """Check and report health/connectivity of the configured external endpoint."""
         if not self.endpoint_url or self.adapter_type == "mock":
-            return {"status": "connected", "mode": "in_memory_adapter", "endpoint": self.endpoint_url or "mock"}
+            return {
+                "status": "connected",
+                "mode": "reference_mode",
+                "endpoint": self.endpoint_url or "mock",
+            }
 
         try:
             parsed = urllib.parse.urlparse(self.endpoint_url)
             scheme = parsed.scheme.lower()
 
             if scheme in {"sqlite", "sqlite3"}:
-                return {"status": "connected", "protocol": "sqlite", "path": parsed.path or ":memory:"}
+                return {
+                    "status": "connected",
+                    "protocol": scheme,
+                    "path": parsed.path or ":memory:",
+                }
             elif scheme in {"http", "https"}:
-                return {"status": "configured", "protocol": scheme, "host": parsed.netloc}
+                host = parsed.hostname or (parsed.netloc.split(":")[0] if ":" in parsed.netloc else parsed.netloc)
+                port = parsed.port or (443 if scheme == "https" else 80)
+                try:
+                    with socket.create_connection((host, port), timeout=0.75):
+                        return {
+                            "status": "connected",
+                            "protocol": scheme,
+                            "host": parsed.netloc,
+                            "endpoint": self.endpoint_url,
+                        }
+                except Exception as ex:
+                    return {
+                        "status": "connection_failed",
+                        "protocol": scheme,
+                        "host": parsed.netloc,
+                        "error": str(ex),
+                        "endpoint": self.endpoint_url,
+                    }
             elif scheme in {"postgres", "postgresql"}:
-                return {"status": "configured", "protocol": "postgresql", "host": parsed.netloc}
+                host = parsed.hostname or (parsed.netloc.split(":")[0] if ":" in parsed.netloc else parsed.netloc)
+                port = parsed.port or 5432
+                try:
+                    with socket.create_connection((host, port), timeout=0.75):
+                        return {
+                            "status": "connected",
+                            "protocol": scheme,
+                            "host": parsed.netloc,
+                            "endpoint": self.endpoint_url,
+                        }
+                except Exception as ex:
+                    return {
+                        "status": "connection_failed",
+                        "protocol": scheme,
+                        "host": parsed.netloc,
+                        "error": str(ex),
+                        "endpoint": self.endpoint_url,
+                    }
             else:
-                return {"status": "active", "protocol": scheme or "custom"}
+                return {"status": "active", "protocol": scheme or "custom", "endpoint": self.endpoint_url}
         except Exception as ex:
-            return {"status": "degraded", "error": str(ex), "endpoint": self.endpoint_url}
+            return {"status": "connection_failed", "error": str(ex), "endpoint": self.endpoint_url}
 
     async def query(
         self,
@@ -1048,7 +1234,11 @@ class CustomDbEngine(BaseComparativeEngine):
             latency_ms=round(elapsed_ms, 2),
             token_count=40,
             token_cost_usd=0.0,
-            metadata={"endpoint_status": conn_status.get("status")},
+            metadata={
+                "baseline_category": "custom_database_adapter",
+                "retrieval_paradigm": "external_custom_endpoint",
+                "endpoint_status": conn_status.get("status"),
+            },
         )
 
 

@@ -6,10 +6,10 @@ resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'emscripten'",
     "python_full_version >= '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
     "python_full_version == '3.13.*' and sys_platform == 'win32'",
-    "python_full_version < '3.13' and sys_platform == 'win32'",
     "python_full_version == '3.13.*' and sys_platform == 'emscripten'",
-    "python_full_version < '3.13' and sys_platform == 'emscripten'",
     "python_full_version == '3.13.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+    "python_full_version < '3.13' and sys_platform == 'win32'",
+    "python_full_version < '3.13' and sys_platform == 'emscripten'",
     "python_full_version < '3.13' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 
@@ -2258,11 +2258,15 @@ production = [
     { name = "uvicorn", extra = ["standard"] },
 ]
 test = [
+    { name = "fastapi" },
+    { name = "httpx" },
     { name = "jsonschema" },
     { name = "litellm" },
     { name = "psutil" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
+    { name = "python-multipart" },
+    { name = "uvicorn" },
 ]
 v2 = [
     { name = "fastapi" },
@@ -2275,9 +2279,11 @@ v2 = [
 requires-dist = [
     { name = "boto3", marker = "extra == 'production'", specifier = ">=1.35,<2" },
     { name = "fastapi", marker = "extra == 'production'", specifier = ">=0.115,<0.116" },
+    { name = "fastapi", marker = "extra == 'test'", specifier = ">=0.115" },
     { name = "fastapi", marker = "extra == 'v2'", specifier = ">=0.115,<0.116" },
     { name = "google-cloud-storage", marker = "extra == 'production'", specifier = ">=2.18,<3" },
     { name = "httpx", marker = "extra == 'production'", specifier = ">=0.27,<1" },
+    { name = "httpx", marker = "extra == 'test'", specifier = ">=0.27" },
     { name = "jsonschema", specifier = ">=4.20" },
     { name = "jsonschema", marker = "extra == 'test'", specifier = ">=4.20" },
     { name = "litellm", marker = "extra == 'production'", specifier = ">=1.0" },
@@ -2294,9 +2300,11 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
     { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.23" },
     { name = "python-multipart", marker = "extra == 'production'", specifier = ">=0.0.9" },
+    { name = "python-multipart", marker = "extra == 'test'", specifier = ">=0.0.12" },
     { name = "python-multipart", marker = "extra == 'v2'", specifier = ">=0.0.9" },
     { name = "qdrant-client", marker = "extra == 'production'", specifier = ">=1.12,<2" },
     { name = "redis", marker = "extra == 'production'", specifier = ">=5.2,<6" },
+    { name = "uvicorn", marker = "extra == 'test'", specifier = ">=0.32" },
     { name = "uvicorn", extras = ["standard"], marker = "extra == 'production'", specifier = ">=0.32,<0.33" },
     { name = "uvicorn", extras = ["standard"], marker = "extra == 'v2'", specifier = ">=0.32,<0.33" },
 ]
