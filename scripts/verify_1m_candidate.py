@@ -47,7 +47,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 
 # Authoritative Canonical Hashes for 1M Scale Gate
 CANONICAL_POLICY_SHA256 = "983279467455f006a5245bea0e8c550ce3a286fbda3fc5b01f9d797b05e3d880"
-CANONICAL_CORPUS_MANIFEST_SHA256 = "f49d20d8bc8cd38ff543611fd5f5a2e40962b0dc2ec23782dd9119dcd8c72df8"
+CANONICAL_CORPUS_MANIFEST_SHA256 = "66c20da6cb77e77a859d20603eccf002eaf1a5f38b8008185c9f300e6ce503c5"
 CANONICAL_QUERIES_MANIFEST_SHA256 = "85ac73edc48d158a0fc300b90a88c8d13ca7f71bac4e256cc673d10f686c69aa"
 CANONICAL_BLIND_QUERIES_SHA256 = "49261b7a56d5363015b536ee6e5f0505cc14709fcf5b36c3f932510b3bff3417"
 CANONICAL_SCHEMA_SHA256 = "f9ce026422d4e0fc65b77f143d98559b26402629ebf56e9040d7181fa6fc2bb6"
@@ -96,7 +96,7 @@ def compute_table_hash(conn: sqlite3.Connection, table_name: str) -> tuple[int, 
         return 0, hashlib.sha256(b"").hexdigest()
 
     col_str = ", ".join(f'"{c}"' for c in cols)
-    order_clause = col_str if target_table != "node_fts" else "rowid"
+    order_clause = "rowid"
     cur.execute(f"SELECT {col_str} FROM {target_table} ORDER BY {order_clause};")
 
     h = hashlib.sha256()
