@@ -44,3 +44,4 @@ tests/.phase1_tmp/
 
 # Benchmark runs and artifacts
 benchmarks/runs/
+suggestions/

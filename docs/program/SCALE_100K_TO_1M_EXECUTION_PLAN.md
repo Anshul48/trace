@@ -63,8 +63,10 @@ promotion state.
 | Retained R2.1 query telemetry | Stale 500-row output with no complete MultiHop/Top-20 evidence | Do not use it as the R3 baseline or as proof of the new evaluator. |
 | Current R2.1 verifier receipt | Bound to a 1K calibration rather than the retained 100K candidate | It cannot attest the 100K gate. Generate a fresh receipt only after a fresh candidate. |
 | R2.1 custody/reporting | Relevant work remains outside a clean immutable candidate lineage | Source implementation, candidate execution, verifier output, and human decision must be distinct artifacts. |
-| Gate C2 | `REPAIR` | Level 2 execution remains blocked. |
-| Level 2 / 1M | Planning only | No corpus acquisition, candidate build, or provider use until Gate D authorizes the exact pilot. |
+| Gate C2 (100K) | `ACCEPTED / PROMOTED` (`DEC-GATE-C2-PASS-VERIFIED`) | 100K Level 1 scale gate certified with 100% 7-table replay parity and 1000/1000 byte anchor proofs. |
+| 1M Candidate #1 (`1m_scale_candidate_final`) | `QUARANTINED_DIAGNOSTIC_NON_CERTIFYING` (`DEC-GATE-F2-FAIL-QUARANTINED`) | 14.14 GB database (1M unique docs, 100% replay) preserved for diagnostic profiling; rejected for Gate F2 due to storage multiplier (7.54x > 3.0x), literal receipts, and query collisions. |
+| Level 2 Policy | `CANONICAL_FROZEN` (`DEC-P-005b-LEVEL2`) | `scale_policy_level2.lock.json` authored and schema-validated; binds 1M invariants, <=3.0x storage ceiling, and fail-closed verifier. |
+| Gate F2 (1M) | `PENDING_REPAIR` | Blocked until storage-optimized 1M candidate is executed under clean custody and verified. |
 
 The next valid evidence lineage starts from a reviewed clean source commit. It
 does not inherit a PASS bit, metric, checkpoint, database count, or scale claim

@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "2.2.0",
+  "policy_id": "DEC-P-005b-LEVEL2",
+  "policy_name": "Trace Wave R2.2 Level 2 (1M) Scale Policy Lockfile",
+  "target_standard": "DEC-P-005b-LEVEL2",
+  "governance_status": "FORMAL_REPAIR_QUALIFICATION_LOCKED",
+  "generated_at_utc": "2026-09-01T16:50:00Z",
+  "governance": {
+    "authority": "Human Gate D & Scale Certification Recovery Plan Architecture",
+    "status": "FORMAL_REPAIR_QUALIFICATION_LOCKED",
+    "effective_date_utc": "2026-09-01T00:00:00Z",
+    "claim_level": "LEVEL2_QUALIFICATION",
+    "decision_references": [
+      "DEC-004",
+      "DEC-P-005",
+      "DEC-P-005b",
+      "DEC-GATE-C2-PASS-VERIFIED",
+      "WAVE-D-GOVERNANCE"
+    ],
+    "description": "Prospective reconciliation of numerical thresholds, retrieval quality floors, latency budgets, storage multiplier accounting (<=3.0x), memory limits (<=8.0 GiB), and 7-table cryptographic replay parity for Level 2 (1,000,000 unique document) scale qualification."
+  },
+  "raw_text_denominator_bytes": 2014465744,
+  "max_storage_multiplier": 3.0,
+  "max_storage_bytes": 6043397232,
+  "scale": {
+    "required_document_count_D": 1000000,
+    "target_scale_description": "1,000,000 unique real text documents (100,000 base + 900,000 delta disjoint)",
+    "synthetic_data_allowed": false,
+    "in_memory_fallback_allowed": false
+  },
+  "retrieval": {
+    "direct_lookup": {
+      "dataset": "beir-scifact",
+      "description": "Scientific claim verification direct fact lookup",
+      "min_ndcg10": 0.6,
+      "min_recall20": 0.75,
+      "max_p95_ms": 25000.0
+    },
+    "domain_semantic": {
+      "dataset": "beir-nfcorpus",
+      "description": "Medical and nutrition domain semantic information retrieval",
+      "min_ndcg10": 0.18,
+      "min_recall20": 0.11,
+      "max_p95_ms": 1000.0
+    },
+    "semantic_qa": {
+      "dataset": "beir-fiqa",
+      "description": "Financial domain opinion mining and semantic question answering",
+      "min_ndcg10": 0.1,
+      "min_recall20": 0.2,
+      "max_p95_ms": 3500.0
+    },
+    "multi_hop_reasoning": {
+      "dataset": "multihop-rag",
+      "description": "Multi-hop cross-document relational reasoning and evidence retrieval",
+      "min_ndcg10": 0.12,
+      "min_coverage20": 0.2,
+      "max_p95_ms": 2000.0
+    },
+    "complex_reasoning": {
+      "dataset": "bright",
+      "description": "Complex multi-step reasoning and Olympiad mathematics retrieval",
+      "min_ndcg10": 0.05,
+      "min_recall20": 0.05,
+      "max_p95_ms": 60000.0
+    }
+  },
+  "abstention": {
+    "min_zero_hallucination_rate": 1.0,
+    "min_abstention_accuracy": 0.9,
+    "required_null_queries": 301,
+    "unlabeled_retrieval_path_required": true,
+    "leakage_prevention_rule": "Evaluation runner and product path must not receive ground truth query labels or branch on system_abstained flags during execution."
+  },
+  "storage": {
+    "max_storage_multiplier": 3.0,
+    "max_storage_bytes": 6043397232,
+    "target_storage_bytes": 5500000000,
+    "raw_text_denominator_bytes": 2014465744,
+    "raw_text_denominator_baseline_bytes": 2014465744,
+    "policy_on_durable_spine_vs_derived_projections": "The 3.00x storage multiplier ceiling strictly applies to the complete hot database capsule (durable SQLite WAL Spine events, raw atom chunks, source provenance, node/edge versions, FTS5 lexical indexes, and cortex graph state) active on disk at rest. Spine events must be immutable and durable; derived projections must be 100% rebuildable from Spine events with full parity. Raw upstream dataset downloads in ~/.cache and ephemeral staging files are excluded.",
+    "spine_vs_projections_policy": {
+      "accounting_scope": "TOTAL_HOT_STATE",
+      "definition": "The 3.00x storage multiplier ceiling strictly applies to the complete hot database capsule (durable SQLite WAL Spine events, raw atom chunks, source provenance, node/edge versions, FTS5 lexical indexes, and cortex graph state) active on disk at rest.",
+      "durable_spine_mandate": "Spine event store and atom records must be immutable, durable, byte-exact, and sufficient for complete state reconstruction.",
+      "derived_projections_mandate": "All projections (FTS5 lexical index, cortex graph tables, and version indices) are derived representations and must be rebuildable from Spine events with 100.0% parity.",
+      "included_hot_artifacts": [
+        "scale_1m.db",
+        "scale_1m.db-wal",
+        "scale_1m.db-shm"
+      ],
+      "excluded_offline_artifacts": [
+        "raw dataset source downloads in ~/.cache or AppData",
+        "ephemeral ingestion staging queues",
+        "offline candidate backup snapshots"
+      ]
+    }
+  },
+  "memory": {
+    "max_peak_ram_gb": 8.0,
+    "reference_host_profile": "R16",
+    "accounting_mechanism": "Peak process-tree RSS (Linux /proc/self/status VmHWM)",
+    "zero_oom_enforcement": true
+  },
+  "graph": {
+    "max_stored_degree": 10,
+    "max_traversal_p95_ms": 35.0,
+    "traversal_algorithm": "Personalized PageRank (PPR) / Spreading Activation",
+    "max_walk_depth": 15,
+    "telemetry_emission_required": true
+  },
+  "durability": {
+    "min_atom_retention": 1.0,
+    "max_hash_drift": 0.0,
+    "min_anchor_recovery": 1.0,
+    "max_repeat_erasure_delta": 0,
+    "anchor_proof_samples": 1000
+  },
+  "resilience": {
+    "min_rebuild_parity": 1.0,
+    "replay_scope": "100% full event replay from Spine events into a blank database capsule",
+    "verification_tables": [
+      "events",
+      "ingestions",
+      "nodes",
+      "node_versions",
+      "edge_versions",
+      "source_lifecycle",
+      "node_fts"
+    ]
+  },
+  "statistical_methods": {
+    "bootstrap_resamples": 10000,
+    "bootstrap_ci_level": 0.95,
+    "bootstrap_seed": 42,
+    "significance_alpha": 0.01,
+    "hypothesis_tests": [
+      "paired_wilcoxon_signed_rank",
+      "paired_students_t"
+    ],
+    "practical_effect_size_floor_delta": 0.03,
+    "denominator_integrity": {
+      "strict_cohort_separation": true,
+      "empty_retrieval_scored_as_zero": true,
+      "prohibited_actions": [
+        "omitting failed queries from average",
+        "synthetic score flooring",
+        "arbitrary cohort slicing"
+      ]
+    }
+  }
+}

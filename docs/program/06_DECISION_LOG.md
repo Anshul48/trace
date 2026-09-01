@@ -437,6 +437,25 @@ substituting for it.
 
 ---
 
+### DEC-GATE-F2-FAIL-QUARANTINED — Level 2 1M Scale Gate Diagnostic Quarantine & Rejection
+
+**Status:** **REJECTED / QUARANTINED (`quarantine_1m_diagnostic`)**.
+**Date:** 2026-09-01
+**Authority / Source:** Lead Scale Certification Architect & Independent Verifier under `SCALE_CERTIFICATION_RECOVERY_PLAN.md` and `SCALE_100K_TO_1M_EXECUTION_PLAN.md`.
+**Audited Candidate:** `benchmarks/runs/1m_scale_candidate_final`
+**Candidate Database:** 14.14 GB SQLite database (`scale_1m.db`) containing 1,000,000 unique document records.
+**Audit Findings & Violations:**
+1. *Storage Multiplier Breach:* Hot storage footprint (14.14 GB) relative to raw text denominator (2.01 GB) produced a storage multiplier of **7.54x**, substantially exceeding the governing policy ceiling of $\le 3.0\times$.
+2. *Control Plane Custody Defects:* Candidate receipts for crash recovery and incremental watermark resume were generated as literal dictionaries rather than from detached process fault drills; `candidate_manifest.json` contained placeholder `"candidate_merkle_root": "SEALED"` and hardcoded `git_clean: true`.
+3. *Policy Identity Mismatch:* Candidate was bound to Level 1 policy (`DEC-P-005b-LEVEL1-R2.2`, requiring 100K documents) rather than a validated Level 2 standard.
+4. *Query Denominator & Collisions:* Native BEIR query IDs (`0`, `1`, etc.) collided across cohorts (79 collisions between SciFact and FiQA); 3 duplicate queries in abstention suite; candidate evaluated 8,275 records with duplicate executions.
+5. *Retrieval Quality & Latency Floors:* Complex reasoning nDCG=0.00, Recall=0.00 with P95 latency 52.8s; direct lookup P95 latency 23.1s; multi-hop nDCG=0.1396.
+6. *Grounded Anchor Verification:* 1,000 anchor proofs were trusted from a self-reported JSON rather than independently sliced and verified against upstream corpus files.
+
+**Decision:** Formally **REJECT** promotion of `1m_scale_candidate_final` as a certified Level 2 release. Designate the 14.14 GB database and replay artifacts as **QUARANTINED_DIAGNOSTIC_NON_CERTIFYING** assets for profiling and test verification. Gate F2 remains unapproved until a compliant, storage-optimized candidate passes detached verification under Gate D.
+
+---
+
 ## Pending Decisions (Explicitly Deferred)
 
 The following decisions remain explicitly deferred and require empirical evidence before human determination:
