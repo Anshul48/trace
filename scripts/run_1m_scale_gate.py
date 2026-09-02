@@ -451,6 +451,7 @@ class Scale1MRunner:
         corpus_manifest_path: Path = DEFAULT_CORPUS_MANIFEST,
         queries_file_path: Path = DEFAULT_QUERIES_FILE,
         policy_file_path: Path = DEFAULT_POLICY_FILE,
+        eval_only: bool = False,
     ) -> None:
         self.mode = mode
         self.target_count = target_count
@@ -463,6 +464,7 @@ class Scale1MRunner:
         self.db_path = self.output_dir / "scale_1m.db"
         self.replay_db_path = self.output_dir / "scale_1m_replay.db"
         self.resume = True
+        self.eval_only = eval_only
         self.db: LeanSpineDatabase | None = None
 
         self.policy: dict[str, Any] = {}
@@ -1248,6 +1250,7 @@ def main() -> None:
     parser.add_argument("--corpus-manifest", type=str, default=str(DEFAULT_CORPUS_MANIFEST), help="Path to 1m_corpus_manifest.json")
     parser.add_argument("--queries-file", type=str, default=str(DEFAULT_QUERIES_FILE), help="Path to 1m_queries_blind_eval.jsonl")
     parser.add_argument("--policy", type=str, default=str(DEFAULT_POLICY_FILE), help="Path to scale_policy.lock.json")
+    parser.add_argument("--eval-only", action="store_true", help="Re-evaluate blind queries on existing candidate database and re-seal")
 
     args = parser.parse_args()
     mode = "candidate" if args.candidate else "diagnostic"
@@ -1259,9 +1262,15 @@ def main() -> None:
         corpus_manifest_path=Path(args.corpus_manifest),
         queries_file_path=Path(args.queries_file),
         policy_file_path=Path(args.policy),
+        eval_only=args.eval_only,
     )
     runner.load_configs()
     runner.run_preflight_checks()
+    if args.eval_only:
+        runner.evaluate_blind_queries()
+        runner.finalize_and_seal()
+        return
+
     runner.ingest_workload()
     runner.run_bounded_graph_walks()
     runner.evaluate_blind_queries()
