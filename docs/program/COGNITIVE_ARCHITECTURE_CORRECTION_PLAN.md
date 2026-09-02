@@ -24,8 +24,10 @@ The architecture is corrected as follows:
 
 1. **CORE**, **RETRIEVAL**, **CORTEX**, and **SYNTHESIS** are distinct
    capability lanes with separate contracts, evaluations, budgets, and claims.
-2. Engineering and research in those lanes may proceed in parallel once their
-   shared contracts and evaluators are frozen.
+2. Read-only audit, contract scaffolding, safety repair and evaluator
+   preparation may proceed in parallel. An evaluated candidate run or
+   operational persistence waits only for its relevant frozen interface,
+   inputs, policy and evaluator—not every program contract.
 3. Certification and promotion remain dependency-ordered. A Cortex result
    cannot repair or certify a failed Core result, and a Core result cannot be
    presented as proof of semantic organization.
@@ -74,7 +76,8 @@ are not the capability itself.
   policy state, and evidence anchors remain recoverable and auditable.
 - Cortex artifacts are derived, revisioned, replaceable, and rollbackable.
 - Candidate projections remain invisible to ordinary reads until validated and
-  atomically activated or explicitly selected for shadow evaluation.
+  made reader-visible through the authoritative release pointer, or explicitly
+  selected for shadow evaluation.
 - Retrieval must expand back to raw source atoms; a generated summary is never
   sufficient evidence for a factual answer.
 - Work, graph traversal, model calls, storage, latency, and cost are bounded and
@@ -82,7 +85,9 @@ are not the capability itself.
 - Evaluation inputs and thresholds are frozen prospectively. Implementers do
   not edit the evaluator that promotes their candidate.
 - Independent verification and explicit Human Owner promotion remain required
-  for release, certification, threshold changes, and high-impact topology.
+  for product releases/claims, certification, threshold changes, activation
+  policy and high-impact topology. Low-risk projection revisions may activate
+  only inside an already approved profile and policy.
 - A model cannot excuse lost events, corrupt anchors, broken replay, privacy
   leakage, or unbounded resource use.
 
@@ -90,14 +95,14 @@ are not the capability itself.
 
 | Previous interpretation | Corrected interpretation |
 | --- | --- |
-| Core must certify before Cortex work begins. | Core must certify before a combined promoted 1M claim; Cortex engineering starts as soon as shared contracts and evaluators are ready. |
+| Core must certify before Cortex work begins. | Core must certify before a combined promoted 1M claim; Cortex scaffolding may start now and evaluated candidates begin after their relevant contracts, inputs, policy and evaluator are frozen. |
 | Offline implies model-free organization. | Offline permits pinned local embedding, reranking, extraction, and generative models. Model-free fallbacks remain controls and degraded modes. |
 | Zero orphans and routing purity prove self-organization. | They prove structural coverage and assignment stability only. Semantic organization requires separate quality and utility evidence. |
 | Extractive clipping is a sufficient hierarchy summary. | It is a deterministic control and emergency fallback, not the target condensation mechanism. |
 | Every generated projection must replay byte-for-byte. | Canonical Spine and deterministic projections require exact replay. Generative projections require immutable inputs/configuration/output receipts, stable lineage, and reproducible regeneration within a declared equivalence policy. |
 | Every useful semantic relation needs manual review. | Review is risk-tiered. High-impact factual/schema/topology changes remain human-governed; low-risk navigation projections may auto-activate after strict validation and sampled audit. |
 | One latency ceiling covers Trace retrieval. | Direct retrieval, graph retrieval, background consolidation, deep navigation, and answer synthesis have separate SLOs and budgets. |
-| Storage amplification against raw text alone is sufficient. | Core durability and Cortex projection economics are reported separately, plus total-system cost. Vector/graph/summary cost is normalized by documents, atoms, tokens, active set, and workload—not hidden in one ratio. |
+| Storage amplification against raw text alone is sufficient. | Core durability, Retrieval projections and Cortex projections are reported separately, plus total-system cost. Vector/graph/summary cost is normalized by documents, atoms, tokens, active set, and workload—not hidden in one ratio. |
 | "Hybrid" is one capability. | Dense retrieval, graph navigation, semantic consolidation, and answer generation are separate mechanisms and must be independently ablated. |
 
 ### 3.3 Explicitly rejected directions
@@ -129,18 +134,38 @@ clause to a permanent decision-log entry without changing its meaning.
 | ID | Decision clause |
 | --- | --- |
 | `CAP-D001` | Adopt CORE, RETRIEVAL, CORTEX, SYNTHESIS, and EVALUATION/CONTROL as distinct capability and claim lanes. |
-| `CAP-D002` | Permit parallel engineering after shared-contract readiness; retain sequential candidate freeze, verification, scale authorization, and promotion. |
+| `CAP-D002` | Permit parallel audit/scaffolding/safety work; require each lane's relevant frozen interfaces, inputs, policy and evaluator before candidate execution, followed by sequential candidate freeze, verification, run authorization and promotion. |
 | `CAP-D003` | Keep canonical ingestion free of generative calls; run semantic consolidation asynchronously over bounded changed neighborhoods. |
 | `CAP-D004` | Keep Spine state canonical and all learned/generated organization rebuildable, revisioned, evidence-anchored Cortex state. |
 | `CAP-D005` | Require exact replay for canonical/deterministic state and declared reproducibility classes plus retained outputs/receipts for generative state. |
 | `CAP-D006` | Select the smallest passing model or cascade empirically; use a strong hosted model only as a policy-approved teacher, upper bound, or escalation candidate. |
-| `CAP-D007` | Use risk-tiered activation: validated navigation and retrieval-only projections may auto-activate; factual/schema/governance changes retain stricter review. |
+| `CAP-D007` | Use risk-tiered activation inside a Human-approved policy/profile: an independent policy mechanism assigns the tier; validated navigation and retrieval-only revisions may auto-activate, while factual/schema/governance changes retain stricter review. |
 | `CAP-D008` | Evaluate structural organization, semantic organization, direct retrieval, multi-hop retrieval, and synthesis with separate scorecards and paired ablations. |
 | `CAP-D009` | Use small frozen experiments, then 10K and 100K gates before admitting a Cortex mechanism to 1M; never use 1M as a tuning loop. |
 | `CAP-D010` | Reconcile storage, latency, freshness, throughput, and cost prospectively by lane and service class before freezing a candidate. |
 | `CAP-D011` | Fail closed on missing models, invalid/empty output, unknown required identity, hidden fallback, incomplete denominators, and unavailable cost evidence. |
 | `CAP-D012` | Preserve Human Owner authority over architecture, thresholds, credentials, provider spend, protected changes, scale execution, and promotion. |
 | `CAP-D013` | Issue component claims and decisions separately; only a compatible, independently verified integrated release may support a combined Trace claim. |
+| `CAP-D014` | Add one versioned `semantic_organization` release component whose manifest binds compatible summary/entity/claim/relation/active-schema artifacts; keep structural hierarchy and lexical/dense indexes separately replaceable, and exclude pending high-risk proposals from the active manifest. |
+| `CAP-D015` | Separate candidate authorship, evaluator-bound validation authority, activation authority, independent verification, and Human Owner promotion; one broad write scope is insufficient. |
+| `CAP-D016` | Require crash-consistent, journaled, idempotent multi-store activation and rollback with one authoritative release pointer and reconciliation; do not claim a distributed atomic transaction across SQL and external indexes. |
+
+The per-lane lifecycle is:
+
+```text
+audit/scaffold
+  -> freeze relevant interface + inputs + policy + evaluator
+  -> separately authorized isolated candidate execution
+  -> frozen candidate + raw evidence
+  -> detached validation/verification
+  -> component decision
+  -> compatible integrated shadow manifest
+  -> Human product-claim/release decision
+```
+
+Low-risk automatic activation is an implementation of a previously accepted
+policy inside this lifecycle, not a substitute for Human approval of that
+policy or of a product/scale claim.
 
 ## 4. Capability lanes and truth boundaries
 
@@ -252,6 +277,14 @@ The implementation DAG should converge on explicit, versioned contracts for:
 Names may change during contract design, but the identities and boundaries may
 not be collapsed into one generic JSON blob without an explicit decision.
 
+The release root adds one `semantic_organization` component rather than one
+release component for every object type. Its immutable child manifest binds
+compatible typed summary, entity, claim, relation and active-schema artifacts
+to exact projection runs and checksums. Structural membership remains in the
+existing `hierarchy` component; lexical and dense indexes remain independent.
+Pending factual/schema proposals stay outside the active semantic manifest
+until their accepted policy transition produces a new candidate revision.
+
 ### 6.2 Risk tiers
 
 | Tier | Examples | Default disposition |
@@ -265,6 +298,13 @@ not be collapsed into one generic JSON blob without an explicit decision.
 The objective is not to remove human authority. It is to spend human attention
 on ambiguity and consequence instead of forcing manual approval of every safe
 navigation artifact.
+
+The Human Owner approves the activation profile, eligible object types,
+thresholds, sampling rate and rollback rules. A validator/risk classifier that
+is independent of the generator assigns each candidate's tier. The generator
+cannot label its own output T1/T2 to obtain automatic activation. Automatic
+activation within that approved profile is distinct from Human promotion of a
+product release, benchmark claim or scale milestone.
 
 ## 7. Reproducibility contract
 
@@ -297,6 +337,17 @@ Generative Cortex outputs require:
 An inability to reproduce the exact text later does not corrupt the Spine. It
 may, however, make that Cortex release ineligible for promotion or require its
 stored output to remain available for audit.
+
+| Reproducibility class | Experiment | Shadow | Automatic active profile | Certification/promotion eligibility |
+| --- | --- | --- | --- | --- |
+| `bit_reproducible` | Yes | Yes | Yes, after all other gates | Yes |
+| `semantically_reproducible` | Yes | Yes | Only with retained original output, known model/runtime revision, accepted equivalence validator and approved risk policy | Yes for the declared semantic claim; never for bit-exact regeneration |
+| `receipt_replay_only` | Yes | Yes, explicitly labeled and time-bounded | No | No, unless a new Human decision prospectively defines and accepts the missing reproducibility guarantee |
+| `provider_revision_unavailable` | Exploratory only | No | No | No |
+
+Provider/model identity that is absent or unknown therefore fails any promoted
+or certifying lane even when an exploratory result is retained as research
+evidence.
 
 ## 8. Model strategy
 
@@ -406,9 +457,13 @@ Report at least three storage views:
 
 1. **Core amplification:** canonical hot durability state versus canonical raw
    admitted bytes.
-2. **Cortex amplification:** active lexical/vector/graph/hierarchy/summary state
-   by source tokens, atoms, documents, and active working set.
-3. **Total operating footprint:** active state, temporary build headroom,
+2. **Retrieval projection amplification:** active lexical, dense, reranker
+   support and retrieval-graph/index state by source tokens, atoms, documents
+   and active working set.
+3. **Cortex amplification:** hierarchy, semantic-organization, entity, claim,
+   relation, schema, summary and consolidation state under the same normalized
+   units.
+4. **Total operating footprint:** active state, temporary build headroom,
    retained rollback release, model weights/cache, snapshots and recovery
    reserve.
 
@@ -432,8 +487,8 @@ its foreground latency is low.
 
 ### 9.5 Provisional Cortex and Synthesis promotion targets
 
-These are recommended starting decisions for Human Owner ratification at Gate
-A, not thresholds silently activated by this planning document. Gate A may
+These are recommended starting decisions for Human Owner ratification at
+`CAP-GA`, not thresholds silently activated by this planning document. `CAP-GA` may
 amend them before any candidate or promotion set is exposed.
 
 | Capability | Recommended initial target |
@@ -463,7 +518,7 @@ boundaries.
 | **W1 Evaluation/data** | Freeze datasets, cluster samples, judgments, metrics, baselines and result schemas. | Evaluation manifest, judgment capsule, metric implementations, negative tests. | Tuning candidate prompts/models after promotion data is exposed. |
 | **W2 Model gateway/economics** | Fail-closed invocation, registry, local/hosted adapters, receipts, privacy and budgets. | Provider/model admission contract, usage/cost accounting, failure tests. | Choosing winners or certifying quality. |
 | **W3 Retrieval** | Establish honest lexical+dense+fusion+rerank baseline and bounded graph hooks. | Pinned indexes/models, query-level results, ablations, latency/work evidence. | Crediting Cortex before separate ablation. |
-| **W4 Cortex contracts/releases** | Typed projection objects, lineage, candidate isolation, validation and activation. | Schemas/migrations, release manifest, rollback, historical visibility tests. | Generative quality evaluator. |
+| **W4 Cortex contracts/releases** | Typed projection objects, lineage, candidate isolation, validation and activation. | Schemas/migrations, `semantic_organization` manifest, authority separation, crash-consistent release reconciliation, rollback, historical visibility and SQLite/PostgreSQL parity tests. | Generative quality evaluator. |
 | **W5 Cortex generation** | Bounded cluster assembly, summaries, entities, claims and typed relation proposals. | Local-first generators, prompt/schema revisions, abstention and invalid-output behavior. | Auto-promoting high-impact schemas or facts. |
 | **W6 Runtime/jobs** | Delta scheduling, leases, retries, cancellation, backpressure, checkpoints and observability. | Restart-safe worker flow, backlog telemetry, idempotency and recovery tests. | Changing semantic thresholds. |
 | **W7 Model bake-off/research** | Execute frozen comparisons and uncertainty/escalation studies. | Raw outputs, scorecards, cost frontier, smallest-passing recommendation. | Editing frozen evaluator or promoting its own recommendation. |
@@ -501,7 +556,7 @@ Required outcomes:
 - Legacy packets and evidence remain immutable historical records.
 - No task can infer that Cortex development is blocked on a 1M Core pass.
 
-**Gate A:** one unambiguous precedence chain exists and every downstream packet
+**`CAP-GA`:** one unambiguous precedence chain exists and every downstream packet
 can name its governing decision digest.
 
 ### Wave B - repair measurement and model-call integrity
@@ -521,7 +576,12 @@ Parallel bounded tracks:
 - freeze golden evidence bundles so Synthesis can be developed without waiting
   for a candidate retriever or gaining write access to evaluated state.
 
-**Gate B:** the same frozen fixture can execute control and candidate paths,
+Every projection/release/audit state-machine change must have shared contract
+tests against both embedded SQLite and production PostgreSQL implementations.
+Wave B must repair complete revision identity and candidate isolation before a
+generated model output may be persisted into an operational workspace.
+
+**`CAP-GB`:** the same frozen fixture can execute control and candidate paths,
 retain raw outputs, expose every fallback/failure, and produce independently
 recomputable metrics. No provider spend is implied until separately approved.
 
@@ -534,11 +594,17 @@ Use a small but real, diverse, frozen corpus and held-out cluster/query sets.
 Compare the model tiers and ablations in Section 9. The initial experiment must
 fit within a separately accepted time, privacy and cost envelope.
 
+Wave C is non-promoting. Model outputs are written only to detached experiment
+artifacts or a disposable isolated store until W4 candidate isolation,
+evaluator-bound validation and activation authority have passed `CAP-GB`. The
+legacy `run_cognitive_delta` auto-publication behavior is forbidden for the
+bake-off.
+
 Synthesis experiments, if included, consume only the frozen golden evidence
 bundles and produce no writes to the evaluated Spine or Cortex. This separates
 answer quality from retrieval failures during early development.
 
-**Gate C:** select the smallest passing model/cascade per task, retain negative
+**`CAP-GC`:** select the smallest passing model/cascade per task, retain negative
 results, and state separately whether summaries, relations, navigation, and
 retrieval improved. A winner at this gate is experimental, not production or
 scale-qualified.
@@ -554,12 +620,14 @@ Required evidence includes:
 - crash/retry/resume does not duplicate or lose work;
 - candidate projections remain isolated;
 - shadow retrieval names the exact Cortex release;
-- activation and rollback are atomic;
+- one authoritative pointer gives readers a coherent release while journaled,
+  idempotent activation/rollback and reconciliation survive partial external-
+  alias changes;
 - backlog, churn, storage, throughput and resource use remain within the frozen
   envelope; and
 - source anchors and privacy policy survive every path.
 
-**Gate D:** the end-to-end lifecycle is useful and restart-safe at 10K without
+**`CAP-GD`:** the end-to-end lifecycle is useful and restart-safe at 10K without
 unbounded review or work.
 
 ### Wave E - real 100K paired qualification
@@ -579,7 +647,7 @@ retrieval+Cortex+Synthesis shadow ablations. Each component receives its own
 limitation statement and decision; the integrated manifest cannot upgrade a
 failed component claim.
 
-**Gate E:** independently verified 100K results justify either promotion to a
+**`CAP-GE`:** independently verified 100K results justify either promotion to a
 bounded active profile, repair, rejection, or additional investigation. A
 Cortex pass cannot overwrite an unresolved Core/Spine failure.
 
@@ -595,7 +663,8 @@ verified migration decision; it is not frozen forever merely because it was
 used at 100K.
 
 Before the single frozen candidate, run non-certifying 250K, 500K, and 750K
-diagnostics (or the exact ladder accepted at Gate D) with the complete Core and
+diagnostics (or the exact ladder authorized in the Human 1M Core Run Decision)
+with the complete Core and
 serving-index path. Cortex consolidation may run asynchronously to the declared
 coverage target; hosted teachers remain sampled comparators, and Synthesis is
 evaluated only on the frozen query pack—not once per document.
@@ -606,7 +675,7 @@ combined/background-consolidation profile against an immutable copy or the same
 frozen source release with isolated accounting. Retrieval serving indexes are
 included only when the claim and policy name them explicitly.
 
-**Gate F:** independently verified G1M-CORE plus explicit Human Gate decision.
+**`CAP-GF`:** independently verified G1M-CORE plus explicit Human Gate decision.
 
 ### Wave G - optional 1M Cortex and combined-system gate
 
@@ -618,9 +687,9 @@ This may be a shadow release, sampled/tiered consolidation, or full active-set
 consolidation depending on the accepted service class. It need not call a model
 for every document. Report unconsolidated/stale coverage explicitly.
 
-**Gate G:** separate G1M-CORTEX and optional G1M-SYNTHESIS results, followed by
+**`CAP-GG`:** separate G1M-CORTEX and optional G1M-SYNTHESIS results, followed by
 an explicit decision about any combined Trace claim. Nothing in this gate may
-retroactively certify Gate F.
+retroactively certify `CAP-GF`.
 
 ## 12. Hard readiness dependencies for the DAG
 
@@ -629,15 +698,43 @@ The exhaustive DAG must encode at least these edges:
 1. Accepted architecture decision -> canonical document reconciliation -> all
    mutable implementation packets.
 2. Frozen evaluation contract -> retrieval/Cortex candidate comparison.
-3. Fail-closed model gateway + complete receipts -> any hosted-model bake-off.
-4. Typed projection/run contracts -> semantic generator persistence.
-5. Candidate isolation + rollback -> auto-activation experiments.
+3. Fail-closed model gateway + complete receipts -> any local or hosted
+   generative bake-off; hosted execution additionally requires privacy, egress
+   and provider-spend authorization.
+4. Typed projection/run contracts + complete revision identity -> semantic
+   generator persistence.
+5. Candidate isolation + SQLite/PostgreSQL contract parity + evaluator-bound
+   validation/activation authority -> any operational persistence or
+   auto-activation experiment.
 6. Pinned dense retrieval baseline -> claims of Cortex retrieval uplift.
 7. Small frozen bake-off -> 10K shadow admission.
 8. Verified 10K lifecycle -> 100K Cortex admission.
-9. Independently verified 100K results -> 1M Cortex admission.
+9. Independently verified 100K results + compatible Core-host readiness + a
+   separate Human 1M Cortex Run Decision -> 1M Cortex admission.
 10. Core readiness/custody gates -> frozen G1M-CORE execution.
 11. Independent verifier output -> Human Owner promotion decision.
+
+Readiness never grants authority by itself. The DAG must include explicit,
+non-inferred decision nodes for:
+
+- model/runtime download or installation where required;
+- provider, privacy/egress, data class, dollar/token budget and authorization
+  expiry for every hosted experiment;
+- each admitted 10K and 100K run whose data/resource envelope requires owner
+  authorization;
+- the exact Human 1M Core Run Decision naming configuration, hardware, corpus,
+  evidence root, resource ceiling and claim scope; and
+- a separate Human 1M Cortex Run Decision naming projection coverage, models,
+  spend/compute envelope and whether the run is Core-isolated or combined.
+
+Completion of a prerequisite makes a run eligible for the corresponding Human
+decision. It does not authorize the download, provider call, benchmark, scale
+execution, activation or promotion itself.
+
+The 1M preparation branch must use different node IDs, result roots and
+resource ledgers for Core-only 250K/500K/750K diagnostics and for any combined
+Cortex-background profile. Combined-profile evidence may explain operational
+interaction but cannot be substituted into the Core-only capacity claim.
 
 It must **not** encode G1M-CORE completion as a prerequisite for beginning
 Cortex contracts, evaluator work, model safety repairs, small bake-offs, 10K
@@ -729,10 +826,17 @@ behavior:
    `3600-3617`, `3812-3902`; `service.py:3628-3709`). Cortex work must first
    make component identity and detached validation fail closed and make
    activation/rollback reconcilable after a crash.
-9. Generated hierarchy state can become active without a meaningful semantic
-   validation stage. Candidate, validated, shadow, active, rejected, and failed
-   states must be explicit; failure leaves the previous release active.
-10. The retrieval engine already exposes lexical, dense, fusion, reranking,
+9. Hierarchy revision identity currently omits prompt, policy, runtime,
+   decoding, quantization and validator identity; store-level deduplication can
+   then reuse a semantically different run (`service.py:1459`,
+   `store.py:2977-2983`). Complete identity repair precedes persisted model
+   generation.
+10. Generated hierarchy state can become active without a meaningful semantic
+    validation stage. Candidate, validated, shadow, active, rejected, and failed
+    states must be explicit; failure leaves the previous release active.
+    Candidate authorship, validator, activator and Human Owner promotion must
+    also be separate authorities bound to an evaluator-manifest receipt.
+11. The retrieval engine already exposes lexical, dense, fusion, reranking,
     hierarchy and graph mechanisms, but hashing/heuristic defaults and provider
     degradation cannot support a required semantic lane. Scale runners must use
     the canonical configured path, and hierarchy navigation must avoid

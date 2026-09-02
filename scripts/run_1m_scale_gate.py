@@ -436,7 +436,7 @@ class LeanSpineDatabase:
                 "structural",
             ))
 
-        fts_row = (doc_id, title, norm_content[:1500])
+        fts_row = (doc_id, title, norm_content[:1000])
         return ing_row, nodes_rows, node_versions_rows, edge_rows, source_lifecycle_rows, fts_row
 
 
@@ -807,6 +807,7 @@ class Scale1MRunner:
         top_k: int = 20,
         conn: sqlite3.Connection | None = None,
         fallback_docs: Sequence[str] | None = None,
+        lane: str = "",
     ) -> list[tuple[str, float]]:
         close_conn = False
         if conn is None:
@@ -836,9 +837,19 @@ class Scale1MRunner:
                     return [(did, 0.0) for did in fallback_docs[:top_k]]
                 cur.execute("SELECT doc_id FROM ingestions LIMIT ?", (top_k,))
                 return [(str(r[0]), 0.0) for r in cur.fetchall()]
-            match_terms = " OR ".join(f'"{w}"' for w in tokens[:8])
+
+            if lane == "complex_reasoning":
+                match_terms = " OR ".join(f'"{w}"' for w in tokens[:15])
+                bm25_clause = "-bm25(node_fts, 1.0, 5.0)"
+            elif lane == "direct_lookup":
+                match_terms = " OR ".join(f'"{w}"' for w in tokens[:20])
+                bm25_clause = "-bm25(node_fts, 5.0, 1.0)"
+            else:
+                match_terms = " OR ".join(f'"{w}"' for w in tokens[:12])
+                bm25_clause = "-bm25(node_fts, 5.0, 1.0)"
+
             try:
-                cur.execute("SELECT doc_id, -bm25(node_fts, 1.0, 1.0) FROM node_fts WHERE node_fts MATCH ? ORDER BY rank LIMIT ?", (match_terms, top_k))
+                cur.execute(f"SELECT doc_id, {bm25_clause} FROM node_fts WHERE node_fts MATCH ? ORDER BY rank LIMIT ?", (match_terms, top_k))
                 hits = [(str(r[0]), float(r[1])) for r in cur.fetchall()]
             except Exception:
                 hits = []
@@ -889,7 +900,7 @@ class Scale1MRunner:
 
             t0 = time.perf_counter()
             conn = get_thread_conn()
-            hits = self.search_bm25_hybrid(q_text, top_k=20, conn=conn, fallback_docs=fallback_docs)
+            hits = self.search_bm25_hybrid(q_text, top_k=20, conn=conn, fallback_docs=fallback_docs, lane=lane)
             lat_ms = (time.perf_counter() - t0) * 1000.0
 
             ranked_candidates = []
