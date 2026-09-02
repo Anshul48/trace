@@ -828,6 +828,12 @@ class Scale1MRunner:
                 "let", "show", "find", "prove", "suppose", "given", "determine", "consider",
                 "problem", "question", "following", "calculate", "equation", "expression", "value",
             }
+            if lane == "complex_reasoning":
+                stopwords.update({
+                    "number", "integer", "positive", "negative", "real", "set", "equal", "assume",
+                    "defined", "exists", "each", "every", "two", "three", "sum", "product", "total",
+                    "answer", "result", "case", "example", "solution", "denote", "denotes", "satisfies",
+                })
             words = re.findall(r"[a-zA-Z0-9]+", query_text.lower())
             tokens = [w for w in words if len(w) > 2 and w not in stopwords]
             if not tokens:
@@ -840,7 +846,7 @@ class Scale1MRunner:
 
             if lane == "complex_reasoning":
                 match_terms = " OR ".join(f'"{w}"' for w in tokens[:15])
-                bm25_clause = "-bm25(node_fts, 1.0, 5.0)"
+                bm25_clause = "-bm25(node_fts, 1.0, 1.0)"
             elif lane == "direct_lookup":
                 match_terms = " OR ".join(f'"{w}"' for w in tokens[:20])
                 bm25_clause = "-bm25(node_fts, 5.0, 1.0)"
