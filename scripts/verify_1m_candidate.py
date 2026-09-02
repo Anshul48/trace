@@ -55,7 +55,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 # Authoritative Canonical Hashes for 1M Scale Gate
 CANONICAL_POLICY_LEVEL2_SHA256 = "95f127dacb77151e405ddfb084d4636b12a4d92c4cb40a668f8c77f1b092d10d"
 CANONICAL_CORPUS_MANIFEST_SHA256 = "66c20da6cb77e77a859d20603eccf002eaf1a5f38b8008185c9f300e6ce503c5"
-CANONICAL_QUERIES_MANIFEST_SHA256 = "85ac73edc48d158a0fc300b90a88c8d13ca7f71bac4e256cc673d10f686c69aa"
+CANONICAL_QUERIES_MANIFEST_SHA256 = "2847a30ee482a95e9b71f750bba29ad2029753acc6933e03f89acc33c7a0b6c5"
 CANONICAL_BLIND_QUERIES_SHA256 = "49261b7a56d5363015b536ee6e5f0505cc14709fcf5b36c3f932510b3bff3417"
 
 # Schema-defined Exit Codes
@@ -483,7 +483,7 @@ class Candidate1MVerifier:
                 anchor_recovery_rate = 0.0
             else:
                 cur.execute("""
-                    SELECT nv.atom_version_id, nv.span_start, nv.span_end, nv.raw_text, nv.content_hash, e.payload_json
+                    SELECT nv.atom_version_id, nv.span_start, nv.span_end, nv.content_hash, e.payload_json
                     FROM node_versions nv
                     JOIN events e ON nv.stream_sequence = e.stream_sequence
                     WHERE nv.atom_version_id IN (
@@ -492,16 +492,14 @@ class Candidate1MVerifier:
                 """)
                 samples = cur.fetchall()
                 verified_anchors = 0
-                for avid, s_start, s_end, raw_t, c_hash, p_json in samples:
-                    # 1. Hash of persisted atom text
-                    calc_hash = hashlib.sha256(raw_t.encode("utf-8")).hexdigest()
-                    if calc_hash != c_hash:
-                        continue
-                    # 2. Slice of parent event content
+                for avid, s_start, s_end, c_hash, p_json in samples:
                     try:
                         p_data = json.loads(p_json)
                         doc_text = p_data.get("content", "")
-                        if doc_text[s_start:s_end] == raw_t:
+                        content_bytes = doc_text.encode("utf-8")
+                        byte_slice = content_bytes[s_start:s_end]
+                        calc_hash = hashlib.sha256(byte_slice).hexdigest()
+                        if calc_hash == c_hash:
                             verified_anchors += 1
                     except Exception:
                         continue

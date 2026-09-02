@@ -78,8 +78,8 @@ def main() -> None:
         with open(bright_judgments_file, "r", encoding="utf-8") as f:
             for line in f:
                 rec = json.loads(line)
-                qid = str(rec.get("query_id") or rec.get("query_internal_id") or rec.get("id") or "")
-                doc_id = str(rec.get("document_id") or rec.get("doc_id") or rec.get("native_id") or rec.get("judgment_native_id") or "")
+                qid = str(rec.get("query_internal_id") or rec.get("query_id") or rec.get("id") or "")
+                doc_id = str(rec.get("source_document_native_id") or rec.get("document_id") or rec.get("native_id") or "")
                 if qid and doc_id:
                     bright_judgments_by_qid.setdefault(qid, []).append(doc_id)
                     
@@ -91,19 +91,19 @@ def main() -> None:
                 qid = str(rec.get("internal_id") or rec.get("query_id") or rec.get("id") or "")
                 q_text = rec.get("query") or rec.get("text") or rec.get("content") or ""
                 gold_ids = bright_judgments_by_qid.get(qid, [])
-                if qid and q_text:
+                if qid and q_text and gold_ids:
                     bright_queries.append({
                         "query_id": qid,
                         "query_text": q_text,
                         "lane": "complex_reasoning",
                         "dataset": "bright",
-                        "gold_ids": gold_ids,
+                        "gold_ids": sorted(list(set(gold_ids))),
                         "is_null_query": False,
                         "expected_abstention": False,
                     })
                     
     print(f"  Loaded BRIGHT candidate queries: {len(bright_queries)}")
-    final_cohorts["complex_reasoning"] = bright_queries[:1000] if len(bright_queries) >= 1000 else bright_queries
+    final_cohorts["complex_reasoning"] = bright_queries
     print(f"  Admitted complex_reasoning   : {len(final_cohorts['complex_reasoning']):5d} queries")
     
     # 3. Summary Statistics

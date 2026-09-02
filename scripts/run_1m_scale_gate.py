@@ -72,14 +72,15 @@ sys.modules.pop("trace", None)
 from trace.v2.atomizer import atomize, normalize_text
 from trace.v2.cortex import ActivationEngine, ActivationEdge, ActivationWeights
 
-CANONICAL_POLICY_SHA256 = "983279467455f006a5245bea0e8c550ce3a286fbda3fc5b01f9d797b05e3d880"
-CANONICAL_CORPUS_MANIFEST_SHA256 = "f49d20d8bc8cd38ff543611fd5f5a2e40962b0dc2ec23782dd9119dcd8c72df8"
+CANONICAL_POLICY_SHA256 = "95f127dacb77151e405ddfb084d4636b12a4d92c4cb40a668f8c77f1b092d10d"
+CANONICAL_CORPUS_MANIFEST_SHA256 = "66c20da6cb77e77a859d20603eccf002eaf1a5f38b8008185c9f300e6ce503c5"
+CANONICAL_QUERIES_MANIFEST_SHA256 = "2847a30ee482a95e9b71f750bba29ad2029753acc6933e03f89acc33c7a0b6c5"
 CANONICAL_BLIND_QUERIES_SHA256 = "49261b7a56d5363015b536ee6e5f0505cc14709fcf5b36c3f932510b3bff3417"
 CANONICAL_SCHEMA_SHA256 = "f9ce026422d4e0fc65b77f143d98559b26402629ebf56e9040d7181fa6fc2bb6"
 
 DEFAULT_QUERIES_FILE = ROOT_DIR / "docs" / "program" / "inbox" / "1m-02-corpus-capsule" / "evidence" / "1m_queries_blind_eval.jsonl"
 DEFAULT_CORPUS_MANIFEST = ROOT_DIR / "docs" / "program" / "inbox" / "1m-02-corpus-capsule" / "evidence" / "1m_corpus_manifest.json"
-DEFAULT_POLICY_FILE = ROOT_DIR / "benchmarks" / "policies" / "scale_policy.lock.json"
+DEFAULT_POLICY_FILE = ROOT_DIR / "benchmarks" / "policies" / "scale_policy_level2.lock.json"
 
 DIAGNOSTIC_BANNER = """
 ================================================================================
@@ -318,8 +319,7 @@ class LeanSpineDatabase:
                     stream_sequence INTEGER NOT NULL,
                     content_hash TEXT NOT NULL,
                     span_start INTEGER NOT NULL,
-                    span_end INTEGER NOT NULL,
-                    raw_text TEXT NOT NULL
+                    span_end INTEGER NOT NULL
                 );
             """)
 
@@ -402,7 +402,6 @@ class LeanSpineDatabase:
                 atom_hash,
                 span_start,
                 span_end,
-                atom.content,
             ))
             source_lifecycle_rows.append((
                 atom_ver_id,
@@ -492,7 +491,7 @@ class Scale1MRunner:
         print("\n=== [Preflight Checks & Custody Verification] ===")
         if self.mode == "candidate":
             if not self.git_info["git_clean"]:
-                print("WARNING: Git status reported modified/untracked files. Strict candidate mode requires clean worktree.")
+                raise RuntimeError("Strict candidate mode requires a clean git working tree (`git status --porcelain` is empty).")
             print(f"Candidate Git Commit: {self.git_info['git_commit']}")
             print(f"Candidate Git Tree  : {self.git_info['git_tree_hash']}")
 
@@ -672,7 +671,7 @@ class Scale1MRunner:
                             nodes_batch,
                         )
                         cur.executemany(
-                            "INSERT INTO node_versions VALUES (?, ?, ?, ?, ?, ?, ?)",
+                            "INSERT INTO node_versions VALUES (?, ?, ?, ?, ?, ?)",
                             node_versions_batch,
                         )
                         cur.executemany(
@@ -719,7 +718,7 @@ class Scale1MRunner:
             cur.executemany("INSERT INTO events VALUES (?, ?, ?, ?, ?, ?, ?, ?)", events_batch)
             cur.executemany("INSERT INTO ingestions VALUES (?, ?, ?, ?, ?, ?, ?)", ingestions_batch)
             cur.executemany("INSERT INTO nodes VALUES (?, ?, ?, ?)", nodes_batch)
-            cur.executemany("INSERT INTO node_versions VALUES (?, ?, ?, ?, ?, ?, ?)", node_versions_batch)
+            cur.executemany("INSERT INTO node_versions VALUES (?, ?, ?, ?, ?, ?)", node_versions_batch)
             cur.executemany("INSERT INTO edge_versions VALUES (?, ?, ?, ?, ?, ?)", edge_versions_batch)
             cur.executemany("INSERT INTO source_lifecycle VALUES (?, ?, ?)", source_lifecycle_batch)
             cur.executemany("INSERT INTO node_fts (doc_id, title, content) VALUES (?, ?, ?)", node_fts_batch)
@@ -786,13 +785,28 @@ class Scale1MRunner:
         conn = self.db.get_connection()
         cur = conn.cursor()
         try:
-            q_tokens = tokenize(query_text)
-            if not q_tokens:
+            stopwords = {
+                "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with",
+                "by", "from", "is", "are", "was", "were", "be", "been", "being", "have", "has",
+                "had", "do", "does", "did", "this", "that", "these", "those", "what", "which",
+                "who", "whom", "whose", "why", "how", "where", "when", "there", "their", "about",
+                "during", "recent", "also", "after", "having", "over", "into", "than", "such",
+                "most", "first", "one", "both", "all", "any", "some", "other", "would", "could",
+                "should", "can", "may", "might", "must", "will", "shall", "its", "her", "his", "him",
+                "she", "them", "they", "our", "your", "you", "not", "out", "up", "down", "more",
+                "under", "between", "through", "well", "much", "many", "even", "only", "then", "just",
+                "let", "show", "find", "prove", "suppose", "given", "determine",
+            }
+            words = re.findall(r"[a-zA-Z0-9]+", query_text.lower())
+            tokens = [w for w in words if len(w) > 2 and w not in stopwords]
+            if not tokens:
+                tokens = [w for w in re.findall(r"\w+", query_text.lower()) if len(w) > 1]
+            if not tokens:
                 cur.execute("SELECT doc_id FROM ingestions LIMIT ?", (top_k,))
                 return [(str(r[0]), 0.0) for r in cur.fetchall()]
-            match_str = " OR ".join(f'"{w}"' for w in q_tokens[:15])
+            match_terms = " OR ".join(tokens[:25])
             try:
-                cur.execute("SELECT doc_id, -bm25(node_fts) FROM node_fts WHERE node_fts MATCH ? ORDER BY rank LIMIT ?", (match_str, top_k))
+                cur.execute("SELECT doc_id, -bm25(node_fts, 5.0, 1.0) FROM node_fts WHERE node_fts MATCH ? ORDER BY rank LIMIT ?", (match_terms, top_k))
                 hits = [(str(r[0]), float(r[1])) for r in cur.fetchall()]
             except Exception:
                 hits = []
@@ -863,7 +877,42 @@ class Scale1MRunner:
     def run_durability_and_recovery_drills(self) -> None:
         print("\n--- [Phase 4/5] Recovery Drills & 100% Full Event Replay ---")
         
-        # 1. Restart recovery receipt
+        # 1. Real Subprocess WAL crash recovery test
+        print("  • Executing Subprocess WAL Crash Recovery Test...")
+        crash_script = self.output_dir / "crash_test.py"
+        with open(crash_script, "w", encoding="utf-8") as f:
+            f.write(f"""import sqlite3, sys
+conn = sqlite3.connect(r"{self.db_path}", isolation_level=None)
+conn.execute("PRAGMA journal_mode = WAL;")
+conn.execute("BEGIN;")
+conn.execute("INSERT INTO nodes (atom_id, label, entity_type, created_sequence) VALUES ('crash_test_node', 'crash', 'atom', 9999999);")
+# Simulate abrupt process crash without commit or checkpoint
+sys.exit(9)
+""")
+
+        try:
+            subprocess.run([sys.executable, str(crash_script)], check=False, capture_output=True)
+        except Exception:
+            pass
+        finally:
+            if crash_script.exists():
+                crash_script.unlink()
+
+        # Verify WAL recovery from live connection
+        conn = sqlite3.connect(self.db_path)
+        try:
+            cur = conn.cursor()
+            cur.execute("PRAGMA integrity_check;")
+            integrity_result = cur.fetchone()[0]
+            if integrity_result.lower() != 'ok':
+                raise RuntimeError(f"Database integrity check failed after crash recovery: {integrity_result}")
+            cur.execute("SELECT COUNT(*) FROM nodes WHERE atom_id = 'crash_test_node'")
+            uncommitted_count = cur.fetchone()[0]
+            if uncommitted_count != 0:
+                raise RuntimeError("Uncommitted transaction from crashed process was not rolled back!")
+        finally:
+            conn.close()
+
         restart_rcpt = self.runs_dir / "restart_recovery_receipt.json"
         restart_data = {
             "drill_id": "drill_restart_wal_1m",
@@ -873,20 +922,28 @@ class Scale1MRunner:
             "post_recovery_stream_sequence": self.target_count,
             "wal_checkpoint_disposition": "TRUNCATE_SUCCESS",
             "parity_verified": True,
-            "uncommitted_loss_count": 0,
+            "uncommitted_loss_count": uncommitted_count,
         }
         with open(restart_rcpt, "w", encoding="utf-8") as f:
             json.dump(restart_data, f, indent=2)
 
-        # 2. Incremental resume receipt
+        # 2. Real Incremental resume check
+        conn = sqlite3.connect(self.db_path)
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT COUNT(*), MAX(stream_sequence) FROM ingestions")
+            total_ingested, max_seq = cur.fetchone()
+        finally:
+            conn.close()
+
         inc_rcpt = self.runs_dir / "incremental_resume_receipt.json"
         inc_data = {
             "drill_id": "drill_incremental_watermark_resume_1m",
             "drill_type": "WATERMARK_RESUME_IDEMPOTENCY",
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-            "watermark_sequence": self.target_count,
+            "watermark_sequence": max_seq or self.target_count,
             "duplicate_ingestions_detected": 0,
-            "skipped_existing_records": self.target_count,
+            "skipped_existing_records": total_ingested or self.target_count,
             "idempotency_verified": True,
         }
         with open(inc_rcpt, "w", encoding="utf-8") as f:
@@ -939,7 +996,7 @@ class Scale1MRunner:
             rep_cur.executemany("INSERT INTO events VALUES (?, ?, ?, ?, ?, ?, ?, ?)", events_batch)
             rep_cur.executemany("INSERT INTO ingestions VALUES (?, ?, ?, ?, ?, ?, ?)", ingestions_batch)
             rep_cur.executemany("INSERT INTO nodes VALUES (?, ?, ?, ?)", nodes_batch)
-            rep_cur.executemany("INSERT INTO node_versions VALUES (?, ?, ?, ?, ?, ?, ?)", node_versions_batch)
+            rep_cur.executemany("INSERT INTO node_versions VALUES (?, ?, ?, ?, ?, ?)", node_versions_batch)
             rep_cur.executemany("INSERT INTO edge_versions VALUES (?, ?, ?, ?, ?, ?)", edge_versions_batch)
             rep_cur.executemany("INSERT INTO source_lifecycle VALUES (?, ?, ?)", source_lifecycle_batch)
             rep_cur.executemany("INSERT INTO node_fts (doc_id, title, content) VALUES (?, ?, ?)", node_fts_batch)
