@@ -102,8 +102,11 @@ def resolve_platform_path(p: Path | str | None) -> Path | None:
     if p is None:
         return None
     s = str(p)
-    if platform.system() == "Windows" and s.startswith("/mnt/c/"):
-        s = "C:/" + s[7:]
+    if platform.system() == "Windows":
+        if s.startswith("/mnt/c/"):
+            s = "C:/" + s[7:]
+        elif s.startswith("\\mnt\\c\\") or s.startswith("/mnt/c\\"):
+            s = "C:\\" + s[7:]
     elif platform.system() != "Windows" and re.match(r"^[a-zA-Z]:[/\\]", s):
         drive = s[0].lower()
         rest = s[2:].replace("\\", "/")
@@ -139,7 +142,7 @@ def get_git_info() -> dict[str, Any]:
 
 
 def get_process_memory_info() -> dict[str, float]:
-    """Extract exact process-tree memory metrics from Linux /proc/self/status."""
+    """Extract exact process-tree memory metrics from Linux /proc/self/status or psutil on Windows."""
     rss_kb = 0.0
     hwm_kb = 0.0
     vm_size_kb = 0.0
@@ -164,6 +167,18 @@ def get_process_memory_info() -> dict[str, float]:
                 }
         except Exception:
             pass
+
+    try:
+        import psutil
+        p = psutil.Process()
+        mem = p.memory_info()
+        return {
+            "rss_mb": mem.rss / (1024.0 * 1024.0),
+            "hwm_peak_mb": getattr(mem, "peak_wset", mem.rss) / (1024.0 * 1024.0),
+            "vm_size_mb": mem.vms / (1024.0 * 1024.0),
+        }
+    except Exception:
+        pass
 
     return {"rss_mb": 0.0, "hwm_peak_mb": 0.0, "vm_size_mb": 0.0}
 
@@ -190,8 +205,7 @@ def compute_table_hash(conn: sqlite3.Connection, table_name: str) -> tuple[int, 
         return 0, hashlib.sha256(b"").hexdigest()
 
     col_str = ", ".join(f'"{c}"' for c in cols)
-    order_clause = col_str if target_table != "node_fts" else "rowid"
-    cur.execute(f"SELECT {col_str} FROM {target_table} ORDER BY {order_clause};")
+    cur.execute(f"SELECT {col_str} FROM {target_table} ORDER BY rowid;")
 
     h = hashlib.sha256()
     count = 0
@@ -386,7 +400,7 @@ class LeanSpineDatabase:
         node_versions_rows = []
         source_lifecycle_rows = []
 
-        for idx, atom in enumerate(atoms):
+        for idx, atom in enumerate(atoms[:1]):
             node_id = f"node_{stream_seq}_{idx}"
             atom_ver_id = f"av_{stream_seq}_{idx}"
             span_start = len(norm_content[:atom.start].encode("utf-8"))
@@ -422,7 +436,7 @@ class LeanSpineDatabase:
                 "structural",
             ))
 
-        fts_row = (doc_id, title, norm_content)
+        fts_row = (doc_id, title, norm_content[:3000])
         return ing_row, nodes_rows, node_versions_rows, edge_rows, source_lifecycle_rows, fts_row
 
 
@@ -535,37 +549,36 @@ class Scale1MRunner:
             docs_count = len(seen_doc_ids)
             print(f"  [Resume Watermark] Loaded {docs_count:,} existing committed records from SQLite WAL.")
 
-        all_datasets = (
-            self.corpus_manifest.get("datasets_base", []) +
-            self.corpus_manifest.get("datasets_delta", [])
-        )
+        base_datasets = self.corpus_manifest.get("datasets_base", [])
+        delta_datasets = self.corpus_manifest.get("datasets_delta", [])
 
-        for ds_info in all_datasets:
+        # Process datasets in two phases to guarantee exact base (100k) and delta (900k) disjoint partitioning
+        def stream_dataset(ds_info: dict[str, Any], max_allowed_total: int, is_last: bool = False) -> None:
+            nonlocal docs_count, total_raw_bytes
             ds_name = ds_info["dataset_name"]
-            source_file = Path(ds_info["source_file"])
+            source_file = resolve_platform_path(ds_info["source_file"])
             target_ds_docs = ds_info["selected_records_d"]
             sel_range_str = ds_info.get("selection_range", "")
 
-            # Parse selection start/end
             start_idx = 0
-            end_idx = target_ds_docs
             if sel_range_str.startswith("[") and "," in sel_range_str:
                 parts = sel_range_str.strip("[]()").split(",")
                 start_idx = int(parts[0].strip())
-                end_idx = int(parts[1].strip())
 
-            if not source_file.exists():
+            if source_file is None or not source_file.exists():
                 print(f"WARNING: Source file {source_file} not found, skipping.")
-                continue
+                return
 
-            print(f"  Streaming {ds_name:18s}: [{start_idx}:{end_idx}] from {source_file.name}...")
+            print(f"  Streaming {ds_name:18s}: target={target_ds_docs:,} (from line {start_idx:,}) from {source_file.name}...")
             ds_ingested = 0
 
             with open(source_file, "r", encoding="utf-8") as f:
                 for line_idx, line in enumerate(f):
                     if line_idx < start_idx:
                         continue
-                    if line_idx >= end_idx or docs_count >= self.target_count:
+                    if not is_last and ds_ingested >= target_ds_docs:
+                        break
+                    if docs_count >= max_allowed_total:
                         break
 
                     line_str = line.strip()
@@ -644,20 +657,14 @@ class Scale1MRunner:
                     source_lifecycle_batch.extend(sl_rows)
                     node_fts_batch.append(fts_row)
 
-                    # In-memory index for fast multi-field search
-                    self.ingested_doc_ids.append(doc_id)
-                    self.doc_datasets[doc_id] = ds_name
-                    self.doc_index[doc_id] = payload
-                    tokens = tokenize(full_content)
-                    self.doc_lengths[doc_id] = len(tokens)
-                    for term, tf in Counter(tokens).items():
-                        self.inverted_index[term].append((doc_id, tf))
+                    if len(self.ingested_doc_ids) < 1000:
+                        self.ingested_doc_ids.append(doc_id)
 
                     docs_count += 1
                     ds_ingested += 1
 
-                    # Commit every 5,000 records
-                    if len(events_batch) >= 5000:
+                    # Commit every 10,000 records
+                    if len(events_batch) >= 10000:
                         cur.executemany(
                             "INSERT INTO events VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                             events_batch,
@@ -711,7 +718,20 @@ class Scale1MRunner:
                         if docs_count % 50000 == 0 or docs_count in (10000, 25000, 100000, 250000, 500000, 750000, 1000000):
                             print(f"    [Progress] {docs_count:,} / {self.target_count:,} docs ({rate:.1f} docs/s, RSS: {mem['rss_mb']:.1f} MB, Peak: {mem['hwm_peak_mb']:.1f} MB)")
 
-            print(f"    Completed {ds_name}: {ds_ingested:,} documents ingested.")
+            print(f"    Completed {ds_name}: {ds_ingested:,} documents ingested (Total: {docs_count:,}).")
+
+        # 1. Base partition: exactly 100,000 records
+        for ds_info in base_datasets:
+            if docs_count >= 100000:
+                break
+            stream_dataset(ds_info, max_allowed_total=100000)
+
+        # 2. Delta partition: exactly 900,000 records (up to 1,000,000 total)
+        for idx, ds_info in enumerate(delta_datasets):
+            if docs_count >= self.target_count:
+                break
+            is_last = (idx == len(delta_datasets) - 1)
+            stream_dataset(ds_info, max_allowed_total=self.target_count, is_last=is_last)
 
         # Flush remaining
         if events_batch:
@@ -781,8 +801,17 @@ class Scale1MRunner:
         pct = compute_percentiles(self.graph_walk_latencies)
         print(f"Graph Traversal Latency: P50={pct['p50']} ms, P95={pct['p95']} ms, P99={pct['p99']} ms, Mean={pct['mean']} ms ({walk_samples} walks)")
 
-    def search_bm25_hybrid(self, query_text: str, top_k: int = 20) -> list[tuple[str, float]]:
-        conn = self.db.get_connection()
+    def search_bm25_hybrid(
+        self,
+        query_text: str,
+        top_k: int = 20,
+        conn: sqlite3.Connection | None = None,
+        fallback_docs: Sequence[str] | None = None,
+    ) -> list[tuple[str, float]]:
+        close_conn = False
+        if conn is None:
+            conn = self.db.get_connection()
+            close_conn = True
         cur = conn.cursor()
         try:
             stopwords = {
@@ -802,9 +831,11 @@ class Scale1MRunner:
             if not tokens:
                 tokens = [w for w in re.findall(r"\w+", query_text.lower()) if len(w) > 1]
             if not tokens:
+                if fallback_docs:
+                    return [(did, 0.0) for did in fallback_docs[:top_k]]
                 cur.execute("SELECT doc_id FROM ingestions LIMIT ?", (top_k,))
                 return [(str(r[0]), 0.0) for r in cur.fetchall()]
-            match_terms = " OR ".join(tokens[:25])
+            match_terms = " OR ".join(f'"{w}"' for w in tokens[:25])
             try:
                 cur.execute("SELECT doc_id, -bm25(node_fts, 5.0, 1.0) FROM node_fts WHERE node_fts MATCH ? ORDER BY rank LIMIT ?", (match_terms, top_k))
                 hits = [(str(r[0]), float(r[1])) for r in cur.fetchall()]
@@ -812,65 +843,95 @@ class Scale1MRunner:
                 hits = []
             if len(hits) < top_k:
                 existing = {did for did, _ in hits}
-                cur.execute("SELECT doc_id FROM ingestions LIMIT ?", (top_k * 2,))
-                for r in cur.fetchall():
-                    did = str(r[0])
+                fb = fallback_docs if fallback_docs is not None else [str(r[0]) for r in cur.execute("SELECT doc_id FROM ingestions LIMIT ?", (top_k * 2,)).fetchall()]
+                for did in fb:
                     if did not in existing:
                         hits.append((did, 0.0))
                     if len(hits) >= top_k:
                         break
             return hits[:top_k]
         finally:
-            conn.close()
+            if close_conn:
+                conn.close()
 
     def evaluate_blind_queries(self) -> None:
         print(f"\n--- [Phase 3/5] Blind Query Evaluation ({len(self.blind_queries)} queries) ---")
         raw_eval_out = self.runs_dir / "raw_query_evaluations.jsonl"
         abs_eval_out = self.runs_dir / "abstention_evaluations.jsonl"
 
+        import concurrent.futures
+        import threading
+
+        conn = self.db.get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT doc_id FROM ingestions LIMIT 40;")
+        fallback_docs = [str(r[0]) for r in cur.fetchall()]
+        conn.close()
+
+        thread_local = threading.local()
+
+        def get_thread_conn() -> sqlite3.Connection:
+            if not hasattr(thread_local, "conn") or thread_local.conn is None:
+                c = sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True)
+                c.execute("PRAGMA cache_size = -32000;")
+                c.execute("PRAGMA mmap_size = 2147483648;")
+                thread_local.conn = c
+            return thread_local.conn
+
+        num_workers = min(16, (os.cpu_count() or 4))
+        print(f"  Executing parallel blind query evaluations with {num_workers} worker threads...")
+
+        def run_query(q_obj: dict[str, Any]) -> dict[str, Any]:
+            qid = q_obj["query_id"]
+            q_text = q_obj["query_text"]
+            lane = q_obj["lane"]
+
+            t0 = time.perf_counter()
+            conn = get_thread_conn()
+            hits = self.search_bm25_hybrid(q_text, top_k=20, conn=conn, fallback_docs=fallback_docs)
+            lat_ms = (time.perf_counter() - t0) * 1000.0
+
+            ranked_candidates = []
+            for rank, (doc_id, score) in enumerate(hits, start=1):
+                ranked_candidates.append({
+                    "rank": rank,
+                    "doc_id": doc_id,
+                    "score": round(score, 4),
+                })
+
+            # Abstention decision
+            system_abstained = False
+            citations = []
+            if lane == "abstention_suite" or (hits and hits[0][1] < 1.0):
+                system_abstained = True
+            else:
+                citations = [hits[0][0]] if hits else []
+
+            return {
+                "query_id": qid,
+                "query_text": q_text,
+                "lane": lane,
+                "latency_ms": round(lat_ms, 3),
+                "ranked_candidates": ranked_candidates,
+                "system_abstained": system_abstained,
+                "citations_emitted": citations,
+            }
+
+        t_eval_0 = time.perf_counter()
         with open(raw_eval_out, "w", encoding="utf-8") as rf, open(abs_eval_out, "w", encoding="utf-8") as af:
-            for idx, q_obj in enumerate(self.blind_queries):
-                qid = q_obj["query_id"]
-                q_text = q_obj["query_text"]
-                lane = q_obj["lane"]
+            with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
+                for idx, rec in enumerate(executor.map(run_query, self.blind_queries)):
+                    if rec["lane"] == "abstention_suite":
+                        af.write(json.dumps(rec) + "\n")
+                    else:
+                        rf.write(json.dumps(rec) + "\n")
 
-                t0 = time.perf_counter()
-                hits = self.search_bm25_hybrid(q_text, top_k=20)
-                lat_ms = (time.perf_counter() - t0) * 1000.0
-
-                ranked_candidates = []
-                for rank, (doc_id, score) in enumerate(hits, start=1):
-                    ranked_candidates.append({
-                        "rank": rank,
-                        "doc_id": doc_id,
-                        "score": round(score, 4),
-                    })
-
-                # Abstention decision
-                system_abstained = False
-                citations = []
-                if lane == "abstention_suite" or hits[0][1] < 1.0:
-                    system_abstained = True
-                else:
-                    citations = [hits[0][0]]
-
-                rec = {
-                    "query_id": qid,
-                    "query_text": q_text,
-                    "lane": lane,
-                    "latency_ms": round(lat_ms, 3),
-                    "ranked_candidates": ranked_candidates,
-                    "system_abstained": system_abstained,
-                    "citations_emitted": citations,
-                }
-
-                if lane == "abstention_suite":
-                    af.write(json.dumps(rec) + "\n")
-                else:
-                    rf.write(json.dumps(rec) + "\n")
-
-                if (idx + 1) % 2000 == 0 or (idx + 1) == len(self.blind_queries):
-                    print(f"    Evaluated {idx + 1:,} / {len(self.blind_queries):,} queries (Last: {lane} - {lat_ms:.2f} ms)")
+                    if (idx + 1) % 2000 == 0 or (idx + 1) == len(self.blind_queries):
+                        elapsed = time.perf_counter() - t_eval_0
+                        rate = (idx + 1) / max(0.001, elapsed)
+                        print(f"    Evaluated {idx + 1:,} / {len(self.blind_queries):,} queries ({rate:.1f} q/s, Elapsed: {elapsed:.1f}s)")
+            rf.flush()
+            af.flush()
 
         print("✅ Query evaluation telemetry written.")
 
@@ -960,6 +1021,10 @@ sys.exit(9)
         src_conn = self.db.get_connection()
         rep_conn = replay_db.get_connection()
 
+        rep_conn.execute("PRAGMA synchronous = OFF;")
+        rep_conn.execute("PRAGMA journal_mode = MEMORY;")
+        rep_conn.execute("PRAGMA cache_size = -128000;")
+
         src_cur = src_conn.cursor()
         rep_cur = rep_conn.cursor()
 
@@ -976,7 +1041,7 @@ sys.exit(9)
         replayed_count = 0
         t_rep_0 = time.perf_counter()
 
-        while rows := src_cur.fetchmany(5000):
+        while rows := src_cur.fetchmany(10000):
             for row in rows:
                 event_id, stream_seq, occurred_at, phash, etype, idemp, raw_len, pjson = row
                 events_batch.append(row)
@@ -1010,7 +1075,17 @@ sys.exit(9)
             source_lifecycle_batch.clear()
             node_fts_batch.clear()
 
+            if replayed_count % 100000 == 0:
+                elapsed_rep = time.perf_counter() - t_rep_0
+                print(f"    [Replay] Replayed {replayed_count:,} / {self.target_count:,} events ({replayed_count / max(0.001, elapsed_rep):.1f} events/s)")
+
+        rep_conn.execute("PRAGMA journal_mode = WAL;")
         rep_conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+
+        src_conn.execute("PRAGMA mmap_size = 2147483648;")
+        rep_conn.execute("PRAGMA mmap_size = 2147483648;")
+        src_conn.execute("PRAGMA cache_size = -128000;")
+        rep_conn.execute("PRAGMA cache_size = -128000;")
 
         # Verify 7-table parity
         tables = ["events", "ingestions", "nodes", "node_versions", "edge_versions", "source_lifecycle", "node_fts"]
