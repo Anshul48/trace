@@ -36,6 +36,7 @@ promotion, scale, and consumer adoption remain sequential gates.
 | [FOUNDATION_STATUS.md](FOUNDATION_STATUS.md) | Current starter-packet state and decision blockers. |
 | [SCALE_CERTIFICATION_RECOVERY_PLAN.md](SCALE_CERTIFICATION_RECOVERY_PLAN.md) | Draft, planning-only route to requalify 100K before a separately verified 1M pilot. |
 | [SCALE_100K_TO_1M_EXECUTION_PLAN.md](SCALE_100K_TO_1M_EXECUTION_PLAN.md) | Detailed execution amendment from the failed R2.1 measurement state through truthful Gate C2, Gate D, and Gate F2. |
+| [COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md](COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md) | Proposed correction separating Core, Retrieval, Cortex, and Synthesis engineering, evidence, and scale claims. |
 | [03_SHARED_CONTRACTS.md](03_SHARED_CONTRACTS.md) | Evidence, release, task, and handoff contracts. |
 | [04_EVALUATION_PROTOCOL.md](04_EVALUATION_PROTOCOL.md) | Real-data evaluation and scale proof boundary. |
 | [05_PROMOTION_RUBRIC.md](05_PROMOTION_RUBRIC.md) | Criteria for promoting an experimental mechanism. |
