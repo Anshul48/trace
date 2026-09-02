@@ -436,7 +436,7 @@ class LeanSpineDatabase:
                 "structural",
             ))
 
-        fts_row = (doc_id, title, norm_content[:3000])
+        fts_row = (doc_id, title, norm_content[:1500])
         return ing_row, nodes_rows, node_versions_rows, edge_rows, source_lifecycle_rows, fts_row
 
 
@@ -824,7 +824,8 @@ class Scale1MRunner:
                 "should", "can", "may", "might", "must", "will", "shall", "its", "her", "his", "him",
                 "she", "them", "they", "our", "your", "you", "not", "out", "up", "down", "more",
                 "under", "between", "through", "well", "much", "many", "even", "only", "then", "just",
-                "let", "show", "find", "prove", "suppose", "given", "determine",
+                "let", "show", "find", "prove", "suppose", "given", "determine", "consider",
+                "problem", "question", "following", "calculate", "equation", "expression", "value",
             }
             words = re.findall(r"[a-zA-Z0-9]+", query_text.lower())
             tokens = [w for w in words if len(w) > 2 and w not in stopwords]
@@ -835,9 +836,9 @@ class Scale1MRunner:
                     return [(did, 0.0) for did in fallback_docs[:top_k]]
                 cur.execute("SELECT doc_id FROM ingestions LIMIT ?", (top_k,))
                 return [(str(r[0]), 0.0) for r in cur.fetchall()]
-            match_terms = " OR ".join(f'"{w}"' for w in tokens[:25])
+            match_terms = " OR ".join(f'"{w}"' for w in tokens[:8])
             try:
-                cur.execute("SELECT doc_id, -bm25(node_fts, 5.0, 1.0) FROM node_fts WHERE node_fts MATCH ? ORDER BY rank LIMIT ?", (match_terms, top_k))
+                cur.execute("SELECT doc_id, -bm25(node_fts, 1.0, 1.0) FROM node_fts WHERE node_fts MATCH ? ORDER BY rank LIMIT ?", (match_terms, top_k))
                 hits = [(str(r[0]), float(r[1])) for r in cur.fetchall()]
             except Exception:
                 hits = []
@@ -878,7 +879,7 @@ class Scale1MRunner:
                 thread_local.conn = c
             return thread_local.conn
 
-        num_workers = min(16, (os.cpu_count() or 4))
+        num_workers = min(8, (os.cpu_count() or 4))
         print(f"  Executing parallel blind query evaluations with {num_workers} worker threads...")
 
         def run_query(q_obj: dict[str, Any]) -> dict[str, Any]:
