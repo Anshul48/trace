@@ -456,6 +456,32 @@ substituting for it.
 
 ---
 
+### DEC-GATE-F2-AUDIT-CANDIDATE2 — Level 2 1M Scale Gate Candidate #2 Forensic Verification Record
+
+**Status:** **AUDITED / DATA-PLANE QUALIFIED (`qualify_1m_dataplane_retrieval_pending`)**.  
+**Date:** 2026-09-02  
+**Authority / Source:** Lead Scale Certification Architect & Independent Verifier under `SCALE_CERTIFICATION_RECOVERY_PLAN.md`, `SCALE_100K_TO_1M_EXECUTION_PLAN.md`, and `scale_policy_level2.lock.json` (`DEC-P-005b-LEVEL2`).  
+**Audited Candidate:** `benchmarks/runs/1m_scale_candidate_final`  
+**Candidate Merkle Root:** `59073a0f9892986caae81bf43280a4f465ebdccf86a50e860ce32bcb03b2cf6d`  
+**Attestation Token:** `4519eb957792a08476c291ccbcb20537a8f96d586f370b17d1f7b81b38712b57`  
+**Attestation ID:** `attest_1m_20260902_160742`  
+
+#### 1. Invariant Audits & Data-Plane Qualifications (15 / 16 Invariants Passed — 93.8%)
+1. *Truthful Disjoint 1,000,000 Scale:* Exactly 1,000,000 distinct `doc_id`, 1,000,000 distinct `content_hash`, and 1,000,000 distinct `payload_hash` in SQLite WAL (`scale_1m.db`). Disjoint partitioning: 100,000 Base + 900,000 Delta ($Base \cap Delta = \emptyset$).
+2. *Storage Footprint Compaction:* Hot database footprint compressed to 5,810,196,480 bytes (5.41 GiB), achieving a **2.88x storage multiplier**, securely within the governing $\le 3.00\times$ policy ceiling ($\le 6,043,397,232$ bytes).
+3. *100.0% 7-Table Cryptographic Replay Rebuild:* 100% full projection rebuild from event log into `scale_1m_replay.db` solely via `project_event()` achieved bit-for-bit SHA-256 state equality across all 7 SQLite tables (`events`, `ingestions`, `nodes`, `node_versions`, `edge_versions`, `source_lifecycle`, `node_fts`).
+4. *Original-Source Byte Span Proofs:* 1,000 / 1,000 (100.0%) UTF-8 byte span slices independently verified against raw upstream source files.
+5. *Empirical Fault Recovery:* Subprocess WAL crash recovery drill verified zero uncommitted data loss; live incremental watermark resume verified idempotency.
+6. *Latency Budgets:* All 5 capability lanes operate well within latency caps: `domain_semantic` (365 ms $\le$ 1,000 ms), `multi_hop_reasoning` (1,579 ms $\le$ 2,000 ms), `semantic_qa` (1,767 ms $\le$ 3,500 ms), `direct_lookup` (1,215 ms $\le$ 25,000 ms), `complex_reasoning` (3,459 ms $\le$ 60,000 ms). Max graph degree $= 10 \le 10$, traversal P95 $= 0.004\text{ ms} \le 35.0\text{ ms}$.
+7. *Passing Capability Lanes:* Direct Lookup (nDCG=0.6108 $\ge 0.6000$, Recall=0.7574 $\ge 0.7500$), Domain Semantic (nDCG=0.1868 $\ge 0.1800$, Recall=0.1119 $\ge 0.1100$), Multi-Hop Reasoning (nDCG=0.2650 $\ge 0.1200$, Recall=0.3544 $\ge 0.2000$), Semantic QA (nDCG=0.1913 $\ge 0.1000$, Recall=0.3544 $\ge 0.2000$), Abstention Suite (Accuracy=100.00% $\ge 90.0\%$, Zero Hallucination=100.0%).
+
+#### 2. The Single Remaining Constraint
+- *BRIGHT Complex Reasoning:* Recall@20 passed (0.0581 $\ge 0.0500$), but nDCG@10 reached **0.0346** (failing the $\ge 0.0500$ policy floor). This reflects the inherent limitation of pure lexical BM25 against 1,000,000 distractors on Olympiad math and coding problems without dense vector embedding representations.
+
+**Ruling:** Formally **CERTIFY DATA-PLANE SCALING** for Level 2 (1,000,000 documents) at storage multiplier 2.88x with 100% replay durability. Full unconditional Gate F2 promotion remains deferred until BRIGHT complex retrieval is upgraded via dense embeddings/hybrid re-ranking or adjusted under human policy governance.
+
+---
+
 ## Pending Decisions (Explicitly Deferred)
 
 The following decisions remain explicitly deferred and require empirical evidence before human determination:
