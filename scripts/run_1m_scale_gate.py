@@ -1164,10 +1164,45 @@ sys.exit(9)
         with open(ts_out, "w", encoding="utf-8") as f:
             json.dump({"timeseries": self.telemetry_samples}, f, indent=2)
 
+        # Dossier
+        dossier_out = self.output_dir / "1m_scale_dossier.json"
+        db_sz = self.db_path.stat().st_size if self.db_path.exists() else 0
+        raw_denom = 2014465744
+        multiplier = round(db_sz / max(1, raw_denom), 2)
+
+        dossier_data = {
+            "dossier_title": "Trace 1,000,000 (1M) Scale Gate Production Candidate Dossier",
+            "contract_standard": "DEC-P-005b-LEVEL2",
+            "execution_mode": self.mode,
+            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+            "scale_workload_vector": {
+                "document_count_D": self.target_count,
+                "base_documents_count": 100000,
+                "delta_documents_count": self.target_count - 100000,
+                "total_raw_text_bytes": raw_denom,
+                "storage_footprint_bytes": db_sz,
+                "storage_multiplier": multiplier,
+            },
+            "metrics": {
+                "promise_4_bounded_economics": {
+                    "graph_traversal_p95_latency_ms": compute_percentiles(self.graph_walk_latencies).get("p95", 0.0),
+                    "storage_multiplier": multiplier,
+                }
+            },
+            "completion_status": "AWAITING_INDEPENDENT_VERIFICATION",
+        }
+        with open(dossier_out, "w", encoding="utf-8") as f:
+            json.dump(dossier_data, f, indent=2)
+
+        # Clean up stale verifier receipt if present from a previous run
+        stale_receipt = self.output_dir / "verifier_receipt_1m.json"
+        if stale_receipt.exists():
+            stale_receipt.unlink()
+
         # Compute Checksums
         checksums: dict[str, str] = {}
         for p in self.output_dir.rglob("*"):
-            if p.is_file() and p.name != "checksums.json" and not p.name.endswith("-wal") and not p.name.endswith("-shm"):
+            if p.is_file() and p.name not in ["checksums.json", "candidate_manifest.json", "verifier_receipt_1m.json"] and not p.name.endswith("-wal") and not p.name.endswith("-shm"):
                 rel = str(p.relative_to(self.output_dir)).replace("\\", "/")
                 checksums[rel] = compute_sha256(p)
 
@@ -1201,36 +1236,6 @@ sys.exit(9)
         }
         with open(cand_manifest_out, "w", encoding="utf-8") as f:
             json.dump(cand_manifest_data, f, indent=2)
-
-        # Dossier
-        dossier_out = self.output_dir / "1m_scale_dossier.json"
-        db_sz = self.db_path.stat().st_size if self.db_path.exists() else 0
-        raw_denom = 2014465744
-        multiplier = round(db_sz / max(1, raw_denom), 2)
-
-        dossier_data = {
-            "dossier_title": "Trace 1,000,000 (1M) Scale Gate Production Candidate Dossier",
-            "contract_standard": "DEC-P-005b-LEVEL2",
-            "execution_mode": self.mode,
-            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-            "scale_workload_vector": {
-                "document_count_D": self.target_count,
-                "base_documents_count": 100000,
-                "delta_documents_count": self.target_count - 100000,
-                "total_raw_text_bytes": raw_denom,
-                "storage_footprint_bytes": db_sz,
-                "storage_multiplier": multiplier,
-            },
-            "metrics": {
-                "promise_4_bounded_economics": {
-                    "graph_traversal_p95_latency_ms": compute_percentiles(self.graph_walk_latencies).get("p95", 0.0),
-                    "storage_multiplier": multiplier,
-                }
-            },
-            "completion_status": "AWAITING_INDEPENDENT_VERIFICATION",
-        }
-        with open(dossier_out, "w", encoding="utf-8") as f:
-            json.dump(dossier_data, f, indent=2)
 
         print(f"\n================================================================================")
         print(f"  ✅ 1M Scale Candidate Execution Complete: {self.output_dir}")

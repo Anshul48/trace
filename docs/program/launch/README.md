@@ -1,5 +1,13 @@
 # Foundation Session Launch Kit
 
+For the proposed cognitive-architecture correction and Cortex/Core lane split,
+use the [TRACE-CAP-001 session prompt pack](CAP_001_SESSION_PROMPTS.md). It
+starts with a documentation-only DAG elaboration and an independent critique;
+mutable implementation and scale sessions remain gated by Human Owner
+decisions. The foundation prompts below are retained for their original
+program records and must be reconciled with the accepted CAP-001 DAG before
+being reused.
+
 Start **five independent Codex sessions** for the foundation program. If the
 human owner performs coordination directly, start the other four.
 
