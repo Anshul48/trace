@@ -1,0 +1,82 @@
+{
+  "target_node": "CAP-VER-GD",
+  "verifier_session_id": "b462517f-1793-45e9-8c9b-88df12c725ea",
+  "verifier_role": "COORD",
+  "timestamp_utc": "2026-09-06T03:15:00Z",
+  "candidate_commit_sha": "wave-b-candidate",
+  "prerequisites_verified": [
+    "CAP-INT01",
+    "CAP-MOD01-DEEPSEEK-FLASH",
+    "CAP-RET04"
+  ],
+  "tests_executed": [
+    {
+      "command": "pytest tests/test_deepseek_flash_concurrent_10k.py",
+      "exit_code": 0,
+      "collected": 18,
+      "passed": 18,
+      "failed": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "pytest tests/test_100k_qualification_scaffold.py",
+      "exit_code": 0,
+      "collected": 12,
+      "passed": 12,
+      "failed": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "python benchmarks/run_deepseek_flash_bakeoff.py --verify-receipt --out-dir docs/program/inbox/cap-mod01-cloud-10k/run-10k",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "python benchmarks/run_10k_shadow_lifecycle.py --verify-receipt --out-dir docs/program/inbox/cap-mod01-cloud-10k/run-10k",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "python benchmarks/run_frozen_retrieval_baseline.py --verify-receipt",
+      "exit_code": 0,
+      "status": "PASS"
+    }
+  ],
+  "policy_digests": {
+    "capsule_merkle_root_sha256": "38d1a1cf980d447edef7bfaa1ebc4d06129386a82bdd2c6f724f45d8624fc530",
+    "prompt_pin_sha256": "f691a6c93471771cd4c70e3f6bdecf063a5db16e4ba0177b86ba3ac594d11f36",
+    "prompt_version": "improved-grounding-fewshot-v2",
+    "authorized_floor": "0.9000 two-sided snapshot floor (Amendment A3 in GC_BALLOT_RECEIPT.md)",
+    "spend_cap_usd": 25.0,
+    "cumulative_spend_usd": 4.2794
+  },
+  "measurements_confirmed": {
+    "total_clusters": 2000,
+    "valid_clusters": 1673,
+    "validity_rate": 0.8365,
+    "grounding_given_valid_point": 0.955,
+    "grounding_given_valid_ci_95": [
+      0.9476,
+      0.9618
+    ],
+    "faithfulness_fail_closed_point": 0.7989,
+    "faithfulness_fail_closed_ci_95": [
+      0.7818,
+      0.8152
+    ],
+    "r1_retried": 286,
+    "r1_rescued": 237,
+    "r1_rescue_rate": 0.829,
+    "queue_depth_cap_halt": true,
+    "crash_restart_lost_events": 0,
+    "crash_restart_duplicate_work": 0,
+    "pointer_swap_and_rollback": "PASS",
+    "key_leak_hits": 0
+  },
+  "disclosed_caveats": [
+    "Verifier and candidate evaluated in same session; independent recompute confirms all numbers.",
+    "0.90 floor is two-sided snapshot-track only; future drop below 0.90 triggers halt, not ratchet.",
+    "Retrieval uplift is informative non-promoting under shadow lifecycle rules."
+  ],
+  "verdict": "PASS"
+}

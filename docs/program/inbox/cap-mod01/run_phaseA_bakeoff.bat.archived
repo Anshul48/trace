@@ -1,0 +1,79 @@
+@echo off
+REM WP-CAP-MOD01: Staged sequential local SLM bake-off (Tiers 0-5, teacher ABSENT).
+REM Hardware: RTX 5050 Laptop GPU (8GB VRAM) with Hybrid RAM Offload.
+REM Staging: 10/100 on 27B -> 10/100 on 26B -> 10-99 on 27B -> 10-99 on 26B.
+REM Real-time per-cluster scores displayed before final tier aggregation.
+REM Fail-closed: any check fails -> STOP.
+setlocal
+set PYTHONUNBUFFERED=1
+
+if exist "%~dp0..\..\..\..\benchmarks\run_model_bakeoff.py" (
+    cd /d "%~dp0..\..\..\.."
+) else (
+    cd /d C:\Users\anshu\OneDrive\Documents\Code\Utilities\trace || (echo [FAIL] repo path not found & pause & exit /b 1)
+)
+
+where python >nul 2>nul || (echo [FAIL] python not on PATH & pause & exit /b 1)
+ollama --version >nul 2>nul || (echo [FAIL] ollama CLI not found - install/start Ollama first & pause & exit /b 1)
+curl.exe -s -m 8 http://127.0.0.1:11434/api/tags >nul 2>nul || (echo [FAIL] Ollama not serving on 127.0.0.1:11434 - start the Ollama app first & pause & exit /b 1)
+
+echo ===============================================================================
+echo [NOTICE] Phase A is SUPERSEDED by Phase B (see PHASE_B_FINALISTS_PLAN.md).
+echo The active finalists bake-off is in: run_phaseB_bakeoff.bat
+echo ===============================================================================
+echo [1/6] PREFLIGHT: Checking cached weights in Ollama (all 5 local SLM models):
+echo ===============================================================================
+ollama list
+set MISSING=
+for %%M in (gemma4:e4b qwen3:8b gemma4:12b qwen3.8:27b gemma4:26b) do (
+  ollama list | findstr /i /c:"%%M" >nul || (echo [MISSING] %%M & set MISSING=1)
+)
+if defined MISSING (echo [FAIL] restore the exact missing tag above, then re-run. Do NOT substitute. & pause & exit /b 1)
+
+set MANIFEST=docs\program\inbox\cap-mod01\bakeoff_clusters_v1.json
+
+echo.
+echo ===============================================================================
+echo [2/6] STEP 1/4: Evaluating pilot clusters 0-9 (10/100) on Model A (qwen3.8:27b)...
+echo Real-time detailed scores per cluster printed before aggregate summary:
+echo ===============================================================================
+python -u benchmarks\run_model_bakeoff.py --manifest %MANIFEST% --model qwen3.8:27b --cluster-start 0 --cluster-end 10 --resume
+if errorlevel 1 (echo [FAIL] Step 1 [qwen3.8:27b pilot] failed & pause & exit /b 1)
+
+echo.
+echo ===============================================================================
+echo [3/6] STEP 2/4: Evaluating pilot clusters 0-9 (10/100) on Model B (gemma4:26b)...
+echo Real-time detailed scores per cluster printed before aggregate summary:
+echo ===============================================================================
+python -u benchmarks\run_model_bakeoff.py --manifest %MANIFEST% --model gemma4:26b --cluster-start 0 --cluster-end 10 --resume
+if errorlevel 1 (echo [FAIL] Step 2 [gemma4:26b pilot] failed & pause & exit /b 1)
+
+echo.
+echo ===============================================================================
+echo [4/6] STEP 3/4: Evaluating clusters 10-99 (completing 100/100) on Model A (qwen3.8:27b)...
+echo Real-time detailed scores per cluster printed before final tier aggregation:
+echo ===============================================================================
+python -u benchmarks\run_model_bakeoff.py --manifest %MANIFEST% --model qwen3.8:27b --cluster-start 10 --cluster-end 100 --resume
+if errorlevel 1 (echo [FAIL] Step 3 [qwen3.8:27b full run] failed & pause & exit /b 1)
+
+echo.
+echo ===============================================================================
+echo [5/6] STEP 4/4: Evaluating clusters 10-99 (completing 100/100) on Model B (gemma4:26b)...
+echo Real-time detailed scores per cluster printed before final tier aggregation:
+echo ===============================================================================
+python -u benchmarks\run_model_bakeoff.py --manifest %MANIFEST% --model gemma4:26b --cluster-start 10 --cluster-end 100 --resume
+if errorlevel 1 (echo [FAIL] Step 4 [gemma4:26b full run] failed & pause & exit /b 1)
+
+echo.
+echo ===============================================================================
+echo [6/6] VERIFICATION: Validating bake-off receipt and artifacts (must exit 0):
+echo ===============================================================================
+python -u benchmarks\run_model_bakeoff.py --manifest %MANIFEST% --verify-receipt
+if errorlevel 1 (echo [FAIL] receipt did not verify - paste every error line back & pause & exit /b 1)
+
+echo.
+echo ===============================================================================
+echo [DONE] Staged bake-off complete. Scorecard and receipt verified 100%%.
+echo Paste the scorecard + verify output back to the coordinator.
+echo ===============================================================================
+pause

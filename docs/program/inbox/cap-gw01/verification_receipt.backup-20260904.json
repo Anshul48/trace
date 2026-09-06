@@ -1,0 +1,66 @@
+{
+  "receipt_format": "TRACE-CAP-001-independent-verification-v1",
+  "gate": "CAP-GB",
+  "node": "CAP-GW01",
+  "packet_id": "WP-CAP-GW01",
+  "attestation_id": "rcpt-cap-gw01-verif-indep-20260903T031302Z",
+  "timestamp_utc": "2026-09-03T03:13:02Z",
+  "verifier_role": "VERIF-INDEP",
+  "verification_mode": "clean-detached-worktree",
+  "verification_worktree": "C:/Users/anshu/AppData/Local/Temp/trace-cap-verif-gw01-20260903",
+  "branch_ref": "cap-gw01-failclosed",
+  "base_commit": "a9255b4de181d0325b7ff140f685a1a065ae5d1f",
+  "verified_commit": "25f194d38e8643abb29f1578688cfa2d30592d6b",
+  "source_identity": {
+    "head_matches_target_commit": true,
+    "worktree_clean_after_verification": true
+  },
+  "checks": {
+    "acceptance_tests": {
+      "requested_command": "pytest tests/v2/test_model_gateway_failclosed.py tests/test_v2_llm_gateway.py -v",
+      "execution_command": "uv run --locked --extra test pytest tests/v2/test_model_gateway_failclosed.py tests/test_v2_llm_gateway.py -v",
+      "exit_code": 0,
+      "collected": 31,
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0,
+      "result": "PASS"
+    },
+    "manufactured_fallback_audit": {
+      "target_file": "src/trace/v2/model_gateway.py",
+      "markers_checked": [
+        "TechnicalArchitecture",
+        "Evidence-grounded architectural specification.",
+        "synthetic fallback",
+        "manufactured fallback",
+        "fallback schema"
+      ],
+      "match_count": 0,
+      "result": "PASS"
+    },
+    "main_diff_allowlist": {
+      "comparison": "main...HEAD",
+      "changed_paths": [
+        "docs/program/inbox/cap-gw01/handoff.md",
+        "src/trace/v2/model_gateway.py",
+        "tests/v2/test_model_gateway_failclosed.py"
+      ],
+      "unexpected_paths": [],
+      "result": "PASS"
+    }
+  },
+  "audited_invariants": {
+    "lease_compliance": true,
+    "synthetic_fallbacks_eliminated": true,
+    "failclosed_exceptions_verified": true,
+    "tests_passed": true
+  },
+  "verdict": "PASS",
+  "disposition": "PASS_FOR_NAMED_VERIFICATION_ONLY",
+  "claim_ceiling": "C1 component safety conformance; no gate certification, promotion, or merge authority",
+  "unblocks": [
+    "CAP-GW02"
+  ],
+  "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+  "signature": "c218e6382e9981cd661362477c7caab0f068f6d8e46822f0eff19faeb32ea16a"
+}

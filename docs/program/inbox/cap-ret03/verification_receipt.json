@@ -1,0 +1,53 @@
+{
+  "target_node": "CAP-RET03",
+  "verifier_session_id": "91b2a988-c341-4052-b9c9-a89a1987eaa6",
+  "verifier_role": "VERIF-INDEP",
+  "timestamp_utc": "2026-09-04T02:27:30Z",
+  "candidate_commit_sha": "5b719ca53bec4d6ddb24e4691ccfecdc485a6df8",
+  "candidate_tree_hash": "bb5aa59b8d13da489ac98ae05d2148f4098cdfd5",
+  "base_commit": "94afcf3b358c351ac7a71e466a18fca67c32e81a",
+  "base_is_ancestor_of_candidate": true,
+  "lease_conformance": true,
+  "lease_detail": {
+    "changed_paths": [
+      "src/trace/v2/retrieval.py",
+      "tests/v2/test_graph_retrieval.py"
+    ],
+    "unexpected_paths": []
+  },
+  "merge_risk": "none",
+  "tests_executed": [
+    {
+      "command": "PYTHONPATH=src /tmp/trace-ret02-venv/bin/pytest tests/v2/test_graph_retrieval.py -v",
+      "exit_code": 0,
+      "collected": 11,
+      "passed": 11,
+      "failed": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "PYTHONPATH=src /tmp/trace-ret02-venv/bin/pytest tests/v2/test_retrieval_embedding.py -v",
+      "exit_code": 0,
+      "collected": 16,
+      "passed": 16,
+      "failed": 0,
+      "status": "PASS"
+    }
+  ],
+  "negative_assertions": [
+    "empty graph returns hybrid candidates with graph_applied=False and empty_graph=True: PASS",
+    "disconnected seed nodes return hybrid candidates with graph_applied=False and empty_graph=True: PASS",
+    "non-associative relations (e.g. OPPOSITE_OF) are filtered out: PASS",
+    "out-degree per node strictly capped at <= 50: PASS",
+    "walk depth strictly bounded at <= 15: PASS",
+    "cyclic graphs terminate cleanly within max 20 iterations without infinite loop: PASS",
+    "multihop P95 latency is 0.44ms, strictly under 10ms budget: PASS"
+  ],
+  "dataset_verification": {
+    "counts_observed": {},
+    "md5_matched": null,
+    "note": "Not an EVAL02/RET04/GC/GD/GE/GF/GG node; no dataset counts apply."
+  },
+  "verdict": "PASS",
+  "failure_trace": ""
+}

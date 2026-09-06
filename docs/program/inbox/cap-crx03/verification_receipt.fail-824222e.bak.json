@@ -1,0 +1,229 @@
+{
+  "receipt_format": "TRACE-CAP-001-independent-verification-v1",
+  "gate": "CAP-GB",
+  "node": "CAP-CRX03",
+  "packet_id": "WP-CAP-CRX03",
+  "verifier_session_id": "S6-CRX03-VERIF-INDEP-20260903",
+  "attestation_id": "rcpt-cap-crx03-verif-indep-20260903-824222e",
+  "timestamp_utc": "2026-09-03T15:59:09.447Z",
+  "verifier_role": "VERIF-INDEP",
+  "verification_mode": "read-only-named-worktree-detached-check-failed",
+  "verification_worktree": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-crx03",
+  "receipt_path": "docs/program/inbox/cap-crx03/verification_receipt.json",
+  "branch_ref": "cap-crx03-activation",
+  "base_ref": "cap-crx02-consolidator",
+  "base_commit": "45c359118991bb6670092baf36cee3f573fc6454",
+  "expected_commit": "824222eed180679727398401adc92d9cfed25358",
+  "verified_commit": "824222eed180679727398401adc92d9cfed25358",
+  "source_identity": {
+    "target_branch_ref": "cap-crx03-activation",
+    "target_branch_ref_exists": true,
+    "target_branch_ref_matches_expected": true,
+    "requested_commit_short": "824222e",
+    "requested_commit_full": "824222eed180679727398401adc92d9cfed25358",
+    "head_matches_target_commit": true,
+    "verified_commit_full": "824222eed180679727398401adc92d9cfed25358",
+    "verified_tree_full": "82c32af7d40cb6cf7a02b9449d9c5a37e199ebd9",
+    "dispatch_base_ref": "cap-crx02-consolidator",
+    "dispatch_base_short": "45c3591",
+    "dispatch_base_commit_full": "45c359118991bb6670092baf36cee3f573fc6454",
+    "base_tree_full": "4161e5aa43a92befd59ad085cc6da2a8c33e4c93",
+    "base_is_ancestor_of_verified_commit": true,
+    "handoff_claimed_base_commit": "45c3591942fc692c8427fbf0cf339bf4b3ca4254",
+    "handoff_claimed_base_resolves": false,
+    "handoff_claim_conflicts_with_dispatch_base": true,
+    "initial_head_state": "HEAD -> cap-crx03-activation (branch attached)",
+    "detached_head": false,
+    "worktree_path_matches_dispatch": true,
+    "initial_worktree_clean": true,
+    "final_worktree_clean": true,
+    "tracked_diff_after_verification": false,
+    "untracked_paths_after_verification": [],
+    "receipt_written_outside_candidate_worktree": true,
+    "handoff_claims_relied_upon": false
+  },
+  "checks": {
+    "worktree_identity": {
+      "requested_branch_ref": "cap-crx03-activation",
+      "actual_head": "824222eed180679727398401adc92d9cfed25358",
+      "symbolic_head": "cap-crx03-activation",
+      "detached_required": true,
+      "detached_observed": false,
+      "initial_status": "clean, branch attached",
+      "result": "FAIL",
+      "failure_reasons": [
+        "The named worktree is attached to cap-crx03-activation rather than detached at the candidate commit."
+      ]
+    },
+    "lease_and_mutation_scope": {
+      "lease_id": "lease-cap-crx03-20260903T130500Z",
+      "lease_source": "docs/program/inbox/cap-crx03/dispatch_lease.json",
+      "expected_base_branch": "cap-crx02-consolidator",
+      "expected_base_commit_full": "45c359118991bb6670092baf36cee3f573fc6454",
+      "verification_boundary": [
+        "src/trace/v2/service.py (activation section)",
+        "src/trace/v2/store.py (pointer-swap section)",
+        "tests/v2/test_cortex_activation.py"
+      ],
+      "candidate_changed_paths_from_expected_base": [
+        "docs/program/inbox/cap-crx03/handoff.md",
+        "src/trace/v2/service.py",
+        "src/trace/v2/store.py",
+        "tests/v2/test_cortex_activation.py"
+      ],
+      "unexpected_changed_paths": [
+        "docs/program/inbox/cap-crx03/handoff.md"
+      ],
+      "service_diff_numstat": {
+        "insertions": 116,
+        "deletions": 5
+      },
+      "store_diff_numstat": {
+        "insertions": 333,
+        "deletions": 40
+      },
+      "test_diff_numstat": {
+        "insertions": 423,
+        "deletions": 0
+      },
+      "handoff_diff_numstat": {
+        "insertions": 96,
+        "deletions": 0
+      },
+      "lease_issued_at_utc": "2026-09-03T13:05:00Z",
+      "lease_duration_seconds": 7200,
+      "lease_expires_at_utc": "2026-09-03T15:05:00Z",
+      "observed_at_utc": "2026-09-03T15:55:35.4466936Z",
+      "lease_time_valid": false,
+      "lease_expired_at_observation": true,
+      "branch_ref_matches": true,
+      "worktree_is_detached": false,
+      "result": "FAIL",
+      "failure_reasons": [
+        "handoff.md is changed from the expected base and is outside the task's three-path verification allowlist.",
+        "The dispatch lease expired at 2026-09-03T15:05:00Z before the 2026-09-03T15:55:35.4466936Z observation.",
+        "The candidate handoff records non-resolving base 45c3591942fc692c8427fbf0cf339bf4b3ca4254; dispatch base 45c3591 resolves to 45c359118991bb6670092baf36cee3f573fc6454."
+      ]
+    },
+    "acceptance_tests": {
+      "requested_command": "$env:PYTHONPATH='src'; pytest tests/v2/test_cortex_activation.py -v",
+      "execution_command": "$env:PYTHONPATH='src'; pytest tests/v2/test_cortex_activation.py -v",
+      "execution_worktree": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-crx03",
+      "runtime_python": "C:/Program Files/Python312/python.exe",
+      "pytest_resolved_on_path": false,
+      "exit_code": 1,
+      "collected": null,
+      "passed": null,
+      "failed": null,
+      "skipped": null,
+      "stdout": "",
+      "stderr": "pytest : The term 'pytest' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.",
+      "expected_result": "9/9",
+      "result": "VERIFICATION_ERROR"
+    },
+    "overlap_audit": {
+      "directive": "D3",
+      "candidate_branch": "cap-crx03-activation",
+      "candidate_commit": "824222eed180679727398401adc92d9cfed25358",
+      "other_branch": "cap-job02-recovery",
+      "other_commit": "d6ab37b0514bbc02108529a942fa038c946bc596",
+      "other_node_receipt": "docs/program/inbox/cap-job02/verification_receipt.json",
+      "other_node_verdict": "FAIL",
+      "other_node_treated_as_qualification": false,
+      "common_base": "a9255b4de181d0325b7ff140f685a1a065ae5d1f",
+      "common_base_tree": "66b106d17e75a337491231f1d5ec25697a012a51",
+      "shared_paths": [
+        "src/trace/v2/service.py",
+        "src/trace/v2/store.py"
+      ],
+      "job02_changed_regions_against_common_base": {
+        "src/trace/v2/service.py": [
+          "exact diff hunks spanning common-base lines 12, 58, 172-175, 308-314, 490, and 587; resulting edits through line 906"
+        ],
+        "src/trace/v2/store.py": [
+          "common-base lines 50, 557, 898, and 5330-5593; resulting edits through line 5776"
+        ]
+      },
+      "crx03_changed_regions_against_common_base": {
+        "src/trace/v2/service.py": [
+          "common-base lines 3628, 3647, 3679, 3693, and 3696-3698; resulting activation section through line 3810"
+        ],
+        "src/trace/v2/store.py": [
+          "common-base line 806 and lines 3847-3900; resulting pointer-swap/proposal section through line 4196"
+        ]
+      },
+      "three_way_merge_validation": {
+        "command": "git merge-tree --write-tree --no-messages refs/heads/cap-job02-recovery refs/heads/cap-crx03-activation",
+        "comparison_basis": "exact branch refs and exact common base; isolated temporary object store",
+        "exit_code": 0,
+        "result_tree": "6598d878ffa5a341dd558f5f4aff355979dbb37f",
+        "textual_conflicting_hunks": []
+      },
+      "result": "PASS_WITH_MERGE_RISK",
+      "risk_reason": "The branches share leased service.py and store.py paths. The exact three-way merge has no textual conflicts, but D3 serialization remains mandatory and this is not a silent PASS.",
+      "required_serialization": "JOB02 merges first into wave-b-candidate; CRX03 rebases onto cap-job02-recovery before final merge clearance."
+    },
+    "negative_checks": {
+      "crash_log_predecessor_restoration": {
+        "required_evidence": "A crash log showing predecessor-release restoration during pointer swap.",
+        "candidate_crash_log_paths": [],
+        "static_test_source": "tests/v2/test_cortex_activation.py:314-345 asserts predecessor status active and journal rolled_back, but is not a runtime crash log.",
+        "exact_acceptance_test_ran": false,
+        "observed_predecessor_restoration": null,
+        "result": "FAIL",
+        "reason": "Required runtime crash-log evidence is missing; handoff prose and static assertions are not sufficient."
+      },
+      "dangling_aliases": {
+        "required_evidence": "Zero dangling aliases after crash rollback.",
+        "candidate_crash_log_paths": [],
+        "static_test_alias_observation": false,
+        "test_fixture": "SqliteEventStore plus MemoryObjectStore; no runtime alias-count or zero-dangling-alias assertion is present.",
+        "observed_dangling_alias_count": null,
+        "result": "FAIL",
+        "reason": "Missing or ambiguous evidence is a fail-closed result; zero dangling aliases was not observed."
+      }
+    },
+    "receipt_integrity": {
+      "receipt_json_parse": true,
+      "signature_required_by_repository_convention": true,
+      "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+      "canonicalization": "UTF-8 JSON with sort_keys=true, separators=(',', ':'), ensure_ascii=false; signature field excluded",
+      "post_write_recomputation_required": true,
+      "result": "PASS"
+    }
+  },
+  "audited_invariants": {
+    "target_commit_identity": true,
+    "target_branch_ref": true,
+    "base_identity_and_ancestry": true,
+    "handoff_base_identity_consistent": false,
+    "clean_named_worktree": true,
+    "detached_checkout": false,
+    "lease_time_valid": false,
+    "mutation_allowlist_exact": false,
+    "literal_acceptance_command_executed": false,
+    "acceptance_tests_passed_9_of_9": false,
+    "overlap_comparison_exact": true,
+    "overlap_textual_conflicts": false,
+    "d3_merge_serialization_required": true,
+    "predecessor_restoration_crash_log": false,
+    "zero_dangling_aliases": false,
+    "receipt_signature_valid": true
+  },
+  "limitations": [
+    "The requested worktree was attached to its branch, not detached.",
+    "The task allowlist was violated by docs/program/inbox/cap-crx03/handoff.md.",
+    "The dispatch lease expired before verification observation.",
+    "The literal acceptance command could not start because pytest was unavailable on PATH; no 9/9 result is claimed.",
+    "The candidate handoff base hash does not resolve and disagrees with the exact dispatch base resolution.",
+    "No runtime crash log proved predecessor restoration or zero dangling aliases; no alternate test or workaround was used.",
+    "This receipt does not certify CAP-CRX03, certify CAP-GB, unlock a successor, authorize merge or rebase, authorize promotion, or grant merge authority."
+  ],
+  "verdict": "FAIL",
+  "disposition": "FAIL_FOR_NAMED_VERIFICATION_ONLY",
+  "claim_ceiling": "Named verification failed; no component qualification, gate certification, promotion, merge, rebase clearance, or successor unlock",
+  "unblocks": [],
+  "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+  "canonicalization": "UTF-8 JSON with sort_keys=true, separators=(',', ':'), ensure_ascii=false; signature field excluded",
+  "signature": "5fac67ca89c39fa357cf5c5e055482310fad8f57f543bed84065ef2940646b81"
+}

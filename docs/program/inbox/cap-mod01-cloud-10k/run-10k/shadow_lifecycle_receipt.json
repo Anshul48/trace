@@ -1,0 +1,51 @@
+{
+  "target_node": "CAP-MOD01-CLOUD-10K-SHADOW",
+  "timestamp_utc": "2026-09-06T02:36:17.221776+00:00",
+  "queue_depth_cap_drill": {
+    "status": "PASS",
+    "queue_depth_cap": 5000,
+    "nominal_depth": 4999,
+    "nominal_pass": true,
+    "cap_depth": 5000,
+    "cap_pass": true,
+    "exceeded_depth": 5001,
+    "alert_halt_triggered": true,
+    "policy": "Halt ingestion when consolidation queue depth exceeds 5,000"
+  },
+  "crash_restart_drill": {
+    "status": "PASS",
+    "total_clusters": 2000,
+    "simulated_crash_watermark": 1000,
+    "crashed_at_utc": "2026-09-06T02:35:56.589240+00:00",
+    "pre_crash_count": 1000,
+    "post_resume_processed_count": 1000,
+    "total_recovered_count": 2000,
+    "lost_events_count": 0,
+    "duplicate_work_count": 0,
+    "watermark_resume_verified": true
+  },
+  "pointer_swap_and_rollback_drill": {
+    "status": "PASS",
+    "workspace_id": "cap_mod01_cloud_10k_shadow",
+    "predecessor_release_id": "d4e928e0-6b6e-4a48-936c-7e739edf7402",
+    "shadow_candidate_release_id": "00fb85c7-9cd4-4f66-8539-4bcd6a4a5a88",
+    "detached_validation_status": "validated",
+    "pointer_swap": {
+      "previous_active": "d4e928e0-6b6e-4a48-936c-7e739edf7402",
+      "promoted_active": "00fb85c7-9cd4-4f66-8539-4bcd6a4a5a88",
+      "status_after_swap": "active",
+      "transition_event": "cortex.release_activated"
+    },
+    "rollback_drill": {
+      "target_release_id": "d4e928e0-6b6e-4a48-936c-7e739edf7402",
+      "restored_active": "d4e928e0-6b6e-4a48-936c-7e739edf7402",
+      "rolled_back_release_status": "superseded",
+      "transition_event": "cortex.release_rolled_back",
+      "dangling_aliases_count": 0
+    },
+    "atomic_pointer_swap_verified": true,
+    "predecessor_retention_verified": true
+  },
+  "all_drills_passed": true,
+  "verdict": "RESULTS-COMPLETE (All Drills Passed; Promotion Reserved To Ballot)"
+}

@@ -1,7 +1,6 @@
 # Promotion Rubric
 
-> **Status:** Draft. A mechanism is not promoted by a worker, a benchmark
-> number, or a passing unit suite alone.
+> **Status:** Ratified promotion rubric under `DEC-CAP-001` (`TRACE-CAP-001`). A mechanism is not promoted by a worker, a benchmark number, or a passing unit suite alone.
 
 ## 1. Promotion question
 
@@ -48,11 +47,27 @@ Reject or return for redesign when a mechanism:
 - has unbounded graph, rebuild, or query work,
 - cannot be rolled back or observed.
 
-## 5. Decision record
+## 5. Decision record & risk-tiered activation (`DEC-CAP-001`)
 
-Only a reviewed decision log entry can authorize promotion. Rejected mechanisms
-remain useful negative evidence and may be reconsidered only with a new
-evidence packet.
+Under `DEC-CAP-001` (`CAP-D007`), promotion and activation are risk-tiered:
+
+1. **Tier 1 (Low Risk - Derived Navigation Summaries):**
+   - Cluster descriptions, section summaries, and topic navigation holons.
+   - May auto-activate within approved profile scopes following passing detached
+     validation (proposition support $\ge 95\%$, 100% byte anchor resolution).
+
+2. **Tier 2 (Medium Risk - Relational Proposals):**
+   - Inferred entity associations and inter-cluster affinity links.
+   - Require validation receipts and automated consistency checks before
+     activation; subject to rollback if drift exceeds thresholds.
+
+3. **Tier 3 (High Risk - Schema Mutations & Factual Assertions):**
+   - Schema modifications, ontology promotions, and authoritative assertions.
+   - Strictly require explicit Human Owner review and ratification in `06_DECISION_LOG.md`.
+
+Only a reviewed decision log entry can authorize overall architecture promotions.
+Rejected mechanisms remain useful negative evidence and may be reconsidered only
+with a new evidence packet.
 
 ## 6. Promotion units
 

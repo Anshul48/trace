@@ -1,22 +1,29 @@
 # Program Invariants
 
-> **Status:** Draft. Any change to an invariant requires a reviewed decision
-> record and an update to affected evaluators.
+> **Status:** Ratified program invariants under `DEC-CAP-001` (`TRACE-CAP-001`). Any change to an invariant requires a reviewed decision record and an update to affected evaluators.
 
 ## 1. Truth versus projection
 
 - Source artifacts, immutable atoms, event/version history, exact offsets,
   hashes, evidence anchors, temporal validity, and policy/review state are
-  canonical truth.
+  canonical truth (Spine).
 - Trees, summaries, embeddings, lexical indexes, graph affinity, routing,
-  scores, and caches are rebuildable projections.
-- Query-time activation may improve recall but may never rewrite truth.
+  scores, holons, and caches are rebuildable projections.
+- Spine data and deterministic indexes require 100% bit-exact replay parity.
+- Generative projections (summaries, holons, entity/relation proposals) require
+  declared reproducibility classes, immutable prompt/model/runtime receipts, and
+  permanent lineage anchors (`CAP-D005`).
+- Query-time activation or synthesis may improve recall or reasoning but may
+  never rewrite canonical truth.
 
 ## 2. Candidate isolation
 
 - Derived state is built as a named candidate revision or build.
 - Candidate rows are invisible to normal reads.
-- Validation precedes atomic active-revision handover.
+- Detached validation precedes atomic active-revision handover.
+- Risk-tiered activation (`CAP-D007`): low-risk navigation summaries may
+  auto-activate post-validation; high-risk factual/schema proposals require
+  explicit human approval.
 - Failure preserves the last verified active state and source Spine.
 - Rollback targets an already verified release, not a fresh reconstruction.
 
@@ -24,7 +31,8 @@
 
 - Every material result must identify source data, transformation, configuration,
   model/provider where relevant, code revision, and evaluation manifest.
-- Exact source evidence remains recoverable from retrieved output.
+- Exact source evidence remains recoverable from retrieved output via UTF-8 byte
+  spans.
 - A plausible generated summary never substitutes for missing source evidence.
 
 ## 4. Evaluation integrity

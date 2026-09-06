@@ -1,26 +1,23 @@
 # Foundation Program Status
 
-> **Status:** Gate A recorded 2026-08-23; implementation completion remains separate
-> from independent verification and human gate acceptance.
+> **Status:** Governed by `DEC-CAP-001` (`TRACE-CAP-001`). Cognitive Architecture Correction Plan ratified 2026-09-02 (Gate `CAP-GA`).
 
 ## Current objective
 
-Create the finite, trustworthy, reproducible Foundation Release described in
-`FOUNDATION_RELEASE.md`. Broad architecture research begins after the human
-reviews the Foundation Complete record.
+Drive the cognitive architecture correction plan under [`COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md`](COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md)
+and [`CAP_001_EXECUTION_DAG.md`](CAP_001_EXECUTION_DAG.md), establishing decoupled Core,
+Retrieval, Cortex, and Synthesis capability lanes with rigorous detached verification.
 
 ## Program State
 
-`scale_certification_recovery_wave_r1 (Wave R1 100K Production Repair Complete & Independently Attested; Submitted for Gate C2 Review)`
+`trace_cognitive_architecture_wave_a (DEC-CAP-001 Ratified; Wave A Governance Reconciliation Active)`
 
-Following the Human Gate C2 decision (`REPAIR — promote_100k denied`), Wave R1 was fully executed under `00_GLOBAL_CONTEXT_REPAIR_LOOP.md`:
-- **R1-01 Repair Architecture:** Sealed in `docs/program/inbox/r1-01-repair-architecture-20260828/` (native ID mapping, true event rebuilder, compact schemas).
-- **Candidate Commit:** Committed to Git in `a2c25e0` with passing unit tests (`tests/test_scale_rebuild_integrity.py`).
-- **Production Candidate Run:** 100,000 real documents ingested ($N = 228,328$ atoms, peak RSS $1.51\text{ GB}$, storage $679.89\text{ MB}$, P95 graph PPR latency $1.959\text{ ms}$).
-- **True Event Rebuild Parity:** 100,000 events replayed with 100.0% row and SHA-256 state-hash match across all 6 tables and zero cross-DB table copying.
-- **Multi-Lane Retrieval & Abstention:** SciFact nDCG@10 = 0.3406 / Recall@20 = 0.3558, Abstention Accuracy = 95.50% (0.0% hallucination on null queries).
-- **L1-07 Independent Verifier Attestation:** Audited and cryptographically sealed by Independent Verifier (`docs/program/inbox/l1-07-verifier-attestation-20260828/`, receipt SHA-256: `066f3e94...`).
-- **L1-08 Master Gate C2 Dossier:** Re-submitted in `docs/program/inbox/l1-08-gate-c2-dossier-20260828/` for Human Owner promotion review (`promote_100k`).
+Following formal Human Owner ratification of `DEC-CAP-001` on 2026-09-02:
+- **Ratified Decision:** `DEC-CAP-001` (Clauses `CAP-D001` through `CAP-D016`) recorded in `06_DECISION_LOG.md`.
+- **Governing Plan:** `COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md` (SHA-256: `ffcd024ea2c7d013c011bea70145ba70fc2f68a90c1154ee9599a4f80efa9c00`).
+- **Governing Execution DAG:** `CAP_001_EXECUTION_DAG.md`.
+- **Governing Gate Matrix:** `CAP_001_GATE_MATRIX.md`.
+- **Active Phase:** Wave A (Governance & Architecture Reconciliation: `CAP-A01` [PASS], `CAP-A02` [ACTIVE], `CAP-A03` [QUEUED], `CAP-VER-GA` [QUEUED]).
 
 ## Active Task Board (Level 1 Complete / Gate C2 Review Ready)
 

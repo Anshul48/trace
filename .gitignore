@@ -45,3 +45,10 @@ tests/.phase1_tmp/
 # Benchmark runs and artifacts
 benchmarks/runs/
 suggestions/
+
+# Ephemeral artifacts and scratch tools
+trace_stderr.log
+prior_diff.patch
+tools/
+benchmarks/data/
+

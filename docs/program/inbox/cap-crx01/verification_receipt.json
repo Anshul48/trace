@@ -1,0 +1,78 @@
+{
+  "receipt_format": "TRACE-CAP-001-independent-verification-v1",
+  "gate": "CAP-CRX01",
+  "node": "CAP-CRX01",
+  "packet_id": "WP-CAP-CRX01-REPAIR",
+  "attestation_id": "rcpt-cap-crx01-verif-indep-20260903-59ce53a",
+  "timestamp_utc": "2026-09-03T10:18:48.536Z",
+  "verifier_role": "VERIF-INDEP",
+  "verifier_worker": "codex-independent-fallback",
+  "verification_mode": "clean-detached-worktree",
+  "verification_worktree": "C:/Users/anshu/AppData/Local/Temp/trace-cap-crx01-verifier-20260903-d/worktree",
+  "branch_ref": "cap-crx01-schema",
+  "base_commit": "a9255b4de181d0325b7ff140f685a1a065ae5d1f",
+  "verified_commit": "59ce53ab51e11b2344195c3b33d11ba8907f1d4d",
+  "source_identity": {
+    "target_branch_ref": "cap-crx01-schema",
+    "requested_commit_full": "59ce53ab51e11b2344195c3b33d11ba8907f1d4d",
+    "head_matches_target_commit": true,
+    "verified_commit_full": "59ce53ab51e11b2344195c3b33d11ba8907f1d4d",
+    "verified_tree_full": "4209be79fe0bc8b60f322372397de41db8204346",
+    "base_commit_full": "a9255b4de181d0325b7ff140f685a1a065ae5d1f",
+    "base_tree_full": "66b106d17e75a337491231f1d5ec25697a012a51",
+    "base_is_ancestor_of_verified_commit": true,
+    "initial_head_state": "HEAD (no branch)",
+    "initial_worktree_clean": true,
+    "final_worktree_clean": true,
+    "tracked_diff_after_verification": false,
+    "handoff_claims_relied_upon": false
+  },
+  "checks": {
+    "acceptance_tests": {
+      "requested_command": "$env:PYTHONPATH='src'; pytest tests/v2/test_cortex_schemas.py -v",
+      "execution_command": "$env:PYTHONPATH='src'; & .\\.venv\\Scripts\\pytest.exe tests/v2/test_cortex_schemas.py -v",
+      "interpreter": "C:/Users/anshu/AppData/Local/Temp/trace-cap-crx01-verifier-20260903-d/worktree/.venv/Scripts/python.exe",
+      "platform": "win32",
+      "python_version": "3.12.11",
+      "pytest_version": "9.1.1",
+      "exit_code": 0,
+      "collected": 56,
+      "passed": 56,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 1.58,
+      "required_test_observed": "test_deterministic_json_extended_types PASSED",
+      "warnings": [
+        "PytestCacheWarning: access denied while creating .pytest_cache cache path in the temporary worktree; it did not affect test execution or tracked cleanliness."
+      ],
+      "result": "PASS"
+    },
+    "mutation_allowlist": {
+      "comparison": "git diff --name-status main...HEAD",
+      "expected_paths": [
+        "docs/program/inbox/cap-crx01/handoff.md",
+        "src/trace/v2/cortex/",
+        "tests/v2/test_cortex_schemas.py"
+      ],
+      "changed_paths": [
+        "docs/program/inbox/cap-crx01/handoff.md",
+        "src/trace/v2/cortex/__init__.py",
+        "src/trace/v2/cortex/models.py",
+        "src/trace/v2/cortex/schemas.py",
+        "tests/v2/test_cortex_schemas.py"
+      ],
+      "unexpected_paths": [],
+      "receipt_excluded_from_candidate_mutation": true,
+      "git_diff_check": "WARN",
+      "git_diff_check_detail": "tests/v2/test_cortex_schemas.py:979: new blank line at EOF; the path is allowlisted and the requested acceptance suite passes.",
+      "result": "PASS"
+    }
+  },
+  "verdict": "PASS",
+  "disposition": "PASS_FOR_NAMED_VERIFICATION_ONLY",
+  "claim_ceiling": "C1 Cortex projection schema and mutation conformance; no gate certification, promotion, or merge authority",
+  "unblocks": ["CAP-CRX01"],
+  "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+  "canonicalization": "UTF-8 JSON with sort_keys=true, separators=(',', ':'), ensure_ascii=false; signature field excluded",
+  "signature": "66025f7096469bf7b60dfefa63db4d0f8a5ade7a3d6727a24a54bde7d0323289"
+}

@@ -1,0 +1,183 @@
+{
+  "notice": "[TEMPORARY MONITORING TOOLING \u2014 SCHEDULED FOR REMOVAL UPON WAVE C COMPLETION]",
+  "task_id": "CAP-MOD01",
+  "task_name": "Sequential Model Bake-Off on 100 Frozen Atom Clusters",
+  "status": "completed",
+  "active_model": "Gemma 4 26B MoE",
+  "total_clusters_all_models": 6,
+  "completed_clusters_all_models": 6,
+  "overall_progress_percent": 100.0,
+  "updated_at": "2026-09-04T07:57:58.098569+00:00",
+  "models": [
+    {
+      "name": "Extractive Control",
+      "id": "extractive_control",
+      "tier": "Tier 0",
+      "params": "0B (Zero-LLM)",
+      "status": "completed",
+      "completed_clusters": 1,
+      "total_clusters": 1,
+      "tokens_per_sec": 2500.0,
+      "p95_latency_ms": 0.5,
+      "error_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    {
+      "name": "Gemma 4 E4B",
+      "id": "gemma4:e4b",
+      "tier": "Tier 1",
+      "params": "4B",
+      "status": "completed",
+      "completed_clusters": 1,
+      "total_clusters": 1,
+      "tokens_per_sec": 38.88,
+      "p95_latency_ms": 46196.0,
+      "error_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    {
+      "name": "Qwen3-8B",
+      "id": "qwen3:8b",
+      "tier": "Tier 2",
+      "params": "8B",
+      "status": "completed",
+      "completed_clusters": 1,
+      "total_clusters": 1,
+      "tokens_per_sec": 8.17,
+      "p95_latency_ms": 136917.9,
+      "error_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    {
+      "name": "Gemma 4 12B",
+      "id": "gemma4:12b",
+      "tier": "Tier 3",
+      "params": "12B",
+      "status": "completed",
+      "completed_clusters": 1,
+      "total_clusters": 1,
+      "tokens_per_sec": 7.43,
+      "p95_latency_ms": 166657.0,
+      "error_rate": 1.0,
+      "invalid_rate": 1.0
+    },
+    {
+      "name": "Qwen3.8-27B",
+      "id": "qwen3.8:27b",
+      "tier": "Tier 4",
+      "params": "27B",
+      "status": "completed",
+      "completed_clusters": 1,
+      "total_clusters": 1,
+      "tokens_per_sec": 0.0,
+      "p95_latency_ms": 241014.5,
+      "error_rate": 1.0,
+      "invalid_rate": 1.0
+    },
+    {
+      "name": "Gemma 4 26B MoE",
+      "id": "gemma4:26b",
+      "tier": "Tier 5",
+      "params": "26B",
+      "status": "completed",
+      "completed_clusters": 1,
+      "total_clusters": 1,
+      "tokens_per_sec": 12.83,
+      "p95_latency_ms": 140457.0,
+      "error_rate": 0.0,
+      "invalid_rate": 0.0
+    }
+  ],
+  "logs": [
+    {
+      "timestamp": "2026-09-04T07:45:39.374417+00:00",
+      "level": "INFO",
+      "message": "Sequential Model Bake-Off initialized. Offline GPU run starting."
+    },
+    {
+      "timestamp": "2026-09-04T07:45:39.431554+00:00",
+      "level": "INFO",
+      "message": "Beginning sequential evaluation for Extractive Control (Deterministic Heuristic)."
+    },
+    {
+      "timestamp": "2026-09-04T07:45:39.501236+00:00",
+      "level": "INFO",
+      "message": "[Extractive Control] Cluster 1/1 evaluated. TPS: 2500.0, P95: 0ms."
+    },
+    {
+      "timestamp": "2026-09-04T07:45:39.547364+00:00",
+      "level": "INFO",
+      "message": "Completed Extractive Control: Faithfulness 0.9444 (95% CI [0.9444, 0.9444]), P95: 0ms."
+    },
+    {
+      "timestamp": "2026-09-04T07:45:39.547475+00:00",
+      "level": "INFO",
+      "message": "Beginning sequential evaluation for Gemma 4 E4B (4B Dense)."
+    },
+    {
+      "timestamp": "2026-09-04T07:46:26.326866+00:00",
+      "level": "INFO",
+      "message": "[Gemma 4 E4B] Cluster 1/1 evaluated. TPS: 38.9, P95: 46196ms."
+    },
+    {
+      "timestamp": "2026-09-04T07:46:26.367360+00:00",
+      "level": "INFO",
+      "message": "Completed Gemma 4 E4B: Faithfulness 0.8769 (95% CI [0.8769, 0.8769]), P95: 46196ms."
+    },
+    {
+      "timestamp": "2026-09-04T07:46:26.367455+00:00",
+      "level": "INFO",
+      "message": "Beginning sequential evaluation for Qwen3-8B (8B Dense)."
+    },
+    {
+      "timestamp": "2026-09-04T07:48:43.816859+00:00",
+      "level": "INFO",
+      "message": "[Qwen3-8B] Cluster 1/1 evaluated. TPS: 8.2, P95: 136918ms."
+    },
+    {
+      "timestamp": "2026-09-04T07:48:43.849962+00:00",
+      "level": "INFO",
+      "message": "Completed Qwen3-8B: Faithfulness 1.0000 (95% CI [1.0000, 1.0000]), P95: 136918ms."
+    },
+    {
+      "timestamp": "2026-09-04T07:48:43.850071+00:00",
+      "level": "INFO",
+      "message": "Beginning sequential evaluation for Gemma 4 12B (12B Dense)."
+    },
+    {
+      "timestamp": "2026-09-04T07:51:31.051344+00:00",
+      "level": "INFO",
+      "message": "[Gemma 4 12B] Cluster 1/1 evaluated. TPS: 7.4, P95: 166657ms."
+    },
+    {
+      "timestamp": "2026-09-04T07:51:31.101226+00:00",
+      "level": "INFO",
+      "message": "Completed Gemma 4 12B: Faithfulness 0.9444 (95% CI [0.9444, 0.9444]), P95: 166657ms."
+    },
+    {
+      "timestamp": "2026-09-04T07:51:31.101347+00:00",
+      "level": "INFO",
+      "message": "Beginning sequential evaluation for Qwen3.8-27B (27B Dense)."
+    },
+    {
+      "timestamp": "2026-09-04T07:55:35.410666+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 1/1 evaluated. TPS: 0.0, P95: 241014ms."
+    },
+    {
+      "timestamp": "2026-09-04T07:55:35.511205+00:00",
+      "level": "INFO",
+      "message": "Completed Qwen3.8-27B: Faithfulness 0.9444 (95% CI [0.9444, 0.9444]), P95: 241014ms."
+    },
+    {
+      "timestamp": "2026-09-04T07:55:35.512744+00:00",
+      "level": "INFO",
+      "message": "Beginning sequential evaluation for Gemma 4 26B MoE (26B MoE)."
+    },
+    {
+      "timestamp": "2026-09-04T07:57:58.057603+00:00",
+      "level": "INFO",
+      "message": "[Gemma 4 26B MoE] Cluster 1/1 evaluated. TPS: 12.8, P95: 140457ms."
+    }
+  ]
+}

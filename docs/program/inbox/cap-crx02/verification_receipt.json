@@ -1,0 +1,272 @@
+{
+  "receipt_format": "TRACE-CAP-001-independent-verification-v1",
+  "gate": "CAP-GB",
+  "target_node": "CAP-CRX02",
+  "node": "CAP-CRX02",
+  "packet_id": "WP-CAP-CRX02",
+  "attestation_id": "rcpt-cap-crx02-verif-indep-20260903T170525Z",
+  "verifier_session_id": "01a06837-8b8a-74d2-a5cc-e9be50a02e2e",
+  "timestamp_utc": "2026-09-03T17:05:25.914Z",
+  "verifier_role": "VERIF-INDEP",
+  "verification_mode": "detached-worktree-read-only",
+  "verification_worktree": "/tmp/trace-wt/vcrx02 (detached HEAD, removed after verification)",
+  "receipt_path": "docs/program/inbox/cap-crx02/verification_receipt.json",
+  "supersedes_receipt": "docs/program/inbox/cap-crx02/verification_receipt.superseded-20260903.json",
+  "branch_ref": "cap-crx02-consolidator",
+  "expected_branch_ref": "cap-crx02-consolidator",
+  "base_commit": "59ce53ab51e11b2344195c3b33d11ba8907f1d4d",
+  "base_commit_requested": "59ce53a",
+  "candidate_commit_sha": "2cfe313541325d39a04eba30d7257c4e172cd8da",
+  "verified_commit": "2cfe313541325d39a04eba30d7257c4e172cd8da",
+  "branch_tip_matches_candidate": true,
+  "source_identity": {
+    "target_branch_ref": "cap-crx02-consolidator",
+    "requested_commit": "2cfe313",
+    "requested_commit_full": "2cfe313541325d39a04eba30d7257c4e172cd8da",
+    "head_matches_target_commit": true,
+    "verified_commit_full": "2cfe313541325d39a04eba30d7257c4e172cd8da",
+    "verified_tree_full": "523792fb2cdb6890998163a159acae0604cb3cd6",
+    "base_commit_full": "59ce53ab51e11b2344195c3b33d11ba8907f1d4d",
+    "base_tree_full": "4209be79fe0bc8b60f322372397de41db8204346",
+    "base_is_ancestor_of_verified_commit": true,
+    "initial_head_state": "detached HEAD 2cfe313",
+    "detached_head_required": true,
+    "detached_head_observed": true,
+    "initial_worktree_clean": true,
+    "initial_status": [],
+    "handoff_prior_declared_base_full": "59ce53a152ca6331908bc7489bb2e15bc963b156",
+    "handoff_prior_declared_base_resolves": false,
+    "handoff_prior_string_still_present": true,
+    "handoff_prior_string_location": "docs/program/inbox/cap-crx02/handoff.md line 7 (historical worker declaration)",
+    "handoff_repair_section_disclaims_prior_string": true,
+    "handoff_repair_section": "handoff.md lines 105-109: rev-parse outputs for dispatch base and pre-repair HEAD plus explicit non-resolution note",
+    "resolved_packet_base_is_ancestor": true,
+    "final_head_state": "detached HEAD 2cfe313 (worktree removed after .venv/.pytest_cache deletion)",
+    "final_worktree_clean": true,
+    "final_status": [],
+    "verifier_modified_candidate_code": false
+  },
+  "lease_conformance": true,
+  "merge_risk": "none",
+  "checks": {
+    "worktree_identity": {
+      "requested_branch": "cap-crx02-consolidator",
+      "requested_commit": "2cfe313",
+      "observed_commit": "2cfe313541325d39a04eba30d7257c4e172cd8da",
+      "detached_required": true,
+      "detached_observed": true,
+      "clean_required": true,
+      "clean_observed": true,
+      "status": "PASS",
+      "evidence": "git rev-parse HEAD returned 2cfe313541325d39a04eba30d7257c4e172cd8da; git symbolic-ref -q HEAD exited 1 (detached); git status --porcelain=v1 --untracked-files=all empty before and after probes (post-probe .venv/.pytest_cache deleted, worktree removed)."
+    },
+    "base_identity": {
+      "dispatch_base_short": "59ce53a",
+      "resolved_base_full": "59ce53ab51e11b2344195c3b33d11ba8907f1d4d",
+      "handoff_prior_base_full": "59ce53a152ca6331908bc7489bb2e15bc963b156",
+      "handoff_prior_base_resolves": false,
+      "status": "PASS",
+      "evidence": "Dispatch base 59ce53a resolves to 59ce53ab51e11b2344195c3b33d11ba8907f1d4d and is ancestor of the candidate (merge-base --is-ancestor OK). The old non-resolving 59ce53a152ca... string is STILL PRESENT at handoff.md line 7 as the historical worker declaration, but repair handoff section 5 (lines 105-109) explicitly flags it as non-resolving and all operative SHAs there are git rev-parse output and resolve."
+    },
+    "lease_conformance": {
+      "comparison": "git diff --name-status 59ce53ab51e11b2344195c3b33d11ba8907f1d4d HEAD plus working-tree status",
+      "allowed_paths": [
+        "src/trace/v2/organization.py",
+        "src/trace/v2/cortex_consolidator.py",
+        "tests/v2/test_cortex_consolidator.py",
+        "src/trace/v2/model_gateway.py (pricing lines only, fix-spec-authorized)",
+        "docs/program/inbox/cap-crx02/handoff.md (own handoff, fix-spec-authorized)"
+      ],
+      "changed_paths_from_resolved_base": [
+        {
+          "status": "A",
+          "path": "docs/program/inbox/cap-crx02/handoff.md"
+        },
+        {
+          "status": "A",
+          "path": "src/trace/v2/cortex_consolidator.py"
+        },
+        {
+          "status": "M",
+          "path": "src/trace/v2/model_gateway.py"
+        },
+        {
+          "status": "M",
+          "path": "src/trace/v2/organization.py"
+        },
+        {
+          "status": "A",
+          "path": "tests/v2/test_cortex_consolidator.py"
+        }
+      ],
+      "repair_commit_files": [
+        "docs/program/inbox/cap-crx02/handoff.md",
+        "src/trace/v2/cortex_consolidator.py",
+        "src/trace/v2/model_gateway.py"
+      ],
+      "model_gateway_hunks_confined_to": [
+        "DEFAULT_MODEL_REGISTRY deepseek-v4-flash coefficients (input 0.27/output 1.10 per 1M)",
+        "TraceModelGateway.call_json estimated_cost output-token term"
+      ],
+      "working_tree_paths": [],
+      "unexpected_paths": [],
+      "status": "PASS",
+      "evidence": "Cumulative base..HEAD name-status stays inside the fix-spec-authorized set; model_gateway.py cumulative diff reviewed hunk-by-hunk (registry coefficients + estimated_cost output term only); repair commit 2cfe313 --stat touches only handoff.md + cortex_consolidator.py + model_gateway.py."
+    },
+    "acceptance_tests": {
+      "requested_command": "PYTHONPATH=src .venv/bin/pytest tests/v2/test_cortex_consolidator.py -v",
+      "execution_command": "PYTHONPATH=src .venv/bin/pytest tests/v2/test_cortex_consolidator.py -v",
+      "exit_code": 0,
+      "collected": 15,
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "status": "PASS",
+      "result": "PASS",
+      "stderr": "",
+      "evidence": "Literal command in detached worktree /tmp/trace-wt/vcrx02 with project venv (uv sync --extra test): '15 passed in 1.42s'. Full per-test list in negative_assertions evidence."
+    },
+    "byte_parity": {
+      "expected": "extractive_control output is byte-identical to base clipping (Option B: U+2026 canonical)",
+      "fixture": "200 ASCII x characters, default clipping limit 180",
+      "base_source": "59ce53ab51e11b2344195c3b33d11ba8907f1d4d:src/trace/v2/organization.py _excerpt (AST-extracted, executed)",
+      "candidate_source": "worktree src/trace/v2/cortex_consolidator.py _excerpt (imported, executed)",
+      "candidate_suffix_repr": "xxxx…",
+      "base_suffix_repr": "xxxx…",
+      "candidate_utf8_tail_hex": "7878e280a6",
+      "base_utf8_tail_hex": "7878e280a6",
+      "candidate_utf8_byte_length": 182,
+      "base_utf8_byte_length": 182,
+      "byte_identical": true,
+      "status": "PASS",
+      "spec_basis": "option-B-pending-GB",
+      "evidence": "In-memory probe exited 0 and reported byte_identical=true; both sides emit U+2026 (e280a6), 182 bytes. Repair commit makes NO marker change (Option B). The canonicalization of U+2026 over the prior receipt's '?' expectation is a SPEC decision requiring GB approval — recorded here, never silently passed as a code change."
+    },
+    "negative_mock_semantic_path": {
+      "expected": "mock-model semantic path produces structured holons",
+      "execution": "tests/v2/test_cortex_consolidator.py::TestCortexConsolidatorSemanticSLM::test_semantic_slm_interfaces_with_gateway within literal 15/15 run, plus verifier cost-probe consolidation",
+      "exit_code": 0,
+      "structured_holons_asserted": true,
+      "asserted_types": [
+        "SectionSummary",
+        "TopicHolon",
+        "EntityCandidate",
+        "RelationCandidate"
+      ],
+      "manifest_lineage_asserted": true,
+      "status": "PASS",
+      "evidence": "Suite test passed in the 15/15 run; verifier's independent mock-gateway consolidation (45 prompt + 85 completion tokens) also returned typed holons with verified lineage."
+    },
+    "negative_evidence_grounding": {
+      "expected": "hallucinated anchors and ungrounded entity references fail closed",
+      "execution": "test_semantic_slm_rejects_hallucinated_anchors_fail_closed and test_semantic_slm_rejects_ungrounded_entity_references within literal 15/15 run",
+      "exit_code": 0,
+      "status": "PASS",
+      "evidence": "Both fail-closed tests passed in the 15/15 run (exit 0 covers them)."
+    },
+    "negative_empty_model_output": {
+      "expected": "empty model output fails closed",
+      "execution": "not re-executed this session",
+      "status": "NOT_REPEATED",
+      "evidence": "Prior receipt (45c3591) directly probed ModelGatewayError on empty completion; repair commit 2cfe313 does not touch the JSON-parse/fail-closed path (only registry coefficients + estimated_cost arithmetic + manifest audit mirroring); 15/15 suite green. Carried, not re-probed."
+    },
+    "cost_integrity": {
+      "expected": "model-call cost is recorded and meaningful",
+      "model_id": "deepseek-v4-flash",
+      "provider_model": "deepseek/deepseek-v4-flash",
+      "flash_input_per_1M": 0.27,
+      "flash_output_per_1M": 1.1,
+      "coefficients_nonzero": true,
+      "estimated_cost_includes_output_tokens": true,
+      "cloud_tokens_observed": 130,
+      "cloud_tokens_breakdown": {
+        "prompt_tokens": 45,
+        "completion_tokens": 85
+      },
+      "cost_usd_observed": 0.00010565000000000002,
+      "cost_usd_nonzero": true,
+      "cost_usd_arithmetic": "(45*0.27 + 85*1.10)/1e6 = 105.65/1e6",
+      "manifest_audit_observed": "full record",
+      "manifest_audit_keys": [
+        "provider",
+        "purpose",
+        "policy_outcome",
+        "excerpt_hashes",
+        "node_count",
+        "estimated_tokens",
+        "cloud_tokens",
+        "cost_usd",
+        "model_id",
+        "provider_model",
+        "workspace_id",
+        "actor",
+        "request_id",
+        "prompt_template_revision",
+        "cognitive_policy_revision",
+        "response_schema_hash",
+        "status"
+      ],
+      "manifest_audit_matches_result_audit": true,
+      "status": "PASS",
+      "evidence": "In-memory mock-gateway consolidation probe (real TraceModelGateway.call_json pricing path, no network) returned audit cost_usd 0.00010565 for 130 cloud tokens; manifest.artifacts.audit is the full audit dict identical to result audit, including cost_usd, tokens, and model id."
+    },
+    "checksum_integrity": {
+      "status": "NOT_APPLICABLE",
+      "evidence": "CAP-CRX02 has no external dataset or checksum manifest input; no checksum claim was used."
+    },
+    "verifier_mutation_audit": {
+      "candidate_code_modified": false,
+      "target_worktree_status_after_probes": [],
+      "status": "PASS",
+      "evidence": "All probes were read-only or in-memory in /tmp; no candidate source or test path was modified. .venv/.pytest_cache removed; worktree removed; parent checkout untouched except the receipt write + backup."
+    },
+    "receipt_integrity": {
+      "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+      "canonicalization": "UTF-8 JSON with sort_keys=true, separators=(',', ':'), ensure_ascii=false; signature field excluded",
+      "status": "PASS",
+      "evidence": "Receipt reloaded after writing and signature recomputed over the canonical payload before completion."
+    }
+  },
+  "tests_executed": [
+    {
+      "command": "PYTHONPATH=src .venv/bin/pytest tests/v2/test_cortex_consolidator.py -v",
+      "exit_code": 0,
+      "status": "PASS"
+    }
+  ],
+  "negative_assertions": [
+    "extractive_control byte parity with base clipping: PASS (byte_identical=true, U+2026 both sides, 182 B) on spec basis option-B-pending-GB",
+    "mock semantic path structured holons: PASS (suite test + verifier probe)",
+    "hallucinated anchors and ungrounded entities fail closed: PASS (suite tests in 15/15 run)",
+    "empty model output fail-closed: NOT_REPEATED this session (prior direct probe stands; path untouched by repair)",
+    "cost integrity: PASS (flash 0.27/1.10 nonzero; estimated_cost output-aware; 130 cloud tokens -> cost_usd 0.00010565; manifest audit full record)"
+  ],
+  "parity_spec_decision": "Option B (U+2026 canonical, no marker change) DECLARED by repair commit but PENDING GB DECISION — a SPEC decision, NOT a code change; code-level byte parity verified true",
+  "dataset_verification": {
+    "status": "NOT_APPLICABLE",
+    "counts_observed": {},
+    "reason": "No external dataset is in scope for CAP-CRX02."
+  },
+  "audited_invariants": {
+    "branch_tip_matches_candidate": true,
+    "candidate_sha_matches_expected": true,
+    "clean_detached_target_identity": true,
+    "mutation_set_matches_allowlist": true,
+    "acceptance_command_15_of_15": true,
+    "extractive_output_byte_identical": true,
+    "mock_semantic_path_structured_holons": true,
+    "hallucinated_anchors_fail_closed": true,
+    "ungrounded_entity_references_fail_closed": true,
+    "cost_accounting_coherent": true,
+    "checksum_verification_in_scope": false,
+    "verifier_did_not_modify_candidate": true
+  },
+  "verdict": "PASS",
+  "disposition": "VERIFIED",
+  "claim_ceiling": "Code criteria verified; byte-parity Option B canonicalization awaits GB approval (spec decision, not code)",
+  "unblocks": [],
+  "failure_trace": "",
+  "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+  "canonicalization": "UTF-8 JSON with sort_keys=true, separators=(',', ':'), ensure_ascii=false; signature field excluded",
+  "signature": "0f27bb913f4496b900ff045a2df5dbb49801f2455eb00ab19c3e53acdc972e81"
+}

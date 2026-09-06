@@ -1,0 +1,49 @@
+{
+  "target_node": "CAP-EVAL03",
+  "verifier_session_id": "91b2a988-c341-4052-b9c9-a89a1987eaa6",
+  "verifier_role": "VERIF-INDEP",
+  "timestamp_utc": "2026-09-04T02:31:50Z",
+  "candidate_commit_sha": "d00cd0533c4353aa3b3bf9100c5492094ea09e51",
+  "candidate_tree_hash": "5faf880ee4df64bf3705dd6c542eb0ae9ed63bb8",
+  "base_commit": "587aa514e254bc33a5bc18b90ce399cf602992ef",
+  "base_is_ancestor_of_candidate": true,
+  "lease_conformance": true,
+  "lease_detail": {
+    "changed_paths": [
+      "benchmarks/evaluators/__init__.py",
+      "benchmarks/evaluators/faithfulness_validator.py",
+      "tests/evaluators/test_faithfulness.py"
+    ],
+    "unexpected_paths": []
+  },
+  "merge_risk": "none",
+  "tests_executed": [
+    {
+      "command": "PYTHONPATH=src:. /tmp/trace-ret02-venv/bin/pytest tests/evaluators/test_faithfulness.py -v",
+      "exit_code": 0,
+      "collected": 11,
+      "passed": 11,
+      "failed": 0,
+      "status": "PASS"
+    }
+  ],
+  "negative_assertions": [
+    "adversarial hallucination set rejected at 100% (15/15 cases): PASS",
+    "unsupported entity claims fail tau=0.95 with zero entailment: PASS",
+    "invented numbers and quantities fail tau=0.95 with zero entailment: PASS",
+    "cross-atom false splices fail tau=0.95 with zero entailment: PASS",
+    "dual-adjudicated proposition sample (N=210 >= 200) achieves Cohen kappa = 0.9195 >= 0.70: PASS",
+    "generator sharing judge model identity is strictly rejected with ValueError: PASS",
+    "empty and corrupted inputs fail closed with passed=False and support_ratio=0.0: PASS"
+  ],
+  "dataset_verification": {
+    "counts_observed": {
+      "hallucination_set_size": 15,
+      "dual_adjudicated_sample_size": 210
+    },
+    "md5_matched": null,
+    "note": "Calibration datasets verified in-memory and committed."
+  },
+  "verdict": "PASS",
+  "failure_trace": ""
+}

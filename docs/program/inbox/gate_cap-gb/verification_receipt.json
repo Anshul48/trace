@@ -1,0 +1,63 @@
+{
+  "target_node": "CAP-VER-GB",
+  "verifier_session_id": "496ff552-4ffb-4232-b2e4-c42e3794d317",
+  "verifier_role": "COORD",
+  "timestamp_utc": "2026-09-04T02:49:00Z",
+  "candidate_commit_sha": "wave-b-convergence",
+  "base_commit": "a9255b4",
+  "lease_conformance": true,
+  "merge_risk": "PASS_WITH_MERGE_RISK: CAP-JOB02 (e9dec78) merges first into wave-b-candidate; CAP-CRX03 (97caace) rebases onto it at merge time per Directive D3",
+  "tests_executed": [
+    {
+      "command": "pytest tests/v2/test_graph_retrieval.py -v",
+      "exit_code": 0,
+      "collected": 11,
+      "passed": 11,
+      "failed": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "pytest tests/evaluators/test_faithfulness.py -v",
+      "exit_code": 0,
+      "collected": 11,
+      "passed": 11,
+      "failed": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "python benchmarks/run_frozen_retrieval_baseline.py --verify-receipt",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "python benchmarks/verify_dataset_checksums.py",
+      "exit_code": 0,
+      "status": "PASS"
+    }
+  ],
+  "negative_assertions": [
+    "All 15 Wave B prerequisite receipts (GW01-03, RET01-04, CRX01-03, JOB01-02, EVAL01-03) verified: PASS",
+    "Fail-closed gateway and pricing telemetry audited: PASS",
+    "Deterministic fallback and synthetic leakage barred from production neural embedder: PASS",
+    "Empty and disconnected graphs fail closed with graph_applied=False and empty_graph=True: PASS",
+    "Frozen adversarial hallucination set rejected at 100% (15/15 cases): PASS",
+    "Dual-adjudicated proposition sample (N=210) achieves Cohen kappa = 0.9195 >= 0.70: PASS",
+    "Generator independence strictly enforced: PASS",
+    "SciFact, NFCorpus, and FiQA clear all nDCG@10 floors with zero LLM calls: PASS",
+    "Crash-after-consolidation zero orphans and activation idempotency verified: PASS",
+    "Predecessor-release restoration with zero dangling aliases verified in crash log: PASS",
+    "Methodology annex amendments B1-B6 prepared for Human Gate CAP-GB ballot: PASS"
+  ],
+  "dataset_verification": {
+    "counts_observed": {
+      "scifact": 300,
+      "nfcorpus": 323,
+      "fiqa": 648,
+      "musique": 500
+    },
+    "md5_matched": true,
+    "note": "Directive D1 verified against benchmarks/manifests/beir_musique_frozen_v1.json"
+  },
+  "verdict": "PASS",
+  "failure_trace": ""
+}

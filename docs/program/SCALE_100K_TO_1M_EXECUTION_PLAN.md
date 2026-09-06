@@ -1,34 +1,41 @@
 # Trace 100K-to-1M Scale Qualification Execution Plan
 
-> **Status:** Draft, planning only.
+> **Status:** Reconciled scale execution plan under `DEC-CAP-001` (`TRACE-CAP-001`).
 >
-> **Prepared:** 2026-08-29 from the current audited repository state.
+> **Prepared:** 2026-08-29; Reconciled 2026-09-02 per `DEC-CAP-001`.
 >
-> **Authority boundary:** This plan does not approve Gate C2, authorize a 1M
-> run, amend DEC-P-005/DEC-P-005b, download a corpus, call a model provider, or
-> certify any result. The human owner retains threshold, cost, execution, and
-> promotion decisions.
+> **Authority boundary:** This plan is governed by `DEC-CAP-001` (`TRACE-CAP-001`) and
+> [`CAP_001_EXECUTION_DAG.md`](CAP_001_EXECUTION_DAG.md). The human owner retains
+> threshold, cost, execution, and promotion decisions.
 >
-> **Relationship to the recovery plan:**
-> `SCALE_CERTIFICATION_RECOVERY_PLAN.md` remains the governing truth and
-> containment contract. This document is its execution amendment for the
-> present R2.1 state. Historical LTR-13 1M plans derived from the invalid 100K
-> predecessor are forensic records, not execution authority.
+> **Relationship to the cognitive architecture plan:**
+> Under `DEC-CAP-001` (`CAP-D001`, `CAP-D002`), Core data-plane scaling and Cortex
+> cognitive consolidation proceed in parallel tracks through 10K and 100K. Sequentiality
+> is strictly scoped to final combined system release claims (`G1M-CORE` + `G1M-CORTEX`).
+
+> [!IMPORTANT]
+> **EXPLICIT SUPERSESSION NOTICE (`DEC-CAP-001`):**
+> The monolithic Gate F2 qualification structure defined in this execution plan is formally **SUPERSEDED** by the decoupled 4-lane `TRACE-CAP-001` architecture (`CORE`, `RETRIEVAL`, `CORTEX`, `SYNTHESIS`) ratified under [`DEC-CAP-001`](06_DECISION_LOG.md#dec-cap-001) and governed by [`COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md`](COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md), [`CAP_001_EXECUTION_DAG.md`](CAP_001_EXECUTION_DAG.md), and [`CAP_001_GATE_MATRIX.md`](CAP_001_GATE_MATRIX.md).
+>
+> 1. **Decoupled Lane-Specific Gates:** The monolithic Gate F2 is superseded and replaced by lane-specific gates: Gate `CAP-GF` (`G1M-CORE` Spine durability and replay), Gate `CAP-GB-RET` (Retrieval baseline), Gate `CAP-GE` (100K paired qualification), and Gate `CAP-GG` (`G1M-CORTEX` semantic consolidation).
+> 2. **Parallel Engineering Authorized:** Cortex semantic consolidation, local SLM research, and hybrid retrieval adapter development proceed in parallel tracks through 10K and 100K corpora and are **not** banned or blocked until 1M Core certifies. Sequentiality applies strictly to promoted combined system release claims.
+> 3. **Component Independence:** A failure in Cortex semantic consolidation cannot invalidate verified Core data-plane durability, and Core durability cannot certify cognitive self-organization.
 
 ## 1. Objective and exact finish line
 
-The program objective is to reach a narrowly truthful 1M claim through two
-strictly sequential qualifications:
+The program objective is to reach a verified 1M system through parallel capability
+development and decoupled claim gates:
 
-1. **G100K-CORE:** promote one frozen, real, persistent 100,000-document
-   candidate after independent verification and Human Gate C2.
-2. **G1M-CORE:** append 900,000 new unique documents to an immutable copy of
-   the accepted 100K base, operate and evaluate the resulting persistent
-   1,000,000-document system, independently verify it, and obtain Human Gate
-   F2 approval.
-
-An optional **G1M-HYBRID** synthesis/LLM claim is a later, separate gate. It
-cannot create, repair, or certify G100K-CORE or G1M-CORE.
+1. **G100K-CORE & G100K-CORTEX (Gate CAP-GE):** Paired qualification of 100,000
+   real documents across separate scorecards for Spine durability, dense+lexical
+   retrieval, and Cortex semantic consolidation.
+2. **G1M-CORE (Gate CAP-GF):** Append 900,000 new unique documents to an immutable
+   copy of the accepted 100K base, operating persistent 1,000,000-document Spine WAL
+   with 100% bit-exact replay and $\le 2.5\times$ storage multiplier.
+3. **G1M-CORTEX (Gate CAP-GG):** Optional promoted combined release incorporating
+   asynchronous background semantic consolidation, topic holons, and answer synthesis.
+   Cortex failure cannot invalidate G1M-CORE durability, and Core durability cannot
+   certify cognitive self-organization.
 
 For this plan, "1M reached" means all of the following at the same frozen
 candidate identity:
@@ -46,7 +53,7 @@ candidate identity:
 - an immutable evidence manifest bound to code, data, policy, environment,
   database snapshot, and projection identities;
 - an independent verification result; and
-- an explicit Human Gate F2 decision naming the exact allowed claim.
+- an explicit Human Gate decision naming the exact allowed claim (Gate CAP-GF for 1M Core Spine durability; Gate CAP-GG for combined Cortex promotion).
 
 No runner or report generator may emit `CERTIFIED`, `APPROVED`, or a human
 promotion state.
@@ -440,10 +447,11 @@ Gate F2 includes every Gate C2 dimension plus:
 | Recovery | Planned 1M process/WAL/projection faults recover; fresh full rebuild matches canonical state. |
 | Claim scope | Approval is limited to the exact local profile and does not imply 10M, distributed production, or general cognition. |
 
-## 7. Optional G1M-HYBRID gate
+## 7. Decoupled Cortex & Synthesis Capability Lanes (supersedes monolithic G1M-HYBRID)
 
-G1M-HYBRID starts only after G1M-CORE is independently verified. It uses the
-accepted 1M release read-only and has its own provider/model/consent/cost lock.
+Under `DEC-CAP-001` (`CAP-D001`, `CAP-D002`, `CAP-D003`), Cortex cognitive consolidation, local SLM research, and synthesis development proceed in parallel tracks and are **not** banned or blocked until 1M Core certifies. Parallel research, local SLM bake-offs, and 10K/100K shadow runs (`CAP-GE`) develop and validate the cognitive architecture independently.
+
+For the final promoted combined 1M release claim (Gate `CAP-GG`), Cortex operates over the verified 1M Spine release (Gate `CAP-GF`) read-only, adhering to strict provider/model/consent/cost locks:
 
 Minimum requirements:
 
@@ -458,7 +466,7 @@ Minimum requirements:
 - no keyword-presence grading as a substitute for claim support;
 - no universal "zero hallucination" statement; report the measured rate and
   confidence interval on the frozen set; and
-- a separate verifier and human decision if a promoted hybrid claim is wanted.
+- a separate verifier and human decision if a promoted combined release claim is wanted (`CAP-GG`).
 
 Failure of this optional gate does not erase a valid G1M-CORE result, and a
 hybrid pass cannot repair a failed core result.
@@ -546,9 +554,9 @@ Operating rules:
 | 9 | Human Gate D | Dossier complete | Specific 1M pilot authorization or denial. |
 | 10 | D1 acquisition/freeze plus D2/D3 | Gate D authorizes | Frozen 1M capsule, implemented incremental path, and passing 250K/500K/750K diagnostics. |
 | 11 | E | 750K go/no-go passes | Frozen 1M candidate bundle, pass or fail. |
-| 12 | F | Candidate bundle sealed | Independent result and F2 dossier. |
-| 13 | Human Gate F2 | Independent verification complete | Narrow 1M core decision. |
-| 14 | Optional G1M-HYBRID | Only after verified G1M-CORE | Separate hybrid evidence and decision. |
+| 12 | F | Candidate bundle sealed | Independent result and F2 dossier (superseded by CAP-GF). |
+| 13 | Human Gate F2 (Superseded by CAP-GF) | Independent verification complete | Narrow 1M Core Spine durability decision. |
+| 14 | Promoted G1M-CORTEX / Synthesis (Gate CAP-GG) | Combined claim after verified G1M-CORE (`CAP-GF`) | Separate Cortex/Synthesis evidence and promotion decision. |
 
 The immediate permitted technical packet is **C2-POL-01 plus R2.2 source and
 test reconciliation**. The next permitted empirical action is a fresh

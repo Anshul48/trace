@@ -1,0 +1,119 @@
+{
+  "receipt_format": "TRACE-CAP-001-independent-verification-v1",
+  "gate": "CAP-GB",
+  "node": "CAP-GW02",
+  "packet_id": "WP-CAP-GW02",
+  "attestation_id": "rcpt-cap-gw02-verif-indep-20260903T045901Z",
+  "timestamp_utc": "2026-09-03T04:59:01Z",
+  "verifier_role": "VERIF-INDEP",
+  "verification_mode": "clean-detached-worktree",
+  "verification_worktree": "C:/Users/anshu/AppData/Local/Temp/trace-cap-verif-gw02-20260903",
+  "branch_ref": "cap-gw02-cost",
+  "base_commit": "25f194d",
+  "verified_commit": "683cfe7",
+  "source_identity": {
+    "target_branch_ref": "cap-gw02-cost",
+    "head_matches_target_commit": true,
+    "verified_commit_full": "683cfe76e11ec24a06c3e17d984da1cdfa907526",
+    "base_commit_full": "25f194d38e8643abb29f1578688cfa2d30592d6b",
+    "base_is_ancestor_of_verified_commit": true,
+    "worktree_clean_after_verification": true,
+    "tracked_diff_after_verification": false
+  },
+  "checks": {
+    "acceptance_tests": {
+      "requested_command": "$env:PYTHONPATH='src'; pytest tests/v2/test_model_cost.py tests/v2/test_model_gateway_failclosed.py tests/test_v2_llm_gateway.py -v",
+      "execution_command": "$env:PYTHONPATH='src'; & C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace\\.venv\\Scripts\\python.exe -m pytest tests/v2/test_model_cost.py tests/v2/test_model_gateway_failclosed.py tests/test_v2_llm_gateway.py -v",
+      "exit_code": 0,
+      "collected": 85,
+      "passed": 85,
+      "failed": 0,
+      "skipped": 0,
+      "warnings": 1,
+      "warning_note": "PytestCacheWarning: verifier temp worktree cache path was not writable; no test failed or skipped.",
+      "result": "PASS"
+    },
+    "dag_deterministic_pricing_check": {
+      "requested_command": "$env:PYTHONPATH='src'; python -c \"from trace.v2.model_gateway import get_model_pricing; assert get_model_pricing('deepseek-chat').input_cost_per_m > 0; assert get_model_pricing('qwen2.5-1.5b-local').input_cost_per_m == 0.0; print('Pricing Registry Verified.')\"",
+      "execution_command": "$env:PYTHONPATH='src'; & C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace\\.venv\\Scripts\\python.exe -c \"from trace.v2.model_gateway import get_model_pricing; assert get_model_pricing('deepseek-chat').input_cost_per_m > 0; assert get_model_pricing('qwen2.5-1.5b-local').input_cost_per_m == 0.0; print('Pricing Registry Verified.')\"",
+      "execution_context": "clean detached verifier worktree root",
+      "exit_code": 0,
+      "stdout": "Pricing Registry Verified.",
+      "result": "PASS"
+    },
+    "registry_pricing_audit": {
+      "registry_entries": 25,
+      "local_entries": 10,
+      "cloud_family_entries": {
+        "DeepSeek": 7,
+        "GPT-4o": 4,
+        "Claude": 4
+      },
+      "cloud_deepseek_gpt4o_claude_non_zero_pricing": true,
+      "local_entries_is_local_and_strict_zero_cost": true,
+      "all_cloud_entries_non_zero_pricing": true,
+      "result": "PASS"
+    },
+    "missing_usage_fail_closed_audit": {
+      "probes": [
+        {
+          "case": "missing usage",
+          "completion_non_empty": true,
+          "observed_exception": "ModelMissingUsageError"
+        },
+        {
+          "case": "prompt and completion usage both zero",
+          "completion_non_empty": true,
+          "observed_exception": "ModelMissingUsageError"
+        },
+        {
+          "case": "completion usage zero",
+          "completion_non_empty": true,
+          "observed_exception": "ModelMissingUsageError"
+        }
+      ],
+      "failed_zero_cost_audit_persisted": true,
+      "result": "PASS"
+    },
+    "mutation_allowlist": {
+      "comparison": "25f194d..683cfe7",
+      "expected_paths": [
+        "src/trace/v2/model_gateway.py",
+        "src/trace/v2/types.py",
+        "tests/v2/test_model_cost.py",
+        "docs/program/inbox/cap-gw02/handoff.md"
+      ],
+      "changed_paths": [
+        "docs/program/inbox/cap-gw02/handoff.md",
+        "src/trace/v2/model_gateway.py",
+        "src/trace/v2/types.py",
+        "tests/v2/test_model_cost.py"
+      ],
+      "unexpected_paths": [],
+      "git_diff_check": "PASS",
+      "result": "PASS"
+    },
+    "provider_spend_audit": {
+      "live_provider_calls": 0,
+      "provider_spend_usd": 0,
+      "result": "PASS"
+    }
+  },
+  "audited_invariants": {
+    "clean_detached_worktree_at_verified_commit": true,
+    "cloud_models_have_non_zero_input_and_output_pricing": true,
+    "local_models_are_is_local_and_zero_cost": true,
+    "missing_or_zero_usage_on_non_empty_completion_fails_closed": true,
+    "mutation_set_matches_exclusive_lease": true,
+    "acceptance_tests_passed_85_of_85": true,
+    "no_live_provider_spend": true
+  },
+  "verdict": "PASS",
+  "disposition": "PASS_FOR_NAMED_VERIFICATION_ONLY",
+  "claim_ceiling": "C1 component safety conformance; no gate certification, promotion, or merge authority",
+  "unblocks": [
+    "CAP-GW03"
+  ],
+  "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+  "signature": "200f92ba1adcd231da3ccc88994bc5e970aaf5fc79fab1e14e2afa40199ac422"
+}

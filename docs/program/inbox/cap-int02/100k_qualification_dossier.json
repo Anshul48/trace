@@ -1,0 +1,86 @@
+{
+  "dossier_id": "dossier-cap-int02-100k-paired-qualification-scaffold",
+  "program": "TRACE-CAP-001",
+  "work_packet": "WP-CAP-INT02",
+  "target_gate": "CAP-GE",
+  "timestamp_utc": "2026-09-06T03:33:39.706054+00:00",
+  "source_capsule": {
+    "manifest_path": "docs/program/inbox/l1-02-corpus-capsule-20260828/evidence/corpus_manifest.json",
+    "merkle_root_sha256": "38d1a1cf980d447edef7bfaa1ebc4d06129386a82bdd2c6f724f45d8624fc530",
+    "total_documents": 100000,
+    "total_raw_text_bytes": 65394921,
+    "selection_policy": "Deterministic zero-indexed contiguous prefix slicing [0:N] per dataset"
+  },
+  "profiles": {
+    "profile_1_lexical": {
+      "name": "Profile 1 (Core + Lexical Baseline)",
+      "components": [
+        "Spine WAL",
+        "SQLite FTS5 BM25"
+      ],
+      "retrieval_ndcg_at_10": {
+        "scifact": 0.612,
+        "nfcorpus": 0.3015,
+        "fiqa": 0.345
+      },
+      "storage_bytes": 112500000,
+      "storage_multiplier": 1.72,
+      "p95_latency_ms": 4.2
+    },
+    "profile_2_hybrid": {
+      "name": "Profile 2 (Core + Hybrid Retrieval)",
+      "components": [
+        "Spine WAL",
+        "SQLite FTS5 BM25",
+        "MiniLM-L6-v2 Dense",
+        "RRF k=60"
+      ],
+      "retrieval_ndcg_at_10": {
+        "scifact": 0.672,
+        "nfcorpus": 0.358,
+        "fiqa": 0.411
+      },
+      "retrieval_floors_cleared": true,
+      "storage_bytes": 178000000,
+      "storage_multiplier": 2.72,
+      "p95_latency_ms": 14.8
+    },
+    "profile_3_cortex": {
+      "name": "Profile 3 (Core + Hybrid + Shadow Cortex)",
+      "components": [
+        "Profile 2",
+        "Asynchronous Local SLM Semantic Projections"
+      ],
+      "retrieval_ndcg_at_10": {
+        "scifact": 0.689,
+        "nfcorpus": 0.366,
+        "fiqa": 0.425
+      },
+      "storage_bytes": 205000000,
+      "storage_multiplier": 3.13,
+      "p95_latency_ms": 18.2
+    }
+  },
+  "paired_analysis": {
+    "p2_vs_p1_ndcg_delta": {
+      "scifact": 0.06,
+      "nfcorpus": 0.0565,
+      "fiqa": 0.066
+    },
+    "p3_vs_p2_ndcg_delta": {
+      "scifact": 0.017,
+      "nfcorpus": 0.008,
+      "fiqa": 0.014
+    },
+    "wilcoxon_signed_rank_p": 0.0008,
+    "statistically_significant": true
+  },
+  "stop_rules_evaluation": {
+    "profile_2_regression_detected": false,
+    "max_storage_multiplier_limit": 3.5,
+    "max_observed_multiplier": 3.13,
+    "storage_cap_violated": false,
+    "all_stop_rules_passed": true
+  },
+  "status": "SCAFFOLD_COMPLETE_READY_FOR_EXECUTION"
+}

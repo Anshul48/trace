@@ -1,0 +1,57 @@
+{
+  "timestamp_utc": "2026-09-06T02:19:02.427114+00:00",
+  "datasets": {
+    "scifact": {
+      "dataset": "scifact",
+      "queries_count": 300,
+      "qrels_count": 339,
+      "floor_ndcg_at_10": 0.65,
+      "point_estimate_ndcg_at_10": 0.6650593457199848,
+      "bootstrap_95_ci": [
+        0.6518237362489673,
+        0.6782124610978034
+      ],
+      "ci_width": 0.026388724848836143,
+      "clears_point_floor": true,
+      "clears_lower_ci_floor": true,
+      "status": "PASS"
+    },
+    "nfcorpus": {
+      "dataset": "nfcorpus",
+      "queries_count": 323,
+      "qrels_count": 12334,
+      "floor_ndcg_at_10": 0.32,
+      "point_estimate_ndcg_at_10": 0.3523728976713569,
+      "bootstrap_95_ci": [
+        0.34224998919108096,
+        0.36250138660545544
+      ],
+      "ci_width": 0.020251397414374483,
+      "clears_point_floor": true,
+      "clears_lower_ci_floor": true,
+      "status": "PASS"
+    },
+    "fiqa": {
+      "dataset": "fiqa",
+      "queries_count": 648,
+      "qrels_count": 1706,
+      "floor_ndcg_at_10": 0.38,
+      "point_estimate_ndcg_at_10": 0.4028043038021869,
+      "bootstrap_95_ci": [
+        0.39407638326423555,
+        0.41162834146814964
+      ],
+      "ci_width": 0.017551958203914086,
+      "clears_point_floor": true,
+      "clears_lower_ci_floor": true,
+      "status": "PASS"
+    }
+  },
+  "llm_audit": {
+    "llm_calls_made": 0,
+    "llm_cost_usd": 0.0,
+    "pure_retrieval_verified": true
+  },
+  "all_floors_cleared": true,
+  "status": "PASS"
+}

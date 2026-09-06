@@ -1,0 +1,27 @@
+{
+  "gate": "CAP-GA",
+  "node": "CAP-VER-GA",
+  "attestation_id": "rcpt-cap-ver-ga-20260902-165600",
+  "timestamp_utc": "2026-09-02T16:56:00Z",
+  "prerequisites_status": {
+    "CAP-A01": "PASS",
+    "CAP-A02": "PASS",
+    "CAP-A03": "PASS"
+  },
+  "audited_invariants": {
+    "decision_ratified": true,
+    "contradictions_reconciled_count": 15,
+    "control_plane_files_verified": 781,
+    "hash_mismatches_count": 0,
+    "src_runtime_modified": false,
+    "git_diff_clean": true
+  },
+  "verdict": "PASS",
+  "unblocks": [
+    "CAP-GW01",
+    "CAP-RET01",
+    "CAP-CRX01",
+    "CAP-JOB01",
+    "CAP-EVAL01"
+  ]
+}

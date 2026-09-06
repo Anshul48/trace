@@ -1,32 +1,43 @@
 # Program Charter
 
-> **Status:** Draft broad-stroke charter. Human direction is authoritative.
+> **Status:** Ratified cognitive architecture charter under `DEC-CAP-001` (`TRACE-CAP-001`). Human direction is authoritative.
 
 ## 1. Mission
 
 Build durable, self-organizing, evidence-grounded memory systems whose source
 truth survives independently of retrieval and organization mechanisms.
 
+Trace is architected as a dual-system cognitive memory database: a fast,
+model-free Hippocampal Spine coupled with an asynchronous, model-assisted
+Neocortex for multi-resolution semantic organization.
+
 Trace-Lite is the fast local proving ground. Trace is the governed, versioned,
 policy-aware system that adopts only mechanisms that earn promotion.
 
 ## 2. Near-term outcomes
 
-1. Make Trace-Lite Beta a trustworthy local reference implementation.
-2. Establish real-data, fail-closed evaluation before broad quality claims.
-3. Make Trace Cortex projections versioned, validated, atomically activated,
-   and rollbackable.
-4. Prove the 100K gate before a 1M pilot or live downstream dependency.
-5. Use Reflex and Entorhinal initially as shadow/conformance consumers.
+1. Establish four decoupled, independently verified capability lanes (`CORE`,
+   `RETRIEVAL`, `CORTEX`, `SYNTHESIS`) per `DEC-CAP-001`.
+2. Restore dense neural embeddings (`all-MiniLM-L6-v2`) and BM25+Dense RRF fusion.
+3. Make Trace Cortex projections versioned, validated, risk-tiered, atomically
+   activated, and rollbackable without Spine contamination.
+4. Establish asynchronous, background ("sleep phase") semantic consolidation
+   using local SLMs (3B–14B) selected via frozen bake-offs.
+5. Prove the 100K paired qualification gate across separate scorecards before
+   1M combined promotion.
+6. Use Reflex and Entorhinal initially as shadow/conformance consumers.
 
 ## 3. Scope
 
 This program covers:
 
-- Trace-Lite projection lifecycle, graph safety, retrieval evaluation, and
-  local service boundary.
-- Trace V2 Cortex Release lifecycle, temporal truth, typed activation, and
-  production verification.
+- Hippocampal Spine lifecycle: append-only WAL event sourcing, exact UTF-8 byte
+  offsets, and 100% bit-exact replay.
+- Retrieval engine: hybrid lexical + dense neural search, graph spreading
+  activation (PPR), and sub-20ms passage retrieval.
+- Neocortex semantic projections: topic holons, section summaries, entity/relation
+  proposals, and risk-tiered activation.
+- Answer synthesis: citation-grounded query responses with zero hallucination.
 - Shared evidence-bundle contracts, real benchmark staging, and promotion
   decisions.
 

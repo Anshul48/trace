@@ -1,7 +1,6 @@
 # Risk Register
 
-> **Status:** Draft. Risks are prompts for evidence and mitigation, not claims
-> that the listed failure is currently present in every checkout.
+> **Status:** Ratified risk register under `DEC-CAP-001` (`TRACE-CAP-001`). Risks are prompts for evidence and mitigation, not claims that the listed failure is currently present in every checkout.
 
 | ID | Risk | Why it matters | Broad mitigation | Primary role |
 | --- | --- | --- | --- | --- |
@@ -58,6 +57,20 @@ test is not enough.
 | R-14 | Worktree or OneDrive/Windows environment causes non-product test failures. | External writable test roots, environment capture, separate cleanup failures from product evidence. | Verifier |
 | R-15 | Documentation turns assumptions into apparent facts. | Status labels, current-state audits, evidence links, claim-level reporting. | Coordinator |
 | R-16 | Scale economics overwhelm local developer use. | Budget envelope, selective activation/model tiering, cost-per-query/build tracking. | Evaluation / Trace |
+
+## Cognitive Architecture & Generative Model Risks (`DEC-CAP-001`)
+
+Under `DEC-CAP-001` (`TRACE-CAP-001` Section 16), generative cognitive consolidation
+and model-assisted organization introduce material risks with mandatory stop conditions:
+
+| ID | Risk | Why it matters | Broad mitigation & Control | Stop Condition |
+| --- | --- | --- | --- | --- |
+| **R-COG-01** | Hallucinated condensation | Synthesized summaries or holons assert ungrounded facts. | Atomic proposition extraction, detached entailment ($\ge 95\%$), 100% byte-offset anchor resolution. | Any critical unsupported claim in an auto-activation candidate. |
+| **R-COG-02** | Semantic drift / churn | Re-consolidation mutates graph topology unstably. | Stable cluster identities, parent lineage hashes, change velocity caps, retained predecessor releases. | Unbounded neighborhood churn or inability to explain a changed projection. |
+| **R-COG-03** | Review saturation | Proposal volume overwhelms human authority. | Risk-tiered activation (`CAP-D007`): Tier 1 auto-activates post-validation; Tier 3 requires approval. | Review backlog grows faster than bounded drain capacity. |
+| **R-COG-04** | Model / provider drift | Remote cloud provider updates alter output behavior silently. | Empirical local SLM bake-offs (`CAP-D006`), pinned local weights, frozen runtime receipts, fail-closed timeouts. | Provider identity or model generation changes during frozen run. |
+| **R-COG-05** | Cost explosion & consolidation debt | Background consolidation jobs overrun compute or cloud budget. | Preflight token reservation, hard spend caps (`CAP-GW03`), local SLM execution at $0 cost, WAL backpressure caps. | Missing/zero pricing receipt, spend cap breach, or queue depth $> 5,000$. |
+| **R-COG-06** | Evaluation leakage & scale thrashing | Test set queries or qrels leak into training or graph prompts. | Independent verifier custody, separate worktrees, read-only evaluator harnesses, 10K shadow proof ladder. | Candidate builder accesses held-out qrels or reruns 1M for small-scale bugs. |
 
 ## Escalation triggers
 

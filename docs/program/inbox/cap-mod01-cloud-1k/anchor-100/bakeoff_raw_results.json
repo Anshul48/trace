@@ -1,0 +1,1741 @@
+{
+  "manifest": "bakeoff_clusters_v1.json",
+  "model": "deepseek-ai/DeepSeek-V4-Flash-0731",
+  "results": {
+    "model_id": "deepseek-ai/DeepSeek-V4-Flash-0731",
+    "provider": "Sail Research",
+    "endpoint": "https://api.sailresearch.com/v1/chat/completions",
+    "architecture": "DeepSeek-V4-Flash MoE",
+    "clusters_evaluated": 100,
+    "prompt_revision": {
+      "version": "improved-grounding-fewshot-v2",
+      "prompt_sha256": "f691a6c93471771cd4c70e3f6bdecf063a5db16e4ba0177b86ba3ac594d11f36",
+      "clarifications": [
+        "Plain-language definition of holon as a factual topic card",
+        "Explicit lexical anchoring rule enforcing source vocabulary",
+        "Concrete 1-shot input/output demonstration",
+        "Robust JSON cleanup stripping think tags, markdown fences, and repairing trailing commas"
+      ]
+    },
+    "faithfulness": {
+      "point_estimate": 0.7779,
+      "bootstrap_95_ci": [
+        0.6956,
+        0.8547
+      ],
+      "ci_width": 0.1591,
+      "clears_95_floor": false,
+      "valid_cluster_count": 86
+    },
+    "disentangled_metrics": {
+      "validity_rate": 0.86,
+      "grounding_given_valid": {
+        "point_estimate": 0.9045,
+        "bootstrap_95_ci": [
+          0.8421,
+          0.9566
+        ]
+      }
+    },
+    "performance": {
+      "warm_tokens_per_sec": 62.17,
+      "p95_latency_ms": 31711.6,
+      "total_wall_clock_sec": 1421.87
+    },
+    "robustness": {
+      "invalid_output_rate": 0.14,
+      "invalid_cluster_count": 14,
+      "transport_error_count": 0
+    },
+    "cost_and_resources": {
+      "total_prompt_tokens": 123730,
+      "total_completion_tokens": 81372,
+      "total_spend_usd": 0.122916,
+      "cost_per_1k_holons_usd": 1.2292
+    }
+  },
+  "clusters": [
+    {
+      "cluster_id": "cluster_001",
+      "theme": "La Rosiere de Pessac",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 1.7594935894012451,
+      "prompt_tokens": 1207,
+      "completion_tokens": 20,
+      "tps": 11.366907001238914,
+      "propositions": [
+        "La Rosiere de Pessac La Rosi\u00e8re de Pessac (The Virgin of Pessac) is the title of two hour-long films directed by Jean Eustache (in 1968 and 1979 respectively)",
+        "The films cover an\u2026 Zona Universit\u00e0ria station Zona Universit\u00e0ria is a station in the Barcelona Metro and Trambaix networks, in the Les Corts district of Barcelona",
+        "It is currently the western termi\u2026 Philae (spacecraft) The lander is named after the Philae obelisk, which bears a bilingual inscription and was used along with the Rosetta Stone to decipher Egyptian hieroglyphs",
+        "\u2026 La Rosiere de Pessac La Rosi\u00e8re de Pessac (The Virgin of Pessac) is the title of two hour-long films directed by Jean Eustache (in 1968 and 1979 respectively)",
+        "The films cover an\u2026 Zona Universit\u00e0ria station Zona Universit\u00e0ria is a station in the Barcelona Metro and Trambaix networks, in the Les Corts district of Barcelona",
+        "It is currently the western termi\u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_002",
+      "theme": "Mitro Repo",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 2.1219539642333984,
+      "prompt_tokens": 1298,
+      "completion_tokens": 19,
+      "tps": 8.954011406587776,
+      "propositions": [
+        "Mitro Repo Mitro Repo (born September 3, 1958) is a Finnish Orthodox Christian priest",
+        "He was member of the European Parliament from 2009 until 2014, elected as an independent ca\u2026 The Block (Australian TV series) Applications for the fourteenth season of the series opened in August 2017 until 10 September 2017, looking for couples couples aged between 18 a\u2026 Abdullah Khadr Abdullah Khadr was born in 1981 in Ottawa, Ontario, Canada as the second child and first son to Ahmed Khadr and his wife Maha el-Samnah",
+        "his father was still\u2026 Mitro Repo Mitro Repo (born September 3, 1958) is a Finnish Orthodox Christian priest",
+        "He was member of the European Parliament from 2009 until 2014, elected as an independent ca\u2026 The Block (Australian TV series) Applications for the fourteenth season of the series opened in August 2017 until 10 September 2017, looking for couples couples aged between 18 a\u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_003",
+      "theme": "Switzerland",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 3.522179365158081,
+      "prompt_tokens": 1301,
+      "completion_tokens": 59,
+      "tps": 16.750992463256335,
+      "propositions": [
+        "Switzerland Switzerland is one of the richest and wealthiest countries in the world",
+        "Switzerland ranks top or close to the top in several metrics of national performance, includi\u2026 The Journey of Jared Price The Journey of Jared Price is a gay-themed coming-of-age 2000 film written, produced and directed by Academy Award winner Dustin Lance Black and starri\u2026 Pike Place Fish Market The Pike Place Fish Market, founded in 1930, is an open air fish market located in Seattle, Washington's Pike Place Market, at the corner of Pike Street an\u2026 Switzerland Switzerland is one of the richest and wealthiest countries in the world",
+        "Switzerland ranks top or close to the top in several metrics of national performance, includi\u2026 The Journey of Jared Price The Journey of Jared Price is a gay-themed coming-of-age 2000 film written, produced and directed by Academy Award winner Dustin Lance Black and starri\u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_004",
+      "theme": "Sanctuary (Charlie Musselwhite album)",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 1.8886919021606445,
+      "prompt_tokens": 1225,
+      "completion_tokens": 16,
+      "tps": 8.471471700437833,
+      "propositions": [
+        "Sanctuary (Charlie Musselwhite album) Sanctuary is the twenty third studio album by American singer and harpist Charlie Musselwhite",
+        "It was released in 2004 on Peter Gabriel's Re\u2026 Krishna Aur Kans Krishna Aur Kans () is a 2012 Hindi Flash-animated film produced and distributed by Reliance Entertainment",
+        "It was directed by Vikram Veturi",
+        "It was tax free in \u2026 Endangered Species Act of 1973 It authorized the Secretary of the Interior to list endangered domestic fish and wildlife and allowed the United States Fish and Wildlife Service t\u2026 Sanctuary (Charlie Musselwhite album) Sanctuary is the twenty third studio album by American singer and harpist Charlie Musselwhite",
+        "It was released in 2004 on Peter Gabriel's Re\u2026 Krishna Aur Kans Krishna Aur Kans () is a 2012 Hindi Flash-animated film produced and distributed by Reliance Entertainment",
+        "It was directed by Vikram Veturi",
+        "It was tax free in \u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_005",
+      "theme": "Chai Wan Mosque",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 22.44658088684082,
+      "prompt_tokens": 1187,
+      "completion_tokens": 2048,
+      "tps": 91.23883990726749,
+      "propositions": [
+        "Chai Wan Mosque The Chai Wan Mosque () or Cape Collinson Mosque is a mosque in Chai Wan, Hong Kong, China",
+        "It is the fifth mosque built in Hong Kong",
+        "World Blood Donor Day Every year on 14 June, countries around the world celebrate World Blood Donor Day (WBDD)",
+        "The event, established in 2004, serves to raise awareness of the n\u2026 The Bronx Education in the Bronx is provided by a large number of public and private institutions, many of which draw students who live beyond the Bronx",
+        "The New York City Depart\u2026 Chai Wan Mosque The Chai Wan Mosque () or Cape Collinson Mosque is a mosque in Chai Wan, Hong Kong, China",
+        "It is the fifth mosque built in Hong Kong",
+        "World Blood Donor Day Every year on 14 June, countries around the world celebrate World Blood Donor Day (WBDD)",
+        "The event, established in 2004, serves to raise awareness of the n\u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_006",
+      "theme": "Agriculture in China",
+      "faithfulness": 0.0,
+      "is_invalid": false,
+      "wall_sec": 12.453081369400024,
+      "prompt_tokens": 1381,
+      "completion_tokens": 265,
+      "tps": 21.279873803054368,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_007",
+      "theme": "2008 European Road Championships",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 24.493692874908447,
+      "prompt_tokens": 1256,
+      "completion_tokens": 1016,
+      "tps": 41.48006612105434,
+      "propositions": [
+        "The 2008 European Road Championships were held in Stresa, Pettenasco, Arona and Verbania, in the province of Novare and Verbano-Cusio-Ossola, Italy, between July 3 and July 6, 2008, regulated by the European Cycling Union, and consisted of a road race and a time trial for men and women under 23 and juniors",
+        "Arthur is a 1981 American comedy film written and directed by Steve Gordon, starring Dudley Moore as Arthur Bach, a drunken New York City millionaire who falls for a working-class girl from Queens, and it was the first and only film directed by Gordon, who died in 1982",
+        "Banfield (December 1827 \u2013 March 4, 1883) was an American soldier, law enforcement officer, police sergeant and founding member of the New York City Police Department \"Steamboat Squad\", born in England, emigrated to the United States as a child, worked as a painter, served in the Mexican-American War, and joined the police force in June 1857",
+        "The 2008 European Road Championships were held in Italy, regulated by the European Cycling Union, and included road race and time trial events for under 23 and junior men and women",
+        "Arthur is a 1981 American comedy film written and directed by Steve Gordon, starring Dudley Moore as Arthur Bach, and it was Gordon's first and only film",
+        "Banfield was an American soldier and police sergeant, founding member of the New York City Police Department \"Steamboat Squad\", who served in the Mexican-American War and joined the police force in June 1857"
+      ]
+    },
+    {
+      "cluster_id": "cluster_008",
+      "theme": "Park Sang-jin",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 7.87610125541687,
+      "prompt_tokens": 1249,
+      "completion_tokens": 646,
+      "tps": 82.0202761557575,
+      "propositions": [
+        "Park Sang-jin is a South Korean football player who plays as a fullback for South Korean club that K-League side Gangwon FC",
+        "Goddard Space Flight Center is NASA's first, and oldest, space center",
+        "Eisenhower's main goals in office were to keep pressure on the Soviet Union and reduce federal deficits"
+      ]
+    },
+    {
+      "cluster_id": "cluster_009",
+      "theme": "Alien (franchise)",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 8.441423177719116,
+      "prompt_tokens": 1207,
+      "completion_tokens": 379,
+      "tps": 44.897642497103945,
+      "propositions": [
+        "Alien (franchise) Several novelizations of each of the six films and some comic books as well as original canonical novels based on the franchise have been released",
+        "The original\u2026 Wysox Creek Wysox Creek is a tributary of the Susquehanna River in Bradford County, Pennsylvania, in the United States",
+        "It is approximately long and flows through Windham Townshi\u2026 The Fall of Yquatine The Fall of Yquatine is a BBC Books original novel written by Nick Walters and based on the long-running British science fiction television series \"Doctor Wh\u2026 Alien (franchise) Several novelizations of each of the six films and some comic books as well as original canonical novels based on the franchise have been released",
+        "The original\u2026 Wysox Creek Wysox Creek is a tributary of the Susquehanna River in Bradford County, Pennsylvania, in the United States",
+        "It is approximately long and flows through Windham Townshi\u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_010",
+      "theme": "",
+      "faithfulness": 0.8523809523809524,
+      "is_invalid": false,
+      "wall_sec": 15.28445291519165,
+      "prompt_tokens": 1248,
+      "completion_tokens": 880,
+      "tps": 57.57484450917724,
+      "propositions": [
+        "The author predicts self driving cars will arrive soon, citing the desire to surf the internet during commutes, despite a short personal commute",
+        "Little Boy was the codename for the atomic bomb dropped on Hiroshima on 6 August 1945 by the Enola Gay, piloted by Colonel Paul W",
+        "Tibbets, Jr., and was the first atomic bomb used in warfare",
+        "Tumaraa is a commune of French Polynesia located on the island of Raiatea, with a population of 3,721 at the 2017 census, making it the least populous commune on Raiatea",
+        "The author believes self driving cars will be available soon, enabling internet use during commutes, as mentioned in av_010_01",
+        "Little Boy was the first atomic bomb used in warfare, dropped on Hiroshima on 6 August 1945 by the Enola Gay, as detailed in av_010_02",
+        "Tumaraa is a commune in French Polynesia on Raiatea with a population of 3,721, as stated in av_010_03"
+      ]
+    },
+    {
+      "cluster_id": "cluster_011",
+      "theme": "Anselm Tupper",
+      "faithfulness": 0.9444444444444445,
+      "is_invalid": false,
+      "wall_sec": 9.143224477767944,
+      "prompt_tokens": 1297,
+      "completion_tokens": 1041,
+      "tps": 113.85480062654332,
+      "propositions": [
+        "Anselm Tupper was born in Easton, Massachusetts on October 11, 1763, and enlisted in May 1775 at age eleven in Captain Robert West's Chesterfield company, assigned to Colonel John Fellows' regiment, where his father Benjamin Tupper was major",
+        "Natalie Horler was born in Bonn, Germany to British parents, her father David Horler is a jazz musician and her mother Christine is a foreign languages teacher, and she began singing jazz songs in her father's studio as well as Disney songs",
+        "The Children's Act, 2005 is an act of the Parliament of South Africa that consolidates and reforms the law on matters related to children, dealing with topics including age of majority, custody, adoption, and trafficking",
+        "Anselm Tupper, born in Easton, Massachusetts in 1763, enlisted at age eleven in 1775 in a company where his father was major",
+        "Natalie Horler, born in Bonn to British parents, began singing jazz and Disney songs in her father's studio",
+        "The Children's Act, 2005 is a South African act consolidating and reforming child-related law, covering topics like custody and adoption"
+      ]
+    },
+    {
+      "cluster_id": "cluster_012",
+      "theme": "Marie Anne de Bourbon",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 24.941478967666626,
+      "prompt_tokens": 1328,
+      "completion_tokens": 1079,
+      "tps": 43.26126776197926,
+      "propositions": [
+        "Marie Anne de Bourbon, \"L\u00e9gitim\u00e9e de France\" (2 October 1666 \u2013 3 May 1739) was the eldest legitimised daughter of King Louis XIV of France and his mistress Louise de La Valli\u00e8re, married at thirteen to Louis Armand de Bourbon, Prince of Conti, widowed in 1685, never remarried, had no children, and later became the Duchess of La Valli\u00e8re in her own right",
+        "WCNL is an AM radio station located at 1010 on the AM dial, licensed to Newport, New Hampshire, was Newport's first radio station, with studios on Main Street and slogan \"Country 1010 WCNL-AM\"",
+        "During his first months in Congress, Walsh emerged as a sharp critic of the Obama Administration, accusing the president of abandoning the U.S.\u2013Israel alliance and bankrupting the country, challenged President Barack Obama to secure the borders with \"moats and alligators\" if necessary, maintained a no-compromise approach to legislating that included rejecting any tax increases, consistently voted against raising the federal debt ceiling, and authored a balanced budget amendment to the United States Constitution",
+        "Marie Anne de Bourbon was the eldest legitimised daughter of King Louis XIV and Louise de La Valli\u00e8re, married to Louis Armand de Bourbon, Prince of Conti, widowed at 19, and later Duchess of La Valli\u00e8re in her own right",
+        "WCNL is an AM radio station at 1010 AM, licensed to Newport, New Hampshire, being Newport's first radio station with studios on Main Street and slogan \"Country 1010 WCNL-AM\"",
+        "Joe Walsh, an Illinois politician, was a sharp critic of the Obama Administration, advocated for border security with \"moats and alligators\", rejected tax increases, voted against raising the debt ceiling, and authored a balanced budget amendment"
+      ]
+    },
+    {
+      "cluster_id": "cluster_013",
+      "theme": "The Year of Intelligent Tigers",
+      "faithfulness": 0.9365079365079364,
+      "is_invalid": false,
+      "wall_sec": 26.43414807319641,
+      "prompt_tokens": 1134,
+      "completion_tokens": 934,
+      "tps": 35.333084970763764,
+      "propositions": [
+        "The Year of Intelligent Tigers is a BBC Books original novel written by Kate Orman and based on the long-running British science fiction television series \"Doctor Who\", featuring the Eighth Doctor, Fitz and Anji",
+        "The Urzarsaiskoye mine is a large open pit mine located in the eastern part of Russia in Siberia, representing one of the largest tungsten reserves in Russia having estimated reserves of 90.9 million tonnes of ore grading 0.11% tungsten",
+        "The passage advises to either remove the $50 going to the 529 plan or move it into a ROTH IRA instead, noting that ROTH contributions can be used for college expenses in the future, but suspects the reader may not have enough saved for retirement to help with college",
+        "The Year of Intelligent Tigers is a BBC Books original novel by Kate Orman based on Doctor Who, featuring the Eighth Doctor, Fitz and Anji",
+        "The Urzarsaiskoye mine is a large open pit mine in Siberia, Russia, with estimated tungsten reserves of 90.9 million tonnes of ore grading 0.11% tungsten",
+        "The passage advises removing the $50 from the 529 plan or moving it into a ROTH IRA, as ROTH contributions can be used for college expenses, but suggests the reader may not have enough retirement savings to help with college"
+      ]
+    },
+    {
+      "cluster_id": "cluster_014",
+      "theme": "Pierre Paul Leroy-Beaulieu",
+      "faithfulness": 0.0,
+      "is_invalid": false,
+      "wall_sec": 31.711572408676147,
+      "prompt_tokens": 1255,
+      "completion_tokens": 2048,
+      "tps": 64.58210187772575,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_015",
+      "theme": "Katherine of England",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 23.87453556060791,
+      "prompt_tokens": 1265,
+      "completion_tokens": 1072,
+      "tps": 44.90139702523721,
+      "propositions": [
+        "Katherine of England was the fifth child of Henry III and Eleanor of Provence, born possibly deaf-mute or deaf and mentally challenged, very sickly, possibly had a degenerative disease, and died at Windsor before her fourth year",
+        "Puttin' On the Ritz is a song written by Irving Berlin in May 1927, first published in December 2, 1929, introduced by Harry Richman in the musical film Puttin' On the Ritz (1930), and the title derives from the slang expression 'to put on the Ritz'",
+        "The chapter house at Westminster Abbey was built concurrently with the east parts under Henry III between about 1245 and 1253, restored by Sir George Gilbert Scott in 1872, and approached from the east cloister walk with a double doorway and tympanum",
+        "Katherine of England, fifth child of Henry III and Eleanor of Provence, was sickly, possibly deaf-mute or mentally challenged, and died at Windsor before age four",
+        "Puttin' On the Ritz, written by Irving Berlin in 1927 and published in 1929, was introduced by Harry Richman in the 1930 film and derives its title from a slang expression",
+        "The chapter house at Westminster Abbey was built under Henry III between 1245 and 1253, restored by Sir George Gilbert Scott in 1872, and features a double doorway with tympanum"
+      ]
+    },
+    {
+      "cluster_id": "cluster_016",
+      "theme": "Marilyn Dondero Loop",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 15.637018203735352,
+      "prompt_tokens": 1171,
+      "completion_tokens": 974,
+      "tps": 62.288090178684584,
+      "propositions": [
+        "Marilyn Dondero Loop is an American politician and a Democratic member of the Nevada Senate since November 2018, representing District 8, and was previously a member of the Nevada Assembly from 2008 to 2014",
+        "Susan Coolidge shared her publisher, Roberts Brothers, with Louisa May Alcott, and \"What Katy Did\" helped satisfy the demand for naturalistic novels about girlhood that followed the 1868 success of \"Little Women\"",
+        "The Army Show is an American comedy television series that aired on The WB, first shown on September 13, 1998, following an army sergeant played by David Anthony Higgins who must take charge of a group of soldiers at Fort Bendix, Florida",
+        "Marilyn Dondero Loop is a Democratic politician who served in the Nevada Assembly and currently serves in the Nevada Senate",
+        "Susan Coolidge's \"What Katy Did\" was published by Roberts Brothers and followed the success of \"Little Women\" by Louisa May Alcott",
+        "The Army Show is an American comedy television series on The WB that premiered in 1998 and features an army sergeant at Fort Bendix"
+      ]
+    },
+    {
+      "cluster_id": "cluster_017",
+      "theme": "History of medicine",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 20.352294921875,
+      "prompt_tokens": 1188,
+      "completion_tokens": 941,
+      "tps": 46.23557213631947,
+      "propositions": [
+        "The earliest known physician is credited to ancient Egypt: Hesy-Ra, 'Chief of Dentists and Physicians' for King Djoser in the 27th century BCE, and the earliest known woman physician, Peseshet, practiced in Ancient Egypt at the time of the 4th dynasty, with the title 'Lady Overseer of the Lady Physicians' and trained midwives at an ancient Egyptian medical school in Sais",
+        "Reiner Gamma (\u03b3) is a geographical feature of the Moon known as a lunar swirl, one of the most visible lunar swirls from Earth, visible from most telescopes, originally thought to be a lunar highland but eventually realized to cast no shadow on the moon",
+        "Lee Evans, also known as LeRoi Evans and LeRoy Evans, is an American record producer, recording engineer, songwriter, musician, entrepreneur, businessman and the CEO and co-owner of JAMBOX Entertainment, currently residing in midtown Manhattan, New York",
+        "Ancient Egypt is credited with the earliest known physician Hesy-Ra and the earliest known woman physician Peseshet, who trained midwives at a medical school in Sais",
+        "Reiner Gamma is a lunar swirl on the Moon, visible from Earth and casting no shadow",
+        "Lee Evans is an American record producer and CEO of JAMBOX Entertainment residing in Manhattan"
+      ]
+    },
+    {
+      "cluster_id": "cluster_018",
+      "theme": "Goodrich Corporation",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 28.418758392333984,
+      "prompt_tokens": 1158,
+      "completion_tokens": 979,
+      "tps": 34.44907713716611,
+      "propositions": [
+        "The Goodrich Corporation, formerly the B.F",
+        "Goodrich Company, was an American aerospace manufacturing company based in Charlotte, North Carolina, founded in Akron, Ohio in 1870 as Goodrich, Tew & Co",
+        "Benjamin Franklin Goodrich",
+        "Rod Smith, born January 10, 1992, is an American football running back for the Dallas Cowboys of the National Football League, signed by the Seattle Seahawks as an undrafted free agent in 2015, and played college football at Ohio State",
+        "Monroe City is a town in Harrison Township, Knox County, Indiana, United States, with a population of 545 at the 2010 census",
+        "The Goodrich Corporation, formerly the B.F",
+        "Goodrich Company, was an American aerospace manufacturing company based in Charlotte, North Carolina, founded in Akron, Ohio in 1870",
+        "Rod Smith is an American football running back for the Dallas Cowboys, signed by the Seattle Seahawks in 2015, and played college football at Ohio State",
+        "Monroe City is a town in Harrison Township, Knox County, Indiana, with a population of 545 at the 2010 census"
+      ]
+    },
+    {
+      "cluster_id": "cluster_019",
+      "theme": "NRHEG High School",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 27.44957399368286,
+      "prompt_tokens": 1234,
+      "completion_tokens": 1059,
+      "tps": 38.5798337068442,
+      "propositions": [
+        "NRHEG High School is located in New Richland, Minnesota, and NRHEG stands for New Richland, Hartland, Ellendale, Geneva, which are the towns that the school district covers",
+        "Edward Burleson was the third Vice President of the Republic of Texas, served in the State Senate after annexation, commanded Texian Army forces during the Texas Revolution, served in militias in Alabama, Missouri, and Tennessee, fought in the War of 1812, and was given Santa Anna's sword when he surrendered",
+        "The Museum of Trade Ceramics is located in Hoi An, central Vietnam, and showcases the origins and history of the town and region in the context of historic trade and relationships with foreign nations, housed in a restored traditional wooden house likened to those of Kyoto",
+        "NRHEG High School is located in New Richland, Minnesota, and its name stands for the towns of New Richland, Hartland, Ellendale, and Geneva",
+        "Edward Burleson served as the third Vice President of the Republic of Texas, in the State Senate, as a commander in the Texian Army, and in militias in multiple states, and fought in the War of 1812",
+        "The Museum of Trade Ceramics in Hoi An, central Vietnam, showcases the town's history and trade relationships with foreign nations, and is housed in a restored traditional wooden house"
+      ]
+    },
+    {
+      "cluster_id": "cluster_020",
+      "theme": "Imitation of Life (1959 film)",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 8.735296487808228,
+      "prompt_tokens": 1292,
+      "completion_tokens": 985,
+      "tps": 112.76091216534611,
+      "propositions": [
+        "The cast features Sandra Dee, Dan O'Herlihy, Susan Kohner, Robert Alda and Juanita Moore as Annie Johnson, with Kohner and Moore receiving Academy Award nominations and Mahalia Jackson appearing as a church choir soloist",
+        "Chinese character dictionaries allow users to locate entries by radical order, by sound using pinyin, zhuyin, kana, or hangul, and by total number of strokes",
+        "Hard assets of significant value are likely insured and appraised, and adding them to net worth calculation is trivial, with goals being a mix of liquid and harder-to-sell assets, sometimes required for official calculations like student loans or financial disclosure",
+        "The 1959 film Imitation of Life features Sandra Dee, Dan O'Herlihy, Susan Kohner, Robert Alda, and Juanita Moore, with Kohner and Moore receiving Academy Award nominations and Mahalia Jackson appearing as a choir soloist",
+        "Chinese character dictionaries list characters by radical order, by sound using pinyin, zhuyin, kana, or hangul, and by total number of strokes",
+        "Significant hard assets are likely insured and appraised, making their inclusion in net worth trivial, and such assets may be required for official calculations like student loans or financial disclosure"
+      ]
+    },
+    {
+      "cluster_id": "cluster_021",
+      "theme": "European Movement International",
+      "faithfulness": 0.9444444444444445,
+      "is_invalid": false,
+      "wall_sec": 7.300411939620972,
+      "prompt_tokens": 1222,
+      "completion_tokens": 1024,
+      "tps": 140.26605737719026,
+      "propositions": [
+        "The European Movement International is a lobbying association that coordinates the efforts of associations and national councils with the goal of promoting European integration, and disseminating information about it",
+        "The fourth and final season of the Medical drama series The Night Shift began on June 22, 2017 on NBC in the United States with a timeslot change from Wednesday at 10:00 PM to Thursday at 10:00 PM, produced by Sachs / Judah Productions and Sony Pictures Television with series creators Gabe Sachs and Jeff Judah serving as executive producers, concluding on August 31, 2017 and containing 10 episodes",
+        "Edward Walter Furlong (born August 2, 1977) is an American actor and musician who won Saturn and MTV Movie Awards for his breakthrough performance as John Connor in Terminator 2: Judgment Day (1991), and the following year gave an Independent Spirit Award - nominated turn opposite Jeff Bridges in American Heart, earned a second Saturn Award nomination for his work in Pet Sematary Two, won a Young Artist Award for his performance alongside Kathy Bates in A Home of Our Own (1993), and shared a further ensemble nomination with the cast of the film",
+        "The European Movement International is a lobbying association that coordinates associations and national councils to promote European integration and disseminate information about it",
+        "The fourth and final season of The Night Shift aired on NBC in 2017, produced by Sachs/Judah Productions and Sony Pictures Television, with Gabe Sachs and Jeff Judah as executive producers",
+        "Edward Furlong is an American actor and musician who won Saturn and MTV Movie Awards for Terminator 2: Judgment Day and received other award nominations and wins for his performances in various films"
+      ]
+    },
+    {
+      "cluster_id": "cluster_022",
+      "theme": "Beauty and the Beast (2017 film)",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 2.9958417415618896,
+      "prompt_tokens": 1199,
+      "completion_tokens": 24,
+      "tps": 8.011104080380274,
+      "propositions": [
+        "Beauty and the Beast (2017 film) In Rococo - era France, an enchantress disguised as a beggar arrives at a ball and offers the host, a coldhearted prince, a rose for shelter",
+        "Whe\u2026 \"I just can't come around to calling it \"\"taking advantage of\"\" when the means to act on them was put into existence knowingly",
+        "It's like saying you took advantage of the highway \u2026 Allen Harvin Allen Nathaniel Harvin (born March 18, 1959 in Philadelphia, Pennsylvania) was an American football running back in the National Football League for the Washington R\u2026 Beauty and the Beast (2017 film) In Rococo - era France, an enchantress disguised as a beggar arrives at a ball and offers the host, a coldhearted prince, a rose for shelter",
+        "Whe\u2026 \"I just can't come around to calling it \"\"taking advantage of\"\" when the means to act on them was put into existence knowingly",
+        "It's like saying you took advantage of the highway \u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_023",
+      "theme": "Le Travel Store",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 14.868216276168823,
+      "prompt_tokens": 1128,
+      "completion_tokens": 894,
+      "tps": 60.12826174938868,
+      "propositions": [
+        "Le Travel Store, based in San Diego, California, was a retail store that sells travel gear, founded in 1976, claiming to be the first business to call itself a 'travel store' and the first retail store to cater to backpackers and other independent travelers",
+        "In the final episode, Eric returns to Point Place for the New Year and he and Donna kiss, and it is presumed that they end up together again at the end of the series and the end of the 1970s",
+        "Collier Peak is located on the border of Alberta and British Columbia, and it was named in 1903 after Collier, Dr",
+        "Le Travel Store, founded in 1976 in San Diego, California, claims to be the first travel store and the first retail store to cater to backpackers and independent travelers",
+        "In the final episode of That '70s Show, Eric returns to Point Place for New Year and he and Donna kiss, implying they end up together again",
+        "Collier Peak, located on the border of Alberta and British Columbia, was named in 1903 after Dr"
+      ]
+    },
+    {
+      "cluster_id": "cluster_024",
+      "theme": "Cuenya",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 36.300945520401,
+      "prompt_tokens": 1167,
+      "completion_tokens": 2048,
+      "tps": 56.417263259686486,
+      "propositions": [
+        "Cuenya Cuenya is one of six parishes (administrative divisions) in Nava, a municipality within the province and autonomous community of Asturias, in northern Spain",
+        "It has an are\u2026 \"Although banks do not have to honor checks that are more than six months old, they often do",
+        "Limit Noted on Check",
+        "Many large corporations put the length of time that a check is \u2026 Eos Airlines Eos Airlines, Inc",
+        "was an American all-business class airline headquartered in Purchase, New York, with its flights from John F",
+        "Kennedy International Airport, New Y\u2026 Cuenya Cuenya is one of six parishes (administrative divisions) in Nava, a municipality within the province and autonomous community of Asturias, in northern Spain",
+        "It has an are\u2026 \"Although banks do not have to honor checks that are more than six months old, they often do",
+        "Limit Noted on Check",
+        "Many large corporations put the length of time that a check is \u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_025",
+      "theme": "List of international goals scored by Lionel Messi",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 9.241315126419067,
+      "prompt_tokens": 1400,
+      "completion_tokens": 1026,
+      "tps": 111.02315914613405,
+      "propositions": [
+        "Lionel Messi has scored 65 goals in 127 international appearances for Argentina, becoming the country's all-time top scorer, surpassing Gabriel Batistuta's record, with a free kick against United States in the semi-final of Copa Am\u00e9rica Centenario on 21 June 2016",
+        "Hard work is neither necessary nor sufficient for success, and chance rules us all, taking nothing away from the hard-working to admit that",
+        "Whether Provider A allows partial ISA transfer and HMRC rules on continued payments to the remaining part are unclear, but HMRC typically looks at the situation in the round at the end of the tax year and won't have an issue if no double-benefit is attempted",
+        "Lionel Messi has scored 65 goals in 127 international appearances for Argentina, becoming the country's all-time top scorer, surpassing Gabriel Batistuta's record, with a free kick against United States in the semi-final of Copa Am\u00e9rica Centenario on 21 June 2016",
+        "Hard work is neither necessary nor sufficient for success, and chance rules us all, taking nothing away from the hard-working to admit that",
+        "Whether Provider A allows partial ISA transfer and HMRC rules on continued payments to the remaining part are unclear, but HMRC typically looks at the situation in the round at the end of the tax year and won't have an issue if no double-benefit is attempted"
+      ]
+    },
+    {
+      "cluster_id": "cluster_026",
+      "theme": "California",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 29.834490299224854,
+      "prompt_tokens": 1330,
+      "completion_tokens": 888,
+      "tps": 29.764208843315537,
+      "propositions": [
+        "California is a state in the Pacific Region of the United States with 39.3 million residents, the most populous state, and the third most extensive by area, with capital Sacramento",
+        "Monologue of Love is a studio album by Soviet singer Sofia Rotaru, released in 1987 by Melodiya, including songs in Russian with new rock style arrangements by leading Soviet pop and rock bands",
+        "You can't insure for more than the financial cost of the event that you're insuring against, but that can be more than the current market value of the item",
+        "California is a state in the Pacific Region of the United States with 39.3 million residents, the most populous state, and the third most extensive by area, with capital Sacramento",
+        "Monologue of Love is a studio album by Soviet singer Sofia Rotaru, released in 1987 by Melodiya, including songs in Russian with new rock style arrangements by leading Soviet pop and rock bands",
+        "You can't insure for more than the financial cost of the event that you're insuring against, but that can be more than the current market value of the item"
+      ]
+    },
+    {
+      "cluster_id": "cluster_027",
+      "theme": "Independence of the Seas",
+      "faithfulness": 0.0,
+      "is_invalid": false,
+      "wall_sec": 2.3122942447662354,
+      "prompt_tokens": 1398,
+      "completion_tokens": 37,
+      "tps": 16.001423730456313,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_028",
+      "theme": "Ceremonies of Light and Dark",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 2.1098055839538574,
+      "prompt_tokens": 1204,
+      "completion_tokens": 13,
+      "tps": 6.161705182160669,
+      "propositions": [
+        "Ceremonies of Light and Dark \"Ceremonies of Light and Dark\" is the eleventh episode from the third season of the science fiction television series \"Babylon 5\"",
+        "The Woman in the Advocate's Gown The Woman in the Advocate's Gown (German: Die Frau im Talar) is a 1929 Norwegian-German silent drama film directed by Adolf Trotz and starring Au\u2026 Reformed Political Party The Reformed Political Party (, SGP) is an orthodox Calvinist political party in the Netherlands",
+        "The term \"Reformed\" is not a reference to political ref\u2026 Ceremonies of Light and Dark \"Ceremonies of Light and Dark\" is the eleventh episode from the third season of the science fiction television series \"Babylon 5\"",
+        "The Woman in the Advocate's Gown The Woman in the Advocate's Gown (German: Die Frau im Talar) is a 1929 Norwegian-German silent drama film directed by Adolf Trotz and starring Au\u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_029",
+      "theme": "NEMA connector",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 6.0131309032440186,
+      "prompt_tokens": 1217,
+      "completion_tokens": 968,
+      "tps": 160.9810289474614,
+      "propositions": [
+        "NEMA connectors are power plugs and receptacles used for AC mains electricity in North America and other countries that use the standards set by the US National Electrical Manufacturers Association, with current ratings from 15 to 60 amperes and voltage ratings from 125 to 600 volts",
+        "Holmes Summit is a peak rising to , the highest elevation in the Read Mountains of the Shackleton Range in Antarctica, photographed from the air by the U.S",
+        "Navy in 1967 and surveyed by the British Antarctic Survey in the period 1968\u201371",
+        "You should check out existing resources like Investopedia for definitions, and ask questions if there is something you do not understand, instead of asking folks to spit out definitions, and a good book for you to read might be Wall Street Words",
+        "NEMA connectors are power plugs and receptacles used for AC mains electricity in North America and other countries that use the standards set by the US National Electrical Manufacturers Association, with current ratings from 15 to 60 amperes and voltage ratings from 125 to 600 volts",
+        "Holmes Summit is a peak rising to , the highest elevation in the Read Mountains of the Shackleton Range in Antarctica, photographed from the air by the U.S",
+        "Navy in 1967 and surveyed by the British Antarctic Survey in the period 1968\u201371",
+        "You should check out existing resources like Investopedia for definitions, and ask questions if there is something you do not understand, instead of asking folks to spit out definitions, and a good book for you to read might be Wall Street Words"
+      ]
+    },
+    {
+      "cluster_id": "cluster_030",
+      "theme": "",
+      "faithfulness": 0.8507936507936508,
+      "is_invalid": false,
+      "wall_sec": 6.3035888671875,
+      "prompt_tokens": 1264,
+      "completion_tokens": 892,
+      "tps": 141.50669067952518,
+      "propositions": [
+        "The passage discusses the potential downside of taking a loan from a 401(k) pre-tax, noting that once the loan is paid off, the principal is restored, but the author suggests there are several issues to consider",
+        "The oldest NBA player ever was Nat Hickey, who played at 45, and the youngest was Andrew Bynum at 18, with Vince Carter being the oldest active player and Isaac Bonga the youngest active player",
+        "Scott Petri, born in 1960, served in the Pennsylvania House of Representatives from the 178th Legislative District, chaired House Urban Affairs and the House Ethics Committee, and now leads the Philadelphia Parking Authority",
+        "The passage questions the downside of a 401(k) loan, noting the pre-tax contribution and principal restoration, but lists several issues to consider",
+        "The passage lists the oldest and youngest NBA players ever and currently active, including Nat Hickey, Andrew Bynum, Vince Carter, and Isaac Bonga",
+        "Scott Petri served in the Pennsylvania House of Representatives and chaired committees, now serving as executive director of the Philadelphia Parking Authority"
+      ]
+    },
+    {
+      "cluster_id": "cluster_031",
+      "theme": "Sielpia Wielka",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 3.00162410736084,
+      "prompt_tokens": 1260,
+      "completion_tokens": 30,
+      "tps": 9.994589238016655,
+      "propositions": [
+        "Sielpia Wielka Sielpia Wielka is a village in the administrative district of Gmina Ko\u0144skie, within Ko\u0144skie County, \u015awi\u0119tokrzyskie Voivodeship, in south-central Poland",
+        "It lies ap\u2026 Andy Barclay Andy Barclay Child's Play character Andy in Child's Play 2 First appearance Child's Play Created by Don Mancini Portrayed by Alex Vincent (1 - 2, 6 - 7) Justin Whali\u2026 Pinckney State Recreation Area Pinckney State Recreation Area is a Michigan state recreation area in Dexter, Sylvan and Lyndon Townships, Washtenaw County and Putnam and Unadilla\u2026 Sielpia Wielka Sielpia Wielka is a village in the administrative district of Gmina Ko\u0144skie, within Ko\u0144skie County, \u015awi\u0119tokrzyskie Voivodeship, in south-central Poland",
+        "It lies ap\u2026 Andy Barclay Andy Barclay Child's Play character Andy in Child's Play 2 First appearance Child's Play Created by Don Mancini Portrayed by Alex Vincent (1 - 2, 6 - 7) Justin Whali\u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_032",
+      "theme": "German Revolution of 1918\u201319",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 16.50544238090515,
+      "prompt_tokens": 1309,
+      "completion_tokens": 951,
+      "tps": 57.6173590536534,
+      "propositions": [
+        "On 6 January, the Revolutionary Committee called for a mass demonstration, but the KPD activists failed to win over the troops, and units like the People's Navy Division declared themselves neutral while other regiments remained loyal to the government",
+        "Curonians who remained in East Prussia were expelled by the Soviet Union, faced anti-German discrimination, and many immigrated to West Germany in 1958",
+        "The moonwalk is a dance move in which the dancer moves backwards while seemingly walking forwards, popularized by Michael Jackson during a performance of 'Billie Jean' on Motown 25 on March 25, 1983",
+        "During the German Revolution, the Revolutionary Committee's call for a demonstration on 6 January failed to gain military support, with the People's Navy Division remaining neutral and other regiments loyal to the government",
+        "Curonians remaining in East Prussia were expelled by the Soviet Union, faced anti-German discrimination, and many immigrated to West Germany in 1958",
+        "The moonwalk, a dance move moving backwards while appearing to walk forwards, became popular after Michael Jackson performed it during 'Billie Jean' on Motown 25 in 1983"
+      ]
+    },
+    {
+      "cluster_id": "cluster_033",
+      "theme": "Lord Voldemort",
+      "faithfulness": 0.9583333333333334,
+      "is_invalid": false,
+      "wall_sec": 13.923709154129028,
+      "prompt_tokens": 1302,
+      "completion_tokens": 1030,
+      "tps": 73.97454145288269,
+      "propositions": [
+        "Lord Voldemort / Tom Riddle is a Harry Potter character created by J.K",
+        "Rowling, first appearing in Harry Potter and the Philosopher's Stone and last appearing in Harry Potter and the Deathly Hallows, portrayed by Ralph Fiennes, Frank Dillane, Hero Fiennes-Tiffin, Christian Coulson, Ian Hart, Richard Bremmer, and Eddie Izzard, and belonging to House Slytherin",
+        "Kasowitz, Benson & Torres is a New York law firm founded in 1993, employing 350 lawyers, maintaining offices in several states, focusing on product liability litigation, corporate, family and employment law, intellectual property, bankruptcy and creditors' rights, with notable clients including Donald Trump, Robert DeNiro, Celanese, ArvinMeritor, Liggett Group, Enron, WorldCom and Mia Farrow",
+        "There are two types of political parties in India - National Party and Regional / State party, every political party must bear a symbol and must be registered with the Election Commission of India, and symbols are used as an identity of political parties so that illiterate people can vote by recognizing symbols",
+        "Lord Voldemort / Tom Riddle is a Harry Potter character created by J.K",
+        "Rowling, appearing in the Philosopher's Stone and Deathly Hallows, portrayed by multiple actors, and belonging to House Slytherin",
+        "Kasowitz, Benson & Torres is a New York law firm founded in 1993 with 350 lawyers, focusing on various legal areas, and representing notable clients",
+        "India has National and Regional/State parties, all must be registered with the Election Commission and bear symbols to aid illiterate voters"
+      ]
+    },
+    {
+      "cluster_id": "cluster_034",
+      "theme": "Politics of Mexico",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 12.846161365509033,
+      "prompt_tokens": 1190,
+      "completion_tokens": 807,
+      "tps": 62.8203225102507,
+      "propositions": [
+        "The Politics of Mexico take place in a framework of a federal presidential representative democratic republic whose government is based on a congressional system, whereby the President of Mexico is both head of state and head of government, and of a multi-party system",
+        "Whiston is a large village and civil parish within the Metropolitan Borough of Knowsley in Merseyside, England, with a population of 13,629 at the 2001 Census and 14,263 at the 2011 Census",
+        "Burton Constable is a village and civil parish in the East Riding of Yorkshire, England, located approximately north-east of Hull city centre and south-east of the village of Skirlaugh",
+        "The Politics of Mexico are a federal presidential representative democratic republic with a congressional system and a multi-party system, as established by the Political Constitution of the United Mexican States",
+        "Whiston and Burton Constable are villages and civil parishes in England, with Whiston in Merseyside and Burton Constable in the East Riding of Yorkshire"
+      ]
+    },
+    {
+      "cluster_id": "cluster_035",
+      "theme": "Moross House",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 12.748092412948608,
+      "prompt_tokens": 1140,
+      "completion_tokens": 919,
+      "tps": 72.08921697700787,
+      "propositions": [
+        "The Moross House is a house located at 1460 East Jefferson Avenue in Detroit, Michigan, designated a Michigan State Historic Site in 1971 and listed on the National Register of Historic Places in 1972",
+        "Rest Your Love on Me is a country ballad performed by the Bee Gees written and sung by Barry Gibb, and was the B-side of the US No",
+        "1 hit Too Much Heaven",
+        "Omega Ruby and Alpha Sapphire were released in Japan, North America, and Australia on November 21, 2014, exactly twelve years after the release date of the original Ruby and Sapphire",
+        "the European release was one week later on November 28, 2014",
+        "The Moross House in Detroit, Michigan was designated a Michigan State Historic Site in 1971 and listed on the National Register of Historic Places in 1972",
+        "Rest Your Love on Me is a country ballad performed by the Bee Gees, written and sung by Barry Gibb, and was the B-side of the US No",
+        "1 hit Too Much Heaven",
+        "Omega Ruby and Alpha Sapphire were released in Japan, North America, and Australia on November 21, 2014, and in Europe on November 28, 2014"
+      ]
+    },
+    {
+      "cluster_id": "cluster_036",
+      "theme": "Luke Skywalker",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 13.279881238937378,
+      "prompt_tokens": 1327,
+      "completion_tokens": 930,
+      "tps": 70.03074675646845,
+      "propositions": [
+        "In the Hand of Thrawn Duology, Luke, now a Jedi Master, works again with Mara Jade, who has learned to better her Force knowledge since her training at Luke's Jedi Academy, and they eventually marry and have a son named Ben after Obi-Wan Kenobi's pseudonym Ben",
+        "Kung Fu Panda premiered in the United States on June 6, 2008, received positive reviews, opened in 4,114 theaters, grossed $20.3 million on its opening day and $60.2 million on its opening weekend, becoming DreamWorks' biggest opening for a non-sequel film and the highest grossing animated film of the year worldwide",
+        "Stockholm Mean Machines is the oldest and most successful football club in Sweden, established in 1972, the same year the sport was introduced in the country, and the men's team leads the nation in seasons played in the premier league and has 11 national championships",
+        "Luke Skywalker, a Jedi Master, works with Mara Jade, marries her, and they have a son named Ben",
+        "Kung Fu Panda premiered in 2008, received positive reviews, and achieved significant box office success",
+        "Stockholm Mean Machines is the oldest and most successful football club in Sweden, established in 1972"
+      ]
+    },
+    {
+      "cluster_id": "cluster_037",
+      "theme": "Super Gem Fighter Mini Mix",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 15.442471742630005,
+      "prompt_tokens": 1306,
+      "completion_tokens": 956,
+      "tps": 61.90718791221073,
+      "propositions": [
+        "Super Gem Fighter Mini Mix is a Japanese children's fighting video game released by Capcom in 1997 for the CPS II arcade system, and was ported to PlayStation, Sega Saturn, WonderSwan, and PlayStation 2 as part of the \"Street Fighter Alpha Anthology\"",
+        "Gaspard Ulliel is a French actor and model, best known for portraying Hannibal Lecter in \"Hannibal Rising\" and Yves Saint Laurent in \"Saint Laurent\", and for being the face of Bleu de Chanel",
+        "The University of Southern Indiana is a public university established in 1965 as Indiana State University - Evansville, renamed in 1985, located in Vanderburgh County, Indiana, with a suburban campus of 1,400 acres and 11,033 students",
+        "Super Gem Fighter Mini Mix is a Capcom fighting game released in 1997 and ported to multiple platforms",
+        "Gaspard Ulliel is a French actor and model known for specific roles and a Chanel fragrance",
+        "The University of Southern Indiana is a public university established in 1965 and located in Vanderburgh County, Indiana"
+      ]
+    },
+    {
+      "cluster_id": "cluster_038",
+      "theme": "Manuel P\u00e9rez Trevi\u00f1o",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 6.968313455581665,
+      "prompt_tokens": 1236,
+      "completion_tokens": 921,
+      "tps": 132.16971450419942,
+      "propositions": [
+        "General Manuel P\u00e9rez Trevi\u00f1o (June 5, 1890 \u2013 April 29, 1945) was a Mexican politician and was an important military and political leader during and after the Mexican Revolution",
+        "In 1987, Adele Wheeler is a depressed single mother who lives in a rural home with her 13-year-old son, Henry, and a bloody man approaches Henry and makes them take him home to look after him, revealed to be Frank Chambers, an escaped convict wanted by police, and through flashbacks it is revealed that Frank is a Vietnam veteran who married his pregnant girlfriend, Mandy, and after a fight he pushed her against a radiator resulting in her death, and it is implied that the baby drowned, and Frank was jailed for murder",
+        "Shane Joseph (born July 23, 1981 in Brooks, Alberta) is a Canadian professional ice hockey winger who is currently a Free Agent and most recently played for the Iserlohn Roosters in the Deutsche Eishockey Liga",
+        "Manuel P\u00e9rez Trevi\u00f1o was a Mexican politician and important military and political leader during and after the Mexican Revolution",
+        "Labor Day (film) depicts Adele Wheeler and her son Henry encountering escaped convict Frank Chambers, whose backstory involves the death of his wife Mandy and implied drowning of his baby",
+        "Shane Joseph is a Canadian professional ice hockey winger who is currently a free agent and last played for the Iserlohn Roosters"
+      ]
+    },
+    {
+      "cluster_id": "cluster_039",
+      "theme": "Kenan Evren",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 13.768577337265015,
+      "prompt_tokens": 1259,
+      "completion_tokens": 1013,
+      "tps": 73.57332389442219,
+      "propositions": [
+        "Ahmet Kenan Evren was a Turkish politician and military officer who served as the seventh President of Turkey from 1980 to 1989, assuming the post by leading the 1980 military coup",
+        "Windows Phone 8.1 is the third generation of Microsoft's Windows Phone mobile operating system, succeeding Windows Phone 8, rolled out at Microsoft's Build Conference in San Francisco on April 2, 2014, released to developers on April 14, 2014, and reaching general availability on August 4, 2014",
+        "Thomas Coutts was the fourth son of John Coutts, who carried on business in Edinburgh as a corn factor and negotiator of bills of exchange, and the family originally of Montrose, with Thomas educated at the Royal High School",
+        "Kenan Evren, a Turkish politician and military officer, became the seventh President of Turkey from 1980 to 1989 by leading the 1980 military coup",
+        "Windows Phone 8.1, the third generation of Microsoft's mobile operating system, succeeded Windows Phone 8 and was rolled out at the Build Conference in 2014",
+        "Thomas Coutts was the fourth son of John Coutts, a corn factor and negotiator of bills of exchange in Edinburgh, with family origins in Montrose"
+      ]
+    },
+    {
+      "cluster_id": "cluster_040",
+      "theme": "The Shadow of Saganami",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 12.13133692741394,
+      "prompt_tokens": 1152,
+      "completion_tokens": 713,
+      "tps": 58.77340677834026,
+      "propositions": [
+        "The Shadow of Saganami is a science fiction novel by American writer David Weber, published in 2004, set in the Honorverse, billed as the first in the \"Saganami Island\" series, and debuted at #16 on The New York Times best seller list for hardcover fiction",
+        "Oh, What a Life is the debut studio album by American indie rock band American Authors, released by Island Def Jam label Mercury Records on March 3, 2014, serving as a replacement to the band's eponymous 2013 extended play",
+        "Night Rocker is the debut studio album by the American actor David Hasselhoff, released in January 1985 on Silver Blue Records, produced by record producer Joel Diamond",
+        "Oh, What a Life and Night Rocker are debut studio albums by American artists, released in 2014 and 1985 respectively"
+      ]
+    },
+    {
+      "cluster_id": "cluster_041",
+      "theme": "Felipe Berrioz\u00e1bal",
+      "faithfulness": 0.9404761904761906,
+      "is_invalid": false,
+      "wall_sec": 15.002962827682495,
+      "prompt_tokens": 1335,
+      "completion_tokens": 966,
+      "tps": 64.38728210521187,
+      "propositions": [
+        "Felipe Berrioz\u00e1bal was a Mexican politician, engineer and military leader who participated in the Reform War and the fight against French Intervention in Mexico, served as Secretary of War and Secretary of Marine in Benito Ju\u00e1rez's cabinet, and was buried at the Rotunda of Illustrious Persons in the Pante\u00f3n de Dolores",
+        "Sir Lyman Poore Duff was the eighth Chief Justice of the Supreme Court of Canada and the longest serving justice of the Supreme Court of Canada",
+        "The answer depends on how much you spend every month, and the DTI is calculated using the minimum payment on the balance owed on your card, which can affect the maximum amount a lender will approve you for",
+        "Felipe Berrioz\u00e1bal was a Mexican politician, engineer and military leader who served in Benito Ju\u00e1rez's cabinet and was buried in the Rotunda of Illustrious Persons",
+        "Sir Lyman Poore Duff was the eighth Chief Justice of the Supreme Court of Canada and its longest serving justice",
+        "Credit card minimum payments affect DTI calculations and can influence the maximum mortgage amount a lender approves"
+      ]
+    },
+    {
+      "cluster_id": "cluster_042",
+      "theme": "Up Where We Belong",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 41.76346778869629,
+      "prompt_tokens": 1175,
+      "completion_tokens": 917,
+      "tps": 21.95698893203968,
+      "propositions": [
+        "Up Where We Belong is a song written by Jack Nitzsche, Buffy Sainte-Marie and Will Jennings that was recorded by Joe Cocker and Jennifer Warnes for the 1982 film An Officer and a Gentleman, and is about the belief that love can withstand the struggles of a relationship and make it stronger",
+        "You're acting like there are still considerably fewer people in the world, the globalist haven't forced us to compete with shitty employers round the world, and that the inefficiencies of your local producer has any hope of making quality items cheaply",
+        "Paul Augustus Maloy (June 4, 1892 \u2013 March 18, 1976) was a relief pitcher in Major League Baseball who played briefly for the Boston Red Sox during the season, batted and threw right-handed, and was born in Bascom, Ohio",
+        "Up Where We Belong is a song written by Jack Nitzsche, Buffy Sainte-Marie and Will Jennings, recorded by Joe Cocker and Jennifer Warnes for the 1982 film An Officer and a Gentleman, about love withstanding struggles",
+        "Paul Augustus Maloy was a relief pitcher in Major League Baseball who played briefly for the Boston Red Sox, batted and threw right-handed, and was born in Bascom, Ohio"
+      ]
+    },
+    {
+      "cluster_id": "cluster_043",
+      "theme": "Taming Strange",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 19.55997896194458,
+      "prompt_tokens": 1270,
+      "completion_tokens": 967,
+      "tps": 49.43768098531045,
+      "propositions": [
+        "\"Taming Strange\" is the fifth episode in the seventeenth season of the American animated television series \"South Park\", premiered on Comedy Central on October 30, 2013, and parodies Miley Cyrus' performance at the 2013 MTV Video Music Awards and HealthCare.gov technical problems, focusing on Kyle bonding with his brother Ike going through puberty",
+        "The soundtrack includes \"The Washington Post\" composed by John Philip Sousa, \"Mr",
+        "Sandman\" performed by The Four Aces, \"The Ballad of Davy Crockett\" performed by Fess Parker, \"Pledging My Love\" performed by Johnny Ace, and \"Out the Window\" performed by Edward Van Halen",
+        "For returning of capital, use bankrate.com to find an online bank savings account or MMA account with higher rates, sometimes higher than a CD and FDIC insured, and ally bank's raise your rate 2 year CD always has the best rate and allows raising the rate if rates go up",
+        "The South Park episode \"Taming Strange\" premiered on October 30, 2013, and parodies Miley Cyrus' performance and HealthCare.gov issues, with Kyle bonding with Ike",
+        "The Back to the Future soundtrack includes songs by John Philip Sousa, The Four Aces, Fess Parker, Johnny Ace, and Edward Van Halen",
+        "Using bankrate.com can find higher rates for savings or MMA accounts, and ally bank's raise your rate 2 year CD offers the best rate with the ability to raise it"
+      ]
+    },
+    {
+      "cluster_id": "cluster_044",
+      "theme": "Eligibility for the NBA draft",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 9.712307214736938,
+      "prompt_tokens": 1223,
+      "completion_tokens": 1024,
+      "tps": 105.433238195579,
+      "propositions": [
+        "The NBA draft is an annual event in which the 30 franchises in the National Basketball Association select new players, and no player may sign with the NBA until they are 19 years or older, producing one-and-done players",
+        "Charity Creek, a northern tributary of the Parramatta River, is a creek west of Sydney Harbour, located in Sydney, New South Wales, Australia, and joins Parramatta River at Meadowbank Park, Meadowbank",
+        "Peter Claver Cullen, born July 28, 1941, is a Canadian voice actor known as the voice of Optimus Prime and Ironhide in the original 1980s Transformers animated series, Eeyore in Winnie the Pooh, and Monterey Jack in Chip 'n Dale Rescue Rangers, returning to Optimus Prime in 2007",
+        "The NBA draft is an annual event where 30 franchises select new players, with eligibility rules requiring players to be 19 years or older, leading to one-and-done players",
+        "Charity Creek is a northern tributary of the Parramatta River, located west of Sydney Harbour in Sydney, Australia, joining the river at Meadowbank Park",
+        "Peter Cullen is a Canadian voice actor known for voicing Optimus Prime, Ironhide, Eeyore, and Monterey Jack, returning to Optimus Prime in 2007"
+      ]
+    },
+    {
+      "cluster_id": "cluster_045",
+      "theme": "Mammillaria mammillaris",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 16.408416509628296,
+      "prompt_tokens": 1194,
+      "completion_tokens": 964,
+      "tps": 58.75033702577786,
+      "propositions": [
+        "Mammillaria mammillaris, common name Woolly Nipple Cactus, is a species of plant in the family Cactaceae, described by Carolus Linnaeus as Cactus mammillaris in 1753",
+        "Yane Yanev, born 22 April 1971, is a Bulgarian politician, leader of the center-right opposition party Order, Law and Justice and a member of the Bulgarian National Assembly",
+        "Adele Mary Blood was an American actress in silent movies, vaudeville, and theater",
+        "Mammillaria mammillaris is a plant species in the family Cactaceae, described by Carolus Linnaeus as Cactus mammillaris in 1753",
+        "Yane Yanev is a Bulgarian politician and leader of the center-right opposition party Order, Law and Justice",
+        "Adele Blood was an American actress in silent movies, vaudeville, and theater"
+      ]
+    },
+    {
+      "cluster_id": "cluster_046",
+      "theme": "Embryotoxic effects of pine needles and pine needle extracts.",
+      "faithfulness": 0.9583333333333334,
+      "is_invalid": false,
+      "wall_sec": 55.26697587966919,
+      "prompt_tokens": 1382,
+      "completion_tokens": 1003,
+      "tps": 18.148269993708286,
+      "propositions": [
+        "A heat stable toxin in ponderosa pine needles, soluble in methanol, ethanol, chloroform hexanes and 1-butanol, caused embryo resorption in pregnant mice, with autoclaving enhancing the effect and significant weight loss in adult mice",
+        "Malcolm Shabazz was born in Paris on October 8, 1984, to L",
+        "Bouasba and Qubilah Shabazz, and according to Malcolm he never met his father, though other sources say they had little contact",
+        "Super Star is S.H.E's fourth studio album released on 22 August 2003, with Ella absent from some music videos due to a back injury, and the title track composed by Sweetbox and later covered by Skye Sweetnam",
+        "Pine needle toxin from ponderosa pine is heat stable, soluble in various solvents, and causes embryo resorption in mice, with autoclaving enhancing the effect",
+        "Malcolm Shabazz was born in Paris to L",
+        "Bouasba and Qubilah Shabazz, and his relationship with his father is disputed",
+        "S.H.E's album Super Star, released in 2003, features the hit single composed by Sweetbox and later covered by Skye Sweetnam"
+      ]
+    },
+    {
+      "cluster_id": "cluster_047",
+      "theme": "To Kill a Mockingbird",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 14.189527988433838,
+      "prompt_tokens": 1187,
+      "completion_tokens": 925,
+      "tps": 65.1889196563822,
+      "propositions": [
+        "To Kill a Mockingbird is a novel by Harper Lee published in 1960, immediately successful, winning the Pulitzer Prize, and has become a classic of modern American literature, with plot and characters loosely based on the author's observations of her family and neighbors and an event near her hometown in 1936",
+        "Helicobacter pylori induces motogenic and cytoskeletal responses in gastric epithelial cells via independent signaling pathways that often occur in parallel, with the cag pathogenicity island nonessential for motility induction and elongation depending on translocation and phosphorylation of CagA",
+        "Tancredo Neves is a bairro in the District of Sede in the municipality of Santa Maria, in the Brazilian state of Rio Grande do Sul, located in west Santa Maria",
+        "To Kill a Mockingbird is a 1960 novel by Harper Lee that won the Pulitzer Prize and became a classic of modern American literature, based on the author's observations and a 1936 event",
+        "Helicobacter pylori induces motility and elongation in gastric epithelial cells via independent signaling pathways, with elongation dependent on CagA translocation and phosphorylation",
+        "Tancredo Neves is a bairro in the District of Sede, Santa Maria, Rio Grande do Sul, located in west Santa Maria"
+      ]
+    },
+    {
+      "cluster_id": "cluster_048",
+      "theme": "Salem County Vocational Technical Schools",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 12.832014322280884,
+      "prompt_tokens": 1324,
+      "completion_tokens": 1079,
+      "tps": 84.08656450191745,
+      "propositions": [
+        "The Salem County Vocational Technical Schools (SCVTS) is a countywide vocational and technical public school district, serving the educational needs of residents of Salem County, New Jersey, United States, offering programs on both a full-time and shared-time basis in cooperation and partnership with the county's elementary and secondary schools, local and regional colleges and universities, for both school-aged students and adults",
+        "Hansen's problem is a problem in planar surveying, named after the astronomer Peter Andreas Hansen (1795\u20131874), who worked on the geodetic survey of Denmark, involving two known points and two unknown points from which angles are measured to find the positions of the unknown points",
+        "The Confederation of Regions Party (CoR) was a right-wing federal political party in Canada founded in 1984 by Elmer Knutson, as a successor to the Western Canada Federation (West-Fed), to fight the Liberal Party of Canada and fill the void on the right of the political spectrum left by the decline of the Social Credit Party of Canada and the growing unpopularity among westerners of the Progressive Conservative Party of Canada under the leadership of Brian Mulroney",
+        "The Salem County Vocational Technical Schools is a countywide vocational and technical public school district in Salem County, New Jersey, offering programs for students and adults",
+        "Hansen's problem is a planar surveying problem named after astronomer Peter Andreas Hansen, involving known and unknown points and angle measurements",
+        "The Confederation of Regions Party was a right-wing federal political party in Canada founded in 1984 by Elmer Knutson as a successor to the Western Canada Federation"
+      ]
+    },
+    {
+      "cluster_id": "cluster_049",
+      "theme": "Karl Schiller",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 18.333614349365234,
+      "prompt_tokens": 1262,
+      "completion_tokens": 701,
+      "tps": 38.23577755273721,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_050",
+      "theme": "Marina Giordana",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 6.7310950756073,
+      "prompt_tokens": 1202,
+      "completion_tokens": 1014,
+      "tps": 150.64413570306223,
+      "propositions": [
+        "Marina began her acting career with a role in the Italian comedy \"Che notte quella notte!\" (1976) and the little-known film \"Quella strana voglia d'amare\" (1977) but her best-known film is the gritty crime thriller \"La belva col mitra\" (a.k.a",
+        "\"The Beast With a Gun\") from 1977, starring Helmut Berger and Marisa Mell",
+        "Virginia is located in Lempira Honduras and shares a border with El Salvador, and many Virginians travel to El Salvador to do their shopping because the Honduran cities are far away from Virginia",
+        "Born in Santa Giustina, near Belluno in the Veneto, he was first elected to parliament in 1921, and after the rise to power of the fascists, he joined the democratic opposition around Giovanni Giolitti and in 1924 refused to candidate himself in the fascist-led national union list, and when all political parties were dissolved in early 1925, he retired from political life and kept on being a lawyer",
+        "Marina Giordana began her acting career with roles in Italian films and is best known for the crime thriller \"La belva col mitra\" from 1977",
+        "Virginia, located in Lempira Honduras, shares a border with El Salvador, and its residents travel there for shopping due to distance from Honduran cities",
+        "Bruno Villabruna, born in Santa Giustina, was elected to parliament in 1921, opposed the fascists, and retired from politics in 1925 to continue as a lawyer"
+      ]
+    },
+    {
+      "cluster_id": "cluster_051",
+      "theme": "Pervez Bilgrami",
+      "faithfulness": 0.0,
+      "is_invalid": false,
+      "wall_sec": 48.99556612968445,
+      "prompt_tokens": 1270,
+      "completion_tokens": 2048,
+      "tps": 41.79970070310503,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_052",
+      "theme": "Tyler Lepley",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 10.67813491821289,
+      "prompt_tokens": 1165,
+      "completion_tokens": 893,
+      "tps": 83.62883657490384,
+      "propositions": [
+        "Tyler Lepley (March 24, 1987) is an American actor, best known for his portrayal of Benjamin ``Benny ''Young on the Tyler Perry produced The Have and the Have Nots; which is the first scripted television series to air on the Oprah Winfrey Network",
+        "Vaikom Padmanabha Pillai (1767\u20131809) was a militia leader and military officer of the Kingdom of Travancore (now roughly the Indian state of Kerala)",
+        "In 1808 he led an uprising against British control in Travancore",
+        "He was captured in 1809 and hanged for his role in the rebellion",
+        "Joe Wheeler State Park is a state-owned, public recreation area with resort features located on Wheeler Lake, an impoundment of the Tennessee River in northwest Alabama",
+        "The state park contains of land in three separate parcels and adjoins the Tennessee Valley Authority's Wheeler Dam",
+        "Tyler Lepley is an American actor known for his role in The Have and the Have Nots, the first scripted series on OWN",
+        "Vaikom Padmanabha Pillai led an uprising against British control in Travancore and was hanged for his role",
+        "Joe Wheeler State Park is a public recreation area on Wheeler Lake in Alabama, adjoining Wheeler Dam"
+      ]
+    },
+    {
+      "cluster_id": "cluster_053",
+      "theme": "The English Teacher",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 9.638307094573975,
+      "prompt_tokens": 1187,
+      "completion_tokens": 724,
+      "tps": 75.11692591820263,
+      "propositions": [
+        "The English Teacher is a 1945 novel written by R.K",
+        "Narayan, the third and final part in the 'Malgudi Days' series, preceded by Swami and Friends (1935) and The Bachelor of Arts (1937)",
+        "If You Go Away is an adaptation of the 1959 Jacques Brel song 'Ne me quitte pas' with English lyrics by Rod McKuen, considered a pop standard and recorded by many artists, including Greta Keller",
+        "The Premier of the Cabinet is nominally the non-executive head of government of North Korea, alternatively known as Prime Minister of North Korea, with the current premier being Pak Pong-ju",
+        "The English Teacher is the third and final part in the 'Malgudi Days' series by R.K",
+        "Narayan, preceded by Swami and Friends and The Bachelor of Arts",
+        "If You Go Away is an adaptation of the 1959 Jacques Brel song 'Ne me quitte pas' with English lyrics by Rod McKuen, considered a pop standard",
+        "The Premier of the Cabinet is nominally the non-executive head of government of North Korea, also known as Prime Minister, currently held by Pak Pong-ju"
+      ]
+    },
+    {
+      "cluster_id": "cluster_054",
+      "theme": "Femme Lisant",
+      "faithfulness": 0.9,
+      "is_invalid": false,
+      "wall_sec": 7.246019601821899,
+      "prompt_tokens": 1203,
+      "completion_tokens": 703,
+      "tps": 97.0187825358962,
+      "propositions": [
+        "Femme Lisant is a 1869 painting by French artist Jean-Baptiste-Camille Corot, now in the Metropolitan Museum of Art in New York City",
+        "The educational system of Myanmar is operated by the Ministry of Education, based on the United Kingdom's system, with nearly all schools government-operated and schooling compulsory until the end of elementary school",
+        "As Minister of Education, Kannagara introduced reforms on 1 October 1945 to make education free, provide religious instruction, pay teachers directly by the government, and make provisions for adult education",
+        "The passages describe education systems in Myanmar and reforms by C",
+        "Kannangara, both involving government operation and compulsory schooling"
+      ]
+    },
+    {
+      "cluster_id": "cluster_055",
+      "theme": "",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 21.736080646514893,
+      "prompt_tokens": 1234,
+      "completion_tokens": 840,
+      "tps": 38.645421576252915,
+      "propositions": [
+        "The commenter thanks the poster and states that Elizabeth Warren's ideas are much more thoroughly researched and present a much more comprehensive and compelling explanation than most uninformed opinions",
+        "Major League Baseball is a professional baseball organization, the oldest of the four major professional sports leagues in the United States and Canada, with 30 teams in the National League and American League, and it oversees Minor League Baseball and manages the World Baseball Classic",
+        "Gonzalo G\u00fcell y Morales de los R\u00edos was a Cuban lawyer and career diplomat from 1919 to 1959, born in Havana in 1895 and died in Coral Gables, Florida in 1985",
+        "Major League Baseball is a professional baseball organization with 30 teams in the National League and American League, overseeing Minor League Baseball and managing the World Baseball Classic",
+        "Gonzalo G\u00fcell y Morales de los R\u00edos was a Cuban lawyer and career diplomat from 1919 to 1959"
+      ]
+    },
+    {
+      "cluster_id": "cluster_056",
+      "theme": "Upper Klamath Lake",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 10.390374660491943,
+      "prompt_tokens": 1260,
+      "completion_tokens": 1016,
+      "tps": 97.78280699186033,
+      "propositions": [
+        "Upper Klamath Lake is a large, shallow freshwater lake east of the Cascade Range in south-central Oregon, the largest body of fresh water by surface area in Oregon, approximately 25 miles long and 8 miles wide, extending northwest from Klamath Falls at an average elevation of 4,140 feet",
+        "Balance of Power is a computer strategy game of geopolitics during the Cold War, created by Chris Crawford and published in 1985 on the Macintosh by Mindscape, followed by ports to a variety of platforms over the next two years",
+        "\"Cold Turkey\" is a song written by John Lennon, released as a single in 1969 by the Plastic Ono Band on Apple Records, peaking at number 30 on the Billboard Hot 100 and number 14 on the UK Singles Chart, with its first album appearance on \"Live Peace in Toronto 1969\"",
+        "Upper Klamath Lake is a large, shallow freshwater lake in south-central Oregon, the largest by surface area in the state, extending northwest from Klamath Falls",
+        "Balance of Power is a Cold War geopolitics strategy game created by Chris Crawford and published in 1985 on the Macintosh by Mindscape",
+        "\"Cold Turkey\" is a John Lennon song released as a 1969 single by the Plastic Ono Band on Apple Records, peaking at number 30 on the Billboard Hot 100 and number 14 on the UK Singles Chart"
+      ]
+    },
+    {
+      "cluster_id": "cluster_057",
+      "theme": "The Book of Eli",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 3.0101358890533447,
+      "prompt_tokens": 1269,
+      "completion_tokens": 37,
+      "tps": 12.291803879869391,
+      "propositions": [
+        "The Book of Eli Denzel Washington as Eli Gary Oldman as Carnegie Mila Kunis as Solara Ray Stevenson as Redridge Jennifer Beals as Claudia Evan Jones as Martz Joe Pingue as Hoyt F\u2026 Colonic motility in man: features in normal subjects and in patients with chronic idiopathic constipation",
+        "The human colon is still a relatively unknown viscus, especially concer\u2026 \"I think it started when the lines between tech and artist began blurring",
+        "Once something becomes insanely popular in Silicon Valley it has a way of, eventually, filtering to the \u2026 The Book of Eli Denzel Washington as Eli Gary Oldman as Carnegie Mila Kunis as Solara Ray Stevenson as Redridge Jennifer Beals as Claudia Evan Jones as Martz Joe Pingue as Hoyt F\u2026 Colonic motility in man: features in normal subjects and in patients with chronic idiopathic constipation",
+        "The human colon is still a relatively unknown viscus, especially concer\u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_058",
+      "theme": "Novolaksky District",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 20.858816146850586,
+      "prompt_tokens": 1266,
+      "completion_tokens": 944,
+      "tps": 45.25664320324008,
+      "propositions": [
+        "Novolaksky District is an administrative and municipal district in the Republic of Dagestan, Russia, located in the west of the republic, with its administrative center in the rural locality of Novolakskoye",
+        "Gagosian is a contemporary art gallery owned and directed by Larry Gagosian, exhibiting influential artists of the 20th and 21st centuries, with 16 gallery spaces across multiple cities",
+        "Shiranthi Wickremesinghe Rajapaksa is the wife of the sixth President of Sri Lanka, Mahinda Rajapaksa, and was the First Lady of Sri Lanka from 2005 to 2015, being a professional in child psychology and pre-school education",
+        "Novolaksky District is an administrative and municipal district in the Republic of Dagestan, Russia, located in the west, with its administrative center at Novolakskoye",
+        "Gagosian is a contemporary art gallery owned and directed by Larry Gagosian, with 16 gallery spaces in various cities",
+        "Shiranthi Wickremesinghe Rajapaksa is the wife of Mahinda Rajapaksa, the sixth President of Sri Lanka, and was First Lady from 2005 to 2015"
+      ]
+    },
+    {
+      "cluster_id": "cluster_059",
+      "theme": "Japanorama",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 24.8452250957489,
+      "prompt_tokens": 1183,
+      "completion_tokens": 1038,
+      "tps": 41.7786514712481,
+      "propositions": [
+        "Japanorama is a series of documentaries presented by Jonathan Ross, exploring various facets of popular culture and trends of modern-day Japan",
+        "Brundage (1866 in New York \u2013 1910 in South Norwalk, Connecticut) was a Democratic mayor of South Norwalk, Connecticut from 1909 to 1910, and died of typhoid fever while in office",
+        "In 1939, Rene Dubos reported the discovery of the first naturally derived antibiotic, tyrothricin, a compound of 20% gramicidin and 80% tyrocidine, from B",
+        "brevis, which was one of the first commercially manufactured antibiotics universally and was very effective in treating wounds and ulcers during World War II, but gramicidin and tyrocidine could not be used systemically because of toxicity, and research results were not shared between the Axis and the Allied powers during the war",
+        "Japanorama is a documentary series presented by Jonathan Ross that explores popular culture and trends of modern-day Japan",
+        "Brundage was a Democratic mayor of South Norwalk, Connecticut from 1909 to 1910, who died of typhoid fever while in office",
+        "Rene Dubos reported the discovery of tyrothricin, the first naturally derived antibiotic, in 1939, which was effective in treating wounds and ulcers during World War II but had toxicity issues for systemic use"
+      ]
+    },
+    {
+      "cluster_id": "cluster_060",
+      "theme": "The Valley of Fear (film)",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 1.9307053089141846,
+      "prompt_tokens": 1321,
+      "completion_tokens": 7,
+      "tps": 3.625618041075752,
+      "propositions": [
+        "The Valley of Fear (film) The Valley of Fear is a British silent adventure film of 1916 directed by Alexander Butler and starring Harry Arthur Saintsbury, Daisy Burrell and Booth\u2026 Mary Jo Catlett Mary Jo Catlett (born September 2, 1938) is an American actress",
+        "She is notable for her role as housekeeper Pearl Gallagher on the television sitcom Diff'rent Str\u2026 Apollo In classical Greece, Anaxagoras asserted that a divine reason (mind) gave order to the seeds of the universe, and Plato extended the Greek belief of ideal forms to his met\u2026 The Valley of Fear (film) The Valley of Fear is a British silent adventure film of 1916 directed by Alexander Butler and starring Harry Arthur Saintsbury, Daisy Burrell and Booth\u2026 Mary Jo Catlett Mary Jo Catlett (born September 2, 1938) is an American actress",
+        "She is notable for her role as housekeeper Pearl Gallagher on the television sitcom Diff'rent Str\u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_061",
+      "theme": "The History of the Reformation in Scotland",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 24.96540904045105,
+      "prompt_tokens": 1157,
+      "completion_tokens": 1438,
+      "tps": 57.599697151768346,
+      "propositions": [
+        "The History of the Reformation in Scotland is a five-volume book written by the Scottish reformer, John Knox, between 1559 and 1566",
+        "Dead Horse Bay is a small water body off Barren Island, between the Gerritsen Inlet and Rockaway Inlet in the New York City borough of Brooklyn",
+        "Jenny Sarah Slate (born March 25, 1982) is an American comedian, actress, voice actress and author, best known for her role as Donna Stern in Obvious Child, as well as being the co-creator of the Marcel the Shell with Shoes On short films and children's book series",
+        "The History of the Reformation in Scotland is a five-volume book written by the Scottish reformer, John Knox, between 1559 and 1566",
+        "Dead Horse Bay is a small water body off Barren Island, between the Gerritsen Inlet and Rockaway Inlet in the New York City borough of Brooklyn",
+        "Jenny Sarah Slate is an American comedian, actress, voice actress and author, best known for her role as Donna Stern in Obvious Child, as well as being the co-creator of the Marcel the Shell with Shoes On short films and children's book series"
+      ]
+    },
+    {
+      "cluster_id": "cluster_062",
+      "theme": "Bee Gees",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 22.794766426086426,
+      "prompt_tokens": 1250,
+      "completion_tokens": 867,
+      "tps": 38.035046457321954,
+      "propositions": [
+        "The Bee Gees' younger brother Andy now followed his older siblings into a music career and enjoyed considerable success",
+        "A study was carried out to determine the effect of a low animal protein diet, such as taken by vegetarians, on the risk of urinary stone disease",
+        "Santiago de Cassurr\u00e3es e P\u00f3voa de Cerv\u00e3es is a civil parish in the municipality of Mangualde, Portugal",
+        "The Bee Gees' younger brother Andy now followed his older siblings into a music career and enjoyed considerable success",
+        "A study was carried out to determine the effect of a low animal protein diet, such as taken by vegetarians, on the risk of urinary stone disease",
+        "Santiago de Cassurr\u00e3es e P\u00f3voa de Cerv\u00e3es is a civil parish in the municipality of Mangualde, Portugal"
+      ]
+    },
+    {
+      "cluster_id": "cluster_063",
+      "theme": "The Greatest Story Ever Told",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 22.4831383228302,
+      "prompt_tokens": 1255,
+      "completion_tokens": 975,
+      "tps": 43.365832029327926,
+      "propositions": [
+        "For The Greatest Story Ever Told, Stevens cast Swedish actor Max von Sydow as Jesus, who had never appeared in an English-language film and was best known for his performances in Ingmar Bergman's dramatic films",
+        "Carlos Pr\u00edo Socarr\u00e1s was the President of Cuba from 1948 until he was deposed by a military coup led by Fulgencio Batista on March 10, 1952, three months before new elections were to be held",
+        "Clipper Mills is a census-designated place in Butte County, California, lying at an elevation of 3550 feet (1082 m), with a post office first established in 1861 and moved in 1891, and a population of 142 at the 2010 census",
+        "Stevens cast Max von Sydow as Jesus in The Greatest Story Ever Told because he was unknown to international audiences and free of secular associations",
+        "Carlos Pr\u00edo Socarr\u00e1s served as President of Cuba from 1948 until deposed by a military coup led by Fulgencio Batista in 1952",
+        "Clipper Mills is a census-designated place in Butte County, California, with a post office established in 1861 and a population of 142 in 2010"
+      ]
+    },
+    {
+      "cluster_id": "cluster_064",
+      "theme": "Choptank River",
+      "faithfulness": 0.9222222222222222,
+      "is_invalid": false,
+      "wall_sec": 12.807496786117554,
+      "prompt_tokens": 1352,
+      "completion_tokens": 1082,
+      "tps": 84.48177017485678,
+      "propositions": [
+        "The Choptank River is a major tributary of the Chesapeake Bay and the largest river on the Delmarva Peninsula, rising in Kent County, Delaware, running through Caroline County, Maryland, and forming much of the border between Talbot County on the north and Caroline and Dorchester Counties on the east and south",
+        "Elephant seals spend up to 80% of their lives in the ocean, can hold their breath for more than 100 minutes, dive to depths up to 1,550 m (with a recorded maximum of 2,388 m), and typically dive to 300-600 m for about 20 minutes (females) or 60 minutes (males) to feed on skates, rays, squid, octopuses, eels, small sharks, and large fish",
+        "The Fightin' Side of Me is a song written and performed by American country music artist Merle Haggard, released in December 1969 as the first single and title track from the album The Fightin' Side of Me, and became one of the most famous of his career",
+        "The Choptank River is a major tributary of the Chesapeake Bay and the largest river on the Delmarva Peninsula, rising in Delaware and flowing through Maryland, forming borders between counties",
+        "Elephant seals spend most of their lives in the ocean, dive to great depths for extended periods, and feed on a variety of marine prey",
+        "The Fightin' Side of Me is a song by Merle Haggard, released in 1969 as a single and title track, and became one of his most famous"
+      ]
+    },
+    {
+      "cluster_id": "cluster_065",
+      "theme": "Le\u0219u Ursului mine",
+      "faithfulness": 0.0,
+      "is_invalid": false,
+      "wall_sec": 3.1318130493164062,
+      "prompt_tokens": 1121,
+      "completion_tokens": 129,
+      "tps": 41.19019812761728,
+      "propositions": [
+        "Consolidated section summaries for the source passages",
+        "Consolidated topic holons for the source passages"
+      ]
+    },
+    {
+      "cluster_id": "cluster_066",
+      "theme": "Hawk Run, Pennsylvania",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 4.354066610336304,
+      "prompt_tokens": 1275,
+      "completion_tokens": 144,
+      "tps": 33.072530323296455,
+      "propositions": [
+        "Hawk Run is a census-designated place in Morris Township, Clearfield County, Pennsylvania",
+        "As of the 2010 census, its population was 534"
+      ]
+    },
+    {
+      "cluster_id": "cluster_067",
+      "theme": "Live at Memory Lane",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 20.979512691497803,
+      "prompt_tokens": 1110,
+      "completion_tokens": 810,
+      "tps": 38.609095068650575,
+      "propositions": [
+        "Live at Memory Lane is a live album by jazz cornetist Nat Adderley released on the Atlantic label featuring performances by Adderley's Quintet with Joe Henderson, Joe Zawinul, Victor Gaskin, and Roy McCurdy",
+        "I can't think of anyone who seriously uses LinkedIn as a definitive source to find personnel, maybe some bottom feeding firms in India, but that's about it",
+        "Snooper and Blabber is one of the sequences from \"The Quick Draw McGraw Show\", produced by Hanna-Barbera between 1959 and 1962",
+        "Live at Memory Lane is a live album by jazz cornetist Nat Adderley released on the Atlantic label featuring performances by Adderley's Quintet with Joe Henderson, Joe Zawinul, Victor Gaskin, and Roy McCurdy",
+        "Snooper and Blabber is one of the sequences from \"The Quick Draw McGraw Show\", produced by Hanna-Barbera between 1959 and 1962"
+      ]
+    },
+    {
+      "cluster_id": "cluster_068",
+      "theme": "Camden Head",
+      "faithfulness": 0.9291666666666666,
+      "is_invalid": false,
+      "wall_sec": 27.130241870880127,
+      "prompt_tokens": 1248,
+      "completion_tokens": 1017,
+      "tps": 37.48584346723363,
+      "propositions": [
+        "The Camden Head is one of the oldest pubs in Camden, London, England having been established in 1787 and is also a former music venue and hosts comedy events",
+        "Ciboulette is a French op\u00e9rette in three acts, music by Reynaldo Hahn, libretto by Robert de Flers and Francis de Croisset, first performed at the Th\u00e9\u00e2tre des Vari\u00e9t\u00e9s, in Paris, on 7 April 1923, and is one of the most elegant and refined composition of Hahn, considered as one of the last masterpieces of French operetta",
+        "In 1937 over 100 people died after ingesting \"Elixir Sulfanilamide\" manufactured by S.E",
+        "Massengill Company of Tennessee, which was formulated in diethylene glycol, a highly toxic solvent now widely used as antifreeze, and in response the U.S",
+        "Congress passed the Federal Food, Drug, and Cosmetic Act of 1938 requiring pre-market demonstration of safety and prohibiting false therapeutic claims",
+        "The Camden Head is one of the oldest pubs in Camden, London, established in 1787, and also a former music venue hosting comedy events",
+        "Ciboulette is a French op\u00e9rette in three acts with music by Reynaldo Hahn and libretto by Robert de Flers and Francis de Croisset, first performed in Paris in 1923, considered one of the last masterpieces of French operetta",
+        "The 1937 Elixir Sulfanilamide incident, involving over 100 deaths and the S.E",
+        "Massengill Company, led to the U.S",
+        "Federal Food, Drug, and Cosmetic Act of 1938 requiring pre-market safety demonstration"
+      ]
+    },
+    {
+      "cluster_id": "cluster_069",
+      "theme": "Abdul Rahman bin Faisal",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 9.020157098770142,
+      "prompt_tokens": 1227,
+      "completion_tokens": 756,
+      "tps": 83.81228749364878,
+      "propositions": [
+        "Abdul Rahman bin Faisal Al Saud (1845\u20131928) was the last ruler of the Emirate of Nejd, Second Saudi State, and the father of Ibn Saud",
+        "Hayek's greatest intellectual debt was to Carl Menger, and his discussion in The Road to Serfdom (1944) influenced some later opponents of postmodernism",
+        "Jaluit Airport is a public use airstrip located one nautical mile southeast of the village of Jabor on Jaluit Atoll, Marshall Islands, with identifiers N55 and UIT",
+        "The passages describe Abdul Rahman bin Faisal as the last ruler of the Emirate of Nejd, Hayek's intellectual debt to Carl Menger, and the location of Jaluit Airport"
+      ]
+    },
+    {
+      "cluster_id": "cluster_070",
+      "theme": "Jacqueline Fontyn",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 4.263706922531128,
+      "prompt_tokens": 1246,
+      "completion_tokens": 62,
+      "tps": 14.541337180650778,
+      "propositions": [
+        "Jacqueline Fontyn Jacqueline, Baroness Fontyn (born 27 December 1930) is a contemporary Belgian composer, pianist and music educator",
+        "She was born in Antwerp, and has received th\u2026 Mount Hood The last three eruptions at Mount Hood occurred within the past 1,800 years from vents high on the southwest flank and produced deposits that were distributed primaril\u2026 William Blake's illustrations of Paradise Lost William Blake illustrated \"Paradise Lost\" more often than any other work by John Milton, and illustrated Milton's work more often t\u2026 Jacqueline Fontyn Jacqueline, Baroness Fontyn (born 27 December 1930) is a contemporary Belgian composer, pianist and music educator",
+        "She was born in Antwerp, and has received th\u2026 Mount Hood The last three eruptions at Mount Hood occurred within the past 1,800 years from vents high on the southwest flank and produced deposits that were distributed primaril\u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_071",
+      "theme": "Butler Public Schools",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 7.307612180709839,
+      "prompt_tokens": 1270,
+      "completion_tokens": 953,
+      "tps": 130.41195624963072,
+      "propositions": [
+        "Butler Public Schools is classified by the New Jersey Department of Education as being in District Factor Group \"DE\", the fifth-highest of eight groups, which organize districts statewide to allow comparison by common socioeconomic characteristics",
+        "``Unchained Melody'' is a 1955 song with music by Alex North and lyrics by Hy Zaret, used as a theme for the prison film Unchained, and has become a standard with over 1,500 recordings by more than 670 artists",
+        "In systems analysis, a one-to-many relationship is a type of cardinality referring to the relationship between two entities A and B in which an element of A may be linked to many elements of B, but a member of B is linked to only one element of A",
+        "Butler Public Schools is classified by the New Jersey Department of Education in District Factor Group \"DE\", the fifth-highest of eight groups",
+        "``Unchained Melody'' is a 1955 song with music by Alex North and lyrics by Hy Zaret, used as a theme for the prison film Unchained, and has become a standard with over 1,500 recordings",
+        "In systems analysis, a one-to-many relationship is a type of cardinality referring to the relationship between two entities A and B in which an element of A may be linked to many elements of B, but a member of B is linked to only one element of A"
+      ]
+    },
+    {
+      "cluster_id": "cluster_072",
+      "theme": "The Curious Case of Benjamin Button (film)",
+      "faithfulness": 0.0,
+      "is_invalid": false,
+      "wall_sec": 3.2342865467071533,
+      "prompt_tokens": 1276,
+      "completion_tokens": 46,
+      "tps": 14.222611180457365,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_073",
+      "theme": "Colchester Racing Developments",
+      "faithfulness": 0.0,
+      "is_invalid": true,
+      "wall_sec": 2.257044792175293,
+      "prompt_tokens": 1344,
+      "completion_tokens": 15,
+      "tps": 6.6458583595690675,
+      "propositions": [
+        "Colchester Racing Developments Colchester Racing Developments produced Merlyn racing cars from 1960 to 1979",
+        "The company was founded by Clive Maskrey, Selwyn Hayward and continue\u2026 Reffye 85 mm cannon The Reffye 85 mm cannon (French: \"Canon de campagne de 7 de Reffye mod\u00e8le 1870\") was a French artillery piece of the 19th century, developed by the French art\u2026 Bernard Newman (designer) Bernard Newman started working as costume designer in the film industry from 1933 on, working mainly for RKO Pictures for the next three years",
+        "Newman i\u2026 Colchester Racing Developments Colchester Racing Developments produced Merlyn racing cars from 1960 to 1979",
+        "The company was founded by Clive Maskrey, Selwyn Hayward and continue\u2026 Reffye 85 mm cannon The Reffye 85 mm cannon (French: \"Canon de campagne de 7 de Reffye mod\u00e8le 1870\") was a French artillery piece of the 19th century, developed by the French art\u2026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_074",
+      "theme": "Kim Deitch",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 14.226288080215454,
+      "prompt_tokens": 1092,
+      "completion_tokens": 572,
+      "tps": 40.207255524052144,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_075",
+      "theme": "California Basic Educational Skills Test",
+      "faithfulness": 0.9117647058823529,
+      "is_invalid": false,
+      "wall_sec": 8.017348289489746,
+      "prompt_tokens": 1218,
+      "completion_tokens": 978,
+      "tps": 121.98547009390852,
+      "propositions": [
+        "One must earn a total of 123 points to get a passing status across all three sections, but you can get away with a score as low as 37 in one or two sections, and make up the rest of remaining points elsewhere",
+        "Princess Sirindhorn Stadium is a sports stadium in Si Racha, Chonburi Province, Thailand, named after Princess Sirindhorn, used mostly for football matches, formerly home to Sriracha FC and Chonburi FC, holds 8,000 people, located near the city centre on the ground of Assumption College Sriracha, has a running track and floodlights",
+        "You buy something on margin, it goes down, you get a margin call, and the value of your account has to be X% of the asset you control, regardless of the ETF being bull, bear, triple long/short",
+        "The California Basic Educational Skills Test requires a total of 123 points to pass across all three sections, with a minimum score of 37 in one or two sections and the remaining points made up elsewhere",
+        "Princess Sirindhorn Stadium is a sports stadium in Si Racha, Thailand, named after Princess Sirindhorn, used for football, formerly home to Sriracha FC and Chonburi FC, holds 8,000 people, and is located on the ground of Assumption College Sriracha",
+        "A margin call occurs when an asset bought on margin goes down, requiring the account value to be a certain percentage of the controlled asset, regardless of the ETF type"
+      ]
+    },
+    {
+      "cluster_id": "cluster_076",
+      "theme": "WHOS",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 4.18425989151001,
+      "prompt_tokens": 1281,
+      "completion_tokens": 167,
+      "tps": 39.91147881106718,
+      "propositions": [
+        "Bickmore is an unincorporated community and coal town in Clay County, West Virginia, with a post office and ZIP code 25019"
+      ]
+    },
+    {
+      "cluster_id": "cluster_077",
+      "theme": "Frederick Baltimore Calvert",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 7.655805587768555,
+      "prompt_tokens": 1197,
+      "completion_tokens": 1035,
+      "tps": 135.1915207530332,
+      "propositions": [
+        "Frederick Baltimore Calvert (1793 \u2013 21 April 1877) was an English actor and lecturer on elocution, the son of Charles Calvert, steward of the Duke of Norfolk",
+        "Stanly County Schools (abbreviated SCS) is a local education agency headquartered in Albemarle, North Carolina and is the public school system for Stanly County, with over 1,350 employees and serving more than 8,700 students in grades PK \u2013 12",
+        "Kinfolk is the debut and only album by American rap duo Ali & Gipp, released on August 14, 2007, through Derrty Entertainment and Universal Records, with singles 'Go' Head', 'N da Paint', 'Work Dat, Twerk Dat', and 'Almost Made Ya'",
+        "Frederick Baltimore Calvert was an English actor and lecturer on elocution, son of Charles Calvert, steward of the Duke of Norfolk",
+        "Stanly County Schools is a local education agency headquartered in Albemarle, North Carolina, serving as the public school system for Stanly County with over 1,350 employees and more than 8,700 students",
+        "Kinfolk is the debut and only album by American rap duo Ali & Gipp, released on August 14, 2007, through Derrty Entertainment and Universal Records"
+      ]
+    },
+    {
+      "cluster_id": "cluster_078",
+      "theme": "Marquette\u2013Joliet Bridge",
+      "faithfulness": 0.8846153846153846,
+      "is_invalid": false,
+      "wall_sec": 15.771281480789185,
+      "prompt_tokens": 1238,
+      "completion_tokens": 881,
+      "tps": 55.86102822862783,
+      "propositions": [
+        "The Marquette\u2013Joliet Bridge is a bridge crossing the Mississippi River, connecting Marquette, Iowa and Prairie du Chien, Wisconsin, and local residents refer to it as the Prairie Bridge or the Marquette Bridge",
+        "Havola Escarpment is an isolated, snow-covered escarpment about northwest of the Thiel Mountains in Antarctica, arc shaped, 30 nautical miles long, facing south, observed and mapped by the United States Antarctic Research Program Horlick Mountains Traverse party, 1958\u201359, and named for Major Antero Havola",
+        "Geographical features are man-made or naturally-created features of the Earth, with natural geographical features consisting of landforms and ecosystems, and artificial geographical features including human settlements or other engineered forms",
+        "The passages describe the Marquette\u2013Joliet Bridge, Havola Escarpment, and the general concept of geographical features, all being geographical features of the Earth"
+      ]
+    },
+    {
+      "cluster_id": "cluster_079",
+      "theme": "Holding Out for a Hero",
+      "faithfulness": 0.9619565217391304,
+      "is_invalid": false,
+      "wall_sec": 34.01421856880188,
+      "prompt_tokens": 1275,
+      "completion_tokens": 1066,
+      "tps": 31.339835070553228,
+      "propositions": [
+        "Japanese singer Miki Asakura recorded the song in Japanese as \u30d2\u30fc\u30ed\u30fc HOLDING OUT FOR A HERO in 1984, Elizabeth Daily recorded it as the series theme song to Cover Up, Jennifer Saunders recorded it for Shrek 2, Frou Frou recorded an alternatively tuned version for Shrek 2, Emery did a cover for Punk Goes 80's, and Ella Mae Bowen recorded a country version for the 2011 Footloose remake",
+        "Berry Spur is a mostly ice-covered spur in Antarctica, located between McDermott Glacier and Comberiate Glacier on the west side of the Royal Society Range, Victoria Land, named by the Advisory Committee on Antarctic Names after Russell D",
+        "Berry, a United States Geological Survey cartographer and member of the satellite surveying team at South Pole Station, winter party 1983",
+        "When William II died on 2 August 1100, Robert was on his return journey from the Crusade and was about to marry a wealthy young bride to raise funds to buy back his duchy, and as a result of Robert's absence, his brother Henry was able to seize the crown of England for himself",
+        "Multiple artists recorded versions of the song Holding Out for a Hero, including Miki Asakura, Elizabeth Daily, Jennifer Saunders, Frou Frou, Emery, and Ella Mae Bowen, for various media and compilations",
+        "Berry Spur is an ice-covered spur in Antarctica named after Russell D",
+        "Berry, a cartographer and satellite surveying team member at South Pole Station",
+        "Robert's absence from England after William II's death allowed his brother Henry to seize the crown"
+      ]
+    },
+    {
+      "cluster_id": "cluster_080",
+      "theme": "Rafael Barbosa do Nascimento",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 8.0751051902771,
+      "prompt_tokens": 1237,
+      "completion_tokens": 946,
+      "tps": 117.15017671089159,
+      "propositions": [
+        "Rafael Barbosa do Nascimento (born 10 August 1983) is a Brazilian footballer who plays for Hajer Club in the Saudi Professional League",
+        "Doctor Who (series 10) is a series with 11 stories and 12 episodes, starring Peter Capaldi, Pearl Mackie, and Matt Lucas, originally released on BBC One from 15 April 2017 to 1 July 2017",
+        "ZIP Codes are a system of postal codes used by the United States Postal Service (USPS) since 1963, with the basic format consisting of five digits and an extended 'ZIP + 4' code introduced in 1983",
+        "Rafael Barbosa do Nascimento is a Brazilian footballer who plays for Hajer Club in the Saudi Professional League",
+        "Doctor Who (series 10) consists of 11 stories and 12 episodes, starring Peter Capaldi, Pearl Mackie, and Matt Lucas, and aired on BBC One from 15 April 2017 to 1 July 2017",
+        "ZIP Codes are a postal code system used by the United States Postal Service since 1963, with a five-digit basic format and an extended 'ZIP + 4' code introduced in 1983"
+      ]
+    },
+    {
+      "cluster_id": "cluster_081",
+      "theme": "Kunigunde of Poland",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 20.125996828079224,
+      "prompt_tokens": 1179,
+      "completion_tokens": 735,
+      "tps": 36.51993023145808,
+      "propositions": [
+        "Kunigunde of Poland (c",
+        "1298 \u2013 9 April 1331) was a daughter of W\u0142adys\u0142aw I the Elbow-high and his wife Jadwiga of Greater Poland, and a member of the House of Piast",
+        "Near the Rainbow's End is a 1930 American western directed by J",
+        "McGowan for Tiffany Productions, starring Bob Steele, Lafe McKee and Al Ferguson, released in the United States on 10 June 1930",
+        "Theodore Matthew Michael Kuhn, Jr",
+        "(born September 21, 1932), known as Mickey Kuhn, is an American former child actor of the 1930s, 1940s and 1950s, who came to prominence in 1939 playing Beau Wilkes in Gone with the Wind",
+        "The passages describe Kunigunde of Poland, a member of the House of Piast; the 1930 American western Near the Rainbow's End; and Mickey Kuhn, an American former child actor"
+      ]
+    },
+    {
+      "cluster_id": "cluster_082",
+      "theme": "BBC Television",
+      "faithfulness": 0.0,
+      "is_invalid": false,
+      "wall_sec": 5.434393882751465,
+      "prompt_tokens": 1256,
+      "completion_tokens": 108,
+      "tps": 19.87342145787176,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_083",
+      "theme": "National Security Agency in popular culture",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 7.737892150878906,
+      "prompt_tokens": 1139,
+      "completion_tokens": 802,
+      "tps": 103.64579711916831,
+      "propositions": [
+        "The National Security Agency (NSA), the main signals intelligence organization of the United States, has been featured in numerous works of spy fiction over the past decades, with its depictions augmenting along with the growing public awareness of this highly-secretive organization",
+        "Beckwith is a township in eastern Ontario, Canada, located in Lanark County on the Mississippi River and within Canada's National Capital Region",
+        "Danger \u2013 Love at Work is a 1937 American screwball comedy film directed by Otto Preminger, with a screenplay by James Edward Grant and Ben Markson focusing on an attorney's frustrating efforts to deal with a wildly eccentric family",
+        "The National Security Agency (NSA), the main signals intelligence organization of the United States, has been featured in numerous works of spy fiction, with its depictions augmenting along with growing public awareness of this highly-secretive organization",
+        "Beckwith is a township in eastern Ontario, Canada, located in Lanark County on the Mississippi River and within Canada's National Capital Region",
+        "Danger \u2013 Love at Work is a 1937 American screwball comedy film directed by Otto Preminger, with a screenplay by James Edward Grant and Ben Markson focusing on an attorney's frustrating efforts to deal with a wildly eccentric family"
+      ]
+    },
+    {
+      "cluster_id": "cluster_084",
+      "theme": "",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 10.557835340499878,
+      "prompt_tokens": 1285,
+      "completion_tokens": 858,
+      "tps": 81.26665858376387,
+      "propositions": [
+        "Casual dining restaurants have a business model that is increasingly obsolete, and rather than trying to adapt to changing market conditions, they're just blaming those dang kids",
+        "Titanic won a record - tying eleven awards including Best Director for James Cameron and Best Picture, and the telecast garnered more than 57 million viewers in the United States, making it the most watched Oscars broadcast in history",
+        "The Rockland Boulders are an American independent professional baseball team based in Pomona, New York in Rockland County, and they are a member of the Canadian American Association of Professional Baseball",
+        "Casual dining restaurants have an increasingly obsolete business model and are blaming kids instead of adapting to market conditions",
+        "Titanic won a record-tying eleven awards at the 70th Academy Awards, and the telecast was the most watched Oscars broadcast in history",
+        "The Rockland Boulders are an American independent professional baseball team based in Pomona, New York, and a member of the Can-Am League"
+      ]
+    },
+    {
+      "cluster_id": "cluster_085",
+      "theme": "Jack McFarland",
+      "faithfulness": 0.8947368421052632,
+      "is_invalid": false,
+      "wall_sec": 11.516908168792725,
+      "prompt_tokens": 1310,
+      "completion_tokens": 1194,
+      "tps": 103.67365811211141,
+      "propositions": [
+        "In season three, Jack undertakes a search for his biological father, which ends when he discovers that his father died several years back, but he meets Elliot, his own biological son, whom he fathered by depositing at a sperm bank as a teenager so that he could buy a leather jacket, and later discovers that the boy's mother Bonnie is a lesbian who was a nurse at the sperm bank who stole Jack's deposit and was inseminated with it",
+        "The conventional wisdom is that there has been little inflation which seems weird to me because it was only about ten years ago that a typical coke machine took coins and charged about 50 cents, a loaf of bread could be had for 35 cents at Aldi and gas was about $1.50 per gallon, and I'm 43 and the cost for just about everything has about tripled since I was a kid, with minimum wage being $3.15 when I was a teenager and now it's $7.25, and the other day I got a bottle of Pepsi at Dunkin Donuts and the cashier didn't even blink when she told me it was $2.08",
+        "The Sch\u00fcrmann-Bau is an office building in Bonn, named after its architect Joachim Sch\u00fcrmann, which houses the headquarters of the Deutsche Welle, after being originally planned for the members of parliament, and the construction site was heavily damaged in spring 1993 by a flood of the Rhine, with no flood control installed during the construction period, and only in 1997 the damaged building was renovated with estimated costs of 700 million Euros",
+        "Jack McFarland discovers his biological father died, meets his biological son Elliot, and learns that Elliot's mother Bonnie is a lesbian who stole his sperm deposit",
+        "The passage discusses perceived inflation, noting that prices for items like coke, bread, gas, and Pepsi have increased significantly over time, and minimum wage has risen from $3.15 to $7.25",
+        "The Sch\u00fcrmann-Bau is an office building in Bonn, named after architect Joachim Sch\u00fcrmann, housing Deutsche Welle, damaged by a Rhine flood in 1993, renovated in 1997 at an estimated cost of 700 million Euros"
+      ]
+    },
+    {
+      "cluster_id": "cluster_086",
+      "theme": "Above Us the Waves",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 17.98130965232849,
+      "prompt_tokens": 1232,
+      "completion_tokens": 945,
+      "tps": 52.55457017712985,
+      "propositions": [
+        "Above Us the Waves is a 1955 British war film directed by Ralph Thomas, about human torpedo and midget submarine attacks on the German battleship \"Tirpitz\", based on two true-life attacks using Chariot manned torpedoes in Operation Title in 1942 and X-Craft midget submarines in Operation Source in 1943",
+        "Jean-Claude Pirotte (20 October 1939 \u2013 24 May 2014) was a Belgian writer, poet and painter, a French language writer whose 2006 novel \"Une adolescence en Gueldre\" won the Prix des Deux Magots",
+        "San Nicolas is one of the sixteen districts in the city of Manila in the Philippines, located at the west central part of the city on the northern bank of Pasig River, bounded by Binondo to the east and Tondo to the north and west, and has kept its 19th-century ancestral houses",
+        "Above Us the Waves is a 1955 British war film directed by Ralph Thomas about attacks on the Tirpitz, based on true-life operations",
+        "Jean-Claude Pirotte was a Belgian writer, poet and painter who won the Prix des Deux Magots for his 2006 novel",
+        "San Nicolas is a district in Manila, Philippines, with 19th-century ancestral houses, bounded by Binondo and Tondo"
+      ]
+    },
+    {
+      "cluster_id": "cluster_087",
+      "theme": "Leo Harris",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 13.351423740386963,
+      "prompt_tokens": 1285,
+      "completion_tokens": 954,
+      "tps": 71.45305388774594,
+      "propositions": [
+        "Harris was an American athlete, coach, and athletic director who played college football at Stanford University, coached at Fresno State College, and was the first athletic director for the University of Oregon, known for a handshake deal with Walt Disney permitting use of Donald Duck's likeness for the Oregon Duck mascot",
+        "The Julius Edgar Lilienfeld Prize of the American Physical Society, to remember Julius Edgar Lilienfeld, has been awarded annually since 1989, except 2002, to recognize outstanding contributions to physics",
+        "The album cover displays a surreal sculpture designed by Robert Brownjohn, featuring a record being played by a tone-arm, a record-changer spindle with items including a film canister, clock dial, pizza, tyre, and cake with figurines, prepared by Delia Smith, inspired by the working title Automatic Changer",
+        "Harris, as athletic director, made a handshake deal with Walt Disney to use Donald Duck's likeness for the Oregon Duck mascot",
+        "The Julius Edgar Lilienfeld Prize of the American Physical Society has been awarded annually since 1989, except 2002, to recognize outstanding contributions to physics",
+        "The Let It Bleed album cover features a surreal sculpture by Robert Brownjohn, with cake prepared by Delia Smith, inspired by the working title Automatic Changer"
+      ]
+    },
+    {
+      "cluster_id": "cluster_088",
+      "theme": "Reserve Officers' Training Corps (Philippines)",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 11.939762353897095,
+      "prompt_tokens": 1278,
+      "completion_tokens": 898,
+      "tps": 75.21087718357276,
+      "propositions": [
+        "ROTC in the Philippines began in 1912 when the Philippine Constabulary commenced with military instruction at the University of the Philippines, and the first official ROTC unit was established on 3 July 1922",
+        "Judith Klusman is a former member of the Wisconsin State Assembly 1989-2000 and a current County Commissioner for Rowan County in North Carolina",
+        "Patrick Modiano is a French novelist and recipient of the 2014 Nobel Prize in Literature, with works translated into more than 30 languages",
+        "ROTC in the Philippines began in 1912 with military instruction at the University of the Philippines, leading to the establishment of the first official ROTC unit on 3 July 1922",
+        "Judith Klusman served in the Wisconsin State Assembly from 1989 to 2000 and currently serves as County Commissioner for Rowan County in North Carolina",
+        "Patrick Modiano is a French novelist who won the 2014 Nobel Prize in Literature and has had works translated into more than 30 languages"
+      ]
+    },
+    {
+      "cluster_id": "cluster_089",
+      "theme": "History of rugby union matches between Italy and Wales",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 11.506620645523071,
+      "prompt_tokens": 1222,
+      "completion_tokens": 882,
+      "tps": 76.6515232552803,
+      "propositions": [
+        "Italy and Wales have played each other at rugby union since 1994, with a total of 27 matches played, Wales winning 24, Italy winning two and one drawn match",
+        "Rex Everett Chapman, born October 5, 1967, is a retired American professional basketball player who played for four NBA teams and later served as vice president of player personnel with the Denver Nuggets",
+        "In April 2010, Shell announced intention to divest from downstream business of African countries except South Africa and Egypt, and in August 2014 disclosed finalizing sale of interests in four Nigerian oil fields",
+        "Italy and Wales have played each other at rugby union since 1994, with Wales winning 24 of 27 matches",
+        "Rex Chapman is a retired American professional basketball player who played for four NBA teams and later served as vice president of player personnel with the Denver Nuggets",
+        "Shell announced divestment from downstream business in African countries except South Africa and Egypt, and later finalized sale of interests in four Nigerian oil fields"
+      ]
+    },
+    {
+      "cluster_id": "cluster_090",
+      "theme": "Staten Island Cakes",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 9.35590672492981,
+      "prompt_tokens": 1121,
+      "completion_tokens": 777,
+      "tps": 83.0491392063156,
+      "propositions": [
+        "Staten Island Cakes is an American food reality-television series airing on WE tv",
+        "Katharine Brown is a Scottish model and beauty pageant titleholder who was crowned Miss Scotland 2009 and Miss United Kingdom 2010",
+        "Death Studies is a peer-reviewed academic journal published ten times a year by Routledge and sponsored by the Association for Death Education and Counseling - The Thanatology Association"
+      ]
+    },
+    {
+      "cluster_id": "cluster_091",
+      "theme": "",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 13.48341989517212,
+      "prompt_tokens": 1155,
+      "completion_tokens": 969,
+      "tps": 71.86604048035029,
+      "propositions": [
+        "The passage discusses Facebook's IPO overpricing and suggests that Ebersman did a great job of getting Facebook the maximum amount of capital while giving up the minimum amount of equity",
+        "Business @ the Speed of Thought is a book written by Bill Gates and Collins Hemingway in 1999 that discusses how business and technology are integrated and how digital infrastructures and information networks can help get an edge on the competition",
+        "The 2017 U.S",
+        "News & World Report's Best Law School Rankings ranked the FIU College of Law at 100 in the United States, an increase of more than 51 spots since 2009",
+        "The passage discusses Facebook's IPO overpricing and suggests that Ebersman did a great job of getting Facebook the maximum amount of capital while giving up the minimum amount of equity",
+        "Business @ the Speed of Thought is a book written by Bill Gates and Collins Hemingway in 1999 that discusses how business and technology are integrated and how digital infrastructures and information networks can help get an edge on the competition",
+        "The 2017 U.S",
+        "News & World Report's Best Law School Rankings ranked the FIU College of Law at 100 in the United States, an increase of more than 51 spots since 2009"
+      ]
+    },
+    {
+      "cluster_id": "cluster_092",
+      "theme": "Carmelo G\u00f3mez",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 10.140851020812988,
+      "prompt_tokens": 1194,
+      "completion_tokens": 817,
+      "tps": 80.56523050414573,
+      "propositions": [
+        "Carmelo G\u00f3mez Celada, born 2 January 1962 in Sahag\u00fan, Le\u00f3n, is a Spanish actor who moved to Salamanca for acting studies and received two Goya Awards for best supporting actor in El m\u00e9todo and best leading actor in D\u00edas contados",
+        "The Board of Governors states that having a sexual relationship with a poodle means 'We have screwed the pooch', but in the long run efforts will bear fruit in the creation of an EconoDoodle",
+        "Bethania is a suburb of Logan City, Queensland, Australia, situated on the main Beenleigh railway line and south of the Logan River, with lower lying areas near the river occasionally suffering floods",
+        "Carmelo G\u00f3mez Celada, a Spanish actor born in Sahag\u00fan, received two Goya Awards for his roles in El m\u00e9todo and D\u00edas contados",
+        "Bethania is a suburb of Logan City, Queensland, Australia, located on the Beenleigh railway line and south of the Logan River, with flood-prone lower areas"
+      ]
+    },
+    {
+      "cluster_id": "cluster_093",
+      "theme": "Chasing the Sun (Chris Poland album)",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 22.02039074897766,
+      "prompt_tokens": 1201,
+      "completion_tokens": 1222,
+      "tps": 55.49401978966852,
+      "propositions": [
+        "Chasing the Sun is the second studio album by former Megadeth guitarist Chris Poland, released in 2000 through Grooveyard Records (United States) and Mascot Records (Europe), and reissued on March 16, 2004 through Rotten Records",
+        "Ahmet Zappa was born in Los Angeles, California, the third of four children born to musician Frank Zappa and businesswoman Gail Zappa (n\u00e9e Sloatman)",
+        "The United Nations member states are the 193 sovereign states that are members of the United Nations (UN) and have equal representation in the UN General Assembly",
+        "Chasing the Sun is the second studio album by former Megadeth guitarist Chris Poland, released in 2000 through Grooveyard Records (United States) and Mascot Records (Europe), and reissued on March 16, 2004 through Rotten Records",
+        "Ahmet Zappa was born in Los Angeles, California, the third of four children born to musician Frank Zappa and businesswoman Gail Zappa (n\u00e9e Sloatman)",
+        "The United Nations member states are the 193 sovereign states that are members of the United Nations (UN) and have equal representation in the UN General Assembly"
+      ]
+    },
+    {
+      "cluster_id": "cluster_094",
+      "theme": "Swimming at the Commonwealth Games",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 9.895040512084961,
+      "prompt_tokens": 1296,
+      "completion_tokens": 817,
+      "tps": 82.56661496253459,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_095",
+      "theme": "",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 10.115320444107056,
+      "prompt_tokens": 1253,
+      "completion_tokens": 781,
+      "tps": 77.20961528757024,
+      "propositions": [
+        "If some one ever offers High returns and low risk they are either extremely stupid or scamming you",
+        "Tiberius Coruncanius (died 241 BC) was a consul of the Roman Republic in 280 BC",
+        "Histoires Naturelles is Nolwenn Leroy's second album"
+      ]
+    },
+    {
+      "cluster_id": "cluster_096",
+      "theme": "",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 15.720672369003296,
+      "prompt_tokens": 1118,
+      "completion_tokens": 1202,
+      "tps": 76.45983401893184,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_097",
+      "theme": "List of Texas hurricanes (1980\u2013present)",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 8.495674848556519,
+      "prompt_tokens": 1114,
+      "completion_tokens": 756,
+      "tps": 88.98645645889452,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_098",
+      "theme": "Antoine Coypel",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 7.626320123672485,
+      "prompt_tokens": 1218,
+      "completion_tokens": 646,
+      "tps": 84.70664613130822,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_099",
+      "theme": "Djenar Maesa Ayu",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 8.308526277542114,
+      "prompt_tokens": 1237,
+      "completion_tokens": 734,
+      "tps": 88.34298351850877,
+      "propositions": []
+    },
+    {
+      "cluster_id": "cluster_100",
+      "theme": "1924 United States presidential election",
+      "faithfulness": 1.0,
+      "is_invalid": false,
+      "wall_sec": 15.105770349502563,
+      "prompt_tokens": 1165,
+      "completion_tokens": 982,
+      "tps": 65.0082701695738,
+      "propositions": []
+    }
+  ]
+}

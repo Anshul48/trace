@@ -1,7 +1,6 @@
 # Evaluation Protocol
 
-> **Status:** Draft broad-stroke protocol. It defines the proof boundary to be
-> implemented and reviewed; it is not a completed benchmark result.
+> **Status:** Ratified evaluation protocol under `DEC-CAP-001` (`TRACE-CAP-001`). Governed by deconfounded capability scorecards.
 
 ## 1. Purpose
 
@@ -18,7 +17,7 @@ quality claim.
 | Public benchmark | Compare reproducibly on real downloadable data. | External retrieval evidence. |
 | Held-out downstream | Test realistic Reflex/Entorhinal task classes. | Product-fit evidence. |
 | Recovery/fault | Test crash, replay, invalid build, and rollback. | Durability evidence. |
-| Scale/load | Measure resource, latency, and cost at 100K then 1M. | Operational evidence. |
+| Cognitive consolidation | Measure proposition support, coherence, and grounding. | Semantic organization evidence. |
 
 ## 3. Dataset requirements
 
@@ -54,18 +53,36 @@ The future release runner should:
 - query-class breakdown,
 - raw failure and exclusion counts.
 
-## 6. Gate structure
+## 6. Gate structure & multi-resolution scorecards (`DEC-CAP-001`)
 
-The five release-quality gates are:
+Under `DEC-CAP-001` (`CAP-D008`, `CAP-D016`), topological proxies (e.g. 0% orphan
+rate) are necessary assignment hygiene but do not certify semantic organization.
+Evaluation requires separate scorecards:
 
-1. durable headless memory,
-2. self-organization correctness,
-3. accurate retrieval,
-4. bounded retrieval latency and resources,
-5. real-corpus scale/recovery proof.
+1. **Structural Coverage Scorecard:**
+   - Orphan atom rate $= 0.0\%$.
+   - Routing purity $\ge 85.0\%$.
+   - Duplicate uncoordinated leaf assignment $= 0.0\%$.
 
-The initial scale gate is 100K real source atoms. A 1M pilot is planned only
-after the 100K evidence has been reviewed.
+2. **Semantic Organization & Condensation Scorecard:**
+   - Atomic proposition support / faithfulness $\ge 95.0\%$ independently verified
+     by detached entailment against raw source byte spans.
+   - Semantic coherence score $\ge 0.85$.
+   - Rebuild parity from Spine event log.
+
+3. **Direct IR & Domain Retrieval Scorecard (Dense + BM25 RRF):**
+   - Direct lookup (`beir-scifact`): $\text{nDCG@10} \ge 0.6500$, $\text{Recall@20} \ge 0.8000$, $\text{P95} \le 15\text{ ms}$.
+   - Domain semantic (`beir-nfcorpus`): $\text{nDCG@10} \ge 0.3200$, $\text{Recall@20} \ge 0.2000$, $\text{P95} \le 20\text{ ms}$.
+   - Semantic QA (`beir-fiqa`): $\text{nDCG@10} \ge 0.3800$, $\text{Recall@20} \ge 0.5000$, $\text{P95} \le 25\text{ ms}$.
+   - Evaluated without LLM inference, utilizing restored `all-MiniLM-L6-v2` dense embeddings and un-truncated postings.
+
+4. **Multi-Hop Reasoning Scorecard:**
+   - Compositional queries (`musique`, `multihop-rag`): complete coverage@20 $\ge 0.7500$, $\text{P95} \le 50\text{ ms}$.
+   - Graph spreading activation (PPR): degree cap $\le 50$, walk depth $\le 15$, latency $\le 10\text{ ms}$.
+
+5. **Synthesis Grounding & Abstention Scorecard:**
+   - Abstention accuracy $\ge 95.0\%$ on unanswerable/null queries.
+   - Zero hallucination rate: 100% of asserted propositions resolve to verified UTF-8 byte spans.
 
 ## 7. Evaluation hierarchy and claim boundary
 

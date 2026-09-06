@@ -1,0 +1,14 @@
+{
+  "task_id": "CAP-MOD01-CLOUD-10K",
+  "model": "deepseek-ai/DeepSeek-V4-Flash-0731",
+  "completed_clusters": 2000,
+  "total_clusters": 2000,
+  "overall_faithfulness_point": 0.7989,
+  "grounding_given_valid_point": 0.955,
+  "validity_rate": 0.8365,
+  "tokens_per_sec": 55.2,
+  "p95_latency_ms": 31296.7,
+  "run_spend_usd": 2.9613,
+  "cumulative_spend_usd": 4.2794,
+  "updated_at": "2026-09-06T02:18:01.363628+00:00"
+}

@@ -1,0 +1,64 @@
+{
+  "target_node": "CAP-MOD01-DEEPSEEK-FLASH",
+  "timestamp_utc": "2026-09-05T17:55:08.477757+00:00",
+  "model_id": "deepseek-ai/DeepSeek-V4-Flash-0731",
+  "provider": "Sail Research",
+  "manifest_sha256": "52a6e6508714110e792c3428982b3f4f0c3589e8bb0ce75bcf4f924ad6bc1476",
+  "clusters_evaluated": 286,
+  "valid_cluster_count": 237,
+  "faithfulness_point": 0.7918,
+  "faithfulness_ci_95": [
+    0.7465,
+    0.8356
+  ],
+  "validity_rate": 0.8287,
+  "grounding_given_valid_point": 0.9555,
+  "grounding_given_valid_ci_95": [
+    0.9342,
+    0.9729
+  ],
+  "clears_95_floor": false,
+  "total_prompt_tokens": 444216,
+  "total_completion_tokens": 257301,
+  "total_spend_usd": 0.403,
+  "prior_spend_usd": 0.9151,
+  "cumulative_total_spend_usd": 1.3181,
+  "spend_cap_usd": 25.0,
+  "concurrency": 1,
+  "max_tokens_cap": 4096,
+  "finish_reasons_summary": {
+    "length": 5,
+    "stop": 281
+  },
+  "retry_summary": {
+    "attempts_1_count": 199,
+    "attempts_2_count": 87,
+    "r1a_retries": 6,
+    "r1b_retries": 81,
+    "r1c_retries": 0,
+    "r1_rescued_count": 38
+  },
+  "prior_class_rescue_summary": {
+    "R1a": {
+      "total_in_manifest": 34,
+      "rescued_count": 34,
+      "rescue_rate": 1.0
+    },
+    "R1b": {
+      "total_in_manifest": 136,
+      "rescued_count": 106,
+      "rescue_rate": 0.7794
+    },
+    "R1c": {
+      "total_in_manifest": 116,
+      "rescued_count": 97,
+      "rescue_rate": 0.8362
+    },
+    "overall": {
+      "total_in_manifest": 286,
+      "rescued_count": 237,
+      "rescue_rate": 0.8287
+    }
+  },
+  "verdict": "FAIL"
+}

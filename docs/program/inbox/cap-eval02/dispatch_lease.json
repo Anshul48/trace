@@ -1,0 +1,31 @@
+{
+  "lease_id": "lease-cap-eval02-20260903T130500Z",
+  "node_id": "CAP-EVAL02",
+  "packet_id": "WP-CAP-EVAL02",
+  "assigned_role": "EVAL-SPEC",
+  "base_branch": "cap-eval01-protocol",
+  "base_commit": "8f6efe2",
+  "target_branch": "cap-eval02-datasets",
+  "worktree_path": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-eval02",
+  "posix_worktree_path": "/mnt/c/Users/anshu/AppData/Local/trace-worktrees/trace-eval02",
+  "exclusive_file_leases": [
+    "benchmarks/manifests/",
+    "benchmarks/data/",
+    "tests/v2/test_eval_datasets.py",
+    "docs/program/inbox/cap-eval02/handoff.md"
+  ],
+  "forbidden_boundaries": [
+    "src/trace/ (production runtime code)",
+    "docs/program/06_DECISION_LOG.md"
+  ],
+  "issued_by": "Program Coordinator (COORD)",
+  "issued_at_utc": "2026-09-03T13:05:00Z",
+  "lease_duration_sec": 7200,
+  "status": "ACTIVE_DISPATCHED",
+  "acceptance_criteria": [
+    "Stage and pin frozen splits for SciFact (1,000 queries), NFCorpus (323), FiQA (648), and MuSiQue (500)",
+    "Generate immutable cryptographic manifest benchmarks/manifests/beir_musique_frozen_v1.json with SHA-256 digests",
+    "Verification script and unit tests asserting manifest reproducibility and hash integrity",
+    "pytest tests/v2/test_eval_datasets.py -v (100% pass) or python benchmarks/verify_dataset_checksums.py --manifest benchmarks/manifests/beir_musique_frozen_v1.json"
+  ]
+}

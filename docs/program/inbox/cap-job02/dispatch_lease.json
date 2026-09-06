@@ -1,0 +1,34 @@
+{
+  "lease_id": "lease-cap-job02-20260903T130500Z",
+  "node_id": "CAP-JOB02",
+  "packet_id": "WP-CAP-JOB02",
+  "assigned_role": "INFRA-SPEC",
+  "base_branch": "cap-job01-pipeline",
+  "base_commit": "c853f43",
+  "target_branch": "cap-job02-recovery",
+  "worktree_path": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-job02",
+  "posix_worktree_path": "/mnt/c/Users/anshu/AppData/Local/trace-worktrees/trace-job02",
+  "exclusive_file_leases": [
+    "src/trace/v2/service.py",
+    "src/trace/v2/store.py",
+    "tests/v2/test_job_recovery.py",
+    "docs/program/inbox/cap-job02/handoff.md"
+  ],
+  "forbidden_boundaries": [
+    "src/trace/v2/cortex/",
+    "src/trace/v2/organization.py",
+    "src/trace/v2/cortex_consolidator.py",
+    "benchmarks/"
+  ],
+  "issued_by": "Program Coordinator (COORD)",
+  "issued_at_utc": "2026-09-03T13:05:00Z",
+  "lease_duration_sec": 7200,
+  "status": "ACTIVE_DISPATCHED",
+  "acceptance_criteria": [
+    "Worker heartbeat monitoring with liveness updates",
+    "300s lease timeouts with automatic zombie/abandoned job reclamation",
+    "3-retry dead-letter queuing (`failed_dead_letter`) for poisoned jobs",
+    "5,000-item queue backpressure cap rejecting new ingestion jobs with 429/BackpressureError",
+    "pytest tests/v2/test_job_recovery.py -v (100% pass)"
+  ]
+}

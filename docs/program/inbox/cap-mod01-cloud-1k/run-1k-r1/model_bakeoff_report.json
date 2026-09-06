@@ -1,0 +1,110 @@
+{
+  "report_id": "report-cap-mod01-deepseek-flash-sail-1788630908",
+  "program": "TRACE-CAP-001",
+  "work_packet": "WP-CAP-MOD01",
+  "node_id": "CAP-MOD01-DEEPSEEK-FLASH",
+  "target_gate": "CAP-GC",
+  "created_at_utc": "2026-09-05T17:55:08.439411+00:00",
+  "manifest_sha256": "52a6e6508714110e792c3428982b3f4f0c3589e8bb0ce75bcf4f924ad6bc1476",
+  "total_clusters": 286,
+  "control_baseline": {
+    "name": "Extractive Control",
+    "faithfulness": 0.9983,
+    "bootstrap_95_ci": [
+      0.9963,
+      0.9997
+    ]
+  },
+  "model_under_test": {
+    "model_id": "deepseek-ai/DeepSeek-V4-Flash-0731",
+    "provider": "Sail Research",
+    "endpoint": "https://api.sailresearch.com/v1/chat/completions",
+    "architecture": "DeepSeek-V4-Flash MoE",
+    "clusters_evaluated": 286,
+    "prompt_revision": {
+      "version": "improved-grounding-fewshot-v2",
+      "prompt_sha256": "f691a6c93471771cd4c70e3f6bdecf063a5db16e4ba0177b86ba3ac594d11f36",
+      "clarifications": [
+        "Plain-language definition of holon as a factual topic card",
+        "Explicit lexical anchoring rule enforcing source vocabulary",
+        "Concrete 1-shot input/output demonstration",
+        "Robust JSON cleanup stripping think tags, markdown fences, and repairing trailing commas"
+      ]
+    },
+    "faithfulness": {
+      "point_estimate": 0.7918,
+      "bootstrap_95_ci": [
+        0.7465,
+        0.8356
+      ],
+      "ci_width": 0.089,
+      "clears_95_floor": false,
+      "valid_cluster_count": 237
+    },
+    "disentangled_metrics": {
+      "validity_rate": 0.8287,
+      "grounding_given_valid": {
+        "point_estimate": 0.9555,
+        "bootstrap_95_ci": [
+          0.9342,
+          0.9729
+        ]
+      }
+    },
+    "performance": {
+      "warm_tokens_per_sec": 62.05,
+      "p95_latency_ms": 36922.9,
+      "total_wall_clock_sec": 4572.03
+    },
+    "robustness": {
+      "invalid_output_rate": 0.1713,
+      "invalid_cluster_count": 49,
+      "transport_error_count": 0
+    },
+    "cost_and_resources": {
+      "total_prompt_tokens": 444216,
+      "total_completion_tokens": 257301,
+      "total_spend_usd": 0.402969,
+      "cost_per_1k_holons_usd": 1.409
+    },
+    "protocol_m2_r1": {
+      "max_tokens_cap": 4096,
+      "concurrency": 1,
+      "finish_reasons_summary": {
+        "length": 5,
+        "stop": 281
+      },
+      "dynamic_retries": {
+        "attempts_1_count": 199,
+        "attempts_2_count": 87,
+        "r1a_retries": 6,
+        "r1b_retries": 81,
+        "r1c_retries": 0,
+        "r1_rescued_count": 38
+      },
+      "prior_class_rescues": {
+        "R1a": {
+          "total_in_manifest": 34,
+          "rescued_count": 34,
+          "rescue_rate": 1.0
+        },
+        "R1b": {
+          "total_in_manifest": 136,
+          "rescued_count": 106,
+          "rescue_rate": 0.7794
+        },
+        "R1c": {
+          "total_in_manifest": 116,
+          "rescued_count": 97,
+          "rescue_rate": 0.8362
+        },
+        "overall": {
+          "total_in_manifest": 286,
+          "rescued_count": 237,
+          "rescue_rate": 0.8287
+        }
+      }
+    }
+  },
+  "verdict": "FAIL (< 95% floor)"
+}

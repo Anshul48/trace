@@ -1,0 +1,178 @@
+{
+  "receipt_format": "TRACE-CAP-001-independent-verification-v1",
+  "gate": "CAP-GB",
+  "node": "CAP-GW03",
+  "packet_id": "WP-CAP-GW03",
+  "attestation_id": "rcpt-cap-gw03-verif-indep-20260903T085724Z",
+  "timestamp_utc": "2026-09-03T08:57:24Z",
+  "verifier_role": "VERIF-INDEP",
+  "verifier_worker": "worker-2",
+  "verification_mode": "clean-detached-worktree",
+  "verification_worktree": "C:/Users/anshu/AppData/Local/Temp/trace-cap-verif-gw03-20260903-4caf24946a6d4568abcf965df5fa581d",
+  "branch_ref": "cap-gw03-budget",
+  "base_commit": "683cfe7",
+  "verified_commit": "10c4c24f876dfe190a2b0e322a1ac1dbdb92172e",
+  "source_identity": {
+    "target_branch_ref": "cap-gw03-budget",
+    "head_matches_target_commit": true,
+    "verified_commit_full": "10c4c24f876dfe190a2b0e322a1ac1dbdb92172e",
+    "verified_tree_full": "c11a9b48f81c791e7f4de9663673caa6b50e676e",
+    "base_commit_full": "683cfe76e11ec24a06c3e17d984da1cdfa907526",
+    "base_tree_full": "3769d6b5c40eb36bf8165b2fdb7d62fff590f755",
+    "base_is_ancestor_of_verified_commit": true,
+    "initial_head_state": "HEAD (no branch)",
+    "initial_worktree_clean": true,
+    "tracked_diff_after_verification": false,
+    "handoff_claims_relied_upon": false
+  },
+  "checks": {
+    "acceptance_tests": {
+      "requested_command": "$env:PYTHONPATH='src'; pytest tests/v2/test_budget_cap.py tests/v2/test_model_cost.py tests/v2/test_model_gateway_failclosed.py -v",
+      "execution_command": "$env:Path = (Join-Path (Get-Location) '.venv\\Scripts') + ';' + $env:Path\n$env:PYTHONPATH='src'; pytest tests/v2/test_budget_cap.py tests/v2/test_model_cost.py tests/v2/test_model_gateway_failclosed.py -v",
+      "interpreter": "C:/Users/anshu/AppData/Local/Temp/trace-cap-verif-gw03-20260903-4caf24946a6d4568abcf965df5fa581d/.venv/Scripts/python.exe",
+      "python_version": "3.12.11 (main, Aug 18 2025, 19:17:54) [MSC v.1944 64 bit (AMD64)]",
+      "pytest_version": "9.1.1",
+      "test_files": [
+        "tests/v2/test_budget_cap.py",
+        "tests/v2/test_model_cost.py",
+        "tests/v2/test_model_gateway_failclosed.py"
+      ],
+      "attempts": [
+        {
+          "execution_environment": "sandboxed process",
+          "exit_code": 1,
+          "collected": 131,
+          "passed": 126,
+          "failed": 5,
+          "skipped": 0,
+          "warnings": 2,
+          "duration_seconds": 4.30,
+          "output_summary": "Five persistence/temp-file tests raised PermissionError or WinError 5 while writing system TEMP paths.",
+          "result": "ENVIRONMENT_BLOCKED"
+        },
+        {
+          "execution_environment": "same detached worktree with normal temporary-directory access",
+          "exit_code": 0,
+          "collected": 131,
+          "passed": 131,
+          "failed": 0,
+          "skipped": 0,
+          "warnings": 0,
+          "duration_seconds": 1.27,
+          "output_summary": "131 passed in 1.27s",
+          "result": "PASS"
+        }
+      ],
+      "exit_code": 0,
+      "collected": 131,
+      "passed": 131,
+      "failed": 0,
+      "skipped": 0,
+      "warnings": 0,
+      "output_summary": "131 passed in 1.27s",
+      "result": "PASS"
+    },
+    "focused_invariant_tests": {
+      "requested_command": "$env:PYTHONPATH='src'; pytest tests/v2/test_budget_cap.py -v -k \"test_hard_rejection_with_budget_exceeded_error_when_spend_cap_breached or test_local_model_bypasses_exhausted_dollar_budget or test_gateway_call_json_releases_reservation_on_provider_failure\"",
+      "execution_command": "$env:Path = (Join-Path (Get-Location) '.venv\\Scripts') + ';' + $env:Path\n$env:PYTHONPATH='src'; pytest tests/v2/test_budget_cap.py -v -k \"test_hard_rejection_with_budget_exceeded_error_when_spend_cap_breached or test_local_model_bypasses_exhausted_dollar_budget or test_gateway_call_json_releases_reservation_on_provider_failure\"",
+      "interpreter": "C:/Users/anshu/AppData/Local/Temp/trace-cap-verif-gw03-20260903-4caf24946a6d4568abcf965df5fa581d/.venv/Scripts/python.exe",
+      "exit_code": 0,
+      "collected": 53,
+      "selected": 3,
+      "deselected": 50,
+      "passed": 3,
+      "failed": 0,
+      "output_summary": "3 passed, 50 deselected in 1.00s",
+      "selected_tests": [
+        "TestHardSpendCapEnforcement::test_hard_rejection_with_budget_exceeded_error_when_spend_cap_breached",
+        "TestUnreservedBudgetRelease::test_gateway_call_json_releases_reservation_on_provider_failure",
+        "TestZeroCostExemptionForLocalModels::test_local_model_bypasses_exhausted_dollar_budget"
+      ],
+      "result": "PASS"
+    },
+    "independent_runtime_probes": {
+      "execution_command": "$env:PYTHONPATH='src'; inline Python assertions for the three invariants and provider/malformed-response cleanup piped to the detached worktree .venv\\Scripts\\python.exe",
+      "exit_code": 0,
+      "provider_spend_usd": 0.0,
+      "result": "PASS",
+      "observations": {
+        "hard_cap_rejection": {
+          "exception": "BudgetExceededError",
+          "requested_cost_usd": 0.0055,
+          "available_budget_usd": 0.001,
+          "reserved_after_rejection": 0.0,
+          "spent_after_rejection": 0.0
+        },
+        "local_zero_cost_exemption": {
+          "is_exhausted_before": true,
+          "reservation_is_local": true,
+          "reserved_cost_usd": 0.0,
+          "total_reserved_usd": 0.0
+        },
+        "provider_exception_release": {
+          "exception": "ModelUnavailableError",
+          "provider_calls": 1,
+          "reserved_after_exception": 0.0,
+          "spent_after_exception": 0.0,
+          "available_after_exception": 0.05
+        },
+        "malformed_response_release": {
+          "exception": "ModelMalformedJsonError",
+          "reserved_after_error": 0.0,
+          "spent_after_error": 0.0,
+          "available_after_error": 0.05
+        }
+      }
+    },
+    "source_runtime_audit": {
+      "source_locations": [
+        "src/trace/v2/model_gateway.py:34-54",
+        "src/trace/v2/model_gateway.py:1137-1242",
+        "src/trace/v2/model_gateway.py:1931-2180"
+      ],
+      "observed": [
+        "BudgetExceededError is raised before reservation creation when committed spend plus requested cloud cost exceeds hard_cap_usd.",
+        "The hard-cap branch is skipped for local models and local reservations force reserved cost to 0.0.",
+        "call_json releases the active reservation in its exception handler after provider, response, validation, or telemetry errors."
+      ],
+      "result": "PASS"
+    },
+    "mutation_allowlist": {
+      "comparison": "git diff 683cfe7 10c4c24 --name-status",
+      "exit_code": 0,
+      "expected_paths": [
+        "docs/program/inbox/cap-gw03/handoff.md",
+        "src/trace/v2/model_gateway.py",
+        "tests/v2/test_budget_cap.py"
+      ],
+      "changed_paths": [
+        "docs/program/inbox/cap-gw03/handoff.md",
+        "src/trace/v2/model_gateway.py",
+        "tests/v2/test_budget_cap.py"
+      ],
+      "unexpected_paths": [],
+      "receipt_excluded_from_candidate_mutation": true,
+      "result": "PASS"
+    }
+  },
+  "audited_invariants": {
+    "hard_rejection_raises_budget_exceeded_error": true,
+    "cloud_over_cap_leaves_no_reservation_or_spend": true,
+    "exhausted_dollar_budget_does_not_block_zero_cost_local_model": true,
+    "local_reservation_cost_is_strictly_zero": true,
+    "unused_reservation_released_on_provider_exception": true,
+    "unused_reservation_released_on_malformed_response_error": true,
+    "acceptance_tests_passed_131_of_131": true,
+    "mutation_allowlist_exact": true,
+    "no_live_provider_spend": true
+  },
+  "verdict": "PASS",
+  "disposition": "PASS_FOR_NAMED_VERIFICATION_ONLY",
+  "claim_ceiling": "C1 component safety conformance; no gate certification, promotion, or merge authority",
+  "unblocks": [
+    "CAP-GW03"
+  ],
+  "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+  "canonicalization": "UTF-8 JSON with sort_keys=true, separators=(',', ':'), ensure_ascii=false; signature field excluded",
+  "signature": "a7a52902225ab1cc8c297b94caf9e340f0db472d62ae6b1687465ef14f057520"
+}

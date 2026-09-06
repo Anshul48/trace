@@ -1,0 +1,58 @@
+{
+  "dispatch_session_id": "dispatch-verif-b1-20260903T144000Z",
+  "batch": "Batch 1",
+  "target_nodes": [
+    "CAP-RET02",
+    "CAP-CRX02",
+    "CAP-JOB01"
+  ],
+  "assigned_role": "VERIF-INDEP",
+  "issued_by": "Program Coordinator (COORD)",
+  "issued_at_utc": "2026-09-03T14:40:00Z",
+  "lease_duration_sec": 7200,
+  "status": "ACTIVE_DISPATCHED",
+  "targets": {
+    "CAP-RET02": {
+      "branch": "cap-ret02-fusion",
+      "commit": "94afcf3b358c351ac7a71e466a18fca67c32e81a",
+      "base_ref": "cap-ret01-embedding",
+      "base_commit": "9f90ac8",
+      "worktree": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-ret02",
+      "posix_worktree": "/mnt/c/Users/anshu/AppData/Local/trace-worktrees/trace-ret02",
+      "lease_paths": [
+        "src/trace/v2/retrieval.py",
+        "tests/v2/test_hybrid_retrieval.py"
+      ],
+      "lease_section_constraint": "RRF fusion section only; do not overlap with CAP-RET03 graph section",
+      "receipt_path": "docs/program/inbox/cap-ret02/verification_receipt.json"
+    },
+    "CAP-CRX02": {
+      "branch": "cap-crx02-consolidator",
+      "commit": "45c359118991bb6670092baf36cee3f573fc6454",
+      "base_ref": "cap-crx01-schema",
+      "base_commit": "59ce53a",
+      "worktree": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-crx02",
+      "posix_worktree": "/mnt/c/Users/anshu/AppData/Local/trace-worktrees/trace-crx02",
+      "lease_paths": [
+        "src/trace/v2/organization.py",
+        "src/trace/v2/cortex_consolidator.py",
+        "tests/v2/test_cortex_consolidator.py"
+      ],
+      "receipt_path": "docs/program/inbox/cap-crx02/verification_receipt.json"
+    },
+    "CAP-JOB01": {
+      "branch": "cap-job01-pipeline",
+      "commit": "c853f43b0361e085c9ab0bb63e3ac16758a89fb1",
+      "base_ref": "main",
+      "base_commit": "a9255b4",
+      "worktree": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-job01",
+      "posix_worktree": "/mnt/c/Users/anshu/AppData/Local/trace-worktrees/trace-job01",
+      "lease_paths": [
+        "src/trace/v2/service.py",
+        "tests/v2/test_job_pipeline.py"
+      ],
+      "lease_section_constraint": "job chaining section only",
+      "receipt_path": "docs/program/inbox/cap-job01/verification_receipt.json"
+    }
+  }
+}

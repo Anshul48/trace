@@ -1,37 +1,28 @@
 # Execution DAG
 
-> **Status:** Draft foundation-first DAG. It defines dependency order and
-> proof gates; it does not claim that any listed capability is implemented or
-> verified.
+> **Status:** Reconciled DAG under `DEC-CAP-001` (`TRACE-CAP-001`). The canonical, exhaustive execution DAG across all five capability lanes is defined in [`CAP_001_EXECUTION_DAG.md`](CAP_001_EXECUTION_DAG.md).
 
 ## 1. Governing execution rule
 
-The program first establishes a trustworthy, reproducible, finite foundation
-release for Trace-Lite, Trace, and the separately versioned benchmark suite.
-Only then does it open broad architecture work, deep research, and speculative
-retrieval mechanisms.
+Per `DEC-CAP-001` (`CAP-D001`, `CAP-D002`), system construction is decoupled into
+four technical capability lanes (`CORE`, `RETRIEVAL`, `CORTEX`, `SYNTHESIS`) and
+one control lane (`EVALUATION & CONTROL`).
 
-Independent construction lanes may run in parallel. The following are always
-sequential and human-gated: decisions, certification, promotion, scale
+Scaffolding, safety hardening, model bake-offs, and 10K/100K shadow Cortex
+research proceed in parallel across independent worktrees. The following are
+strictly sequential and human-gated: decisions, certification, promotion, scale
 advancement, and downstream adoption.
 
 ```text
-current-state records
-       │
-       ▼
-parallel foundation construction
-       │
-       ▼
-independent verification and repair
-       │
-       ▼
-Foundation Complete gate
-       │
-       ▼
-deep research and bounded experiments
-       │
-       ▼
-promotion → 100K → 1M → consumer shadowing
+========================================================================================
+                              DECOUPLED EXECUTION TOPOLOGY
+========================================================================================
+  [LANE 1: GOVERNANCE]  -> Wave A Reconciliation -> Relock -> Gate CAP-GA
+  [LANE 2: RETRIEVAL]   -> MiniLM Dense Adapter -> BM25+Dense RRF -> PPR Graph Walk
+  [LANE 3: CORTEX]      -> Schemas -> Local SLM Consolidator -> Risk-Tiered Activation
+  [LANE 4: SYNTHESIS]   -> Grounded Synthesis -> Zero-Hallucination Gate
+  [LANE 5: EVAL/VERIF]  -> Fail-Closed Gateways -> Bake-off -> 10K Shadow -> 100K Paired
+========================================================================================
 ```
 
 ## 2. Stage 0: Control plane and current-state re-anchor
@@ -93,12 +84,15 @@ and its release/evaluation machinery fails closed.
 
 ## 5. Stage 3: Deep research and architecture work
 
+Under `DEC-CAP-001` (`CAP-D001` through `CAP-D003`), cognitive consolidation
+research, local SLM bake-offs, and risk-tiered projection pipelines are
+decoupled from G1M-CORE and executed via [`CAP_001_EXECUTION_DAG.md`](CAP_001_EXECUTION_DAG.md).
 Broad research begins against a trustworthy baseline rather than against
 ambiguous implementation state.
 
 | Node | Output | Hard dependencies | Unblocks |
 | --- | --- | --- | --- |
-| R2 | Architecture research memos and mechanism cards: sparse assembly/hypergraph association, temporal truth, routing, hierarchy, economics, policy-aware retrieval. | F2. | X2. |
+| R2 | Architecture research memos and mechanism cards: sparse assembly/hypergraph association, temporal truth, routing, hierarchy, economics, policy-aware retrieval. | F2 (or CAP-GA under DEC-CAP-001). | X2. |
 | X2 | Bounded prototype in a disposable candidate Cortex, with fixed baseline and ablation plan. | R2, B3 when real evaluation is required. | V3, P1. |
 | V3 | Independent experiment verification: quality, safety, provenance, recovery, resource, and cost checks. | X2. | P1. |
 | P1 | Promotion dossier: promote, reject, or investigate. | R2, X2, V3. | Human promotion decision only. |

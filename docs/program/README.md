@@ -1,8 +1,6 @@
 # Trace / Trace-Lite Program Control Plane
 
-> **Status:** Draft planning scaffold. These documents define work, evidence,
-> and handoffs; they do not establish that a feature, benchmark, or operational
-> guarantee already exists.
+> **Status:** Ratified control plane under `DEC-CAP-001` (`TRACE-CAP-001`). These documents define work, evidence, and handoffs across decoupled Core, Retrieval, Cortex, and Synthesis capability lanes.
 
 ## Purpose
 
@@ -34,9 +32,15 @@ promotion, scale, and consumer adoption remain sequential gates.
 | [02_EXECUTION_DAG.md](02_EXECUTION_DAG.md) | Dependency-ordered stages and gates. |
 | [FOUNDATION_RELEASE.md](FOUNDATION_RELEASE.md) | Finite baseline-release scope and Foundation Complete gate. |
 | [FOUNDATION_STATUS.md](FOUNDATION_STATUS.md) | Current starter-packet state and decision blockers. |
-| [SCALE_CERTIFICATION_RECOVERY_PLAN.md](SCALE_CERTIFICATION_RECOVERY_PLAN.md) | Draft, planning-only route to requalify 100K before a separately verified 1M pilot. |
-| [SCALE_100K_TO_1M_EXECUTION_PLAN.md](SCALE_100K_TO_1M_EXECUTION_PLAN.md) | Detailed execution amendment from the failed R2.1 measurement state through truthful Gate C2, Gate D, and Gate F2. |
-| [COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md](COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md) | Proposed correction separating Core, Retrieval, Cortex, and Synthesis engineering, evidence, and scale claims. |
+| [SCALE_CERTIFICATION_RECOVERY_PLAN.md](SCALE_CERTIFICATION_RECOVERY_PLAN.md) | Reconciled recovery plan under `DEC-CAP-001`; monolithic Gate F2 superseded by 4-lane `TRACE-CAP-001` architecture. |
+| [SCALE_100K_TO_1M_EXECUTION_PLAN.md](SCALE_100K_TO_1M_EXECUTION_PLAN.md) | Reconciled scale execution plan under `DEC-CAP-001`; monolithic Gate F2 superseded by 4-lane `TRACE-CAP-001` architecture. |
+| [COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md](COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md) | Ratified cognitive architecture correction plan (`DEC-CAP-001`) separating Core, Retrieval, Cortex, and Synthesis capability lanes. |
+| [CAP_001_CONTRADICTION_LEDGER_AND_DECISION_REQUEST.md](CAP_001_CONTRADICTION_LEDGER_AND_DECISION_REQUEST.md) | Active document contradiction audit and formal Human Owner Decision Request (`DEC-CAP-001`). |
+| [CAP_001_EXECUTION_DAG.md](CAP_001_EXECUTION_DAG.md) | Exhaustive acyclic execution DAG across all capability lanes, seed families, and gates. |
+| [CAP_001_WORK_PACKETS_WAVE_A_B.md](CAP_001_WORK_PACKETS_WAVE_A_B.md) | Bounded, isolated work packets for Wave A governance and Wave B infrastructure/safety. |
+| [CAP_001_RESPONSIBILITY_LEASE_MAP.md](CAP_001_RESPONSIBILITY_LEASE_MAP.md) | Exclusive file lease map and role segregation (implementer vs independent verifier). |
+| [CAP_001_GATE_MATRIX.md](CAP_001_GATE_MATRIX.md) | Gate matrix detailing evidence requirements, verifier attestations, and human decisions. |
+| [CAP_001_DAG_CONSISTENCY_REPORT.md](CAP_001_DAG_CONSISTENCY_REPORT.md) | Formal DAG verification report proving acyclicity, ID uniqueness, and Spine isolation. |
 | [03_SHARED_CONTRACTS.md](03_SHARED_CONTRACTS.md) | Evidence, release, task, and handoff contracts. |
 | [04_EVALUATION_PROTOCOL.md](04_EVALUATION_PROTOCOL.md) | Real-data evaluation and scale proof boundary. |
 | [05_PROMOTION_RUBRIC.md](05_PROMOTION_RUBRIC.md) | Criteria for promoting an experimental mechanism. |
@@ -187,10 +191,11 @@ After review of those records, prepare independent foundation packets for:
 3. the Trace Cortex Release and temporal/revocation foundation;
 4. independent negative verification and consumer-conformance fixtures.
 
-Broad architecture research is intentionally deferred until the resulting
-foundation baseline is reproducible and independently verified. Narrow
-research needed to resolve a named implementation dependency remains allowed,
-but does not itself authorize a product change or promotion.
+Under `DEC-CAP-001` (`CAP-D001`, `CAP-D002`), parallel construction of scaffolding,
+safety hardening, local SLM bake-offs, and 10K/100K shadow Cortex research is
+authorized across decoupled capability lanes (`CORE`, `RETRIEVAL`, `CORTEX`,
+`SYNTHESIS`). Only promotions, certifications, and combined release claims
+remain strictly sequential and human-gated.
 
 ## Detailed Foundation Procedure
 

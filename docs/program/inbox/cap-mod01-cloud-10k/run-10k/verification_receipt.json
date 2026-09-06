@@ -1,0 +1,56 @@
+{
+  "target_node": "CAP-MOD01-DEEPSEEK-FLASH",
+  "timestamp_utc": "2026-09-06T02:18:31.831577+00:00",
+  "model_id": "deepseek-ai/DeepSeek-V4-Flash-0731",
+  "provider": "Sail Research",
+  "manifest_sha256": "e93b8d4ef8d094099f2be91e3442cc4356679d42a8a5332de5d99a58b0918d98",
+  "clusters_evaluated": 2000,
+  "valid_cluster_count": 1673,
+  "faithfulness_point": 0.7989,
+  "faithfulness_ci_95": [
+    0.7818,
+    0.8152
+  ],
+  "validity_rate": 0.8365,
+  "grounding_given_valid_point": 0.955,
+  "grounding_given_valid_ci_95": [
+    0.9476,
+    0.9618
+  ],
+  "clears_90_floor": true,
+  "clears_95_floor": false,
+  "total_prompt_tokens": 3368068,
+  "total_completion_tokens": 1865392,
+  "run_spend_usd": 2.9613,
+  "prior_spend_usd": 1.3181,
+  "cumulative_total_spend_usd": 4.2794,
+  "spend_cap_usd": 25.0,
+  "concurrency": 10,
+  "max_tokens_floor": 8192,
+  "think_metering": {
+    "mean_reasoning_chars": 0.0,
+    "p95_reasoning_chars": 0,
+    "p99_reasoning_chars": 0,
+    "max_reasoning_chars": 0,
+    "mean_reasoning_words": 0.0,
+    "p95_reasoning_words": 0
+  },
+  "finish_reasons_summary": {
+    "stop": 1862,
+    "length": 4,
+    "unknown": 134
+  },
+  "retry_summary": {
+    "attempts_1_count": 1714,
+    "attempts_2_count": 286,
+    "r1a_retries": 22,
+    "r1b_retries": 264,
+    "r1c_retries": 0,
+    "r1_rescued_count": 237
+  },
+  "serial_fallback_summary": {
+    "queued_count": 286,
+    "rescued_count": 237
+  },
+  "verdict": "RESULTS-COMPLETE (Clears >= 90% floor; promotion reserved to GC/GD ballot)"
+}

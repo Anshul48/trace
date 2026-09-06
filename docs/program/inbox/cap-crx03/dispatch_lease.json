@@ -1,0 +1,33 @@
+{
+  "lease_id": "lease-cap-crx03-20260903T130500Z",
+  "node_id": "CAP-CRX03",
+  "packet_id": "WP-CAP-CRX03",
+  "assigned_role": "CRX-SPEC",
+  "base_branch": "cap-crx02-consolidator",
+  "base_commit": "45c3591",
+  "target_branch": "cap-crx03-activation",
+  "worktree_path": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-crx03",
+  "posix_worktree_path": "/mnt/c/Users/anshu/AppData/Local/trace-worktrees/trace-crx03",
+  "exclusive_file_leases": [
+    "src/trace/v2/service.py",
+    "src/trace/v2/store.py",
+    "tests/v2/test_cortex_activation.py",
+    "docs/program/inbox/cap-crx03/handoff.md"
+  ],
+  "forbidden_boundaries": [
+    "Spine canonical tables (atoms, events, source_blobs, WAL)",
+    "Bypassing detached validation receipts",
+    "docs/program/04_EVALUATION_PROTOCOL.md"
+  ],
+  "issued_by": "Program Coordinator (COORD)",
+  "issued_at_utc": "2026-09-03T13:05:00Z",
+  "lease_duration_sec": 7200,
+  "status": "ACTIVE_DISPATCHED",
+  "acceptance_criteria": [
+    "Tier 1 (Navigation Summaries) auto-activation upon passing detached validation",
+    "Tier 2/3 (Factual claims, schema proposals) staged in durable cortex_proposals requiring explicit human review",
+    "Atomic journaled pointer swaps across SQLite/Postgres for active release transitions",
+    "Crash-injection recovery and rollback preserving last-known-good active release",
+    "pytest tests/v2/test_cortex_activation.py -v (100% pass)"
+  ]
+}

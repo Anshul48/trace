@@ -1,0 +1,34 @@
+{
+  "lease_id": "lease-cap-eval03-20260904T021500Z",
+  "node_id": "CAP-EVAL03",
+  "packet_id": "WP-CAP-EVAL03",
+  "assigned_role": "EVAL-SPEC",
+  "base_branch": "cap-eval02-datasets",
+  "base_commit": "587aa514e254bc33a5bc18b90ce399cf602992ef",
+  "target_branch": "cap-eval03-faithfulness",
+  "worktree_path": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-eval03",
+  "posix_worktree_path": "/mnt/c/Users/anshu/AppData/Local/trace-worktrees/trace-eval03",
+  "linux_worktree_path": "/tmp/trace-wt/eval03",
+  "exclusive_file_leases": [
+    "benchmarks/evaluators/faithfulness_validator.py",
+    "tests/evaluators/test_faithfulness.py",
+    "docs/program/inbox/cap-eval03/handoff.md"
+  ],
+  "forbidden_boundaries": [
+    "src/trace/v2/",
+    "benchmarks/data/",
+    "benchmarks/manifests/"
+  ],
+  "issued_by": "Program Coordinator (COORD)",
+  "issued_at_utc": "2026-09-04T02:15:00Z",
+  "lease_duration_sec": 28800,
+  "status": "ACTIVE_DISPATCHED",
+  "acceptance_criteria": [
+    "Detached validation harness with atomic proposition extraction, source span alignment, and NLI entailment scoring at tau=0.95",
+    "ValidationReceipt schema: passed (bool), support_ratio (float)",
+    "Frozen hallucination set rejected at 100%",
+    "Dual-adjudicated proposition sample >= 200 propositions with Cohen's kappa >= 0.70",
+    "NLI model shares no weights/data/revision with generator",
+    "pytest tests/evaluators/test_faithfulness.py -v (100% pass)"
+  ]
+}

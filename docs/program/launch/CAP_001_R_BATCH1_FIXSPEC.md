@@ -1,0 +1,28 @@
+# CAP-001 Batch-1 Repair Fix-Spec (R-RET02, R-CRX02, R-JOB01) — READ-ONLY spec, no edits made
+
+Context: Step-0 ruling (`CAP_001_COORD_REPAIR_STEP0_ADJUDICATION.md`) — all RET02 `retrieval.py` hunks FUSION-NECESSARY, zero scope-creep (lease re-scope only). JOB01 intended base `a9255b4` (= `a9255b4de181d0325b7ff140f685a1a065ae5d1f`, confirmed ancestor of `c853f43`, `merge-base --is-ancestor` OK). CRX02 base `59ce53a` = `59ce53ab51e11b2344195c3b33d11ba8907f1d4d`.
+
+## R-RET02 (branch `cap-ret02-fusion` @ `94afcf3`, base `9f90ac8`)
+(a) Neural-backend gap (receipt `dense_backend_observation`): active `deterministic-fallback` on CPU, `provider_id: local-dense:...:deterministic-fallback:cpu`, `is_neural=false`, `model_backend_qualification: NOT_ESTABLISHED`; missing `numpy, onnxruntime, torch, sentence_transformers`.
+- Re-run requirement: install all four neural deps and run acceptance in an env where the dense adapter reports `is_neural=true`, `is_fallback=false`, qualification other than fallback (real sentence-transformers backend, not `deterministic-fallback`).
+- Guarding assertion: `tests/v2/test_hybrid_retrieval.py:293` `test_hybrid_dense_rescues_vocabulary_mismatch`, branch at `:309` (`if getattr(standard_adapter, "is_fallback", False):`) swaps in `SemanticMockEmbedder` (`provider_id mock-semantic-v1`, `QUALIFIED_MOCK`) and asserts `dense > 0.30`, `lexical == 0.0`, top `doc_medical`. Under fallback this branch passes WITHOUT neural evidence — re-run must take the `else` (real-adapter) path.
+(b) No code motion: Step-0 rules every hunk FUSION-NECESSARY, zero SCOPE-CREEP — repair is lease re-scope only (`retrieval.py` hunks + `tests/v2/test_hybrid_retrieval.py` + own `handoff.md`); do not move/split code.
+- New tests: none (existing 39 cover; re-run is env-qualification, not code).
+- Acceptance: 39/39 literal `pytest tests/v2/test_hybrid_retrieval.py tests/v2/test_retrieval_embedding.py` AND fallback NOT active (`is_fallback=false`, neural qualified).
+
+## R-CRX02 (branch `cap-crx02-consolidator` @ `45c3591`, base `59ce53a`)
+(a) Byte parity: candidate `src/trace/v2/cortex_consolidator.py:47-49` (`_excerpt`, suffix `…` U+2026, `e280a6`, 190 bytes) vs receipt-cited legacy `59ce53a:src/trace/v2/organization.py:22-24`. OBSERVED: base file at those lines already emits `…`, not `?` (`git show 59ce53a:...organization.py:24` identical `…`); receipt probe reports legacy `xxx?` (188 B, `3f`) vs actual `xxx…` (190 B), `byte_identical=false`.
+- Option A (restore `?`): change consolidator `:49` marker `…`→`?` to satisfy the receipt's legacy expectation. Note: this DIVERGES from base-file behavior observed above.
+- Option B (spec-change proposal, favored by evidence): declare `…` canonical, update the acceptance probe/control clip to expect `…` (190 B). Requires GB approval; no code change.
+(b) Cost integrity (receipt: 130 cloud tokens, `cost_usd 0.0`, `manifest audit null`):
+- `src/trace/v2/model_gateway.py:124-136` `RegisteredModel.input_cost_per_million_usd/output_cost_per_million_usd` default `0.0`; `:163-168` `DEFAULT_MODEL_REGISTRY` `deepseek-v4-flash` entry sets NO coefficients → set real per-1M input+output coefficients on the flash entry (and extend `:534` `estimated_cost` to include output tokens if applicable).
+- `src/trace/v2/cortex_consolidator.py:589-591` stores `"audit": getattr(audit, "cost_usd", None)` (bare float) → populate `manifest.artifacts.audit` with the full audit record (`cost_usd`, tokens, model id); `:605` already persists full `audit` on result — mirror into manifest.
+(c) Handoff SHA rule: worker handoff declared `59ce53a152ca6331908bc7489bb2e15bc963b156` which does NOT resolve (`handoff_base_resolves: false`); resolved base is `59ce53ab51e11b2344195c3b33d11ba8907f1d4d`. Rule: all SHAs by `git rev-parse <ref>` output only — never hand-typed lengthened prefixes.
+- New tests: none required in spec (existing 15 cover; parity/cost are probe criteria). Optional: byte-parity regression test pinning the GB-chosen marker.
+- Acceptance: byte-parity probe `true` + nonzero cloud `cost_usd` + non-null manifest audit + 15/15 literal `pytest tests/v2/test_cortex_consolidator.py`.
+
+## R-JOB01 (branch `cap-job01-pipeline` @ `c853f43`, base `a9255b4` confirmed above)
+- Fallback location: `src/trace/v2/service.py:475-479` in `_run_cortex_release_assemble_job` — `validation_receipt = payload.get("validation_receipt") or {"passed": True, ...}` (default-pass on omitted receipt; receipt probe observed `validated` release). Amplifier: `src/trace/v2/store.py:3812` — `passed = bool(validation_receipt.get("passed", True))` (missing key defaults True). Contrast legitimate constructor at `service.py:425-436` (explicitly built receipt passed through `:441-452` — leave intact).
+- Fix: at `service.py:475` raise fail-closed (`InvariantViolation`/`ValidationError`, message naming omitted `validation_receipt`) when key is absent/None/empty instead of synthesizing `passed:True`; change `store.py:3812` default to fail-closed (`validation_receipt["passed"]` strict, or `get("passed", False)` + explicit-missing rejection — must reject, not default-fail).
+- New tests in `tests/v2/test_job_pipeline.py` (16 existing, `test_raw_atom_ingestion...` through `test_concurrent_ingestions_and_pipeline_drain:536`): add `test_release_assemble_rejects_omitted_validation_receipt` (omit key → raises, no `validated` release) and `test_release_assemble_rejects_ambiguous_passed_missing` (receipt dict without `passed` → raises).
+- Acceptance: omitted-receipt probe rejects (no `validated` status, no stored `passed:true` receipt) + 16/16 literal `pytest tests/v2/test_job_pipeline.py` (16 existing; 18/18 after the 2 new tests land).

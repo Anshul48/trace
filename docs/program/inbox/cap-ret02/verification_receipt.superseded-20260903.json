@@ -1,0 +1,161 @@
+{
+  "receipt_format": "TRACE-CAP-001-independent-verification-v1",
+  "gate": "CAP-GB",
+  "node": "CAP-RET02",
+  "packet_id": "WP-CAP-RET02",
+  "attestation_id": "rcpt-cap-ret02-verif-indep-20260903T154352Z",
+  "timestamp_utc": "2026-09-03T15:43:52Z",
+  "verifier_role": "VERIF-INDEP",
+  "verification_mode": "clean-detached-worktree",
+  "verification_worktree": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-ret02",
+  "receipt_path": "docs/program/inbox/cap-ret02/verification_receipt.json",
+  "branch_ref": "cap-ret02-fusion",
+  "base_ref": "cap-ret01-embedding",
+  "base_commit": "9f90ac8bd00f07935d40d1b01ac4ea2283121c97",
+  "expected_commit": "94afcf3b358c351ac7a71e466a18fca67c32e81a",
+  "verified_commit": "94afcf3b358c351ac7a71e466a18fca67c32e81a",
+  "source_identity": {
+    "target_branch_ref": "cap-ret02-fusion",
+    "target_branch_ref_matches_expected": true,
+    "head_matches_target_commit": true,
+    "verified_commit_full": "94afcf3b358c351ac7a71e466a18fca67c32e81a",
+    "base_commit_full": "9f90ac8bd00f07935d40d1b01ac4ea2283121c97",
+    "base_resolution": "merge-base of cap-ret01-embedding and the named target commit; also named as predecessor in the candidate handoff",
+    "base_tree_hash": "715e9da791c85771e538fa8083345bcffa4be5cc",
+    "verified_tree_hash": "b89a37e39cbbc4fd97ebe3da1505ce4d26927b9b",
+    "base_is_ancestor_of_verified_commit": true,
+    "detached_head": true,
+    "candidate_worktree_clean_after_verification": true,
+    "tracked_diff_after_verification": false,
+    "untracked_files_after_verification": []
+  },
+  "checks": {
+    "acceptance_tests": {
+      "requested_command": "$env:PYTHONPATH='src'; pytest tests/v2/test_hybrid_retrieval.py tests/v2/test_retrieval_embedding.py -v",
+      "literal_execution": {
+        "process_exit_code": 0,
+        "pytest_session_started": false,
+        "failure_trace": [
+          "pytest : The term 'pytest' is not recognized as the name of a cmdlet, function, script file, or operable program.",
+          "No tests were collected or executed by the requested literal command."
+        ],
+        "result": "VERIFICATION_ERROR"
+      },
+      "locked_isolated_execution": {
+        "execution_command": "$env:PYTHONPATH='src'; $env:UV_CACHE_DIR='C:/Users/anshu/AppData/Local/Temp/trace-ret02-uv-cache'; uv run --isolated --locked --extra test pytest tests/v2/test_hybrid_retrieval.py tests/v2/test_retrieval_embedding.py -v",
+        "execution_context": "same clean detached worktree with uv isolated environment",
+        "exit_code": 0,
+        "collected": 39,
+        "passed": 39,
+        "failed": 0,
+        "skipped": 0,
+        "duration_seconds": 13.35,
+        "stdout_summary": "collected 39 items; all 39 tests PASSED; ============================= 39 passed in 13.35s =============================",
+        "result": "PASS_CONTROL_ONLY"
+      },
+      "setup_failure_trace": [
+        "Non-isolated uv run could not initialize the worktree environment because .venv\\lib64 could not be removed: Access is denied.",
+        "The isolated locked run completed successfully in a temporary uv environment."
+      ],
+      "result": "FAIL_REQUESTED_LITERAL_COMMAND_UNAVAILABLE"
+    },
+    "lease_check": {
+      "comparison": "git diff refs/heads/cap-ret01-embedding HEAD --name-status",
+      "allowed_paths": [
+        "src/trace/v2/retrieval.py (RRF fusion only, approximately lines 1160-1290)",
+        "tests/v2/test_hybrid_retrieval.py"
+      ],
+      "changed_paths": [
+        "A docs/program/inbox/cap-ret02/handoff.md",
+        "M src/trace/v2/retrieval.py",
+        "A tests/v2/test_hybrid_retrieval.py"
+      ],
+      "unexpected_paths": [
+        "docs/program/inbox/cap-ret02/handoff.md"
+      ],
+      "retrieval_numstat": {
+        "insertions": 508,
+        "deletions": 14
+      },
+      "retrieval_changed_new_line_ranges": [
+        "31",
+        "56-132",
+        "561-789",
+        "858-859",
+        "948",
+        "960-961",
+        "966-970",
+        "1443",
+        "1446-1456",
+        "1463-1476",
+        "1749",
+        "1761-1765",
+        "1786-1944"
+      ],
+      "retrieval_changes_outside_requested_window": true,
+      "result": "FAIL"
+    },
+    "no_candidate_truncation": {
+      "target_file": "src/trace/v2/retrieval.py",
+      "static_check": "AST scan for executable slices containing hard-coded 300 or 1000 bounds",
+      "executable_ast_matches": [],
+      "literal_matches": [
+        "line 565: docstring text mentioning [:300]",
+        "line 650: comment text mentioning no [:300] cutoff"
+      ],
+      "comments_or_docstrings_only": true,
+      "result": "PASS"
+    },
+    "rrf_k60_bit_exact": {
+      "default_k": 60,
+      "formula_control": "compute_rrf_score(rank_bm25, rank_dense, k=60, w_bm25=1.0, w_dense=1.0)",
+      "direct_probe": {
+        "checks": 5,
+        "all_exact": true,
+        "exit_code": 0
+      },
+      "test_control": "test_rrf_score_formula_bit_exactness",
+      "result": "PASS"
+    },
+    "dense_backend_observation": {
+      "provider_id": "local-dense:sentence-transformers/all-MiniLM-L6-v2:deterministic-fallback:cpu",
+      "active_backend": "deterministic-fallback",
+      "active_device": "cpu",
+      "is_neural": false,
+      "is_fallback": true,
+      "model_backend_qualification": "NOT_ESTABLISHED",
+      "missing_neural_dependencies": [
+        "numpy",
+        "onnxruntime",
+        "torch",
+        "sentence_transformers"
+      ],
+      "result": "NO_NEURAL_QUALIFICATION"
+    }
+  },
+  "audited_invariants": {
+    "clean_detached_target_identity": true,
+    "target_commit_matches_expected": true,
+    "lease_compliance": false,
+    "literal_acceptance_command_executed": false,
+    "locked_alternate_test_control_passed_39_of_39": true,
+    "no_executable_candidate_truncation_300_or_1000": true,
+    "rrf_k60_bit_exact": true,
+    "neural_dense_qualification": false,
+    "successor_unlock_granted": false
+  },
+  "limitations": [
+    "The exclusive lease fails: cap-ret02 handoff.md is an unexpected changed path, and retrieval.py contains changed hunks outside the requested RRF window.",
+    "The literal requested pytest command could not start because pytest is not globally available; 39/39 is alternate locked-environment control evidence only.",
+    "The dense adapter used deterministic-fallback on CPU; neural model qualification and semantic retrieval quality are not established.",
+    "Under the observed fallback environment, the vocabulary-mismatch test takes its in-test semantic mock branch; this is not neural retrieval evidence.",
+    "This receipt does not certify CAP-RET02, unlock CAP-RET03, authorize merge or promotion, or establish any production, scale, or semantic-quality claim."
+  ],
+  "verdict": "FAIL",
+  "disposition": "REPAIR_REQUESTED",
+  "claim_ceiling": "C0 diagnostic evidence only; lease compliance, literal acceptance execution, neural qualification, certification, successor unlock, merge, and promotion are not granted",
+  "unblocks": [],
+  "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+  "canonicalization": "UTF-8 JSON with sort_keys=true, separators=(',', ':'), ensure_ascii=false; signature field excluded",
+  "signature": "2b9b341511cdfeebd651d4661ba18b1739d4ee523ac8f4ed6de5d27a1e287642"
+}

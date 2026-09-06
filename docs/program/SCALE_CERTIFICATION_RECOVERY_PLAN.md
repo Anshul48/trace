@@ -1,13 +1,17 @@
 # Scale Certification Recovery Plan
 
-> **Status:** Draft, planning only.
+> **Status:** Reconciled recovery plan under `DEC-CAP-001` (`TRACE-CAP-001`). Governed by decoupled capability lanes and `CAP_001_EXECUTION_DAG.md`.
 >
-> **Prepared:** 2026-08-28 against observed head `f74767e`.
+> **Prepared:** 2026-08-28 against observed head `f74767e`; Reconciled 2026-09-02 per `DEC-CAP-001`.
 >
-> **Authority boundary:** This document authorizes neither a data download,
-> provider call, benchmark execution, 100K/1M claim, promotion, nor a human
-> decision. It defines the bounded work and evidence required before any of
-> those actions can be proposed.
+> **Authority boundary:** Governed by `DEC-CAP-001` and [`CAP_001_GATE_MATRIX.md`](CAP_001_GATE_MATRIX.md). Human owner retains threshold, cost, execution, and promotion decisions.
+
+> [!IMPORTANT]
+> **EXPLICIT SUPERSESSION NOTICE (`DEC-CAP-001`):**
+> The monolithic Gate F2 qualification structure defined in this recovery plan is formally **SUPERSEDED** by the decoupled 4-lane `TRACE-CAP-001` architecture (`CORE`, `RETRIEVAL`, `CORTEX`, `SYNTHESIS`) ratified under [`DEC-CAP-001`](06_DECISION_LOG.md#dec-cap-001) and governed by [`COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md`](COGNITIVE_ARCHITECTURE_CORRECTION_PLAN.md), [`CAP_001_EXECUTION_DAG.md`](CAP_001_EXECUTION_DAG.md), and [`CAP_001_GATE_MATRIX.md`](CAP_001_GATE_MATRIX.md).
+>
+> 1. **Monolithic Gate F2 Superseded:** Monolithic qualification (lumping raw storage, retrieval latency, and generative synthesis into Gate F2) is decomposed into lane-specific gates per [`CAP_001_GATE_MATRIX.md`](CAP_001_GATE_MATRIX.md) (Gates `CAP-GF`, `CAP-GB-RET`, `CAP-GE`, `CAP-GG`).
+> 2. **Cortex/LLM Work Authorized in Parallel:** Quarantine R0-02 applies strictly to unanchored in-memory synthetic loops. Dense neural embeddings (`all-MiniLM-L6-v2`) and local SLM semantic consolidation are authorized to develop and qualify in parallel through 10K and 100K corpora, rather than being banned until 1M Core certifies.
 
 ## 1. Purpose and current truth boundary
 
@@ -29,8 +33,9 @@ The two levels are strictly sequential:
 2. **Level 2 — execute and independently verify a bounded 1M pilot only after
    an explicit human 100K promotion decision.**
 
-No 10M, consumer-shadow, or broad cognitive-capability claim follows from
-either level.
+Under `DEC-CAP-001`, cognitive consolidation mechanisms develop in parallel within
+the `CORTEX` lane under explicit scorecards, while Core scale qualification remains
+bounded to Spine durability.
 
 ## 2. Facts this plan addresses
 
@@ -207,10 +212,13 @@ The replacement runner must satisfy all of these conditions:
    immutable source bytes at every reported offset and checks source ID,
    boundaries, quote hash, and authorization. It does not trust an LLM's
    citation count.
-9. **Separated LLM lane.** If synthesis is in scope, it is an explicit
-   optional lane with a frozen provider/model policy, cost receipt, raw
-   redacted request/response hashes, and judgment protocol. It cannot seed
-   facts or certify the data-plane/retrieval result by itself.
+9. **Separated LLM lane (`DEC-CAP-001`).** Under `DEC-CAP-001` (`CAP-D001`, `CAP-D016`),
+   quarantine R0-02 applies strictly to unanchored in-memory synthetic loops.
+   Persistent dense embedding adapters (`all-MiniLM-L6-v2`) and local SLM
+   consolidation are explicitly authorized within decoupled capability lanes.
+   If synthesis is in scope, it is an explicit optional lane with a frozen
+   provider/model policy, cost receipt, raw redacted request/response hashes,
+   and judgment protocol. It cannot seed facts or certify the data-plane result.
 10. **Proposal safety.** Schema/taxonomy output remains a proposal. No benchmark
     run may self-approve a schema or mutate trusted graph edges.
 
@@ -296,8 +304,8 @@ ingesting a single new record.
 | L2-04: diagnostics | Run operator | 100K, 250K, and intermediate non-certifying checkpoints with resource/queue/recovery telemetry. | A bottleneck creates a bounded repair packet; it does not license a claim or an untracked rewrite. |
 | L2-05: frozen 1M candidate | Custody owner and run operator | New isolated candidate data root, exact 1M run, full raw telemetry, and candidate-only results. | Any missing record, duplicate, resource breach, failed recovery, failed quality lane, or invalid citation yields `candidate_failed`. |
 | L2-06: read-only hybrid evaluation | Evaluator | Frozen multi-domain query pack executed against the actual 1M candidate release, with retrieval and synthesis measured separately. | Any seeded fact, keyword-only judgment, hidden fallback, or database write invalidates the evaluation. |
-| L2-07: independent F2 verification | Separate verifier | Fresh worktree/data copy/result root, evidence-manifest validation, independent reproduction, and signed limitation report. | The verifier does not patch data/code or reuse the candidate’s mutable cache. |
-| L2-08: human F2 dossier | Coordinator and human owner | Narrow claim recommendation: exact corpus, configuration, hardware, scope, and residual limitations. | A pass cannot imply 10M, distributed readiness, general grounded cognition, or production adoption. |
+| L2-07: independent verification | Separate verifier | Fresh worktree/data copy/result root, evidence-manifest validation, independent reproduction, and signed limitation report (Gate CAP-GF). | The verifier does not patch data/code or reuse the candidate’s mutable cache. |
+| L2-08: human scale dossier | Coordinator and human owner | Narrow claim recommendation: exact corpus, configuration, hardware, scope, and residual limitations (superseded by lane gates CAP-GF / CAP-GG). | A pass cannot imply 10M, distributed readiness, general grounded cognition, or production adoption. |
 
 ### 6.4 Required 1M workload proofs
 
@@ -413,8 +421,8 @@ failures/exclusions, limitations, and the one next allowed packet.
 | Gate D | S6 plan is reviewed. | Human authorization for a bounded 1M pilot or no execution. |
 | S7 | Gate D authorizes execution. | 1M data-plane and evaluator candidate; diagnostic checkpoints. |
 | S8 | S7 is frozen. | Full isolated 1M candidate run and read-only hybrid evaluation. |
-| S9 | S8 evidence is sealed. | Independent F2 verification and limitation report. |
-| Gate F2 | S9 report exists. | Human decision on the exact 1M claim and next allowed work. |
+| S9 | S8 evidence is sealed. | Independent verification and limitation report (Gate CAP-GF). |
+| Gate F2 (Superseded) | S9 report exists. | Human decision on the exact 1M claim under decoupled gates CAP-GF (Core Spine) and CAP-GG (Cortex). |
 
 Corpus preparation and runner engineering may proceed in parallel only while
 their inputs are still mutable and explicitly marked non-certifying. Candidate

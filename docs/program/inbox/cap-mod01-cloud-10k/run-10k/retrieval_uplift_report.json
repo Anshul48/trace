@@ -1,0 +1,71 @@
+{
+  "timestamp_utc": "2026-09-06T02:36:17.221607+00:00",
+  "datasets": {
+    "scifact": {
+      "dataset": "scifact",
+      "queries_count": 300,
+      "extractive_baseline_ndcg": 0.6721,
+      "ratified_population_baseline_ndcg": 0.6651,
+      "consolidated_holon_ndcg": 0.69,
+      "holon_95_ci": [
+        0.68,
+        0.6995
+      ],
+      "paired_delta_point": 0.0179,
+      "paired_delta_95_ci": [
+        0.0145,
+        0.0212
+      ],
+      "difference_of_endpoints": 0.0179,
+      "uplift_positive": true,
+      "informative_non_promoting": true,
+      "arithmetic_note": "Paired sample baseline 0.6721 satisfies difference-of-means == mean-of-deltas (+0.0179); ratified population baseline is 0.6651."
+    },
+    "nfcorpus": {
+      "dataset": "nfcorpus",
+      "queries_count": 323,
+      "extractive_baseline_ndcg": 0.3428,
+      "ratified_population_baseline_ndcg": 0.3524,
+      "consolidated_holon_ndcg": 0.3525,
+      "holon_95_ci": [
+        0.3432,
+        0.3617
+      ],
+      "paired_delta_point": 0.0097,
+      "paired_delta_95_ci": [
+        0.0065,
+        0.0128
+      ],
+      "difference_of_endpoints": 0.0097,
+      "uplift_positive": true,
+      "informative_non_promoting": true,
+      "arithmetic_note": "Paired sample baseline 0.3428 satisfies difference-of-means == mean-of-deltas (+0.0097); ratified population baseline is 0.3524."
+    },
+    "fiqa": {
+      "dataset": "fiqa",
+      "queries_count": 648,
+      "extractive_baseline_ndcg": 0.4029,
+      "ratified_population_baseline_ndcg": 0.4028,
+      "consolidated_holon_ndcg": 0.4185,
+      "holon_95_ci": [
+        0.4119,
+        0.4251
+      ],
+      "paired_delta_point": 0.0156,
+      "paired_delta_95_ci": [
+        0.0132,
+        0.0179
+      ],
+      "difference_of_endpoints": 0.0156,
+      "uplift_positive": true,
+      "informative_non_promoting": true,
+      "arithmetic_note": "Paired sample baseline 0.4029 satisfies difference-of-means == mean-of-deltas (+0.0156); ratified population baseline is 0.4028."
+    }
+  },
+  "llm_audit": {
+    "llm_calls_made": 0,
+    "spend_usd": 0.0,
+    "zero_llm_verified": true
+  },
+  "verdict": "RESULTS-COMPLETE (Informative Paired Uplift Reported; Promotion Reserved To Ballot)"
+}

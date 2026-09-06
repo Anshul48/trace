@@ -1,0 +1,25 @@
+{
+  "target_node": "CAP-MOD01-DEEPSEEK-FLASH",
+  "timestamp_utc": "2026-09-05T16:04:02.989893+00:00",
+  "model_id": "deepseek-ai/DeepSeek-V4-Flash-0731",
+  "provider": "Sail Research",
+  "manifest_sha256": "b0318a379ad3eb29d2ae8e627b95c98666df32c9be7b215bed14318053994b3d",
+  "clusters_evaluated": 769,
+  "valid_cluster_count": 524,
+  "faithfulness_point": 0.6016,
+  "faithfulness_ci_95": [
+    0.5681,
+    0.6351
+  ],
+  "validity_rate": 0.6814,
+  "grounding_given_valid_point": 0.8829,
+  "grounding_given_valid_ci_95": [
+    0.8584,
+    0.9058
+  ],
+  "clears_95_floor": false,
+  "total_prompt_tokens": 872923,
+  "total_completion_tokens": 505931,
+  "total_spend_usd": 0.7922,
+  "verdict": "FAIL"
+}

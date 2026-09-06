@@ -1,0 +1,72 @@
+{
+  "report_id": "report-cap-mod01-deepseek-flash-sail-20260904",
+  "program": "TRACE-CAP-001",
+  "work_packet": "WP-CAP-MOD01",
+  "node_id": "CAP-MOD01-DEEPSEEK-FLASH",
+  "target_gate": "CAP-GC",
+  "created_at_utc": "2026-09-05T16:04:02.937815+00:00",
+  "manifest_sha256": "b0318a379ad3eb29d2ae8e627b95c98666df32c9be7b215bed14318053994b3d",
+  "total_clusters": 769,
+  "control_baseline": {
+    "name": "Extractive Control",
+    "faithfulness": 0.9967,
+    "bootstrap_95_ci": [
+      0.9952,
+      0.998
+    ]
+  },
+  "model_under_test": {
+    "model_id": "deepseek-ai/DeepSeek-V4-Flash-0731",
+    "provider": "Sail Research",
+    "endpoint": "https://api.sailresearch.com/v1/chat/completions",
+    "architecture": "DeepSeek-V4-Flash MoE",
+    "clusters_evaluated": 769,
+    "prompt_revision": {
+      "version": "improved-grounding-fewshot-v2",
+      "prompt_sha256": "f691a6c93471771cd4c70e3f6bdecf063a5db16e4ba0177b86ba3ac594d11f36",
+      "clarifications": [
+        "Plain-language definition of holon as a factual topic card",
+        "Explicit lexical anchoring rule enforcing source vocabulary",
+        "Concrete 1-shot input/output demonstration",
+        "Robust JSON cleanup stripping think tags, markdown fences, and repairing trailing commas"
+      ]
+    },
+    "faithfulness": {
+      "point_estimate": 0.6016,
+      "bootstrap_95_ci": [
+        0.5681,
+        0.6351
+      ],
+      "ci_width": 0.067,
+      "clears_95_floor": false,
+      "valid_cluster_count": 524
+    },
+    "disentangled_metrics": {
+      "validity_rate": 0.6814,
+      "grounding_given_valid": {
+        "point_estimate": 0.8829,
+        "bootstrap_95_ci": [
+          0.8584,
+          0.9058
+        ]
+      }
+    },
+    "performance": {
+      "warm_tokens_per_sec": 56.83,
+      "p95_latency_ms": 28429.8,
+      "total_wall_clock_sec": 582.07
+    },
+    "robustness": {
+      "invalid_output_rate": 0.3186,
+      "invalid_cluster_count": 245,
+      "transport_error_count": 0
+    },
+    "cost_and_resources": {
+      "total_prompt_tokens": 872923,
+      "total_completion_tokens": 505931,
+      "total_spend_usd": 0.792213,
+      "cost_per_1k_holons_usd": 1.0302
+    }
+  },
+  "verdict": "FAIL (< 95% floor)"
+}

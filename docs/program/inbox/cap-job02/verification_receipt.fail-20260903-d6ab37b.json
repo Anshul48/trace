@@ -1,0 +1,188 @@
+{
+  "receipt_format": "TRACE-CAP-001-independent-verification-v1",
+  "gate": "CAP-GB",
+  "node": "CAP-JOB02",
+  "packet_id": "WP-CAP-JOB02",
+  "attestation_id": "rcpt-cap-job02-verif-indep-20260903-d6ab37b",
+  "timestamp_utc": "2026-09-03T15:47:28.600Z",
+  "verifier_role": "VERIF-INDEP",
+  "verification_mode": "read-only-named-worktree-detached-check-failed",
+  "verification_worktree": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-job02",
+  "receipt_path": "docs/program/inbox/cap-job02/verification_receipt.json",
+  "branch_ref": "cap-job02-recovery",
+  "base_commit": "c853f43b0361e085c9ab0bb63e3ac16758a89fb1",
+  "verified_commit": "d6ab37b0514bbc02108529a942fa038c946bc596",
+  "source_identity": {
+    "target_branch_ref": "cap-job02-recovery",
+    "requested_commit_full": "d6ab37b0514bbc02108529a942fa038c946bc596",
+    "head_matches_target_commit": true,
+    "verified_commit_full": "d6ab37b0514bbc02108529a942fa038c946bc596",
+    "verified_tree_full": "7a794390094554cdc1397445ae4ed549e98bd920",
+    "base_commit_full": "c853f43b0361e085c9ab0bb63e3ac16758a89fb1",
+    "base_tree_full": "8ae9922981edc29105ccadb39c1f90f01bee9a0d",
+    "base_is_ancestor_of_verified_commit": true,
+    "target_branch_ref_exists_at_target_commit": true,
+    "initial_head_state": "HEAD -> cap-job02-recovery (branch attached)",
+    "detached_head": false,
+    "worktree_path_matches_dispatch": true,
+    "initial_worktree_clean": true,
+    "final_worktree_clean": true,
+    "tracked_diff_after_verification": false,
+    "untracked_paths_after_verification": [],
+    "receipt_written_outside_candidate_worktree": true,
+    "handoff_claims_relied_upon": false
+  },
+  "checks": {
+    "lease_and_mutation_scope": {
+      "lease_id": "lease-cap-job02-20260903T130500Z",
+      "lease_source": "docs/program/inbox/cap-job02/dispatch_lease.json",
+      "verification_boundary": [
+        "src/trace/v2/service.py (lease/heartbeat section)",
+        "src/trace/v2/store.py (job recovery section)",
+        "tests/v2/test_job_recovery.py"
+      ],
+      "expected_base_branch": "cap-job01-pipeline",
+      "expected_base_commit_full": "c853f43b0361e085c9ab0bb63e3ac16758a89fb1",
+      "candidate_changed_paths_from_expected_base": [
+        "docs/program/inbox/cap-job02/handoff.md",
+        "src/trace/v2/service.py",
+        "src/trace/v2/store.py",
+        "tests/v2/test_job_recovery.py"
+      ],
+      "unexpected_changed_paths": [
+        "docs/program/inbox/cap-job02/handoff.md"
+      ],
+      "diff_check": "PASS",
+      "lease_issued_at_utc": "2026-09-03T13:05:00Z",
+      "lease_duration_seconds": 7200,
+      "lease_expires_at_utc": "2026-09-03T15:05:00Z",
+      "observed_at_utc": "2026-09-03T15:47:06.578Z",
+      "lease_time_valid": false,
+      "lease_expired_at_observation": true,
+      "branch_ref_matches": true,
+      "worktree_is_detached": false,
+      "result": "FAIL",
+      "failure_reasons": [
+        "The named worktree is attached to cap-job02-recovery rather than detached at the candidate commit.",
+        "The lease had expired before verification completed.",
+        "handoff.md is changed from c853f43 and is outside the requested verification boundary."
+      ]
+    },
+    "acceptance_tests": {
+      "requested_command": "$env:PYTHONPATH='src'; pytest tests/v2/test_job_recovery.py -v",
+      "execution_command": "$env:PYTHONPATH='src'; pytest tests/v2/test_job_recovery.py -v",
+      "execution_worktree": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-job02",
+      "runtime_python": "C:/Program Files/Python312/python.exe",
+      "pytest_resolved_on_path": false,
+      "exit_code": 1,
+      "collected": null,
+      "passed": null,
+      "failed": null,
+      "skipped": null,
+      "stderr": "pytest : The term 'pytest' is not recognized as the name of a cmdlet, function, script file, or operable program.",
+      "expected_result": "15/15",
+      "result": "VERIFICATION_ERROR"
+    },
+    "negative_checks": {
+      "lease_expiry_300_seconds": {
+        "source_evidence": [
+          "src/trace/v2/service.py:588",
+          "src/trace/v2/store.py:5526",
+          "src/trace/v2/store.py:5603"
+        ],
+        "test_evidence": "tests/v2/test_job_recovery.py:386-408 sets heartbeat 400 seconds stale while lease_until is in the future and requests a 300-second reclaim.",
+        "runtime_probe": "temporary SQLite store; stale heartbeat set 301 seconds in the past and future lease retained; default reclaim_stale_jobs() returned queued",
+        "default_timeout_seconds": 300,
+        "observed_status": "queued",
+        "result": "PASS"
+      },
+      "three_strike_dead_letter": {
+        "source_evidence": [
+          "src/trace/v2/store.py:5365",
+          "src/trace/v2/store.py:5728-5746"
+        ],
+        "test_evidence": "tests/v2/test_job_recovery.py:173-210 exercises three failures and checks failed_dead_letter, attempts, and diagnostics.",
+        "runtime_probe_states": [
+          {
+            "attempts": 1,
+            "status": "queued"
+          },
+          {
+            "attempts": 2,
+            "status": "queued"
+          },
+          {
+            "attempts": 3,
+            "status": "failed_dead_letter"
+          }
+        ],
+        "result": "PASS"
+      },
+      "backpressure_cap_5000": {
+        "source_evidence": [
+          "src/trace/v2/service.py:175",
+          "src/trace/v2/service.py:805-808",
+          "src/trace/v2/store.py:5384-5392"
+        ],
+        "test_evidence": "tests/v2/test_job_recovery.py:256-271 checks deterministic rejection at a reduced cap; it does not itself fill the literal 5,000 limit.",
+        "runtime_probe": "temporary SQLite store accepted 5,000 pending jobs and rejected the 5,001st with QueueBackpressureError",
+        "observed_depth_before_overflow": 5000,
+        "overflow_rejected": true,
+        "rejection": "queue backpressure cap exceeded: 5000 pending jobs >= limit 5000",
+        "result": "PASS"
+      },
+      "crash_orphan_and_double_activation": {
+        "required_evidence": "simulated crash-after-consolidation with zero orphaned or double-activated jobs",
+        "committed_test_search": "No committed test in tests/v2/test_job_recovery.py covers crash-after-consolidation, orphan counts, double activation, or activation idempotency; test_run_pipeline_until_idle only drains a normal pipeline.",
+        "generic_runtime_probe": {
+          "simulated_crash_left_running": true,
+          "reclaimed_status": "queued",
+          "recovered_status": "succeeded",
+          "job_rows_after_recovery": 1,
+          "orphaned_queued_or_running_rows_after_recovery": 0,
+          "handler_invocations": 2
+        },
+        "evidence_status": "INSUFFICIENT",
+        "result": "FAIL",
+        "reason": "Generic job recovery does not establish crash-after-consolidation or activation idempotency; missing or ambiguous evidence is a fail-closed failure."
+      }
+    },
+    "receipt_integrity": {
+      "receipt_json_parse": true,
+      "signature_required_by_repository_convention": true,
+      "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+      "canonicalization": "UTF-8 JSON with sort_keys=true, separators=(',', ':'), ensure_ascii=false; signature field excluded",
+      "post_write_recomputation_required": true,
+      "result": "PASS"
+    }
+  },
+  "audited_invariants": {
+    "target_commit_identity": true,
+    "target_branch_ref": true,
+    "base_identity_and_ancestry": true,
+    "clean_named_worktree": true,
+    "detached_checkout": false,
+    "lease_time_valid": false,
+    "mutation_allowlist_exact": false,
+    "acceptance_tests_passed_15_of_15": false,
+    "lease_300_seconds_enforced": true,
+    "three_strike_dead_letter_enforced": true,
+    "backpressure_cap_5000_enforced": true,
+    "crash_orphan_double_activation_evidence": false,
+    "receipt_signature_valid": true
+  },
+  "limitations": [
+    "The exact acceptance command could not start because pytest was unavailable on PATH; no 15/15 result is claimed.",
+    "The requested worktree was attached to its branch, not detached.",
+    "The dispatch lease expired at 2026-09-03T15:05:00Z before verification observation.",
+    "The candidate changes handoff.md outside the requested verification boundary.",
+    "No committed crash-after-consolidation or activation-idempotency evidence was present; the generic temporary probe is not equivalent."
+  ],
+  "verdict": "FAIL",
+  "disposition": "FAIL_FOR_NAMED_VERIFICATION_ONLY",
+  "claim_ceiling": "Named verification failed; no component qualification, gate certification, promotion, merge, or successor unlock",
+  "unblocks": [],
+  "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+  "canonicalization": "UTF-8 JSON with sort_keys=true, separators=(',', ':'), ensure_ascii=false; signature field excluded",
+  "signature": "5f9129c0eba66261885816cd5a43b185e7d2f1991cd8eb5bb8fa7157a0c1b8c7"
+}

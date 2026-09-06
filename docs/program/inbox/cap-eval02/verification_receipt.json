@@ -1,0 +1,105 @@
+{
+  "target_node": "CAP-EVAL02",
+  "verifier_session_id": "VERIF-B2-EVAL02-SESSION-2",
+  "timestamp_utc": "2026-09-03T15:44:50.5818750Z",
+  "candidate_commit_sha": "587aa514e254bc33a5bc18b90ce399cf602992ef",
+  "base_commit": "8f6efe2ca0877bca99ec1fd211c0051b1f504a09",
+  "lease_conformance": true,
+  "merge_risk": "none",
+  "tests_executed": [
+    {
+      "command": "$env:PYTHONPATH='src;.'; .\\.venv\\Scripts\\pytest.exe tests/v2/test_eval_datasets.py -v",
+      "exit_code": 0,
+      "status": "PASS",
+      "observed": "12 passed in 0.65s"
+    },
+    {
+      "command": "python benchmarks/verify_dataset_checksums.py --manifest benchmarks/manifests/beir_musique_frozen_v1.json",
+      "exit_code": 0,
+      "status": "PASS",
+      "observed": "[PASS] All 4 frozen dataset splits and 8 staged files matched cryptographic checksums 100%."
+    }
+  ],
+  "negative_assertions": [
+    "Directive D1 SciFact: split=test, manifest queries_count=300, observed query-file rows=300, canonical archive MD5=5f7d1de60b170fc8027bb7898e2efca1.",
+    "Directive D1 NFCorpus: split=test, manifest queries_count=323, observed query-file rows=323, canonical archive MD5=a89dba18a62ef92f7d323ec890a0d38d.",
+    "Directive D1 FiQA: split=test, manifest queries_count=648, observed query-file rows=648, canonical archive MD5=17918ed23cd04fb15047f73e6c3bd9d9.",
+    "No unnamed SciFact 1,000-query claim was accepted; the provisional 1,000-query text was not used.",
+    "All 12 acceptance tests passed, including count-mismatch, tamper-detection, and authority-failure fail-closed cases.",
+    "The detached worktree was clean after verification; the candidate diff had no paths outside the CAP-EVAL02 lease and git diff --check passed."
+  ],
+  "dataset_verification": {
+    "counts_observed": {
+      "scifact": 300,
+      "nfcorpus": 323,
+      "fiqa": 648,
+      "musique": 500
+    },
+    "md5_matched": true,
+    "details": {
+      "scifact": {
+        "query_file_rows": 300,
+        "qrels_rows": 339,
+        "split": "test",
+        "canonical_archive_md5": "5f7d1de60b170fc8027bb7898e2efca1"
+      },
+      "nfcorpus": {
+        "query_file_rows": 323,
+        "qrels_rows": 12334,
+        "split": "test",
+        "canonical_archive_md5": "a89dba18a62ef92f7d323ec890a0d38d"
+      },
+      "fiqa": {
+        "query_file_rows": 648,
+        "qrels_rows": 1706,
+        "split": "test",
+        "canonical_archive_md5": "17918ed23cd04fb15047f73e6c3bd9d9"
+      },
+      "musique": {
+        "query_file_rows": 500,
+        "qrels_rows": 1325,
+        "split": "frozen_dev_500"
+      },
+      "md5_scope": "Manifest authority fields compared with Directive D1; no raw archive download was required by this verification prompt."
+    }
+  },
+  "verdict": "PASS",
+  "failure_trace": "",
+  "signature_scheme": "session+utc",
+  "signature": "VERIF-B2-EVAL02-SESSION-2|2026-09-03T15:44:50.5818750Z",
+  "candidate_branch": "cap-eval02-datasets",
+  "worktree_path": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-eval02",
+  "verified_artifacts": {
+    "git_tree_sha": "5cd671569a198bf66a1ae8733057c1f8a556e26d",
+    "manifest": {
+      "path": "benchmarks/manifests/beir_musique_frozen_v1.json",
+      "sha256": "bf82b0d6114e01e1385a21c9a69a6d96bc8e6891f96abc8a01c1f5cae4001ed7"
+    },
+    "verifier_script": {
+      "path": "benchmarks/verify_dataset_checksums.py",
+      "sha256": "81cda9e9b14ba3ed19d2c1aa6c3306a658be8c240b58a9159d53445b14e6061d"
+    },
+    "acceptance_test": {
+      "path": "tests/v2/test_eval_datasets.py",
+      "sha256": "b66bad877c0f212128d17b0fcf50ac5c4e64a9fb07e9481cc11e2a4b9b47e6e6"
+    },
+    "data_sha256": {
+      "benchmarks/data/scifact/queries.jsonl": "703117bad47dd87bbd17fc56ca197f2e2453fc208f1c8f602c3f3399135e693e",
+      "benchmarks/data/scifact/qrels.jsonl": "52eff9c1848a1c3bd02d2835697c9ddd8afa23e7d934deea94e2b1f0aa62e504",
+      "benchmarks/data/nfcorpus/queries.jsonl": "9114262ec5ef5969989ee2950a0945dcdbe7eb7db51b3bbb01921fc21394db87",
+      "benchmarks/data/nfcorpus/qrels.jsonl": "8bcdc108ff67409d60cbbb969c61bf4db62854080f82c5d00a9d23ac699062b5",
+      "benchmarks/data/fiqa/queries.jsonl": "61a33d5f16a4c2bdcbb4c4d80d3645503240054a16cc985e1ae73071b83f1373",
+      "benchmarks/data/fiqa/qrels.jsonl": "01cd54f708eb98bbe35c952ea1748545cac75763c971cb430a2135ef3bca3db0",
+      "benchmarks/data/musique/queries.jsonl": "e97d490d1a412b3d41fbe4dc33ef99dcf840f2f797be3033b4c4f2d6728dde0f",
+      "benchmarks/data/musique/qrels.jsonl": "758f22336234fb23d339aad5c1fe3f5dbc0ac2ec99f3db0439485f6eb6aebe96"
+    }
+  },
+  "identity_notes": [
+    "Dispatch base 8f6efe2 resolved in the verification repository to 8f6efe2ca0877bca99ec1fd211c0051b1f504a09; the worker handoff's literal full SHA 8f6efe27fcbbba3a45cbe27ef3e80f2d87e07ca4 was not an object, so the repository-resolved identity is recorded here.",
+    "The acceptance result is independent node evidence only; it does not certify RET04, a program gate, production readiness, a SOTA claim, or promotion."
+  ],
+  "execution_notes": [
+    "The literal pytest executable was not on PATH in the unactivated shell; the canonical isolated worktree venv invocation was used.",
+    "The canonical invocation used PYTHONPATH=src;. so the repository-root benchmarks namespace was importable; no candidate file was changed."
+  ]
+}

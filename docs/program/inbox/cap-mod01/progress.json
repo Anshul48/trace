@@ -1,0 +1,343 @@
+{
+  "notice": "[TEMPORARY MONITORING TOOLING \u2014 SCHEDULED FOR REMOVAL UPON WAVE C COMPLETION]",
+  "task_id": "CAP-MOD01",
+  "task_name": "Sequential Model Bake-Off on 100 Frozen Atom Clusters",
+  "status": "in_progress",
+  "active_model": "Qwen3.8-27B [Evaluating Cluster 90/100]",
+  "total_clusters_all_models": 600,
+  "completed_clusters_all_models": 189,
+  "overall_progress_percent": 31.5,
+  "updated_at": "2026-09-06T03:13:18.109454+00:00",
+  "models": [
+    {
+      "name": "Extractive Control",
+      "id": "extractive_control",
+      "tier": "Tier 0",
+      "params": "0B (Zero-LLM)",
+      "status": "pending",
+      "completed_clusters": 0,
+      "total_clusters": 100,
+      "tokens_per_sec": null,
+      "p95_latency_ms": null,
+      "error_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    {
+      "name": "Gemma 4 E4B",
+      "id": "gemma4:e4b",
+      "tier": "Tier 1",
+      "params": "4B",
+      "status": "pending",
+      "completed_clusters": 0,
+      "total_clusters": 100,
+      "tokens_per_sec": null,
+      "p95_latency_ms": null,
+      "error_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    {
+      "name": "Qwen3-8B",
+      "id": "qwen3:8b",
+      "tier": "Tier 2",
+      "params": "8B",
+      "status": "pending",
+      "completed_clusters": 0,
+      "total_clusters": 100,
+      "tokens_per_sec": null,
+      "p95_latency_ms": null,
+      "error_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    {
+      "name": "Gemma 4 12B",
+      "id": "gemma4:12b",
+      "tier": "Tier 3",
+      "params": "12B",
+      "status": "pending",
+      "completed_clusters": 0,
+      "total_clusters": 100,
+      "tokens_per_sec": null,
+      "p95_latency_ms": null,
+      "error_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    {
+      "name": "Qwen3.8-27B",
+      "id": "qwen3.8:27b",
+      "tier": "Tier 4",
+      "params": "27B",
+      "status": "in_progress",
+      "completed_clusters": 89,
+      "total_clusters": 100,
+      "tokens_per_sec": 3.96,
+      "p95_latency_ms": 318581.5,
+      "error_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    {
+      "name": "Gemma 4 26B MoE",
+      "id": "gemma4:26b",
+      "tier": "Tier 5",
+      "params": "26B",
+      "status": "completed",
+      "completed_clusters": 100,
+      "total_clusters": 100,
+      "tokens_per_sec": 28.3,
+      "p95_latency_ms": 281975.9,
+      "error_rate": 0.02,
+      "invalid_rate": 0.02
+    }
+  ],
+  "logs": [
+    {
+      "timestamp": "2026-09-05T22:59:02.717595+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 40/100 (live): Faithfulness 0.9125, TPS 3.9, Latency 149120ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:04:21.538730+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 41/100 (live): Faithfulness 1.0000, TPS 4.0, Latency 318737ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:09:55.381699+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 42/100 (live): Faithfulness 0.9028, TPS 3.9, Latency 333760ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:12:40.863630+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 43/100 (live): Faithfulness 0.8358, TPS 3.7, Latency 165432ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:15:13.663930+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 44/100 (live): Faithfulness 0.9219, TPS 3.9, Latency 152755ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:17:44.501610+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 45/100 (live): Faithfulness 1.0000, TPS 4.1, Latency 150790ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:20:35.923415+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 46/100 (live): Faithfulness 0.9314, TPS 3.9, Latency 171372ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:23:07.914293+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 47/100 (live): Faithfulness 1.0000, TPS 4.0, Latency 151948ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:25:42.641919+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 48/100 (live): Faithfulness 1.0000, TPS 4.0, Latency 154682ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:28:15.732762+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 49/100 (live): Faithfulness 0.9250, TPS 3.8, Latency 153042ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:30:50.850604+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 50/100 (live): Faithfulness 0.8472, TPS 4.1, Latency 155071ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:33:35.736198+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 51/100 (live): Faithfulness 1.0000, TPS 4.0, Latency 164838ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:36:02.506468+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 52/100 (live): Faithfulness 1.0000, TPS 4.3, Latency 146709ms"
+    },
+    {
+      "timestamp": "2026-09-05T23:38:33.808226+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 53/100 (live): Faithfulness 0.9286, TPS 4.0, Latency 151257ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:26:12.929290+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 54/100 (live): Faithfulness 0.9300, TPS 4.0, Latency 158451ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:28:44.175950+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 55/100 (live): Faithfulness 0.8810, TPS 3.8, Latency 151193ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:31:16.238810+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 56/100 (live): Faithfulness 1.0000, TPS 4.0, Latency 151997ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:34:14.067516+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 57/100 (live): Faithfulness 0.8646, TPS 3.7, Latency 177781ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:36:46.597030+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 58/100 (live): Faithfulness 1.0000, TPS 4.1, Latency 152480ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:39:21.066968+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 59/100 (live): Faithfulness 0.9167, TPS 3.9, Latency 154423ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:42:03.971581+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 60/100 (live): Faithfulness 0.9474, TPS 3.8, Latency 162849ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:44:33.128514+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 61/100 (live): Faithfulness 1.0000, TPS 3.9, Latency 149114ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:47:13.666804+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 62/100 (live): Faithfulness 0.8139, TPS 3.7, Latency 160491ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:49:51.360464+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 63/100 (live): Faithfulness 0.9167, TPS 3.8, Latency 157644ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:52:32.568096+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 64/100 (live): Faithfulness 0.9062, TPS 4.0, Latency 161156ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:55:00.702385+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 65/100 (live): Faithfulness 1.0000, TPS 4.1, Latency 148093ms"
+    },
+    {
+      "timestamp": "2026-09-06T01:57:53.000346+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 66/100 (live): Faithfulness 0.9120, TPS 3.7, Latency 172252ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:00:20.082112+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 67/100 (live): Faithfulness 0.9135, TPS 4.1, Latency 147033ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:03:22.897772+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 68/100 (live): Faithfulness 0.9375, TPS 3.7, Latency 182772ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:06:23.341067+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 69/100 (live): Faithfulness 0.8636, TPS 4.2, Latency 180397ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:08:43.233690+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 70/100 (live): Faithfulness 0.9219, TPS 4.1, Latency 139839ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:11:17.016341+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 71/100 (live): Faithfulness 0.9048, TPS 4.2, Latency 153740ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:14:27.915005+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 72/100 (live): Faithfulness 0.8810, TPS 4.0, Latency 190844ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:17:09.357637+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 73/100 (live): Faithfulness 0.9200, TPS 4.0, Latency 161392ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:19:24.906913+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 74/100 (live): Faithfulness 1.0000, TPS 4.1, Latency 135503ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:24:43.585493+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 75/100 (live): Faithfulness 1.0000, TPS 4.1, Latency 318582ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:39:36.684794+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 76/100 (live): Faithfulness 1.0000, TPS 3.8, Latency 293856ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:42:05.079788+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 77/100 (live): Faithfulness 1.0000, TPS 4.3, Latency 148352ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:44:43.787047+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 78/100 (live): Faithfulness 1.0000, TPS 4.3, Latency 158653ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:47:28.104278+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 79/100 (live): Faithfulness 0.8750, TPS 3.8, Latency 164276ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:50:03.382592+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 80/100 (live): Faithfulness 1.0000, TPS 4.1, Latency 155229ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:52:35.430621+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 81/100 (live): Faithfulness 1.0000, TPS 4.2, Latency 151996ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:55:21.273673+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 82/100 (live): Faithfulness 0.8889, TPS 3.9, Latency 165791ms"
+    },
+    {
+      "timestamp": "2026-09-06T02:57:40.004345+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 83/100 (live): Faithfulness 0.9125, TPS 4.3, Latency 138682ms"
+    },
+    {
+      "timestamp": "2026-09-06T03:00:12.680024+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 84/100 (live): Faithfulness 1.0000, TPS 4.1, Latency 152606ms"
+    },
+    {
+      "timestamp": "2026-09-06T03:03:02.477619+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 85/100 (live): Faithfulness 0.8000, TPS 3.9, Latency 169747ms"
+    },
+    {
+      "timestamp": "2026-09-06T03:05:29.597622+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 86/100 (live): Faithfulness 1.0000, TPS 4.1, Latency 147063ms"
+    },
+    {
+      "timestamp": "2026-09-06T03:08:25.868276+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 87/100 (live): Faithfulness 0.8500, TPS 3.9, Latency 176213ms"
+    },
+    {
+      "timestamp": "2026-09-06T03:10:55.938961+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 88/100 (live): Faithfulness 0.9000, TPS 4.0, Latency 150025ms"
+    },
+    {
+      "timestamp": "2026-09-06T03:13:18.109454+00:00",
+      "level": "INFO",
+      "message": "[Qwen3.8-27B] Cluster 89/100 (live): Faithfulness 1.0000, TPS 3.7, Latency 142109ms"
+    }
+  ]
+}

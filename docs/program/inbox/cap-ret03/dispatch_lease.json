@@ -1,0 +1,33 @@
+{
+  "lease_id": "lease-cap-ret03-20260904T021500Z",
+  "node_id": "CAP-RET03",
+  "packet_id": "WP-CAP-RET03",
+  "assigned_role": "RET-SPEC",
+  "base_branch": "cap-ret02-fusion",
+  "base_commit": "94afcf3b358c351ac7a71e466a18fca67c32e81a",
+  "target_branch": "cap-ret03-graph",
+  "worktree_path": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-ret03",
+  "posix_worktree_path": "/mnt/c/Users/anshu/AppData/Local/trace-worktrees/trace-ret03",
+  "linux_worktree_path": "/tmp/trace-wt/ret03",
+  "exclusive_file_leases": [
+    "src/trace/v2/retrieval.py",
+    "tests/v2/test_graph_retrieval.py",
+    "docs/program/inbox/cap-ret03/handoff.md"
+  ],
+  "forbidden_boundaries": [
+    "src/trace/v2/retrieval.py:RRF_FUSION_SECTION",
+    "src/trace/v2/cortex/",
+    "benchmarks/manifests/"
+  ],
+  "issued_by": "Program Coordinator (COORD)",
+  "issued_at_utc": "2026-09-04T02:15:00Z",
+  "lease_duration_sec": 28800,
+  "status": "ACTIVE_DISPATCHED",
+  "acceptance_criteria": [
+    "Personalized PageRank spreading activation over CONTAINS, DEPENDS_ON, ASSOCIATED_WITH edges",
+    "Constraints: max out-degree <= 50, walk depth <= 15, teleport alpha = 0.15, max 20 iterations",
+    "Multihop P95 latency <= 10 ms",
+    "Empty graph returns hybrid candidates with explicit telemetry flag",
+    "pytest tests/v2/test_graph_retrieval.py -v (100% pass)"
+  ]
+}

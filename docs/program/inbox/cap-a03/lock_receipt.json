@@ -1,0 +1,10 @@
+{
+  "packet_id": "CAP-A03",
+  "snapshot_id": "cap-001-wave-a-relock-20260902",
+  "generated_at_utc": "2026-09-02T16:54:00Z",
+  "file_count": 781,
+  "tree_sha256": "43f11b84a20c9f7f0a084a82ceca00e67cffdc970d4f75f6ca8f2d57622db75f",
+  "core_documents_count": 23,
+  "status": "PASS",
+  "verified_by": "Program Coordinator (COORD)"
+}

@@ -1,0 +1,70 @@
+{
+  "dispatch_session_id": "dispatch-verif-b2-20260903T144000Z",
+  "batch": "Batch 2",
+  "target_nodes": [
+    "CAP-JOB02",
+    "CAP-CRX03",
+    "CAP-EVAL02"
+  ],
+  "assigned_role": "VERIF-INDEP",
+  "issued_by": "Program Coordinator (COORD)",
+  "issued_at_utc": "2026-09-03T14:40:00Z",
+  "lease_duration_sec": 7200,
+  "status": "ACTIVE_DISPATCHED",
+  "targets": {
+    "CAP-JOB02": {
+      "branch": "cap-job02-recovery",
+      "commit": "d6ab37b0514bbc02108529a942fa038c946bc596",
+      "base_ref": "cap-job01-pipeline",
+      "base_commit": "c853f43",
+      "worktree": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-job02",
+      "posix_worktree": "/mnt/c/Users/anshu/AppData/Local/trace-worktrees/trace-job02",
+      "lease_paths": [
+        "src/trace/v2/service.py",
+        "src/trace/v2/store.py",
+        "tests/v2/test_job_recovery.py"
+      ],
+      "receipt_path": "docs/program/inbox/cap-job02/verification_receipt.json",
+      "special_audit": "LEASE_OVERLAP_AUDIT_JOB02_CRX03",
+      "merge_serialization_priority": "FIRST (Directive D3)"
+    },
+    "CAP-CRX03": {
+      "branch": "cap-crx03-activation",
+      "commit": "824222eed180679727398401adc92d9cfed25358",
+      "base_ref": "cap-crx02-consolidator",
+      "base_commit": "45c3591",
+      "worktree": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-crx03",
+      "posix_worktree": "/mnt/c/Users/anshu/AppData/Local/trace-worktrees/trace-crx03",
+      "lease_paths": [
+        "src/trace/v2/service.py",
+        "src/trace/v2/store.py",
+        "tests/v2/test_cortex_activation.py"
+      ],
+      "receipt_path": "docs/program/inbox/cap-crx03/verification_receipt.json",
+      "special_audit": "LEASE_OVERLAP_AUDIT_JOB02_CRX03_AND_CRASH_ROLLBACK",
+      "merge_serialization_priority": "SECOND (Requires rebase onto JOB02 per Directive D3)"
+    },
+    "CAP-EVAL02": {
+      "branch": "cap-eval02-datasets",
+      "commit": "587aa514e254bc33a5bc18b90ce399cf602992ef",
+      "base_ref": "cap-eval01-protocol",
+      "base_commit": "8f6efe2",
+      "worktree": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-eval02",
+      "posix_worktree": "/mnt/c/Users/anshu/AppData/Local/trace-worktrees/trace-eval02",
+      "lease_paths": [
+        "benchmarks/manifests/",
+        "benchmarks/data/",
+        "benchmarks/verify_dataset_checksums.py",
+        "tests/v2/test_eval_datasets.py"
+      ],
+      "receipt_path": "docs/program/inbox/cap-eval02/verification_receipt.json",
+      "special_audit": "SCIFACT_COUNT_AUDIT_DIRECTIVE_D1",
+      "required_counts": {
+        "scifact_queries": 300,
+        "nfcorpus_queries": 323,
+        "fiqa_queries": 648,
+        "musique_queries": 500
+      }
+    }
+  }
+}

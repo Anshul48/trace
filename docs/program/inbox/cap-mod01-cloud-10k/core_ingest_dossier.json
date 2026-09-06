@@ -1,0 +1,52 @@
+{
+  "program": "TRACE-CAP-001",
+  "phase": "Core Ingestion & Atomization (Local)",
+  "timestamp_utc": "2026-09-05T18:06:53.302979+00:00",
+  "total_docs": 10000,
+  "total_atoms": 23336,
+  "total_clusters_full": 7778,
+  "sampled_window_clusters": 2000,
+  "metrics": {
+    "load_duration_sec": 0.9394,
+    "atomize_duration_sec": 0.6384,
+    "total_ingest_duration_sec": 1.5778,
+    "docs_per_sec": 6337.96,
+    "target_docs_per_sec": 800.0,
+    "clears_ingest_floor": true,
+    "atoms_per_sec": 14790.26,
+    "tokens_per_sec": 687366.96,
+    "peak_rss_mb": 965.88,
+    "storage_split": {
+      "source_text_bytes": 6704283,
+      "atom_text_bytes": 6678559,
+      "spine_wal_approx_mb": 12.7629,
+      "clusters_10k_v1_json_bytes": 5696539,
+      "clusters_10k_full_json_bytes": 21706133
+    }
+  },
+  "shard_slices": [
+    {
+      "dataset": "musique",
+      "count": 8000
+    },
+    {
+      "dataset": "beir-fiqa",
+      "count": 1058
+    },
+    {
+      "dataset": "beir-scifact",
+      "count": 518
+    },
+    {
+      "dataset": "beir-nfcorpus",
+      "count": 363
+    },
+    {
+      "dataset": "multihop-rag",
+      "count": 61
+    }
+  ],
+  "manifest_10k_v1_sha256": "e93b8d4ef8d094099f2be91e3442cc4356679d42a8a5332de5d99a58b0918d98",
+  "manifest_10k_full_sha256": "710449c42eede79e7bae61ea4e2fdbcfe3671d33110e06bd5a43963a969c9613",
+  "verdict": "PASS"
+}

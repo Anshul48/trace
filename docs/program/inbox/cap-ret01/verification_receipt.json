@@ -1,0 +1,166 @@
+{
+  "receipt_format": "TRACE-CAP-001-independent-verification-v1",
+  "gate": "CAP-GB",
+  "node": "CAP-RET01",
+  "packet_id": "WP-CAP-RET01-REPAIR",
+  "attestation_id": "rcpt-cap-ret01-verif-indep-20260903T085622Z",
+  "timestamp_utc": "2026-09-03T08:56:22Z",
+  "verifier_role": "VERIF-INDEP",
+  "verification_mode": "clean-detached-worktree",
+  "verification_worktree": "C:/Users/anshu/AppData/Local/Temp/trace-cap-ret01-verif-indep-20260903-01",
+  "receipt_path": "docs/program/inbox/cap-ret01/verification_receipt.json",
+  "branch_ref": "cap-ret01-embedding",
+  "base_commit": "a9255b4de181d0325b7ff140f685a1a065ae5d1f",
+  "verified_commit": "9f90ac8bd00f07935d40d1b01ac4ea2283121c97",
+  "source_identity": {
+    "target_branch_ref": "cap-ret01-embedding",
+    "head_matches_target_commit": true,
+    "verified_commit_full": "9f90ac8bd00f07935d40d1b01ac4ea2283121c97",
+    "base_commit_full": "a9255b4de181d0325b7ff140f685a1a065ae5d1f",
+    "base_tree_hash": "66b106d17e75a337491231f1d5ec25697a012a51",
+    "verified_tree_hash": "715e9da791c85771e538fa8083345bcffa4be5cc",
+    "base_is_ancestor_of_verified_commit": true,
+    "detached_head": true,
+    "candidate_source_worktree_clean_before_receipt": true,
+    "tracked_diff_after_verification": false,
+    "receipt_is_only_expected_untracked_artifact": true
+  },
+  "checks": {
+    "acceptance_tests": {
+      "requested_command": "$env:PYTHONPATH='src'; pytest tests/v2/test_retrieval_embedding.py tests/test_v2_cognitive.py -v",
+      "execution_context": "clean detached worktree with worktree-local locked test environment on PATH",
+      "execution_command": "$env:PATH = 'C:/Users/anshu/AppData/Local/Temp/trace-cap-ret01-verif-indep-20260903-01/.venv/Scripts;' + $env:PATH; $env:PYTHONPATH='src'; pytest tests/v2/test_retrieval_embedding.py tests/test_v2_cognitive.py -v",
+      "runtime_python": "C:/Users/anshu/AppData/Local/Temp/trace-cap-ret01-verif-indep-20260903-01/.venv/Scripts/python.exe",
+      "exit_code": 0,
+      "collected": 24,
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "warnings": 1,
+      "warning_note": "PytestCacheWarning: could not create .pytest_cache path in the temporary worktree; no test failed or skipped.",
+      "result": "PASS"
+    },
+    "environment_resolution": {
+      "locked_environment_command": "$env:PYTHONPATH='src'; uv run --locked --extra test pytest tests/v2/test_retrieval_embedding.py tests/test_v2_cognitive.py -v",
+      "exit_code": 0,
+      "result": "PASS; created the worktree-local .venv used by the exact acceptance command"
+    },
+    "discarded_incomplete_interpreter_probe": {
+      "execution_command": "$env:PATH = 'C:/Users/anshu/OneDrive/Documents/Code/Utilities/trace/.venv/Scripts;' + $env:PATH; $env:PYTHONPATH='src'; pytest tests/v2/test_retrieval_embedding.py tests/test_v2_cognitive.py -v",
+      "exit_code": 1,
+      "stderr": "ModuleNotFoundError: No module named 'iniconfig'",
+      "result": "NOT_USED_FOR_VERDICT; shared coordinator venv was incomplete"
+    },
+    "dag_dense_adapter_check": {
+      "requested_command": "$env:PYTHONPATH='src'; python -c \"from trace.v2.retrieval import get_embedding_adapter; a = get_embedding_adapter('all-MiniLM-L6-v2'); vec = a.embed('Test query'); assert len(vec) == 384; print('Dense Adapter Verified.')\"",
+      "execution_context": "same clean detached worktree with worktree-local .venv on PATH",
+      "execution_command": "$env:PATH = 'C:/Users/anshu/AppData/Local/Temp/trace-cap-ret01-verif-indep-20260903-01/.venv/Scripts;' + $env:PATH; $env:PYTHONPATH='src'; python -c \"from trace.v2.retrieval import get_embedding_adapter; a = get_embedding_adapter('all-MiniLM-L6-v2'); vec = a.embed('Test query'); assert len(vec) == 384; print('Dense Adapter Verified.')\"",
+      "exit_code": 0,
+      "stdout": "Dense Adapter Verified.",
+      "stderr": "Using deterministic CPU projection fallback for LocalDenseEmbedder (qualification: NOT_ESTABLISHED). Reason: Deterministic CPU projection fallback active (model_backend_qualification=NOT_ESTABLISHED). Neural backends unavailable: [onnx: Missing ONNX dependencies: numpy, onnxruntime; sentence-transformers: Missing SentenceTransformers dependencies: torch, sentence_transformers].",
+      "vector_dimension": 384,
+      "backend_observed": "deterministic-fallback",
+      "device_observed": "cpu",
+      "model_backend_qualification": "NOT_ESTABLISHED",
+      "result": "PASS_SHAPE_AND_WIRING_ONLY"
+    },
+    "invariant_probe": {
+      "exit_code": 0,
+      "adapter_class": "LocalDenseEmbedder",
+      "protocol_structural_conformance": true,
+      "single_string_vector_type": "list[float]",
+      "single_string_vector_dimension": 384,
+      "single_string_vector_l2_norm": 1.0,
+      "provider_id_before_embed": "local-dense:sentence-transformers/all-MiniLM-L6-v2:deterministic-fallback:cpu",
+      "provider_id_after_embed": "local-dense:sentence-transformers/all-MiniLM-L6-v2:deterministic-fallback:cpu",
+      "provider_id_stable": true,
+      "telemetry_provider_id_matches_property": true,
+      "declared_model_name": "sentence-transformers/all-MiniLM-L6-v2",
+      "declared_model_revision": "e4ce9877abf3ed5223c6a46944e9514f7b60a2d2",
+      "telemetry_dimensions": 384,
+      "active_backend": "deterministic-fallback",
+      "active_device": "cpu",
+      "is_neural": false,
+      "is_fallback": true,
+      "qualification_status": "DETERMINISTIC_FALLBACK_UNQUALIFIED",
+      "model_backend_qualification": "NOT_ESTABLISHED",
+      "fallback_cannot_claim_neural_qualification": true,
+      "result": "PASS"
+    },
+    "main_diff_allowlist": {
+      "comparison": "git diff a9255b4 9f90ac8 --name-status",
+      "expected_paths": [
+        "docs/program/inbox/cap-ret01/handoff.md",
+        "src/trace/v2/adapters/embedding.py",
+        "src/trace/v2/retrieval.py",
+        "tests/v2/test_retrieval_embedding.py"
+      ],
+      "changed_paths": [
+        "docs/program/inbox/cap-ret01/handoff.md",
+        "src/trace/v2/adapters/embedding.py",
+        "src/trace/v2/retrieval.py",
+        "tests/v2/test_retrieval_embedding.py"
+      ],
+      "unexpected_paths": [],
+      "receipt_artifact_excluded_from_candidate_mutation_audit": true,
+      "result": "PASS"
+    }
+  },
+  "backend_observation": {
+    "adapter_class": "LocalDenseEmbedder",
+    "provider_id": "local-dense:sentence-transformers/all-MiniLM-L6-v2:deterministic-fallback:cpu",
+    "declared_model_name": "sentence-transformers/all-MiniLM-L6-v2",
+    "declared_model_revision": "e4ce9877abf3ed5223c6a46944e9514f7b60a2d2",
+    "dimensions": 384,
+    "active_backend": "deterministic-fallback",
+    "active_device": "cpu",
+    "is_neural": false,
+    "is_fallback": true,
+    "qualification_status": "DETERMINISTIC_FALLBACK_UNQUALIFIED",
+    "model_backend_qualification": "NOT_ESTABLISHED",
+    "onnxruntime_available": false,
+    "sentence_transformers_available": false,
+    "torch_available": false,
+    "cuda_available": false,
+    "available_providers": [],
+    "fallback_reason": "Deterministic CPU projection fallback active (model_backend_qualification=NOT_ESTABLISHED). Neural backends unavailable: [onnx: Missing ONNX dependencies: numpy, onnxruntime; sentence-transformers: Missing SentenceTransformers dependencies: torch, sentence_transformers].",
+    "attempts": [
+      {
+        "backend": "onnx",
+        "status": "unavailable",
+        "reason": "Missing ONNX dependencies: numpy, onnxruntime"
+      },
+      {
+        "backend": "sentence-transformers",
+        "status": "unavailable",
+        "reason": "Missing SentenceTransformers dependencies: torch, sentence_transformers"
+      },
+      {
+        "backend": "deterministic-fallback",
+        "status": "active",
+        "qualification": "NOT_ESTABLISHED"
+      }
+    ]
+  },
+  "audited_invariants": {
+    "clean_detached_target_identity": true,
+    "single_string_embedding_returns_384_vector": true,
+    "vector_is_float_list_and_normalized": true,
+    "adapter_wiring_and_protocol": true,
+    "provider_id_stable_and_coherent": true,
+    "pinned_revision_provenance_coherent": true,
+    "fallback_is_not_neural_qualified": true,
+    "tests_passed_24_of_24": true,
+    "mutation_set_matches_allowlist": true
+  },
+  "limitations": [
+    "No neural backend was exercised: numpy, onnxruntime, torch, and sentence_transformers were unavailable in the isolated test environment.",
+    "The observed 384-vector is deterministic fallback evidence only; QUALIFIED_NEURAL is not established and no semantic model-quality claim is made.",
+    "This receipt is component verification for the named packet only; it does not certify retrieval quality, production readiness, scale, promotion, or successor unlock."
+  ],
+  "verdict": "PASS",
+  "disposition": "PASS_FOR_NAMED_VERIFICATION_ONLY",
+  "claim_ceiling": "C1 component conformance with deterministic fallback; neural qualification, gate certification, production, promotion, and CAP-RET02 unlock are not granted",
+  "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+  "signature": "c2e98dd28fa29a6f33a78b1d88565a3a193c0435cdca4bb24c40fb9a2364c188"
+}

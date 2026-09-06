@@ -1,0 +1,32 @@
+{
+  "target_node": "CAP-MOD01",
+  "verifier_session_id": "session-mod01-bakeoff-verified-20260904",
+  "timestamp_utc": "2026-09-04T07:57:58.179538+00:00",
+  "candidate_commit_sha": "a9255b4de181d0325b7ff140f685a1a065ae5d1f",
+  "base_commit": "a9255b4de181d0325b7ff140f685a1a065ae5d1f",
+  "lease_conformance": true,
+  "merge_risk": "none",
+  "tests_executed": [
+    {
+      "command": "python benchmarks/run_model_bakeoff.py --manifest docs/program/inbox/cap-mod01/bakeoff_clusters_v1.json --verify-receipt",
+      "exit_code": 0,
+      "status": "PASS"
+    }
+  ],
+  "negative_assertions": [
+    "zero_production_spine_writes: PASS (bake-off outputs strictly detached to docs/program/inbox/cap-mod01/)",
+    "no_auto_publication: PASS (legacy run_cognitive_delta auto-publication disabled)",
+    "faithfulness_floor_evaluated: PASS (1 clusters evaluated with 10,000 bootstrap resamples)",
+    "cloud_spend_cap_enforced: PASS ($0.048 DeepSeek comparator spend strictly <= $5.00 limit)",
+    "smallest_passing_rule_applied: PASS (qwen3:8b evaluated per CAP-D006)"
+  ],
+  "dataset_verification": {
+    "counts_observed": {
+      "clusters": 1,
+      "total_atoms": 300
+    },
+    "md5_matched": true
+  },
+  "verdict": "PASS",
+  "failure_trace": ""
+}

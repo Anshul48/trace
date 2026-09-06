@@ -1,7 +1,6 @@
 # Shared Contracts
 
-> **Status:** Draft outline. Schema details and compatibility rules will be
-> added through reviewed decisions, not inferred by individual workers.
+> **Status:** Ratified shared contracts under `DEC-CAP-001` (`TRACE-CAP-001`). Schema details and compatibility rules are governed by `TRACE-CAP-001`.
 
 ## 1. Evidence bundle
 
@@ -179,6 +178,60 @@ Rules:
    normal queries.
 4. Retirement preserves rollback and audit information until retention permits
    cleanup.
+
+### 10.1 Cognitive architecture & Cortex projection schemas (`DEC-CAP-001`)
+
+Under `DEC-CAP-001` (`CAP-D004`, `CAP-D005`, `CAP-D014`), all model-generated
+semantic artifacts are governed by first-class typed contracts:
+
+~~~yaml
+CandidateProjection:
+  projection_id: opaque-uuid
+  projection_kind: topic_holon|section_summary|entity_candidate|relation_candidate
+  risk_tier: TIER_1_LOW_RISK_NAV|TIER_2_MED_RISK_RELATION|TIER_3_HIGH_RISK_SCHEMA
+  source_atom_ids: [list-of-atom-hashes]
+  model_id: string (e.g. qwen2.5-3b-local)
+  prompt_hash: sha256
+  runtime_hash: sha256
+  policy_id: string
+  created_at: utc-timestamp
+  payload:
+    title: string
+    summary: string
+    propositions: [list-of-atomic-claims]
+    anchors: [{atom_id: sha256, byte_start: int, byte_end: int}]
+
+ModelInvocationReceipt:
+  invocation_id: opaque-uuid
+  model_id: string
+  is_local: boolean
+  prompt_tokens: integer
+  completion_tokens: integer
+  wall_time_ms: float
+  usd_cost: float (0.00 for is_local=True; verified non-zero for cloud)
+  request_hash: sha256
+  response_hash: sha256
+
+ValidationReceipt:
+  validation_id: opaque-uuid
+  projection_id: opaque-uuid
+  validator_version: string
+  proposition_support_rate: float (>= 0.95 required for activation)
+  anchor_resolution_rate: float (1.00 required)
+  hallucination_detected: boolean
+  verdict: PASS|FAIL
+  attested_by: role-id
+
+SemanticOrganizationManifest:
+  manifest_id: opaque-uuid
+  release_id: opaque-id
+  holon_count: integer
+  summary_count: integer
+  entity_count: integer
+  relation_count: integer
+  validation_receipt_ids: [list-of-receipt-uuids]
+  status: candidate|active|rolled_back
+~~~
 
 ## 11. Dataset and evaluation-manifest contract
 

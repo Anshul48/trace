@@ -1,0 +1,12 @@
+{
+  "task_id": "CAP-MOD01-DEEPSEEK-FLASH",
+  "model": "deepseek-ai/DeepSeek-V4-Flash-0731",
+  "provider": "Sail Research (api.sailresearch.com)",
+  "completed_clusters": 100,
+  "total_clusters": 100,
+  "current_faithfulness_point": 0.7779,
+  "tokens_per_sec": 62.2,
+  "p95_latency_ms": 31711.6,
+  "invalid_rate": 0.14,
+  "updated_at": "2026-09-05T15:15:28.591837+00:00"
+}

@@ -1,0 +1,148 @@
+{
+  "authority": {
+    "charter": "TRACE-CAP-001",
+    "decision_clauses": [
+      "CAP-D008",
+      "CAP-D012",
+      "DEC-P-005"
+    ],
+    "directives": "CAP_001_WAVEB_DIRECTIVES.md",
+    "methodology_annex": "CAP_001_BENCHMARK_METHODOLOGY_ANNEX.md"
+  },
+  "created_at": "2026-09-03T13:29:18.380897+00:00",
+  "datasets": {
+    "fiqa": {
+      "benchmark_suite": "BEIR",
+      "canonical_archive_md5": "17918ed23cd04fb15047f73e6c3bd9d9",
+      "canonical_archive_url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/fiqa.zip",
+      "canonical_name": "beir-fiqa",
+      "corpus_document_count": 57600,
+      "corpus_sha256": "6ab17b79aaf4c32c7115a0e636917da9c68f86396d04a40f9343ec3b018f6d26",
+      "qrels_count": 1706,
+      "qrels_file": "benchmarks/data/fiqa/qrels.jsonl",
+      "queries_count": 648,
+      "query_file": "benchmarks/data/fiqa/queries.jsonl",
+      "split": "test"
+    },
+    "musique": {
+      "benchmark_suite": "MuSiQue-Ans (TACL 2022)",
+      "canonical_name": "musique",
+      "corpus_document_count": 101962,
+      "qrels_count": 1325,
+      "qrels_file": "benchmarks/data/musique/qrels.jsonl",
+      "queries_count": 500,
+      "query_file": "benchmarks/data/musique/queries.jsonl",
+      "sampling_strategy": {
+        "hop_distribution": {
+          "2_hop": 259,
+          "3_hop": 157,
+          "4_hop": 84
+        },
+        "random_seed": 42,
+        "resampling_prohibited_clause": "PROTOCOL_SEC_12",
+        "source_split": "dev"
+      },
+      "split": "frozen_dev_500"
+    },
+    "nfcorpus": {
+      "benchmark_suite": "BEIR",
+      "canonical_archive_md5": "a89dba18a62ef92f7d323ec890a0d38d",
+      "canonical_archive_url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/nfcorpus.zip",
+      "canonical_name": "beir-nfcorpus",
+      "corpus_document_count": 3633,
+      "corpus_sha256": "3b3a5b627f754936ccc299770849a8a0e38d58b7e6b508f2b540d63c29f14348",
+      "qrels_count": 12334,
+      "qrels_file": "benchmarks/data/nfcorpus/qrels.jsonl",
+      "queries_count": 323,
+      "query_file": "benchmarks/data/nfcorpus/queries.jsonl",
+      "split": "test"
+    },
+    "scifact": {
+      "benchmark_suite": "BEIR",
+      "canonical_archive_md5": "5f7d1de60b170fc8027bb7898e2efca1",
+      "canonical_archive_url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip",
+      "canonical_name": "beir-scifact",
+      "corpus_document_count": 5183,
+      "corpus_sha256": "12868d8af3ab82b8d626a693ef24db15cdee7f900bf8ca0e56bc832b3b4b4cd2",
+      "qrels_count": 339,
+      "qrels_file": "benchmarks/data/scifact/qrels.jsonl",
+      "queries_count": 300,
+      "query_file": "benchmarks/data/scifact/queries.jsonl",
+      "split": "test"
+    }
+  },
+  "files": {
+    "benchmarks/data/fiqa/qrels.jsonl": {
+      "byte_length": 1415806,
+      "dataset": "fiqa",
+      "record_type": "qrels",
+      "row_count": 1706,
+      "sha256": "01cd54f708eb98bbe35c952ea1748545cac75763c971cb430a2135ef3bca3db0",
+      "split": "test"
+    },
+    "benchmarks/data/fiqa/queries.jsonl": {
+      "byte_length": 346170,
+      "dataset": "fiqa",
+      "record_type": "queries",
+      "row_count": 648,
+      "sha256": "61a33d5f16a4c2bdcbb4c4d80d3645503240054a16cc985e1ae73071b83f1373",
+      "split": "test"
+    },
+    "benchmarks/data/musique/qrels.jsonl": {
+      "byte_length": 1524405,
+      "dataset": "musique",
+      "record_type": "qrels",
+      "row_count": 1325,
+      "sha256": "758f22336234fb23d339aad5c1fe3f5dbc0ac2ec99f3db0439485f6eb6aebe96",
+      "split": "frozen_dev_500"
+    },
+    "benchmarks/data/musique/queries.jsonl": {
+      "byte_length": 336527,
+      "dataset": "musique",
+      "record_type": "queries",
+      "row_count": 500,
+      "sha256": "e97d490d1a412b3d41fbe4dc33ef99dcf840f2f797be3033b4c4f2d6728dde0f",
+      "split": "frozen_dev_500"
+    },
+    "benchmarks/data/nfcorpus/qrels.jsonl": {
+      "byte_length": 10686538,
+      "dataset": "nfcorpus",
+      "record_type": "qrels",
+      "row_count": 12334,
+      "sha256": "8bcdc108ff67409d60cbbb969c61bf4db62854080f82c5d00a9d23ac699062b5",
+      "split": "test"
+    },
+    "benchmarks/data/nfcorpus/queries.jsonl": {
+      "byte_length": 166743,
+      "dataset": "nfcorpus",
+      "record_type": "queries",
+      "row_count": 323,
+      "sha256": "9114262ec5ef5969989ee2950a0945dcdbe7eb7db51b3bbb01921fc21394db87",
+      "split": "test"
+    },
+    "benchmarks/data/scifact/qrels.jsonl": {
+      "byte_length": 286905,
+      "dataset": "scifact",
+      "record_type": "qrels",
+      "row_count": 339,
+      "sha256": "52eff9c1848a1c3bd02d2835697c9ddd8afa23e7d934deea94e2b1f0aa62e504",
+      "split": "test"
+    },
+    "benchmarks/data/scifact/queries.jsonl": {
+      "byte_length": 170487,
+      "dataset": "scifact",
+      "record_type": "queries",
+      "row_count": 300,
+      "sha256": "703117bad47dd87bbd17fc56ca197f2e2453fc208f1c8f602c3f3399135e693e",
+      "split": "test"
+    }
+  },
+  "manifest_id": "beir_musique_frozen_v1",
+  "manifest_version": "1.0.0",
+  "summary": {
+    "total_datasets": 4,
+    "total_files": 8,
+    "total_qrels": 15704,
+    "total_queries": 1771
+  }
+}

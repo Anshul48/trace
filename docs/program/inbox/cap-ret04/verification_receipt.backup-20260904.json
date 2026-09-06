@@ -1,0 +1,38 @@
+{
+  "target_node": "CAP-RET04",
+  "verifier_session_id": "91b2a988-c341-4052-b9c9-a89a1987eaa6",
+  "verifier_role": "VERIF-INDEP",
+  "timestamp_utc": "2026-09-04T02:35:35.117998+00:00",
+  "candidate_commit_sha": "5b719ca53bec4d6ddb24e4691ccfecdc485a6df8",
+  "base_commit": "94afcf3b358c351ac7a71e466a18fca67c32e81a",
+  "lease_conformance": true,
+  "merge_risk": "none",
+  "tests_executed": [
+    {
+      "command": "python benchmarks/run_frozen_retrieval_baseline.py --verify-receipt",
+      "exit_code": 0,
+      "status": "PASS"
+    }
+  ],
+  "negative_assertions": [
+    "SciFact nDCG@10 point estimate 0.6651 >= 0.65 floor: PASS",
+    "SciFact lower 95% bootstrap bound 0.6518 >= 0.63: PASS",
+    "NFCorpus nDCG@10 point estimate 0.3524 >= 0.32 floor: PASS",
+    "NFCorpus lower 95% bootstrap bound 0.3422 >= 0.30: PASS",
+    "NFCorpus CI width 0.0203 <= 0.10: PASS",
+    "FiQA nDCG@10 point estimate 0.4028 >= 0.38 floor: PASS",
+    "FiQA lower 95% bootstrap bound 0.3941 >= 0.36: PASS",
+    "Receipt audit confirms exactly 0 LLM calls and $0.00 spend during retrieval: PASS"
+  ],
+  "dataset_verification": {
+    "counts_observed": {
+      "scifact": 300,
+      "nfcorpus": 323,
+      "fiqa": 648
+    },
+    "md5_matched": true,
+    "note": "Verified against benchmarks/manifests/beir_musique_frozen_v1.json"
+  },
+  "verdict": "PASS",
+  "failure_trace": ""
+}

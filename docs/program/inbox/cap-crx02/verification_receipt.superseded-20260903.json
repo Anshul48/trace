@@ -1,0 +1,219 @@
+{
+  "receipt_format": "TRACE-CAP-001-independent-verification-v1",
+  "gate": "CAP-GB",
+  "target_node": "CAP-CRX02",
+  "node": "CAP-CRX02",
+  "packet_id": "WP-CAP-CRX02",
+  "attestation_id": "rcpt-cap-crx02-verif-indep-20260903T154914Z",
+  "verifier_session_id": "SESSION-3-CRX02",
+  "timestamp_utc": "2026-09-03T15:49:14.418Z",
+  "verifier_role": "VERIF-INDEP",
+  "verification_mode": "named-worktree-read-only",
+  "verification_worktree": "C:/Users/anshu/AppData/Local/trace-worktrees/trace-crx02",
+  "receipt_path": "docs/program/inbox/cap-crx02/verification_receipt.json",
+  "branch_ref": "cap-crx02-consolidator",
+  "expected_branch_ref": "cap-crx02-consolidator",
+  "base_commit": "59ce53ab51e11b2344195c3b33d11ba8907f1d4d",
+  "base_commit_requested": "59ce53a",
+  "candidate_commit_sha": "45c359118991bb6670092baf36cee3f573fc6454",
+  "verified_commit": "45c359118991bb6670092baf36cee3f573fc6454",
+  "source_identity": {
+    "target_branch_ref": "cap-crx02-consolidator",
+    "requested_commit": "45c3591",
+    "requested_commit_full": "45c359118991bb6670092baf36cee3f573fc6454",
+    "head_matches_target_commit": true,
+    "verified_commit_full": "45c359118991bb6670092baf36cee3f573fc6454",
+    "verified_tree_full": "4161e5aa43a92befd59ad085cc6da2a8c33e4c93",
+    "base_commit_full": "59ce53ab51e11b2344195c3b33d11ba8907f1d4d",
+    "base_tree_full": "4209be79fe0bc8b60f322372397de41db8204346",
+    "base_is_ancestor_of_verified_commit": true,
+    "initial_head_state": "branch cap-crx02-consolidator (attached)",
+    "detached_head_required": true,
+    "detached_head_observed": false,
+    "initial_worktree_clean": false,
+    "initial_status": ["?? .venv"],
+    "handoff_declared_base_commit_full": "59ce53a152ca6331908bc7489bb2e15bc963b156",
+    "handoff_declared_base_resolves": false,
+    "resolved_packet_base_is_ancestor": true,
+    "final_head_state": "branch cap-crx02-consolidator (attached)",
+    "final_worktree_clean": false,
+    "final_status": ["?? .venv"],
+    "verifier_modified_candidate_code": false
+  },
+  "lease_conformance": false,
+  "merge_risk": "not_applicable",
+  "checks": {
+    "worktree_identity": {
+      "requested_branch": "cap-crx02-consolidator",
+      "observed_branch": "cap-crx02-consolidator",
+      "requested_commit": "45c3591",
+      "observed_commit": "45c359118991bb6670092baf36cee3f573fc6454",
+      "detached_required": true,
+      "detached_observed": false,
+      "clean_required": true,
+      "clean_observed": false,
+      "status": "FAIL",
+      "evidence": "git branch --show-current returned cap-crx02-consolidator; git symbolic-ref --short -q HEAD returned cap-crx02-consolidator; git rev-parse HEAD matched the requested commit; git status --porcelain=v1 --untracked-files=all returned '?? .venv'."
+    },
+    "base_identity": {
+      "dispatch_base_short": "59ce53a",
+      "resolved_base_full": "59ce53ab51e11b2344195c3b33d11ba8907f1d4d",
+      "handoff_base_full": "59ce53a152ca6331908bc7489bb2e15bc963b156",
+      "handoff_base_resolves": false,
+      "status": "FAIL",
+      "evidence": "The packet dispatch names 59ce53a, which resolves to the CRX01 commit above; the worker handoff's longer base identity is not a Git object in the repository. Missing or ambiguous identity is fail-closed."
+    },
+    "lease_conformance": {
+      "comparison": "git diff --name-status 59ce53ab51e11b2344195c3b33d11ba8907f1d4d HEAD plus working-tree status",
+      "allowed_paths": [
+        "src/trace/v2/organization.py",
+        "src/trace/v2/cortex_consolidator.py",
+        "tests/v2/test_cortex_consolidator.py"
+      ],
+      "changed_paths_from_resolved_base": [
+        {"status": "A", "path": "docs/program/inbox/cap-crx02/handoff.md"},
+        {"status": "A", "path": "src/trace/v2/cortex_consolidator.py"},
+        {"status": "M", "path": "src/trace/v2/organization.py"},
+        {"status": "A", "path": "tests/v2/test_cortex_consolidator.py"}
+      ],
+      "working_tree_paths": [".venv"],
+      "unexpected_paths": [
+        "docs/program/inbox/cap-crx02/handoff.md",
+        ".venv"
+      ],
+      "status": "FAIL",
+      "evidence": "The committed handoff is outside the exact three-path lease, and the target worktree has untracked .venv."
+    },
+    "acceptance_tests": {
+      "requested_command": "$env:PYTHONPATH='src'; pytest tests/v2/test_cortex_consolidator.py -v",
+      "execution_command": "$env:PYTHONPATH='src'; pytest tests/v2/test_cortex_consolidator.py -v",
+      "exit_code": 1,
+      "collected": null,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "status": "VERIFICATION_ERROR",
+      "result": "VERIFICATION_ERROR",
+      "stderr": "pytest : The term 'pytest' is not recognized as the name of a cmdlet, function, script file, or operable program.",
+      "worker_claimed_result_not_used": "15 passed in 2.43s was present in handoff.md and was not accepted as verifier evidence.",
+      "evidence": "The exact named command was run without PATH or environment substitution and exited before test collection. No alternate test command was run."
+    },
+    "negative_extractive_control": {
+      "expected": "extractive_control output is byte-identical to legacy clipping",
+      "fixture": "200 ASCII x characters, label Legacy, default clipping limit 180",
+      "legacy_source": "59ce53ab51e11b2344195c3b33d11ba8907f1d4d:src/trace/v2/organization.py lines 22-29; truncation suffix '?'",
+      "candidate_source": "src/trace/v2/cortex_consolidator.py lines 47-54; truncation suffix '…'",
+      "actual_suffix": "xxx…",
+      "legacy_suffix": "xxx?",
+      "actual_marker_utf8_hex": "e280a6",
+      "legacy_marker_utf8_hex": "3f",
+      "actual_utf8_byte_length": 190,
+      "legacy_utf8_byte_length": 188,
+      "byte_identical": false,
+      "status": "FAIL",
+      "evidence": "Read-only Python probe exited 0 and reported byte_identical=false; the differing UTF-8 marker bytes are directly observed."
+    },
+    "negative_mock_semantic_path": {
+      "expected": "mock-model semantic path produces structured holons",
+      "execution": "Direct invocation of TestCortexConsolidatorSemanticSLM.test_semantic_slm_interfaces_with_gateway from tests/v2/test_cortex_consolidator.py",
+      "exit_code": 0,
+      "structured_holons_asserted": true,
+      "asserted_types": [
+        "SectionSummary",
+        "TopicHolon",
+        "EntityCandidate",
+        "RelationCandidate"
+      ],
+      "asserted_counts": {"sections": 1, "topics": 1, "entities": 2, "relations": 1},
+      "manifest_lineage_asserted": true,
+      "status": "PASS",
+      "evidence": "The existing focused test method was executed directly with its in-file mock gateway and all of its typed-holon assertions completed."
+    },
+    "negative_evidence_grounding": {
+      "expected": "hallucinated anchors and ungrounded entity references fail closed",
+      "execution": "Direct invocation of test_semantic_slm_rejects_hallucinated_anchors_fail_closed and test_semantic_slm_rejects_ungrounded_entity_references",
+      "exit_code": 0,
+      "hallucinated_anchor_rejected": true,
+      "ungrounded_entity_reference_rejected": true,
+      "exception_type": "SummaryValidationError",
+      "status": "PASS",
+      "evidence": "Both existing negative test methods completed their assertRaises and message assertions."
+    },
+    "negative_empty_model_output": {
+      "expected": "empty model output fails closed",
+      "execution": "Direct TraceModelGateway call with an empty completion content and the Cortex consolidation response schema",
+      "observed_exception": "trace.v2.model_gateway.ModelGatewayError: model returned invalid JSON",
+      "exit_code": 1,
+      "expected_failure_observed": true,
+      "status": "PASS",
+      "evidence": "The empty completion reached json.loads('') and raised ModelGatewayError; no success-shaped fallback was emitted for this schema."
+    },
+    "cost_integrity": {
+      "expected": "model-call cost is recorded and meaningful",
+      "model_id": "deepseek-v4-flash",
+      "provider_model": "deepseek/deepseek-v4-flash",
+      "cloud_tokens_observed": 130,
+      "cost_usd_observed": 0.0,
+      "manifest_audit_observed": null,
+      "status": "FAIL",
+      "evidence": "Direct mock semantic probe returned an audit cost_usd field of 0.0 for a cloud-registered model whose default input/output price coefficients are both 0.0, while CortexConsolidationResult.manifest.artifacts.audit was null. Cost integrity is not established under the fail-closed rule."
+    },
+    "checksum_integrity": {
+      "status": "NOT_APPLICABLE",
+      "evidence": "CAP-CRX02 has no external dataset or checksum manifest input; no checksum claim was used."
+    },
+    "verifier_mutation_audit": {
+      "candidate_code_modified": false,
+      "target_worktree_status_after_probes": ["?? .venv"],
+      "status": "PASS",
+      "evidence": "All probes were read-only or in-memory; no candidate source or test path was modified by the verifier."
+    },
+    "receipt_integrity": {
+      "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+      "canonicalization": "UTF-8 JSON with sort_keys=true, separators=(',', ':'), ensure_ascii=false; signature field excluded",
+      "status": "PASS",
+      "evidence": "Receipt will be reloaded after writing and its signature recomputed over the canonical payload before completion."
+    }
+  },
+  "tests_executed": [
+    {
+      "command": "$env:PYTHONPATH='src'; pytest tests/v2/test_cortex_consolidator.py -v",
+      "exit_code": 1,
+      "status": "VERIFICATION_ERROR"
+    }
+  ],
+  "negative_assertions": [
+    "extractive_control byte parity with legacy clipping: FAIL (UTF-8 … differs from legacy ?)",
+    "mock semantic path structured holons: PASS",
+    "hallucinated anchors and ungrounded entities fail closed: PASS",
+    "empty model output fails closed: PASS",
+    "cost integrity: FAIL (zero-priced cloud model and null manifest audit)"
+  ],
+  "dataset_verification": {
+    "status": "NOT_APPLICABLE",
+    "counts_observed": {},
+    "reason": "No external dataset is in scope for CAP-CRX02."
+  },
+  "audited_invariants": {
+    "candidate_sha_matches_expected": true,
+    "clean_detached_target_identity": false,
+    "mutation_set_matches_allowlist": false,
+    "acceptance_command_15_of_15": false,
+    "extractive_output_byte_identical": false,
+    "mock_semantic_path_structured_holons": true,
+    "hallucinated_anchors_fail_closed": true,
+    "ungrounded_entity_references_fail_closed": true,
+    "empty_model_output_fail_closed": true,
+    "cost_accounting_coherent": false,
+    "checksum_verification_in_scope": false,
+    "verifier_did_not_modify_candidate": true
+  },
+  "verdict": "FAIL",
+  "disposition": "REPAIR_REQUESTED",
+  "claim_ceiling": "No CAP-CRX02 verification clearance, certification, promotion, merge, or successor unlock",
+  "unblocks": [],
+  "failure_trace": "FAIL: target worktree is attached and dirty; handoff full base identity is invalid; resolved-base diff contains out-of-lease handoff.md; exact pytest command exited 1 because pytest is unavailable; extractive byte parity is false; cost integrity is not established. The semantic mock and grounding negative checks pass but cannot override these failures.",
+  "signature_algorithm": "SHA-256 over canonical JSON excluding signature",
+  "canonicalization": "UTF-8 JSON with sort_keys=true, separators=(',', ':'), ensure_ascii=false; signature field excluded",
+  "signature": "ea3391e90e15a94205f5169d26543f74dcdf7fd6f75ee905c35a9ca971e1baff"
+}
