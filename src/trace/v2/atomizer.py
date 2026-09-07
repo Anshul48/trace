@@ -50,7 +50,7 @@ ENGLISH_STOP_WORDS: frozenset[str] = frozenset({
     "yours", "yourself", "yourselves",
 })
 
-_SIG_PATTERN = re.compile(r"^\s*(?:def|class)\s+([A-Za-z_][A-Za-z0-9_]*)", re.MULTILINE)
+_SIG_PATTERN = re.compile(r"^\s*(?:(?:async\s+)?def|class)\s+([A-Za-z_][A-Za-z0-9_]*)", re.MULTILINE)
 _PARAGRAPH = re.compile(r"\S(?:.*?\S)?(?=\n\s*\n|\Z)", re.DOTALL)
 _BULLET = re.compile(r"^\s*(?:[-*+]\s+|\d+[.)]\s+)")
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9])")
@@ -375,8 +375,8 @@ def check_embedding_diameter_constraints(
     if cent_cos < centroid_floor:
         return False, {"centroid_cos": cent_cos, "min_pairwise_cos": min_pw, "coherence_norm": 0.0}
 
-    # 3. Norm coherence floor of union
-    all_vecs = list(member_vecs) + [candidate_vec]
+    # 3. Norm coherence floor of union (guaranteed on S^{d-1})
+    all_vecs = [unit_normalize(v) for v in (list(member_vecs) + [candidate_vec])]
     dim = len(candidate_vec)
     sum_vec = [0.0] * dim
     for v in all_vecs:
@@ -434,7 +434,22 @@ def atomize_with_aliasing(
         normalized = normalize_text(text_or_atoms)
         atoms = atomize(text_or_atoms, max_chars=max_chars)
     else:
-        atoms = list(text_or_atoms)
+        atoms = []
+        for a in text_or_atoms:
+            if not a.content_hash:
+                c_h = hashlib.sha256(a.content.encode("utf-8")).hexdigest()
+                atoms.append(
+                    AtomDraft(
+                        content=a.content,
+                        start=a.start,
+                        end=a.end,
+                        ordinal=a.ordinal,
+                        parser_location=a.parser_location,
+                        content_hash=c_h,
+                    )
+                )
+            else:
+                atoms.append(a)
         normalized = ""
 
     if not atoms:
@@ -483,6 +498,9 @@ def atomize_with_aliasing(
         for c_idx, cluster_members in enumerate(clusters):
             # 1. Capacity bound: maximum 8 spans per holon
             if len(cluster_members) >= MAX_SPANS_PER_HOLON:
+                for j in cluster_members:
+                    if aliased_matrix[(j, k)][0]:
+                        see_also_links.setdefault(k, set()).add(c_idx)
                 continue
 
             # 2. Complete-linkage constraint: k must alias with ALL members in cluster
@@ -521,6 +539,16 @@ def atomize_with_aliasing(
         else:
             clusters.append([k])
 
+    # Symmetrize see_also relationships across holon graph
+    holon_links: dict[int, set[int]] = {c: set() for c in range(len(clusters))}
+    for c_idx, member_indices in enumerate(clusters):
+        for idx in member_indices:
+            if idx in see_also_links:
+                for target_c_idx in see_also_links[idx]:
+                    if target_c_idx != c_idx and target_c_idx < len(clusters):
+                        holon_links[c_idx].add(target_c_idx)
+                        holon_links[target_c_idx].add(c_idx)
+
     # Build HolonDraft instances
     holons: list[HolonDraft] = []
     for c_idx, member_indices in enumerate(clusters):
@@ -535,12 +563,7 @@ def atomize_with_aliasing(
             frechet_c = compute_frechet_unit_centroid(m_vecs)
             c_int8 = quantize_centroid_int8(frechet_c)
 
-        links: set[str] = set()
-        for idx in member_indices:
-            if idx in see_also_links:
-                for target_c_idx in see_also_links[idx]:
-                    if target_c_idx != c_idx:
-                        links.add(f"holon_{target_c_idx + 1:04d}")
+        links = [f"holon_{target_c_idx + 1:04d}" for target_c_idx in sorted(holon_links[c_idx])]
 
         h_id = f"holon_{c_idx + 1:04d}"
         combined_content = "\n\n".join(member_texts)
@@ -559,7 +582,7 @@ def atomize_with_aliasing(
                 tier="nav",
                 status="ACTIVE",
                 version=1,
-                see_also=sorted(links),
+                see_also=links,
             )
         )
 
