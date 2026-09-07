@@ -55,7 +55,8 @@ def is_process_alive(pid: int) -> bool:
             success = kernel32.GetExitCodeProcess(h_proc, ctypes.byref(exit_code))
             kernel32.CloseHandle(h_proc)
             return bool(success and exit_code.value == STILL_ACTIVE)
-        except Exception:
+        except Exception as exc:
+            logger.debug("Windows ctypes OpenProcess check failed: %s", exc)
             return True
     try:
         os.kill(pid, 0)
@@ -395,14 +396,14 @@ class ReaderLease:
         for mm in self._open_mmaps:
             try:
                 mm.close()
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("Error closing mmap: %s", exc)
         self._open_mmaps.clear()
         for f in self._open_files:
             try:
                 f.close()
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("Error closing file handle: %s", exc)
         self._open_files.clear()
 
     def release(self) -> bool:
@@ -786,8 +787,12 @@ class EpochIndexManager:
         if current_info.gen_dir.exists():
             try:
                 (current_info.gen_dir / ".retired").write_text(str(now))
-            except OSError:
-                pass
+            except OSError as exc:
+                logger.warning(
+                    "Failed to write .retired marker to %s: %s",
+                    current_info.gen_dir,
+                    exc,
+                )
 
         # 6. Deferred sweep of retired generations
         self.sweep_retired_generations()
@@ -862,7 +867,12 @@ class EpochIndexManager:
                 if retired_marker.exists():
                     try:
                         retired_at = float(retired_marker.read_text().strip())
-                    except (ValueError, OSError):
+                    except (ValueError, OSError) as exc:
+                        logger.debug(
+                            "Failed reading .retired marker from %s, falling back to mtime: %s",
+                            entry.name,
+                            exc,
+                        )
                         retired_at = entry.stat().st_mtime
                 elif gen_epoch < active_ep:
                     retired_at = active_promoted_at
