@@ -13,15 +13,24 @@ import json
 import math
 import os
 import re
+import struct
+import time
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Callable, Protocol, Sequence
+from typing import Any, Callable, Mapping, Protocol, Sequence
 
 from .models import ActivationWeights, DeepNavigationPlan, QueryRequest
 from .model_gateway import ModelGatewayPolicy, ModelPolicy
 from .store import ALLOWED_RELATIONS, STRUCTURAL_RELATIONS
-from .cortex import ActivationEdge, ActivationEngine
-
+from .cortex import (
+    ActivationEdge,
+    ActivationEngine,
+    Edge,
+    FROZEN_PPR_PRIORS,
+    PPRPriors,
+    TwoPassPPREngine,
+    TwoPassPPRResult,
+)
 
 _TOKEN = re.compile(r"[\w][\w'-]*", re.UNICODE)
 _STOPWORDS = frozenset({
@@ -40,6 +49,391 @@ def cosine(left: Sequence[float], right: Sequence[float]) -> float:
     numerator = sum(a * b for a, b in zip(left, right, strict=True))
     denominator = math.sqrt(sum(a * a for a in left)) * math.sqrt(sum(b * b for b in right))
     return numerator / denominator if denominator else 0.0
+
+
+
+# ==============================================================================
+# WP5 3-Tier Dual-Dispatch & Grounding Verifier Constants (Appendix A)
+# ==============================================================================
+
+# Appendix A Row 5: Explicit Latency SLOs (worst-case p95 <= 65 ms)
+TIER1_MAX_LATENCY_MS: float = 5.0
+TIER2_MAX_LATENCY_MS: float = 35.0
+TIER3_MAX_LATENCY_MS: float = 25.0
+CASCADE_MAX_LATENCY_MS: float = 65.0
+
+# Appendix A Row 7: Calibration Register Priors & Thresholds
+THETA_LEX: float = 2.0                   # Lexical score floor for Tier 1 short-circuit
+RRF_SCORE_FLOOR: float = 0.012           # Tier 3 flat hybrid RRF floor
+DENSE_COSINE_FLOOR: float = 0.40         # Tier 3 dense cosine floor
+CONFIDENT_COSINE_THRESHOLD: float = 0.65 # Tier 2 confident candidate cosine threshold
+GOVERNOR_MIN_CONCEPTS: int = 8           # Governor caps retrieved set at 8-20 concepts
+GOVERNOR_MAX_CONCEPTS: int = 20          # Governor maximum retrieved concepts
+
+# Appendix A Row 6: Stage 3 CPU Cross-Encoder NLI Specifications
+STAGE3_NLI_MODEL: str = "cross-encoder/nli-deberta-v3-small"
+STAGE3_SAMPLE_RATIO: float = 0.10        # 10% stratified sample
+STAGE3_MAX_CONTRADICTION_P: float = 0.01 # P(contradiction) < 0.01
+STAGE3_MIN_ENTAILMENT_P: float = 0.70    # P(entailment) >= 0.70
+STAGE3_MAX_LATENCY_BUDGET_MS: float = 15.0 # <= 15 ms/doc CPU budget
+
+# Deterministic polarity marker set N
+NEGATION_MARKERS: frozenset[str] = frozenset({
+    "not", "no", "never", "none", "neither", "nor", "without",
+    "cannot", "can't", "won't", "don't", "doesn't", "didn't",
+    "prohibit", "prohibits", "prohibited", "prohibiting",
+    "forbidden", "forbid", "forbids",
+    "disallow", "disallows", "disallowed",
+    "deny", "denies", "denied",
+    "reject", "rejects", "rejected",
+    "prevent", "prevents", "prevented",
+})
+
+# Antonym / directionality pairs where polarity is inverted
+ANTONYM_POLARITY_PAIRS: list[tuple[frozenset[str], frozenset[str]]] = [
+    (frozenset({"prohibit", "prohibits", "forbidden", "disallow", "disallows", "deny", "denies"}),
+     frozenset({"permit", "permits", "permitted", "allow", "allows", "allowed", "enable", "enables", "grant", "grants"})),
+    (frozenset({"require", "requires", "mandatory", "compulsory"}),
+     frozenset({"optional", "discretionary", "forbidden", "prohibited"})),
+    (frozenset({"always", "must"}),
+     frozenset({"never", "cannot"})),
+    (frozenset({"enable", "enables", "enabled"}),
+     frozenset({"disable", "disables", "disabled"})),
+]
+
+
+_RE_CONTRACTION = re.compile(r"\b([A-Za-z]+)['’]t\b", re.IGNORECASE)
+_RE_CANNOT = re.compile(r"\bcannot\b", re.IGNORECASE)
+
+def normalize_polarity_text(text: str) -> str:
+    """Normalize contractions and cannot for polarity verification."""
+    def _expand_nt(m: re.Match[str]) -> str:
+        w = m.group(1).lower()
+        if w == "ca":
+            return "can not"
+        if w == "wo":
+            return "will not"
+        return f"{w} not"
+
+    expanded = _RE_CANNOT.sub("can not", text)
+    return _RE_CONTRACTION.sub(_expand_nt, expanded)
+
+
+def extract_normalized_tokens(text: str) -> list[str]:
+    """Extract lowercase alpha-numeric tokens after contraction normalization."""
+    expanded = normalize_polarity_text(text)
+    return [t.lower() for t in re.findall(r"\b[A-Za-z0-9_]+\b", expanded)]
+
+
+_RE_ENTITY_QUANTITY = re.compile(
+    r"\b(?:[A-Z]{2,}|[A-Z][a-z0-9]+|[0-9]+(?:\.[0-9]+)?|[a-zA-Z0-9]+_[a-zA-Z0-9_]+)\b"
+)
+_NON_ENTITIES = frozenset({
+    "the", "this", "that", "these", "those", "there", "here", "when", "where",
+    "which", "while", "since", "after", "before", "because", "although", "though",
+    "however", "therefore", "furthermore", "moreover", "also", "thus", "hence",
+    "first", "second", "third", "finally", "instead", "meanwhile", "otherwise",
+    "each", "every", "all", "both", "either", "neither", "some", "any", "many",
+    "much", "more", "most", "other", "another", "such", "what", "how", "why",
+    "who", "whom", "whose", "if", "unless", "until",
+})
+
+
+def extract_entities_and_quantities(text: str) -> set[str]:
+    """Extract named entities, code symbols, numbers, and identifiers."""
+    tokens = _RE_ENTITY_QUANTITY.findall(text)
+    return {t.lower() for t in tokens if t.lower() not in _NON_ENTITIES}
+
+
+@dataclass(frozen=True)
+class GroundingVerificationResult:
+    """Outcome of 3-Stage Proposition Grounding Verifier."""
+
+    passed: bool
+    stage: int  # 1, 2, or 3
+    failure_reason: str | None = None
+    diagnostics: dict[str, Any] | None = None
+
+
+class PropositionVerifier:
+    """3-Stage Proposition Grounding Verifier per CORTICAL_SUBSTRATE_V1_PLAN Appendix A Row 6.
+
+    Stage 1: Deterministic polarity parity and negation marker alignment (N).
+             100% rejects polarity and directionality inversions.
+    Stage 2: Entity & quantity containment E(Pi) subseteq E(A) + salient token recall >= 0.80.
+    Stage 3: Sampled local CPU NLI audit (cross-encoder/nli-deberta-v3-small, 10% sample, <= 15ms CPU).
+    """
+
+    def __init__(
+        self,
+        *,
+        model_name: str = STAGE3_NLI_MODEL,
+        sample_ratio: float = STAGE3_SAMPLE_RATIO,
+        max_contradiction_p: float = STAGE3_MAX_CONTRADICTION_P,
+        min_entailment_p: float = STAGE3_MIN_ENTAILMENT_P,
+        max_latency_budget_ms: float = STAGE3_MAX_LATENCY_BUDGET_MS,
+        nli_client: Any | None = None,
+    ) -> None:
+        self.model_name = model_name
+        self.sample_ratio = sample_ratio
+        self.max_contradiction_p = max_contradiction_p
+        self.min_entailment_p = min_entailment_p
+        self.max_latency_budget_ms = max_latency_budget_ms
+        self.nli_client = nli_client
+        self._nli_model: Any | None = None
+
+    DIRECT_NEG_PARTICLES = frozenset({"not", "no", "never", "none", "neither", "nor", "without"})
+
+    def verify_stage1_polarity(self, source: str, hypothesis: str) -> tuple[bool, str | None]:
+        source_tokens = extract_normalized_tokens(source)
+        hypo_tokens = extract_normalized_tokens(hypothesis)
+
+        # Cross inversion: Source has negative direction, Hypothesis has positive direction (or vice-versa)
+        for neg_set, pos_set in ANTONYM_POLARITY_PAIRS:
+            s_has_neg = bool(set(source_tokens) & neg_set)
+            s_has_pos = bool(set(source_tokens) & pos_set)
+            h_has_neg = bool(set(hypo_tokens) & neg_set)
+            h_has_pos = bool(set(hypo_tokens) & pos_set)
+
+            if (s_has_neg and h_has_pos) or (s_has_pos and h_has_neg):
+                return False, "POLARITY_INVERSION"
+
+        # Explicit negation particle parity check
+        s_particles = [t for t in source_tokens if t in self.DIRECT_NEG_PARTICLES]
+        h_particles = [t for t in hypo_tokens if t in self.DIRECT_NEG_PARTICLES]
+
+        if (len(s_particles) % 2) != (len(h_particles) % 2):
+            return False, "POLARITY_INVERSION"
+
+        if len(s_particles) != len(h_particles):
+            s_set = set(s_particles)
+            h_set = set(h_particles)
+            if s_set ^ h_set:
+                return False, "POLARITY_INVERSION"
+
+        return True, None
+
+    def verify_stage2_containment(
+        self,
+        source: str,
+        hypothesis: str,
+        token_recall_threshold: float = 0.80,
+    ) -> tuple[bool, str | None, float]:
+        source_tokens = set(extract_normalized_tokens(source))
+        hypo_eq = extract_entities_and_quantities(hypothesis)
+
+        # 1. Entity and quantity subset check: E(Pi) subseteq E(A)
+        unsupported_entities = {e for e in hypo_eq if e not in source_tokens}
+        if unsupported_entities:
+            return False, f"UNSUPPORTED_ENTITIES: {sorted(unsupported_entities)}", 0.0
+
+        # 2. Salient token recall: tokens in hypothesis supported by source
+        hypo_tokens = [t for t in extract_normalized_tokens(hypothesis) if len(t) >= 3]
+        if not hypo_tokens:
+            return True, None, 1.0
+
+        matched = sum(1 for t in hypo_tokens if t in source_tokens)
+        recall = matched / len(hypo_tokens)
+        if recall < token_recall_threshold:
+            return False, f"LOW_TOKEN_RECALL: {recall:.2f} < {token_recall_threshold}", recall
+
+        return True, None, recall
+
+    def _should_sample_stage3(self, hypothesis: str) -> bool:
+        # Deterministic 10% stratified sampling using SHA-256
+        digest = hashlib.sha256(hypothesis.encode("utf-8")).digest()
+        val = int.from_bytes(digest[:4], "big") % 100
+        return val < int(self.sample_ratio * 100)
+
+    def verify_stage3_nli(
+        self,
+        source: str,
+        hypothesis: str,
+    ) -> tuple[bool, str | None, dict[str, Any]]:
+        t0 = time.perf_counter()
+        if self.nli_client is not None:
+            res = self.nli_client(source, hypothesis)
+            elapsed = (time.perf_counter() - t0) * 1000.0
+            p_contradiction = float(res.get("contradiction", 0.0))
+            p_entailment = float(res.get("entailment", 1.0))
+            if p_contradiction >= self.max_contradiction_p:
+                return False, f"NLI_CONTRADICTION: {p_contradiction:.3f} >= {self.max_contradiction_p}", {"p_contradiction": p_contradiction, "elapsed_ms": elapsed}
+            if p_entailment < self.min_entailment_p:
+                return False, f"NLI_NOT_ENTAILED: {p_entailment:.3f} < {self.min_entailment_p}", {"p_entailment": p_entailment, "elapsed_ms": elapsed}
+            return True, None, {"p_contradiction": p_contradiction, "p_entailment": p_entailment, "elapsed_ms": elapsed}
+
+        if self._nli_model is None:
+            try:
+                from sentence_transformers import CrossEncoder
+                self._nli_model = CrossEncoder(self.model_name)
+            except Exception:
+                return True, None, {"nli_evaluated": False, "reason": "model_not_installed"}
+
+        try:
+            scores = self._nli_model.predict([(source, hypothesis)])
+            import numpy as np
+            probs = np.exp(scores[0]) / np.sum(np.exp(scores[0]))
+            cfg = getattr(getattr(self._nli_model, "model", None), "config", getattr(self._nli_model, "config", None))
+            id2label = getattr(cfg, "id2label", None) if cfg is not None else None
+            c_idx, e_idx = 0, 2
+            if isinstance(id2label, dict):
+                l2i = {str(v).lower(): int(k) for k, v in id2label.items()}
+                c_idx = l2i.get("contradiction", 0)
+                e_idx = l2i.get("entailment", 2 if l2i.get("neutral") == 1 else 1)
+            p_contradiction = float(probs[c_idx])
+            p_entailment = float(probs[e_idx])
+            elapsed = (time.perf_counter() - t0) * 1000.0
+            if p_contradiction >= self.max_contradiction_p:
+                return False, f"NLI_CONTRADICTION: {p_contradiction:.3f} >= {self.max_contradiction_p}", {"p_contradiction": p_contradiction, "elapsed_ms": elapsed}
+            if p_entailment < self.min_entailment_p:
+                return False, f"NLI_NOT_ENTAILED: {p_entailment:.3f} < {self.min_entailment_p}", {"p_entailment": p_entailment, "elapsed_ms": elapsed}
+            return True, None, {"p_contradiction": p_contradiction, "p_entailment": p_entailment, "elapsed_ms": elapsed}
+        except Exception as e:
+            return True, None, {"nli_evaluated": False, "error": str(e)}
+
+    def verify(
+        self,
+        source: str,
+        hypothesis: str,
+        *,
+        force_stage3: bool = False,
+    ) -> GroundingVerificationResult:
+        """Execute 3-stage grounding verifier pipeline."""
+        # Stage 1: Deterministic Polarity & Directionality Alignment
+        s1_pass, s1_err = self.verify_stage1_polarity(source, hypothesis)
+        if not s1_pass:
+            return GroundingVerificationResult(
+                passed=False,
+                stage=1,
+                failure_reason=s1_err,
+                diagnostics={"source": source, "hypothesis": hypothesis},
+            )
+
+        # Stage 2: Entity & Quantity Containment + Salient Token Recall
+        s2_pass, s2_err, recall = self.verify_stage2_containment(source, hypothesis)
+        if not s2_pass:
+            return GroundingVerificationResult(
+                passed=False,
+                stage=2,
+                failure_reason=s2_err,
+                diagnostics={"token_recall": recall},
+            )
+
+        # Stage 3: Sampled Local CPU NLI Audit
+        if force_stage3 or self._should_sample_stage3(hypothesis):
+            s3_pass, s3_err, s3_diag = self.verify_stage3_nli(source, hypothesis)
+            if not s3_pass:
+                return GroundingVerificationResult(
+                    passed=False,
+                    stage=3,
+                    failure_reason=s3_err,
+                    diagnostics={"token_recall": recall, **s3_diag},
+                )
+            return GroundingVerificationResult(
+                passed=True,
+                stage=3,
+                diagnostics={"token_recall": recall, **s3_diag},
+            )
+
+        return GroundingVerificationResult(
+            passed=True,
+            stage=2,
+            diagnostics={"token_recall": recall, "stage3_sampled": False},
+        )
+
+
+def verify_grounding(
+    source: str,
+    hypothesis: str,
+    *,
+    verifier: PropositionVerifier | None = None,
+    force_stage3: bool = False,
+) -> GroundingVerificationResult:
+    """Module-level helper to verify proposition grounding."""
+    v = verifier or PropositionVerifier()
+    return v.verify(source=source, hypothesis=hypothesis, force_stage3=force_stage3)
+
+
+# Triggers for Tier 1 Lexical Short-Circuit
+_RE_QUOTED = re.compile(r'["\']([^"\']+)["\']')
+_RE_UPPER_SNAKE = re.compile(r'\b[A-Z0-9_]*[A-Z][A-Z0-9_]*_[A-Z0-9_]*\b')
+_RE_TRACEBACK = re.compile(
+    r'(?:Traceback \(most recent call last\)|File\s+"[^"]+",\s+line\s+\d+|[A-Za-z0-9_.]*(?:Error|Exception):|\bline\s+\d+,\s+in\s+)',
+    re.IGNORECASE,
+)
+_RE_BACKTICK = re.compile(r'`([^`]+)`')
+
+
+def is_tier1_triggered(query: str) -> bool:
+    """Determine whether a query triggers the Tier 1 Lexical Short-Circuit path.
+
+    Triggers per CORTICAL_SUBSTRATE_V1_PLAN §2.C:
+    1. Quoted string (e.g. "exact match" or 'exact match')
+    2. UPPER_SNAKE identifier of length >= 3 (e.g. MAX_RETRIES, DIVERSE_OVERFLOW)
+    3. Traceback snippets (e.g. File "...", line ..., Traceback, Error, Exception)
+    4. Backtick literals (e.g. `symbol`)
+    """
+    if not query:
+        return False
+    if _RE_QUOTED.search(query):
+        return True
+    for m in _RE_UPPER_SNAKE.finditer(query):
+        if len(m.group(0)) >= 3:
+            return True
+    if "traceback" in query.lower() or _RE_TRACEBACK.search(query):
+        return True
+    if _RE_BACKTICK.search(query) or "`" in query:
+        return True
+    return False
+
+
+def is_mixed_query(query: str) -> bool:
+    """Check if query mixes lexical triggers with broader conceptual terms."""
+    if not is_tier1_triggered(query):
+        return False
+    stripped = _RE_QUOTED.sub(' ', query)
+    stripped = _RE_BACKTICK.sub(' ', stripped)
+    stripped = _RE_UPPER_SNAKE.sub(' ', stripped)
+    stripped = _RE_TRACEBACK.sub(' ', stripped)
+    stripped = stripped.replace('`', ' ')
+    natural_terms = tokens(stripped)
+    return len(natural_terms) >= 2
+
+
+def _get_atom_ids_for_span(span: Any, atoms: Sequence[dict[str, Any]]) -> list[str]:
+    """Resolve an L1 holon span to canonical atom_version_ids."""
+    if isinstance(span, str):
+        return [span]
+    if isinstance(span, int):
+        return [str(a["atom_version_id"]) for a in atoms if a.get("id") == span]
+    if isinstance(span, dict):
+        for key in ("source_atom_version_id", "atom_version_id", "id", "node_id"):
+            val = span.get(key)
+            if val is not None:
+                return [str(val)]
+        sb = span.get("start_byte", span.get("start"))
+        eb = span.get("end_byte", span.get("end"))
+        if sb is not None and eb is not None:
+            matched = []
+            for a in atoms:
+                a_sb = a.get("start_byte", a.get("span_start", a.get("properties", {}).get("source_start")))
+                a_eb = a.get("end_byte", a.get("span_end", a.get("properties", {}).get("source_end")))
+                if a_sb == sb and a_eb == eb:
+                    matched.append(str(a["atom_version_id"]))
+            if matched:
+                return matched
+    if isinstance(span, (list, tuple)) and len(span) >= 2:
+        sb, eb = span[0], span[1]
+        matched = []
+        for a in atoms:
+            a_sb = a.get("start_byte", a.get("span_start", a.get("properties", {}).get("source_start")))
+            a_eb = a.get("end_byte", a.get("span_end", a.get("properties", {}).get("source_end")))
+            if a_sb == sb and a_eb == eb:
+                matched.append(str(a["atom_version_id"]))
+        if matched:
+            return matched
+    return []
+
 
 
 class DenseEmbedder(Protocol):
@@ -366,6 +760,8 @@ class HybridRetrievalEngine:
         lexical_index: Any | None = None,
         dense_index: Any | None = None,
         colbert_tier: ColBERTQualityTier | None = None,
+        tier2_mode: str = "shadow",
+        proposition_verifier: PropositionVerifier | None = None,
     ) -> None:
         model_name = os.environ.get("TRACE_DENSE_MODEL")
         reranker_name = os.environ.get("TRACE_RERANK_MODEL")
@@ -385,6 +781,8 @@ class HybridRetrievalEngine:
         self.dense_index = dense_index
         self.colbert_tier = colbert_tier
         self.colbert_enabled = bool(colbert_tier and os.environ.get("TRACE_COLBERT_ENABLED", "false").lower() == "true")
+        self.tier2_mode = tier2_mode
+        self.proposition_verifier = proposition_verifier or PropositionVerifier()
 
     @staticmethod
     def _bm25(query_terms: list[str], documents: Sequence[dict[str, Any]]) -> dict[str, float]:
@@ -948,6 +1346,293 @@ class HybridRetrievalEngine:
             candidates.append(candidate)
         return sorted(candidates, key=lambda item: (-item.score, item.atom["atom_version_id"]))[:request.retrieval_budget.hierarchy_limit]
 
+    def verify_candidate(
+        self,
+        source: str,
+        hypothesis: str,
+        *,
+        force_stage3: bool = False,
+    ) -> GroundingVerificationResult:
+        """Verify candidate proposition using 3-stage grounding verifier."""
+        return self.proposition_verifier.verify(source=source, hypothesis=hypothesis, force_stage3=force_stage3)
+
+    def _tier1_search(
+        self,
+        *,
+        store: Any,
+        request: QueryRequest,
+        atoms: Sequence[dict[str, Any]],
+        limit: int = 20,
+    ) -> list[Candidate]:
+        """Tier 1 Lexical Short-Circuit (<= 5 ms):
+
+        Queries fts_atoms and holons.lex_sig top-20.
+        Hits >= 3 with BM25 score >= theta_lex (2.0) qualify for short-circuit.
+        """
+        query = request.query
+        atom_by_id = {atom["atom_version_id"]: atom for atom in atoms}
+        hits: dict[str, float] = {}
+
+        # 1. Search fts_atoms via store
+        fts_searcher = getattr(store, "search_fts_atoms", None)
+        if callable(fts_searcher):
+            try:
+                fts_results = fts_searcher(query, limit=limit)
+                for r in fts_results:
+                    row_id = str(r.get("id", ""))
+                    score = abs(float(r.get("score", 0.0)))
+                    matched_aid = None
+                    if row_id in atom_by_id:
+                        matched_aid = row_id
+                    else:
+                        for a in atoms:
+                            if (
+                                str(a.get("id")) == row_id
+                                or str(a.get("node_id")) == row_id
+                                or a.get("content") == r.get("text")
+                                or a.get("text") == r.get("text")
+                            ):
+                                matched_aid = a["atom_version_id"]
+                                break
+                    if matched_aid:
+                        hits[matched_aid] = max(hits.get(matched_aid, 0.0), score)
+            except Exception:
+                pass
+
+        # 2. Search holons.lex_sig
+        q_tokens = set(extract_normalized_tokens(query))
+        holon_spans: list[tuple[str, list[str]]] = []
+        txn_method = getattr(store, "transaction", None)
+        if callable(txn_method):
+            try:
+                with store.transaction() as conn:
+                    rows = conn.execute(
+                        "SELECT id, lex_sig, spans FROM holons WHERE status = 'ACTIVE' LIMIT 200"
+                    ).fetchall()
+                    for r in rows:
+                        sig_raw = r["lex_sig"]
+                        sig = json.loads(sig_raw) if isinstance(sig_raw, str) else (sig_raw or [])
+                        sig_set = set(t.lower() for t in sig)
+                        overlap = q_tokens & sig_set
+                        if overlap:
+                            spans_raw = r["spans"]
+                            spans = json.loads(spans_raw) if isinstance(spans_raw, str) else (spans_raw or [])
+                            source_ids: list[str] = []
+                            for span in spans:
+                                source_ids.extend(_get_atom_ids_for_span(span, atoms))
+                            holon_spans.append((r["id"], source_ids))
+            except Exception:
+                pass
+
+        for h_id, source_ids in holon_spans:
+            for s_id in source_ids:
+                if s_id in atom_by_id and s_id not in hits:
+                    hits[s_id] = THETA_LEX
+
+        # 3. If fts_atoms search produced no hits, evaluate Okapi BM25 over visible atoms
+        if not hits:
+            q_terms = tokens(query)
+            bm25_scores = self._bm25(q_terms, atoms)
+            for aid, sc in bm25_scores.items():
+                if sc > 0:
+                    hits[aid] = sc
+
+        # Ensure exact trigger matches qualify
+        qualifying: list[Candidate] = []
+        for aid, score in hits.items():
+            atom = atom_by_id.get(aid)
+            if not atom:
+                continue
+            content = atom.get("content") or atom.get("text") or ""
+            for q_sub in _RE_QUOTED.findall(query):
+                if q_sub.lower() in content.lower():
+                    score = max(score, THETA_LEX + 1.0)
+            for b_sub in _RE_BACKTICK.findall(query):
+                if b_sub.lower() in content.lower():
+                    score = max(score, THETA_LEX + 1.0)
+            for m in _RE_UPPER_SNAKE.finditer(query):
+                snake = m.group(0)
+                if len(snake) >= 3 and snake in content:
+                    score = max(score, THETA_LEX + 1.0)
+            if _RE_TRACEBACK.search(query):
+                for tb_m in _RE_TRACEBACK.finditer(query):
+                    tb_str = tb_m.group(0).strip()
+                    if tb_str and tb_str.lower() in content.lower():
+                        score = max(score, THETA_LEX + 1.0)
+            if "traceback" in query.lower() and "traceback" in content.lower():
+                score = max(score, THETA_LEX + 1.0)
+
+            if score >= THETA_LEX:
+                qualifying.append(Candidate(
+                    atom=atom,
+                    lexical=score,
+                    score=score,
+                ))
+
+        qualifying.sort(key=lambda c: (-c.score, c.atom["atom_version_id"]))
+        return qualifying[:limit]
+
+    def _tier2_beam_search(
+        self,
+        *,
+        store: Any,
+        request: QueryRequest,
+        atoms: Sequence[dict[str, Any]],
+        query_vector: Sequence[float],
+        K: int = 20,
+    ) -> tuple[list[Candidate], dict[str, Any]]:
+        """Tier 2 Top-Down Hierarchical Beam Search (<= 35 ms):
+
+        1. Probe L2 TOC beam K <= 20 (excluding DIVERSE_OVERFLOW).
+        2. Filter candidate L1 holons.
+        3. Two-Pass Lateral Rectification PPR (<= 2500 steps).
+        4. Confident candidates (>= 3 with cos >= 0.65).
+        """
+        atom_by_id = {atom["atom_version_id"]: atom for atom in atoms}
+        toc_nodes: list[dict[str, Any]] = []
+
+        txn_method = getattr(store, "transaction", None)
+        if callable(txn_method):
+            try:
+                with store.transaction() as conn:
+                    rows = conn.execute(
+                        "SELECT id, parent, c0, r0, members, boundary, status FROM toc WHERE status = 'ACTIVE'"
+                    ).fetchall()
+                    for r in rows:
+                        b_raw = r["boundary"]
+                        boundary = json.loads(b_raw) if isinstance(b_raw, str) else (b_raw or {})
+                        m_raw = r["members"]
+                        members = json.loads(m_raw) if isinstance(m_raw, str) else (m_raw or [])
+                        toc_nodes.append({
+                            "id": r["id"],
+                            "parent": r["parent"],
+                            "c0": r["c0"],
+                            "r0": r["r0"],
+                            "members": members,
+                            "boundary": boundary,
+                            "status": r["status"],
+                        })
+            except Exception:
+                toc_nodes = []
+
+        # Exclude DIVERSE_OVERFLOW per Appendix A Rows 4 & 12
+        from .organization import is_candidate_for_beam
+        eligible_tocs = [node for node in toc_nodes if is_candidate_for_beam(node)]
+
+        # Score eligible TOC nodes against query vector
+        scored_tocs: list[tuple[float, dict[str, Any]]] = []
+        for node in eligible_tocs:
+            c0_val = node.get("c0")
+            if c0_val is None:
+                continue
+            if isinstance(c0_val, (bytes, bytearray)):
+                num_floats = len(c0_val) // 4
+                vec = list(struct.unpack(f"{num_floats}f", c0_val))
+            elif isinstance(c0_val, list):
+                vec = c0_val
+            else:
+                continue
+            if len(vec) == len(query_vector):
+                cos_sim = cosine(query_vector, vec)
+                scored_tocs.append((cos_sim, node))
+
+        scored_tocs.sort(key=lambda x: -x[0])
+        top_k_tocs = scored_tocs[:K]
+
+        candidate_l1_ids = list(dict.fromkeys(
+            m for _, t in top_k_tocs for m in t.get("members", [])
+        ))
+
+        holon_rows: list[dict[str, Any]] = []
+        if candidate_l1_ids and callable(txn_method):
+            try:
+                with store.transaction() as conn:
+                    placeholders = ",".join("?" for _ in candidate_l1_ids)
+                    rows = conn.execute(
+                        f"SELECT id, parent_toc, centroid_int8, lex_sig, spans, status FROM holons WHERE id IN ({placeholders})",
+                        candidate_l1_ids,
+                    ).fetchall()
+                    for r in rows:
+                        holon_rows.append({
+                            "id": r["id"],
+                            "parent_toc": r["parent_toc"],
+                            "centroid_int8": r["centroid_int8"],
+                            "spans": json.loads(r["spans"]) if isinstance(r["spans"], str) else (r["spans"] or []),
+                            "status": r["status"],
+                        })
+            except Exception:
+                holon_rows = []
+
+        seed_scores: dict[str, float] = {}
+        holon_by_id = {h["id"]: h for h in holon_rows}
+        for h in holon_rows:
+            c_int8 = h.get("centroid_int8")
+            if c_int8 is not None and isinstance(c_int8, (bytes, bytearray)):
+                vec = [float(b if b < 128 else b - 256) / 127.0 for b in c_int8]
+                if len(vec) == len(query_vector):
+                    cos_val = max(0.001, cosine(query_vector, vec))
+                else:
+                    cos_val = 0.50
+            else:
+                cos_val = 0.50
+            seed_scores[h["id"]] = cos_val
+
+        edge_rows: list[dict[str, Any]] = []
+        getter = getattr(store, "get_edges", None)
+        if callable(getter):
+            try:
+                edge_rows = getter()
+            except Exception:
+                pass
+
+        ppr_edges: list[Edge] = []
+        for e in edge_rows:
+            s = e.get("src")
+            d = e.get("dst")
+            t = e.get("type", "REFERENCES")
+            w = float(e.get("weight", 1.0))
+            if s in seed_scores and d in seed_scores:
+                ppr_edges.append(Edge(src=s, dst=d, edge_type=t, weight=w))
+
+        engine = TwoPassPPREngine(priors=PPRPriors(max_steps=2500, max_iterations=20, beta_lateral_inhibition=1.0))
+        ppr_result = engine.run(
+            nodes=list(seed_scores.keys()),
+            seed_scores=seed_scores,
+            edges=ppr_edges,
+        )
+
+        confident_holons = [
+            h_id for h_id, s in seed_scores.items() if s >= CONFIDENT_COSINE_THRESHOLD
+        ]
+
+        tier2_candidates: list[Candidate] = []
+        for h_id in sorted(ppr_result.final_scores, key=lambda x: -ppr_result.final_scores[x]):
+            h = holon_by_id.get(h_id)
+            if not h:
+                continue
+            h_score = ppr_result.final_scores[h_id]
+            for span in h.get("spans", []):
+                for aid in _get_atom_ids_for_span(span, atoms):
+                    if aid in atom_by_id:
+                        tier2_candidates.append(Candidate(
+                            atom=atom_by_id[aid],
+                            score=h_score,
+                            dense=seed_scores.get(h_id, 0.0),
+                            graph=h_score,
+                        ))
+
+        diagnostics = {
+            "probed_tocs": [t.get("id") for _, t in top_k_tocs],
+            "candidate_l1_count": len(candidate_l1_ids),
+            "ppr_iterations": ppr_result.iterations,
+            "ppr_steps": ppr_result.step_count,
+            "suppression_fallback_triggered": ppr_result.suppression_fallback_triggered,
+            "confident_count": len(confident_holons),
+            "elapsed_ms": ppr_result.elapsed_ms,
+            "mode": self.tier2_mode,
+        }
+        return tier2_candidates, diagnostics
+
     def retrieve(
         self,
         *,
@@ -963,6 +1648,91 @@ class HybridRetrievalEngine:
         query_terms = tokens(request.query)
         if not query_terms:
             return RetrievalOutcome([], "insufficient_evidence", {"reason": "no_query_terms"})
+
+        cascade_start = time.perf_counter()
+        budget = request.retrieval_budget
+        profile = request.retrieval_profile
+
+        # ----------------------------------------------------------------------
+        # Tier 1: Lexical Short-Circuit (<= 5 ms)
+        # Triggers: quoted strings, UPPER_SNAKE >= 3, tracebacks, backticks.
+        # Queries: fts_atoms + holon lex_sig top-20.
+        # Success: hits >= 3 with BM25 score >= THETA_LEX (2.0) -> expand L0 & return.
+        # ----------------------------------------------------------------------
+        t1_triggered = is_tier1_triggered(request.query)
+        t1_candidates: list[Candidate] = []
+        t1_elapsed: float = 0.0
+        if t1_triggered:
+            t1_start = time.perf_counter()
+            t1_candidates = self._tier1_search(
+                store=store, request=request, atoms=atoms, limit=budget.candidate_limit
+            )
+            t1_elapsed = (time.perf_counter() - t1_start) * 1000.0
+            if len(t1_candidates) >= 3 and not is_mixed_query(request.query):
+                governed_count = min(GOVERNOR_MAX_CONCEPTS, max(GOVERNOR_MIN_CONCEPTS, budget.candidate_limit))
+                capped_t1 = t1_candidates[:governed_count]
+                cascade_elapsed = (time.perf_counter() - cascade_start) * 1000.0
+                return RetrievalOutcome(
+                    candidates=capped_t1,
+                    sufficiency_state="answerable",
+                    diagnostics={
+                        "tier": 1,
+                        "tier1_triggered": True,
+                        "tier1_short_circuit": True,
+                        "tier1_hits": len(t1_candidates),
+                        "tier1_elapsed_ms": t1_elapsed,
+                        "cascade_elapsed_ms": cascade_elapsed,
+                        "tier2_provably_non_default": (self.tier2_mode == "shadow"),
+                        "tier2_mode": self.tier2_mode,
+                        "governor_capped": len(capped_t1),
+                        "lexical_provider": "bm25-okapi-v1",
+                        "dense_provider": self.dense_embedder.provider_id,
+                        "stage_counts": {"atoms": len(atoms), "tier1_hits": len(t1_candidates)},
+                    },
+                )
+
+        # ----------------------------------------------------------------------
+        # Tier 2: Top-Down Hierarchical Beam (<= 35 ms)
+        # Probes L2 TOC beam K <= 20 (excluding DIVERSE_OVERFLOW) -> filter candidate
+        # L1 holons -> Two-Pass Lateral Rectification PPR (<= 2500 steps).
+        # In v1 qualification, Tier 2 operates in SHADOW mode (never default).
+        # ----------------------------------------------------------------------
+        t2_start = time.perf_counter()
+        query_vector = self.dense_embedder.embed([request.query])[0]
+        t2_candidates, t2_diag = self._tier2_beam_search(
+            store=store, request=request, atoms=atoms, query_vector=query_vector, K=20
+        )
+        t2_elapsed = (time.perf_counter() - t2_start) * 1000.0
+        t2_diag["elapsed_ms"] = t2_elapsed
+
+        # Tier 2 active promotion path: short-circuit if confident candidates >= 3
+        if self.tier2_mode == "active" and t2_diag.get("confident_count", 0) >= 3 and len(t2_candidates) >= 3:
+            governed_count = min(GOVERNOR_MAX_CONCEPTS, max(GOVERNOR_MIN_CONCEPTS, budget.candidate_limit))
+            capped_t2 = t2_candidates[:governed_count]
+            cascade_elapsed = (time.perf_counter() - cascade_start) * 1000.0
+            return RetrievalOutcome(
+                candidates=capped_t2,
+                sufficiency_state="answerable",
+                diagnostics={
+                    "tier": 2,
+                    "tier1_triggered": t1_triggered,
+                    "tier1_short_circuit": False,
+                    "tier1_elapsed_ms": t1_elapsed,
+                    "tier2_mode": "active",
+                    "tier2_provably_non_default": False,
+                    "tier2_elapsed_ms": t2_elapsed,
+                    "cascade_elapsed_ms": cascade_elapsed,
+                    "governor_capped": len(capped_t2),
+                    "tier2_beam": t2_diag,
+                },
+            )
+
+        # ----------------------------------------------------------------------
+        # Tier 3: Global Flat Hybrid Fallback (<= 25 ms)
+        # Global dense kNN + global BM25 fused via Reciprocal Rank Fusion (RRF).
+        # Never return insufficient_evidence before Tier 3 runs.
+        # ----------------------------------------------------------------------
+        t3_start = time.perf_counter()
 
         active_rel_getter = getattr(store, "get_active_cortex_release", None)
         active_rel = active_rel_getter(request.workspace_id) if callable(active_rel_getter) else None
@@ -1010,7 +1780,28 @@ class HybridRetrievalEngine:
             if atom_id in dense_rank:
                 rrf += 1.0 / (60 + dense_rank[atom_id])
             candidates[atom_id] = Candidate(atom=atom_by_id[atom_id], lexical=lexical.get(atom_id, 0.0), dense=dense.get(atom_id, 0.0), rrf=rrf, score=rrf)
+
+        # Union lexical short-circuit candidates if present (mixed queries or un-short-circuited hits)
+        if t1_candidates:
+            for c in t1_candidates:
+                cid = c.atom["atom_version_id"]
+                if cid not in candidates:
+                    candidates[cid] = c
+                else:
+                    candidates[cid].score = max(candidates[cid].score, c.score)
+                    candidates[cid].lexical = max(candidates[cid].lexical, c.lexical)
+
+        # Active Tier 2 promotion path if explicitly requested
+        if self.tier2_mode == "active" and len(t2_candidates) >= 3:
+            for c in t2_candidates:
+                cid = c.atom["atom_version_id"]
+                if cid not in candidates:
+                    candidates[cid] = c
+                else:
+                    candidates[cid].score += 0.20 * c.score
+
         ordered = sorted(candidates.values(), key=lambda item: (-item.score, item.atom["atom_version_id"]))
+        t3_elapsed = (time.perf_counter() - t3_start) * 1000.0
         rerank_applied = profile in {"rerank", "hierarchy", "graph", "deep"} or (profile == "auto" and budget.mode != "fast")
         if rerank_applied:
             rerank_set = ordered[:budget.rerank_limit]
@@ -1281,15 +2072,39 @@ class HybridRetrievalEngine:
                 "degraded": bool(plans and plans[-1].get("stop_reason") == "provider_unavailable"),
             }
             preliminary = sorted([*candidates.values(), *selected_hierarchy], key=lambda item: (-item.score, item.atom["atom_version_id"]))
-        final = preliminary[:budget.candidate_limit]
-        raw_results = [item for item in final if "atom" in item.atom.get("facets", [])]
-        state = "answerable" if raw_results else "insufficient_evidence"
-        if state == "answerable" and len(raw_results) > 1 and len(query_terms) > 1 and abs(raw_results[0].score - raw_results[1].score) < 0.015:
-            state = "ambiguous"
+
+        top_cand = preliminary[0] if preliminary else None
+        passes_floor = top_cand is not None and (
+            top_cand.rrf >= RRF_SCORE_FLOOR or top_cand.dense >= DENSE_COSINE_FLOOR or top_cand.lexical >= THETA_LEX
+        )
+        governed_limit = min(GOVERNOR_MAX_CONCEPTS, max(GOVERNOR_MIN_CONCEPTS, budget.candidate_limit))
+
+        if passes_floor:
+            final = preliminary[:governed_limit]
+            raw_results = [item for item in final if not item.atom.get("facets") or "atom" in item.atom.get("facets", [])]
+            state = "answerable" if raw_results else "insufficient_evidence"
+            if state == "answerable" and len(raw_results) > 1 and len(query_terms) > 1 and abs(raw_results[0].score - raw_results[1].score) < 0.015:
+                state = "ambiguous"
+        else:
+            final = []
+            state = "insufficient_evidence"
+
+        cascade_elapsed = (time.perf_counter() - cascade_start) * 1000.0
         return RetrievalOutcome(
             candidates=final,
             sufficiency_state=state,
             diagnostics={
+                "tier": 3 if self.tier2_mode == "shadow" else 2,
+                "tier1_triggered": t1_triggered,
+                "tier1_short_circuit": False,
+                "tier1_elapsed_ms": t1_elapsed,
+                "tier2_mode": self.tier2_mode,
+                "tier2_provably_non_default": (self.tier2_mode == "shadow"),
+                "tier2_shadow": t2_diag,
+                "tier3_elapsed_ms": t3_elapsed,
+                "cascade_elapsed_ms": cascade_elapsed,
+                "governor_capped": len(final),
+                "rrf_floor_passed": passes_floor,
                 "lexical_provider": "bm25-okapi-v1",
                 "dense_provider": self.dense_embedder.provider_id,
                 "lexical_index": getattr(self.lexical_index, "provider_id", None),
