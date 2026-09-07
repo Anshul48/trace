@@ -6,10 +6,11 @@ import hashlib
 import json
 import math
 import os
+import struct
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any, Callable, Protocol, Sequence
+from typing import Any, Callable, Mapping, Protocol, Sequence
 
 from .retrieval import tokens
 from .model_gateway import ModelGatewayPolicy, ModelPolicy
@@ -757,3 +758,678 @@ class SoftSchemaClassifier:
     def query_alignment(query: str, labels: Sequence[dict[str, Any]]) -> float:
         wanted = set(tokens(query))
         return max((len(wanted & set(tokens(item["label"]))) / max(1, len(wanted))) * item["confidence"] for item in labels) if labels else 0.0
+
+
+# ==============================================================================
+# Work Packet 3 (WP3): L2 Macro-Topology (TOC-DAG) & Drift Monitor
+# ==============================================================================
+
+MAX_TOC_FANOUT = 64
+COHESION_FLOOR = 0.08
+DRIFT_EPSILON = 0.25
+MIN_EFFECTIVE_RADIUS = 0.05
+NEWBORN_APOPTOSIS_GRACE_DAYS = 7.0
+OVERFLOW_APOPTOSIS_DAYS = 30.0
+
+TOC_STATUS_ACTIVE = "ACTIVE"
+TOC_STATUS_STALE_CENTROID = "STALE_CENTROID"
+TOC_STATUS_DORMANT = "DORMANT"
+TOC_STATUS_DIRTY_CONTRACT = "DIRTY_CONTRACT"
+
+NODE_TYPE_STANDARD = "STANDARD"
+NODE_TYPE_DIVERSE_OVERFLOW = "DIVERSE_OVERFLOW"
+
+
+def _vector_dot(u: Sequence[float], v: Sequence[float]) -> float:
+    return sum(x * y for x, y in zip(u, v))
+
+
+def _vector_norm(v: Sequence[float]) -> float:
+    return math.sqrt(sum(x * x for x in v))
+
+
+def _unit_norm(v: Sequence[float]) -> list[float]:
+    n = _vector_norm(v)
+    if n <= 1e-9:
+        return [0.0] * len(v)
+    return [x / n for x in v]
+
+
+def _frechet_unit_centroid(vectors: Sequence[Sequence[float]]) -> list[float]:
+    if not vectors:
+        return []
+    dim = len(vectors[0])
+    acc = [0.0] * dim
+    for vec in vectors:
+        for i, val in enumerate(vec):
+            acc[i] += val
+    return _unit_norm(acc)
+
+
+def _dequantize_int8(data: bytes | Sequence[int]) -> list[float]:
+    floats = []
+    for b in data:
+        val = b if b < 128 else b - 256
+        floats.append(val / 127.0)
+    return _unit_norm(floats)
+
+
+def _effective_radius(c0: Sequence[float], member_vecs: Sequence[Sequence[float]]) -> float:
+    """R0_eff = max(1.0 - min_{h in TOC}(c0 . h), 0.05)."""
+    if not member_vecs:
+        return MIN_EFFECTIVE_RADIUS
+    max_dist = max(1.0 - _vector_dot(c0, mv) for mv in member_vecs)
+    return max(max_dist, MIN_EFFECTIVE_RADIUS)
+
+
+def evaluate_holon_energy(hits_7d: float = 0.0, centrality: float = 0.0, age_days: float = 0.0) -> float:
+    """energy = max(0.0, 1.0*hits_7d + 0.5*centrality - 0.02*age_days)."""
+    raw = 1.0 * float(hits_7d) + 0.5 * float(centrality) - 0.02 * float(age_days)
+    return max(0.0, raw)
+
+
+def is_newborn_apoptosis_exempt(holon: Any, *, grace_days: float = NEWBORN_APOPTOSIS_GRACE_DAYS, now: datetime | None = None) -> bool:
+    """Holons with age_days < 7 are strictly exempt from apoptosis pruning."""
+    if isinstance(holon, HolonMember):
+        if holon.age_days > 0.0:
+            age = holon.age_days
+        elif holon.created_at:
+            try:
+                dt = datetime.fromisoformat(str(holon.created_at).replace("Z", "+00:00"))
+                current_time = now or datetime.now(UTC)
+                age = max(0.0, (current_time - dt).total_seconds() / 86400.0)
+            except Exception:
+                age = 0.0
+        else:
+            age = 0.0
+    elif isinstance(holon, dict):
+        if "age_days" in holon and holon["age_days"] is not None:
+            age = float(holon["age_days"])
+        elif "created_at" in holon and holon["created_at"]:
+            created_str = str(holon["created_at"])
+            try:
+                dt = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
+                current_time = now or datetime.now(UTC)
+                age = max(0.0, (current_time - dt).total_seconds() / 86400.0)
+            except Exception:
+                age = 0.0
+        else:
+            age = 0.0
+    elif hasattr(holon, "age_days"):
+        age = float(getattr(holon, "age_days"))
+    else:
+        age = 0.0
+
+    return age < grace_days
+
+
+@dataclass
+class HolonMember:
+    """L1 Holon member descriptor for L2 TOC partitioning."""
+
+    id: str
+    centroid: list[float]
+    lex_sig: list[str] = field(default_factory=list)
+    created_at: str | None = None
+    hits_7d: float = 0.0
+    centrality: float = 0.0
+    age_days: float = 0.0
+    energy: float = 0.0
+
+
+def normalize_holon_member(item: Any, *, now: datetime | None = None) -> HolonMember:
+    """Normalize input dict/dataclass into HolonMember."""
+    if isinstance(item, HolonMember):
+        return item
+    if isinstance(item, dict):
+        vec = item.get("centroid", item.get("centroid_int8", []))
+        if isinstance(vec, bytes):
+            vec = _dequantize_int8(vec)
+        elif vec and isinstance(vec, (list, tuple)):
+            vec = _unit_norm(vec)
+        lex_sig = item.get("lex_sig", [])
+        if isinstance(lex_sig, str):
+            try:
+                lex_sig = json.loads(lex_sig)
+            except Exception:
+                lex_sig = []
+        hits_7d = float(item.get("hits_7d", 0.0))
+        centrality = float(item.get("centrality", 0.0))
+        created_at = item.get("created_at")
+
+        if "age_days" in item and item["age_days"] is not None:
+            age_days = float(item["age_days"])
+        elif created_at:
+            try:
+                dt = datetime.fromisoformat(str(created_at).replace("Z", "+00:00"))
+                current_time = now or datetime.now(UTC)
+                age_days = max(0.0, (current_time - dt).total_seconds() / 86400.0)
+            except Exception:
+                age_days = 0.0
+        else:
+            age_days = 0.0
+
+        energy = item.get("energy", evaluate_holon_energy(hits_7d, centrality, age_days))
+        return HolonMember(
+            id=str(item.get("id", item.get("node_id", ""))),
+            centroid=list(vec),
+            lex_sig=list(lex_sig),
+            created_at=created_at,
+            hits_7d=hits_7d,
+            centrality=centrality,
+            age_days=age_days,
+            energy=float(energy),
+        )
+    raise TypeError(f"Cannot normalize member of type {type(item)}")
+
+
+@dataclass
+class TOCNode:
+    """L2 TOC partition node."""
+
+    id: str
+    parent: str | None
+    c0: list[float]
+    r0: float
+    members: list[str]
+    boundary: dict[str, Any] = field(default_factory=dict)
+    status: str = TOC_STATUS_ACTIVE
+    version: int = 1
+    node_type: str = NODE_TYPE_STANDARD
+    created_at: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        b = self.boundary
+        if isinstance(b, str):
+            try:
+                b = json.loads(b)
+            except Exception:
+                b = {}
+        elif isinstance(b, dict):
+            b = dict(b)
+        else:
+            b = {}
+        b.setdefault("node_type", self.node_type)
+
+        return {
+            "id": self.id,
+            "parent": self.parent,
+            "c0": self.c0_bytes,
+            "r0": self.r0,
+            "members": list(self.members),
+            "boundary": b,
+            "status": self.status,
+            "version": self.version,
+            "created_at": self.created_at,
+            "node_type": self.node_type,
+            "excluded_from_beam": self.excluded_from_beam,
+        }
+
+    @property
+    def c0_bytes(self) -> bytes:
+        return struct.pack(f"{len(self.c0)}f", *self.c0)
+
+    @property
+    def excluded_from_beam(self) -> bool:
+        b = self.boundary
+        if isinstance(b, str):
+            try:
+                b = json.loads(b)
+            except Exception:
+                b = {}
+        elif not isinstance(b, dict):
+            b = {}
+
+        return (
+            self.node_type == NODE_TYPE_DIVERSE_OVERFLOW
+            or b.get("node_type") == NODE_TYPE_DIVERSE_OVERFLOW
+            or b.get("cohesion_floor", COHESION_FLOOR) == 0.0
+            or (self.status == TOC_STATUS_STALE_CENTROID and self.node_type == NODE_TYPE_DIVERSE_OVERFLOW)
+        )
+
+
+def is_candidate_for_beam(node: Any) -> bool:
+    """DIVERSE_OVERFLOW nodes are excluded from Tier 2 beam candidacy."""
+    if isinstance(node, TOCNode):
+        return not node.excluded_from_beam
+    if isinstance(node, dict):
+        if node.get("node_type") == NODE_TYPE_DIVERSE_OVERFLOW:
+            return False
+        if node.get("excluded_from_beam") is True:
+            return False
+
+        boundary = node.get("boundary") or {}
+        if isinstance(boundary, str):
+            try:
+                boundary = json.loads(boundary)
+            except Exception:
+                boundary = {}
+        elif not isinstance(boundary, dict):
+            boundary = {}
+
+        if boundary.get("node_type") == NODE_TYPE_DIVERSE_OVERFLOW:
+            return False
+        if boundary.get("cohesion_floor") == 0.0:
+            return False
+        if node.get("status") == TOC_STATUS_STALE_CENTROID and (
+            boundary.get("cohesion_floor") == 0.0 or node.get("node_type") == NODE_TYPE_DIVERSE_OVERFLOW
+        ):
+            return False
+        return True
+    return True
+
+
+def is_overflow_orphan_apoptosis_eligible(
+    node: Any,
+    *,
+    orphan_days: float = OVERFLOW_APOPTOSIS_DAYS,
+    is_orphaned: bool = True,
+    now: datetime | None = None,
+) -> bool:
+    """Evaluate 30-day orphan apoptosis policy for DIVERSE_OVERFLOW nodes.
+
+    Per CORTICAL_SUBSTRATE_V1_PLAN Appendix A (Row 4):
+    DIVERSE_OVERFLOW nodes are pruned after 30 days if orphaned.
+    """
+    if isinstance(node, TOCNode):
+        node_type = node.node_type
+        created_at = node.created_at
+    elif isinstance(node, dict):
+        node_type = node.get("node_type")
+        boundary = node.get("boundary") or {}
+        if isinstance(boundary, str):
+            try:
+                boundary = json.loads(boundary)
+            except Exception:
+                boundary = {}
+        if not node_type and isinstance(boundary, dict):
+            node_type = boundary.get("node_type")
+        created_at = node.get("created_at")
+    else:
+        return False
+
+    if node_type != NODE_TYPE_DIVERSE_OVERFLOW:
+        return False
+
+    if not is_orphaned:
+        return False
+
+    if not created_at:
+        return False
+
+    try:
+        dt = datetime.fromisoformat(str(created_at).replace("Z", "+00:00"))
+        current_time = now or datetime.now(UTC)
+        age_days = (current_time - dt).total_seconds() / 86400.0
+        return age_days >= orphan_days
+    except Exception:
+        return False
+
+
+def check_cohesion(
+    members: Sequence[HolonMember],
+    cohesion_floor: float = COHESION_FLOOR,
+    min_shared_terms: int = 1,
+) -> tuple[bool, float]:
+    """Intra-cluster Jaccard affinity >= 0.08; min 1 shared salient term.
+
+    Evaluates intra-cluster cohesion:
+    1. For |members| <= 1: trivially satisfies cohesion.
+    2. For |members| > 1: every member must share >= min_shared_terms with
+       the union of terms in other cluster members, and the cluster average
+       Jaccard affinity must satisfy >= cohesion_floor.
+    """
+    if len(members) <= 1:
+        return True, 1.0
+
+    member_terms = [set(m.lex_sig) for m in members]
+    total_jaccard = 0.0
+
+    for i, terms_i in enumerate(member_terms):
+        other_terms: set[str] = set()
+        for j, terms_j in enumerate(member_terms):
+            if i != j:
+                other_terms.update(terms_j)
+
+        shared = terms_i & other_terms
+        if len(shared) < min_shared_terms:
+            return False, 0.0
+
+        union = terms_i | other_terms
+        jaccard = len(shared) / max(1, len(union))
+        total_jaccard += jaccard
+
+    avg_jaccard = total_jaccard / len(members)
+    return avg_jaccard >= cohesion_floor, avg_jaccard
+
+
+def detect_centroid_drift(
+    c0: Sequence[float],
+    c_new: Sequence[float],
+    *,
+    r0: float | None = None,
+    members: Sequence[Any] | None = None,
+    drift_epsilon: float = DRIFT_EPSILON,
+) -> tuple[bool, float, float]:
+    """Hyperspherical Cosine Drift Monitor:
+
+    Delta_cos = 1.0 - (c0 . c_new)
+    R0_eff = max(R0, 0.05) where R0 = max_{h in TOC}(1.0 - c0 . h)
+    Flag STALE_CENTROID iff Delta_cos > 0.25 * R0_eff.
+    Returns: (is_stale, delta_cos, threshold)
+    """
+    u_c0 = _unit_norm(c0)
+    u_c_new = _unit_norm(c_new)
+    delta_cos = max(0.0, 1.0 - _vector_dot(u_c0, u_c_new))
+
+    if r0 is not None:
+        r0_eff = max(float(r0), MIN_EFFECTIVE_RADIUS)
+    elif members:
+        member_vecs = [
+            normalize_holon_member(m).centroid
+            for m in members
+            if normalize_holon_member(m).centroid
+        ]
+        r0_eff = _effective_radius(u_c0, member_vecs)
+    else:
+        r0_eff = MIN_EFFECTIVE_RADIUS
+
+    threshold = drift_epsilon * r0_eff
+    is_stale = delta_cos > threshold
+    return is_stale, delta_cos, threshold
+
+
+def bisecting_spherical_2means(
+    members: Sequence[Any],
+    *,
+    parent_id: str | None = None,
+    c0: Sequence[float] | None = None,
+    max_fanout: int = MAX_TOC_FANOUT,
+) -> list[TOCNode]:
+    """Deterministic Bisecting Spherical 2-Means partitioning.
+
+    When |members| > 64, bisect using diametrically opposed seeds:
+      s1 = argmax (1.0 - h . c0)
+      s2 = argmax (1.0 - h . s1)
+    with members iterated in strictly sorted-ID order to guarantee deterministic tie-breaking.
+    Recursively bisects child partitions until all partitions satisfy |members| <= 64.
+    """
+    norm_members = [normalize_holon_member(m) for m in members]
+    norm_members.sort(key=lambda m: m.id)
+
+    if not norm_members:
+        return []
+
+    if len(norm_members) <= max_fanout:
+        member_vecs = [m.centroid for m in norm_members]
+        c_unit = _frechet_unit_centroid(member_vecs) if member_vecs else (list(c0) if c0 else [0.0] * 384)
+        r0 = _effective_radius(c_unit, member_vecs)
+        valid, cohesion_score = check_cohesion(norm_members)
+        node_id = f"toc_{_key(parent_id or 'root', *(m.id for m in norm_members))[:16]}"
+        boundary = {
+            "cohesion_floor": COHESION_FLOOR if valid else 0.0,
+            "radius": r0,
+            "cohesion_score": cohesion_score,
+            "node_type": NODE_TYPE_STANDARD,
+        }
+        return [
+            TOCNode(
+                id=node_id,
+                parent=parent_id,
+                c0=c_unit,
+                r0=r0,
+                members=[m.id for m in norm_members],
+                boundary=boundary,
+                status=TOC_STATUS_ACTIVE,
+                node_type=NODE_TYPE_STANDARD,
+            )
+        ]
+
+    # |members| > 64: Bisect using diametrical seeds with sorted-ID tie breaking
+    if c0 and any(c0):
+        base_c0 = _unit_norm(c0)
+    else:
+        base_c0 = _frechet_unit_centroid([m.centroid for m in norm_members])
+
+    # Seed 1: s1 = argmax_{h in members} (1.0 - h . c0) in sorted-ID order
+    best_d1 = -1.0
+    s1 = norm_members[0]
+    for m in norm_members:
+        d = 1.0 - _vector_dot(m.centroid, base_c0)
+        if d > best_d1:
+            best_d1 = d
+            s1 = m
+
+    # Seed 2: s2 = argmax_{h in members} (1.0 - h . s1) in sorted-ID order
+    best_d2 = -1.0
+    s2 = norm_members[0]
+    for m in norm_members:
+        d = 1.0 - _vector_dot(m.centroid, s1.centroid)
+        if d > best_d2:
+            best_d2 = d
+            s2 = m
+
+    if s1.id == s2.id and len(norm_members) > 1:
+        s2 = norm_members[-1]
+
+    c1 = list(s1.centroid)
+    c2 = list(s2.centroid)
+    part1: list[HolonMember] = []
+    part2: list[HolonMember] = []
+
+    for _ in range(25):
+        part1 = []
+        part2 = []
+        for m in norm_members:
+            sim1 = _vector_dot(m.centroid, c1)
+            sim2 = _vector_dot(m.centroid, c2)
+            if sim1 > sim2:
+                part1.append(m)
+            elif sim2 > sim1:
+                part2.append(m)
+            else:
+                # Deterministic tie-break
+                part1.append(m)
+
+        # Degenerate partition guard
+        if not part1 or not part2:
+            mid = len(norm_members) // 2
+            part1 = norm_members[:mid]
+            part2 = norm_members[mid:]
+            break
+
+        new_c1 = _frechet_unit_centroid([m.centroid for m in part1])
+        new_c2 = _frechet_unit_centroid([m.centroid for m in part2])
+        if _vector_dot(new_c1, c1) > 1.0 - 1e-7 and _vector_dot(new_c2, c2) > 1.0 - 1e-7:
+            c1, c2 = new_c1, new_c2
+            break
+        c1, c2 = new_c1, new_c2
+
+    # Recursive bisection
+    sub1 = bisecting_spherical_2means(part1, parent_id=parent_id, c0=c1, max_fanout=max_fanout)
+    sub2 = bisecting_spherical_2means(part2, parent_id=parent_id, c0=c2, max_fanout=max_fanout)
+    return sub1 + sub2
+
+
+def resolve_cohesion_deadlocks(
+    nodes: Sequence[TOCNode],
+    all_members: Mapping[str, HolonMember],
+    *,
+    parent_id: str | None = None,
+    max_fanout: int = MAX_TOC_FANOUT,
+) -> list[TOCNode]:
+    """Cohesion deadlock resolution:
+
+    If a split partition violates cohesion (< 0.08), reassign members to
+    available neighbor TOC nodes; if no neighbor satisfies capacity (<= 64)
+    and cohesion (>= 0.08), assign to a DIVERSE_OVERFLOW TOC node under
+    parent with cohesion_floor = 0.0 and status STALE_CENTROID.
+    Fan-out <= 64 is strictly enforced across all nodes including overflow.
+    """
+    valid_nodes: list[TOCNode] = []
+    deadlocked_members: list[HolonMember] = []
+
+    for node in nodes:
+        node_members = [all_members[mid] for mid in node.members if mid in all_members]
+        valid, cohesion_score = check_cohesion(node_members)
+        if valid:
+            valid_nodes.append(node)
+        else:
+            deadlocked_members.extend(node_members)
+
+    if not deadlocked_members:
+        return list(nodes)
+
+    # Sort deadlocked members by ID for deterministic processing
+    deadlocked_members.sort(key=lambda m: m.id)
+    overflow_members: list[HolonMember] = []
+
+    for m in deadlocked_members:
+        reassigned = False
+        # Try available neighbor nodes
+        for neighbor in valid_nodes:
+            if len(neighbor.members) < max_fanout:
+                cand_members = [all_members[mid] for mid in neighbor.members if mid in all_members] + [m]
+                can_join, cand_score = check_cohesion(cand_members)
+                if can_join:
+                    neighbor.members.append(m.id)
+                    neighbor.members.sort()
+                    cand_vecs = [cm.centroid for cm in cand_members]
+                    neighbor.c0 = _frechet_unit_centroid(cand_vecs)
+                    neighbor.r0 = _effective_radius(neighbor.c0, cand_vecs)
+                    if not isinstance(neighbor.boundary, dict):
+                        neighbor.boundary = {}
+                    neighbor.boundary["radius"] = neighbor.r0
+                    neighbor.boundary["cohesion_score"] = cand_score
+                    reassigned = True
+                    break
+        if not reassigned:
+            overflow_members.append(m)
+
+    if overflow_members:
+        # Create DIVERSE_OVERFLOW node(s) with fanout <= 64
+        for chunk_idx in range(0, len(overflow_members), max_fanout):
+            chunk = overflow_members[chunk_idx : chunk_idx + max_fanout]
+            chunk_vecs = [m.centroid for m in chunk]
+            c_over = _frechet_unit_centroid(chunk_vecs)
+            r0_over = _effective_radius(c_over, chunk_vecs)
+            overflow_id = f"toc_overflow_{chunk_idx // max_fanout}_{_key(parent_id or 'root', *(m.id for m in chunk))[:12]}"
+            overflow_node = TOCNode(
+                id=overflow_id,
+                parent=parent_id,
+                c0=c_over,
+                r0=r0_over,
+                members=[m.id for m in chunk],
+                boundary={
+                    "cohesion_floor": 0.0,
+                    "radius": r0_over,
+                    "cohesion_score": 0.0,
+                    "node_type": NODE_TYPE_DIVERSE_OVERFLOW,
+                },
+                status=TOC_STATUS_STALE_CENTROID,
+                node_type=NODE_TYPE_DIVERSE_OVERFLOW,
+                created_at=datetime.now(UTC).isoformat(),
+            )
+            valid_nodes.append(overflow_node)
+
+    return valid_nodes
+
+
+class TOCPartitionManager:
+    """Governs L2 TOC macro-topology, deterministic bisecting spherical 2-means,
+
+    cohesion deadlocks, DIVERSE_OVERFLOW nodes, and hyperspherical drift monitoring.
+    """
+
+    def __init__(
+        self,
+        store: Any = None,
+        max_fanout: int = MAX_TOC_FANOUT,
+        cohesion_floor: float = COHESION_FLOOR,
+        drift_epsilon: float = DRIFT_EPSILON,
+    ) -> None:
+        self.store = store
+        self.max_fanout = max_fanout
+        self.cohesion_floor = cohesion_floor
+        self.drift_epsilon = drift_epsilon
+
+    def partition_members(
+        self,
+        members: Sequence[Any],
+        parent_id: str | None = None,
+        c0: Sequence[float] | None = None,
+    ) -> list[TOCNode]:
+        """Deterministically partition members into TOC nodes with fan-out <= 64."""
+        norm_members = [normalize_holon_member(m) for m in members]
+        norm_members.sort(key=lambda m: m.id)
+        if not norm_members:
+            return []
+
+        by_id = {m.id: m for m in norm_members}
+
+        raw_nodes = bisecting_spherical_2means(
+            norm_members,
+            parent_id=parent_id,
+            c0=c0,
+            max_fanout=self.max_fanout,
+        )
+
+        final_nodes = resolve_cohesion_deadlocks(
+            raw_nodes,
+            by_id,
+            parent_id=parent_id,
+            max_fanout=self.max_fanout,
+        )
+
+        for node in final_nodes:
+            assert len(node.members) <= self.max_fanout, f"Fanout bound <= {self.max_fanout} breached: {len(node.members)}"
+
+        if self.store is not None and hasattr(self.store, "insert_toc_nodes"):
+            self.store.insert_toc_nodes([n.to_dict() for n in final_nodes])
+
+        return final_nodes
+
+    def check_drift(
+        self,
+        toc_id: str,
+        new_centroid: Sequence[float] | None = None,
+        members: Sequence[Any] | None = None,
+    ) -> tuple[bool, float, float]:
+        """Check if a TOC node has experienced hyperspherical drift."""
+        node = None
+        if self.store is not None and hasattr(self.store, "get_toc_node"):
+            node = self.store.get_toc_node(toc_id)
+
+        if node is not None:
+            c0_data = node.get("c0")
+            if isinstance(c0_data, bytes):
+                c0 = list(struct.unpack(f"{len(c0_data)//4}f", c0_data))
+            else:
+                c0 = list(c0_data or [])
+            r0 = float(node.get("r0") or MIN_EFFECTIVE_RADIUS)
+        else:
+            c0 = [0.0] * 384
+            r0 = None
+
+        if new_centroid is None and members:
+            member_vecs = [
+                normalize_holon_member(m).centroid
+                for m in members
+                if normalize_holon_member(m).centroid
+            ]
+            new_c = _frechet_unit_centroid(member_vecs)
+        elif new_centroid is not None:
+            new_c = list(new_centroid)
+        else:
+            return False, 0.0, 0.0
+
+        is_stale, delta_cos, thresh = detect_centroid_drift(
+            c0, new_c, r0=r0, members=members, drift_epsilon=self.drift_epsilon
+        )
+        if is_stale and node is not None and self.store is not None:
+            node["status"] = TOC_STATUS_STALE_CENTROID
+            if hasattr(self.store, "insert_toc_nodes"):
+                self.store.insert_toc_nodes([node])
+
+        return is_stale, delta_cos, thresh
+
