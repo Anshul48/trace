@@ -40,7 +40,7 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from trace.v2.atomizer import atomize
+from trace.v2.atomizer import atomize, build_holons
 
 DEFAULT_BASE_DATA_ROOT = Path("/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820")
 DEFAULT_OUT_DIR = REPO_ROOT / "docs/program/inbox/cap-mod01-cloud-10k"
@@ -142,13 +142,15 @@ def assemble_10k_clusters(
 
     # Core Phase Ingestion & Atomization
     docs = derive_10k_docs(base_data_root=base_data_root, shard_slices=shard_slices)
-    if len(docs) != EXPECTED_TOTAL_DOCS:
-        raise ValueError(f"Expected {EXPECTED_TOTAL_DOCS} docs, got {len(docs)}")
+    expected_docs = sum(cnt for _, cnt in shard_slices)
+    if len(docs) != expected_docs:
+        raise ValueError(f"Expected {expected_docs} docs, got {len(docs)}")
 
     t_loaded = time.perf_counter()
     load_duration = t_loaded - t_start
 
     raw_atoms: list[dict[str, Any]] = []
+    all_clusters: list[dict[str, Any]] = []
     total_source_chars = 0
     total_token_est = 0
 
@@ -166,16 +168,46 @@ def assemble_10k_clusters(
         total_source_chars += len(full_text)
         total_token_est += len(full_text.split())
 
-        atom_drafts = atomize(full_text)
-        for draft in atom_drafts:
-            content = draft.content
-            c_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
-            raw_atoms.append({
-                "content": content,
-                "content_hash": c_hash,
-                "title": title or doc.get("source_document_key") or dataset_name,
-                "dataset": dataset_name,
-                "doc_id": doc_id,
+        doc_title = title or doc.get("source_document_key") or dataset_name
+        doc_holons = build_holons(full_text, doc_id=doc_id, file_id=doc_id)
+
+        for h in doc_holons:
+            cluster_c_idx = len(all_clusters)
+            cluster_id = f"cluster_{cluster_c_idx + 1:04d}"
+            theme = doc_title if doc_title else h.content[:60].strip()
+
+            source_atoms = []
+            for ord_idx, a in enumerate(h.atoms):
+                c_hash = a.content_hash or hashlib.sha256(a.content.encode("utf-8")).hexdigest()
+                raw_atoms.append({
+                    "content": a.content,
+                    "content_hash": c_hash,
+                    "title": doc_title,
+                    "dataset": dataset_name,
+                    "doc_id": doc_id,
+                })
+                node_id = f"atom_{cluster_c_idx + 1:04d}_{ord_idx + 1:02d}"
+                atom_version_id = f"av_{cluster_c_idx + 1:04d}_{ord_idx + 1:02d}"
+                source_atoms.append({
+                    "node_id": node_id,
+                    "atom_version_id": atom_version_id,
+                    "workspace_id": "cap_mod01_cloud_10k",
+                    "content": a.content,
+                    "content_hash": c_hash,
+                    "properties": {
+                        "title": doc_title,
+                        "source_dataset": dataset_name,
+                        "cluster_id": cluster_id,
+                        "ordinal": ord_idx,
+                        "doc_id": doc_id,
+                    },
+                })
+
+            all_clusters.append({
+                "cluster_id": cluster_id,
+                "theme": theme,
+                "atom_count": len(source_atoms),
+                "source_atoms": source_atoms,
             })
 
     t_atomized = time.perf_counter()
@@ -183,7 +215,7 @@ def assemble_10k_clusters(
     total_ingest_duration = t_atomized - t_start
 
     total_atom_count = len(raw_atoms)
-    num_triples = total_atom_count // 3
+    total_clusters_count = len(all_clusters)
     docs_per_sec = len(docs) / total_ingest_duration
     atoms_per_sec = total_atom_count / total_ingest_duration
     tokens_per_sec = total_token_est / total_ingest_duration
@@ -196,43 +228,15 @@ def assemble_10k_clusters(
     print(f"  Atoms/sec: {atoms_per_sec:.1f} (total atoms: {total_atom_count})")
     print(f"  Est. tokens/sec: {tokens_per_sec:.1f} (total words: {total_token_est})")
     print(f"  Peak RSS: {peak_rss_mb:.1f} MB")
-    print(f"  Total triples/clusters: {num_triples}")
+    print(f"  Total clusters: {total_clusters_count}")
 
-    # Build all contiguous clusters
-    all_clusters = []
-    for c_idx in range(num_triples):
-        cluster_id = f"cluster_{c_idx + 1:04d}"
-        triple_atoms = raw_atoms[c_idx * 3 : (c_idx + 1) * 3]
-
-        theme = triple_atoms[0]["title"]
-        if not theme:
-            theme = triple_atoms[0]["content"][:60].strip()
-
-        source_atoms = []
-        for ord_idx, a in enumerate(triple_atoms):
-            node_id = f"atom_{c_idx + 1:04d}_{ord_idx + 1:02d}"
-            atom_version_id = f"av_{c_idx + 1:04d}_{ord_idx + 1:02d}"
-            source_atoms.append({
-                "node_id": node_id,
-                "atom_version_id": atom_version_id,
-                "workspace_id": "cap_mod01_cloud_10k",
-                "content": a["content"],
-                "content_hash": a["content_hash"],
-                "properties": {
-                    "title": a["title"],
-                    "source_dataset": a["dataset"],
-                    "cluster_id": cluster_id,
-                    "ordinal": ord_idx,
-                    "doc_id": a["doc_id"],
-                },
-            })
-
-        all_clusters.append({
-            "cluster_id": cluster_id,
-            "theme": theme,
-            "atom_count": len(source_atoms),
-            "source_atoms": source_atoms,
-        })
+    # Invariant Verification: Zero cross-doc clusters
+    for cl in all_clusters:
+        doc_ids_in_cluster = {sa["properties"]["doc_id"] for sa in cl["source_atoms"]}
+        if len(doc_ids_in_cluster) > 1:
+            raise ValueError(
+                f"Cross-doc cluster detected in {cl['cluster_id']}: {doc_ids_in_cluster}"
+            )
 
     # Sample the 2,000 consolidation window via deterministic stride over shard order (seed 42)
     sampled_clusters, sampled_indices, stride_meta = sample_strided_clusters(
