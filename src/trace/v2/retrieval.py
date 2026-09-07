@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import math
 import os
 import re
@@ -37,6 +38,8 @@ _STOPWORDS = frozenset({
     "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "in", "is", "it", "of", "on",
     "or", "that", "the", "to", "with", "what", "which", "where", "when", "why", "how",
 })
+
+logger = logging.getLogger(__name__)
 
 
 def tokens(text: str) -> list[str]:
@@ -266,8 +269,9 @@ class PropositionVerifier:
             try:
                 from sentence_transformers import CrossEncoder
                 self._nli_model = CrossEncoder(self.model_name)
-            except Exception:
-                return True, None, {"nli_evaluated": False, "reason": "model_not_installed"}
+            except Exception as exc:
+                logger.debug("CrossEncoder %s unavailable: %s", self.model_name, exc)
+                return True, None, {"nli_evaluated": False, "reason": f"model_not_installed: {exc}"}
 
         try:
             scores = self._nli_model.predict([(source, hypothesis)])
@@ -1396,8 +1400,8 @@ class HybridRetrievalEngine:
                                 break
                     if matched_aid:
                         hits[matched_aid] = max(hits.get(matched_aid, 0.0), score)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("FTS5 query failed or table absent: %s", exc)
 
         # 2. Search holons.lex_sig
         q_tokens = set(extract_normalized_tokens(query))
@@ -1421,8 +1425,8 @@ class HybridRetrievalEngine:
                             for span in spans:
                                 source_ids.extend(_get_atom_ids_for_span(span, atoms))
                             holon_spans.append((r["id"], source_ids))
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("holons.lex_sig query failed or table absent: %s", exc)
 
         for h_id, source_ids in holon_spans:
             for s_id in source_ids:
@@ -1512,7 +1516,8 @@ class HybridRetrievalEngine:
                             "boundary": boundary,
                             "status": r["status"],
                         })
-            except Exception:
+            except Exception as exc:
+                logger.debug("Failed querying toc table from store: %s", exc)
                 toc_nodes = []
 
         # Exclude DIVERSE_OVERFLOW per Appendix A Rows 4 & 12
@@ -1560,7 +1565,8 @@ class HybridRetrievalEngine:
                             "spans": json.loads(r["spans"]) if isinstance(r["spans"], str) else (r["spans"] or []),
                             "status": r["status"],
                         })
-            except Exception:
+            except Exception as exc:
+                logger.debug("Failed querying candidate holons from store: %s", exc)
                 holon_rows = []
 
         seed_scores: dict[str, float] = {}
@@ -1582,8 +1588,8 @@ class HybridRetrievalEngine:
         if callable(getter):
             try:
                 edge_rows = getter()
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("Failed querying edges from store: %s", exc)
 
         ppr_edges: list[Edge] = []
         for e in edge_rows:
