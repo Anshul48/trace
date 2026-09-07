@@ -253,12 +253,31 @@ class PropositionVerifier:
         source: str,
         hypothesis: str,
     ) -> tuple[bool, str | None, dict[str, Any]]:
-        t0 = time.perf_counter()
         if self.nli_client is not None:
-            res = self.nli_client(source, hypothesis)
-            elapsed = (time.perf_counter() - t0) * 1000.0
-            p_contradiction = float(res.get("contradiction", 0.0))
-            p_entailment = float(res.get("entailment", 1.0))
+            t0 = time.perf_counter()
+            try:
+                res = self.nli_client(source, hypothesis)
+                elapsed = (time.perf_counter() - t0) * 1000.0
+                if elapsed > self.max_latency_budget_ms:
+                    logger.warning(
+                        "Stage-3 NLI client latency budget exceeded: %.2f ms > %.2f ms (model=%s)",
+                        elapsed,
+                        self.max_latency_budget_ms,
+                        self.model_name,
+                    )
+                    return False, "NLI_BUDGET_EXCEEDED", {"elapsed_ms": elapsed, "budget_ms": self.max_latency_budget_ms}
+                if not isinstance(res, dict):
+                    raise TypeError(f"nli_client must return dict, got {type(res).__name__}")
+                if "contradiction" not in res or "entailment" not in res:
+                    raise KeyError(f"nli_client missing required keys 'contradiction' and 'entailment': {list(res.keys())}")
+                p_contradiction = float(res["contradiction"])
+                p_entailment = float(res["entailment"])
+                if math.isnan(p_contradiction) or math.isnan(p_entailment) or not (0.0 <= p_contradiction <= 1.0) or not (0.0 <= p_entailment <= 1.0):
+                    raise ValueError(f"nli_client returned invalid probabilities: contradiction={p_contradiction}, entailment={p_entailment}")
+            except Exception as exc:
+                logger.warning("Stage-3 NLI custom client execution failed: %s (model=%s)", exc, self.model_name)
+                return True, None, {"nli_evaluated": False, "error": str(exc), "reason": f"client_error: {exc}"}
+
             if p_contradiction >= self.max_contradiction_p:
                 return False, f"NLI_CONTRADICTION: {p_contradiction:.3f} >= {self.max_contradiction_p}", {"p_contradiction": p_contradiction, "elapsed_ms": elapsed}
             if p_entailment < self.min_entailment_p:
@@ -270,11 +289,21 @@ class PropositionVerifier:
                 from sentence_transformers import CrossEncoder
                 self._nli_model = CrossEncoder(self.model_name)
             except Exception as exc:
-                logger.debug("CrossEncoder %s unavailable: %s", self.model_name, exc)
+                logger.warning("CrossEncoder %s unavailable: %s", self.model_name, exc)
                 return True, None, {"nli_evaluated": False, "reason": f"model_not_installed: {exc}"}
 
         try:
+            t0 = time.perf_counter()
             scores = self._nli_model.predict([(source, hypothesis)])
+            elapsed = (time.perf_counter() - t0) * 1000.0
+            if elapsed > self.max_latency_budget_ms:
+                logger.warning(
+                    "Stage-3 NLI prediction latency budget exceeded: %.2f ms > %.2f ms (model=%s)",
+                    elapsed,
+                    self.max_latency_budget_ms,
+                    self.model_name,
+                )
+                return False, "NLI_BUDGET_EXCEEDED", {"elapsed_ms": elapsed, "budget_ms": self.max_latency_budget_ms}
             import numpy as np
             probs = np.exp(scores[0]) / np.sum(np.exp(scores[0]))
             cfg = getattr(getattr(self._nli_model, "model", None), "config", getattr(self._nli_model, "config", None))
@@ -286,14 +315,16 @@ class PropositionVerifier:
                 e_idx = l2i.get("entailment", 2 if l2i.get("neutral") == 1 else 1)
             p_contradiction = float(probs[c_idx])
             p_entailment = float(probs[e_idx])
-            elapsed = (time.perf_counter() - t0) * 1000.0
+            if math.isnan(p_contradiction) or math.isnan(p_entailment) or not (0.0 <= p_contradiction <= 1.0) or not (0.0 <= p_entailment <= 1.0):
+                raise ValueError(f"Invalid model prediction probabilities: contradiction={p_contradiction}, entailment={p_entailment}")
             if p_contradiction >= self.max_contradiction_p:
                 return False, f"NLI_CONTRADICTION: {p_contradiction:.3f} >= {self.max_contradiction_p}", {"p_contradiction": p_contradiction, "elapsed_ms": elapsed}
             if p_entailment < self.min_entailment_p:
                 return False, f"NLI_NOT_ENTAILED: {p_entailment:.3f} < {self.min_entailment_p}", {"p_entailment": p_entailment, "elapsed_ms": elapsed}
             return True, None, {"p_contradiction": p_contradiction, "p_entailment": p_entailment, "elapsed_ms": elapsed}
         except Exception as e:
-            return True, None, {"nli_evaluated": False, "error": str(e)}
+            logger.warning("Stage-3 NLI predict failed: %s (model=%s)", e, self.model_name)
+            return True, None, {"nli_evaluated": False, "error": str(e), "reason": f"predict_error: {e}"}
 
     def verify(
         self,
@@ -325,13 +356,29 @@ class PropositionVerifier:
 
         # Stage 3: Sampled Local CPU NLI Audit
         if force_stage3 or self._should_sample_stage3(hypothesis):
-            s3_pass, s3_err, s3_diag = self.verify_stage3_nli(source, hypothesis)
+            try:
+                s3_pass, s3_err, s3_diag = self.verify_stage3_nli(source, hypothesis)
+            except Exception as exc:
+                logger.warning("Unexpected error during Stage-3 NLI verification: %s (model=%s)", exc, self.model_name)
+                s3_pass, s3_err, s3_diag = True, None, {"nli_evaluated": False, "error": str(exc), "reason": f"unexpected_error: {exc}"}
             if not s3_pass:
                 return GroundingVerificationResult(
                     passed=False,
                     stage=3,
                     failure_reason=s3_err,
                     diagnostics={"token_recall": recall, **s3_diag},
+                )
+            if s3_diag.get("nli_evaluated") is False:
+                return GroundingVerificationResult(
+                    passed=True,
+                    stage=2,
+                    failure_reason=None,
+                    diagnostics={
+                        "token_recall": recall,
+                        "stage3_skipped": True,
+                        "stage3_reason": s3_diag.get("reason") or s3_diag.get("error") or "nli_not_evaluated",
+                        **s3_diag,
+                    },
                 )
             return GroundingVerificationResult(
                 passed=True,
@@ -1056,7 +1103,8 @@ class HybridRetrievalEngine:
         policy_data = policy.get("policy", {}) if isinstance(policy, dict) else {}
         try:
             weights = ActivationWeights.model_validate(policy_data.get("activation", {}))
-        except Exception:
+        except Exception as exc:
+            logger.debug("ActivationWeights fallback to default: %s", exc)
             weights = ActivationWeights()
         atom_by_node = {atom["node_id"]: atom for atom in atoms}
         atom_by_id = {atom["atom_version_id"]: atom for atom in atoms}

@@ -159,8 +159,8 @@ class TestTier1LexicalShortCircuit:
         assert outcome.diagnostics["tier1_short_circuit"] is True
         assert outcome.diagnostics["tier1_triggered"] is True
         assert len(outcome.candidates) >= 3
-        # Latency must adhere to SLO
-        assert outcome.diagnostics["tier1_elapsed_ms"] < 25.0
+        # Latency must adhere to SLO (<= 5.0 ms)
+        assert outcome.diagnostics["tier1_elapsed_ms"] <= TIER1_MAX_LATENCY_MS
         assert outcome.diagnostics["tier2_provably_non_default"] is True
 
     def test_tier1_holon_lex_sig_expansion(self, tmp_path: Path) -> None:
@@ -238,6 +238,47 @@ class TestTier1LexicalShortCircuit:
         assert outcome.diagnostics["tier1_short_circuit"] is True
         assert outcome.diagnostics["tier1_triggered"] is True
         assert len(outcome.candidates) >= 3
+
+    def test_tier1_weak_fts_match_does_not_short_circuit(self, tmp_path: Path) -> None:
+        """Negative test: weak/irrelevant FTS matches under THETA_LEX (2.0) must not short-circuit Tier 1."""
+        store = SqliteEventStore(tmp_path / "test_t1_weak.db")
+        embedder = HashingDenseEmbedder(dimensions=16)
+        engine = HybridRetrievalEngine(dense_embedder=embedder)
+
+        ws = "ws-t1-weak"
+        atoms = [
+            make_atom(ws, f"n{i}", f"v{i}", f"General document {i} discussing software architecture and design patterns.")
+            for i in range(10)
+        ]
+        store.insert_atoms(atoms)
+
+        # 1. Real FTS5 hits test: Query triggers Tier 1 via UPPER_SNAKE, and FTS5 returns >= 3 hits,
+        # but raw bm25 scores are weak (abs(score) < THETA_LEX = 2.0). Since none contain the trigger,
+        # they receive no verbatim boost and must NOT short-circuit Tier 1.
+        raw_fts_hits = store.search_fts_atoms("architecture OR UNMATCHED_UPPER_TRIGGER")
+        assert len(raw_fts_hits) >= 3
+        assert all(abs(float(h["score"])) < THETA_LEX for h in raw_fts_hits)
+
+        req1 = QueryRequest(
+            workspace_id=ws,
+            query="architecture OR UNMATCHED_UPPER_TRIGGER",
+            retrieval_budget=RetrievalBudget(candidate_limit=10),
+        )
+        outcome1 = engine.retrieve(store=store, request=req1, atoms=atoms)
+        assert outcome1.diagnostics["tier1_triggered"] is True
+        assert outcome1.diagnostics["tier1_short_circuit"] is False
+        assert outcome1.diagnostics["tier"] != 1
+
+        # 2. Absent trigger phrase query: Quoted trigger absent from all documents
+        req2 = QueryRequest(
+            workspace_id=ws,
+            query='"NONEXISTENT_TRIGGER_KEYWORD" document architecture',
+            retrieval_budget=RetrievalBudget(candidate_limit=10),
+        )
+        outcome2 = engine.retrieve(store=store, request=req2, atoms=atoms)
+        assert outcome2.diagnostics["tier1_triggered"] is True
+        assert outcome2.diagnostics["tier1_short_circuit"] is False
+        assert outcome2.diagnostics["tier"] != 1
 
 
 # ==============================================================================
@@ -637,6 +678,73 @@ class TestPropositionGroundingVerifier:
         )
         assert res_e.passed is True
         assert res_e.stage == 3
+
+    def test_stage3_nli_missing_model_skips_to_stage2(self) -> None:
+        """When CrossEncoder model is missing/unavailable, verify() must skip to Stage 2 with explicit diagnostic."""
+        verifier = PropositionVerifier(model_name="nonexistent_mock_nli_model_missing")
+        res = verifier.verify(
+            "System requires encryption.", "System requires encryption.", force_stage3=True
+        )
+        assert res.passed is True
+        assert res.stage == 2
+        assert res.diagnostics is not None
+        assert res.diagnostics.get("stage3_skipped") is True
+        assert "stage3_reason" in res.diagnostics
+        assert res.diagnostics.get("nli_evaluated") is False
+
+    def test_stage3_nli_client_error_skips_to_stage2(self) -> None:
+        """When NLI inference/client raises an exception, verify() must skip to Stage 2 with logged warning."""
+        def failing_client(src: str, hyp: str) -> dict[str, float]:
+            raise RuntimeError("Inference backend process died")
+
+        verifier = PropositionVerifier(nli_client=failing_client)
+        res = verifier.verify(
+            "System requires encryption.", "System requires encryption.", force_stage3=True
+        )
+        assert res.passed is True
+        assert res.stage == 2
+        assert res.diagnostics is not None
+        assert res.diagnostics.get("stage3_skipped") is True
+        assert "client_error" in res.diagnostics.get("stage3_reason", "")
+        assert res.diagnostics.get("nli_evaluated") is False
+
+    def test_stage3_nli_malformed_client_output_skips_to_stage2(self) -> None:
+        """Malformed client outputs (empty dict, None, NaN, missing keys, bad types) must skip to Stage 2."""
+        malformed_responses = [
+            {},  # empty dict (must not fabricate 1.0 entailment)
+            {"contradiction": 0.001},  # missing entailment
+            {"entailment": 0.95},  # missing contradiction
+            None,  # non-dict
+            {"contradiction": float("nan"), "entailment": float("nan")},  # NaNs
+            {"contradiction": "invalid_str", "entailment": 0.95},  # string type
+            {"contradiction": -0.5, "entailment": 1.5},  # out-of-range probabilities
+        ]
+        for bad_resp in malformed_responses:
+            verifier = PropositionVerifier(nli_client=lambda s, h, r=bad_resp: r)
+            res = verifier.verify(
+                "System requires encryption.", "System requires encryption.", force_stage3=True
+            )
+            assert res.passed is True, f"Failed for {bad_resp!r}: {res}"
+            assert res.stage == 2, f"Expected stage 2 for {bad_resp!r}, got stage {res.stage}"
+            assert res.diagnostics is not None
+            assert res.diagnostics.get("stage3_skipped") is True
+            assert res.diagnostics.get("nli_evaluated") is False
+
+    def test_stage3_nli_budget_exceeded(self) -> None:
+        """When NLI execution exceeds max_latency_budget_ms, verify() must fail-closed with NLI_BUDGET_EXCEEDED."""
+        def slow_client(src: str, hyp: str) -> dict[str, float]:
+            time.sleep(0.015)
+            return {"contradiction": 0.001, "entailment": 0.99}
+
+        verifier = PropositionVerifier(nli_client=slow_client, max_latency_budget_ms=5.0)
+        res = verifier.verify(
+            "System requires encryption.", "System requires encryption.", force_stage3=True
+        )
+        assert res.passed is False
+        assert res.stage == 3
+        assert res.failure_reason == "NLI_BUDGET_EXCEEDED"
+        assert res.diagnostics is not None
+        assert res.diagnostics.get("elapsed_ms", 0.0) >= 5.0
 
     def test_module_level_verify_grounding(self) -> None:
         res = verify_grounding(
