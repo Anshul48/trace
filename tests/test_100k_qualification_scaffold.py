@@ -11,11 +11,16 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+import sqlite3
+
 from benchmarks.run_100k_qualification import (
     DEFAULT_CAPSULE_MANIFEST,
     EXPECTED_MERKLE_ROOT,
     FORBIDDEN_LEGACY_CORPUS,
+    PreflightFailure,
     check_stop_rules,
+    measure_live_storage,
+    run_paired_ablation,
     run_preflight_checks,
     scaffold_100k_qualification,
     verify_qualification_receipt,
@@ -175,6 +180,55 @@ class Test100KQualificationScaffold(unittest.TestCase):
             ok, errors = verify_qualification_receipt(out_dir)
             self.assertFalse(ok)
             self.assertTrue(any("Merkle root mismatch" in e for e in errors))
+
+    def test_live_ablation_uses_measured_scores(self) -> None:
+        with self.assertRaises(PreflightFailure):
+            run_paired_ablation(db_path=Path("nonexistent/test.db"), n_queries=5)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # db1 has matching document for query 0 ("31715818")
+            db1_path = Path(tmpdir) / "db1.db"
+            conn1 = sqlite3.connect(str(db1_path))
+            conn1.execute("CREATE TABLE node_versions (atom_version_id TEXT, content TEXT)")
+            conn1.execute(
+                "INSERT INTO node_versions VALUES (?, ?)",
+                ("31715818", "0-dimensional biomaterials lack inductive properties in experiments"),
+            )
+            conn1.commit()
+            conn1.close()
+
+            # db2 has non-matching document
+            db2_path = Path(tmpdir) / "db2.db"
+            conn2 = sqlite3.connect(str(db2_path))
+            conn2.execute("CREATE TABLE node_versions (atom_version_id TEXT, content TEXT)")
+            conn2.execute(
+                "INSERT INTO node_versions VALUES (?, ?)",
+                ("99999999", "completely unrelated text about aerospace engineering"),
+            )
+            conn2.commit()
+            conn2.close()
+
+            res1 = run_paired_ablation(db_path=db1_path, n_queries=1, n_resamples=100)
+            res2 = run_paired_ablation(db_path=db2_path, n_queries=1, n_resamples=100)
+
+            ndcg1 = res1["top20_metrics"]["bm25_only"]["ndcg_at_10"]
+            ndcg2 = res2["top20_metrics"]["bm25_only"]["ndcg_at_10"]
+            self.assertEqual(ndcg1, 1.0)
+            self.assertNotEqual(ndcg1, ndcg2)
+
+    def test_storage_dbstat_failure_fails_closed(self) -> None:
+        with self.assertRaises(PreflightFailure):
+            measure_live_storage(db_path=Path("nonexistent/path/db.sqlite"))
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            corrupted = Path(tmpdir) / "corrupted.db"
+            corrupted.write_bytes(b"NOT_A_VALID_SQLITE_DATABASE_PAGE_HEADER")
+
+            with self.assertRaises(PreflightFailure):
+                measure_live_storage(db_path=corrupted)
+
+            with self.assertRaises(PreflightFailure):
+                scaffold_100k_qualification(out_dir=Path(tmpdir) / "out", db_path=corrupted)
 
 
 if __name__ == "__main__":

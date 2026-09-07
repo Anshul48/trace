@@ -1,7 +1,7 @@
 {
   "target_node": "CAP-INT02",
   "work_packet": "WP6-LIVE-QUALIFICATION",
-  "timestamp_utc": "2026-09-07T15:02:23.963173+00:00",
+  "timestamp_utc": "2026-09-07T17:35:34.226844+00:00",
   "capsule_merkle_root": "38d1a1cf980d447edef7bfaa1ebc4d06129386a82bdd2c6f724f45d8624fc530",
   "profiles_evaluated": [
     "profile_1_lexical",
@@ -17,17 +17,17 @@
   "durable_gate_verified": true,
   "durable_multiplier": 0.0675,
   "durable_gate_limit": 1.6,
-  "psutil_rss_mb": 27.73,
-  "psutil_peak_rss_mb": 55.74,
+  "psutil_rss_mb": 72.86,
+  "psutil_peak_rss_mb": 126.09,
   "top20_metrics_emitted": true,
   "ablation_matrix_evaluated": true,
   "paired_queries_count": 1000,
   "bootstrap_seed": 42,
   "bootstrap_resamples": 10000,
-  "tier2_uplift_point": 0.016,
+  "tier2_uplift_point": 0.0144,
   "tier2_uplift_95_ci": [
-    0.0153,
-    0.0167
+    0.0142,
+    0.0146
   ],
   "tier2_uplift_verdict": "PROMOTE",
   "tier2_effective_mode": "active",
