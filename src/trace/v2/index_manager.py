@@ -174,8 +174,11 @@ def init_generation_db(db_path: Path | str) -> sqlite3.Connection:
                 END;
                 """
             )
-        except sqlite3.OperationalError:
-            pass
+        except sqlite3.OperationalError as exc:
+            logger.warning(
+                "FTS5 table/trigger creation skipped or failed in database init: %s",
+                exc,
+            )
 
         # Holons, TOC, Edges
         conn.execute(
@@ -545,8 +548,11 @@ class EpochIndexManager:
                         );
                         """
                     )
-                except sqlite3.OperationalError:
-                    pass
+                except sqlite3.OperationalError as exc:
+                    logger.warning(
+                        "FTS5 virtual table creation skipped or failed in generation init: %s",
+                        exc,
+                    )
             fts_conn.close()
 
         if not graph_path.exists():

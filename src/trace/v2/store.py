@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import logging
 import os
 import sqlite3
 import threading
@@ -31,6 +32,8 @@ from .cortex import PROJECTION_RUN_STATUSES, canonical_pair
 STRUCTURAL_RELATIONS = frozenset({"NEXT", "CHILD_OF", "DERIVED_FROM", "CONTAINS", "alias_of"})
 EVIDENCE_RELATIONS = frozenset({"supports", "contradicts", "depends_on", "implements", "example_of"})
 ALLOWED_RELATIONS = STRUCTURAL_RELATIONS | EVIDENCE_RELATIONS
+
+logger = logging.getLogger(__name__)
 
 
 class TraceStoreError(RuntimeError):
@@ -969,8 +972,11 @@ class SqliteEventStore:
                     END;
                     """
                 )
-            except sqlite3.OperationalError:
-                pass
+            except sqlite3.OperationalError as exc:
+                logger.warning(
+                    "FTS5 table/trigger creation skipped or failed in store migration: %s",
+                    exc,
+                )
             # TR2 adds only forward-compatible metadata to existing local
             # databases.  No prior release or source event is rewritten.
             release_columns = {row[1] for row in conn.execute("PRAGMA table_info(cortex_releases)").fetchall()}
@@ -6159,11 +6165,17 @@ class SqliteEventStore:
             raise ValueError(f"end_byte ({end_byte}) < start_byte ({start_byte})")
         if isinstance(content_hash, bytes):
             raw_hash = content_hash
-        else:
+        elif isinstance(content_hash, str):
             try:
-                raw_hash = bytes.fromhex(str(content_hash))
-            except ValueError:
-                raw_hash = str(content_hash).encode("utf-8")
+                raw_hash = bytes.fromhex(content_hash)
+            except ValueError as err:
+                raise ValueError(
+                    f"content_hash string must be valid hexadecimal, got: {content_hash!r}"
+                ) from err
+        else:
+            raise ValueError(
+                f"content_hash must be bytes or hex string, got {type(content_hash).__name__}: {content_hash!r}"
+            )
         with self.transaction() as conn:
             if atom_id is not None:
                 cursor = conn.execute(
@@ -6194,12 +6206,19 @@ class SqliteEventStore:
                 if eb < sb:
                     raise ValueError(f"end_byte ({eb}) < start_byte ({sb})")
                 raw_hash = a["content_hash"]
-                if not isinstance(raw_hash, bytes):
-                    h_str = str(raw_hash)
+                if isinstance(raw_hash, bytes):
+                    pass
+                elif isinstance(raw_hash, str):
                     try:
-                        raw_hash = bytes.fromhex(h_str)
-                    except ValueError:
-                        raw_hash = h_str.encode("utf-8")
+                        raw_hash = bytes.fromhex(raw_hash)
+                    except ValueError as err:
+                        raise ValueError(
+                            f"content_hash string must be valid hexadecimal, got: {raw_hash!r}"
+                        ) from err
+                else:
+                    raise ValueError(
+                        f"content_hash must be bytes or hex string, got {type(raw_hash).__name__}: {raw_hash!r}"
+                    )
                 aid = a.get("id")
                 if aid is not None:
                     cursor = conn.execute(
@@ -6254,15 +6273,29 @@ class SqliteEventStore:
         with self.transaction() as conn:
             try:
                 rows = conn.execute(sql, (query, limit)).fetchall()
-            except sqlite3.OperationalError:
+            except sqlite3.OperationalError as exc:
+                logger.warning(
+                    "FTS5 query MATCH failed on raw input: %s; attempting sanitized token query for %r",
+                    exc,
+                    query,
+                )
                 # Sanitize query by wrapping tokens in double quotes
                 tokens = [t.replace('"', '""') for t in query.split() if t.strip()]
                 if not tokens:
+                    logger.warning(
+                        "FTS5 query sanitization produced empty token set for query: %r",
+                        query,
+                    )
                     return []
                 safe_query = " ".join(f'"{t}"' for t in tokens)
                 try:
                     rows = conn.execute(sql, (safe_query, limit)).fetchall()
-                except sqlite3.OperationalError:
+                except sqlite3.OperationalError as retry_exc:
+                    logger.warning(
+                        "FTS5 sanitized query MATCH failed: %s; returning empty list for %r",
+                        retry_exc,
+                        safe_query,
+                    )
                     return []
             return [
                 {"id": r["rowid"], "text": r["text"], "score": float(r["score"])}

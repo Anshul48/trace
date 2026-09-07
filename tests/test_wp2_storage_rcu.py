@@ -76,6 +76,27 @@ class TestWP2StorageSchema:
             assert "active_generation" in tables
             assert "active_reader_leases" in tables
 
+            # Assert external content FTS5 table DDL: zero text duplication
+            fts_sql_row = conn.execute(
+                "SELECT sql FROM sqlite_master WHERE name='fts_atoms' AND type='table';"
+            ).fetchone()
+            assert fts_sql_row is not None
+            fts_sql = fts_sql_row[0].lower()
+            assert "content='atom'" in fts_sql or 'content="atom"' in fts_sql
+            assert "content_rowid='id'" in fts_sql or 'content_rowid="id"' in fts_sql
+
+        # Also verify generation FTS5 database DDL has external content specification
+        gen_db_path = tmp_path / "gen_ddl_test.db"
+        gen_conn = init_generation_db(gen_db_path)
+        gen_sql_row = gen_conn.execute(
+            "SELECT sql FROM sqlite_master WHERE name='fts_atoms' AND type='table';"
+        ).fetchone()
+        assert gen_sql_row is not None
+        gen_sql = gen_sql_row[0].lower()
+        assert "content='atom'" in gen_sql or 'content="atom"' in gen_sql
+        assert "content_rowid='id'" in gen_sql or 'content_rowid="id"' in gen_sql
+        gen_conn.close()
+
         store.close()
 
     def test_atom_byte_exact_provenance_and_fts_sync(self, tmp_path: Path) -> None:
@@ -606,7 +627,7 @@ class TestEdgeCasesAndRCURobustness:
         assert not gen1_dir.exists()
 
     def test_fts_atoms_query_robustness(self, tmp_path: Path) -> None:
-        """Verify search_fts_atoms handles special characters and syntax gracefully."""
+        """Verify search_fts_atoms handles valid queries, syntax errors, and fallbacks gracefully."""
         db_path = tmp_path / "fts_robust.db"
         store = SqliteEventStore(str(db_path))
 
@@ -619,26 +640,36 @@ class TestEdgeCasesAndRCURobustness:
             text="hello (world) testing*",
         )
 
-        # Queries with special FTS syntax characters should not crash
-        hits = store.search_fts_atoms("hello (world")
-        assert len(hits) >= 1
-        assert hits[0]["text"] == "hello (world) testing*"
+        # 1. Clean valid query: hits raw MATCH branch directly
+        hits_clean = store.search_fts_atoms("hello")
+        assert len(hits_clean) >= 1
+        assert hits_clean[0]["text"] == "hello (world) testing*"
 
-        hits_empty = store.search_fts_atoms("")
-        assert hits_empty == []
+        # 2. Syntax-error query: raw MATCH fails, sanitize-and-retry wraps tokens and succeeds
+        hits_syntax = store.search_fts_atoms("hello (world")
+        assert len(hits_syntax) >= 1
+        assert hits_syntax[0]["text"] == "hello (world) testing*"
 
+        # 3. Special glob character in query
         hits_star = store.search_fts_atoms("testing*")
         assert len(hits_star) >= 1
+
+        # 4. Empty and whitespace-only queries: early exit with []
+        assert store.search_fts_atoms("") == []
+        assert store.search_fts_atoms("   ") == []
+
+        # 5. Malformed query producing empty tokens after sanitize
+        assert store.search_fts_atoms('""') == []
 
         store.close()
 
     def test_atom_validation_and_nonhex_hash(self, tmp_path: Path) -> None:
-        """Verify input validation for start/end bytes and non-hex content_hash."""
+        """Verify strict byte/hex input validation for content_hash and byte offsets."""
         db_path = tmp_path / "atom_val.db"
         store = SqliteEventStore(str(db_path))
 
         # Invalid bounds: end_byte < start_byte must raise ValueError
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"end_byte.*<.*start_byte"):
             store.insert_atom(
                 doc_id="d1",
                 file_id="f1",
@@ -648,18 +679,67 @@ class TestEdgeCasesAndRCURobustness:
                 text="invalid",
             )
 
-        # Arbitrary non-hex string with even length: should not crash with ValueError
-        atom_id = store.insert_atom(
-            doc_id="d2",
-            file_id="f2",
+        # Strict provenance: non-hex string MUST raise ValueError (no silent utf-8 coercion)
+        with pytest.raises(ValueError, match="valid hexadecimal"):
+            store.insert_atom(
+                doc_id="d2",
+                file_id="f2",
+                start_byte=0,
+                end_byte=6,
+                content_hash="nothex",  # len 6, even, not hex!
+                text="hello!",
+            )
+
+        # Non-hex string in bulk insert_atoms MUST also raise ValueError
+        with pytest.raises(ValueError, match="valid hexadecimal"):
+            store.insert_atoms([
+                {
+                    "doc_id": "d2_bulk",
+                    "file_id": "f2_bulk",
+                    "start_byte": 0,
+                    "end_byte": 6,
+                    "content_hash": "non_hex_payload",
+                    "text": "hello!",
+                }
+            ])
+
+        # Non-bytes and non-string type MUST raise ValueError
+        with pytest.raises(ValueError, match="must be bytes or hex string"):
+            store.insert_atom(
+                doc_id="d_bad_type",
+                file_id="f_bad_type",
+                start_byte=0,
+                end_byte=4,
+                content_hash=123456,  # type int
+                text="bad!",
+            )
+
+        # Valid hex string and bytes: accepted and produce identical stored hashes
+        hex_str = "0123456789abcdef" * 4
+        expected_bytes = bytes.fromhex(hex_str)
+
+        atom_id_hex = store.insert_atom(
+            doc_id="d3_hex",
+            file_id="f3_hex",
             start_byte=0,
-            end_byte=6,
-            content_hash="nothex",  # len 6, even, not hex!
-            text="hello!",
+            end_byte=5,
+            content_hash=hex_str,
+            text="valid",
         )
-        atom = store.get_atom(atom_id)
-        assert atom is not None
-        assert atom["text"] == "hello!"
+        atom_id_bytes = store.insert_atom(
+            doc_id="d3_bytes",
+            file_id="f3_bytes",
+            start_byte=0,
+            end_byte=5,
+            content_hash=expected_bytes,
+            text="valid",
+        )
+
+        atom_hex = store.get_atom(atom_id_hex)
+        atom_bytes = store.get_atom(atom_id_bytes)
+        assert atom_hex is not None and atom_bytes is not None
+        assert atom_hex["content_hash"] == expected_bytes
+        assert atom_bytes["content_hash"] == expected_bytes
 
         store.close()
 
