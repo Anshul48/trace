@@ -3,7 +3,7 @@
   "program": "TRACE-CAP-001",
   "work_packet": "WP6-LIVE-QUALIFICATION",
   "target_gate": "CAP-GE",
-  "timestamp_utc": "2026-09-07T14:40:07.435833+00:00",
+  "timestamp_utc": "2026-09-07T15:02:23.941036+00:00",
   "source_capsule": {
     "manifest_path": "docs/program/inbox/l1-02-corpus-capsule-20260828/evidence/corpus_manifest.json",
     "merkle_root_sha256": "38d1a1cf980d447edef7bfaa1ebc4d06129386a82bdd2c6f724f45d8624fc530",
@@ -13,10 +13,10 @@
   },
   "live_telemetry": {
     "memory": {
-      "rss_bytes": 28700672,
-      "rss_mb": 27.37,
-      "peak_rss_bytes": 58167296,
-      "peak_rss_mb": 55.47
+      "rss_bytes": 29073408,
+      "rss_mb": 27.73,
+      "peak_rss_bytes": 58445824,
+      "peak_rss_mb": 55.74
     },
     "storage": {
       "db_path": "docs/program/inbox/s7-real-100k-20260826/evidence/work/scale_100k.db",
@@ -50,9 +50,9 @@
       "storage_gate_verified": true,
       "gate_passed": true
     },
-    "psutil_rss_bytes": 28700672,
-    "psutil_rss_mb": 27.37,
-    "psutil_peak_rss_mb": 55.47,
+    "psutil_rss_bytes": 29073408,
+    "psutil_rss_mb": 27.73,
+    "psutil_peak_rss_mb": 55.74,
     "admitted_raw_utf8_denominator_bytes": 65394921,
     "physical_on_disk_bytes": 6521008,
     "live_hot_multiplier": 0.0997,
