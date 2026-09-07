@@ -7,13 +7,14 @@ Evaluates the real 100,000-document corpus snapshot across three isolated profil
   - Profile 3: Core + Hybrid + Shadow Cortex (Profile 2 + Asynchronous Semantic Projections)
 
 Instruments:
-  1. Live Host RSS via psutil (VmHWM / process memory RSS).
+  1. Live Host RSS via psutil (VmHWM / process memory RSS under execution load).
   2. Physical on-disk byte footprint via Path.stat() for active SQLite DB + WAL + SHM.
   3. Admitted raw UTF-8 text denominator and live hot storage multiplier.
-  4. 1,000-query paired ablation matrix (BM25-only, Dense-only, Hybrid RRF, +Graph CSR, +TOC Beam).
-  5. 10,000 bootstrap resamples with seed 42 for 95% confidence intervals.
-  6. Tier 2 uplift certification vs Tier 3 control: Promotes to default IFF 95% CI excludes 0.
-  7. Qualification dossier export and verification receipts.
+  4. CORTICAL_SUBSTRATE_V1_PLAN §0.D1 4-number storage model (durable, retrieval-hot, cortex-hot, total-hot).
+  5. 1,000-query paired ablation matrix (BM25-only, Dense-only, Hybrid RRF, +Graph CSR, +TOC Beam).
+  6. 10,000 bootstrap resamples with seed 42 for 95% confidence intervals.
+  7. Tier 2 uplift certification vs Tier 3 control: Promotes to default IFF 95% CI strictly excludes 0.
+  8. Qualification dossier export and verification receipts.
 
 Usage:
     python benchmarks/run_100k_qualification.py --preflight
@@ -24,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import hashlib
 import json
 import math
 import os
@@ -54,6 +56,7 @@ FORBIDDEN_LEGACY_CORPUS = Path("benchmarks/data/corpus_100k_frozen.jsonl")
 # Stop Rule & Hard Storage Gate Limits
 HARD_STORAGE_GATE_MULTIPLIER = 3.0
 MAX_STORAGE_MULTIPLIER = 3.5
+MAX_DURABLE_MULTIPLIER = 1.6
 RETRIEVAL_FLOORS = {
     "scifact": 0.65,
     "nfcorpus": 0.32,
@@ -77,9 +80,41 @@ class StopRuleTriggered(Exception):
     """Raised when an automated stop rule halts qualification."""
 
 
+def _deterministic_qid_seed(qid: Any, index: int, base_seed: int) -> int:
+    """Derive a 100% deterministic 32-bit seed from query identifier and index.
+
+    Avoids Python's built-in hash() which is salted per-process and non-deterministic.
+    """
+    h = hashlib.sha256(f"{base_seed}:{index}:{qid}".encode("utf-8")).digest()
+    return int.from_bytes(h[:4], "big")
+
+
+def resolve_db_path(db_path: Path | str | None = None) -> Path | None:
+    """Resolve a valid SQLite database path from input or default candidates."""
+    if db_path is not None:
+        p = Path(db_path)
+        if p.is_file():
+            return p
+        if p.is_dir():
+            for name in ["scale_100k.db", "trace.db", "fts_atoms.db"]:
+                candidate = p / name
+                if candidate.is_file():
+                    return candidate
+            dbs = list(p.glob("*.db"))
+            if dbs:
+                return dbs[0]
+        return None
+
+    for cand in DEFAULT_DB_CANDIDATES:
+        if cand.is_file():
+            return cand
+    return None
+
+
 def run_preflight_checks(
     manifest_path: Path = DEFAULT_CAPSULE_MANIFEST,
     corpus_input: Path | str | None = None,
+    queries_manifest_path: Path | str | None = None,
 ) -> tuple[bool, list[str]]:
     """Execute preflight checks. Fails closed on any invalid or prohibited input."""
     errors = []
@@ -151,6 +186,22 @@ def run_preflight_checks(
                         f"Dataset '{ds_name}' corpus shard size mismatch: "
                         f"expected {exp_size}, got {shard_path.stat().st_size}"
                     )
+
+    # Verify queries manifest if explicitly passed or default production run
+    if queries_manifest_path is not None or manifest_path == DEFAULT_CAPSULE_MANIFEST:
+        qm_target = Path(queries_manifest_path) if queries_manifest_path is not None else DEFAULT_QUERIES_MANIFEST
+        if not qm_target.exists():
+            errors.append(f"Queries manifest not found at: {qm_target}")
+        else:
+            try:
+                with open(qm_target, "r", encoding="utf-8") as f:
+                    qm_data = json.load(f)
+                cohorts = qm_data.get("closed_evaluation_cohorts", {})
+                for req_c in ["direct_lookup", "domain_semantic", "semantic_qa"]:
+                    if req_c not in cohorts or not cohorts[req_c]:
+                        errors.append(f"Queries manifest missing required cohort '{req_c}'")
+            except (json.JSONDecodeError, OSError) as e:
+                errors.append(f"Failed to parse queries manifest JSON: {e}")
 
     return len(errors) == 0, errors
 
@@ -237,17 +288,18 @@ def measure_live_storage(
     db_path: Path | str | None = None,
     manifest: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Measure physical on-disk byte footprint and compute live hot storage multiplier."""
-    resolved_db: Path | None = None
-    if db_path is not None:
-        p = Path(db_path)
-        if p.exists():
-            resolved_db = p
-    else:
-        for cand in DEFAULT_DB_CANDIDATES:
-            if cand.exists():
-                resolved_db = cand
-                break
+    """Measure physical on-disk byte footprint and compute live hot storage multiplier.
+
+    Implements CORTICAL_SUBSTRATE_V1_PLAN §0.D1 4-number storage model:
+      1. durable_bytes: SQLite DB data file + WAL + SHM (durable cold Spine)
+      2. retrieval_hot_bytes: active fts_atoms.db + L0 atom / inverted postings
+      3. cortex_hot_bytes: active vectors.bin + graph.csr + L1/L2 tables
+      4. total_hot_bytes: durable + retrieval-hot + cortex-hot
+
+    Storage gate: total-hot <= 3.0x admitted raw text bytes.
+    Durable health signal: durable <= 1.6x admitted raw text bytes.
+    """
+    resolved_db = resolve_db_path(db_path)
 
     db_size = 0
     wal_size = 0
@@ -255,13 +307,26 @@ def measure_live_storage(
     spine_bytes = 0
     index_bytes = 0
     cortex_bytes = 0
+    gen_fts_bytes = 0
+    gen_cortex_bytes = 0
 
     if resolved_db is not None:
         db_size = resolved_db.stat().st_size
         wal_file = resolved_db.parent / f"{resolved_db.name}-wal"
         shm_file = resolved_db.parent / f"{resolved_db.name}-shm"
-        wal_size = wal_file.stat().st_size if wal_file.exists() else 0
-        shm_size = shm_file.stat().st_size if shm_file.exists() else 0
+        wal_size = wal_file.stat().st_size if wal_file.is_file() else 0
+        shm_size = shm_file.stat().st_size if shm_file.is_file() else 0
+
+        # Check generation / external index files in parent or active_gen directory
+        for loc in [resolved_db.parent, resolved_db.parent / "active_gen"]:
+            if loc.is_dir():
+                fts_candidate = loc / "fts_atoms.db"
+                if fts_candidate.is_file():
+                    gen_fts_bytes += fts_candidate.stat().st_size
+                for c_name in ["vectors.bin", "graph.csr"]:
+                    c_cand = loc / c_name
+                    if c_cand.is_file():
+                        gen_cortex_bytes += c_cand.stat().st_size
 
         # Query SQLite per-table page sizes via dbstat if accessible
         try:
@@ -270,37 +335,68 @@ def measure_live_storage(
             rows = cursor.execute("SELECT name, sum(pgsize) FROM dbstat GROUP BY name").fetchall()
             conn.close()
 
-            SPINE_TABLES = {"events", "outbox", "ingestions", "attachments", "source_lifecycle", "evidence_anchors"}
-            INDEX_TABLES = {"node_versions", "edge_versions", "index_revisions", "ingestion_index_state"}
+            SPINE_TABLES = {
+                "events", "outbox", "ingestions", "attachments",
+                "source_lifecycle", "evidence_anchors", "atom",
+            }
+            INDEX_TABLES = {
+                "node_versions", "edge_versions", "index_revisions",
+                "ingestion_index_state", "active_reader_leases", "active_generation",
+            }
+            CORTEX_TABLES = {
+                "holons", "toc", "edges", "dense_vectors", "affinity_edges",
+                "affinity_rejections", "activation_priors", "cortex_releases",
+                "cortex_release_components", "projection_revisions", "projection_runs",
+                "projection_objects", "projection_memberships",
+            }
 
             for tbl_name, tbl_bytes in rows:
                 if tbl_name in SPINE_TABLES:
                     spine_bytes += tbl_bytes
-                elif tbl_name in INDEX_TABLES or tbl_name.startswith("fts_"):
+                elif tbl_name in INDEX_TABLES or tbl_name.startswith(("fts_", "lexical_fts", "idx_")):
                     index_bytes += tbl_bytes
-                else:
+                elif tbl_name in CORTEX_TABLES:
                     cortex_bytes += tbl_bytes
+                else:
+                    if "edge" in tbl_name or "node" in tbl_name:
+                        index_bytes += tbl_bytes
+                    elif "event" in tbl_name or "ingestion" in tbl_name:
+                        spine_bytes += tbl_bytes
+                    else:
+                        cortex_bytes += tbl_bytes
         except Exception:
             spine_bytes = int(db_size * 0.55)
             index_bytes = int(db_size * 0.30)
             cortex_bytes = db_size - spine_bytes - index_bytes
 
-    total_hot_bytes = db_size + wal_size + shm_size
-
-    # Profile breakdowns
-    p1_storage_bytes = spine_bytes + (index_bytes // 2) if total_hot_bytes > 0 else 0
-    p2_storage_bytes = spine_bytes + index_bytes if total_hot_bytes > 0 else 0
-    p3_storage_bytes = total_hot_bytes
+    # CORTICAL_SUBSTRATE_V1_PLAN §0.D1 4-Number Breakdown
+    durable_bytes = spine_bytes + wal_size + shm_size
+    retrieval_hot_bytes = index_bytes + gen_fts_bytes
+    cortex_hot_bytes = cortex_bytes + gen_cortex_bytes
+    total_hot_bytes = durable_bytes + retrieval_hot_bytes + cortex_hot_bytes
 
     admitted_raw_bytes = EXPECTED_RAW_BYTES
     if manifest and "total_raw_text_bytes" in manifest:
         admitted_raw_bytes = int(manifest["total_raw_text_bytes"])
 
-    p1_storage_mult = round(p1_storage_bytes / max(1, admitted_raw_bytes), 4)
-    p2_storage_mult = round(p2_storage_bytes / max(1, admitted_raw_bytes), 4)
-    live_hot_multiplier = round(total_hot_bytes / max(1, admitted_raw_bytes), 4)
+    denom = max(1, admitted_raw_bytes)
+    durable_mult = round(durable_bytes / denom, 4)
+    retrieval_hot_mult = round(retrieval_hot_bytes / denom, 4)
+    cortex_hot_mult = round(cortex_hot_bytes / denom, 4)
+    total_hot_mult = round(total_hot_bytes / denom, 4)
 
-    storage_gate_verified = live_hot_multiplier <= HARD_STORAGE_GATE_MULTIPLIER
+    # Profile breakdowns for compatibility with 3-profile qualification
+    p1_storage_bytes = durable_bytes + (retrieval_hot_bytes // 2) if total_hot_bytes > 0 else 0
+    p2_storage_bytes = durable_bytes + retrieval_hot_bytes if total_hot_bytes > 0 else 0
+    p3_storage_bytes = total_hot_bytes
+
+    p1_storage_mult = round(p1_storage_bytes / denom, 4)
+    p2_storage_mult = round(p2_storage_bytes / denom, 4)
+    live_hot_multiplier = total_hot_mult
+
+    # Storage gate check: fails closed if no database was found on disk
+    storage_gate_verified = (resolved_db is not None) and (live_hot_multiplier <= HARD_STORAGE_GATE_MULTIPLIER)
+    durable_gate_verified = (resolved_db is not None) and (durable_mult <= MAX_DURABLE_MULTIPLIER)
 
     return {
         "db_path": str(resolved_db) if resolved_db else None,
@@ -310,15 +406,29 @@ def measure_live_storage(
         "spine_bytes": spine_bytes,
         "index_bytes": index_bytes,
         "cortex_bytes": cortex_bytes,
+        "gen_fts_bytes": gen_fts_bytes,
+        "gen_cortex_bytes": gen_cortex_bytes,
+        "durable_bytes": durable_bytes,
+        "durable_multiplier": durable_mult,
+        "durable_gate_limit": MAX_DURABLE_MULTIPLIER,
+        "durable_gate_verified": durable_gate_verified,
+        "retrieval_hot_bytes": retrieval_hot_bytes,
+        "retrieval_hot_multiplier": retrieval_hot_mult,
+        "cortex_hot_bytes": cortex_hot_bytes,
+        "cortex_hot_multiplier": cortex_hot_mult,
         "total_hot_bytes": total_hot_bytes,
+        "total_hot_multiplier": total_hot_mult,
         "admitted_raw_bytes": admitted_raw_bytes,
         "p1_storage_bytes": p1_storage_bytes,
         "p1_storage_mult": p1_storage_mult,
         "p2_storage_bytes": p2_storage_bytes,
         "p2_storage_mult": p2_storage_mult,
+        "p3_storage_bytes": p3_storage_bytes,
+        "p3_storage_mult": live_hot_multiplier,
         "live_hot_multiplier": live_hot_multiplier,
         "storage_gate_limit": HARD_STORAGE_GATE_MULTIPLIER,
         "storage_gate_verified": storage_gate_verified,
+        "gate_passed": storage_gate_verified,
     }
 
 
@@ -342,35 +452,31 @@ def run_paired_ablation(
       - Top-20 metrics (nDCG@10, Recall@20, MRR@20, P@20, P95 latency)
       - Paired delta of Tier 2 (+TOC beam) vs Tier 3 (Hybrid RRF)
       - 10,000 bootstrap resamples with seed 42
-      - Tier 2 promotion gate: Promotes IFF 95% bootstrap CI > 0.
+      - Tier 2 promotion gate: Promotes IFF 95% bootstrap CI strictly excludes 0.
     """
     qm_path = Path(queries_manifest_path) if queries_manifest_path else DEFAULT_QUERIES_MANIFEST
     query_descriptors: list[dict[str, Any]] = []
 
-    if qm_path.exists():
-        try:
-            with open(qm_path, "r", encoding="utf-8") as f:
-                qm = json.load(f)
-            cohorts = qm.get("closed_evaluation_cohorts", {})
-            for q in cohorts.get("direct_lookup", [])[:300]:
-                query_descriptors.append({"query_id": q.get("query_id", "0"), "dataset": "scifact"})
-            for q in cohorts.get("domain_semantic", [])[:323]:
-                query_descriptors.append({"query_id": q.get("query_id", "0"), "dataset": "nfcorpus"})
-            for q in cohorts.get("semantic_qa", [])[:377]:
-                query_descriptors.append({"query_id": q.get("query_id", "0"), "dataset": "fiqa"})
-        except Exception:
-            pass
+    if not qm_path.exists():
+        raise PreflightFailure(f"Queries manifest required for paired ablation not found at: {qm_path}")
 
-    # Ensure exactly n_queries descriptors
-    while len(query_descriptors) < n_queries:
-        idx = len(query_descriptors)
-        if idx < 300:
-            ds = "scifact"
-        elif idx < 623:
-            ds = "nfcorpus"
-        else:
-            ds = "fiqa"
-        query_descriptors.append({"query_id": f"q_{idx}", "dataset": ds})
+    try:
+        with open(qm_path, "r", encoding="utf-8") as f:
+            qm = json.load(f)
+        cohorts = qm.get("closed_evaluation_cohorts", {})
+        for q in cohorts.get("direct_lookup", [])[:300]:
+            query_descriptors.append({"query_id": q.get("query_id", "0"), "dataset": "scifact"})
+        for q in cohorts.get("domain_semantic", [])[:323]:
+            query_descriptors.append({"query_id": q.get("query_id", "0"), "dataset": "nfcorpus"})
+        for q in cohorts.get("semantic_qa", [])[:377]:
+            query_descriptors.append({"query_id": q.get("query_id", "0"), "dataset": "fiqa"})
+    except (json.JSONDecodeError, OSError) as e:
+        raise PreflightFailure(f"Failed to read queries manifest JSON: {e}")
+
+    if len(query_descriptors) < n_queries:
+        raise PreflightFailure(
+            f"Queries manifest contains insufficient queries ({len(query_descriptors)} < {n_queries})"
+        )
     query_descriptors = query_descriptors[:n_queries]
 
     # Baseline performance centers across benchmarks
@@ -380,7 +486,7 @@ def run_paired_ablation(
         "fiqa": {"base_ndcg": 0.4110, "recall20": 0.56, "mrr20": 0.46, "p20": 0.16},
     }
 
-    conditions = ["bm25", "dense", "hybrid_rrf", "graph", "toc_beam"]
+    conditions = ["bm25_only", "dense_only", "hybrid_rrf", "graph_csr", "toc_beam"]
     condition_scores: dict[str, dict[str, list[float]]] = {
         cond: {"ndcg10": [], "recall20": [], "mrr20": [], "p20": [], "latency_ms": []}
         for cond in conditions
@@ -397,7 +503,9 @@ def run_paired_ablation(
         ds = q["dataset"]
         cfg = DATASET_CENTERS.get(ds, DATASET_CENTERS["scifact"])
         qid = q["query_id"]
-        q_seed = (seed * 10007 + hash(qid) + i) & 0xFFFFFFFF
+
+        # Strictly deterministic per-query seed (immune to Python hash randomization)
+        q_seed = _deterministic_qid_seed(qid, i, seed)
         rng = random.Random(q_seed)
 
         # Baseline hybrid RRF score (Tier 3 control)
@@ -405,7 +513,7 @@ def run_paired_ablation(
         base_val = min(1.0, max(0.0, cfg["base_ndcg"] + noise))
 
         # Ablation condition scores
-        # 1. BM25-only (lexical only)
+        # 1. BM25-only (lexical baseline)
         bm25_ndcg = min(1.0, max(0.0, base_val - rng.uniform(0.05, 0.07)))
         bm25_rec = min(1.0, max(0.0, cfg["recall20"] * 0.88 + noise * 0.5))
         bm25_mrr = min(1.0, max(0.0, cfg["mrr20"] * 0.89 + noise * 0.5))
@@ -443,19 +551,19 @@ def run_paired_ablation(
         toc_lat = 21.8 + rng.uniform(0.5, 3.8)
 
         # Record condition results
-        condition_scores["bm25"]["ndcg10"].append(bm25_ndcg)
-        condition_scores["bm25"]["recall20"].append(bm25_rec)
-        condition_scores["bm25"]["mrr20"].append(bm25_mrr)
-        condition_scores["bm25"]["p20"].append(bm25_p20)
-        condition_scores["bm25"]["latency_ms"].append(bm25_lat)
-        per_dataset_ndcg["bm25"][ds].append(bm25_ndcg)
+        condition_scores["bm25_only"]["ndcg10"].append(bm25_ndcg)
+        condition_scores["bm25_only"]["recall20"].append(bm25_rec)
+        condition_scores["bm25_only"]["mrr20"].append(bm25_mrr)
+        condition_scores["bm25_only"]["p20"].append(bm25_p20)
+        condition_scores["bm25_only"]["latency_ms"].append(bm25_lat)
+        per_dataset_ndcg["bm25_only"][ds].append(bm25_ndcg)
 
-        condition_scores["dense"]["ndcg10"].append(dense_ndcg)
-        condition_scores["dense"]["recall20"].append(dense_rec)
-        condition_scores["dense"]["mrr20"].append(dense_mrr)
-        condition_scores["dense"]["p20"].append(dense_p20)
-        condition_scores["dense"]["latency_ms"].append(dense_lat)
-        per_dataset_ndcg["dense"][ds].append(dense_ndcg)
+        condition_scores["dense_only"]["ndcg10"].append(dense_ndcg)
+        condition_scores["dense_only"]["recall20"].append(dense_rec)
+        condition_scores["dense_only"]["mrr20"].append(dense_mrr)
+        condition_scores["dense_only"]["p20"].append(dense_p20)
+        condition_scores["dense_only"]["latency_ms"].append(dense_lat)
+        per_dataset_ndcg["dense_only"][ds].append(dense_ndcg)
 
         condition_scores["hybrid_rrf"]["ndcg10"].append(rrf_ndcg)
         condition_scores["hybrid_rrf"]["recall20"].append(rrf_rec)
@@ -464,12 +572,12 @@ def run_paired_ablation(
         condition_scores["hybrid_rrf"]["latency_ms"].append(rrf_lat)
         per_dataset_ndcg["hybrid_rrf"][ds].append(rrf_ndcg)
 
-        condition_scores["graph"]["ndcg10"].append(graph_ndcg)
-        condition_scores["graph"]["recall20"].append(graph_rec)
-        condition_scores["graph"]["mrr20"].append(graph_mrr)
-        condition_scores["graph"]["p20"].append(graph_p20)
-        condition_scores["graph"]["latency_ms"].append(graph_lat)
-        per_dataset_ndcg["graph"][ds].append(graph_ndcg)
+        condition_scores["graph_csr"]["ndcg10"].append(graph_ndcg)
+        condition_scores["graph_csr"]["recall20"].append(graph_rec)
+        condition_scores["graph_csr"]["mrr20"].append(graph_mrr)
+        condition_scores["graph_csr"]["p20"].append(graph_p20)
+        condition_scores["graph_csr"]["latency_ms"].append(graph_lat)
+        per_dataset_ndcg["graph_csr"][ds].append(graph_ndcg)
 
         condition_scores["toc_beam"]["ndcg10"].append(toc_ndcg)
         condition_scores["toc_beam"]["recall20"].append(toc_rec)
@@ -480,13 +588,13 @@ def run_paired_ablation(
 
         deltas_tier2_vs_tier3.append(toc_ndcg - rrf_ndcg)
 
-    # Compute bootstrap CIs for each condition
+    # Compute bootstrap CIs and Top-20 metrics for each condition
     top20_metrics = {}
     CONDITION_NAMES = {
-        "bm25": "BM25-only",
-        "dense": "Dense-only",
+        "bm25_only": "BM25-only",
+        "dense_only": "Dense-only",
         "hybrid_rrf": "Hybrid RRF (Tier 3 Control)",
-        "graph": "+Graph CSR",
+        "graph_csr": "+Graph CSR",
         "toc_beam": "+TOC Beam (Tier 2)",
     }
 
@@ -499,15 +607,37 @@ def run_paired_ablation(
         lats_sorted = sorted(lats)
         p95_idx = int(math.ceil(0.95 * len(lats))) - 1
 
+        rec_list = condition_scores[cond]["recall20"]
+        mrr_list = condition_scores[cond]["mrr20"]
+        p20_list = condition_scores[cond]["p20"]
+
+        # Paired delta vs hybrid RRF control
+        paired_deltas = [
+            condition_scores[cond]["ndcg10"][idx] - condition_scores["hybrid_rrf"]["ndcg10"][idx]
+            for idx in range(len(query_descriptors))
+        ]
+        p_pt, p_low, p_high = bootstrap_ci(
+            paired_deltas, n_resamples=n_resamples, confidence=confidence, seed=seed
+        )
+
         top20_metrics[cond] = {
             "name": CONDITION_NAMES[cond],
             "ndcg_at_10": round(pt_ndcg, 4),
             "ndcg_at_10_95_ci": [round(ci_low, 4), round(ci_high, 4)],
-            "recall_at_20": round(sum(condition_scores[cond]["recall20"]) / len(query_descriptors), 4),
-            "mrr_at_20": round(sum(condition_scores[cond]["mrr20"]) / len(query_descriptors), 4),
-            "precision_at_20": round(sum(condition_scores[cond]["p20"]) / len(query_descriptors), 4),
+            "recall_at_20": round(sum(rec_list) / len(query_descriptors), 4),
+            "mrr_at_20": round(sum(mrr_list) / len(query_descriptors), 4),
+            "precision_at_20": round(sum(p20_list) / len(query_descriptors), 4),
             "p95_latency_ms": round(lats_sorted[max(0, min(len(lats) - 1, p95_idx))], 2),
+            "paired_ndcg_delta_vs_tier3": {
+                "point_estimate": round(p_pt, 4),
+                "bootstrap_95_ci": [round(p_low, 4), round(p_high, 4)],
+            },
         }
+
+    # Backward-compatibility aliases for short keys
+    top20_metrics["bm25"] = top20_metrics["bm25_only"]
+    top20_metrics["dense"] = top20_metrics["dense_only"]
+    top20_metrics["graph"] = top20_metrics["graph_csr"]
 
     # Tier 2 vs Tier 3 Paired Uplift Bootstrap CI
     delta_pt, delta_low, delta_high = bootstrap_ci(
@@ -542,6 +672,9 @@ def run_paired_ablation(
             ds: round(sum(scores) / max(1, len(scores)), 4)
             for ds, scores in per_dataset_ndcg[cond].items()
         }
+    per_dataset_summary["bm25"] = per_dataset_summary["bm25_only"]
+    per_dataset_summary["dense"] = per_dataset_summary["dense_only"]
+    per_dataset_summary["graph"] = per_dataset_summary["graph_csr"]
 
     return {
         "total_queries": len(query_descriptors),
@@ -554,7 +687,7 @@ def run_paired_ablation(
             "bootstrap_seed": seed,
             "bootstrap_resamples": n_resamples,
             "confidence_level": confidence,
-            "conditions": top20_metrics,
+            "conditions": {c: top20_metrics[c] for c in conditions},
         },
     }
 
@@ -571,18 +704,22 @@ def scaffold_100k_qualification(
     confidence_level: float = 0.95,
 ) -> dict[str, Any]:
     """Assemble 100K qualification dossier and verification receipts with live telemetry."""
-    ok, errors = run_preflight_checks(manifest_path=manifest_path, corpus_input=corpus_input)
+    ok, errors = run_preflight_checks(
+        manifest_path=manifest_path,
+        corpus_input=corpus_input,
+        queries_manifest_path=queries_manifest_path,
+    )
     if not ok:
         raise PreflightFailure(f"Preflight validation failed: {errors}")
 
     with open(manifest_path, "r", encoding="utf-8") as f:
         manifest = json.load(f)
 
-    # 1. Live Memory Telemetry via psutil
-    live_memory = get_live_memory_telemetry()
-
-    # 2. Live On-Disk Storage Footprint & Admitted Raw UTF-8 Denominator
+    # 1. Live On-Disk Storage Footprint & Admitted Raw UTF-8 Denominator
     live_storage = measure_live_storage(db_path=db_path, manifest=manifest)
+    if not live_storage.get("db_path"):
+        raise PreflightFailure("No valid SQLite database file found on disk for live storage measurement.")
+
     p1_storage_bytes = live_storage["p1_storage_bytes"]
     p1_storage_mult = live_storage["p1_storage_mult"]
     p2_storage_bytes = live_storage["p2_storage_bytes"]
@@ -590,7 +727,7 @@ def scaffold_100k_qualification(
     p3_storage_bytes = live_storage["total_hot_bytes"]
     p3_storage_mult = live_storage["live_hot_multiplier"]
 
-    # 3. Paired Ablation Matrix across 1,000 Queries
+    # 2. Paired Ablation Matrix across 1,000 Queries
     ablation = run_paired_ablation(
         n_queries=n_ablation_queries,
         seed=bootstrap_seed,
@@ -598,9 +735,12 @@ def scaffold_100k_qualification(
         confidence=confidence_level,
         queries_manifest_path=queries_manifest_path,
     )
-    p1_scores = ablation["per_dataset"]["bm25"]
+    p1_scores = ablation["per_dataset"]["bm25_only"]
     p2_scores = ablation["per_dataset"]["hybrid_rrf"]
     p3_scores = ablation["per_dataset"]["toc_beam"]
+
+    # 3. Live Memory Telemetry via psutil (captured under active workload)
+    live_memory = get_live_memory_telemetry()
 
     # Stop rule evaluation on Profile 2
     stop_ok, stop_violations = check_stop_rules(p2_scores, p2_storage_mult)
@@ -646,6 +786,20 @@ def scaffold_100k_qualification(
             "live_hot_multiplier": live_storage["live_hot_multiplier"],
             "storage_gate_verified": live_storage["storage_gate_verified"],
             "storage_gate_limit": HARD_STORAGE_GATE_MULTIPLIER,
+            "durable_spine_bytes": live_storage["durable_bytes"],
+            "durable_spine_multiplier": live_storage["durable_multiplier"],
+            "durable_gate_verified": live_storage["durable_gate_verified"],
+            "durable_gate_limit": MAX_DURABLE_MULTIPLIER,
+            "four_number_breakdown": {
+                "durable_bytes": live_storage["durable_bytes"],
+                "durable_multiplier": live_storage["durable_multiplier"],
+                "retrieval_hot_bytes": live_storage["retrieval_hot_bytes"],
+                "retrieval_hot_multiplier": live_storage["retrieval_hot_multiplier"],
+                "cortex_hot_bytes": live_storage["cortex_hot_bytes"],
+                "cortex_hot_multiplier": live_storage["cortex_hot_multiplier"],
+                "total_hot_bytes": live_storage["total_hot_bytes"],
+                "total_hot_multiplier": live_storage["total_hot_multiplier"],
+            },
         },
         "profiles": {
             "profile_1_lexical": {
@@ -654,7 +808,7 @@ def scaffold_100k_qualification(
                 "retrieval_ndcg_at_10": p1_scores,
                 "storage_bytes": p1_storage_bytes,
                 "storage_multiplier": p1_storage_mult,
-                "p95_latency_ms": top20["bm25"]["p95_latency_ms"],
+                "p95_latency_ms": top20["bm25_only"]["p95_latency_ms"],
             },
             "profile_2_hybrid": {
                 "name": "Profile 2 (Core + Hybrid Retrieval)",
@@ -682,15 +836,30 @@ def scaffold_100k_qualification(
             "profile_2_regression_detected": False,
             "max_storage_multiplier_limit": MAX_STORAGE_MULTIPLIER,
             "hard_storage_gate_limit": HARD_STORAGE_GATE_MULTIPLIER,
+            "durable_spine_limit": MAX_DURABLE_MULTIPLIER,
             "max_observed_multiplier": p3_storage_mult,
             "storage_cap_violated": False,
             "hard_storage_gate_verified": live_storage["storage_gate_verified"],
+            "durable_gate_verified": live_storage["durable_gate_verified"],
             "all_stop_rules_passed": True,
         },
         "acceptance_summary": {
             "storage_gate_verified_on_disk": live_storage["storage_gate_verified"],
             "storage_gate_limit": HARD_STORAGE_GATE_MULTIPLIER,
             "live_hot_multiplier": live_storage["live_hot_multiplier"],
+            "durable_gate_verified": live_storage["durable_gate_verified"],
+            "durable_gate_limit": MAX_DURABLE_MULTIPLIER,
+            "durable_multiplier": live_storage["durable_multiplier"],
+            "four_number_breakdown": {
+                "durable_bytes": live_storage["durable_bytes"],
+                "durable_multiplier": live_storage["durable_multiplier"],
+                "retrieval_hot_bytes": live_storage["retrieval_hot_bytes"],
+                "retrieval_hot_multiplier": live_storage["retrieval_hot_multiplier"],
+                "cortex_hot_bytes": live_storage["cortex_hot_bytes"],
+                "cortex_hot_multiplier": live_storage["cortex_hot_multiplier"],
+                "total_hot_bytes": live_storage["total_hot_bytes"],
+                "total_hot_multiplier": live_storage["total_hot_multiplier"],
+            },
             "top20_metrics_emitted": True,
             "uplift_verdict_recorded": True,
             "uplift_verdict": ablation["tier2_uplift_promotion_gate"]["verdict"],
@@ -718,7 +887,11 @@ def scaffold_100k_qualification(
         "storage_gate_verified_on_disk": live_storage["storage_gate_verified"],
         "live_hot_multiplier": live_storage["live_hot_multiplier"],
         "storage_gate_limit": HARD_STORAGE_GATE_MULTIPLIER,
+        "durable_gate_verified": live_storage["durable_gate_verified"],
+        "durable_multiplier": live_storage["durable_multiplier"],
+        "durable_gate_limit": MAX_DURABLE_MULTIPLIER,
         "psutil_rss_mb": live_memory["rss_mb"],
+        "psutil_peak_rss_mb": live_memory["peak_rss_mb"],
         "top20_metrics_emitted": True,
         "ablation_matrix_evaluated": True,
         "paired_queries_count": ablation["ablation_matrix"]["total_queries"],
@@ -768,6 +941,8 @@ def verify_qualification_receipt(out_dir: Path = DEFAULT_OUT_DIR) -> tuple[bool,
     merkle = d.get("source_capsule", {}).get("merkle_root_sha256")
     if merkle != EXPECTED_MERKLE_ROOT:
         errors.append(f"Dossier Merkle root mismatch: {merkle} != {EXPECTED_MERKLE_ROOT}")
+    if r.get("capsule_merkle_root") != EXPECTED_MERKLE_ROOT:
+        errors.append(f"Receipt Merkle root mismatch: {r.get('capsule_merkle_root')} != {EXPECTED_MERKLE_ROOT}")
 
     acc = d.get("acceptance_summary")
     if acc is not None:
@@ -797,7 +972,11 @@ def main() -> int:
 
     if args.preflight:
         print("[CAP-INT02] Running 100K Paired Qualification Preflight Checks...")
-        ok, errors = run_preflight_checks(manifest_path=args.manifest, corpus_input=args.corpus_input)
+        ok, errors = run_preflight_checks(
+            manifest_path=args.manifest,
+            corpus_input=args.corpus_input,
+            queries_manifest_path=args.queries_manifest,
+        )
         if ok:
             print(f"[PASS] Capsule manifest verified: {args.manifest}")
             print(f"       Merkle Root: {EXPECTED_MERKLE_ROOT}")
@@ -829,9 +1008,13 @@ def main() -> int:
             )
             print(f"[SUCCESS] 100K qualification dossier assembled in {args.out_dir}")
             print(f"          Capsule Merkle: {dossier['source_capsule']['merkle_root_sha256']}")
-            print(f"          Live Hot Multiplier: {dossier['live_telemetry']['live_hot_multiplier']:.4f}x "
-                  f"(Storage Gate: {'PASS (<= 3.0x)' if dossier['live_telemetry']['storage_gate_verified'] else 'FAIL'})")
-            print(f"          Host RSS: {dossier['live_telemetry']['psutil_rss_mb']:.2f} MB")
+            storage = dossier["live_telemetry"]["storage"]
+            print(f"          Live Hot Multiplier: {storage['live_hot_multiplier']:.4f}x "
+                  f"(Storage Gate: {'PASS (<= 3.0x)' if storage['storage_gate_verified'] else 'FAIL'})")
+            print(f"          Durable Spine Multiplier: {storage['durable_multiplier']:.4f}x "
+                  f"(Health Signal: {'PASS (<= 1.6x)' if storage['durable_gate_verified'] else 'WARN'})")
+            mem = dossier["live_telemetry"]["memory"]
+            print(f"          Host RSS: {mem['rss_mb']:.2f} MB (Peak: {mem['peak_rss_mb']:.2f} MB)")
             print(f"          Ablation Matrix Conditions: {list(dossier['ablation_matrix']['conditions'].keys())}")
             gate = dossier["tier2_uplift_promotion_gate"]
             print(f"          Tier 2 Uplift Point: {gate['point_estimate_uplift']:+.4f}, "

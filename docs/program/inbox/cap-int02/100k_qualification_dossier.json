@@ -3,7 +3,7 @@
   "program": "TRACE-CAP-001",
   "work_packet": "WP6-LIVE-QUALIFICATION",
   "target_gate": "CAP-GE",
-  "timestamp_utc": "2026-09-07T14:09:54.032247+00:00",
+  "timestamp_utc": "2026-09-07T14:40:07.435833+00:00",
   "source_capsule": {
     "manifest_path": "docs/program/inbox/l1-02-corpus-capsule-20260828/evidence/corpus_manifest.json",
     "merkle_root_sha256": "38d1a1cf980d447edef7bfaa1ebc4d06129386a82bdd2c6f724f45d8624fc530",
@@ -13,37 +13,65 @@
   },
   "live_telemetry": {
     "memory": {
-      "rss_bytes": 18350080,
-      "rss_mb": 17.5,
-      "peak_rss_bytes": 18350080,
-      "peak_rss_mb": 17.5
+      "rss_bytes": 28700672,
+      "rss_mb": 27.37,
+      "peak_rss_bytes": 58167296,
+      "peak_rss_mb": 55.47
     },
     "storage": {
       "db_path": "docs/program/inbox/s7-real-100k-20260826/evidence/work/scale_100k.db",
       "db_bytes": 6467584,
       "wal_bytes": 20656,
       "shm_bytes": 32768,
-      "spine_bytes": 3813376,
-      "index_bytes": 663552,
-      "cortex_bytes": 1990656,
+      "spine_bytes": 4358144,
+      "index_bytes": 946176,
+      "cortex_bytes": 1163264,
+      "gen_fts_bytes": 0,
+      "gen_cortex_bytes": 0,
+      "durable_bytes": 4411568,
+      "durable_multiplier": 0.0675,
+      "durable_gate_limit": 1.6,
+      "durable_gate_verified": true,
+      "retrieval_hot_bytes": 946176,
+      "retrieval_hot_multiplier": 0.0145,
+      "cortex_hot_bytes": 1163264,
+      "cortex_hot_multiplier": 0.0178,
       "total_hot_bytes": 6521008,
+      "total_hot_multiplier": 0.0997,
       "admitted_raw_bytes": 65394921,
-      "p1_storage_bytes": 4145152,
-      "p1_storage_mult": 0.0634,
-      "p2_storage_bytes": 4476928,
-      "p2_storage_mult": 0.0685,
+      "p1_storage_bytes": 4884656,
+      "p1_storage_mult": 0.0747,
+      "p2_storage_bytes": 5357744,
+      "p2_storage_mult": 0.0819,
+      "p3_storage_bytes": 6521008,
+      "p3_storage_mult": 0.0997,
       "live_hot_multiplier": 0.0997,
       "storage_gate_limit": 3.0,
-      "storage_gate_verified": true
+      "storage_gate_verified": true,
+      "gate_passed": true
     },
-    "psutil_rss_bytes": 18350080,
-    "psutil_rss_mb": 17.5,
-    "psutil_peak_rss_mb": 17.5,
+    "psutil_rss_bytes": 28700672,
+    "psutil_rss_mb": 27.37,
+    "psutil_peak_rss_mb": 55.47,
     "admitted_raw_utf8_denominator_bytes": 65394921,
     "physical_on_disk_bytes": 6521008,
     "live_hot_multiplier": 0.0997,
     "storage_gate_verified": true,
-    "storage_gate_limit": 3.0
+    "storage_gate_limit": 3.0,
+    "durable_spine_bytes": 4411568,
+    "durable_spine_multiplier": 0.0675,
+    "durable_gate_verified": true,
+    "durable_gate_limit": 1.6,
+    "four_number_breakdown": {
+      "durable_bytes": 4411568,
+      "durable_multiplier": 0.0675,
+      "retrieval_hot_bytes": 946176,
+      "retrieval_hot_multiplier": 0.0145,
+      "cortex_hot_bytes": 1163264,
+      "cortex_hot_multiplier": 0.0178,
+      "total_hot_bytes": 6521008,
+      "total_hot_multiplier": 0.0997
+    }
   },
   "profiles": {
     "profile_1_lexical": {
@@ -53,12 +81,12 @@
         "SQLite FTS5 BM25"
       ],
       "retrieval_ndcg_at_10": {
-        "scifact": 0.6131,
-        "nfcorpus": 0.3013,
-        "fiqa": 0.3507
+        "scifact": 0.614,
+        "nfcorpus": 0.2984,
+        "fiqa": 0.353
       },
-      "storage_bytes": 4145152,
-      "storage_multiplier": 0.0634,
+      "storage_bytes": 4884656,
+      "storage_multiplier": 0.0747,
       "p95_latency_ms": 4.67
     },
     "profile_2_hybrid": {
@@ -70,14 +98,14 @@
         "RRF k=60"
       ],
       "retrieval_ndcg_at_10": {
-        "scifact": 0.6728,
-        "nfcorpus": 0.3612,
-        "fiqa": 0.4103
+        "scifact": 0.6736,
+        "nfcorpus": 0.3584,
+        "fiqa": 0.4131
       },
       "retrieval_floors_cleared": true,
-      "storage_bytes": 4476928,
-      "storage_multiplier": 0.0685,
-      "p95_latency_ms": 17.47
+      "storage_bytes": 5357744,
+      "storage_multiplier": 0.0819,
+      "p95_latency_ms": 17.49
     },
     "profile_3_cortex": {
       "name": "Profile 3 (Core + Hybrid + Shadow Cortex)",
@@ -86,13 +114,13 @@
         "Asynchronous Local SLM Semantic Projections"
       ],
       "retrieval_ndcg_at_10": {
-        "scifact": 0.6887,
-        "nfcorpus": 0.3779,
-        "fiqa": 0.4265
+        "scifact": 0.6898,
+        "nfcorpus": 0.3741,
+        "fiqa": 0.4292
       },
       "storage_bytes": 6521008,
       "storage_multiplier": 0.0997,
-      "p95_latency_ms": 25.4
+      "p95_latency_ms": 25.42
     }
   },
   "ablation_matrix": {
@@ -101,137 +129,264 @@
     "bootstrap_resamples": 10000,
     "confidence_level": 0.95,
     "conditions": {
-      "bm25": {
+      "bm25_only": {
         "name": "BM25-only",
-        "ndcg_at_10": 0.4135,
+        "ndcg_at_10": 0.4137,
         "ndcg_at_10_95_ci": [
-          0.4039,
-          0.4232
+          0.404,
+          0.4233
         ],
-        "recall_at_20": 0.4787,
-        "mrr_at_20": 0.4625,
-        "precision_at_20": 0.1727,
-        "p95_latency_ms": 4.67
+        "recall_at_20": 0.4789,
+        "mrr_at_20": 0.4627,
+        "precision_at_20": 0.1728,
+        "p95_latency_ms": 4.67,
+        "paired_ndcg_delta_vs_tier3": {
+          "point_estimate": -0.0599,
+          "bootstrap_95_ci": [
+            -0.0603,
+            -0.0596
+          ]
+        }
       },
-      "dense": {
+      "dense_only": {
         "name": "Dense-only",
-        "ndcg_at_10": 0.4408,
+        "ndcg_at_10": 0.4411,
         "ndcg_at_10_95_ci": [
-          0.4312,
-          0.4506
+          0.4314,
+          0.4507
         ],
-        "recall_at_20": 0.5005,
-        "mrr_at_20": 0.4729,
-        "precision_at_20": 0.1826,
-        "p95_latency_ms": 12.88
+        "recall_at_20": 0.5006,
+        "mrr_at_20": 0.4731,
+        "precision_at_20": 0.1827,
+        "p95_latency_ms": 12.9,
+        "paired_ndcg_delta_vs_tier3": {
+          "point_estimate": -0.0325,
+          "bootstrap_95_ci": [
+            -0.033,
+            -0.0321
+          ]
+        }
       },
       "hybrid_rrf": {
         "name": "Hybrid RRF (Tier 3 Control)",
-        "ndcg_at_10": 0.4732,
+        "ndcg_at_10": 0.4736,
         "ndcg_at_10_95_ci": [
-          0.4636,
-          0.483
+          0.4639,
+          0.4832
         ],
-        "recall_at_20": 0.5439,
-        "mrr_at_20": 0.5196,
-        "precision_at_20": 0.1985,
-        "p95_latency_ms": 17.47
+        "recall_at_20": 0.5441,
+        "mrr_at_20": 0.5198,
+        "precision_at_20": 0.1986,
+        "p95_latency_ms": 17.49,
+        "paired_ndcg_delta_vs_tier3": {
+          "point_estimate": 0.0,
+          "bootstrap_95_ci": [
+            0.0,
+            0.0
+          ]
+        }
       },
-      "graph": {
+      "graph_csr": {
         "name": "+Graph CSR",
-        "ndcg_at_10": 0.4808,
+        "ndcg_at_10": 0.4817,
         "ndcg_at_10_95_ci": [
-          0.4711,
-          0.4907
+          0.472,
+          0.4914
         ],
-        "recall_at_20": 0.5548,
-        "mrr_at_20": 0.53,
+        "recall_at_20": 0.555,
+        "mrr_at_20": 0.5302,
         "precision_at_20": 0.2025,
-        "p95_latency_ms": 21.27
+        "p95_latency_ms": 21.29,
+        "paired_ndcg_delta_vs_tier3": {
+          "point_estimate": 0.0081,
+          "bootstrap_95_ci": [
+            0.0074,
+            0.0087
+          ]
+        }
       },
       "toc_beam": {
         "name": "+TOC Beam (Tier 2)",
-        "ndcg_at_10": 0.4895,
+        "ndcg_at_10": 0.4896,
         "ndcg_at_10_95_ci": [
-          0.4799,
-          0.4992
+          0.4798,
+          0.4993
         ],
-        "recall_at_20": 0.5657,
-        "mrr_at_20": 0.5404,
+        "recall_at_20": 0.5658,
+        "mrr_at_20": 0.5405,
         "precision_at_20": 0.2045,
-        "p95_latency_ms": 25.4
+        "p95_latency_ms": 25.42,
+        "paired_ndcg_delta_vs_tier3": {
+          "point_estimate": 0.016,
+          "bootstrap_95_ci": [
+            0.0153,
+            0.0167
+          ]
+        }
       }
     }
   },
   "top20_metrics": {
-    "bm25": {
+    "bm25_only": {
       "name": "BM25-only",
-      "ndcg_at_10": 0.4135,
+      "ndcg_at_10": 0.4137,
       "ndcg_at_10_95_ci": [
-        0.4039,
-        0.4232
+        0.404,
+        0.4233
       ],
-      "recall_at_20": 0.4787,
-      "mrr_at_20": 0.4625,
-      "precision_at_20": 0.1727,
-      "p95_latency_ms": 4.67
+      "recall_at_20": 0.4789,
+      "mrr_at_20": 0.4627,
+      "precision_at_20": 0.1728,
+      "p95_latency_ms": 4.67,
+      "paired_ndcg_delta_vs_tier3": {
+        "point_estimate": -0.0599,
+        "bootstrap_95_ci": [
+          -0.0603,
+          -0.0596
+        ]
+      }
     },
-    "dense": {
+    "dense_only": {
       "name": "Dense-only",
-      "ndcg_at_10": 0.4408,
+      "ndcg_at_10": 0.4411,
       "ndcg_at_10_95_ci": [
-        0.4312,
-        0.4506
+        0.4314,
+        0.4507
       ],
-      "recall_at_20": 0.5005,
-      "mrr_at_20": 0.4729,
-      "precision_at_20": 0.1826,
-      "p95_latency_ms": 12.88
+      "recall_at_20": 0.5006,
+      "mrr_at_20": 0.4731,
+      "precision_at_20": 0.1827,
+      "p95_latency_ms": 12.9,
+      "paired_ndcg_delta_vs_tier3": {
+        "point_estimate": -0.0325,
+        "bootstrap_95_ci": [
+          -0.033,
+          -0.0321
+        ]
+      }
     },
     "hybrid_rrf": {
       "name": "Hybrid RRF (Tier 3 Control)",
-      "ndcg_at_10": 0.4732,
+      "ndcg_at_10": 0.4736,
       "ndcg_at_10_95_ci": [
-        0.4636,
-        0.483
+        0.4639,
+        0.4832
       ],
-      "recall_at_20": 0.5439,
-      "mrr_at_20": 0.5196,
-      "precision_at_20": 0.1985,
-      "p95_latency_ms": 17.47
+      "recall_at_20": 0.5441,
+      "mrr_at_20": 0.5198,
+      "precision_at_20": 0.1986,
+      "p95_latency_ms": 17.49,
+      "paired_ndcg_delta_vs_tier3": {
+        "point_estimate": 0.0,
+        "bootstrap_95_ci": [
+          0.0,
+          0.0
+        ]
+      }
     },
-    "graph": {
+    "graph_csr": {
       "name": "+Graph CSR",
-      "ndcg_at_10": 0.4808,
+      "ndcg_at_10": 0.4817,
       "ndcg_at_10_95_ci": [
-        0.4711,
-        0.4907
+        0.472,
+        0.4914
       ],
-      "recall_at_20": 0.5548,
-      "mrr_at_20": 0.53,
+      "recall_at_20": 0.555,
+      "mrr_at_20": 0.5302,
       "precision_at_20": 0.2025,
-      "p95_latency_ms": 21.27
+      "p95_latency_ms": 21.29,
+      "paired_ndcg_delta_vs_tier3": {
+        "point_estimate": 0.0081,
+        "bootstrap_95_ci": [
+          0.0074,
+          0.0087
+        ]
+      }
     },
     "toc_beam": {
       "name": "+TOC Beam (Tier 2)",
-      "ndcg_at_10": 0.4895,
+      "ndcg_at_10": 0.4896,
       "ndcg_at_10_95_ci": [
-        0.4799,
-        0.4992
+        0.4798,
+        0.4993
       ],
-      "recall_at_20": 0.5657,
-      "mrr_at_20": 0.5404,
+      "recall_at_20": 0.5658,
+      "mrr_at_20": 0.5405,
       "precision_at_20": 0.2045,
-      "p95_latency_ms": 25.4
+      "p95_latency_ms": 25.42,
+      "paired_ndcg_delta_vs_tier3": {
+        "point_estimate": 0.016,
+        "bootstrap_95_ci": [
+          0.0153,
+          0.0167
+        ]
+      }
+    },
+    "bm25": {
+      "name": "BM25-only",
+      "ndcg_at_10": 0.4137,
+      "ndcg_at_10_95_ci": [
+        0.404,
+        0.4233
+      ],
+      "recall_at_20": 0.4789,
+      "mrr_at_20": 0.4627,
+      "precision_at_20": 0.1728,
+      "p95_latency_ms": 4.67,
+      "paired_ndcg_delta_vs_tier3": {
+        "point_estimate": -0.0599,
+        "bootstrap_95_ci": [
+          -0.0603,
+          -0.0596
+        ]
+      }
+    },
+    "dense": {
+      "name": "Dense-only",
+      "ndcg_at_10": 0.4411,
+      "ndcg_at_10_95_ci": [
+        0.4314,
+        0.4507
+      ],
+      "recall_at_20": 0.5006,
+      "mrr_at_20": 0.4731,
+      "precision_at_20": 0.1827,
+      "p95_latency_ms": 12.9,
+      "paired_ndcg_delta_vs_tier3": {
+        "point_estimate": -0.0325,
+        "bootstrap_95_ci": [
+          -0.033,
+          -0.0321
+        ]
+      }
+    },
+    "graph": {
+      "name": "+Graph CSR",
+      "ndcg_at_10": 0.4817,
+      "ndcg_at_10_95_ci": [
+        0.472,
+        0.4914
+      ],
+      "recall_at_20": 0.555,
+      "mrr_at_20": 0.5302,
+      "precision_at_20": 0.2025,
+      "p95_latency_ms": 21.29,
+      "paired_ndcg_delta_vs_tier3": {
+        "point_estimate": 0.0081,
+        "bootstrap_95_ci": [
+          0.0074,
+          0.0087
+        ]
+      }
     }
   },
   "tier2_uplift_promotion_gate": {
     "comparison": "Tier 2 (+TOC Beam) vs Tier 3 (Hybrid RRF Control)",
     "paired_queries_evaluated": 1000,
-    "point_estimate_uplift": 0.0163,
+    "point_estimate_uplift": 0.016,
     "bootstrap_95_ci": [
-      0.0156,
-      0.0169
+      0.0153,
+      0.0167
     ],
     "bootstrap_resamples": 10000,
     "bootstrap_seed": 42,
@@ -244,24 +399,24 @@
   },
   "paired_analysis": {
     "p2_vs_p1_ndcg_delta": {
-      "scifact": 0.0597,
-      "nfcorpus": 0.0599,
-      "fiqa": 0.0596
+      "scifact": 0.0596,
+      "nfcorpus": 0.06,
+      "fiqa": 0.0601
     },
     "p3_vs_p2_ndcg_delta": {
-      "scifact": 0.0159,
-      "nfcorpus": 0.0167,
-      "fiqa": 0.0162
+      "scifact": 0.0162,
+      "nfcorpus": 0.0157,
+      "fiqa": 0.0161
     },
     "wilcoxon_signed_rank_p": 0.0008,
     "statistically_significant": true,
     "tier2_vs_tier3_uplift": {
       "comparison": "Tier 2 (+TOC Beam) vs Tier 3 (Hybrid RRF Control)",
       "paired_queries_evaluated": 1000,
-      "point_estimate_uplift": 0.0163,
+      "point_estimate_uplift": 0.016,
       "bootstrap_95_ci": [
-        0.0156,
-        0.0169
+        0.0153,
+        0.0167
       ],
       "bootstrap_resamples": 10000,
       "bootstrap_seed": 42,
@@ -277,15 +432,30 @@
     "profile_2_regression_detected": false,
     "max_storage_multiplier_limit": 3.5,
     "hard_storage_gate_limit": 3.0,
+    "durable_spine_limit": 1.6,
     "max_observed_multiplier": 0.0997,
     "storage_cap_violated": false,
     "hard_storage_gate_verified": true,
+    "durable_gate_verified": true,
     "all_stop_rules_passed": true
   },
   "acceptance_summary": {
     "storage_gate_verified_on_disk": true,
     "storage_gate_limit": 3.0,
     "live_hot_multiplier": 0.0997,
+    "durable_gate_verified": true,
+    "durable_gate_limit": 1.6,
+    "durable_multiplier": 0.0675,
+    "four_number_breakdown": {
+      "durable_bytes": 4411568,
+      "durable_multiplier": 0.0675,
+      "retrieval_hot_bytes": 946176,
+      "retrieval_hot_multiplier": 0.0145,
+      "cortex_hot_bytes": 1163264,
+      "cortex_hot_multiplier": 0.0178,
+      "total_hot_bytes": 6521008,
+      "total_hot_multiplier": 0.0997
+    },
     "top20_metrics_emitted": true,
     "uplift_verdict_recorded": true,
     "uplift_verdict": "PROMOTE",
