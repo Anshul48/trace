@@ -295,24 +295,23 @@ class TestEpochIndexManagerLifecycle:
         assert len(unlinked) == 1
         assert not gen1_dir.exists()
 
-    def test_winerror_32_mitigation(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Verify WinError 32 / PermissionError during unlinking is caught and deferred."""
+    def test_winerror_32_mitigation(self, tmp_path: Path) -> None:
+        """Verify PermissionError / file-locking during unlinking is caught and deferred."""
         mgr = EpochIndexManager(workspace_dir=tmp_path, lease_grace_seconds=120.0)
         gen1_dir = mgr.active_gen_dir
         mgr.compact_and_promote(target_epoch=2)
         assert gen1_dir.exists()
 
-        # Simulate Windows NTFS file locking by raising PermissionError (WinError 32)
-        def mock_rmtree(path: Any, *args: Any, **kwargs: Any) -> None:
-            err = PermissionError("[WinError 32] The process cannot access the file because it is being used")
-            raise err
-
-        monkeypatch.setattr("shutil.rmtree", mock_rmtree)
-
-        # Sweep must catch the exception cleanly without crashing
-        unlinked = mgr.sweep_retired_generations(force=True)
-        assert len(unlinked) == 0
-        assert gen1_dir.exists()
+        # Real filesystem permission restriction (zero mocks): revoke write permission on generations dir
+        orig_mode = mgr.generations_dir.stat().st_mode
+        try:
+            os.chmod(mgr.generations_dir, 0o555)
+            # Sweep must catch the PermissionError cleanly without crashing
+            unlinked = mgr.sweep_retired_generations(force=True)
+            assert len(unlinked) == 0
+            assert gen1_dir.exists()
+        finally:
+            os.chmod(mgr.generations_dir, orig_mode)
 
 
 # ==============================================================================
