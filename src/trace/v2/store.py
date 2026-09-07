@@ -13,6 +13,7 @@ import json
 import os
 import sqlite3
 import threading
+import time
 import uuid
 from collections import defaultdict
 from contextlib import contextmanager
@@ -856,8 +857,120 @@ class SqliteEventStore:
                 );
                 CREATE INDEX IF NOT EXISTS activation_priors_lookup
                     ON activation_priors(workspace_id, release_id, atom_version_id, expires_at);
+
+                -- ------------------------------------------------------
+                -- WP2 Storage Schema: L0 Atom, Holons, TOC, Edges, RCU
+                -- ------------------------------------------------------
+                CREATE TABLE IF NOT EXISTS atom (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    doc_id TEXT NOT NULL,
+                    file_id TEXT NOT NULL,
+                    start_byte INTEGER NOT NULL,
+                    end_byte INTEGER NOT NULL,
+                    content_hash BLOB NOT NULL,
+                    text TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS atom_file_start ON atom(file_id, start_byte);
+                CREATE INDEX IF NOT EXISTS atom_content_hash ON atom(content_hash);
+                CREATE INDEX IF NOT EXISTS atom_doc_id ON atom(doc_id);
+
+                CREATE TABLE IF NOT EXISTS holons (
+                    id TEXT PRIMARY KEY,
+                    parent_toc TEXT,
+                    centroid_int8 BLOB,
+                    lex_sig TEXT NOT NULL,
+                    spans TEXT NOT NULL,
+                    energy REAL NOT NULL DEFAULT 0.0,
+                    tier TEXT NOT NULL DEFAULT 'nav',
+                    status TEXT NOT NULL DEFAULT 'ACTIVE',
+                    version INTEGER NOT NULL DEFAULT 1,
+                    anchor_model TEXT,
+                    anchor_prompt_hash TEXT,
+                    created_at TEXT
+                );
+                CREATE INDEX IF NOT EXISTS holons_parent_toc ON holons(parent_toc);
+                CREATE INDEX IF NOT EXISTS holons_status ON holons(status);
+                CREATE VIEW IF NOT EXISTS holon AS SELECT * FROM holons;
+
+                CREATE TABLE IF NOT EXISTS toc (
+                    id TEXT PRIMARY KEY,
+                    parent TEXT,
+                    c0 BLOB,
+                    r0 REAL,
+                    members TEXT NOT NULL,
+                    boundary TEXT,
+                    status TEXT NOT NULL DEFAULT 'ACTIVE',
+                    version INTEGER NOT NULL DEFAULT 1,
+                    created_at TEXT
+                );
+                CREATE INDEX IF NOT EXISTS toc_parent ON toc(parent);
+
+                CREATE TABLE IF NOT EXISTS edges (
+                    src TEXT NOT NULL,
+                    dst TEXT NOT NULL,
+                    type TEXT NOT NULL,
+                    weight REAL NOT NULL,
+                    properties_json TEXT NOT NULL DEFAULT '{}',
+                    created_at TEXT,
+                    PRIMARY KEY (src, dst, type)
+                );
+                CREATE INDEX IF NOT EXISTS edges_src ON edges(src);
+                CREATE INDEX IF NOT EXISTS edges_dst ON edges(dst);
+                CREATE INDEX IF NOT EXISTS edges_type ON edges(type);
+                CREATE VIEW IF NOT EXISTS edge AS SELECT * FROM edges;
+
+                CREATE TABLE IF NOT EXISTS active_generation (
+                    lock_id INTEGER PRIMARY KEY CHECK (lock_id = 1),
+                    epoch INTEGER NOT NULL,
+                    gen_dir TEXT NOT NULL,
+                    promoted_at REAL NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS active_reader_leases (
+                    pid INTEGER NOT NULL,
+                    lease_id TEXT PRIMARY KEY,
+                    epoch INTEGER NOT NULL,
+                    acquired_at REAL NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS active_reader_leases_epoch
+                    ON active_reader_leases(epoch);
                 """
             )
+            try:
+                conn.execute(
+                    """
+                    CREATE VIRTUAL TABLE IF NOT EXISTS fts_atoms USING fts5(
+                        text,
+                        content='atom',
+                        content_rowid='id',
+                        tokenize='porter unicode61 remove_diacritics 1'
+                    );
+                    """
+                )
+                conn.execute(
+                    """
+                    CREATE TRIGGER IF NOT EXISTS atom_ai AFTER INSERT ON atom BEGIN
+                        INSERT INTO fts_atoms(rowid, text) VALUES (new.id, new.text);
+                    END;
+                    """
+                )
+                conn.execute(
+                    """
+                    CREATE TRIGGER IF NOT EXISTS atom_ad AFTER DELETE ON atom BEGIN
+                        INSERT INTO fts_atoms(fts_atoms, rowid, text) VALUES('delete', old.id, old.text);
+                    END;
+                    """
+                )
+                conn.execute(
+                    """
+                    CREATE TRIGGER IF NOT EXISTS atom_au AFTER UPDATE ON atom BEGIN
+                        INSERT INTO fts_atoms(fts_atoms, rowid, text) VALUES('delete', old.id, old.text);
+                        INSERT INTO fts_atoms(rowid, text) VALUES (new.id, new.text);
+                    END;
+                    """
+                )
+            except sqlite3.OperationalError:
+                pass
             # TR2 adds only forward-compatible metadata to existing local
             # databases.  No prior release or source event is rewritten.
             release_columns = {row[1] for row in conn.execute("PRAGMA table_info(cortex_releases)").fetchall()}
@@ -6024,3 +6137,389 @@ class SqliteEventStore:
         ).fetchone()
         if not row:
             raise InvariantViolation(f"evidence atom version {version_id} is absent or out of scope")
+
+    # ------------------------------------------------------------------ WP2 Storage Schema & Epoch RCU
+    def insert_atom(
+        self,
+        *,
+        doc_id: str,
+        file_id: str,
+        start_byte: int,
+        end_byte: int,
+        content_hash: bytes | str,
+        text: str,
+        atom_id: int | None = None,
+    ) -> int:
+        """Insert a canonical raw L0 atom with byte-exact provenance.
+
+        Ensures invariant: text length and content match byte offsets.
+        fts_atoms external-content index updates automatically via SQLite triggers.
+        """
+        if end_byte < start_byte:
+            raise ValueError(f"end_byte ({end_byte}) < start_byte ({start_byte})")
+        if isinstance(content_hash, bytes):
+            raw_hash = content_hash
+        else:
+            try:
+                raw_hash = bytes.fromhex(str(content_hash))
+            except ValueError:
+                raw_hash = str(content_hash).encode("utf-8")
+        with self.transaction() as conn:
+            if atom_id is not None:
+                cursor = conn.execute(
+                    """
+                    INSERT INTO atom (id, doc_id, file_id, start_byte, end_byte, content_hash, text)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (atom_id, doc_id, file_id, start_byte, end_byte, raw_hash, text),
+                )
+                return cursor.lastrowid or atom_id
+            else:
+                cursor = conn.execute(
+                    """
+                    INSERT INTO atom (doc_id, file_id, start_byte, end_byte, content_hash, text)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (doc_id, file_id, start_byte, end_byte, raw_hash, text),
+                )
+                return int(cursor.lastrowid)
+
+    def insert_atoms(self, atoms: Sequence[Mapping[str, Any]]) -> list[int]:
+        """Bulk insert canonical L0 atoms."""
+        rowids: list[int] = []
+        with self.transaction() as conn:
+            for a in atoms:
+                sb = a["start_byte"]
+                eb = a["end_byte"]
+                if eb < sb:
+                    raise ValueError(f"end_byte ({eb}) < start_byte ({sb})")
+                raw_hash = a["content_hash"]
+                if not isinstance(raw_hash, bytes):
+                    h_str = str(raw_hash)
+                    try:
+                        raw_hash = bytes.fromhex(h_str)
+                    except ValueError:
+                        raw_hash = h_str.encode("utf-8")
+                aid = a.get("id")
+                if aid is not None:
+                    cursor = conn.execute(
+                        """
+                        INSERT INTO atom (id, doc_id, file_id, start_byte, end_byte, content_hash, text)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (aid, a["doc_id"], a["file_id"], sb, eb, raw_hash, a["text"]),
+                    )
+                    rowids.append(int(cursor.lastrowid or aid))
+                else:
+                    cursor = conn.execute(
+                        """
+                        INSERT INTO atom (doc_id, file_id, start_byte, end_byte, content_hash, text)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """,
+                        (a["doc_id"], a["file_id"], sb, eb, raw_hash, a["text"]),
+                    )
+                    rowids.append(int(cursor.lastrowid))
+        return rowids
+
+    def get_atom(self, atom_id: int) -> dict[str, Any] | None:
+        """Retrieve a canonical atom by id."""
+        with self.transaction() as conn:
+            row = conn.execute(
+                "SELECT id, doc_id, file_id, start_byte, end_byte, content_hash, text FROM atom WHERE id = ?",
+                (atom_id,),
+            ).fetchone()
+            if not row:
+                return None
+            return {
+                "id": row["id"],
+                "doc_id": row["doc_id"],
+                "file_id": row["file_id"],
+                "start_byte": row["start_byte"],
+                "end_byte": row["end_byte"],
+                "content_hash": row["content_hash"],
+                "text": row["text"],
+            }
+
+    def search_fts_atoms(self, query: str, limit: int = 20) -> list[dict[str, Any]]:
+        """Search canonical atoms via external-content FTS5 table fts_atoms."""
+        if not query or not query.strip():
+            return []
+        sql = """
+            SELECT rowid, text, bm25(fts_atoms) AS score
+            FROM fts_atoms
+            WHERE fts_atoms MATCH ?
+            ORDER BY score
+            LIMIT ?
+        """
+        with self.transaction() as conn:
+            try:
+                rows = conn.execute(sql, (query, limit)).fetchall()
+            except sqlite3.OperationalError:
+                # Sanitize query by wrapping tokens in double quotes
+                tokens = [t.replace('"', '""') for t in query.split() if t.strip()]
+                if not tokens:
+                    return []
+                safe_query = " ".join(f'"{t}"' for t in tokens)
+                try:
+                    rows = conn.execute(sql, (safe_query, limit)).fetchall()
+                except sqlite3.OperationalError:
+                    return []
+            return [
+                {"id": r["rowid"], "text": r["text"], "score": float(r["score"])}
+                for r in rows
+            ]
+
+    def insert_holons(self, holons: Sequence[Mapping[str, Any]]) -> None:
+        """Insert or replace operational L1 holons."""
+        with self.transaction() as conn:
+            for h in holons:
+                lex_sig = h.get("lex_sig")
+                if not isinstance(lex_sig, str):
+                    # Top-32 string tokens as JSON array (Appendix A item 10)
+                    lex_sig = _json(list(lex_sig or [])[:32])
+                spans = h.get("spans")
+                if not isinstance(spans, str):
+                    spans = _json(spans or [])
+                centroid = h.get("centroid_int8")
+                if centroid is not None and not isinstance(centroid, bytes):
+                    centroid = bytes(centroid)
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO holons (
+                        id, parent_toc, centroid_int8, lex_sig, spans,
+                        energy, tier, status, version, anchor_model,
+                        anchor_prompt_hash, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        h["id"],
+                        h.get("parent_toc"),
+                        centroid,
+                        lex_sig,
+                        spans,
+                        float(h.get("energy", 0.0)),
+                        str(h.get("tier", "nav")),
+                        str(h.get("status", "ACTIVE")),
+                        int(h.get("version", 1)),
+                        h.get("anchor_model"),
+                        h.get("anchor_prompt_hash"),
+                        h.get("created_at") or _now(),
+                    ),
+                )
+
+    def get_holon(self, holon_id: str) -> dict[str, Any] | None:
+        """Retrieve a holon by id."""
+        with self.transaction() as conn:
+            row = conn.execute(
+                """
+                SELECT id, parent_toc, centroid_int8, lex_sig, spans,
+                       energy, tier, status, version, anchor_model,
+                       anchor_prompt_hash, created_at
+                FROM holons WHERE id = ?
+                """,
+                (holon_id,),
+            ).fetchone()
+            if not row:
+                return None
+            return {
+                "id": row["id"],
+                "parent_toc": row["parent_toc"],
+                "centroid_int8": row["centroid_int8"],
+                "lex_sig": _decode(row["lex_sig"], []),
+                "spans": _decode(row["spans"], []),
+                "energy": row["energy"],
+                "tier": row["tier"],
+                "status": row["status"],
+                "version": row["version"],
+                "anchor_model": row["anchor_model"],
+                "anchor_prompt_hash": row["anchor_prompt_hash"],
+                "created_at": row["created_at"],
+            }
+
+    def insert_toc_nodes(self, nodes: Sequence[Mapping[str, Any]]) -> None:
+        """Insert or replace L2 TOC routing nodes."""
+        with self.transaction() as conn:
+            for n in nodes:
+                c0 = n.get("c0")
+                if c0 is not None and not isinstance(c0, bytes):
+                    c0 = bytes(c0)
+                members = n.get("members")
+                if not isinstance(members, str):
+                    members = _json(members or [])
+                boundary = n.get("boundary")
+                if boundary is not None and not isinstance(boundary, str):
+                    boundary = _json(boundary)
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO toc (
+                        id, parent, c0, r0, members, boundary, status, version, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        n["id"],
+                        n.get("parent"),
+                        c0,
+                        float(n["r0"]) if n.get("r0") is not None else None,
+                        members,
+                        boundary,
+                        str(n.get("status", "ACTIVE")),
+                        int(n.get("version", 1)),
+                        n.get("created_at") or _now(),
+                    ),
+                )
+
+    def get_toc_node(self, toc_id: str) -> dict[str, Any] | None:
+        """Retrieve an L2 TOC node by id."""
+        with self.transaction() as conn:
+            row = conn.execute(
+                "SELECT id, parent, c0, r0, members, boundary, status, version, created_at FROM toc WHERE id = ?",
+                (toc_id,),
+            ).fetchone()
+            if not row:
+                return None
+            return {
+                "id": row["id"],
+                "parent": row["parent"],
+                "c0": row["c0"],
+                "r0": row["r0"],
+                "members": _decode(row["members"], []),
+                "boundary": _decode(row["boundary"], {}) if row["boundary"] else None,
+                "status": row["status"],
+                "version": row["version"],
+                "created_at": row["created_at"],
+            }
+
+    def insert_edges(self, edges: Sequence[Mapping[str, Any]]) -> None:
+        """Insert or replace explicit non-contiguous graph edges."""
+        with self.transaction() as conn:
+            for e in edges:
+                props = e.get("properties_json") or e.get("properties") or {}
+                if not isinstance(props, str):
+                    props = _json(props)
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO edges (src, dst, type, weight, properties_json, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        e["src"],
+                        e["dst"],
+                        e["type"],
+                        float(e["weight"]),
+                        props,
+                        e.get("created_at") or _now(),
+                    ),
+                )
+
+    def get_edges(self, *, src: str | None = None, dst: str | None = None, edge_type: str | None = None) -> list[dict[str, Any]]:
+        """Retrieve explicit graph edges matching filters."""
+        query = "SELECT src, dst, type, weight, properties_json, created_at FROM edges WHERE 1=1"
+        args: list[Any] = []
+        if src is not None:
+            query += " AND src = ?"
+            args.append(src)
+        if dst is not None:
+            query += " AND dst = ?"
+            args.append(dst)
+        if edge_type is not None:
+            query += " AND type = ?"
+            args.append(edge_type)
+        with self.transaction() as conn:
+            rows = conn.execute(query, args).fetchall()
+            return [
+                {
+                    "src": r["src"],
+                    "dst": r["dst"],
+                    "type": r["type"],
+                    "weight": r["weight"],
+                    "properties": _decode(r["properties_json"], {}),
+                    "created_at": r["created_at"],
+                }
+                for r in rows
+            ]
+
+    def get_active_generation(self) -> dict[str, Any] | None:
+        """Get the authoritative active generation record."""
+        with self.transaction() as conn:
+            row = conn.execute(
+                "SELECT lock_id, epoch, gen_dir, promoted_at FROM active_generation WHERE lock_id = 1"
+            ).fetchone()
+            if not row:
+                return None
+            return {
+                "lock_id": row["lock_id"],
+                "epoch": row["epoch"],
+                "gen_dir": row["gen_dir"],
+                "promoted_at": row["promoted_at"],
+            }
+
+    def set_active_generation(
+        self, epoch: int, gen_dir: str, promoted_at: float | None = None
+    ) -> None:
+        """Set or update the single-row active generation pointer atomically."""
+        ts = time.time() if promoted_at is None else float(promoted_at)
+        with self.transaction() as conn:
+            conn.execute(
+                """
+                INSERT INTO active_generation (lock_id, epoch, gen_dir, promoted_at)
+                VALUES (1, ?, ?, ?)
+                ON CONFLICT(lock_id) DO UPDATE SET
+                    epoch = excluded.epoch,
+                    gen_dir = excluded.gen_dir,
+                    promoted_at = excluded.promoted_at
+                """,
+                (epoch, gen_dir, ts),
+            )
+
+    def acquire_reader_lease(
+        self, pid: int, lease_id: str, epoch: int, acquired_at: float | None = None
+    ) -> None:
+        """Register an active reader lease in SQLite."""
+        ts = time.time() if acquired_at is None else float(acquired_at)
+        with self.transaction() as conn:
+            conn.execute(
+                """
+                INSERT INTO active_reader_leases (pid, lease_id, epoch, acquired_at)
+                VALUES (?, ?, ?, ?)
+                """,
+                (pid, lease_id, epoch, ts),
+            )
+
+    def release_reader_lease(self, lease_id: str) -> bool:
+        """Release an active reader lease."""
+        with self.transaction() as conn:
+            cursor = conn.execute(
+                "DELETE FROM active_reader_leases WHERE lease_id = ?", (lease_id,)
+            )
+            return cursor.rowcount > 0
+
+    def count_active_reader_leases(self, epoch: int | None = None) -> int:
+        """Count active reader leases, optionally filtered by epoch."""
+        with self.transaction() as conn:
+            if epoch is not None:
+                row = conn.execute(
+                    "SELECT COUNT(*) FROM active_reader_leases WHERE epoch = ?", (epoch,)
+                ).fetchone()
+            else:
+                row = conn.execute("SELECT COUNT(*) FROM active_reader_leases").fetchone()
+            return int(row[0]) if row else 0
+
+    def cleanup_stale_reader_leases(self, max_age_seconds: float | None = None) -> int:
+        """Clean up orphaned reader leases from dead processes or expired leases."""
+        from trace.v2.index_manager import is_process_alive
+        now = time.time()
+        cleaned = 0
+        with self.transaction() as conn:
+            rows = conn.execute(
+                "SELECT pid, lease_id, acquired_at FROM active_reader_leases"
+            ).fetchall()
+            for r in rows:
+                pid = int(r["pid"])
+                lid = str(r["lease_id"])
+                acq = float(r["acquired_at"])
+                is_dead = not is_process_alive(pid)
+                is_expired = (max_age_seconds is not None) and ((now - acq) > max_age_seconds)
+                if is_dead or is_expired:
+                    conn.execute("DELETE FROM active_reader_leases WHERE lease_id = ?", (lid,))
+                    cleaned += 1
+        return cleaned
