@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import sqlite3
+import struct
 
 from benchmarks.run_100k_qualification import (
     DEFAULT_CAPSULE_MANIFEST,
@@ -229,6 +230,165 @@ class Test100KQualificationScaffold(unittest.TestCase):
 
             with self.assertRaises(PreflightFailure):
                 scaffold_100k_qualification(out_dir=Path(tmpdir) / "out", db_path=corrupted)
+
+    def test_all_arms_measured_not_derived(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "test_ablation.db"
+            conn = sqlite3.connect(str(db_path))
+            conn.execute("CREATE TABLE node_versions (atom_version_id TEXT, content TEXT)")
+            conn.execute("CREATE TABLE edge_versions (source_node_id TEXT, target_node_id TEXT, weight REAL)")
+            conn.execute("CREATE TABLE toc (id TEXT, c0 BLOB, members TEXT, status TEXT)")
+
+            from trace.v2.retrieval import HashingDenseEmbedder
+            embedder = HashingDenseEmbedder(dimensions=384)
+
+            doc_gold = "0-dimensional biomaterials lack inductive properties in experiments"
+            doc_connected = "experiments on inductive properties of cellular matrices and biomaterials"
+            doc_unrelated = "completely unrelated astronomy planetary motion galaxies and stellar dynamics"
+
+            conn.execute("INSERT INTO node_versions VALUES (?, ?)", ("31715818", doc_gold))
+            conn.execute("INSERT INTO node_versions VALUES (?, ?)", ("doc_connected", doc_connected))
+            conn.execute("INSERT INTO node_versions VALUES (?, ?)", ("doc_unrelated", doc_unrelated))
+
+            conn.execute("INSERT INTO edge_versions VALUES (?, ?, ?)", ("31715818", "doc_connected", 1.0))
+            conn.execute("INSERT INTO edge_versions VALUES (?, ?, ?)", ("doc_connected", "31715818", 1.0))
+
+            vec_gold = embedder.embed([doc_gold])[0]
+            blob_gold = struct.pack(f"{len(vec_gold)}f", *vec_gold)
+            vec_unrelated = embedder.embed([doc_unrelated])[0]
+            blob_unrelated = struct.pack(f"{len(vec_unrelated)}f", *vec_unrelated)
+
+            conn.execute(
+                "INSERT INTO toc VALUES (?, ?, ?, ?)",
+                ("toc_1", blob_gold, json.dumps(["31715818", "doc_connected"]), "ACTIVE"),
+            )
+            conn.execute(
+                "INSERT INTO toc VALUES (?, ?, ?, ?)",
+                ("toc_2", blob_unrelated, json.dumps(["doc_unrelated"]), "ACTIVE"),
+            )
+            conn.commit()
+
+            # Run ablation A before mutation
+            res_a = run_paired_ablation(db_path=db_path, n_queries=1, n_resamples=50, require_graph=True)
+            metrics_a = res_a["top20_metrics"]
+            uplift_a = res_a["tier2_uplift_promotion_gate"]["point_estimate_uplift"]
+
+            # Assert all 5 arms exist and delta is not a hardcoded constant
+            for arm in ["bm25_only", "dense_only", "hybrid_rrf", "graph_csr", "toc_beam"]:
+                self.assertIn(arm, metrics_a)
+                self.assertIn("ndcg_at_10", metrics_a[arm])
+            self.assertNotIn(uplift_a, {0.0179, 0.0090, 0.0127, 0.0144})
+
+            # Mutate gold document text so it no longer matches query 0
+            conn.execute(
+                "UPDATE node_versions SET content = ? WHERE atom_version_id = ?",
+                ("completely unrelated astronomy deep space astrophysics", "31715818"),
+            )
+            conn.commit()
+            conn.close()
+
+            # Run ablation B after mutation
+            res_b = run_paired_ablation(db_path=db_path, n_queries=1, n_resamples=50, require_graph=True)
+            metrics_b = res_b["top20_metrics"]
+            uplift_b = res_b["tier2_uplift_promotion_gate"]["point_estimate_uplift"]
+
+            # Assert mutating gold document changes all 5 ablation arms
+            for arm in ["bm25_only", "dense_only", "hybrid_rrf", "graph_csr", "toc_beam"]:
+                score_a = metrics_a[arm]["ndcg_at_10"]
+                score_b = metrics_b[arm]["ndcg_at_10"]
+                self.assertNotEqual(
+                    score_a,
+                    score_b,
+                    f"Ablation arm {arm} failed to change upon mutating gold doc: {score_a} == {score_b}",
+                )
+
+            # Assert delta is measured and changed (not a fixed constant)
+            self.assertNotEqual(uplift_a, uplift_b)
+
+    def test_missing_qrels_or_graph_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # 1. Missing qrels (manifest query with empty gold_ids) fails closed
+            bad_manifest = Path(tmpdir) / "empty_qrels_manifest.json"
+            bad_manifest.write_text(
+                json.dumps({
+                    "closed_evaluation_cohorts": {
+                        "direct_lookup": [
+                            {"query_id": "q_empty_gold", "query_text": "sample text", "gold_ids": []}
+                        ],
+                        "domain_semantic": [],
+                        "semantic_qa": [],
+                    }
+                }),
+                encoding="utf-8",
+            )
+            db_path = Path(tmpdir) / "valid.db"
+            conn = sqlite3.connect(str(db_path))
+            conn.execute("CREATE TABLE node_versions (atom_version_id TEXT, content TEXT)")
+            conn.execute("INSERT INTO node_versions VALUES ('atom1', 'some text')")
+            conn.commit()
+            conn.close()
+
+            with self.assertRaises(PreflightFailure):
+                run_paired_ablation(
+                    db_path=db_path,
+                    queries_manifest_path=bad_manifest,
+                    n_queries=1,
+                )
+
+            # 2. Missing graph / TOC index fails closed when require_graph=True
+            db_no_graph = Path(tmpdir) / "no_graph.db"
+            conn = sqlite3.connect(str(db_no_graph))
+            conn.execute("CREATE TABLE node_versions (atom_version_id TEXT, content TEXT)")
+            conn.execute("INSERT INTO node_versions VALUES ('31715818', 'inductive properties')")
+            conn.commit()
+            conn.close()
+
+            with self.assertRaises(PreflightFailure):
+                run_paired_ablation(
+                    db_path=db_no_graph,
+                    n_queries=1,
+                    require_graph=True,
+                )
+
+            # 3. Explicit --db-path pointing to a DB with zero gold overlap must abort fail-closed
+            db_zero_overlap = Path(tmpdir) / "zero_overlap.db"
+            conn = sqlite3.connect(str(db_zero_overlap))
+            conn.execute("CREATE TABLE node_versions (atom_version_id TEXT, content TEXT)")
+            conn.execute("INSERT INTO node_versions VALUES ('unrelated_99999', 'completely unrelated content')")
+            conn.commit()
+            conn.close()
+
+            with self.assertRaises(PreflightFailure):
+                scaffold_100k_qualification(
+                    out_dir=Path(tmpdir) / "out",
+                    db_path=db_zero_overlap,
+                    n_ablation_queries=1,
+                )
+
+            # 4. Missing or corrupt baseline runs fails closed
+            corrupt_runs_dir = Path(tmpdir) / "corrupt_runs"
+            corrupt_runs_dir.mkdir()
+            (corrupt_runs_dir / "beir-scifact_runs.json").write_text("{invalid json", encoding="utf-8")
+
+            import benchmarks.run_100k_qualification as q_mod
+            orig_dir = q_mod.DEFAULT_BASE_RUNS_DIR
+            try:
+                q_mod.DEFAULT_BASE_RUNS_DIR = corrupt_runs_dir
+                with self.assertRaises(PreflightFailure):
+                    run_paired_ablation(n_queries=1)
+            finally:
+                q_mod.DEFAULT_BASE_RUNS_DIR = orig_dir
+
+    def test_empty_database_atoms_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            empty_db = Path(tmpdir) / "empty.db"
+            conn = sqlite3.connect(str(empty_db))
+            conn.execute("CREATE TABLE node_versions (atom_version_id TEXT, content TEXT)")
+            conn.commit()
+            conn.close()
+
+            with self.assertRaises(PreflightFailure):
+                run_paired_ablation(db_path=empty_db, n_queries=1)
 
 
 if __name__ == "__main__":

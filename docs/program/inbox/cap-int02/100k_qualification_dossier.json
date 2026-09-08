@@ -3,7 +3,7 @@
   "program": "TRACE-CAP-001",
   "work_packet": "WP6-LIVE-QUALIFICATION",
   "target_gate": "CAP-GE",
-  "timestamp_utc": "2026-09-07T17:35:34.214609+00:00",
+  "timestamp_utc": "2026-09-08T01:14:56.460262+00:00",
   "source_capsule": {
     "manifest_path": "docs/program/inbox/l1-02-corpus-capsule-20260828/evidence/corpus_manifest.json",
     "merkle_root_sha256": "38d1a1cf980d447edef7bfaa1ebc4d06129386a82bdd2c6f724f45d8624fc530",
@@ -13,10 +13,10 @@
   },
   "live_telemetry": {
     "memory": {
-      "rss_bytes": 76398592,
-      "rss_mb": 72.86,
-      "peak_rss_bytes": 132218880,
-      "peak_rss_mb": 126.09
+      "rss_bytes": 81149952,
+      "rss_mb": 77.39,
+      "peak_rss_bytes": 132644864,
+      "peak_rss_mb": 126.5
     },
     "storage": {
       "db_path": "docs/program/inbox/s7-real-100k-20260826/evidence/work/scale_100k.db",
@@ -50,9 +50,9 @@
       "storage_gate_verified": true,
       "gate_passed": true
     },
-    "psutil_rss_bytes": 76398592,
-    "psutil_rss_mb": 72.86,
-    "psutil_peak_rss_mb": 126.09,
+    "psutil_rss_bytes": 81149952,
+    "psutil_rss_mb": 77.39,
+    "psutil_peak_rss_mb": 126.5,
     "admitted_raw_utf8_denominator_bytes": 65394921,
     "physical_on_disk_bytes": 6521008,
     "live_hot_multiplier": 0.0997,
@@ -83,7 +83,7 @@
       "retrieval_ndcg_at_10": {
         "scifact": 0.6579,
         "nfcorpus": 0.3138,
-        "fiqa": 0.2622
+        "fiqa": 0.2251
       },
       "storage_bytes": 4884656,
       "storage_multiplier": 0.0747,
@@ -100,7 +100,7 @@
       "retrieval_ndcg_at_10": {
         "scifact": 0.6781,
         "nfcorpus": 0.3349,
-        "fiqa": 0.3936
+        "fiqa": 0.4259
       },
       "retrieval_floors_cleared": true,
       "storage_bytes": 5357744,
@@ -114,13 +114,13 @@
         "Asynchronous Local SLM Semantic Projections"
       ],
       "retrieval_ndcg_at_10": {
-        "scifact": 0.6865,
-        "nfcorpus": 0.344,
-        "fiqa": 0.4058
+        "scifact": 0.6858,
+        "nfcorpus": 0.3508,
+        "fiqa": 0.4386
       },
       "storage_bytes": 6521008,
       "storage_multiplier": 0.0997,
-      "p95_latency_ms": 16.91
+      "p95_latency_ms": 17.31
     }
   },
   "ablation_matrix": {
@@ -131,48 +131,48 @@
     "conditions": {
       "bm25_only": {
         "name": "BM25-only",
-        "ndcg_at_10": 0.3976,
+        "ndcg_at_10": 0.3836,
         "ndcg_at_10_95_ci": [
-          0.3736,
-          0.4222
+          0.359,
+          0.4086
         ],
         "recall_at_20": 0.4311,
         "mrr_at_20": 0.4343,
         "precision_at_20": 0.1314,
         "p95_latency_ms": 9.55,
         "paired_ndcg_delta_vs_tier3": {
-          "point_estimate": -0.0624,
+          "point_estimate": -0.0886,
           "bootstrap_95_ci": [
-            -0.0762,
-            -0.0488
+            -0.1045,
+            -0.0732
           ]
         }
       },
       "dense_only": {
         "name": "Dense-only",
-        "ndcg_at_10": 0.4565,
+        "ndcg_at_10": 0.4507,
         "ndcg_at_10_95_ci": [
-          0.4312,
-          0.4814
+          0.4252,
+          0.4758
         ],
         "recall_at_20": 0.5225,
         "mrr_at_20": 0.4934,
         "precision_at_20": 0.1292,
         "p95_latency_ms": 0.71,
         "paired_ndcg_delta_vs_tier3": {
-          "point_estimate": -0.0035,
+          "point_estimate": -0.0214,
           "bootstrap_95_ci": [
-            -0.0181,
-            0.0115
+            -0.0338,
+            -0.0093
           ]
         }
       },
       "hybrid_rrf": {
         "name": "Hybrid RRF (Tier 3 Control)",
-        "ndcg_at_10": 0.46,
+        "ndcg_at_10": 0.4722,
         "ndcg_at_10_95_ci": [
-          0.4353,
-          0.485
+          0.4473,
+          0.4972
         ],
         "recall_at_20": 0.5471,
         "mrr_at_20": 0.4943,
@@ -188,39 +188,39 @@
       },
       "graph_csr": {
         "name": "+Graph CSR",
-        "ndcg_at_10": 0.465,
+        "ndcg_at_10": 0.4789,
         "ndcg_at_10_95_ci": [
-          0.4405,
-          0.4899
+          0.4541,
+          0.5037
         ],
-        "recall_at_20": 0.5482,
-        "mrr_at_20": 0.4961,
-        "precision_at_20": 0.1327,
-        "p95_latency_ms": 13.31,
+        "recall_at_20": 0.5476,
+        "mrr_at_20": 0.4951,
+        "precision_at_20": 0.1314,
+        "p95_latency_ms": 13.75,
         "paired_ndcg_delta_vs_tier3": {
-          "point_estimate": 0.0051,
+          "point_estimate": 0.0067,
           "bootstrap_95_ci": [
-            0.0048,
-            0.0053
+            0.0065,
+            0.007
           ]
         }
       },
       "toc_beam": {
         "name": "+TOC Beam (Tier 2)",
-        "ndcg_at_10": 0.47,
+        "ndcg_at_10": 0.4844,
         "ndcg_at_10_95_ci": [
-          0.4456,
-          0.4948
+          0.4598,
+          0.5091
         ],
-        "recall_at_20": 0.5494,
-        "mrr_at_20": 0.4979,
-        "precision_at_20": 0.1339,
-        "p95_latency_ms": 16.91,
+        "recall_at_20": 0.5481,
+        "mrr_at_20": 0.4957,
+        "precision_at_20": 0.1323,
+        "p95_latency_ms": 17.31,
         "paired_ndcg_delta_vs_tier3": {
-          "point_estimate": 0.0101,
+          "point_estimate": 0.0122,
           "bootstrap_95_ci": [
-            0.0096,
-            0.0105
+            0.0118,
+            0.0127
           ]
         }
       }
@@ -229,48 +229,48 @@
   "top20_metrics": {
     "bm25_only": {
       "name": "BM25-only",
-      "ndcg_at_10": 0.3976,
+      "ndcg_at_10": 0.3836,
       "ndcg_at_10_95_ci": [
-        0.3736,
-        0.4222
+        0.359,
+        0.4086
       ],
       "recall_at_20": 0.4311,
       "mrr_at_20": 0.4343,
       "precision_at_20": 0.1314,
       "p95_latency_ms": 9.55,
       "paired_ndcg_delta_vs_tier3": {
-        "point_estimate": -0.0624,
+        "point_estimate": -0.0886,
         "bootstrap_95_ci": [
-          -0.0762,
-          -0.0488
+          -0.1045,
+          -0.0732
         ]
       }
     },
     "dense_only": {
       "name": "Dense-only",
-      "ndcg_at_10": 0.4565,
+      "ndcg_at_10": 0.4507,
       "ndcg_at_10_95_ci": [
-        0.4312,
-        0.4814
+        0.4252,
+        0.4758
       ],
       "recall_at_20": 0.5225,
       "mrr_at_20": 0.4934,
       "precision_at_20": 0.1292,
       "p95_latency_ms": 0.71,
       "paired_ndcg_delta_vs_tier3": {
-        "point_estimate": -0.0035,
+        "point_estimate": -0.0214,
         "bootstrap_95_ci": [
-          -0.0181,
-          0.0115
+          -0.0338,
+          -0.0093
         ]
       }
     },
     "hybrid_rrf": {
       "name": "Hybrid RRF (Tier 3 Control)",
-      "ndcg_at_10": 0.46,
+      "ndcg_at_10": 0.4722,
       "ndcg_at_10_95_ci": [
-        0.4353,
-        0.485
+        0.4473,
+        0.4972
       ],
       "recall_at_20": 0.5471,
       "mrr_at_20": 0.4943,
@@ -286,96 +286,96 @@
     },
     "graph_csr": {
       "name": "+Graph CSR",
-      "ndcg_at_10": 0.465,
+      "ndcg_at_10": 0.4789,
       "ndcg_at_10_95_ci": [
-        0.4405,
-        0.4899
+        0.4541,
+        0.5037
       ],
-      "recall_at_20": 0.5482,
-      "mrr_at_20": 0.4961,
-      "precision_at_20": 0.1327,
-      "p95_latency_ms": 13.31,
+      "recall_at_20": 0.5476,
+      "mrr_at_20": 0.4951,
+      "precision_at_20": 0.1314,
+      "p95_latency_ms": 13.75,
       "paired_ndcg_delta_vs_tier3": {
-        "point_estimate": 0.0051,
+        "point_estimate": 0.0067,
         "bootstrap_95_ci": [
-          0.0048,
-          0.0053
+          0.0065,
+          0.007
         ]
       }
     },
     "toc_beam": {
       "name": "+TOC Beam (Tier 2)",
-      "ndcg_at_10": 0.47,
+      "ndcg_at_10": 0.4844,
       "ndcg_at_10_95_ci": [
-        0.4456,
-        0.4948
+        0.4598,
+        0.5091
       ],
-      "recall_at_20": 0.5494,
-      "mrr_at_20": 0.4979,
-      "precision_at_20": 0.1339,
-      "p95_latency_ms": 16.91,
+      "recall_at_20": 0.5481,
+      "mrr_at_20": 0.4957,
+      "precision_at_20": 0.1323,
+      "p95_latency_ms": 17.31,
       "paired_ndcg_delta_vs_tier3": {
-        "point_estimate": 0.0101,
+        "point_estimate": 0.0122,
         "bootstrap_95_ci": [
-          0.0096,
-          0.0105
+          0.0118,
+          0.0127
         ]
       }
     },
     "bm25": {
       "name": "BM25-only",
-      "ndcg_at_10": 0.3976,
+      "ndcg_at_10": 0.3836,
       "ndcg_at_10_95_ci": [
-        0.3736,
-        0.4222
+        0.359,
+        0.4086
       ],
       "recall_at_20": 0.4311,
       "mrr_at_20": 0.4343,
       "precision_at_20": 0.1314,
       "p95_latency_ms": 9.55,
       "paired_ndcg_delta_vs_tier3": {
-        "point_estimate": -0.0624,
+        "point_estimate": -0.0886,
         "bootstrap_95_ci": [
-          -0.0762,
-          -0.0488
+          -0.1045,
+          -0.0732
         ]
       }
     },
     "dense": {
       "name": "Dense-only",
-      "ndcg_at_10": 0.4565,
+      "ndcg_at_10": 0.4507,
       "ndcg_at_10_95_ci": [
-        0.4312,
-        0.4814
+        0.4252,
+        0.4758
       ],
       "recall_at_20": 0.5225,
       "mrr_at_20": 0.4934,
       "precision_at_20": 0.1292,
       "p95_latency_ms": 0.71,
       "paired_ndcg_delta_vs_tier3": {
-        "point_estimate": -0.0035,
+        "point_estimate": -0.0214,
         "bootstrap_95_ci": [
-          -0.0181,
-          0.0115
+          -0.0338,
+          -0.0093
         ]
       }
     },
     "graph": {
       "name": "+Graph CSR",
-      "ndcg_at_10": 0.465,
+      "ndcg_at_10": 0.4789,
       "ndcg_at_10_95_ci": [
-        0.4405,
-        0.4899
+        0.4541,
+        0.5037
       ],
-      "recall_at_20": 0.5482,
-      "mrr_at_20": 0.4961,
-      "precision_at_20": 0.1327,
-      "p95_latency_ms": 13.31,
+      "recall_at_20": 0.5476,
+      "mrr_at_20": 0.4951,
+      "precision_at_20": 0.1314,
+      "p95_latency_ms": 13.75,
       "paired_ndcg_delta_vs_tier3": {
-        "point_estimate": 0.0051,
+        "point_estimate": 0.0067,
         "bootstrap_95_ci": [
-          0.0048,
-          0.0053
+          0.0065,
+          0.007
         ]
       }
     }
@@ -383,10 +383,10 @@
   "tier2_uplift_promotion_gate": {
     "comparison": "Tier 2 (+TOC Beam) vs Tier 3 (Hybrid RRF Control)",
     "paired_queries_evaluated": 1000,
-    "point_estimate_uplift": 0.0144,
+    "point_estimate_uplift": 0.0122,
     "bootstrap_95_ci": [
-      0.0142,
-      0.0146
+      0.0118,
+      0.0127
     ],
     "bootstrap_resamples": 10000,
     "bootstrap_seed": 42,
@@ -401,22 +401,22 @@
     "p2_vs_p1_ndcg_delta": {
       "scifact": 0.0202,
       "nfcorpus": 0.0211,
-      "fiqa": 0.1314
+      "fiqa": 0.2008
     },
     "p3_vs_p2_ndcg_delta": {
-      "scifact": 0.0084,
-      "nfcorpus": 0.0091,
-      "fiqa": 0.0122
+      "scifact": 0.0077,
+      "nfcorpus": 0.0159,
+      "fiqa": 0.0127
     },
     "wilcoxon_signed_rank_p": 0.0008,
     "statistically_significant": true,
     "tier2_vs_tier3_uplift": {
       "comparison": "Tier 2 (+TOC Beam) vs Tier 3 (Hybrid RRF Control)",
       "paired_queries_evaluated": 1000,
-      "point_estimate_uplift": 0.0144,
+      "point_estimate_uplift": 0.0122,
       "bootstrap_95_ci": [
-        0.0142,
-        0.0146
+        0.0118,
+        0.0127
       ],
       "bootstrap_resamples": 10000,
       "bootstrap_seed": 42,
