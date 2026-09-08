@@ -1,5 +1,10 @@
 # Virtual environment
 .venv/
+.venv-linux/
+
+# Agent session logs and working scratch (regenerable, local-only)
+.agents/
+scratch/
 
 # Python cache
 __pycache__/
