@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability Reporting
+    url: https://github.com/Anshul48/trace/blob/main/SECURITY.md
+    about: Please report security vulnerabilities privately per our Security Policy.
+  - name: Trace Discussions & Questions
+    url: https://github.com/Anshul48/trace/discussions
+    about: Ask questions and discuss architecture or use cases with the community.

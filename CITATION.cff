@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use Trace or the Cortical Substrate in your research or production systems, please cite it as below."
+authors:
+  - name: "The Trace Contributors"
+title: "Trace: Local-First Evidence-Preserving Retrieval and Cortical Substrate"
+version: 0.1.0
+date-released: 2026-09-08
+url: "https://github.com/Anshul48/trace"
+license: "Apache-2.0"
+keywords:
+  - "retrieval-augmented-generation"
+  - "cortical-substrate"
+  - "hierarchical-retrieval"
+  - "evidence-grounding"
+  - "fail-closed-systems"
+  - "information-retrieval"

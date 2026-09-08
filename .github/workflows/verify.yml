@@ -1,23 +1,70 @@
-name: verify
+name: CI
 
 on:
-  pull_request:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  python:
+  lint:
+    name: Code Quality & Formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv sync --locked --extra production
-      - run: uv run python -m compileall -q src main.py main_api.py
-      - run: uv run python -m unittest discover -s tests -v
-      - run: uv lock --check
+        with:
+          version: "latest"
+      - name: Install Ruff
+        run: uv pip install --system ruff
+      - name: Run Ruff Check
+        run: ruff check src/ tests/
+      - name: Run Ruff Format Check
+        run: ruff format --check src/ tests/
+
+  test-linux:
+    name: Test Suite (Ubuntu / Python 3.12)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+      - name: Install dependencies
+        run: uv sync --extra test --extra production
+      - name: Bytecode compilation check
+        run: uv run python -m compileall -q src main.py main_api.py
+      - name: Run Core Test Suite (pytest)
+        run: uv run pytest tests/ -q
+      - name: Run 100K Qualification Preflight
+        run: uv run python benchmarks/run_100k_qualification.py --preflight
+      - name: Check uv lockfile
+        run: uv lock --check
+
+  test-windows:
+    name: Test Suite & Concurrency (Windows / Python 3.12)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+      - name: Install dependencies
+        run: uv sync --extra test --extra production
+      - name: Bytecode compilation check
+        run: uv run python -m compileall -q src main.py main_api.py
+      - name: Run Windows Concurrency & Lease RCU Tests
+        run: uv run pytest tests/test_windows_generation_leases.py tests/test_wp2_storage_rcu.py -v
+
   terraform-format:
+    name: Terraform Format Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
-      - run: terraform -chdir=infra/terraform fmt -check
+      - name: Terraform Format Check
+        run: terraform -chdir=infra/terraform fmt -check

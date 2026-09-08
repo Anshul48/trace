@@ -78,3 +78,40 @@ include = ["trace_local", "trace_local.*", "trace", "trace.*"]
 # ``trace-v2 migrate`` command has no hidden repository-path dependency.
 [tool.setuptools.data-files]
 "trace/migrations" = ["migrations/*.sql"]
+
+[project.urls]
+Homepage = "https://github.com/Anshul48/trace"
+Documentation = "https://github.com/Anshul48/trace/tree/main/docs"
+Repository = "https://github.com/Anshul48/trace.git"
+Issues = "https://github.com/Anshul48/trace/issues"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in argument defaults
+    "B904",  # raise ... from err
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["trace", "trace_local"]
