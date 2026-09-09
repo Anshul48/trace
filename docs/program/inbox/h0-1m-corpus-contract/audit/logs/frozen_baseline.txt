@@ -1,0 +1,9 @@
+[CAP-RET04] Evaluating Frozen Retrieval Baseline...
+Manifest: benchmarks/manifests/beir_musique_frozen_v1.json
+Dossier:  docs/program/inbox/cap-ret04/retrieval_baseline_dossier.json
+Receipt:  docs/program/inbox/cap-ret04/verification_receipt.json
+[PASS] Frozen retrieval baseline receipt verified 100% against ratified floors.
+  - SciFact:  nDCG@10 >= 0.65 floor CLEARED (Point 0.6651, Lower CI 0.6518)
+  - NFCorpus: nDCG@10 >= 0.32 floor CLEARED (Point 0.3524, Lower CI 0.3422, CI Width 0.0203 <= 0.10)
+  - FiQA:     nDCG@10 >= 0.38 floor CLEARED (Point 0.4028, Lower CI 0.3941)
+  - LLM Audit: 0 calls made, $0.00 spend verified.

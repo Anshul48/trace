@@ -1,0 +1,23 @@
+usage: seal_1m_manifest.py [-h] --selection SELECTION [--gate-dir GATE_DIR]
+                           [--output-name OUTPUT_NAME] [--expect EXPECT]
+                           [--stall-before-publish STALL_BEFORE_PUBLISH]
+
+Derive every 1M claim from one immutable selection record plus hash-verified
+staged bytes and atomically publish a PROVISIONAL (never adopted) manifest.
+Fail-closed: any mismatch refuses publication with a nonzero exit and no
+output file.
+
+options:
+  -h, --help            show this help message and exit
+  --selection SELECTION
+                        Path to the immutable selection record JSON file
+  --gate-dir GATE_DIR   Directory receiving the provisional manifest
+  --output-name OUTPUT_NAME
+                        Provisional manifest file name inside --gate-dir
+  --expect EXPECT       Optional JSON of expected claims (supports
+                        'shard::field' keys); any deviation refuses
+                        publication
+  --stall-before-publish STALL_BEFORE_PUBLISH
+                        Test-only delay in seconds between tmp fsync and
+                        atomic rename, so a crash-safety probe can kill this
+                        process mid-write. Never creates partial output.

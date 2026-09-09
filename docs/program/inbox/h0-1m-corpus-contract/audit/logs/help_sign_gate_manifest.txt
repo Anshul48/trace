@@ -1,0 +1,22 @@
+usage: sign_gate_manifest.py [-h] [--manifest MANIFEST]
+                             [--queries-manifest QUERIES_MANIFEST]
+                             [--verifier VERIFIER] [--gate-dir GATE_DIR]
+                             [--gate-id GATE_ID]
+                             [--forensic-overrides FORENSIC_OVERRIDES]
+
+Emit the H0 per-gate manifest for the 1M corpus contract. Fail-closed:
+verifier FAIL produces a HOLD manifest and a nonzero exit; never a silent
+PASS.
+
+options:
+  -h, --help            show this help message and exit
+  --manifest MANIFEST   Path to 1M corpus manifest JSON file
+  --queries-manifest QUERIES_MANIFEST
+                        Path to 1M queries manifest JSON file
+  --verifier VERIFIER   Path to the 1M checksum verifier script
+  --gate-dir GATE_DIR   Directory receiving the gate manifest JSON
+  --gate-id GATE_ID     Gate identifier recorded in the manifest
+  --forensic-overrides FORENSIC_OVERRIDES
+                        JSON object for the verifier's non-certifying forensic
+                        pass (default: pre-reseal hypothesis). Use '{}' to
+                        skip the forensic pass.

@@ -1,0 +1,11 @@
+usage: verify_1m_independent.py [-h] --manifest MANIFEST [--root ROOT]
+
+Independently re-derive every claim of an H0 provisional 1M manifest from
+staged bytes (second code path). Fail-closed: any mismatch exits nonzero; a
+PASS never adopts the manifest.
+
+options:
+  -h, --help           show this help message and exit
+  --manifest MANIFEST  Path to the provisional 1M manifest JSON file
+  --root ROOT          Repository root used to resolve the recorded producer
+                       path

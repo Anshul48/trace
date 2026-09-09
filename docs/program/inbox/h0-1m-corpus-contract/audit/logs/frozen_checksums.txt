@@ -1,0 +1,3 @@
+Verifying dataset manifest: /mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/benchmarks/manifests/beir_musique_frozen_v1.json
+Repository root: /mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace
+[PASS] All 4 frozen dataset splits and 8 staged files matched cryptographic checksums 100%.

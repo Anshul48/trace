@@ -1,0 +1,3588 @@
+diff --git a/benchmarks/verify_1m_checksums.py b/benchmarks/verify_1m_checksums.py
+new file mode 100644
+index 0000000..437c04d
+--- /dev/null
++++ b/benchmarks/verify_1m_checksums.py
+@@ -0,0 +1,529 @@
++#!/usr/bin/env python3
++"""Verify the frozen Trace 1M corpus capsule against its manifest claims (WP-H0-2).
++
++H0 preflight check for the 1M corpus contract
++(docs/program/inbox/1m-02-corpus-capsule/evidence/1m_corpus_manifest.json,
++``contract_version`` 2.0.0). This is a SIBLING of the frozen BEIR/MuSiQue
++verifier (benchmarks/verify_dataset_checksums.py): it honors the same
++fail-closed semantics but enforces a different contract, and it MUST NOT
++change the frozen ``manifest_id == beir_musique_frozen_v1`` check.
++
++What it verifies, from staged bytes (no trust in self-reported JSON):
++1. Manifest header: contract_version, doc/byte totals, union Merkle claim.
++2. Every Windows-absolute ``source_file`` resolves to an existing local path
++   whose SHA-256 matches ``source_file_sha256`` (fail closed otherwise).
++3. Per-shard doc counts and UTF-8 byte totals recomputed with the exact
++   selection semantics of scripts/stage_1m_corpus.py (contiguous
++   zero-indexed prefix slicing + strict (doc_id, content_hash) dedup).
++4. Base / delta / union Merkle roots recomputed from per-doc content hashes
++   with the identical Merkle construction (sorted leaves, duplicate-last).
++
++Usage:
++    python3 benchmarks/verify_1m_checksums.py \
++        --manifest docs/program/inbox/1m-02-corpus-capsule/evidence/1m_corpus_manifest.json
++"""
++
++from __future__ import annotations
++
++import argparse
++import hashlib
++import json
++import re
++import sys
++from pathlib import Path
++
++ROOT_DIR = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT_DIR / "src"))
++
++from trace.v2.atomizer import normalize_text  # noqa: E402  (content-hash primitive)
++
++EXPECTED_CONTRACT_VERSION = "2.0.0"
++EXPECTED_BASE_DOCS = 100_000
++EXPECTED_DELTA_DOCS = 900_000
++EXPECTED_TOTAL_DOCS = 1_000_000
++
++RANGE_RE = re.compile(r"\[\s*(\d+)\s*,\s*(\d+)\s*\)")
++
++# Exact doc_id fallback chains from scripts/stage_1m_corpus.py, keyed by
++# capsule dataset_name. Unknown names use the generic base chain.
++ID_FALLBACKS: dict[str, tuple[str, ...]] = {
++    "musique": ("native_id", "internal_id", "segment_internal_id",
++                "source_document_internal_id", "id", "_id", "source_key"),
++    "beir-fiqa": ("native_id", "internal_id", "segment_internal_id",
++                  "source_document_internal_id", "id", "_id", "source_key"),
++    "beir-scifact": ("native_id", "internal_id", "segment_internal_id",
++                     "source_document_internal_id", "id", "_id", "source_key"),
++    "beir-nfcorpus": ("native_id", "internal_id", "segment_internal_id",
++                      "source_document_internal_id", "id", "_id", "source_key"),
++    "multihop-rag": ("native_id", "internal_id", "segment_internal_id",
++                     "source_document_internal_id", "id", "_id", "source_key"),
++    "musique_delta": ("native_id", "internal_id", "segment_internal_id",
++                      "source_document_internal_id"),
++    "beir-fiqa_delta": ("native_id", "internal_id", "segment_internal_id",
++                        "id", "_id"),
++    "bright_delta": ("native_id", "internal_id", "segment_internal_id",
++                     "id", "_id"),
++}
++GENERIC_FALLBACKS = ("native_id", "internal_id", "segment_internal_id",
++                     "source_document_internal_id", "id", "_id", "source_key")
++
++
++def compute_sha256_file(path: Path) -> str:
++    h = hashlib.sha256()
++    with open(path, "rb") as f:
++        while chunk := f.read(65536):
++            h.update(chunk)
++    return h.hexdigest()
++
++
++def compute_merkle_root(leaf_hashes: list[str]) -> str:
++    """Identical construction to scripts/stage_1m_corpus.py."""
++    if not leaf_hashes:
++        return hashlib.sha256(b"").hexdigest()
++    level = [bytes.fromhex(h) for h in sorted(leaf_hashes)]
++    while len(level) > 1:
++        next_level = []
++        for i in range(0, len(level), 2):
++            left = level[i]
++            right = level[i + 1] if i + 1 < len(level) else left
++            next_level.append(hashlib.sha256(left + right).digest())
++        level = next_level
++    return level[0].hex()
++
++
++def parse_range(selection_range: str) -> tuple[int, int]:
++    m = RANGE_RE.fullmatch(selection_range.strip())
++    if not m:
++        raise ValueError(f"Unparseable selection_range: {selection_range!r}")
++    return int(m.group(1)), int(m.group(2))
++
++
++def resolve_doc_id(rec: dict, fallbacks: tuple[str, ...], dataset: str, idx: int) -> str:
++    for key in fallbacks:
++        val = rec.get(key)
++        if val is not None and str(val) != "":
++            return str(val)
++    return f"{dataset}:{idx}"
++
++
++def doc_content(dataset: str, rec: dict, idx: int) -> tuple[str, str]:
++    """Return (doc_id, normalized full content) with staging-exact semantics."""
++    if dataset == "enron_delta":
++        doc_id = str(rec.get("email_id") or rec.get("doc_id") or f"enron:{idx}")
++        subject = rec.get("subject") or rec.get("title") or ""
++        text = rec.get("body") or rec.get("text") or rec.get("content") or ""
++        head = subject
++    elif dataset == "wikipedia_delta":
++        doc_id = str(rec.get("doc_id"))
++        head = rec.get("title") or ""
++        text = rec.get("text") or ""
++    else:
++        fallbacks = ID_FALLBACKS.get(dataset, GENERIC_FALLBACKS)
++        default_ns = dataset.split("_delta")[0] if dataset.endswith("_delta") else dataset
++        doc_id = resolve_doc_id(rec, fallbacks, default_ns, idx)
++        head = rec.get("title") or ""
++        text = rec.get("text") or rec.get("content") or ""
++    full = normalize_text(f"{head}\n\n{text}".strip() if head else text.strip())
++    return doc_id, full
++
++
++def iter_shard_records(
++    dataset: str,
++    src_path: Path,
++    start: int,
++    end: int,
++    seen_ids: set[str],
++    seen_hashes: set[str],
++) -> tuple[int, int, list[str]]:
++    """Yield-once selection scan with staging-exact semantics.
++
++    Contiguous zero-indexed prefix slice [start, end) over file line index,
++    then strict (doc_id, content_hash) dedup against the shared global sets.
++    Returns (unique_docs, text_bytes, content_hash_leaves).
++    """
++    count = nbytes = 0
++    leaves: list[str] = []
++    with open(src_path, "r", encoding="utf-8") as f:
++        for idx, line in enumerate(f):
++            if idx < start:
++                continue
++            if idx >= end:
++                break
++            rec = json.loads(line)
++            doc_id, full = doc_content(dataset, rec, idx)
++            chash = hashlib.sha256(full.encode("utf-8")).hexdigest()
++            if doc_id in seen_ids or chash in seen_hashes:
++                continue
++            seen_ids.add(doc_id)
++            seen_hashes.add(chash)
++            leaves.append(chash)
++            nbytes += len(full.encode("utf-8"))
++            count += 1
++    return count, nbytes, leaves
++
++
++def run_selection(
++    entries: list[dict],
++    resolved: dict[str, Path],
++    seen_ids: set[str],
++    seen_hashes: set[str],
++    range_overrides: dict[str, str] | None = None,
++) -> tuple[list[dict], list[str], list[str], int, int]:
++    """Scan shards in manifest order.
++
++    Returns (shard_rows, base_leaves, delta_leaves, base_bytes, delta_bytes).
++
++    ``range_overrides`` maps dataset_name -> selection_range and exists ONLY
++    for labeled non-certifying forensic analysis (see --forensic-overrides).
++    """
++    range_overrides = range_overrides or {}
++    shard_rows: list[dict] = []
++    base_hashes: list[str] = []
++    delta_hashes: list[str] = []
++    base_bytes = delta_bytes = 0
++    base_entries = [e for e in entries if e.get("partition") == "base_100k"]
++    delta_entries = [e for e in entries if e.get("partition") == "delta_900k"]
++    for partition, part_entries in (("base_100k", base_entries), ("delta_900k", delta_entries)):
++        for entry in part_entries:
++            name = entry["dataset_name"]
++            sel_range = range_overrides.get(name, entry["selection_range"])
++            start, end = parse_range(sel_range)
++            count, nbytes, leaves = iter_shard_records(
++                name, resolved[entry["source_file"]], start, end, seen_ids, seen_hashes
++            )
++            shard_rows.append({
++                "dataset_name": name,
++                "partition": partition,
++                "selection_range_used": sel_range,
++                "recomputed_docs": count,
++                "recomputed_bytes": nbytes,
++            })
++            if partition == "base_100k":
++                base_hashes.extend(leaves)
++                base_bytes += nbytes
++            else:
++                delta_hashes.extend(leaves)
++                delta_bytes += nbytes
++    return shard_rows, base_hashes, delta_hashes, base_bytes, delta_bytes
++
++
++def verify_manifest(manifest_path: Path) -> tuple[bool, list[str], dict]:
++    errors: list[str] = []
++    summary: dict = {"shards": [], "path_map": {}}
++
++    if not manifest_path.exists():
++        return False, [f"Manifest file does not exist: {manifest_path}"], summary
++    try:
++        with open(manifest_path, "r", encoding="utf-8") as f:
++            manifest = json.load(f)
++    except Exception as e:
++        return False, [f"Failed to parse manifest JSON: {e}"], summary
++
++    # 1. Header contract checks
++    if manifest.get("contract_version") != EXPECTED_CONTRACT_VERSION:
++        errors.append(
++            f"contract_version mismatch: expected {EXPECTED_CONTRACT_VERSION}, "
++            f"got {manifest.get('contract_version')}"
++        )
++    for key, expected in (
++        ("target_unique_documents_d", EXPECTED_TOTAL_DOCS),
++        ("base_100k_documents_count", EXPECTED_BASE_DOCS),
++        ("delta_900k_documents_count", EXPECTED_DELTA_DOCS),
++        ("base_intersect_delta_count", 0),
++    ):
++        if manifest.get(key) != expected:
++            errors.append(f"Header {key} mismatch: expected {expected}, got {manifest.get(key)}")
++    if manifest.get("synthetic_data_used") is not False:
++        errors.append("synthetic_data_used must be false for the 1M contract")
++    if manifest.get("in_memory_fallback_used") is not False:
++        errors.append("in_memory_fallback_used must be false for the 1M contract")
++
++    base_entries = manifest.get("datasets_base", [])
++    delta_entries = manifest.get("datasets_delta", [])
++    if not base_entries or not delta_entries:
++        errors.append("Manifest must carry non-empty datasets_base and datasets_delta")
++        return False, errors, summary
++
++    # 2. Resolve + hash-verify every source_file (fail closed)
++    resolved: dict[str, Path] = {}
++    for entry in base_entries + delta_entries:
++        src = entry.get("source_file", "")
++        p = Path(src)
++        if not p.is_absolute() or not p.exists():
++            errors.append(f"Unresolvable source_file for {entry.get('dataset_name')}: {src}")
++            continue
++        actual_sha = compute_sha256_file(p)
++        if actual_sha != entry.get("source_file_sha256"):
++            errors.append(
++                f"source_file SHA-256 mismatch for {entry.get('dataset_name')} "
++                f"({src}): expected {entry.get('source_file_sha256')}, computed {actual_sha}"
++            )
++            continue
++        resolved.setdefault(src, p.resolve())
++        summary["path_map"][src] = str(p.resolve())
++
++    if errors:
++        return False, errors, summary
++
++    # 3. Recompute counts / bytes / content hashes with staging-exact semantics
++    seen_ids: set[str] = set()
++    seen_hashes: set[str] = set()
++    shard_rows, base_hashes, delta_hashes, base_bytes, delta_bytes = run_selection(
++        base_entries + delta_entries, resolved, seen_ids, seen_hashes
++    )
++    base_docs = sum(r["recomputed_docs"] for r in shard_rows if r["partition"] == "base_100k")
++    delta_docs = sum(r["recomputed_docs"] for r in shard_rows if r["partition"] == "delta_900k")
++    summary["shards"] = shard_rows
++    claims = {e["dataset_name"]: e for e in base_entries + delta_entries}
++    for row in shard_rows:
++        entry = claims[row["dataset_name"]]
++        if row["recomputed_docs"] != entry.get("selected_records_d"):
++            errors.append(
++                f"{row['dataset_name']} doc count mismatch: manifest claims "
++                f"{entry.get('selected_records_d')}, recomputed {row['recomputed_docs']}"
++            )
++        if row["recomputed_bytes"] != entry.get("selected_text_bytes"):
++            errors.append(
++                f"{row['dataset_name']} byte total mismatch: manifest claims "
++                f"{entry.get('selected_text_bytes')}, recomputed {row['recomputed_bytes']}"
++            )
++
++    # 4. Totals + Merkle roots
++    if base_docs != EXPECTED_BASE_DOCS:
++        errors.append(
++            f"Base doc total mismatch: expected {EXPECTED_BASE_DOCS}, "
++            f"recomputed {base_docs}"
++        )
++    if delta_docs != EXPECTED_DELTA_DOCS:
++        errors.append(
++            f"Delta doc total mismatch: expected {EXPECTED_DELTA_DOCS}, "
++            f"recomputed {delta_docs}"
++        )
++    if len(seen_ids) != EXPECTED_TOTAL_DOCS or len(seen_hashes) != EXPECTED_TOTAL_DOCS:
++        errors.append(
++            f"Union uniqueness mismatch: {len(seen_ids)} doc_ids / "
++            f"{len(seen_hashes)} content_hashes, expected {EXPECTED_TOTAL_DOCS} each"
++        )
++    if manifest.get("base_raw_text_bytes") != base_bytes:
++        errors.append(
++            f"base_raw_text_bytes mismatch: manifest claims {manifest.get('base_raw_text_bytes')}, "
++            f"recomputed {base_bytes}"
++        )
++    if manifest.get("delta_raw_text_bytes") != delta_bytes:
++        errors.append(
++            f"delta_raw_text_bytes mismatch: manifest "
++            f"claims {manifest.get('delta_raw_text_bytes')}, "
++            f"recomputed {delta_bytes}"
++        )
++    if manifest.get("total_raw_text_bytes") != base_bytes + delta_bytes:
++        errors.append(
++            f"total_raw_text_bytes mismatch: manifest "
++            f"claims {manifest.get('total_raw_text_bytes')}, "
++            f"recomputed {base_bytes + delta_bytes}"
++        )
++
++    base_root = compute_merkle_root(base_hashes)
++    delta_root = compute_merkle_root(delta_hashes)
++    union_root = compute_merkle_root(base_hashes + delta_hashes)
++    summary.update({
++        "recomputed_base_docs": base_docs,
++        "recomputed_base_bytes": base_bytes,
++        "recomputed_delta_docs": delta_docs,
++        "recomputed_delta_bytes": delta_bytes,
++        "recomputed_total_bytes": base_bytes + delta_bytes,
++        "recomputed_base_merkle": base_root,
++        "recomputed_delta_merkle": delta_root,
++        "recomputed_union_merkle": union_root,
++    })
++    for key, recomputed in (
++        ("base_merkle_root_sha256", base_root),
++        ("delta_merkle_root_sha256", delta_root),
++        ("union_merkle_root_sha256", union_root),
++    ):
++        if manifest.get(key) != recomputed:
++            errors.append(
++                f"{key} mismatch: manifest claims {manifest.get(key)}, "
++                f"recomputed {recomputed}"
++            )
++
++    return len(errors) == 0, errors, summary
++
++
++def forensic_selection_analysis(
++    manifest_path: Path,
++    resolved: dict[str, Path],
++    manifest: dict,
++    range_overrides: dict[str, str],
++) -> dict:
++    """Non-certifying analysis: recompute one caller-supplied alternate selection.
++
++    NEVER affects the strict verdict. Exists so a documented historical
++    selection hypothesis (e.g. pre-reseal shard ranges recovered from git
++    history) can be re-executed against current staged bytes by any second
++    party and compared with the manifest's pinned claims, field by field.
++    """
++    base_entries = manifest.get("datasets_base", [])
++    delta_entries = manifest.get("datasets_delta", [])
++    seen_ids: set[str] = set()
++    seen_hashes: set[str] = set()
++    shard_rows, base_hashes, delta_hashes, base_bytes, delta_bytes = run_selection(
++        base_entries + delta_entries, resolved, seen_ids, seen_hashes,
++        range_overrides=range_overrides,
++    )
++    base_docs = sum(r["recomputed_docs"] for r in shard_rows if r["partition"] == "base_100k")
++    delta_docs = sum(r["recomputed_docs"] for r in shard_rows if r["partition"] == "delta_900k")
++    base_root = compute_merkle_root(base_hashes)
++    delta_root = compute_merkle_root(delta_hashes)
++    union_root = compute_merkle_root(base_hashes + delta_hashes)
++    claims = {
++        "base_docs": manifest.get("base_100k_documents_count"),
++        "delta_docs": manifest.get("delta_900k_documents_count"),
++        "union_docs": manifest.get("target_unique_documents_d"),
++        "base_bytes": manifest.get("base_raw_text_bytes"),
++        "delta_bytes": manifest.get("delta_raw_text_bytes"),
++        "total_bytes": manifest.get("total_raw_text_bytes"),
++        "base_merkle": manifest.get("base_merkle_root_sha256"),
++        "delta_merkle": manifest.get("delta_merkle_root_sha256"),
++        "union_merkle": manifest.get("union_merkle_root_sha256"),
++    }
++    observed = {
++        "base_docs": base_docs,
++        "delta_docs": delta_docs,
++        "union_docs": len(seen_ids),
++        "base_bytes": base_bytes,
++        "delta_bytes": delta_bytes,
++        "total_bytes": base_bytes + delta_bytes,
++        "base_merkle": base_root,
++        "delta_merkle": delta_root,
++        "union_merkle": union_root,
++    }
++    return {
++        "certifying": False,
++        "range_overrides": range_overrides,
++        "shards": shard_rows,
++        "observed": observed,
++        "matches_claims": {k: observed[k] == claims[k] for k in claims},
++    }
++
++
++def load_resolved(manifest_path: Path) -> tuple[dict, dict[str, Path], list[str]]:
++    """Load manifest JSON and hash-verify every source_file. Fail-closed."""
++    errors: list[str] = []
++    with open(manifest_path, "r", encoding="utf-8") as f:
++        manifest = json.load(f)
++    resolved: dict[str, Path] = {}
++    for entry in manifest.get("datasets_base", []) + manifest.get("datasets_delta", []):
++        src = entry.get("source_file", "")
++        p = Path(src)
++        if not p.is_absolute() or not p.exists():
++            errors.append(f"Unresolvable source_file for {entry.get('dataset_name')}: {src}")
++            continue
++        actual_sha = compute_sha256_file(p)
++        if actual_sha != entry.get("source_file_sha256"):
++            errors.append(
++                f"source_file SHA-256 mismatch for {entry.get('dataset_name')} ({src})"
++            )
++            continue
++        resolved.setdefault(src, p.resolve())
++    return manifest, resolved, errors
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(
++        description="Verify the frozen Trace 1M corpus capsule (contract 2.0.0) "
++                    "from staged bytes. Fail-closed: any unresolvable source, "
++                    "hash drift, or count/byte/Merkle mismatch exits nonzero."
++    )
++    parser.add_argument(
++        "--manifest",
++        type=Path,
++        default=Path("docs/program/inbox/1m-02-corpus-capsule/evidence/1m_corpus_manifest.json"),
++        help="Path to 1M corpus manifest JSON file",
++    )
++    parser.add_argument(
++        "--root",
++        type=Path,
++        default=Path("."),
++        help="Root directory of repository worktree (resolves relative --manifest)",
++    )
++    parser.add_argument(
++        "--emit-json",
++        type=Path,
++        default=None,
++        help="Optional path to write the machine-readable recompute summary as JSON",
++    )
++    parser.add_argument(
++        "--forensic-overrides",
++        type=str,
++        default=None,
++        help="Optional JSON object mapping dataset_name to an alternate "
++             "selection_range, e.g. '{\"bright_delta\": \"[0, 928750)\"}'. "
++             "Runs ONE additional clearly-labeled NON-CERTIFYING analysis pass "
++             "for diagnosis; the strict verdict is computed without it and is "
++             "never affected by it.",
++    )
++    args = parser.parse_args()
++
++    root_dir = args.root.resolve()
++    manifest_arg: Path = args.manifest
++    if manifest_arg.is_absolute():
++        manifest_path = manifest_arg.resolve()
++    elif manifest_arg.exists():
++        manifest_path = manifest_arg.resolve()
++    else:
++        manifest_path = (root_dir / manifest_arg).resolve()
++
++    print(f"Verifying 1M corpus manifest: {manifest_path}")
++
++    passed, errors, summary = verify_manifest(manifest_path)
++    forensic: dict | None = None
++    if args.forensic_overrides is not None:
++        try:
++            overrides = json.loads(args.forensic_overrides)
++        except Exception as e:
++            print(f"[FAIL] Unparseable --forensic-overrides JSON: {e}")
++            return 1
++        if not isinstance(overrides, dict):
++            print("[FAIL] --forensic-overrides must be a JSON object")
++            return 1
++        try:
++            manifest_doc, resolved, load_errors = load_resolved(manifest_path)
++        except Exception as e:
++            print(f"[FAIL] Forensic pass cannot load manifest: {e}")
++            return 1
++        if load_errors:
++            print("[FAIL] Forensic pass refused: source resolution failed:")
++            for err in load_errors:
++                print(f"  - {err}")
++            return 1
++        forensic = forensic_selection_analysis(manifest_path, resolved, manifest_doc, overrides)
++        print("[FORENSIC-NON-CERTIFYING] alternate selection analysis (does not affect verdict):")
++        for k, match in forensic["matches_claims"].items():
++            print(f"  {k}: {'MATCH' if match else 'DIFFER'}")
++    if args.emit_json is not None:
++        with open(args.emit_json, "w", encoding="utf-8") as f:
++            json.dump(
++                {"passed": passed, "errors": errors, "summary": summary,
++                 "forensic_non_certifying": forensic},
++                f, indent=2,
++            )
++        print(f"Recompute summary: {args.emit_json}")
++    if passed:
++        print(
++            f"[PASS] 1M corpus contract verified: "
++            f"{summary['recomputed_base_docs']} base + {summary['recomputed_delta_docs']} delta = "
++            f"{summary['recomputed_base_docs'] + summary['recomputed_delta_docs']} docs, "
++            f"{summary['recomputed_total_bytes']} bytes."
++        )
++        print(f"  base_merkle : {summary['recomputed_base_merkle']}")
++        print(f"  delta_merkle: {summary['recomputed_delta_merkle']}")
++        print(f"  union_merkle: {summary['recomputed_union_merkle']}")
++        return 0
++    print(f"[FAIL] {len(errors)} verification errors detected:")
++    for err in errors:
++        print(f"  - {err}")
++    return 1
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/benchmarks/verify_1m_independent.py b/benchmarks/verify_1m_independent.py
+new file mode 100644
+index 0000000..b825e47
+--- /dev/null
++++ b/benchmarks/verify_1m_independent.py
+@@ -0,0 +1,353 @@
++#!/usr/bin/env python3
++"""Independent checker for H0 provisional 1M manifests (seal-pipeline repair, path 2).
++
++Recomputes selection counts, UTF-8 byte totals, and Merkle roots from staged
++bytes with code written separately from the seal producer's path (which reuses
++benchmarks/verify_1m_checksums.py). The only shared ground with that path is
++byte-hashing primitives: hashlib.sha256 and trace.v2.atomizer.normalize_text
++(imported directly here, never via the sibling module). This module imports
++neither benchmarks.verify_1m_checksums nor scripts.seal_1m_manifest; a packet
++test asserts that statically.
++
++Input: a provisional manifest as emitted by scripts/seal_1m_manifest.py
++(artifact h0-provisional-1m-manifest, status PROVISIONAL-UNADOPTED). The
++checker re-derives every claim from the embedded selection record and the
++hash-verified staged files, and additionally re-hashes the producer script
++named in the manifest so a mutated producer cannot ride on an old seal.
++
++Fail-closed: any unresolvable source, SHA drift, count/byte/root mismatch,
++producer-identity mismatch, or non-pending co-signature exits nonzero and
++prints INDEPENDENT-FAIL causes. A PASS never adopts anything: adoption stays
++a separate human ballot (co-signature PENDING).
++
++Usage:
++    python3 benchmarks/verify_1m_independent.py \
++        --manifest docs/program/inbox/h0-1m-corpus-contract/provisional_1m_manifest.json
++"""
++
++from __future__ import annotations
++
++import argparse
++import hashlib
++import itertools
++import json
++import sys
++from pathlib import Path
++
++ROOT_DIR = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT_DIR / "src"))
++
++from trace.v2.atomizer import normalize_text  # noqa: E402  (hashing primitive only)
++
++# Doc-id fallback chains, pinned to the staging semantics. Values necessarily
++# match the producer path (same staged bytes); the lookup code below is
++# written independently.
++_FALLBACKS = {
++    "musique": ("native_id", "internal_id", "segment_internal_id",
++                "source_document_internal_id", "id", "_id", "source_key"),
++    "beir-fiqa": ("native_id", "internal_id", "segment_internal_id",
++                  "source_document_internal_id", "id", "_id", "source_key"),
++    "beir-scifact": ("native_id", "internal_id", "segment_internal_id",
++                     "source_document_internal_id", "id", "_id", "source_key"),
++    "beir-nfcorpus": ("native_id", "internal_id", "segment_internal_id",
++                      "source_document_internal_id", "id", "_id", "source_key"),
++    "multihop-rag": ("native_id", "internal_id", "segment_internal_id",
++                     "source_document_internal_id", "id", "_id", "source_key"),
++    "musique_delta": ("native_id", "internal_id", "segment_internal_id",
++                      "source_document_internal_id"),
++    "beir-fiqa_delta": ("native_id", "internal_id", "segment_internal_id",
++                        "id", "_id"),
++    "bright_delta": ("native_id", "internal_id", "segment_internal_id",
++                     "id", "_id"),
++}
++_GENERIC_FALLBACKS = ("native_id", "internal_id", "segment_internal_id",
++                      "source_document_internal_id", "id", "_id", "source_key")
++
++
++def _digest_file(path: Path) -> str:
++    digest = hashlib.sha256()
++    with open(path, "rb") as handle:
++        for block in iter(lambda: handle.read(1 << 20), b""):
++            digest.update(block)
++    return digest.hexdigest()
++
++
++def _split_range(spec: str) -> tuple[int, int]:
++    """Parse '[start, end)' with plain string ops (no shared parser)."""
++    text = spec.strip()
++    if len(text) < 5 or text[0] != "[" or text[-1] != ")":
++        raise ValueError(f"Unparseable selection_range: {spec!r}")
++    pieces = text[1:-1].split(",")
++    if len(pieces) != 2:
++        raise ValueError(f"Unparseable selection_range: {spec!r}")
++    try:
++        start = int(pieces[0].strip())
++        end = int(pieces[1].strip())
++    except ValueError:
++        raise ValueError(f"Unparseable selection_range: {spec!r}")
++    if start < 0 or end < start:
++        raise ValueError(f"Inverted selection_range: {spec!r}")
++    return start, end
++
++
++def _pick_id(record: dict, keys: tuple[str, ...], namespace: str, lineno: int) -> str:
++    for key in keys:
++        value = record.get(key)
++        if value is not None and str(value) != "":
++            return str(value)
++    return "%s:%d" % (namespace, lineno)
++
++
++def _materialize(dataset: str, record: dict, lineno: int) -> tuple[str, str]:
++    """Return (doc_id, normalized full content) with staging-exact semantics."""
++    if dataset == "enron_delta":
++        ident = record.get("email_id") or record.get("doc_id")
++        doc_id = str(ident) if ident is not None else "enron:%d" % lineno
++        heading = record.get("subject") or record.get("title") or ""
++        body = record.get("body") or record.get("text") or record.get("content") or ""
++    elif dataset == "wikipedia_delta":
++        doc_id = str(record.get("doc_id"))
++        heading = record.get("title") or ""
++        body = record.get("text") or ""
++    else:
++        chain = _FALLBACKS.get(dataset, _GENERIC_FALLBACKS)
++        if dataset.endswith("_delta"):
++            namespace = dataset[: -len("_delta")]
++        else:
++            namespace = dataset
++        doc_id = _pick_id(record, chain, namespace, lineno)
++        heading = record.get("title") or ""
++        body = record.get("text") or record.get("content") or ""
++    if heading:
++        joined = "%s\n\n%s" % (heading, body)
++        content = normalize_text(joined.strip())
++    else:
++        content = normalize_text(body.strip())
++    return doc_id, content
++
++
++class _ShardScanner:
++    """Own dedup-scan loop over one shard's line window."""
++
++    def __init__(self) -> None:
++        self.known_ids: set[str] = set()
++        self.known_digests: set[str] = set()
++
++    def scan(self, dataset: str, path: Path, start: int, end: int) -> tuple[int, int, list[str]]:
++        found = 0
++        num_bytes = 0
++        leaves: list[str] = []
++        with open(path, "r", encoding="utf-8") as handle:
++            window = itertools.islice(handle, start, end)
++            for offset, line in enumerate(window):
++                lineno = start + offset
++                record = json.loads(line)
++                doc_id, content = _materialize(dataset, record, lineno)
++                leaf = hashlib.sha256(content.encode("utf-8")).hexdigest()
++                if doc_id in self.known_ids or leaf in self.known_digests:
++                    continue
++                self.known_ids.add(doc_id)
++                self.known_digests.add(leaf)
++                leaves.append(leaf)
++                num_bytes += len(content.encode("utf-8"))
++                found += 1
++        return found, num_bytes, leaves
++
++
++def _combine(nodes: list[bytes]) -> bytes:
++    if len(nodes) == 1:
++        return nodes[0]
++    paired: list[bytes] = []
++    for pos in range(0, len(nodes), 2):
++        left = nodes[pos]
++        if pos + 1 < len(nodes):
++            right = nodes[pos + 1]
++        else:
++            right = left
++        paired.append(hashlib.sha256(left + right).digest())
++    return _combine(paired)
++
++
++def _root_for(leaves: list[str]) -> str:
++    if not leaves:
++        return hashlib.sha256(b"").hexdigest()
++    ordered = [bytes.fromhex(item) for item in sorted(leaves)]
++    return _combine(ordered).hex()
++
++
++def check_provisional(manifest_path: Path) -> tuple[bool, list[str], dict]:
++    failures: list[str] = []
++    detail: dict = {"shards": []}
++
++    if not manifest_path.exists():
++        return False, ["INDEPENDENT-FAIL manifest-missing: %s" % manifest_path], detail
++    try:
++        with open(manifest_path, "r", encoding="utf-8") as handle:
++            provisional = json.load(handle)
++    except Exception as exc:
++        return False, ["INDEPENDENT-FAIL manifest-unparseable: %s" % exc], detail
++
++    if provisional.get("artifact") != "h0-provisional-1m-manifest":
++        failures.append("INDEPENDENT-FAIL not-a-provisional: artifact=%r"
++                        % (provisional.get("artifact"),))
++        return False, failures, detail
++    if provisional.get("status") != "PROVISIONAL-UNADOPTED":
++        failures.append("INDEPENDENT-FAIL not-pending: status=%r"
++                        % (provisional.get("status"),))
++    co_signature = provisional.get("co_signature", {})
++    if co_signature.get("status") != "PENDING_HUMAN_BALLOT":
++        failures.append("INDEPENDENT-FAIL co-signature-not-pending: %r"
++                        % (co_signature.get("status"),))
++
++    producer = provisional.get("producer", {})
++    script_rel = producer.get("script", "")
++    script_path = (ROOT_DIR / script_rel).resolve() if script_rel else None
++    if script_path is None or not script_path.exists():
++        failures.append("INDEPENDENT-FAIL producer-script-missing: %r" % (script_rel,))
++    elif producer.get("script_sha256") != _digest_file(script_path):
++        failures.append("INDEPENDENT-FAIL producer-identity-mismatch: "
++                        "recorded script sha does not match %s" % script_rel)
++
++    selection = provisional.get("selection", [])
++    claims = provisional.get("claims", {})
++    if not selection or not claims:
++        failures.append("INDEPENDENT-FAIL empty-selection-or-claims")
++        return False, failures, detail
++
++    local_paths: dict[str, Path] = {}
++    for entry in selection:
++        raw = entry.get("source_file", "")
++        candidate = Path(raw)
++        if not candidate.is_absolute() or not candidate.exists():
++            failures.append("INDEPENDENT-FAIL source-unresolvable for %s: %s"
++                            % (entry.get("dataset_name"), raw))
++            continue
++        if _digest_file(candidate) != entry.get("source_file_sha256"):
++            failures.append("INDEPENDENT-FAIL source-sha-drift for %s (%s)"
++                            % (entry.get("dataset_name"), raw))
++            continue
++        local_paths.setdefault(raw, candidate.resolve())
++
++    if failures:
++        return False, failures, detail
++
++    scanner = _ShardScanner()
++    base_leaves: list[str] = []
++    delta_leaves: list[str] = []
++    base_total_bytes = 0
++    delta_total_bytes = 0
++    ordered = ([e for e in selection if e.get("partition") == "base_100k"]
++               + [e for e in selection if e.get("partition") == "delta_900k"])
++    for entry in ordered:
++        name = entry["dataset_name"]
++        try:
++            start, end = _split_range(entry["selection_range"])
++        except ValueError as exc:
++            failures.append("INDEPENDENT-FAIL bad-range for %s: %s" % (name, exc))
++            continue
++        found, num_bytes, leaves = scanner.scan(name, local_paths[entry["source_file"]],
++                                                start, end)
++        detail["shards"].append({"dataset_name": name,
++                                 "recomputed_docs": found,
++                                 "recomputed_bytes": num_bytes})
++        if entry.get("partition") == "base_100k":
++            base_leaves.extend(leaves)
++            base_total_bytes += num_bytes
++        else:
++            delta_leaves.extend(leaves)
++            delta_total_bytes += num_bytes
++
++    if failures:
++        return False, failures, detail
++
++    base_docs = sum(r["recomputed_docs"] for r, e in
++                    zip(detail["shards"], ordered) if e.get("partition") == "base_100k")
++    delta_docs = sum(r["recomputed_docs"] for r, e in
++                     zip(detail["shards"], ordered) if e.get("partition") == "delta_900k")
++
++    claimed_shards = {s["dataset_name"]: s for s in claims.get("shards", [])}
++    for row in detail["shards"]:
++        wanted = claimed_shards.get(row["dataset_name"])
++        if wanted is None:
++            failures.append("INDEPENDENT-FAIL claim-missing-shard: %s" % row["dataset_name"])
++            continue
++        if row["recomputed_docs"] != wanted.get("selected_records_d"):
++            failures.append("INDEPENDENT-FAIL shard-count-mismatch for %s: claims %s, "
++                            "recomputed %d" % (row["dataset_name"],
++                                               wanted.get("selected_records_d"),
++                                               row["recomputed_docs"]))
++        if row["recomputed_bytes"] != wanted.get("selected_text_bytes"):
++            failures.append("INDEPENDENT-FAIL shard-bytes-mismatch for %s: claims %s, "
++                            "recomputed %d" % (row["dataset_name"],
++                                               wanted.get("selected_text_bytes"),
++                                               row["recomputed_bytes"]))
++
++    for key, seen in (("target_unique_documents_d", base_docs + delta_docs),
++                      ("base_100k_documents_count", base_docs),
++                      ("delta_900k_documents_count", delta_docs),
++                      ("total_raw_text_bytes", base_total_bytes + delta_total_bytes),
++                      ("base_raw_text_bytes", base_total_bytes),
++                      ("delta_raw_text_bytes", delta_total_bytes)):
++        if claims.get(key) != seen:
++            failures.append("INDEPENDENT-FAIL total-mismatch for %s: claims %s, recomputed %s"
++                            % (key, claims.get(key), seen))
++    if len(scanner.known_ids) != base_docs + delta_docs or \
++            len(scanner.known_digests) != base_docs + delta_docs:
++        failures.append("INDEPENDENT-FAIL union-not-unique: %d ids / %d digests for %d docs"
++                        % (len(scanner.known_ids), len(scanner.known_digests),
++                           base_docs + delta_docs))
++
++    base_root = _root_for(base_leaves)
++    delta_root = _root_for(delta_leaves)
++    union_root = _root_for(base_leaves + delta_leaves)
++    detail.update({"recomputed_base_docs": base_docs,
++                   "recomputed_delta_docs": delta_docs,
++                   "recomputed_total_bytes": base_total_bytes + delta_total_bytes,
++                   "recomputed_base_merkle": base_root,
++                   "recomputed_delta_merkle": delta_root,
++                   "recomputed_union_merkle": union_root})
++    for key, seen in (("base_merkle_root_sha256", base_root),
++                      ("delta_merkle_root_sha256", delta_root),
++                      ("union_merkle_root_sha256", union_root)):
++        if claims.get(key) != seen:
++            failures.append("INDEPENDENT-FAIL root-mismatch for %s: claims %s, recomputed %s"
++                            % (key, claims.get(key), seen))
++
++    return len(failures) == 0, failures, detail
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(
++        description="Independently re-derive every claim of an H0 provisional 1M "
++                    "manifest from staged bytes (second code path). Fail-closed: "
++                    "any mismatch exits nonzero; a PASS never adopts the manifest."
++    )
++    parser.add_argument("--manifest", type=Path, required=True,
++                        help="Path to the provisional 1M manifest JSON file")
++    parser.add_argument("--root", type=Path, default=Path("."),
++                        help="Repository root used to resolve the recorded producer path")
++    args = parser.parse_args()
++
++    global ROOT_DIR
++    ROOT_DIR = args.root.resolve() if args.root.exists() else ROOT_DIR
++
++    manifest_arg: Path = args.manifest
++    manifest_path = manifest_arg.resolve() if manifest_arg.exists() else (
++        ROOT_DIR / manifest_arg).resolve()
++    print("Independently checking provisional manifest: %s" % manifest_path)
++    passed, failures, detail = check_provisional(manifest_path)
++    if passed:
++        print("[INDEPENDENT-PASS] %d base + %d delta = %d docs, %d bytes; "
++              "union %s (still UNADOPTED: human ballot required)"
++              % (detail["recomputed_base_docs"], detail["recomputed_delta_docs"],
++                 detail["recomputed_base_docs"] + detail["recomputed_delta_docs"],
++                 detail["recomputed_total_bytes"], detail["recomputed_union_merkle"]))
++        return 0
++    print("[INDEPENDENT-FAIL] %d error(s):" % len(failures))
++    for failure in failures:
++        print("  - %s" % failure)
++    return 1
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/docs/program/TRACE_STAGED_EXECUTION_PROMPTS_V11.md b/docs/program/TRACE_STAGED_EXECUTION_PROMPTS_V11.md
+index 2f03a47..a365f40 100644
+--- a/docs/program/TRACE_STAGED_EXECUTION_PROMPTS_V11.md
++++ b/docs/program/TRACE_STAGED_EXECUTION_PROMPTS_V11.md
+@@ -62,6 +62,12 @@ Key decisions:
+ 2. P2c and any SLM-dependent work degrade gracefully: no local SLM ⇒ packet PARKED with evidence, pipeline proceeds.
+ 3. Isolation is one git branch per packet (`p11-h0-adopt`, `p11-h1-core`, …) cut from the last approved commit;
+    the critic diffs branch-vs-base. Max 3 attempts per packet, then halt to human.
++4. History discipline (standing authorization): on critic APPROVED the coordinator COMMITS the packet branch
++   immediately (named packet + audit files only, never a broad add) — no per-stage commit approval needed.
++   The next packet branch stacks from that commit. On QUARANTINED/REJECTED the branch is PRESERVED as evidence
++   and work halts to the human; branch deletion only on explicit human order. MERGES to `main` are batched
++   until all stages plus ballots complete, and each merge stays individually human-gated — auto-commit is never
++   auto-merge.
+ 4. The critic runs blind in a fresh musecode session per delivery: diff + test output + acceptance row +
+    `--help` transcripts only, never builder chat.
+ 
+@@ -115,8 +121,10 @@ Step 0 (once): settle the dirty tree (commit/stash/record untracked) so packet d
+ commit and the Paste-A baseline.
+ Per packet: (1) cut branch `p11-<slug>` from the last approved commit, (2) spawn ONE agy builder with Paste B + the
+ D-packet task, (3) collect diff vs base + test outputs + `--help` transcripts, (4) open a FRESH musecode critic
+-session with Paste E + diff + outputs + transcripts + acceptance row, (5) on APPROVED ask the human to merge; on
+-QUARANTINED/REJECTED delete the branch after logging the refutation, max 3 attempts per packet, then halt to human.
++session with Paste E + diff + outputs + transcripts + acceptance row, (5) on APPROVED COMMIT the branch immediately (standing authorization per Key decision 4;
++named files only) and ask the human to merge — merges batch to end of pipeline and each stays human-gated; on
++QUARANTINED/REJECTED PRESERVE the branch with the refutation logged (deletion only on explicit human order),
++max 3 attempts per packet, then halt to human.
+ Never merge without human sign-off. P2b ‖ P3 may run concurrently on separate branches; all else sequential. P2c
+ PARKED (no SLM) is a valid terminal state, not a failure — record and proceed to P3.
+ 
+diff --git a/docs/program/inbox/h0-1m-corpus-contract/audit/00_AUDIT_INDEX.md b/docs/program/inbox/h0-1m-corpus-contract/audit/00_AUDIT_INDEX.md
+new file mode 100644
+index 0000000..b6101ab
+--- /dev/null
++++ b/docs/program/inbox/h0-1m-corpus-contract/audit/00_AUDIT_INDEX.md
+@@ -0,0 +1,38 @@
++# P0 independent-audit pack — how to use
++
++You are auditing the Trace v1.1 P0 (H0 corpus-contract) packet work.
++Nothing here is merged: `main` is at `0150fbc`; all packet files are
++uncommitted on branch `p11-h0-seal-repair` (attempt-1 HOLD evidence also
++present; sibling branch `p11-h0-adopt` preserves attempt 1 alone).
++
++## Read in this order
++
++1. `verdicts.md` — what was built, what each blind critic ruled, and why.
++2. `../selection_reconciliation.md` — the three-way shard table
++   (d14f1a2 vs HEAD vs staged-byte recompute) and the successor proposal.
++3. The code: `benchmarks/verify_1m_checksums.py` (path 1),
++   `benchmarks/verify_1m_independent.py` (path 2),
++   `scripts/seal_1m_manifest.py` (atomic producer),
++   `scripts/sign_gate_manifest.py` (attempt-1 gate signer).
++4. Machine-readable claims: `../selection_record.json`
++   (successor selection, PROPOSED-UNADOPTED),
++   `../provisional_1m_manifest.json` (sha `4f4deb50…`, PROVISIONAL-UNADOPTED),
++   `../gate_manifest.json` (attempt-1 HOLD, signed false).
++
++## Re-verify with one command
++
++`bash docs/program/inbox/h0-1m-corpus-contract/audit/reverify.sh`
++runs, in order: clean-tree check (zero tracked edits expected), packet
++tests (25), frozen BEIR checks, both `--help` smoke checks, the
++independent checker on the provisional manifest, and the SHA inventory
++below. Full suite (`pytest tests/ -q`, ~12 min) is left manual — see
++the script tail for the exact command and the counts to expect
++(494 passed, 3 xpassed).
++
++## Open items (notin'scope for the audit to resolve)
++
++- Successor-contract ballot for `H0-1M-SUCCESSOR-SEL-01` — drafted in
++  `selection_reconciliation.md` §4, needs a human signature.
++- Merge of `p11-h0-seal-repair` — deferred by the human until all
++  stages complete. Attempt-1 branch `p11-h0-adopt` disposition pending.
++- Full-suite re-run on your own checkout (counts above are ours).
+diff --git a/docs/program/inbox/h0-1m-corpus-contract/audit/reverify.sh b/docs/program/inbox/h0-1m-corpus-contract/audit/reverify.sh
+new file mode 100644
+index 0000000..dfe9f3e
+--- /dev/null
++++ b/docs/program/inbox/h0-1m-corpus-contract/audit/reverify.sh
+@@ -0,0 +1,58 @@
++#!/usr/bin/env bash
++# P0 audit re-verification. Exits nonzero on the first failure.
++# Run from the repo root on branch p11-h0-seal-repair.
++# Full suite (~12 min) is intentionally manual; see tail.
++set -u
++ROOT="$(git rev-parse --show-toplevel)"
++cd "$ROOT" || exit 1
++fail() { echo "REVERIFY-FAIL: $1"; exit 1; }
++
++echo "== 1. tracked tree must be clean (packet is additive-only) =="
++[ -z "$(git diff HEAD --name-only)" ] || fail "tracked modifications present"
++echo OK
++
++echo "== 2. packet tests (25) =="
++.venv-linux/bin/python -m pytest tests/test_h0_1m_seal.py tests/test_h0_1m_adopt.py -q \
++  || fail "packet tests red"
++
++echo "== 3. frozen BEIR checks (must PASS unmodified) =="
++python3 benchmarks/verify_dataset_checksums.py \
++  --manifest benchmarks/manifests/beir_musique_frozen_v1.json --root . \
++  || fail "frozen checksum check red"
++python3 benchmarks/run_frozen_retrieval_baseline.py --verify-receipt \
++  --manifest benchmarks/manifests/beir_musique_frozen_v1.json \
++  --dossier docs/program/inbox/cap-ret04/retrieval_baseline_dossier.json \
++  --receipt docs/program/inbox/cap-ret04/verification_receipt.json \
++  || fail "frozen retrieval baseline red"
++
++echo "== 4. help entry points =="
++for cmd in "benchmarks/verify_1m_checksums.py" "benchmarks/verify_1m_independent.py" \
++           "scripts/seal_1m_manifest.py" "scripts/sign_gate_manifest.py"; do
++  python3 "$cmd" --help >/dev/null || fail "$cmd --help red"
++done
++echo OK
++
++echo "== 5. independent checker on provisional manifest =="
++python3 benchmarks/verify_1m_independent.py \
++  --manifest docs/program/inbox/h0-1m-corpus-contract/provisional_1m_manifest.json \
++  || fail "independent checker red"
++
++echo "== 6. SHA inventory (packet files) =="
++G=docs/program/inbox/h0-1m-corpus-contract
++sha256sum -c - <<EOF || fail "SHA mismatch"
++a3cc70ae5aec7b3a293b13987c913a536e8393d4f701a741c902a78f5b2aba73  benchmarks/verify_1m_checksums.py
++f752d64b51f764219481680a2d616b882e59da190538250979aa05f9cbadd350  benchmarks/verify_1m_independent.py
++63595eb159e92f19afd2966a32288734b45ae7a97f7ebbc9ee5d073ba4318e21  scripts/sign_gate_manifest.py
++937fb037470fe0b60e8dcc6d22ce02889b190014e95930d91a187320c7e96d91  scripts/seal_1m_manifest.py
++b1e3ac82b3d3a7598eb646cab5d77ce490fe2346c8cff74daa7313b93781c695  tests/test_h0_1m_adopt.py
++72f2bcf06e802e700033ebc2759231db263401c231859d3f099d5240e70dd7ca  tests/test_h0_1m_seal.py
++d39a2d0d1a57d83b14882e95dddb80bf1854a6342e14074ea492e075cccfd88b  $G/gate_manifest.json
++4f4deb50446f8325f676c3ee2618dfc3059eb78b5551e4855aef932bfe3c8c3d  $G/provisional_1m_manifest.json
++50f3ab5c477f81372ca17dbcb3dcc6df6f81f5dea9dbfc386f0cde3eae8bf75f  $G/selection_record.json
++e55a901dae1670131e1c273559c851ce1e1ac0dc6106f39da13bba18b3ebaa48  $G/selection_reconciliation.json
++0560589ea09ae1e9b96fd7902643e870392ea3a25fb1726ef04e6b98abca96a7  $G/selection_reconciliation.md
++EOF
++
++echo "REVERIFY-PASS (fast checks). Manual remainder:"
++echo "  .venv-linux/bin/python -m pytest tests/ -q"
++echo "  expect: 494 passed, 3 xpassed (baseline 469/3 + 13 adopt + 12 seal)."
+diff --git a/docs/program/inbox/h0-1m-corpus-contract/audit/verdicts.md b/docs/program/inbox/h0-1m-corpus-contract/audit/verdicts.md
+new file mode 100644
+index 0000000..0e0b6b5
+--- /dev/null
++++ b/docs/program/inbox/h0-1m-corpus-contract/audit/verdicts.md
+@@ -0,0 +1,44 @@
++# P0 verdict record (as received by the coordinator)
++
++## Attempt 1 — branch `p11-h0-adopt` — QUARANTINED, no violations
++
++Blind-critic reasoning (complete): all integrity probes clean — zero
++tracked edits with only the four claimed new files, no mocks, no phantom
++tooling, no silent PASS, forensic pass correctly non-certifying with a
++truthful HOLD (signed false, exit 1, PENDING_HUMAN_BALLOT). Adoption
++blocked because the strict Merkle trio FAILs with 9 delta-side errors, so
++the acceptance row is not met and the corpus stays quarantined pending
++reseal and human ballot.
++
++Coordinator's live confirmation: packet tests 13/13; full suite 482
++passed / 3 xpassed vs 469 / 3 xpassed baseline; frozen checks green;
++mapping 10/10 resolved; strict verifier exit 1 with the 9 delta errors
++embedded in `gate_manifest.json` (verdict HOLD, signed false).
++
++## Attempt 2 — branch `p11-h0-seal-repair` — APPROVED, no violations
++
++Blind-critic reasoning (ten probes, received truncated past
++"…checker reimplements range parsing, scanning, and Mer…"; full text in
++the session log cited below): zero tracked modifications with 11 additive
++packet files, code-only phantom-tooling scan empty, statuses
++PROPOSED-UNADOPTED / PROVISIONAL-UNADOPTED / PENDING_HUMAN_BALLOT with
++null signature, `gate_manifest.json` still verdict HOLD, producer uses
++tmp+fsync+rename with a genuine SIGKILL-during-stall test asserting no
++publishable output.
++
++Coordinator's live confirmation: packet tests 25/25 on plain invocation
++(no PYTHONPATH); full suite 494 passed / 3 xpassed (+12 exactly, zero
++regressions); frozen checks green; independent checker live
++INDEPENDENT-PASS (100000 + 900000 = 1000000 docs, 2014465744 bytes,
++union `5039acef…`, exit 0, still UNADOPTED). One delivery defect was
++found and repaired inside the attempt: `test_h0_1m_seal.py` missed the
++repo `sys.path` convention (plain-suite collection error); fix is a
++two-line import-only edit, all else byte-identical.
++
++## Provenance of these records
++
++Verdicts arrived as subagent result envelopes in coordinator session
++`01a08221-3b5b-7fc1-bbf7-9badd58759a2`; full child texts live in that
++session's log, not in this pack. Everything else asserted here is
++re-derivable via `reverify.sh` plus the manual full-suite command.
++Corpus adoption and any merge remain human-gated and have NOT happened.
+diff --git a/docs/program/inbox/h0-1m-corpus-contract/gate_manifest.json b/docs/program/inbox/h0-1m-corpus-contract/gate_manifest.json
+new file mode 100644
+index 0000000..b38227f
+--- /dev/null
++++ b/docs/program/inbox/h0-1m-corpus-contract/gate_manifest.json
+@@ -0,0 +1,443 @@
++{
++  "capsule": {
++    "contract_version": "2.0.0",
++    "manifest_path": "docs/program/inbox/1m-02-corpus-capsule/evidence/1m_corpus_manifest.json",
++    "manifest_sha256": "66c20da6cb77e77a859d20603eccf002eaf1a5f38b8008185c9f300e6ce503c5",
++    "status": "FROZEN_APPROVED"
++  },
++  "co_signature": {
++    "ballot_text": "H0 H0-1M-CORPUS-CONTRACT: <PASS|HOLD|ABORT> \u2014 capsule 1m_corpus_manifest.json (contract 2.0.0), union Merkle 5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5, gate manifest <path>, verifier exit <rc>. Signed: <name+date>.",
++    "instruction": "A human records the H0 ballot in 06_DECISION_LOG.md; until then this manifest confers no scale claim.",
++    "status": "PENDING_HUMAN_BALLOT"
++  },
++  "contract_claims": {
++    "base_100k_documents_count": 100000,
++    "base_merkle_root_sha256": "23b99dfe386a99aab8ad283d5d50636a898ba318480f5c460adb60a2e57e6e5b",
++    "base_raw_text_bytes": 65394921,
++    "delta_900k_documents_count": 900000,
++    "delta_merkle_root_sha256": "9385407a3f90648675467b0a603b2494b3e0c3b72d1fdd4edb7304d7cc10dc30",
++    "delta_raw_text_bytes": 1949070823,
++    "target_unique_documents_d": 1000000,
++    "total_raw_text_bytes": 2014465744,
++    "union_merkle_root_sha256": "5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5"
++  },
++  "created_utc": "2026-09-09T02:52:29.330773+00:00",
++  "forensic_non_certifying": {
++    "certifying": false,
++    "matches_claims": {
++      "base_bytes": true,
++      "base_docs": true,
++      "base_merkle": true,
++      "delta_bytes": true,
++      "delta_docs": true,
++      "delta_merkle": true,
++      "total_bytes": true,
++      "union_docs": true,
++      "union_merkle": true
++    },
++    "observed": {
++      "base_bytes": 65394921,
++      "base_docs": 100000,
++      "base_merkle": "23b99dfe386a99aab8ad283d5d50636a898ba318480f5c460adb60a2e57e6e5b",
++      "delta_bytes": 1949070823,
++      "delta_docs": 900000,
++      "delta_merkle": "9385407a3f90648675467b0a603b2494b3e0c3b72d1fdd4edb7304d7cc10dc30",
++      "total_bytes": 2014465744,
++      "union_docs": 1000000,
++      "union_merkle": "5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5"
++    },
++    "range_overrides": {
++      "bright_delta": "[0, 928750)",
++      "wikipedia_delta": "[0, 96639)"
++    },
++    "shards": [
++      {
++        "dataset_name": "musique",
++        "partition": "base_100k",
++        "recomputed_bytes": 37343384,
++        "recomputed_docs": 80047,
++        "selection_range_used": "[0, 80047)"
++      },
++      {
++        "dataset_name": "beir-fiqa",
++        "partition": "base_100k",
++        "recomputed_bytes": 8141714,
++        "recomputed_docs": 10575,
++        "selection_range_used": "[0, 10575)"
++      },
++      {
++        "dataset_name": "beir-scifact",
++        "partition": "base_100k",
++        "recomputed_bytes": 7777523,
++        "recomputed_docs": 5178,
++        "selection_range_used": "[0, 5183)"
++      },
++      {
++        "dataset_name": "beir-nfcorpus",
++        "partition": "base_100k",
++        "recomputed_bytes": 5718118,
++        "recomputed_docs": 3591,
++        "selection_range_used": "[0, 3633)"
++      },
++      {
++        "dataset_name": "multihop-rag",
++        "partition": "base_100k",
++        "recomputed_bytes": 6414182,
++        "recomputed_docs": 609,
++        "selection_range_used": "[0, 609)"
++      },
++      {
++        "dataset_name": "musique_delta",
++        "partition": "delta_900k",
++        "recomputed_bytes": 10138960,
++        "recomputed_docs": 21915,
++        "selection_range_used": "[80047, 101962)"
++      },
++      {
++        "dataset_name": "beir-fiqa_delta",
++        "partition": "delta_900k",
++        "recomputed_bytes": 36130851,
++        "recomputed_docs": 47015,
++        "selection_range_used": "[10575, 57600)"
++      },
++      {
++        "dataset_name": "bright_delta",
++        "partition": "delta_900k",
++        "recomputed_bytes": 678354057,
++        "recomputed_docs": 684431,
++        "selection_range_used": "[0, 928750)"
++      },
++      {
++        "dataset_name": "enron_delta",
++        "partition": "delta_900k",
++        "recomputed_bytes": 124668874,
++        "recomputed_docs": 50000,
++        "selection_range_used": "[0, 50000)"
++      },
++      {
++        "dataset_name": "wikipedia_delta",
++        "partition": "delta_900k",
++        "recomputed_bytes": 1099778081,
++        "recomputed_docs": 96639,
++        "selection_range_used": "[0, 96639)"
++      }
++    ]
++  },
++  "frozen_workload_vector": {
++    "blind_file": {
++      "relative_path": "1m_queries_blind_eval.jsonl",
++      "sha256": "49261b7a56d5363015b536ee6e5f0505cc14709fcf5b36c3f932510b3bff3417",
++      "total_queries": 8209
++    },
++    "blind_file_sha256": "49261b7a56d5363015b536ee6e5f0505cc14709fcf5b36c3f932510b3bff3417",
++    "contract_version": "2.2.0",
++    "manifest_path": "docs/program/inbox/1m-02-corpus-capsule/evidence/1m_queries_manifest.json",
++    "manifest_sha256": "2847a30ee482a95e9b71f750bba29ad2029753acc6933e03f89acc33c7a0b6c5",
++    "selection_merkle_root_sha256": "18117ca42890d83db227131ee3d1ea40c00d7a95422db5c778cde23e6a95fdd0",
++    "summary_statistics": {
++      "lane_breakdown": {
++        "abstention_suite": 301,
++        "complex_reasoning": 752,
++        "direct_lookup": 1109,
++        "domain_semantic": 3237,
++        "multi_hop_reasoning": 2255,
++        "semantic_qa": 555
++      },
++      "total_answerable_closed_queries": 7908,
++      "total_closed_evaluation_queries": 8209,
++      "total_evaluation_suites": 6,
++      "total_unanswerable_null_queries": 301
++    },
++    "target_standard": "DEC-P-005b-LEVEL2"
++  },
++  "gate_id": "H0-1M-CORPUS-CONTRACT",
++  "horizon": "H0",
++  "objective": "Adopt the 1M corpus contract (preflight; grants no scale claim)",
++  "path_map": {
++    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl"
++  },
++  "revision_scope": {
++    "branch": "p11-h0-adopt",
++    "head_commit": "0150fbc19cc25bf2cb080bb797b535c3f4f5499d",
++    "packet_base_commit": "0150fbc19cc25bf2cb080bb797b535c3f4f5499d",
++    "scope": "H0 preflight only: path normalization + gate manifest. No scale claim, no promotion, no capsule-manifest edits."
++  },
++  "signed": false,
++  "sources": [
++    {
++      "dataset_name": "musique",
++      "license": "CC BY 4.0",
++      "license_url": "https://creativecommons.org/licenses/by/4.0/",
++      "partition": "base_100k",
++      "recomputed_bytes_strict": 37343384,
++      "recomputed_docs_strict": 80047,
++      "selected_records_d_manifest": 80047,
++      "selected_text_bytes_manifest": 37343384,
++      "selection_range_manifest": "[0, 80047)",
++      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
++      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
++      "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c"
++    },
++    {
++      "dataset_name": "beir-fiqa",
++      "license": "CC BY-NC-SA 4.0",
++      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
++      "partition": "base_100k",
++      "recomputed_bytes_strict": 8141714,
++      "recomputed_docs_strict": 10575,
++      "selected_records_d_manifest": 10575,
++      "selected_text_bytes_manifest": 8141714,
++      "selection_range_manifest": "[0, 10575)",
++      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
++      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
++      "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce"
++    },
++    {
++      "dataset_name": "beir-scifact",
++      "license": "CC BY-NC 4.0",
++      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
++      "partition": "base_100k",
++      "recomputed_bytes_strict": 7777523,
++      "recomputed_docs_strict": 5178,
++      "selected_records_d_manifest": 5178,
++      "selected_text_bytes_manifest": 7777523,
++      "selection_range_manifest": "[0, 5183)",
++      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl",
++      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl",
++      "source_file_sha256": "08af2db965a8fd04ad1c4bf03ed5ba91e742c0cbefcb10afc256681084504ff8"
++    },
++    {
++      "dataset_name": "beir-nfcorpus",
++      "license": "CC BY-SA 4.0",
++      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
++      "partition": "base_100k",
++      "recomputed_bytes_strict": 5718118,
++      "recomputed_docs_strict": 3591,
++      "selected_records_d_manifest": 3591,
++      "selected_text_bytes_manifest": 5718118,
++      "selection_range_manifest": "[0, 3633)",
++      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl",
++      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl",
++      "source_file_sha256": "f5bfa0bb46b2d592fdddc62e419e5dbf9d2f6f5deabb70745d45fc32573854b9"
++    },
++    {
++      "dataset_name": "multihop-rag",
++      "license": "ODC-By v1.0",
++      "license_url": "https://opendatacommons.org/licenses/by/1-0/",
++      "partition": "base_100k",
++      "recomputed_bytes_strict": 6414182,
++      "recomputed_docs_strict": 609,
++      "selected_records_d_manifest": 609,
++      "selected_text_bytes_manifest": 6414182,
++      "selection_range_manifest": "[0, 609)",
++      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl",
++      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl",
++      "source_file_sha256": "7228d82f926c41a1d742baeffbf1fb4ae5a14e04f405c045aaf9a5da3281f53a"
++    },
++    {
++      "dataset_name": "musique_delta",
++      "license": "CC BY 4.0",
++      "license_url": "https://creativecommons.org/licenses/by/4.0/",
++      "partition": "delta_900k",
++      "recomputed_bytes_strict": 10138960,
++      "recomputed_docs_strict": 21915,
++      "selected_records_d_manifest": 21915,
++      "selected_text_bytes_manifest": 10138960,
++      "selection_range_manifest": "[80047, 101962)",
++      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
++      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
++      "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c"
++    },
++    {
++      "dataset_name": "beir-fiqa_delta",
++      "license": "CC BY-NC-SA 4.0",
++      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
++      "partition": "delta_900k",
++      "recomputed_bytes_strict": 36130851,
++      "recomputed_docs_strict": 47015,
++      "selected_records_d_manifest": 47015,
++      "selected_text_bytes_manifest": 36130851,
++      "selection_range_manifest": "[10575, 57600)",
++      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
++      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
++      "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce"
++    },
++    {
++      "dataset_name": "bright_delta",
++      "license": "CC BY-NC 4.0 / Apache-2.0",
++      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
++      "partition": "delta_900k",
++      "recomputed_bytes_strict": 603263678,
++      "recomputed_docs_strict": 618306,
++      "selected_records_d_manifest": 643710,
++      "selected_text_bytes_manifest": 678354057,
++      "selection_range_manifest": "[0, 643710)",
++      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
++      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
++      "source_file_sha256": "0ac9088e4dca7f910777bd7388bdc4e5281eb2f2c7339c89797ca8e498101b5b"
++    },
++    {
++      "dataset_name": "enron_delta",
++      "license": "Public Domain (FERC Enron Corpus)",
++      "license_url": "https://www.cs.cmu.edu/~./enron/",
++      "partition": "delta_900k",
++      "recomputed_bytes_strict": 124668874,
++      "recomputed_docs_strict": 50000,
++      "selected_records_d_manifest": 50000,
++      "selected_text_bytes_manifest": 124668874,
++      "selection_range_manifest": "[0, 50000)",
++      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl",
++      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl",
++      "source_file_sha256": "4f9cc47b7e00fd6a89ff6e420bc3933b3c474044b8ceeb9c6f41a2491b4b5e6d"
++    },
++    {
++      "dataset_name": "wikipedia_delta",
++      "license": "CC BY-SA 4.0 / GFDL",
++      "license_url": "https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_4.0_International_License",
++      "partition": "delta_900k",
++      "recomputed_bytes_strict": 1361116951,
++      "recomputed_docs_strict": 137360,
++      "selected_records_d_manifest": 137360,
++      "selected_text_bytes_manifest": 1425430486,
++      "selection_range_manifest": "[0, 137360)",
++      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl",
++      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl",
++      "source_file_sha256": "ffe485442095c1f8a6bb141dc14deb4ca8ff9b78edecf15a2bda830825eb978d"
++    }
++  ],
++  "tokenizer_identity": {
++    "content_hash_primitive": "normalize_text: line-ending normalization only (CRLF/CR -> LF); leaf = sha256(normalized.encode('utf-8'))",
++    "lexical_tokenizer": "tokenize: lowercased [A-Za-z0-9_]{2,} word tokens (model-free, deterministic)",
++    "module": "trace.v2.atomizer",
++    "module_path": "src/trace/v2/atomizer.py",
++    "module_sha256": "12026f943ad52b35d2824e246b95f8c7a002d2b4576aa161434c2c7920fb8447",
++    "note": "1M contract pins raw UTF-8 bytes + content hashes; no model tokenizer enters the corpus commitment."
++  },
++  "verdict": "HOLD",
++  "verification": {
++    "argv": [
++      "/usr/bin/python3",
++      "/mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/benchmarks/verify_1m_checksums.py",
++      "--manifest",
++      "/mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/docs/program/inbox/1m-02-corpus-capsule/evidence/1m_corpus_manifest.json",
++      "--emit-json",
++      "/mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/docs/program/inbox/h0-1m-corpus-contract/.verifier_recompute.tmp.json",
++      "--forensic-overrides",
++      "{\"bright_delta\": \"[0, 928750)\", \"wikipedia_delta\": \"[0, 96639)\"}"
++    ],
++    "exit_code": 1,
++    "stdout_tail": "Verifying 1M corpus manifest: /mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/docs/program/inbox/1m-02-corpus-capsule/evidence/1m_corpus_manifest.json\n[FORENSIC-NON-CERTIFYING] alternate selection analysis (does not affect verdict):\n  base_docs: MATCH\n  delta_docs: MATCH\n  union_docs: MATCH\n  base_bytes: MATCH\n  delta_bytes: MATCH\n  total_bytes: MATCH\n  base_merkle: MATCH\n  delta_merkle: MATCH\n  union_merkle: MATCH\nRecompute summary: /mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/docs/program/inbox/h0-1m-corpus-contract/.verifier_recompute.tmp.json\n[FAIL] 9 verification errors detected:\n  - bright_delta doc count mismatch: manifest claims 643710, recomputed 618306\n  - bright_delta byte total mismatch: manifest claims 678354057, recomputed 603263678\n  - wikipedia_delta byte total mismatch: manifest claims 1425430486, recomputed 1361116951\n  - Delta doc total mismatch: expected 900000, recomputed 874596\n  - Union uniqueness mismatch: 974596 doc_ids / 974596 content_hashes, expected 1000000 each\n  - delta_raw_text_bytes mismatch: manifest claims 1949070823, recomputed 2135319314\n  - total_raw_text_bytes mismatch: manifest claims 2014465744, recomputed 2200714235\n  - delta_merkle_root_sha256 mismatch: manifest claims 9385407a3f90648675467b0a603b2494b3e0c3b72d1fdd4edb7304d7cc10dc30, recomputed f14b18b96bd43592f989d9da5acf76a35a3aaeed756a24c160b16b8c38c31477\n  - union_merkle_root_sha256 mismatch: manifest claims 5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5, recomputed 88768eacc95ef920e146ab3d0d137f961740b856487d5e68daa4ebca17f7cff1\n",
++    "strict_errors": [
++      "bright_delta doc count mismatch: manifest claims 643710, recomputed 618306",
++      "bright_delta byte total mismatch: manifest claims 678354057, recomputed 603263678",
++      "wikipedia_delta byte total mismatch: manifest claims 1425430486, recomputed 1361116951",
++      "Delta doc total mismatch: expected 900000, recomputed 874596",
++      "Union uniqueness mismatch: 974596 doc_ids / 974596 content_hashes, expected 1000000 each",
++      "delta_raw_text_bytes mismatch: manifest claims 1949070823, recomputed 2135319314",
++      "total_raw_text_bytes mismatch: manifest claims 2014465744, recomputed 2200714235",
++      "delta_merkle_root_sha256 mismatch: manifest claims 9385407a3f90648675467b0a603b2494b3e0c3b72d1fdd4edb7304d7cc10dc30, recomputed f14b18b96bd43592f989d9da5acf76a35a3aaeed756a24c160b16b8c38c31477",
++      "union_merkle_root_sha256 mismatch: manifest claims 5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5, recomputed 88768eacc95ef920e146ab3d0d137f961740b856487d5e68daa4ebca17f7cff1"
++    ],
++    "strict_passed": false,
++    "strict_summary": {
++      "path_map": {
++        "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
++        "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl",
++        "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl",
++        "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl",
++        "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
++        "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
++        "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl",
++        "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl"
++      },
++      "recomputed_base_bytes": 65394921,
++      "recomputed_base_docs": 100000,
++      "recomputed_base_merkle": "23b99dfe386a99aab8ad283d5d50636a898ba318480f5c460adb60a2e57e6e5b",
++      "recomputed_delta_bytes": 2135319314,
++      "recomputed_delta_docs": 874596,
++      "recomputed_delta_merkle": "f14b18b96bd43592f989d9da5acf76a35a3aaeed756a24c160b16b8c38c31477",
++      "recomputed_total_bytes": 2200714235,
++      "recomputed_union_merkle": "88768eacc95ef920e146ab3d0d137f961740b856487d5e68daa4ebca17f7cff1",
++      "shards": [
++        {
++          "dataset_name": "musique",
++          "partition": "base_100k",
++          "recomputed_bytes": 37343384,
++          "recomputed_docs": 80047,
++          "selection_range_used": "[0, 80047)"
++        },
++        {
++          "dataset_name": "beir-fiqa",
++          "partition": "base_100k",
++          "recomputed_bytes": 8141714,
++          "recomputed_docs": 10575,
++          "selection_range_used": "[0, 10575)"
++        },
++        {
++          "dataset_name": "beir-scifact",
++          "partition": "base_100k",
++          "recomputed_bytes": 7777523,
++          "recomputed_docs": 5178,
++          "selection_range_used": "[0, 5183)"
++        },
++        {
++          "dataset_name": "beir-nfcorpus",
++          "partition": "base_100k",
++          "recomputed_bytes": 5718118,
++          "recomputed_docs": 3591,
++          "selection_range_used": "[0, 3633)"
++        },
++        {
++          "dataset_name": "multihop-rag",
++          "partition": "base_100k",
++          "recomputed_bytes": 6414182,
++          "recomputed_docs": 609,
++          "selection_range_used": "[0, 609)"
++        },
++        {
++          "dataset_name": "musique_delta",
++          "partition": "delta_900k",
++          "recomputed_bytes": 10138960,
++          "recomputed_docs": 21915,
++          "selection_range_used": "[80047, 101962)"
++        },
++        {
++          "dataset_name": "beir-fiqa_delta",
++          "partition": "delta_900k",
++          "recomputed_bytes": 36130851,
++          "recomputed_docs": 47015,
++          "selection_range_used": "[10575, 57600)"
++        },
++        {
++          "dataset_name": "bright_delta",
++          "partition": "delta_900k",
++          "recomputed_bytes": 603263678,
++          "recomputed_docs": 618306,
++          "selection_range_used": "[0, 643710)"
++        },
++        {
++          "dataset_name": "enron_delta",
++          "partition": "delta_900k",
++          "recomputed_bytes": 124668874,
++          "recomputed_docs": 50000,
++          "selection_range_used": "[0, 50000)"
++        },
++        {
++          "dataset_name": "wikipedia_delta",
++          "partition": "delta_900k",
++          "recomputed_bytes": 1361116951,
++          "recomputed_docs": 137360,
++          "selection_range_used": "[0, 137360)"
++        }
++      ]
++    },
++    "verifier": "benchmarks/verify_1m_checksums.py"
++  }
++}
+diff --git a/docs/program/inbox/h0-1m-corpus-contract/provisional_1m_manifest.json b/docs/program/inbox/h0-1m-corpus-contract/provisional_1m_manifest.json
+new file mode 100644
+index 0000000..45d3eec
+--- /dev/null
++++ b/docs/program/inbox/h0-1m-corpus-contract/provisional_1m_manifest.json
+@@ -0,0 +1,214 @@
++{
++  "artifact": "h0-provisional-1m-manifest",
++  "claims": {
++    "base_100k_documents_count": 100000,
++    "base_intersect_delta_count": 0,
++    "base_merkle_root_sha256": "23b99dfe386a99aab8ad283d5d50636a898ba318480f5c460adb60a2e57e6e5b",
++    "base_raw_text_bytes": 65394921,
++    "delta_900k_documents_count": 900000,
++    "delta_merkle_root_sha256": "9385407a3f90648675467b0a603b2494b3e0c3b72d1fdd4edb7304d7cc10dc30",
++    "delta_raw_text_bytes": 1949070823,
++    "shards": [
++      {
++        "dataset_name": "musique",
++        "partition": "base_100k",
++        "selected_records_d": 80047,
++        "selected_text_bytes": 37343384,
++        "selection_range": "[0, 80047)"
++      },
++      {
++        "dataset_name": "beir-fiqa",
++        "partition": "base_100k",
++        "selected_records_d": 10575,
++        "selected_text_bytes": 8141714,
++        "selection_range": "[0, 10575)"
++      },
++      {
++        "dataset_name": "beir-scifact",
++        "partition": "base_100k",
++        "selected_records_d": 5178,
++        "selected_text_bytes": 7777523,
++        "selection_range": "[0, 5183)"
++      },
++      {
++        "dataset_name": "beir-nfcorpus",
++        "partition": "base_100k",
++        "selected_records_d": 3591,
++        "selected_text_bytes": 5718118,
++        "selection_range": "[0, 3633)"
++      },
++      {
++        "dataset_name": "multihop-rag",
++        "partition": "base_100k",
++        "selected_records_d": 609,
++        "selected_text_bytes": 6414182,
++        "selection_range": "[0, 609)"
++      },
++      {
++        "dataset_name": "musique_delta",
++        "partition": "delta_900k",
++        "selected_records_d": 21915,
++        "selected_text_bytes": 10138960,
++        "selection_range": "[80047, 101962)"
++      },
++      {
++        "dataset_name": "beir-fiqa_delta",
++        "partition": "delta_900k",
++        "selected_records_d": 47015,
++        "selected_text_bytes": 36130851,
++        "selection_range": "[10575, 57600)"
++      },
++      {
++        "dataset_name": "bright_delta",
++        "partition": "delta_900k",
++        "selected_records_d": 684431,
++        "selected_text_bytes": 678354057,
++        "selection_range": "[0, 928750)"
++      },
++      {
++        "dataset_name": "enron_delta",
++        "partition": "delta_900k",
++        "selected_records_d": 50000,
++        "selected_text_bytes": 124668874,
++        "selection_range": "[0, 50000)"
++      },
++      {
++        "dataset_name": "wikipedia_delta",
++        "partition": "delta_900k",
++        "selected_records_d": 96639,
++        "selected_text_bytes": 1099778081,
++        "selection_range": "[0, 96639)"
++      }
++    ],
++    "target_unique_documents_d": 1000000,
++    "total_raw_text_bytes": 2014465744,
++    "union_merkle_root_sha256": "5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5"
++  },
++  "co_signature": {
++    "instruction": "Adoption is a separate human ballot recorded in 06_DECISION_LOG.md; this file confers no scale claim.",
++    "status": "PENDING_HUMAN_BALLOT"
++  },
++  "contract_version": "2.0.0",
++  "created_utc": "2026-09-09T04:06:51.435311+00:00",
++  "path_map": {
++    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl",
++    "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl"
++  },
++  "producer": {
++    "recompute_path": "benchmarks/verify_1m_checksums.py",
++    "recompute_sha256": "a3cc70ae5aec7b3a293b13987c913a536e8393d4f701a741c902a78f5b2aba73",
++    "script": "scripts/seal_1m_manifest.py",
++    "script_sha256": "937fb037470fe0b60e8dcc6d22ce02889b190014e95930d91a187320c7e96d91",
++    "selection_sha256": "50f3ab5c477f81372ca17dbcb3dcc6df6f81f5dea9dbfc386f0cde3eae8bf75f"
++  },
++  "selection": [
++    {
++      "dataset_name": "musique",
++      "license": "CC BY 4.0",
++      "license_url": "https://creativecommons.org/licenses/by/4.0/",
++      "partition": "base_100k",
++      "selection_range": "[0, 80047)",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
++      "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c"
++    },
++    {
++      "dataset_name": "beir-fiqa",
++      "license": "CC BY-NC-SA 4.0",
++      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
++      "partition": "base_100k",
++      "selection_range": "[0, 10575)",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
++      "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce"
++    },
++    {
++      "dataset_name": "beir-scifact",
++      "license": "CC BY-NC 4.0",
++      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
++      "partition": "base_100k",
++      "selection_range": "[0, 5183)",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl",
++      "source_file_sha256": "08af2db965a8fd04ad1c4bf03ed5ba91e742c0cbefcb10afc256681084504ff8"
++    },
++    {
++      "dataset_name": "beir-nfcorpus",
++      "license": "CC BY-SA 4.0",
++      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
++      "partition": "base_100k",
++      "selection_range": "[0, 3633)",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl",
++      "source_file_sha256": "f5bfa0bb46b2d592fdddc62e419e5dbf9d2f6f5deabb70745d45fc32573854b9"
++    },
++    {
++      "dataset_name": "multihop-rag",
++      "license": "ODC-By v1.0",
++      "license_url": "https://opendatacommons.org/licenses/by/1-0/",
++      "partition": "base_100k",
++      "selection_range": "[0, 609)",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl",
++      "source_file_sha256": "7228d82f926c41a1d742baeffbf1fb4ae5a14e04f405c045aaf9a5da3281f53a"
++    },
++    {
++      "dataset_name": "musique_delta",
++      "license": "CC BY 4.0",
++      "license_url": "https://creativecommons.org/licenses/by/4.0/",
++      "partition": "delta_900k",
++      "selection_range": "[80047, 101962)",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
++      "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c"
++    },
++    {
++      "dataset_name": "beir-fiqa_delta",
++      "license": "CC BY-NC-SA 4.0",
++      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
++      "partition": "delta_900k",
++      "selection_range": "[10575, 57600)",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
++      "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce"
++    },
++    {
++      "dataset_name": "bright_delta",
++      "license": "CC BY-NC 4.0 / Apache-2.0",
++      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
++      "partition": "delta_900k",
++      "selection_range": "[0, 928750)",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
++      "source_file_sha256": "0ac9088e4dca7f910777bd7388bdc4e5281eb2f2c7339c89797ca8e498101b5b"
++    },
++    {
++      "dataset_name": "enron_delta",
++      "license": "Public Domain (FERC Enron Corpus)",
++      "license_url": "https://www.cs.cmu.edu/~./enron/",
++      "partition": "delta_900k",
++      "selection_range": "[0, 50000)",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl",
++      "source_file_sha256": "4f9cc47b7e00fd6a89ff6e420bc3933b3c474044b8ceeb9c6f41a2491b4b5e6d"
++    },
++    {
++      "dataset_name": "wikipedia_delta",
++      "license": "CC BY-SA 4.0 / GFDL",
++      "license_url": "https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_4.0_International_License",
++      "partition": "delta_900k",
++      "selection_range": "[0, 96639)",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl",
++      "source_file_sha256": "ffe485442095c1f8a6bb141dc14deb4ca8ff9b78edecf15a2bda830825eb978d"
++    }
++  ],
++  "selection_provenance": {
++    "ballot": "human ballot in 06_DECISION_LOG.md required; this record alone adopts nothing",
++    "base_note": "base ranges are identical in d14f1a2 and HEAD and reproduce exactly.",
++    "bright_note": "staging step 2c iterates the whole bright file (no index slice); 928750 is the staged file line count, so [0, 928750) is the staging-exact full-file iteration that deduplicates to 684431. d14f1a2 recorded the informational range [0, 684431).",
++    "original_seal_commit": "d14f1a2",
++    "reseal_commit": "34a0df1",
++    "reseal_script": "scripts/finalize_1m_candidate.py",
++    "wikipedia_note": "current staged file (137360 lines) extends the original 96639-record staging; [0, 96639) reproduces the original 96639 docs / 1099778081 bytes exactly."
++  },
++  "signature": null,
++  "signing_rule": "A human co-signature binds sha256 of the complete provisional file bytes at adoption time; no signature is minted by this script.",
++  "status": "PROVISIONAL-UNADOPTED"
++}
+diff --git a/docs/program/inbox/h0-1m-corpus-contract/selection_reconciliation.json b/docs/program/inbox/h0-1m-corpus-contract/selection_reconciliation.json
+new file mode 100644
+index 0000000..e8fb11f
+--- /dev/null
++++ b/docs/program/inbox/h0-1m-corpus-contract/selection_reconciliation.json
+@@ -0,0 +1,320 @@
++{
++  "record": "selection_reconciliation",
++  "status": "HOLD-UNADOPTED",
++  "manifest_generations": {
++    "original_seal": "d14f1a2",
++    "reseal": "34a0df1",
++    "note": "exactly two git generations; capsule untouched since 34a0df1"
++  },
++  "contract_claims": {
++    "target_unique_documents_d": 1000000,
++    "base_100k_documents_count": 100000,
++    "delta_900k_documents_count": 900000,
++    "base_intersect_delta_count": 0,
++    "total_raw_text_bytes": 2014465744,
++    "base_raw_text_bytes": 65394921,
++    "delta_raw_text_bytes": 1949070823,
++    "base_merkle_root_sha256": "23b99dfe386a99aab8ad283d5d50636a898ba318480f5c460adb60a2e57e6e5b",
++    "delta_merkle_root_sha256": "9385407a3f90648675467b0a603b2494b3e0c3b72d1fdd4edb7304d7cc10dc30",
++    "union_merkle_root_sha256": "5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5"
++  },
++  "strict_recompute_totals": {
++    "recomputed_base_docs": 100000,
++    "recomputed_base_bytes": 65394921,
++    "recomputed_delta_docs": 874596,
++    "recomputed_delta_bytes": 2135319314,
++    "recomputed_total_bytes": 2200714235,
++    "recomputed_base_merkle": "23b99dfe386a99aab8ad283d5d50636a898ba318480f5c460adb60a2e57e6e5b",
++    "recomputed_delta_merkle": "f14b18b96bd43592f989d9da5acf76a35a3aaeed756a24c160b16b8c38c31477",
++    "recomputed_union_merkle": "88768eacc95ef920e146ab3d0d137f961740b856487d5e68daa4ebca17f7cff1"
++  },
++  "strict_error_count": 9,
++  "forensic_claim_matches": {
++    "base_docs": true,
++    "delta_docs": true,
++    "union_docs": true,
++    "base_bytes": true,
++    "delta_bytes": true,
++    "total_bytes": true,
++    "base_merkle": true,
++    "delta_merkle": true,
++    "union_merkle": true
++  },
++  "shards": [
++    {
++      "dataset_name": "musique",
++      "partition": "base_100k",
++      "d14f1a2_original": {
++        "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c",
++        "selection_range": "[0, 80047)",
++        "selected_records_d": 80047,
++        "selected_text_bytes": 37343384
++      },
++      "head_current": {
++        "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c",
++        "selection_range": "[0, 80047)",
++        "selected_records_d": 80047,
++        "selected_text_bytes": 37343384
++      },
++      "strict_recompute_from_staged_bytes": {
++        "selection_range_used": "[0, 80047)",
++        "recomputed_docs": 80047,
++        "recomputed_bytes": 37343384
++      },
++      "forensic_prereseal_recompute": {
++        "selection_range_used": "[0, 80047)",
++        "recomputed_docs": 80047,
++        "recomputed_bytes": 37343384
++      }
++    },
++    {
++      "dataset_name": "beir-fiqa",
++      "partition": "base_100k",
++      "d14f1a2_original": {
++        "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce",
++        "selection_range": "[0, 10575)",
++        "selected_records_d": 10575,
++        "selected_text_bytes": 8141714
++      },
++      "head_current": {
++        "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce",
++        "selection_range": "[0, 10575)",
++        "selected_records_d": 10575,
++        "selected_text_bytes": 8141714
++      },
++      "strict_recompute_from_staged_bytes": {
++        "selection_range_used": "[0, 10575)",
++        "recomputed_docs": 10575,
++        "recomputed_bytes": 8141714
++      },
++      "forensic_prereseal_recompute": {
++        "selection_range_used": "[0, 10575)",
++        "recomputed_docs": 10575,
++        "recomputed_bytes": 8141714
++      }
++    },
++    {
++      "dataset_name": "beir-scifact",
++      "partition": "base_100k",
++      "d14f1a2_original": {
++        "source_file_sha256": "08af2db965a8fd04ad1c4bf03ed5ba91e742c0cbefcb10afc256681084504ff8",
++        "selection_range": "[0, 5183)",
++        "selected_records_d": 5178,
++        "selected_text_bytes": 7777523
++      },
++      "head_current": {
++        "source_file_sha256": "08af2db965a8fd04ad1c4bf03ed5ba91e742c0cbefcb10afc256681084504ff8",
++        "selection_range": "[0, 5183)",
++        "selected_records_d": 5178,
++        "selected_text_bytes": 7777523
++      },
++      "strict_recompute_from_staged_bytes": {
++        "selection_range_used": "[0, 5183)",
++        "recomputed_docs": 5178,
++        "recomputed_bytes": 7777523
++      },
++      "forensic_prereseal_recompute": {
++        "selection_range_used": "[0, 5183)",
++        "recomputed_docs": 5178,
++        "recomputed_bytes": 7777523
++      }
++    },
++    {
++      "dataset_name": "beir-nfcorpus",
++      "partition": "base_100k",
++      "d14f1a2_original": {
++        "source_file_sha256": "f5bfa0bb46b2d592fdddc62e419e5dbf9d2f6f5deabb70745d45fc32573854b9",
++        "selection_range": "[0, 3633)",
++        "selected_records_d": 3591,
++        "selected_text_bytes": 5718118
++      },
++      "head_current": {
++        "source_file_sha256": "f5bfa0bb46b2d592fdddc62e419e5dbf9d2f6f5deabb70745d45fc32573854b9",
++        "selection_range": "[0, 3633)",
++        "selected_records_d": 3591,
++        "selected_text_bytes": 5718118
++      },
++      "strict_recompute_from_staged_bytes": {
++        "selection_range_used": "[0, 3633)",
++        "recomputed_docs": 3591,
++        "recomputed_bytes": 5718118
++      },
++      "forensic_prereseal_recompute": {
++        "selection_range_used": "[0, 3633)",
++        "recomputed_docs": 3591,
++        "recomputed_bytes": 5718118
++      }
++    },
++    {
++      "dataset_name": "multihop-rag",
++      "partition": "base_100k",
++      "d14f1a2_original": {
++        "source_file_sha256": "7228d82f926c41a1d742baeffbf1fb4ae5a14e04f405c045aaf9a5da3281f53a",
++        "selection_range": "[0, 609)",
++        "selected_records_d": 609,
++        "selected_text_bytes": 6414182
++      },
++      "head_current": {
++        "source_file_sha256": "7228d82f926c41a1d742baeffbf1fb4ae5a14e04f405c045aaf9a5da3281f53a",
++        "selection_range": "[0, 609)",
++        "selected_records_d": 609,
++        "selected_text_bytes": 6414182
++      },
++      "strict_recompute_from_staged_bytes": {
++        "selection_range_used": "[0, 609)",
++        "recomputed_docs": 609,
++        "recomputed_bytes": 6414182
++      },
++      "forensic_prereseal_recompute": {
++        "selection_range_used": "[0, 609)",
++        "recomputed_docs": 609,
++        "recomputed_bytes": 6414182
++      }
++    },
++    {
++      "dataset_name": "musique_delta",
++      "partition": "delta_900k",
++      "d14f1a2_original": {
++        "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c",
++        "selection_range": "[80047, 101962)",
++        "selected_records_d": 21915,
++        "selected_text_bytes": 10138960
++      },
++      "head_current": {
++        "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c",
++        "selection_range": "[80047, 101962)",
++        "selected_records_d": 21915,
++        "selected_text_bytes": 10138960
++      },
++      "strict_recompute_from_staged_bytes": {
++        "selection_range_used": "[80047, 101962)",
++        "recomputed_docs": 21915,
++        "recomputed_bytes": 10138960
++      },
++      "forensic_prereseal_recompute": {
++        "selection_range_used": "[80047, 101962)",
++        "recomputed_docs": 21915,
++        "recomputed_bytes": 10138960
++      }
++    },
++    {
++      "dataset_name": "beir-fiqa_delta",
++      "partition": "delta_900k",
++      "d14f1a2_original": {
++        "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce",
++        "selection_range": "[10575, 57600)",
++        "selected_records_d": 47015,
++        "selected_text_bytes": 36130851
++      },
++      "head_current": {
++        "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce",
++        "selection_range": "[10575, 57600)",
++        "selected_records_d": 47015,
++        "selected_text_bytes": 36130851
++      },
++      "strict_recompute_from_staged_bytes": {
++        "selection_range_used": "[10575, 57600)",
++        "recomputed_docs": 47015,
++        "recomputed_bytes": 36130851
++      },
++      "forensic_prereseal_recompute": {
++        "selection_range_used": "[10575, 57600)",
++        "recomputed_docs": 47015,
++        "recomputed_bytes": 36130851
++      }
++    },
++    {
++      "dataset_name": "bright_delta",
++      "partition": "delta_900k",
++      "d14f1a2_original": {
++        "source_file_sha256": "0ac9088e4dca7f910777bd7388bdc4e5281eb2f2c7339c89797ca8e498101b5b",
++        "selection_range": "[0, 684431)",
++        "selected_records_d": 684431,
++        "selected_text_bytes": 678354057
++      },
++      "head_current": {
++        "source_file_sha256": "0ac9088e4dca7f910777bd7388bdc4e5281eb2f2c7339c89797ca8e498101b5b",
++        "selection_range": "[0, 643710)",
++        "selected_records_d": 643710,
++        "selected_text_bytes": 678354057
++      },
++      "strict_recompute_from_staged_bytes": {
++        "selection_range_used": "[0, 643710)",
++        "recomputed_docs": 618306,
++        "recomputed_bytes": 603263678
++      },
++      "forensic_prereseal_recompute": {
++        "selection_range_used": "[0, 928750)",
++        "recomputed_docs": 684431,
++        "recomputed_bytes": 678354057
++      }
++    },
++    {
++      "dataset_name": "enron_delta",
++      "partition": "delta_900k",
++      "d14f1a2_original": {
++        "source_file_sha256": "4f9cc47b7e00fd6a89ff6e420bc3933b3c474044b8ceeb9c6f41a2491b4b5e6d",
++        "selection_range": "[0, 50000)",
++        "selected_records_d": 50000,
++        "selected_text_bytes": 124668874
++      },
++      "head_current": {
++        "source_file_sha256": "4f9cc47b7e00fd6a89ff6e420bc3933b3c474044b8ceeb9c6f41a2491b4b5e6d",
++        "selection_range": "[0, 50000)",
++        "selected_records_d": 50000,
++        "selected_text_bytes": 124668874
++      },
++      "strict_recompute_from_staged_bytes": {
++        "selection_range_used": "[0, 50000)",
++        "recomputed_docs": 50000,
++        "recomputed_bytes": 124668874
++      },
++      "forensic_prereseal_recompute": {
++        "selection_range_used": "[0, 50000)",
++        "recomputed_docs": 50000,
++        "recomputed_bytes": 124668874
++      }
++    },
++    {
++      "dataset_name": "wikipedia_delta",
++      "partition": "delta_900k",
++      "d14f1a2_original": {
++        "source_file_sha256": "a5acb6a96d32ac71705e8c5e41daeb6193ada9c198bdd0bfafc6bdb56f2a78a4",
++        "selection_range": "[0, 96639)",
++        "selected_records_d": 96639,
++        "selected_text_bytes": 1099778081
++      },
++      "head_current": {
++        "source_file_sha256": "ffe485442095c1f8a6bb141dc14deb4ca8ff9b78edecf15a2bda830825eb978d",
++        "selection_range": "[0, 137360)",
++        "selected_records_d": 137360,
++        "selected_text_bytes": 1425430486
++      },
++      "strict_recompute_from_staged_bytes": {
++        "selection_range_used": "[0, 137360)",
++        "recomputed_docs": 137360,
++        "recomputed_bytes": 1361116951
++      },
++      "forensic_prereseal_recompute": {
++        "selection_range_used": "[0, 96639)",
++        "recomputed_docs": 96639,
++        "recomputed_bytes": 1099778081
++      }
++    }
++  ],
++  "verdict": {
++    "head_recorded_selection_reproduces_claims": false,
++    "prereseal_selection_reproduces_all_9_claim_fields": true,
++    "reproducing_selection": {
++      "bright_delta": "[0, 928750)",
++      "wikipedia_delta": "[0, 96639)",
++      "rest": "as recorded"
++    },
++    "successor": {
++      "selection_record": "docs/program/inbox/h0-1m-corpus-contract/selection_record.json",
++      "provisional_manifest": "docs/program/inbox/h0-1m-corpus-contract/provisional_1m_manifest.json",
++      "provisional_sha256": "4f4deb50446f8325f676c3ee2618dfc3059eb78b5551e4855aef932bfe3c8c3d"
++    },
++    "gate": "HOLD until a human ballot in 06_DECISION_LOG.md adopts or rejects the successor contract; nothing here is adopted"
++  }
++}
+diff --git a/docs/program/inbox/h0-1m-corpus-contract/selection_reconciliation.md b/docs/program/inbox/h0-1m-corpus-contract/selection_reconciliation.md
+new file mode 100644
+index 0000000..017b2ff
+--- /dev/null
++++ b/docs/program/inbox/h0-1m-corpus-contract/selection_reconciliation.md
+@@ -0,0 +1,95 @@
++# H0 1M selection reconciliation (attempt-2 seal-pipeline repair)
++
++Status: `HOLD-UNADOPTED` — evidence for a human ballot, not an adoption.
++Machine-readable sibling: `selection_reconciliation.json` (same directory).
++Successor selection: `selection_record.json`.
++Provisional manifest (UNADOPTED): `provisional_1m_manifest.json`.
++
++Method (all from staged bytes, this session): strict recompute of the
++HEAD-recorded ranges with `benchmarks/verify_1m_checksums.py` (9 errors);
++pre-reseal forensic recompute with the same tool under
++`--forensic-overrides '{"bright_delta": "[0, 928750)", "wikipedia_delta": "[0, 96639)"}'`
++(all 9 claim fields match); atomic seal of the successor selection with
++`scripts/seal_1m_manifest.py` (published provisional, rc=0); second-path
++check of that provisional with `benchmarks/verify_1m_independent.py`
++(INDEPENDENT-PASS, rc=0). All 8 staged files hash-match their fingerprints,
++so the defect is in recorded selection fields, not in staged bytes.
++
++## 1. Per-shard reconciliation
++
++Columns: (i) `d14f1a2` original seal, (ii) HEAD current record, (iii) strict
++recompute from staged bytes using the HEAD-recorded range. File SHAs are
++short (12 hex); paths are short names (full Windows-absolute paths plus full
++SHAs live in the JSON sibling and in `selection_record.json`).
++
++| Shard | (i) d14f1a2 range / docs / bytes | (ii) HEAD range / docs / bytes | (iii) strict recompute docs / bytes |
++|---|---|---|---|
++| musique (base) | [0, 80047) / 80047 / 37343384 | identical | 80047 / 37343384 match |
++| beir-fiqa (base) | [0, 10575) / 10575 / 8141714 | identical | 10575 / 8141714 match |
++| beir-scifact (base) | [0, 5183) / 5178 / 7777523 | identical | 5178 / 7777523 match |
++| beir-nfcorpus (base) | [0, 3633) / 3591 / 5718118 | identical | 3591 / 5718118 match |
++| multihop-rag (base) | [0, 609) / 609 / 6414182 | identical | 609 / 6414182 match |
++| musique_delta | [80047, 101962) / 21915 / 10138960 | identical | 21915 / 10138960 match |
++| beir-fiqa_delta | [10575, 57600) / 47015 / 36130851 | identical | 47015 / 36130851 match |
++| bright_delta | [0, 684431) / 684431 / 678354057 | [0, 643710) / 643710 / 678354057 (same file `…/bright/corpus.jsonl`, sha `0ac9088e4dca`) | [0, 643710) -> 618306 / 603263678 DIFFER |
++| enron_delta | [0, 50000) / 50000 / 124668874 | identical | 50000 / 124668874 match |
++| wikipedia_delta | [0, 96639) / 96639 / 1099778081 (file sha `a5acb6a96d32`) | [0, 137360) / 137360 / 1425430486 (DIFFERENT file, sha `ffe485442095`) | [0, 137360) -> 137360 / 1361116951 count matches, bytes DIFFER |
++
++Totals and roots:
++
++| Field | Claim (both generations, carried over) | Strict recompute (HEAD ranges) |
++|---|---|---|
++| docs | 100000 + 900000 = 1000000 | 100000 + 874596 = 974596 DIFFER |
++| bytes | 65394921 + 1949070823 = 2014465744 | 65394921 + 2135319314 = 2200714235 DIFFER |
++| base root | `23b99dfe…2e57e6e5b` | match |
++| delta root | `9385407a…10dc30` | `f14b18b9…38c31477` DIFFER |
++| union root | `5039acef…f7a79a5f5` | `88768eac…a4ebca17f7cff1` DIFFER |
++
++## 2. What the reseal did (12-line diff, `d14f1a2` -> `34a0df1`)
++
++- `bright_delta`: count/range rewritten 684431 -> 643710 while claimed
++  bytes stayed 678354057 and the staged file (same SHA) stayed untouched.
++  The staging code iterates the whole bright file (928750 lines, no index
++  slice) and deduplicates to 684431, so neither recorded range reproduces
++  the claim; the full-file iteration does.
++- `wikipedia_delta`: range/count/bytes rewritten and a different staged
++  file pinned. The new byte figure 1425430486 equals the new file's
++  on-disk size (`stat().st_size`), not the normalized content bytes
++  (1361116951) — the reseal script took file size for content bytes, which
++  is why the count matches but the bytes and both roots do not.
++- Delta/union roots and all totals were carried over unchanged.
++
++## 3. Verdict
++
++- NO selection matching the HEAD-recorded ranges reproduces
++  1M / 2,014,465,744 / `5039acef…` (9 delta-side errors, both root
++  mismatches). HEAD-as-recorded is unreproducible: HOLD stands.
++- Exactly ONE selection reproducible from staged bytes reproduces all 9
++  claim fields (docs, bytes, trio, totals): the pre-reseal selection —
++  bright full-file `[0, 928750)` (-> 684431 / 678354057) plus wikipedia
++  prefix `[0, 96639)` of the current staged file (-> 96639 /
++  1099778081), everything else as recorded. Verified twice this session
++  through two independent code paths (producer seal + independent
++  checker agree: 1000000 / 2014465744 / `5039acef…`).
++- The current wikipedia file's first 96639 lines reproducing the original
++  bytes/count/leaves exactly is consistent with an append-only extension
++  (96639 + 40721 = 137360 lines), but only the recomputed equality is
++  claimed here.
++
++## 4. Successor contract proposal (FOR HUMAN BALLOT — not adopted)
++
++- Selection: `selection_record.json`
++  (`H0-1M-SUCCESSOR-SEL-01`, status PROPOSED-UNADOPTED).
++- Provisional manifest: `provisional_1m_manifest.json`
++  (sha256 `4f4deb50446f8325f676c3ee2618dfc3059eb78b5551e4855aef932bfe3c8c3d`,
++  status PROVISIONAL-UNADOPTED, co-signature PENDING_HUMAN_BALLOT,
++  signature null; signing binds the complete file bytes at adoption).
++- Claims it carries (derived, both paths agree): 100000 + 900000 =
++  1000000 docs; 65394921 + 1949070823 = 2014465744 bytes; base
++  `23b99dfe…2e57e6e5b`, delta `9385407a…10dc30`, union
++  `5039acef…f7a79a5f5`.
++- Suggested ballot line for `06_DECISION_LOG.md`: `H0
++  H0-1M-CORPUS-CONTRACT successor: <PASS|HOLD|ABORT> — selection
++  H0-1M-SUCCESSOR-SEL-01, provisional <sha above>, verifier exits
++  <rc>. Signed: <name+date>.`
++- Until that ballot passes, P0 stays quarantined: HOLD.
+diff --git a/docs/program/inbox/h0-1m-corpus-contract/selection_record.json b/docs/program/inbox/h0-1m-corpus-contract/selection_record.json
+new file mode 100644
+index 0000000..c5324ca
+--- /dev/null
++++ b/docs/program/inbox/h0-1m-corpus-contract/selection_record.json
+@@ -0,0 +1,107 @@
++{
++  "record_id": "H0-1M-SUCCESSOR-SEL-01",
++  "status": "PROPOSED-UNADOPTED",
++  "contract_target": "2.0.0",
++  "created_utc": "2026-09-09T03:58:19.681547+00:00",
++  "provenance": {
++    "original_seal_commit": "d14f1a2",
++    "reseal_commit": "34a0df1",
++    "reseal_script": "scripts/finalize_1m_candidate.py",
++    "bright_note": "staging step 2c iterates the whole bright file (no index slice); 928750 is the staged file line count, so [0, 928750) is the staging-exact full-file iteration that deduplicates to 684431. d14f1a2 recorded the informational range [0, 684431).",
++    "wikipedia_note": "current staged file (137360 lines) extends the original 96639-record staging; [0, 96639) reproduces the original 96639 docs / 1099778081 bytes exactly.",
++    "base_note": "base ranges are identical in d14f1a2 and HEAD and reproduce exactly.",
++    "ballot": "human ballot in 06_DECISION_LOG.md required; this record alone adopts nothing"
++  },
++  "shards": [
++    {
++      "dataset_name": "musique",
++      "partition": "base_100k",
++      "license": "CC BY 4.0",
++      "license_url": "https://creativecommons.org/licenses/by/4.0/",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
++      "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c",
++      "selection_range": "[0, 80047)"
++    },
++    {
++      "dataset_name": "beir-fiqa",
++      "partition": "base_100k",
++      "license": "CC BY-NC-SA 4.0",
++      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
++      "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce",
++      "selection_range": "[0, 10575)"
++    },
++    {
++      "dataset_name": "beir-scifact",
++      "partition": "base_100k",
++      "license": "CC BY-NC 4.0",
++      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl",
++      "source_file_sha256": "08af2db965a8fd04ad1c4bf03ed5ba91e742c0cbefcb10afc256681084504ff8",
++      "selection_range": "[0, 5183)"
++    },
++    {
++      "dataset_name": "beir-nfcorpus",
++      "partition": "base_100k",
++      "license": "CC BY-SA 4.0",
++      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl",
++      "source_file_sha256": "f5bfa0bb46b2d592fdddc62e419e5dbf9d2f6f5deabb70745d45fc32573854b9",
++      "selection_range": "[0, 3633)"
++    },
++    {
++      "dataset_name": "multihop-rag",
++      "partition": "base_100k",
++      "license": "ODC-By v1.0",
++      "license_url": "https://opendatacommons.org/licenses/by/1-0/",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl",
++      "source_file_sha256": "7228d82f926c41a1d742baeffbf1fb4ae5a14e04f405c045aaf9a5da3281f53a",
++      "selection_range": "[0, 609)"
++    },
++    {
++      "dataset_name": "musique_delta",
++      "partition": "delta_900k",
++      "license": "CC BY 4.0",
++      "license_url": "https://creativecommons.org/licenses/by/4.0/",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
++      "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c",
++      "selection_range": "[80047, 101962)"
++    },
++    {
++      "dataset_name": "beir-fiqa_delta",
++      "partition": "delta_900k",
++      "license": "CC BY-NC-SA 4.0",
++      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
++      "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce",
++      "selection_range": "[10575, 57600)"
++    },
++    {
++      "dataset_name": "bright_delta",
++      "partition": "delta_900k",
++      "license": "CC BY-NC 4.0 / Apache-2.0",
++      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
++      "source_file_sha256": "0ac9088e4dca7f910777bd7388bdc4e5281eb2f2c7339c89797ca8e498101b5b",
++      "selection_range": "[0, 928750)"
++    },
++    {
++      "dataset_name": "enron_delta",
++      "partition": "delta_900k",
++      "license": "Public Domain (FERC Enron Corpus)",
++      "license_url": "https://www.cs.cmu.edu/~./enron/",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl",
++      "source_file_sha256": "4f9cc47b7e00fd6a89ff6e420bc3933b3c474044b8ceeb9c6f41a2491b4b5e6d",
++      "selection_range": "[0, 50000)"
++    },
++    {
++      "dataset_name": "wikipedia_delta",
++      "partition": "delta_900k",
++      "license": "CC BY-SA 4.0 / GFDL",
++      "license_url": "https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_4.0_International_License",
++      "source_file": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl",
++      "source_file_sha256": "ffe485442095c1f8a6bb141dc14deb4ca8ff9b78edecf15a2bda830825eb978d",
++      "selection_range": "[0, 96639)"
++    }
++  ]
++}
+diff --git a/scripts/seal_1m_manifest.py b/scripts/seal_1m_manifest.py
+new file mode 100644
+index 0000000..556594a
+--- /dev/null
++++ b/scripts/seal_1m_manifest.py
+@@ -0,0 +1,290 @@
++#!/usr/bin/env python3
++"""Atomic seal producer for H0 provisional 1M manifests (seal-pipeline repair).
++
++Derives EVERY claim from one immutable selection record plus hash-verified
++staged bytes, using the attempt-1 recompute mechanics
++(benchmarks/verify_1m_checksums.py, imported here as the producer-side code
++path). The independent checker (benchmarks/verify_1m_independent.py)
++re-derives the same claims through genuinely separate code before anything
++may be published.
++
++Publication discipline:
++- The output is a PROVISIONAL manifest in the gate directory, never an
++  adoption: co-signature stays PENDING_HUMAN_BALLOT and no signature is
++  minted here (signing binds the complete provisional file bytes and happens
++  only via the separate human ballot recorded in 06_DECISION_LOG.md).
++- The frozen capsule manifest is NEVER overwritten; output goes to the gate
++  dir under a provisional name only.
++- The manifest is written to a sibling tmp path, flushed + fsync'd, then
++  atomically renamed. A crash (including kill -9) before the rename leaves
++  only the tmp file, which is never treated as publishable output and is
++  discarded on the next run.
++- Any mismatch (unresolvable source, SHA drift, unparseable/inverted range,
++  cross-partition collision, or --expect deviation) refuses publication:
++  nonzero exit, no provisional file created, tmp removed best-effort.
++- The producer embeds its own SHA-256 and the selection record SHA-256 so
++  the checker can re-bind both.
++
++Usage:
++    python3 scripts/seal_1m_manifest.py \
++        --selection docs/program/inbox/h0-1m-corpus-contract/selection_record.json \
++        --gate-dir docs/program/inbox/h0-1m-corpus-contract \
++        --expect /tmp/expected_claims.json
++"""
++
++from __future__ import annotations
++
++import argparse
++import hashlib
++import importlib.util
++import json
++import os
++import sys
++import time
++from datetime import datetime, timezone
++from pathlib import Path
++
++ROOT_DIR = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT_DIR / "src"))
++
++_PATH1 = ROOT_DIR / "benchmarks" / "verify_1m_checksums.py"
++_spec = importlib.util.spec_from_file_location("h0_path1_recompute", _PATH1)
++_path1 = importlib.util.module_from_spec(_spec)
++_spec.loader.exec_module(_path1)
++
++PRODUCER_REL = "scripts/seal_1m_manifest.py"
++TMP_SUFFIX = ".seal-tmp"
++
++
++def sha256_file(path: Path) -> str:
++    digest = hashlib.sha256()
++    with open(path, "rb") as handle:
++        while chunk := handle.read(65536):
++            digest.update(chunk)
++    return digest.hexdigest()
++
++
++def load_selection(path: Path) -> tuple[dict, str]:
++    with open(path, "r", encoding="utf-8") as handle:
++        record = json.load(handle)
++    if not isinstance(record, dict) or not isinstance(record.get("shards"), list):
++        raise ValueError("selection record must carry a 'shards' list")
++    required = ("dataset_name", "partition", "source_file", "source_file_sha256",
++                "selection_range")
++    for entry in record["shards"]:
++        for key in required:
++            if key not in entry:
++                raise ValueError("selection shard %r missing %r"
++                                 % (entry.get("dataset_name"), key))
++        if entry.get("partition") not in ("base_100k", "delta_900k"):
++            raise ValueError("selection shard %r has bad partition %r"
++                             % (entry.get("dataset_name"), entry.get("partition")))
++    return record, sha256_file(path)
++
++
++def derive_claims(record: dict) -> tuple[dict, dict, list[str]]:
++    """Hash-verify sources, recompute counts/bytes/roots. Returns (claims, aux, errors)."""
++    errors: list[str] = []
++    resolved: dict[str, Path] = {}
++    for entry in record["shards"]:
++        raw = entry["source_file"]
++        candidate = Path(raw)
++        if not candidate.is_absolute() or not candidate.exists():
++            errors.append("SEAL-REFUSE source-unresolvable for %s: %s"
++                          % (entry["dataset_name"], raw))
++            continue
++        try:
++            actual = sha256_file(candidate)
++        except OSError as exc:
++            errors.append("SEAL-REFUSE source-unreadable for %s: %s"
++                          % (entry["dataset_name"], exc))
++            continue
++        if actual != entry["source_file_sha256"]:
++            errors.append("SEAL-REFUSE source-sha-drift for %s (%s)"
++                          % (entry["dataset_name"], raw))
++            continue
++        try:
++            _path1.parse_range(entry["selection_range"])
++        except ValueError as exc:
++            errors.append("SEAL-REFUSE bad-range for %s: %s"
++                          % (entry["dataset_name"], exc))
++            continue
++        resolved.setdefault(raw, candidate.resolve())
++    if errors:
++        return {}, {}, errors
++
++    pseudo = [{"dataset_name": e["dataset_name"], "partition": e["partition"],
++               "source_file": e["source_file"], "selection_range": e["selection_range"]}
++              for e in record["shards"]]
++    try:
++        rows, base_leaves, delta_leaves, base_bytes, delta_bytes = _path1.run_selection(
++            pseudo, resolved, set(), set())
++    except Exception as exc:
++        return {}, {}, ["SEAL-REFUSE recompute-crashed: %s" % exc]
++
++    base_docs = sum(r["recomputed_docs"] for r in rows if r["partition"] == "base_100k")
++    delta_docs = sum(r["recomputed_docs"] for r in rows if r["partition"] == "delta_900k")
++    total_docs = base_docs + delta_docs
++    # Cross-partition uniqueness: leaves are content hashes; base+delta leaf
++    # multiset must equal the union with no collision-driven drops.
++    if len(set(base_leaves)) + len(set(delta_leaves)) != total_docs or \
++            len(set(base_leaves + delta_leaves)) != total_docs:
++        errors.append("SEAL-REFUSE cross-partition-collision: %d base + %d delta leaves "
++                      "do not form a %d-unique union" % (len(base_leaves),
++                                                         len(delta_leaves), total_docs))
++        return {}, {}, errors
++
++    base_root = _path1.compute_merkle_root(base_leaves)
++    delta_root = _path1.compute_merkle_root(delta_leaves)
++    union_root = _path1.compute_merkle_root(base_leaves + delta_leaves)
++    shard_claims = [{"dataset_name": r["dataset_name"],
++                     "partition": r["partition"],
++                     "selection_range": r["selection_range_used"],
++                     "selected_records_d": r["recomputed_docs"],
++                     "selected_text_bytes": r["recomputed_bytes"]} for r in rows]
++    claims = {
++        "target_unique_documents_d": total_docs,
++        "base_100k_documents_count": base_docs,
++        "delta_900k_documents_count": delta_docs,
++        "base_intersect_delta_count": 0,
++        "total_raw_text_bytes": base_bytes + delta_bytes,
++        "base_raw_text_bytes": base_bytes,
++        "delta_raw_text_bytes": delta_bytes,
++        "base_merkle_root_sha256": base_root,
++        "delta_merkle_root_sha256": delta_root,
++        "union_merkle_root_sha256": union_root,
++        "shards": shard_claims,
++    }
++    aux = {"rows": rows, "path_map": {k: str(v) for k, v in resolved.items()}}
++    return claims, aux, errors
++
++
++def check_expect(claims: dict, expect_path: Path | None) -> list[str]:
++    if expect_path is None:
++        return []
++    with open(expect_path, "r", encoding="utf-8") as handle:
++        expected = json.load(handle)
++    mismatches: list[str] = []
++    flat = dict(claims)
++    flat_shards = {s["dataset_name"]: s for s in claims.get("shards", [])}
++    for key, wanted in expected.items():
++        if "::" in key:
++            shard_name, field = key.split("::", 1)
++            seen = flat_shards.get(shard_name, {}).get(field, "<absent>")
++        else:
++            seen = flat.get(key, "<absent>")
++        if seen != wanted:
++            mismatches.append("SEAL-REFUSE expect-mismatch for %s: expected %s, derived %s"
++                              % (key, wanted, seen))
++    return mismatches
++
++
++def build_provisional(record: dict, selection_sha: str, claims: dict, aux: dict) -> dict:
++    return {
++        "artifact": "h0-provisional-1m-manifest",
++        "status": "PROVISIONAL-UNADOPTED",
++        "contract_version": "2.0.0",
++        "created_utc": datetime.now(timezone.utc).isoformat(),
++        "producer": {
++            "script": PRODUCER_REL,
++            "script_sha256": sha256_file(ROOT_DIR / PRODUCER_REL),
++            "recompute_path": "benchmarks/verify_1m_checksums.py",
++            "recompute_sha256": sha256_file(_PATH1),
++            "selection_sha256": selection_sha,
++        },
++        "selection": record["shards"],
++        "selection_provenance": record.get("provenance", {}),
++        "path_map": aux["path_map"],
++        "claims": claims,
++        "co_signature": {
++            "status": "PENDING_HUMAN_BALLOT",
++            "instruction": "Adoption is a separate human ballot recorded in "
++                           "06_DECISION_LOG.md; this file confers no scale claim.",
++        },
++        "signature": None,
++        "signing_rule": "A human co-signature binds sha256 of the complete provisional "
++                        "file bytes at adoption time; no signature is minted by this script.",
++    }
++
++
++def atomic_publish(gate_dir: Path, output_name: str, document: dict,
++                   stall_seconds: float) -> Path:
++    gate_dir.mkdir(parents=True, exist_ok=True)
++    final_path = gate_dir / output_name
++    tmp_path = gate_dir / (output_name + TMP_SUFFIX)
++    try:
++        tmp_path.unlink()
++    except OSError:
++        pass
++    payload = json.dumps(document, indent=2, sort_keys=True) + "\n"
++    with open(tmp_path, "w", encoding="utf-8") as handle:
++        handle.write(payload)
++        handle.flush()
++        os.fsync(handle.fileno())
++    if stall_seconds > 0:
++        time.sleep(stall_seconds)
++    os.replace(tmp_path, final_path)
++    return final_path
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(
++        description="Derive every 1M claim from one immutable selection record plus "
++                    "hash-verified staged bytes and atomically publish a PROVISIONAL "
++                    "(never adopted) manifest. Fail-closed: any mismatch refuses "
++                    "publication with a nonzero exit and no output file."
++    )
++    parser.add_argument("--selection", type=Path, required=True,
++                        help="Path to the immutable selection record JSON file")
++    parser.add_argument("--gate-dir", type=Path,
++                        default=ROOT_DIR / "docs" / "program" / "inbox"
++                        / "h0-1m-corpus-contract",
++                        help="Directory receiving the provisional manifest")
++    parser.add_argument("--output-name", type=str, default="provisional_1m_manifest.json",
++                        help="Provisional manifest file name inside --gate-dir")
++    parser.add_argument("--expect", type=Path, default=None,
++                        help="Optional JSON of expected claims (supports 'shard::field' "
++                             "keys); any deviation refuses publication")
++    parser.add_argument("--stall-before-publish", type=float, default=0.0,
++                        help="Test-only delay in seconds between tmp fsync and atomic "
++                             "rename, so a crash-safety probe can kill this process "
++                             "mid-write. Never creates partial output.")
++    args = parser.parse_args()
++
++    selection_path = args.selection
++    if not selection_path.exists():
++        print("SEAL-REFUSE selection-missing: %s" % selection_path)
++        return 1
++    try:
++        record, selection_sha = load_selection(selection_path)
++    except (ValueError, OSError) as exc:
++        print("SEAL-REFUSE bad-selection: %s" % exc)
++        return 1
++
++    claims, aux, errors = derive_claims(record)
++    if args.expect is not None:
++        try:
++            errors.extend(check_expect(claims, args.expect))
++        except (ValueError, OSError) as exc:
++            errors.append("SEAL-REFUSE bad-expect-file: %s" % exc)
++    if errors:
++        print("[SEAL-REFUSE] publication refused with %d error(s):" % len(errors))
++        for error in errors:
++            print("  - %s" % error)
++        return 1
++
++    document = build_provisional(record, selection_sha, claims, aux)
++    final_path = atomic_publish(args.gate_dir, args.output_name, document,
++                                args.stall_before_publish)
++    print("[SEAL-PUBLISH] provisional (UNADOPTED) manifest: %s" % final_path)
++    print("  sha256: %s" % sha256_file(final_path))
++    print("  docs: %d base + %d delta = %d; bytes: %d; union %s"
++          % (claims["base_100k_documents_count"], claims["delta_900k_documents_count"],
++             claims["target_unique_documents_d"], claims["total_raw_text_bytes"],
++             claims["union_merkle_root_sha256"]))
++    print("  co-signature: PENDING_HUMAN_BALLOT (separate ballot adopts; nothing conferred)")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/sign_gate_manifest.py b/scripts/sign_gate_manifest.py
+new file mode 100644
+index 0000000..d9118bc
+--- /dev/null
++++ b/scripts/sign_gate_manifest.py
+@@ -0,0 +1,273 @@
++#!/usr/bin/env python3
++"""Emit the H0 per-gate manifest for the Trace 1M corpus contract (WP-H0-2).
++
++Runs benchmarks/verify_1m_checksums.py as a subprocess (fail closed) and
++binds its recompute output together with source IDs, SHA-256 per shard,
++licenses, tokenizer identity, the frozen workload vector, and revision
++scope into one gate manifest JSON under docs/program/inbox/<gate>/.
++
++Verdict discipline (H0 exit gate):
++- Strict verifier PASS  -> manifest records ``signed: true`` with a
++  human co-signature block left PENDING (only a human ballot in
++  06_DECISION_LOG.md completes the gate; this script never prints
++  CERTIFIED/APPROVED).
++- Strict verifier FAIL  -> manifest records ``verdict: HOLD`` with the
++  verifier errors embedded, ``signed: false``, and exits nonzero. No
++  silent PASS: a HOLD manifest is evidence, not an approval.
++
++A documented non-certifying forensic hypothesis may accompany a HOLD via
++--forensic-overrides (dataset_name -> selection_range JSON). It is recorded
++verbatim with its provenance and NEVER alters the strict verdict.
++
++Default forensic hypothesis (H0-1M-CORPUS-CONTRACT): the pre-reseal shard
++selection recovered from git history (commit d14f1a2, before the
++scripts/finalize_1m_candidate.py reseal overwrote bright_delta counts and
++wikipedia_delta bytes):
++  bright_delta full-file dedup iteration (stage_1m_corpus.py step 2c has no
++  index slice) + wikipedia_delta [0, 96639) prefix of the current staged
++  file (the original 96639 records).
++
++Usage:
++    python3 scripts/sign_gate_manifest.py
++"""
++
++from __future__ import annotations
++
++import argparse
++import hashlib
++import json
++import subprocess
++import sys
++from datetime import datetime, timezone
++from pathlib import Path
++
++ROOT_DIR = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT_DIR / "src"))
++
++from trace.v2.atomizer import normalize_text, tokenize  # noqa: E402  (identity pin)
++
++DEFAULT_VERIFIER = ROOT_DIR / "benchmarks" / "verify_1m_checksums.py"
++DEFAULT_MANIFEST = (
++    ROOT_DIR / "docs" / "program" / "inbox" / "1m-02-corpus-capsule"
++    / "evidence" / "1m_corpus_manifest.json"
++)
++DEFAULT_QUERIES_MANIFEST = (
++    ROOT_DIR / "docs" / "program" / "inbox" / "1m-02-corpus-capsule"
++    / "evidence" / "1m_queries_manifest.json"
++)
++DEFAULT_GATE_DIR = ROOT_DIR / "docs" / "program" / "inbox" / "h0-1m-corpus-contract"
++DEFAULT_GATE_ID = "H0-1M-CORPUS-CONTRACT"
++BASE_COMMIT = "0150fbc19cc25bf2cb080bb797b535c3f4f5499d"
++
++# Pre-reseal selection hypothesis; provenance: git show d14f1a2:<capsule
++# manifest> vs HEAD (reseal at 34a0df1 via scripts/finalize_1m_candidate.py).
++DEFAULT_FORENSIC_OVERRIDES = {
++    "bright_delta": "[0, 928750)",
++    "wikipedia_delta": "[0, 96639)",
++}
++
++ATOMIZER_REL = "src/trace/v2/atomizer.py"
++
++
++def sha256_file(path: Path) -> str:
++    h = hashlib.sha256()
++    with open(path, "rb") as f:
++        while chunk := f.read(65536):
++            h.update(chunk)
++    return h.hexdigest()
++
++
++def git_fact(args: list[str]) -> str:
++    r = subprocess.run(
++        ["git", *args], capture_output=True, text=True, check=False, cwd=str(ROOT_DIR)
++    )
++    if r.returncode != 0:
++        raise RuntimeError(f"git {' '.join(args)} failed: {r.stderr.strip()}")
++    return r.stdout.strip()
++
++
++def build_gate_manifest(
++    capsule: dict,
++    recompute: dict,
++    forensic: dict | None,
++    verifier_argv: list[str],
++    verifier_rc: int,
++    verifier_stdout_tail: str,
++    queries_manifest: dict,
++    gate_id: str,
++) -> dict:
++    strict_passed: bool = bool(recompute.get("passed", False))
++    summary: dict = recompute.get("summary", {})
++    sources = []
++    for entry in capsule.get("datasets_base", []) + capsule.get("datasets_delta", []):
++        name = entry["dataset_name"]
++        strict_row = next(
++            (r for r in summary.get("shards", []) if r["dataset_name"] == name), {}
++        )
++        sources.append({
++            "dataset_name": name,
++            "partition": entry.get("partition"),
++            "license": entry.get("license"),
++            "license_url": entry.get("license_url"),
++            "selection_range_manifest": entry.get("selection_range"),
++            "selected_records_d_manifest": entry.get("selected_records_d"),
++            "selected_text_bytes_manifest": entry.get("selected_text_bytes"),
++            "source_file_manifest": entry.get("source_file"),
++            "source_file_resolved": summary.get("path_map", {}).get(entry.get("source_file", "")),
++            "source_file_sha256": entry.get("source_file_sha256"),
++            "recomputed_docs_strict": strict_row.get("recomputed_docs"),
++            "recomputed_bytes_strict": strict_row.get("recomputed_bytes"),
++        })
++    atomizer_path = ROOT_DIR / ATOMIZER_REL
++    blind_rel = "docs/program/inbox/1m-02-corpus-capsule/evidence/1m_queries_blind_eval.jsonl"
++    return {
++        "gate_id": gate_id,
++        "horizon": "H0",
++        "objective": "Adopt the 1M corpus contract (preflight; grants no scale claim)",
++        "created_utc": datetime.now(timezone.utc).isoformat(),
++        "verdict": "SIGNED-AWAITING-BALLOT" if strict_passed else "HOLD",
++        "signed": bool(strict_passed),
++        "capsule": {
++            "manifest_path": "docs/program/inbox/1m-02-corpus-capsule"
++                             "/evidence/1m_corpus_manifest.json",
++            "manifest_sha256": sha256_file(DEFAULT_MANIFEST),
++            "contract_version": capsule.get("contract_version"),
++            "status": capsule.get("status"),
++        },
++        "contract_claims": {
++            "target_unique_documents_d": capsule.get("target_unique_documents_d"),
++            "base_100k_documents_count": capsule.get("base_100k_documents_count"),
++            "delta_900k_documents_count": capsule.get("delta_900k_documents_count"),
++            "total_raw_text_bytes": capsule.get("total_raw_text_bytes"),
++            "base_raw_text_bytes": capsule.get("base_raw_text_bytes"),
++            "delta_raw_text_bytes": capsule.get("delta_raw_text_bytes"),
++            "base_merkle_root_sha256": capsule.get("base_merkle_root_sha256"),
++            "delta_merkle_root_sha256": capsule.get("delta_merkle_root_sha256"),
++            "union_merkle_root_sha256": capsule.get("union_merkle_root_sha256"),
++        },
++        "verification": {
++            "verifier": "benchmarks/verify_1m_checksums.py",
++            "argv": verifier_argv,
++            "exit_code": verifier_rc,
++            "strict_passed": strict_passed,
++            "strict_errors": recompute.get("errors", []),
++            "strict_summary": summary,
++            "stdout_tail": verifier_stdout_tail,
++        },
++        "forensic_non_certifying": forensic,
++        "path_map": summary.get("path_map", {}),
++        "sources": sources,
++        "tokenizer_identity": {
++            "module": "trace.v2.atomizer",
++            "module_path": ATOMIZER_REL,
++            "module_sha256": sha256_file(atomizer_path),
++            "content_hash_primitive": "normalize_text: line-ending normalization only "
++                                      "(CRLF/CR -> LF); leaf = sha256(normalized.encode('utf-8'))",
++            "lexical_tokenizer": "tokenize: lowercased [A-Za-z0-9_]{2,} word tokens "
++                                 "(model-free, deterministic)",
++            "note": "1M contract pins raw UTF-8 bytes + content hashes; no model "
++                    "tokenizer enters the corpus commitment.",
++        },
++        "frozen_workload_vector": {
++            "manifest_path": "docs/program/inbox/1m-02-corpus-capsule"
++                             "/evidence/1m_queries_manifest.json",
++            "manifest_sha256": sha256_file(DEFAULT_QUERIES_MANIFEST),
++            "contract_version": queries_manifest.get("contract_version"),
++            "target_standard": queries_manifest.get("target_standard"),
++            "selection_merkle_root_sha256": queries_manifest.get("selection_merkle_root_sha256"),
++            "blind_file": queries_manifest.get("blind_queries_file"),
++            "blind_file_sha256": sha256_file(ROOT_DIR / blind_rel),
++            "summary_statistics": queries_manifest.get("summary_statistics"),
++        },
++        "revision_scope": {
++            "packet_base_commit": BASE_COMMIT,
++            "head_commit": git_fact(["rev-parse", "HEAD"]),
++            "branch": git_fact(["branch", "--show-current"]),
++            "scope": "H0 preflight only: path normalization + gate manifest. "
++                     "No scale claim, no promotion, no capsule-manifest edits.",
++        },
++        "co_signature": {
++            "status": "PENDING_HUMAN_BALLOT",
++            "instruction": "A human records the H0 ballot in 06_DECISION_LOG.md; "
++                           "until then this manifest confers no scale claim.",
++            "ballot_text": (
++                f"H0 {gate_id}: <PASS|HOLD|ABORT> — capsule "
++                "1m_corpus_manifest.json (contract 2.0.0), union Merkle "
++                f"{capsule.get('union_merkle_root_sha256')}, "
++                "gate manifest <path>, verifier exit <rc>. Signed: <name+date>."
++            ),
++        },
++    }
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(
++        description="Emit the H0 per-gate manifest for the 1M corpus contract. "
++                    "Fail-closed: verifier FAIL produces a HOLD manifest and a "
++                    "nonzero exit; never a silent PASS."
++    )
++    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST,
++                        help="Path to 1M corpus manifest JSON file")
++    parser.add_argument("--queries-manifest", type=Path, default=DEFAULT_QUERIES_MANIFEST,
++                        help="Path to 1M queries manifest JSON file")
++    parser.add_argument("--verifier", type=Path, default=DEFAULT_VERIFIER,
++                        help="Path to the 1M checksum verifier script")
++    parser.add_argument("--gate-dir", type=Path, default=DEFAULT_GATE_DIR,
++                        help="Directory receiving the gate manifest JSON")
++    parser.add_argument("--gate-id", type=str, default=DEFAULT_GATE_ID,
++                        help="Gate identifier recorded in the manifest")
++    parser.add_argument("--forensic-overrides", type=str,
++                        default=json.dumps(DEFAULT_FORENSIC_OVERRIDES),
++                        help="JSON object for the verifier's non-certifying "
++                             "forensic pass (default: pre-reseal hypothesis). "
++                             "Use '{}' to skip the forensic pass.")
++    args = parser.parse_args()
++
++    gate_dir: Path = args.gate_dir
++    gate_dir.mkdir(parents=True, exist_ok=True)
++    tmp_out = gate_dir / ".verifier_recompute.tmp.json"
++
++    verifier_argv = [sys.executable, str(args.verifier), "--manifest", str(args.manifest),
++                     "--emit-json", str(tmp_out),
++                     "--forensic-overrides", args.forensic_overrides]
++    print(f"[H0-SIGN] Running: {' '.join(verifier_argv)}")
++    proc = subprocess.run(verifier_argv, capture_output=True, text=True, check=False)
++    print(proc.stdout[-3000:])
++    if proc.stderr:
++        print(proc.stderr[-1000:], file=sys.stderr)
++    if not tmp_out.exists():
++        print("[H0-SIGN-FAIL] Verifier produced no recompute JSON; refusing to sign.")
++        return 1
++    with open(tmp_out, "r", encoding="utf-8") as f:
++        recompute = json.load(f)
++    try:
++        tmp_out.unlink()
++    except OSError:
++        pass
++
++    with open(args.manifest, "r", encoding="utf-8") as f:
++        capsule = json.load(f)
++    with open(args.queries_manifest, "r", encoding="utf-8") as f:
++        queries_manifest = json.load(f)
++
++    manifest_doc = build_gate_manifest(
++        capsule, recompute, recompute.get("forensic_non_certifying"),
++        verifier_argv, proc.returncode, proc.stdout[-3000:],
++        queries_manifest, args.gate_id,
++    )
++    out_path = gate_dir / "gate_manifest.json"
++    with open(out_path, "w", encoding="utf-8") as f:
++        json.dump(manifest_doc, f, indent=2, sort_keys=True)
++        f.write("\n")
++    print(f"[H0-SIGN] Gate manifest: {out_path} (SHA-256: {sha256_file(out_path)})")
++    if manifest_doc["signed"]:
++        print("[H0-SIGN] Strict PASS recorded; awaiting human ballot (co-signature PENDING).")
++        return 0
++    print(f"[H0-SIGN-HOLD] Strict verifier failed with "
++          f"{len(manifest_doc['verification']['strict_errors'])} errors; "
++          f"verdict HOLD recorded, signed=false.")
++    return 1
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/tests/test_h0_1m_adopt.py b/tests/test_h0_1m_adopt.py
+new file mode 100644
+index 0000000..9ab2441
+--- /dev/null
++++ b/tests/test_h0_1m_adopt.py
+@@ -0,0 +1,274 @@
++"""H0 packet tests: 1M corpus-contract adoption (fail-closed, no domain mocks).
++
++Uses real temporary files and real subprocesses only. The full 1M
++recompute is exercised by scripts/sign_gate_manifest.py at gate time;
++these tests pin the verifier/signer mechanics on small fixtures plus
++byte-exact guards on frozen semantics.
++"""
++
++from __future__ import annotations
++
++import hashlib
++import importlib.util
++import json
++import subprocess
++import sys
++from pathlib import Path
++
++import pytest
++
++ROOT_DIR = Path(__file__).resolve().parents[1]
++VERIFIER = ROOT_DIR / "benchmarks" / "verify_1m_checksums.py"
++SIGNER = ROOT_DIR / "scripts" / "sign_gate_manifest.py"
++FROZEN_VERIFIER = ROOT_DIR / "benchmarks" / "verify_dataset_checksums.py"
++
++
++def load_verifier_module():
++    spec = importlib.util.spec_from_file_location("verify_1m_checksums", VERIFIER)
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++def sha_bytes(data: bytes) -> str:
++    return hashlib.sha256(data).hexdigest()
++
++
++def write_shard(path: Path, records: list[dict]) -> None:
++    path.write_text("\n".join(json.dumps(r) for r in records) + "\n", encoding="utf-8")
++
++
++def leaf_of(title: str, text: str) -> str:
++    full = f"{title}\n\n{text}".strip() if title else text.strip()
++    return sha_bytes(full.encode("utf-8"))
++
++
++def merkle(leaves: list[str]) -> str:
++    level = [bytes.fromhex(h) for h in sorted(leaves)]
++    while len(level) > 1:
++        nxt = []
++        for i in range(0, len(level), 2):
++            left = level[i]
++            right = level[i + 1] if i + 1 < len(level) else left
++            nxt.append(hashlib.sha256(left + right).digest())
++        level = nxt
++    return level[0].hex()
++
++
++@pytest.fixture()
++def mini_capsule(tmp_path: Path):
++    """Two-shard capsule whose per-shard figures are exactly right.
++
++    Header totals intentionally use the real 1M contract constants, so the
++    strict verdict FAILs on totals only — proving fail-closed while letting
++    the recompute mechanics be asserted exactly via --emit-json.
++    """
++    recs_a = [
++        {"id": f"a{i}", "title": f"T{i}", "text": f"alpha body {i}"}
++        for i in range(5)
++    ]
++    recs_b = [
++        {"doc_id": f"b{i}", "title": "", "content": f"beta content {i}"}
++        for i in range(3)
++    ]
++    pa = tmp_path / "a.jsonl"
++    pb = tmp_path / "b.jsonl"
++    write_shard(pa, recs_a)
++    write_shard(pb, recs_b)
++    leaves_a = [leaf_of(f"T{i}", f"alpha body {i}") for i in range(5)]
++    leaves_b = [leaf_of("", f"beta content {i}") for i in range(3)]
++    ba = sum(len(f"T{i}\n\nalpha body {i}".encode()) for i in range(5))
++    bb = sum(len(f"beta content {i}".encode()) for i in range(3))
++    manifest = {
++        "contract_version": "2.0.0",
++        "target_unique_documents_d": 1000000,
++        "base_100k_documents_count": 100000,
++        "delta_900k_documents_count": 900000,
++        "base_intersect_delta_count": 0,
++        "total_raw_text_bytes": ba + bb,
++        "base_raw_text_bytes": ba,
++        "delta_raw_text_bytes": bb,
++        "base_merkle_root_sha256": merkle(leaves_a),
++        "delta_merkle_root_sha256": merkle(leaves_b),
++        "union_merkle_root_sha256": merkle(leaves_a + leaves_b),
++        "synthetic_data_used": False,
++        "in_memory_fallback_used": False,
++        "datasets_base": [{
++            "dataset_name": "probe-a", "partition": "base_100k",
++            "license": "MIT", "license_url": "https://example.com",
++            "selected_records_d": 5, "selection_range": "[0, 5)",
++            "selected_text_bytes": ba, "source_file": str(pa),
++            "source_file_sha256": sha_bytes(pa.read_bytes()),
++        }],
++        "datasets_delta": [{
++            "dataset_name": "probe-b", "partition": "delta_900k",
++            "license": "MIT", "license_url": "https://example.com",
++            "selected_records_d": 3, "selection_range": "[0, 3)",
++            "selected_text_bytes": bb, "source_file": str(pb),
++            "source_file_sha256": sha_bytes(pb.read_bytes()),
++        }],
++    }
++    mp = tmp_path / "mini_manifest.json"
++    mp.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
++    return mp, manifest, {"a": (ba, leaves_a), "b": (bb, leaves_b)}
++
++
++def run(cmd: list[str]) -> subprocess.CompletedProcess:
++    return subprocess.run(cmd, capture_output=True, text=True, check=False)
++
++
++# --- unit: Merkle construction vectors -------------------------------------
++
++def test_merkle_empty_is_sha256_of_empty():
++    v = load_verifier_module()
++    assert v.compute_merkle_root([]) == sha_bytes(b"")
++
++
++def test_merkle_singleton_is_leaf():
++    v = load_verifier_module()
++    assert v.compute_merkle_root(["ab" * 32]) == "ab" * 32
++
++
++def test_merkle_odd_duplicates_last_and_sorts():
++    v = load_verifier_module()
++    leaves = ["cc" * 32, "aa" * 32, "bb" * 32]
++    level = [bytes.fromhex(h) for h in sorted(leaves)]
++    left = hashlib.sha256(level[0] + level[1]).digest()
++    right = hashlib.sha256(level[2] + level[2]).digest()
++    expected = hashlib.sha256(left + right).hexdigest()
++    assert v.compute_merkle_root(leaves) == expected
++    assert v.compute_merkle_root(list(reversed(leaves))) == expected
++
++
++def test_content_hash_primitive_is_atomizer_normalize():
++    v = load_verifier_module()
++    from trace.v2.atomizer import normalize_text
++    assert v.normalize_text is normalize_text
++
++
++# --- fail-closed subprocess probes ------------------------------------------
++
++def test_fail_closed_missing_source(tmp_path: Path, mini_capsule):
++    mp, manifest, _ = mini_capsule
++    manifest["datasets_base"][0]["source_file"] = str(tmp_path / "absent.jsonl")
++    mp.write_text(json.dumps(manifest), encoding="utf-8")
++    proc = run([sys.executable, str(VERIFIER), "--manifest", str(mp)])
++    assert proc.returncode != 0
++    assert "Unresolvable source_file" in proc.stdout
++
++
++def test_fail_closed_sha_drift(tmp_path: Path, mini_capsule):
++    mp, manifest, _ = mini_capsule
++    pa = Path(manifest["datasets_base"][0]["source_file"])
++    with open(pa, "a", encoding="utf-8") as f:
++        f.write('{"id": "evil", "text": "tampered"}\n')
++    proc = run([sys.executable, str(VERIFIER), "--manifest", str(mp)])
++    assert proc.returncode != 0
++    assert "SHA-256 mismatch" in proc.stdout
++
++
++def test_fail_closed_count_drift(mini_capsule):
++    mp, manifest, _ = mini_capsule
++    manifest["datasets_base"][0]["selected_records_d"] = 4
++    mp.write_text(json.dumps(manifest), encoding="utf-8")
++    proc = run([sys.executable, str(VERIFIER), "--manifest", str(mp)])
++    assert proc.returncode != 0
++    assert "doc count mismatch" in proc.stdout
++
++
++def test_recompute_exact_on_mini_fixture(tmp_path: Path, mini_capsule):
++    mp, manifest, expect = mini_capsule
++    out = tmp_path / "summary.json"
++    proc = run([sys.executable, str(VERIFIER), "--manifest", str(mp),
++                "--emit-json", str(out)])
++    assert proc.returncode != 0  # totals gate holds: 8 docs != 1M contract
++    assert "Base doc total mismatch" in proc.stdout
++    summary = json.loads(out.read_text(encoding="utf-8"))
++    assert summary["passed"] is False
++    assert {e.split(":")[0] for e in summary["errors"]} == {
++        "Base doc total mismatch",
++        "Delta doc total mismatch",
++        "Union uniqueness mismatch",
++    }
++    rows = {r["dataset_name"]: r for r in summary["summary"]["shards"]}
++    assert rows["probe-a"]["recomputed_docs"] == 5
++    assert rows["probe-a"]["recomputed_bytes"] == expect["a"][0]
++    assert rows["probe-b"]["recomputed_docs"] == 3
++    assert rows["probe-b"]["recomputed_bytes"] == expect["b"][0]
++    assert summary["summary"]["recomputed_base_merkle"] == manifest["base_merkle_root_sha256"]
++    assert summary["summary"]["recomputed_delta_merkle"] == manifest["delta_merkle_root_sha256"]
++    assert summary["summary"]["recomputed_union_merkle"] == manifest["union_merkle_root_sha256"]
++
++
++def test_forensic_pass_never_changes_strict_verdict(tmp_path: Path, mini_capsule):
++    mp, manifest, _ = mini_capsule
++    out = tmp_path / "summary.json"
++    proc = run([sys.executable, str(VERIFIER), "--manifest", str(mp),
++                "--emit-json", str(out),
++                "--forensic-overrides", json.dumps({"probe-a": "[0, 2)"})])
++    assert proc.returncode != 0
++    assert "FORENSIC-NON-CERTIFYING" in proc.stdout
++    summary = json.loads(out.read_text(encoding="utf-8"))
++    assert summary["passed"] is False
++    forensic = summary["forensic_non_certifying"]
++    assert forensic["certifying"] is False
++    assert forensic["range_overrides"] == {"probe-a": "[0, 2)"}
++    row = next(r for r in forensic["shards"] if r["dataset_name"] == "probe-a")
++    assert row["recomputed_docs"] == 2  # override applied in analysis only
++    strict_row = next(r for r in summary["summary"]["shards"]
++                      if r["dataset_name"] == "probe-a")
++    assert strict_row["recomputed_docs"] == 5  # strict unaffected
++
++
++# --- signer HOLD path --------------------------------------------------------
++
++def test_signer_hold_manifest_on_strict_fail(tmp_path: Path, mini_capsule):
++    mp, manifest, _ = mini_capsule
++    gate_dir = tmp_path / "gate"
++    proc = run([sys.executable, str(SIGNER), "--manifest", str(mp),
++                "--gate-dir", str(gate_dir), "--gate-id", "H0-TEST",
++                "--forensic-overrides", "{}"])
++    assert proc.returncode != 0
++    assert "HOLD" in proc.stdout
++    gate = json.loads((gate_dir / "gate_manifest.json").read_text(encoding="utf-8"))
++    assert gate["gate_id"] == "H0-TEST"
++    assert gate["verdict"] == "HOLD"
++    assert gate["signed"] is False
++    assert gate["verification"]["strict_passed"] is False
++    assert len(gate["verification"]["strict_errors"]) == 3
++    assert set(gate["path_map"]) == {
++        manifest["datasets_base"][0]["source_file"],
++        manifest["datasets_delta"][0]["source_file"],
++    }
++    assert [s["dataset_name"] for s in gate["sources"]] == ["probe-a", "probe-b"]
++    assert all("license" in s and "source_file_sha256" in s for s in gate["sources"])
++    assert gate["tokenizer_identity"]["module"] == "trace.v2.atomizer"
++    assert gate["frozen_workload_vector"]["target_standard"] == "DEC-P-005b-LEVEL2"
++    base_commit = gate["revision_scope"]["packet_base_commit"]
++    assert base_commit == "0150fbc19cc25bf2cb080bb797b535c3f4f5499d"
++    assert gate["co_signature"]["status"] == "PENDING_HUMAN_BALLOT"
++
++
++# --- frozen-semantics guards ---------------------------------------------------
++
++def test_frozen_beir_manifest_id_check_byte_identical():
++    lines = FROZEN_VERIFIER.read_text(encoding="utf-8").splitlines()
++    assert lines[55] == '    if manifest.get("manifest_id") != "beir_musique_frozen_v1":'
++
++
++def test_new_packet_files_have_no_phantom_tooling():
++    phantom = ["trace" + "-bench", "Activation" + "Router", "spine" + "."]
++    for path in (VERIFIER, SIGNER):
++        text = path.read_text(encoding="utf-8")
++        for token in phantom:
++            assert token not in text, f"phantom tooling {token!r} in {path}"
++        for token in ('"CERTIFIED', "'CERTIFIED", '"APPROVED', "'APPROVED"):
++            assert token not in text, f"self-certification string {token!r} in {path}"
++
++
++def test_help_entry_points():
++    for cmd in ([sys.executable, str(VERIFIER), "--help"],
++                [sys.executable, str(SIGNER), "--help"]):
++        proc = run(cmd)
++        assert proc.returncode == 0
++        assert "usage:" in proc.stdout
+diff --git a/tests/test_h0_1m_seal.py b/tests/test_h0_1m_seal.py
+new file mode 100644
+index 0000000..7a61b9f
+--- /dev/null
++++ b/tests/test_h0_1m_seal.py
+@@ -0,0 +1,436 @@
++"""H0 seal-pipeline repair tests: atomic producer + independent checker.
++
++Real temporary files and real subprocesses only; no mocks of domain or
++storage. The full-corpus seal is exercised by scripts/seal_1m_manifest.py at
++gate time; these tests pin the fail-closed mechanics on small fixtures plus
++the fault-independence of the two recompute paths.
++"""
++
++from __future__ import annotations
++
++import hashlib
++import importlib.util
++import json
++import signal
++import subprocess
++import sys
++import time
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
++
++import pytest
++
++from trace.v2.atomizer import normalize_text
++
++ROOT_DIR = Path(__file__).resolve().parents[1]
++PRODUCER = ROOT_DIR / "scripts" / "seal_1m_manifest.py"
++CHECKER = ROOT_DIR / "benchmarks" / "verify_1m_independent.py"
++PATH1 = ROOT_DIR / "benchmarks" / "verify_1m_checksums.py"
++SELECTION_RECORD = ROOT_DIR / "docs" / "program" / "inbox" / "h0-1m-corpus-contract" / "selection_record.json"
++RECONCILIATION_MD = ROOT_DIR / "docs" / "program" / "inbox" / "h0-1m-corpus-contract" / "selection_reconciliation.md"
++RECONCILIATION_JSON = ROOT_DIR / "docs" / "program" / "inbox" / "h0-1m-corpus-contract" / "selection_reconciliation.json"
++
++SELF = Path(__file__).resolve()
++
++
++def _sha_bytes(data: bytes) -> str:
++    return hashlib.sha256(data).hexdigest()
++
++
++def _content(title: str, text: str) -> str:
++    joined = ("%s\n\n%s" % (title, text)).strip() if title else text.strip()
++    return normalize_text(joined)
++
++
++def _leaf(title: str, text: str) -> str:
++    return _sha_bytes(_content(title, text).encode("utf-8"))
++
++
++def _merkle(leaves: list[str]) -> str:
++    if not leaves:
++        return _sha_bytes(b"")
++    level = [bytes.fromhex(h) for h in sorted(leaves)]
++    while len(level) > 1:
++        nxt = []
++        for i in range(0, len(level), 2):
++            left = level[i]
++            right = level[i + 1] if i + 1 < len(level) else left
++            nxt.append(hashlib.sha256(left + right).digest())
++        level = nxt
++    return level[0].hex()
++
++
++def _write_shard(path: Path, records: list[dict]) -> None:
++    path.write_text("\n".join(json.dumps(r) for r in records) + "\n", encoding="utf-8")
++
++
++def _load_path1():
++    spec = importlib.util.spec_from_file_location("h0_path1_recompute", PATH1)
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++def _load_checker():
++    spec = importlib.util.spec_from_file_location("h0_path2_check", CHECKER)
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++@pytest.fixture()
++def mini_selection(tmp_path: Path):
++    """Four-shard selection covering generic, enron, and wiki semantics plus dedup."""
++    base_recs = [{"id": "k%d" % i, "title": "Base %d" % i, "text": "base body %d" % i}
++                 for i in range(5)]
++    enron_recs = [{"email_id": "m%d" % i, "subject": "Sub %d" % i, "body": "mail %d" % i}
++                  for i in range(3)]
++    wiki_recs = [{"doc_id": "w%d" % i, "title": "Wiki %d" % i, "text": "article %d" % i}
++                 for i in range(2)]
++    dup_recs = ([{"native_id": "d%d" % i, "title": "Delta %d" % i,
++                  "content": "delta text %d" % i} for i in range(3)]
++                + [{"native_id": "d1", "title": "Delta 1", "content": "delta text 1"}])
++    paths = {}
++    for name, recs in (("base", base_recs), ("enron", enron_recs),
++                       ("wiki", wiki_recs), ("dup", dup_recs)):
++        p = tmp_path / ("%s.jsonl" % name)
++        _write_shard(p, recs)
++        paths[name] = p
++    shards = [
++        {"dataset_name": "probe-base", "partition": "base_100k",
++         "license": "MIT", "license_url": "https://example.com/a",
++         "source_file": str(paths["base"]),
++         "source_file_sha256": _sha_bytes(paths["base"].read_bytes()),
++         "selection_range": "[0, 5)"},
++        {"dataset_name": "enron_delta", "partition": "delta_900k",
++         "license": "MIT", "license_url": "https://example.com/b",
++         "source_file": str(paths["enron"]),
++         "source_file_sha256": _sha_bytes(paths["enron"].read_bytes()),
++         "selection_range": "[0, 3)"},
++        {"dataset_name": "wikipedia_delta", "partition": "delta_900k",
++         "license": "MIT", "license_url": "https://example.com/c",
++         "source_file": str(paths["wiki"]),
++         "source_file_sha256": _sha_bytes(paths["wiki"].read_bytes()),
++         "selection_range": "[0, 2)"},
++        {"dataset_name": "probe_delta", "partition": "delta_900k",
++         "license": "MIT", "license_url": "https://example.com/d",
++         "source_file": str(paths["dup"]),
++         "source_file_sha256": _sha_bytes(paths["dup"].read_bytes()),
++         "selection_range": "[0, 4)"},
++    ]
++    base_leaves = [_leaf("Base %d" % i, "base body %d" % i) for i in range(5)]
++    enron_leaves = [_leaf("Sub %d" % i, "mail %d" % i) for i in range(3)]
++    wiki_leaves = [_leaf("Wiki %d" % i, "article %d" % i) for i in range(2)]
++    dup_leaves = [_leaf("Delta %d" % i, "delta text %d" % i) for i in range(3)]
++    base_bytes = sum(len(_content("Base %d" % i, "base body %d" % i).encode())
++                     for i in range(5))
++    enron_bytes = sum(len(_content("Sub %d" % i, "mail %d" % i).encode())
++                      for i in range(3))
++    wiki_bytes = sum(len(_content("Wiki %d" % i, "article %d" % i).encode())
++                     for i in range(2))
++    dup_bytes = sum(len(_content("Delta %d" % i, "delta text %d" % i).encode())
++                    for i in range(3))
++    oracle = {
++        "probe-base": (5, base_bytes, base_leaves),
++        "enron_delta": (3, enron_bytes, enron_leaves),
++        "wikipedia_delta": (2, wiki_bytes, wiki_leaves),
++        "probe_delta": (3, dup_bytes, dup_leaves),
++    }
++    record = {"record_id": "TEST-SEL-01", "status": "PROPOSED-UNADOPTED",
++              "provenance": {"note": "fixture"}, "shards": shards}
++    sel_path = tmp_path / "selection.json"
++    sel_path.write_text(json.dumps(record, indent=2), encoding="utf-8")
++    return sel_path, record, oracle
++
++
++def _run(cmd: list[str], timeout: int = 120) -> subprocess.CompletedProcess:
++    return subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=timeout)
++
++
++def _seal(tmp_path: Path, sel_path: Path, output_name: str = "prov.json",
++          extra: list[str] | None = None) -> tuple[subprocess.CompletedProcess, Path]:
++    gate_dir = tmp_path / "gate"
++    cmd = [sys.executable, str(PRODUCER), "--selection", str(sel_path),
++           "--gate-dir", str(gate_dir), "--output-name", output_name] + (extra or [])
++    return _run(cmd), gate_dir / output_name
++
++
++def _expect_for(oracle: dict, sel_path: Path) -> Path:
++    base_docs = oracle["probe-base"][0]
++    delta_docs = (oracle["enron_delta"][0] + oracle["wikipedia_delta"][0]
++                  + oracle["probe_delta"][0])
++    base_bytes = oracle["probe-base"][1]
++    delta_bytes = (oracle["enron_delta"][1] + oracle["wikipedia_delta"][1]
++                   + oracle["probe_delta"][1])
++    base_root = _merkle(oracle["probe-base"][2])
++    delta_leaves = (oracle["enron_delta"][2] + oracle["wikipedia_delta"][2]
++                    + oracle["probe_delta"][2])
++    delta_root = _merkle(delta_leaves)
++    union_root = _merkle(oracle["probe-base"][2] + delta_leaves)
++    expect = {
++        "target_unique_documents_d": base_docs + delta_docs,
++        "base_100k_documents_count": base_docs,
++        "delta_900k_documents_count": delta_docs,
++        "base_intersect_delta_count": 0,
++        "total_raw_text_bytes": base_bytes + delta_bytes,
++        "base_raw_text_bytes": base_bytes,
++        "delta_raw_text_bytes": delta_bytes,
++        "base_merkle_root_sha256": base_root,
++        "delta_merkle_root_sha256": delta_root,
++        "union_merkle_root_sha256": union_root,
++    }
++    for name, (count, nbytes, _leaves) in oracle.items():
++        expect["%s::selected_records_d" % name] = count
++        expect["%s::selected_text_bytes" % name] = nbytes
++    out = sel_path.parent / "expect.json"
++    out.write_text(json.dumps(expect, indent=2), encoding="utf-8")
++    return out
++
++
++def test_producer_publishes_provisional_on_coherent_selection(tmp_path, mini_selection):
++    sel_path, record, oracle = mini_selection
++    proc, prov_path = _seal(tmp_path, sel_path)
++    assert proc.returncode == 0, proc.stdout + proc.stderr
++    assert "[SEAL-PUBLISH]" in proc.stdout
++    assert prov_path.exists()
++    assert not (prov_path.parent / (prov_path.name + ".seal-tmp")).exists()
++    provisional = json.loads(prov_path.read_text(encoding="utf-8"))
++    assert provisional["artifact"] == "h0-provisional-1m-manifest"
++    assert provisional["status"] == "PROVISIONAL-UNADOPTED"
++    assert provisional["signature"] is None
++    assert provisional["co_signature"]["status"] == "PENDING_HUMAN_BALLOT"
++    assert provisional["producer"]["script"] == "scripts/seal_1m_manifest.py"
++    assert provisional["producer"]["script_sha256"] == _sha_bytes(PRODUCER.read_bytes())
++    assert provisional["producer"]["selection_sha256"] == _sha_bytes(sel_path.read_bytes())
++    claims = provisional["claims"]
++    for name, (count, nbytes, _leaves) in oracle.items():
++        row = next(s for s in claims["shards"] if s["dataset_name"] == name)
++        assert row["selected_records_d"] == count
++        assert row["selected_text_bytes"] == nbytes
++    expect_path = _expect_for(oracle, sel_path)
++    expect = json.loads(expect_path.read_text(encoding="utf-8"))
++    for key, wanted in expect.items():
++        if "::" in key:
++            shard_name, field = key.split("::", 1)
++            seen = next(s for s in claims["shards"]
++                        if s["dataset_name"] == shard_name)[field]
++        else:
++            seen = claims[key]
++        assert seen == wanted, key
++
++
++def test_producer_accepts_matching_expect_file(tmp_path, mini_selection):
++    sel_path, _record, oracle = mini_selection
++    expect_path = _expect_for(oracle, sel_path)
++    proc, prov_path = _seal(tmp_path, sel_path, extra=["--expect", str(expect_path)])
++    assert proc.returncode == 0, proc.stdout + proc.stderr
++    assert prov_path.exists()
++
++
++# --- producer: refusal modes --------------------------------------------------
++
++def test_producer_refuses_changed_ranges_with_stale_roots(tmp_path, mini_selection):
++    sel_path, record, oracle = mini_selection
++    record["shards"][3]["selection_range"] = "[0, 2)"
++    sel_path.write_text(json.dumps(record, indent=2), encoding="utf-8")
++    expect_path = _expect_for(oracle, sel_path)  # stale: pinned to the [0, 4) truth
++    proc, prov_path = _seal(tmp_path, sel_path, extra=["--expect", str(expect_path)])
++    assert proc.returncode != 0
++    assert "SEAL-REFUSE" in proc.stdout
++    assert "expect-mismatch" in proc.stdout
++    assert not prov_path.exists()
++    assert not (prov_path.parent / (prov_path.name + ".seal-tmp")).exists()
++
++
++def test_producer_refuses_replaced_shard_file(tmp_path, mini_selection):
++    sel_path, _record, oracle = mini_selection
++    victim = Path(json.loads(sel_path.read_text(encoding="utf-8"))["shards"][0]["source_file"])
++    with open(victim, "a", encoding="utf-8") as handle:
++        handle.write('{"id": "intruder", "title": "X", "text": "replaced"}\n')
++    expect_path = _expect_for(oracle, sel_path)
++    proc, prov_path = _seal(tmp_path, sel_path, extra=["--expect", str(expect_path)])
++    assert proc.returncode != 0
++    assert "source-sha-drift" in proc.stdout
++    assert not prov_path.exists()
++
++
++def test_producer_refuses_inconsistent_totals(tmp_path, mini_selection):
++    sel_path, _record, oracle = mini_selection
++    expect_path = _expect_for(oracle, sel_path)
++    expect = json.loads(expect_path.read_text(encoding="utf-8"))
++    expect["total_raw_text_bytes"] = expect["total_raw_text_bytes"] + 1
++    expect["union_merkle_root_sha256"] = "00" * 32
++    expect_path.write_text(json.dumps(expect), encoding="utf-8")
++    proc, prov_path = _seal(tmp_path, sel_path, extra=["--expect", str(expect_path)])
++    assert proc.returncode != 0
++    assert "expect-mismatch" in proc.stdout
++    assert not prov_path.exists()
++
++
++def test_kill9_mid_write_leaves_no_publishable_manifest(tmp_path, mini_selection):
++    sel_path, _record, _oracle = mini_selection
++    gate_dir = tmp_path / "gate"
++    prov_path = gate_dir / "prov.json"
++    tmp_path_ = gate_dir / "prov.json.seal-tmp"
++    proc = subprocess.Popen(
++        [sys.executable, str(PRODUCER), "--selection", str(sel_path),
++         "--gate-dir", str(gate_dir), "--output-name", "prov.json",
++         "--stall-before-publish", "30"],
++        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
++    try:
++        deadline = time.time() + 60
++        while time.time() < deadline:
++            if tmp_path_.exists():
++                break
++            if proc.poll() is not None:
++                break
++            time.sleep(0.1)
++        assert tmp_path_.exists(), "producer never reached the pre-publish stall"
++        proc.kill()
++        proc.wait(timeout=30)
++    finally:
++        if proc.poll() is None:
++            proc.kill()
++            proc.wait(timeout=30)
++    assert proc.returncode == -signal.SIGKILL
++    assert not prov_path.exists()
++    # A later clean run publishes normally; the stale tmp is never adopted.
++    proc2, _ = _seal(tmp_path, sel_path, output_name="prov2.json")
++    assert proc2.returncode == 0
++    assert (gate_dir / "prov2.json").exists()
++
++
++# --- checker: agreement + planted-bug capture ---------------------------------
++
++def test_checker_passes_on_producer_output(tmp_path, mini_selection):
++    sel_path, _record, _oracle = mini_selection
++    proc, prov_path = _seal(tmp_path, sel_path)
++    assert proc.returncode == 0
++    check = _run([sys.executable, str(CHECKER), "--manifest", str(prov_path)])
++    assert check.returncode == 0, check.stdout + check.stderr
++    assert "[INDEPENDENT-PASS]" in check.stdout
++    assert "UNADOPTED" in check.stdout
++
++
++def test_checker_catches_planted_count_bug(tmp_path, mini_selection):
++    sel_path, _record, _oracle = mini_selection
++    proc, prov_path = _seal(tmp_path, sel_path)
++    assert proc.returncode == 0
++    provisional = json.loads(prov_path.read_text(encoding="utf-8"))
++    victim = next(s for s in provisional["claims"]["shards"]
++                  if s["dataset_name"] == "probe_delta")
++    victim["selected_records_d"] = victim["selected_records_d"] - 1  # planted miscount
++    bad_path = tmp_path / "planted.json"
++    bad_path.write_text(json.dumps(provisional, indent=2), encoding="utf-8")
++    check = _run([sys.executable, str(CHECKER), "--manifest", str(bad_path)])
++    assert check.returncode != 0
++    assert "INDEPENDENT-FAIL" in check.stdout
++    assert "shard-count-mismatch" in check.stdout
++    assert "probe_delta" in check.stdout
++
++
++def test_checker_rejects_flipped_co_signature(tmp_path, mini_selection):
++    sel_path, _record, _oracle = mini_selection
++    proc, prov_path = _seal(tmp_path, sel_path)
++    assert proc.returncode == 0
++    provisional = json.loads(prov_path.read_text(encoding="utf-8"))
++    provisional["co_signature"]["status"] = "HUMAN_SIGNED"
++    flipped = tmp_path / "flipped.json"
++    flipped.write_text(json.dumps(provisional, indent=2), encoding="utf-8")
++    check = _run([sys.executable, str(CHECKER), "--manifest", str(flipped)])
++    assert check.returncode != 0
++    assert "co-signature-not-pending" in check.stdout
++
++
++# --- fault-independence of the two paths --------------------------------------
++
++def test_paths_agree_on_fixture_and_diverge_with_cause(tmp_path, mini_selection):
++    sel_path, record, oracle = mini_selection
++    path1 = _load_path1()
++    path2 = _load_checker()
++    pseudo = [{"dataset_name": e["dataset_name"], "partition": e["partition"],
++               "source_file": e["source_file"], "selection_range": e["selection_range"]}
++              for e in record["shards"]]
++    resolved = {e["source_file"]: Path(e["source_file"]) for e in record["shards"]}
++    rows, base_leaves, delta_leaves, base_bytes, delta_bytes = path1.run_selection(
++        pseudo, resolved, set(), set())
++    scanner = path2._ShardScanner()
++    releaves_base, releaves_delta = [], []
++    re_base_bytes = re_delta_bytes = 0
++    ordered = ([e for e in record["shards"] if e["partition"] == "base_100k"]
++               + [e for e in record["shards"] if e["partition"] == "delta_900k"])
++    per_shard = {}
++    for entry in ordered:
++        start, end = path2._split_range(entry["selection_range"])
++        found, num_bytes, leaves = scanner.scan(
++            entry["dataset_name"], Path(entry["source_file"]), start, end)
++        per_shard[entry["dataset_name"]] = (found, num_bytes)
++        if entry["partition"] == "base_100k":
++            releaves_base.extend(leaves)
++            re_base_bytes += num_bytes
++        else:
++            releaves_delta.extend(leaves)
++            re_delta_bytes += num_bytes
++    for row in rows:
++        assert per_shard[row["dataset_name"]] == (row["recomputed_docs"],
++                                                  row["recomputed_bytes"])
++    assert (base_bytes, delta_bytes) == (re_base_bytes, re_delta_bytes)
++    assert path1.compute_merkle_root(base_leaves) == path2._root_for(releaves_base)
++    assert path1.compute_merkle_root(delta_leaves) == path2._root_for(releaves_delta)
++    assert path1.compute_merkle_root(base_leaves + delta_leaves) == \
++        path2._root_for(releaves_base + releaves_delta)
++    # Static independence: the checker shares no claim-calculation imports.
++    checker_src = CHECKER.read_text(encoding="utf-8").splitlines()
++    for line in checker_src:
++        stripped = line.strip()
++        if stripped.startswith("import ") or stripped.startswith("from "):
++            assert "verify_1m_checksums" not in stripped
++            assert "seal_1m_manifest" not in stripped
++    # Diverges with cause on a mutated claim (function-level, real tmp file).
++    proc, prov_path = _seal(tmp_path, sel_path)
++    assert proc.returncode == 0
++    passed, failures, _detail = path2.check_provisional(prov_path)
++    assert passed, failures
++    provisional = json.loads(prov_path.read_text(encoding="utf-8"))
++    provisional["claims"]["delta_raw_text_bytes"] += 7
++    mutated = tmp_path / "mutated.json"
++    mutated.write_text(json.dumps(provisional), encoding="utf-8")
++    passed2, failures2, _d2 = path2.check_provisional(mutated)
++    assert not passed2
++    assert any("total-mismatch" in f and "delta_raw_text_bytes" in f for f in failures2)
++
++
++# --- entry points and hygiene ---------------------------------------------------
++
++def test_help_entry_points():
++    for cmd in ([sys.executable, str(PRODUCER), "--help"],
++                [sys.executable, str(CHECKER), "--help"]):
++        proc = _run(cmd)
++        assert proc.returncode == 0
++        assert "usage:" in proc.stdout
++
++
++def test_new_files_have_no_phantom_tooling_or_self_certification():
++    phantom_head = "trace" + "-" + "bench"
++    router = "Activation" + "Router"
++    store_mod = "spine" + "."
++    cert_token = "CERTI" + "FIED"
++    appr_token = "APPRO" + "VED"
++    # Data-bearing records pin byte-exact on-disk source paths (which live
++    # under a staging directory whose name contains the phantom prefix), so
++    # the phantom-tooling scan covers code only; the self-certification scan
++    # covers every packet file.
++    code_targets = [PRODUCER, CHECKER, SELF]
++    all_targets = code_targets + [SELECTION_RECORD, RECONCILIATION_MD, RECONCILIATION_JSON]
++    for path in all_targets:
++        assert path.exists(), "missing packet file %s" % path
++    for path in code_targets:
++        text = path.read_text(encoding="utf-8")
++        for token in (phantom_head, router, store_mod):
++            assert token not in text, "banned token %r in %s" % (token, path)
++    for path in all_targets:
++        text = path.read_text(encoding="utf-8")
++        for token in (cert_token, appr_token):
++            assert token not in text, "banned token %r in %s" % (token, path)
++

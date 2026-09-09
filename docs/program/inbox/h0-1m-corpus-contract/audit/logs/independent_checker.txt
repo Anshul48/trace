@@ -1,0 +1,2 @@
+Independently checking provisional manifest: /mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/docs/program/inbox/h0-1m-corpus-contract/provisional_1m_manifest.json
+[INDEPENDENT-PASS] 100000 base + 900000 delta = 1000000 docs, 2014465744 bytes; union 5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5 (still UNADOPTED: human ballot required)

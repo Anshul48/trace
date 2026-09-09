@@ -1,0 +1,23 @@
+usage: verify_1m_checksums.py [-h] [--manifest MANIFEST] [--root ROOT]
+                              [--emit-json EMIT_JSON]
+                              [--forensic-overrides FORENSIC_OVERRIDES]
+
+Verify the frozen Trace 1M corpus capsule (contract 2.0.0) from staged bytes.
+Fail-closed: any unresolvable source, hash drift, or count/byte/Merkle
+mismatch exits nonzero.
+
+options:
+  -h, --help            show this help message and exit
+  --manifest MANIFEST   Path to 1M corpus manifest JSON file
+  --root ROOT           Root directory of repository worktree (resolves
+                        relative --manifest)
+  --emit-json EMIT_JSON
+                        Optional path to write the machine-readable recompute
+                        summary as JSON
+  --forensic-overrides FORENSIC_OVERRIDES
+                        Optional JSON object mapping dataset_name to an
+                        alternate selection_range, e.g. '{"bright_delta": "[0,
+                        928750)"}'. Runs ONE additional clearly-labeled NON-
+                        CERTIFYING analysis pass for diagnosis; the strict
+                        verdict is computed without it and is never affected
+                        by it.

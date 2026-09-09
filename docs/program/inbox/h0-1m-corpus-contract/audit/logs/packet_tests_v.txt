@@ -1,0 +1,36 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/.venv-linux/bin/python
+cachedir: .pytest_cache
+rootdir: /mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace
+configfile: pyproject.toml
+plugins: anyio-4.14.2, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 25 items
+
+tests/test_h0_1m_seal.py::test_producer_publishes_provisional_on_coherent_selection PASSED [  4%]
+tests/test_h0_1m_seal.py::test_producer_accepts_matching_expect_file PASSED [  8%]
+tests/test_h0_1m_seal.py::test_producer_refuses_changed_ranges_with_stale_roots PASSED [ 12%]
+tests/test_h0_1m_seal.py::test_producer_refuses_replaced_shard_file PASSED [ 16%]
+tests/test_h0_1m_seal.py::test_producer_refuses_inconsistent_totals PASSED [ 20%]
+tests/test_h0_1m_seal.py::test_kill9_mid_write_leaves_no_publishable_manifest PASSED [ 24%]
+tests/test_h0_1m_seal.py::test_checker_passes_on_producer_output PASSED  [ 28%]
+tests/test_h0_1m_seal.py::test_checker_catches_planted_count_bug PASSED  [ 32%]
+tests/test_h0_1m_seal.py::test_checker_rejects_flipped_co_signature PASSED [ 36%]
+tests/test_h0_1m_seal.py::test_paths_agree_on_fixture_and_diverge_with_cause PASSED [ 40%]
+tests/test_h0_1m_seal.py::test_help_entry_points PASSED                  [ 44%]
+tests/test_h0_1m_seal.py::test_new_files_have_no_phantom_tooling_or_self_certification PASSED [ 48%]
+tests/test_h0_1m_adopt.py::test_merkle_empty_is_sha256_of_empty PASSED   [ 52%]
+tests/test_h0_1m_adopt.py::test_merkle_singleton_is_leaf PASSED          [ 56%]
+tests/test_h0_1m_adopt.py::test_merkle_odd_duplicates_last_and_sorts PASSED [ 60%]
+tests/test_h0_1m_adopt.py::test_content_hash_primitive_is_atomizer_normalize PASSED [ 64%]
+tests/test_h0_1m_adopt.py::test_fail_closed_missing_source PASSED        [ 68%]
+tests/test_h0_1m_adopt.py::test_fail_closed_sha_drift PASSED             [ 72%]
+tests/test_h0_1m_adopt.py::test_fail_closed_count_drift PASSED           [ 76%]
+tests/test_h0_1m_adopt.py::test_recompute_exact_on_mini_fixture PASSED   [ 80%]
+tests/test_h0_1m_adopt.py::test_forensic_pass_never_changes_strict_verdict PASSED [ 84%]
+tests/test_h0_1m_adopt.py::test_signer_hold_manifest_on_strict_fail PASSED [ 88%]
+tests/test_h0_1m_adopt.py::test_frozen_beir_manifest_id_check_byte_identical PASSED [ 92%]
+tests/test_h0_1m_adopt.py::test_new_packet_files_have_no_phantom_tooling PASSED [ 96%]
+tests/test_h0_1m_adopt.py::test_help_entry_points PASSED                 [100%]
+
+======================== 25 passed in 91.85s (0:01:31) =========================
