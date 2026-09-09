@@ -1,0 +1,218 @@
+{
+  "base_commit": "43ed591732cf1a3649cb241478671b1d37ff489f",
+  "cert_scan_verdict": "NO-EMISSION-FOUND",
+  "created_utc": "2026-09-09T13:48:20.647369+00:00",
+  "p3_commit": "a9b4d3bec1aaee40aa404ed458de2c3b92054865",
+  "packets": {
+    "P0": {
+      "branch": "p11-h0-seal-repair",
+      "commit": "43ed591732cf1a3649cb241478671b1d37ff489f",
+      "files": [
+        {
+          "bytes": 24826,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/gate_manifest.json",
+          "sha256": "d39a2d0d1a57d83b14882e95dddb80bf1854a6342e14074ea492e075cccfd88b"
+        },
+        {
+          "bytes": 11113,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/provisional_1m_manifest.json",
+          "sha256": "4f4deb50446f8325f676c3ee2618dfc3059eb78b5551e4855aef932bfe3c8c3d"
+        },
+        {
+          "bytes": 5685,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/selection_record.json",
+          "sha256": "50f3ab5c477f81372ca17dbcb3dcc6df6f81f5dea9dbfc386f0cde3eae8bf75f"
+        },
+        {
+          "bytes": 11636,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/selection_reconciliation.json",
+          "sha256": "e55a901dae1670131e1c273559c851ce1e1ac0dc6106f39da13bba18b3ebaa48"
+        },
+        {
+          "bytes": 5677,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/selection_reconciliation.md",
+          "sha256": "0560589ea09ae1e9b96fd7902643e870392ea3a25fb1726ef04e6b98abca96a7"
+        },
+        {
+          "bytes": 1883,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/00_AUDIT_INDEX.md",
+          "sha256": "51b464176c0ceba09daefefd48a1caacdb1223ebf5a12bed09049400e86c9823"
+        },
+        {
+          "bytes": 1840,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/acceptance_and_law.md",
+          "sha256": "5d345bab1417dd4264e116c1e7b8df4ff0c6f23540885ecf5aad1bac40c546a1"
+        },
+        {
+          "bytes": 2340,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/verdicts.md",
+          "sha256": "0f8b666040c12cdc285a2c02079a39a82a1f019df0de6eedc9166ace3143a061"
+        },
+        {
+          "bytes": 3030,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/reverify.sh",
+          "sha256": "ca8e61008e346e8d9cd9531a1346336c989ac050299e6fbc8dc36d4e2a55c6b0"
+        },
+        {
+          "bytes": 631,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/logs/frozen_baseline.txt",
+          "sha256": "e4b95a33719889583936805bbf0d689981ada7d456ec6976418a4bf057bc464c"
+        },
+        {
+          "bytes": 304,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/logs/frozen_checksums.txt",
+          "sha256": "4747f53e45ad10bae68c17ec1c4e33d10a1dc63981378a7c33edae042a9a472e"
+        },
+        {
+          "bytes": 603,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/logs/full_suite_q.txt",
+          "sha256": "730a949e4c3314562b6ae6bbd8e74999b9b899ba90ce9ab0e81296d66de2c2cf"
+        },
+        {
+          "bytes": 366,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/logs/independent_checker.txt",
+          "sha256": "7d87f51eaeb0f17695c438ec7df0cce12a4f1f609d69443f2317d61da6472709"
+        },
+        {
+          "bytes": 2747,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/logs/packet_tests_v.txt",
+          "sha256": "c699c4bf70345db2490801ff687310f2ed6e1440fc51f307f47cf94bab92495f"
+        },
+        {
+          "bytes": 1235,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/logs/help_seal_1m_manifest.txt",
+          "sha256": "959a0314e53d6a684ab12560f4a901d2c8b701f0a7eb81e69dd651a266708f5c"
+        },
+        {
+          "bytes": 1135,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/logs/help_sign_gate_manifest.txt",
+          "sha256": "357f15a5f9466be0db44cc86b69c3cf68954a809c35bde075d3bd2641f8504dc"
+        },
+        {
+          "bytes": 1210,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/logs/help_verify_1m_checksums.txt",
+          "sha256": "41cd40d4fdc4bfb04fd24cee251fec1ca1f82e5a700c1fb5f71c579465fc7921"
+        },
+        {
+          "bytes": 493,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/logs/help_verify_1m_independent.txt",
+          "sha256": "51b3acc5ce598a08b05e230af67c8984730d571ad393ddca9e2567d2f90879e0"
+        },
+        {
+          "bytes": 170402,
+          "path": "docs/program/inbox/h0-1m-corpus-contract/audit/logs/packet.diff",
+          "sha256": "82745547d07622a6c6c234c1e57d010e9861def9056f28fe3e8ec920eaeee421"
+        },
+        {
+          "bytes": 6786,
+          "path": "docs/program/inbox/1m-02-corpus-capsule/evidence/1m_corpus_manifest.json",
+          "sha256": "66c20da6cb77e77a859d20603eccf002eaf1a5f38b8008185c9f300e6ce503c5"
+        },
+        {
+          "bytes": 5147,
+          "path": "benchmarks/manifests/beir_musique_frozen_v1.json",
+          "sha256": "bf82b0d6114e01e1385a21c9a69a6d96bc8e6891f96abc8a01c1f5cae4001ed7"
+        },
+        {
+          "bytes": 1492,
+          "path": "docs/program/inbox/cap-ret04/retrieval_baseline_dossier.json",
+          "sha256": "a7b12ae14a9c14e9f05f415291c78517421dc963646a2bdc1ef0cc23f26f4df2"
+        },
+        {
+          "bytes": 1362,
+          "path": "docs/program/inbox/cap-ret04/verification_receipt.json",
+          "sha256": "2279cf085e6c21cbf09a93319ff2bf6961c0f693be25ab99b341c231f332117e"
+        },
+        {
+          "bytes": 12894,
+          "path": "scripts/seal_1m_manifest.py",
+          "sha256": "937fb037470fe0b60e8dcc6d22ce02889b190014e95930d91a187320c7e96d91"
+        },
+        {
+          "bytes": 12370,
+          "path": "scripts/sign_gate_manifest.py",
+          "sha256": "63595eb159e92f19afd2966a32288734b45ae7a97f7ebbc9ee5d073ba4318e21"
+        },
+        {
+          "bytes": 22229,
+          "path": "benchmarks/verify_1m_checksums.py",
+          "sha256": "a3cc70ae5aec7b3a293b13987c913a536e8393d4f701a741c902a78f5b2aba73"
+        },
+        {
+          "bytes": 16020,
+          "path": "benchmarks/verify_1m_independent.py",
+          "sha256": "f752d64b51f764219481680a2d616b882e59da190538250979aa05f9cbadd350"
+        },
+        {
+          "bytes": 11342,
+          "path": "tests/test_h0_1m_adopt.py",
+          "sha256": "b1e3ac82b3d3a7598eb646cab5d77ce490fe2346c8cff74daa7313b93781c695"
+        },
+        {
+          "bytes": 19865,
+          "path": "tests/test_h0_1m_seal.py",
+          "sha256": "72f2bcf06e802e700033ebc2759231db263401c231859d3f099d5240e70dd7ca"
+        }
+      ],
+      "note": "Critic-APPROVED attempt 2, but corpus UNADOPTED: successor H0-1M-SUCCESSOR-SEL-01 awaits human ballot; P0 stays quarantined until ballot.",
+      "status": "HOLD"
+    },
+    "P1": {
+      "branch": "p11-h1-core",
+      "commit": null,
+      "files": [],
+      "note": "NOT-BUILT: branch cut, no commits. 1M runner + H1 durability unattempted.",
+      "status": "NOT-BUILT"
+    },
+    "P2a": {
+      "branch": "(no branch; sequential after P1)",
+      "commit": null,
+      "files": [],
+      "note": "NOT-BUILT: B log pipeline + C2 budget router unattempted.",
+      "status": "NOT-BUILT"
+    },
+    "P2b": {
+      "branch": "p11-p2b-bridge-contradiction",
+      "commit": null,
+      "files": [],
+      "note": "NOT-BUILT: branch cut, no commits. C1 + C4 unattempted.",
+      "status": "NOT-BUILT"
+    },
+    "P2c": {
+      "branch": "p11-p2c-hyde",
+      "commit": null,
+      "files": [],
+      "note": "NOT-BUILT: branch cut, no commits. SLM probe belongs to the P2c packet; PARKED (no SLM) remains a valid terminal state per coordinator protocol.",
+      "status": "NOT-BUILT"
+    },
+    "P3": {
+      "branch": "p11-p3-warm-dream",
+      "commit": "a9b4d3bec1aaee40aa404ed458de2c3b92054865",
+      "files": [
+        {
+          "bytes": 41043,
+          "git": "a9b4d3bec1aaee40aa404ed458de2c3b92054865:src/trace/v2/cortex.py",
+          "sha256": "5f28b85d205bfa68c6f33c7f2c671904ab0f3c539439fe102a74a3f8f5eacc0c"
+        },
+        {
+          "bytes": 6882,
+          "git": "a9b4d3bec1aaee40aa404ed458de2c3b92054865:src/trace/v2/jobs.py",
+          "sha256": "617a4c7d990bd0c2060770eb124e37600476a98bddf3f8d06f5e2fbf39432ad2"
+        },
+        {
+          "bytes": 7231,
+          "git": "a9b4d3bec1aaee40aa404ed458de2c3b92054865:src/trace/v2/worker.py",
+          "sha256": "0e4c84b5996c40b864e4a66177212da2098fde5e1d207b89bcfa70d1169a06ec"
+        },
+        {
+          "bytes": 19294,
+          "git": "a9b4d3bec1aaee40aa404ed458de2c3b92054865:tests/test_p3_warm_dream.py",
+          "sha256": "1081e362347f2886ea1242802eca92c0f6793c0576943fe5845d6ee4206efc94"
+        }
+      ],
+      "note": "Code delivered on its branch; blind-critic verdict pending; unapproved, unmerged.",
+      "status": "PENDING-CRITIC"
+    }
+  },
+  "schema_version": "p4-ballot-manifest/1.0.0"
+}

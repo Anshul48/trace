@@ -1,0 +1,16 @@
+usage: assemble_ballot_manifest.py [-h] [--root ROOT] [--out OUT]
+                                   [--scan-out SCAN_OUT] [--check]
+
+Assemble (or --check) the Trace v1.1 ballot evidence manifest. Scripts only;
+no new claims; fail closed.
+
+options:
+  -h, --help           show this help message and exit
+  --root ROOT          Repo root (default: current directory).
+  --out OUT            Manifest JSON to write (default:
+                       docs/program/inbox/p4-ballot-
+                       pack/evidence_manifest.json).
+  --scan-out SCAN_OUT  Scan report to write (default:
+                       docs/program/inbox/p4-ballot-pack/cert_scan.txt).
+  --check              Recompute and compare against --out/--scan-out; exit
+                       nonzero on any mismatch (second-party recompute).

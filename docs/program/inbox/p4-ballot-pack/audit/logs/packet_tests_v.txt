@@ -1,0 +1,14 @@
+plugins: anyio-4.14.2, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 8 items
+
+tests/test_p4_ballot_pack.py::test_help_lists_all_flags PASSED           [ 12%]
+tests/test_p4_ballot_pack.py::test_manifest_recomputable_into_tmp PASSED [ 25%]
+tests/test_p4_ballot_pack.py::test_check_mode_passes_second_party PASSED [ 37%]
+tests/test_p4_ballot_pack.py::test_check_mode_fails_closed_on_tamper PASSED [ 50%]
+tests/test_p4_ballot_pack.py::test_check_mode_fails_closed_on_missing_root PASSED [ 62%]
+tests/test_p4_ballot_pack.py::test_manifest_covers_all_packets_with_hashes PASSED [ 75%]
+tests/test_p4_ballot_pack.py::test_scan_verdict_clean_and_self_exclusion_exact PASSED [ 87%]
+tests/test_p4_ballot_pack.py::test_ballot_rows_complete_and_unsigned PASSED [100%]
+
+============================== 8 passed in 9.62s ===============================

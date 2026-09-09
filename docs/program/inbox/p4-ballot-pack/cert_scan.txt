@@ -1,0 +1,26 @@
+P4 certification-string scan
+verdict: NO-EMISSION-FOUND
+scope files: 34
+excluded (with rationale above):
+  - docs/program/inbox/h0-1m-corpus-contract/audit/logs/packet.diff
+  - docs/program/inbox/p4-ballot-pack/assemble_ballot_manifest.py
+reviewed hits (9):
+  docs/program/inbox/h0-1m-corpus-contract/gate_manifest.json:6 [INPUT-STATUS] APPROVED :: "status": "FROZEN_APPROVED"
+    rationale: Labels the staged capsule input as frozen; gate verdict is HOLD with co-signature PENDING.
+  docs/program/inbox/h0-1m-corpus-contract/audit/acceptance_and_law.md:17 [AUDIT-QUOTE] APPROVED :: successor `H0-1M-SUCCESSOR-SEL-01` awaits human ballot → critic APPROVED
+    rationale: Quotes the received blind-critic verdict; packet status stays quarantined until ballot.
+  docs/program/inbox/h0-1m-corpus-contract/audit/verdicts.md:18 [AUDIT-QUOTE] APPROVED :: ## Attempt 2 — branch `p11-h0-seal-repair` — APPROVED, no violations
+    rationale: Coordinator record of the received blind-critic verdict text.
+  docs/program/inbox/1m-02-corpus-capsule/evidence/1m_corpus_manifest.json:134 [INPUT-STATUS] APPROVED :: "status": "FROZEN_APPROVED"
+    rationale: Labels the staged capsule input as frozen; the gate verdict on it is HOLD with co-signature PENDING (see gate_manifest.json).
+  scripts/sign_gate_manifest.py:13 [MENTION-PROHIBITION] CERTIFIED :: CERTIFIED/APPROVED).
+    rationale: Tail line of the docstring prohibition (lines 11-14: the script never prints these strings); the script emits no such string.
+  scripts/sign_gate_manifest.py:13 [MENTION-PROHIBITION] APPROVED :: CERTIFIED/APPROVED).
+    rationale: Tail line of the docstring prohibition (lines 11-14: the script never prints these strings); the script emits no such string.
+  tests/test_h0_1m_adopt.py:265 [TEST-PATTERN] CERTIFIED :: for token in ('"CERTIFIED', "'CERTIFIED", '"APPROVED', "'APPROVED"):
+    rationale: H0 packet test's own quoted-claim scan patterns (precedent: packet.diff:3137).
+  tests/test_h0_1m_adopt.py:265 [TEST-PATTERN] APPROVED :: for token in ('"CERTIFIED', "'CERTIFIED", '"APPROVED', "'APPROVED"):
+    rationale: H0 packet test's own quoted-claim scan patterns (precedent: packet.diff:3137).
+  docs/program/inbox/p4-ballot-pack/ballot_rows_draft.md:8 [AUDIT-QUOTE] APPROVED :: > (base `43ed591`): P0 HOLD (critic-APPROVED (P0 attempt 2), corpus
+    rationale: Draft rows quote the received P0 critic verdict; the draft confers nothing.
+unreviewed hits (0):
