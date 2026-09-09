@@ -62,6 +62,12 @@ Key decisions:
 2. P2c and any SLM-dependent work degrade gracefully: no local SLM ⇒ packet PARKED with evidence, pipeline proceeds.
 3. Isolation is one git branch per packet (`p11-h0-adopt`, `p11-h1-core`, …) cut from the last approved commit;
    the critic diffs branch-vs-base. Max 3 attempts per packet, then halt to human.
+4. History discipline (standing authorization): on critic APPROVED the coordinator COMMITS the packet branch
+   immediately (named packet + audit files only, never a broad add) — no per-stage commit approval needed.
+   The next packet branch stacks from that commit. On QUARANTINED/REJECTED the branch is PRESERVED as evidence
+   and work halts to the human; branch deletion only on explicit human order. MERGES to `main` are batched
+   until all stages plus ballots complete, and each merge stays individually human-gated — auto-commit is never
+   auto-merge.
 4. The critic runs blind in a fresh musecode session per delivery: diff + test output + acceptance row +
    `--help` transcripts only, never builder chat.
 
@@ -115,8 +121,10 @@ Step 0 (once): settle the dirty tree (commit/stash/record untracked) so packet d
 commit and the Paste-A baseline.
 Per packet: (1) cut branch `p11-<slug>` from the last approved commit, (2) spawn ONE agy builder with Paste B + the
 D-packet task, (3) collect diff vs base + test outputs + `--help` transcripts, (4) open a FRESH musecode critic
-session with Paste E + diff + outputs + transcripts + acceptance row, (5) on APPROVED ask the human to merge; on
-QUARANTINED/REJECTED delete the branch after logging the refutation, max 3 attempts per packet, then halt to human.
+session with Paste E + diff + outputs + transcripts + acceptance row, (5) on APPROVED COMMIT the branch immediately (standing authorization per Key decision 4;
+named files only) and ask the human to merge — merges batch to end of pipeline and each stays human-gated; on
+QUARANTINED/REJECTED PRESERVE the branch with the refutation logged (deletion only on explicit human order),
+max 3 attempts per packet, then halt to human.
 Never merge without human sign-off. P2b ‖ P3 may run concurrently on separate branches; all else sequential. P2c
 PARKED (no SLM) is a valid terminal state, not a failure — record and proceed to P3.
 

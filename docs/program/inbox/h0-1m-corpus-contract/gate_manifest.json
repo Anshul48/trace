@@ -1,0 +1,443 @@
+{
+  "capsule": {
+    "contract_version": "2.0.0",
+    "manifest_path": "docs/program/inbox/1m-02-corpus-capsule/evidence/1m_corpus_manifest.json",
+    "manifest_sha256": "66c20da6cb77e77a859d20603eccf002eaf1a5f38b8008185c9f300e6ce503c5",
+    "status": "FROZEN_APPROVED"
+  },
+  "co_signature": {
+    "ballot_text": "H0 H0-1M-CORPUS-CONTRACT: <PASS|HOLD|ABORT> \u2014 capsule 1m_corpus_manifest.json (contract 2.0.0), union Merkle 5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5, gate manifest <path>, verifier exit <rc>. Signed: <name+date>.",
+    "instruction": "A human records the H0 ballot in 06_DECISION_LOG.md; until then this manifest confers no scale claim.",
+    "status": "PENDING_HUMAN_BALLOT"
+  },
+  "contract_claims": {
+    "base_100k_documents_count": 100000,
+    "base_merkle_root_sha256": "23b99dfe386a99aab8ad283d5d50636a898ba318480f5c460adb60a2e57e6e5b",
+    "base_raw_text_bytes": 65394921,
+    "delta_900k_documents_count": 900000,
+    "delta_merkle_root_sha256": "9385407a3f90648675467b0a603b2494b3e0c3b72d1fdd4edb7304d7cc10dc30",
+    "delta_raw_text_bytes": 1949070823,
+    "target_unique_documents_d": 1000000,
+    "total_raw_text_bytes": 2014465744,
+    "union_merkle_root_sha256": "5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5"
+  },
+  "created_utc": "2026-09-09T02:52:29.330773+00:00",
+  "forensic_non_certifying": {
+    "certifying": false,
+    "matches_claims": {
+      "base_bytes": true,
+      "base_docs": true,
+      "base_merkle": true,
+      "delta_bytes": true,
+      "delta_docs": true,
+      "delta_merkle": true,
+      "total_bytes": true,
+      "union_docs": true,
+      "union_merkle": true
+    },
+    "observed": {
+      "base_bytes": 65394921,
+      "base_docs": 100000,
+      "base_merkle": "23b99dfe386a99aab8ad283d5d50636a898ba318480f5c460adb60a2e57e6e5b",
+      "delta_bytes": 1949070823,
+      "delta_docs": 900000,
+      "delta_merkle": "9385407a3f90648675467b0a603b2494b3e0c3b72d1fdd4edb7304d7cc10dc30",
+      "total_bytes": 2014465744,
+      "union_docs": 1000000,
+      "union_merkle": "5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5"
+    },
+    "range_overrides": {
+      "bright_delta": "[0, 928750)",
+      "wikipedia_delta": "[0, 96639)"
+    },
+    "shards": [
+      {
+        "dataset_name": "musique",
+        "partition": "base_100k",
+        "recomputed_bytes": 37343384,
+        "recomputed_docs": 80047,
+        "selection_range_used": "[0, 80047)"
+      },
+      {
+        "dataset_name": "beir-fiqa",
+        "partition": "base_100k",
+        "recomputed_bytes": 8141714,
+        "recomputed_docs": 10575,
+        "selection_range_used": "[0, 10575)"
+      },
+      {
+        "dataset_name": "beir-scifact",
+        "partition": "base_100k",
+        "recomputed_bytes": 7777523,
+        "recomputed_docs": 5178,
+        "selection_range_used": "[0, 5183)"
+      },
+      {
+        "dataset_name": "beir-nfcorpus",
+        "partition": "base_100k",
+        "recomputed_bytes": 5718118,
+        "recomputed_docs": 3591,
+        "selection_range_used": "[0, 3633)"
+      },
+      {
+        "dataset_name": "multihop-rag",
+        "partition": "base_100k",
+        "recomputed_bytes": 6414182,
+        "recomputed_docs": 609,
+        "selection_range_used": "[0, 609)"
+      },
+      {
+        "dataset_name": "musique_delta",
+        "partition": "delta_900k",
+        "recomputed_bytes": 10138960,
+        "recomputed_docs": 21915,
+        "selection_range_used": "[80047, 101962)"
+      },
+      {
+        "dataset_name": "beir-fiqa_delta",
+        "partition": "delta_900k",
+        "recomputed_bytes": 36130851,
+        "recomputed_docs": 47015,
+        "selection_range_used": "[10575, 57600)"
+      },
+      {
+        "dataset_name": "bright_delta",
+        "partition": "delta_900k",
+        "recomputed_bytes": 678354057,
+        "recomputed_docs": 684431,
+        "selection_range_used": "[0, 928750)"
+      },
+      {
+        "dataset_name": "enron_delta",
+        "partition": "delta_900k",
+        "recomputed_bytes": 124668874,
+        "recomputed_docs": 50000,
+        "selection_range_used": "[0, 50000)"
+      },
+      {
+        "dataset_name": "wikipedia_delta",
+        "partition": "delta_900k",
+        "recomputed_bytes": 1099778081,
+        "recomputed_docs": 96639,
+        "selection_range_used": "[0, 96639)"
+      }
+    ]
+  },
+  "frozen_workload_vector": {
+    "blind_file": {
+      "relative_path": "1m_queries_blind_eval.jsonl",
+      "sha256": "49261b7a56d5363015b536ee6e5f0505cc14709fcf5b36c3f932510b3bff3417",
+      "total_queries": 8209
+    },
+    "blind_file_sha256": "49261b7a56d5363015b536ee6e5f0505cc14709fcf5b36c3f932510b3bff3417",
+    "contract_version": "2.2.0",
+    "manifest_path": "docs/program/inbox/1m-02-corpus-capsule/evidence/1m_queries_manifest.json",
+    "manifest_sha256": "2847a30ee482a95e9b71f750bba29ad2029753acc6933e03f89acc33c7a0b6c5",
+    "selection_merkle_root_sha256": "18117ca42890d83db227131ee3d1ea40c00d7a95422db5c778cde23e6a95fdd0",
+    "summary_statistics": {
+      "lane_breakdown": {
+        "abstention_suite": 301,
+        "complex_reasoning": 752,
+        "direct_lookup": 1109,
+        "domain_semantic": 3237,
+        "multi_hop_reasoning": 2255,
+        "semantic_qa": 555
+      },
+      "total_answerable_closed_queries": 7908,
+      "total_closed_evaluation_queries": 8209,
+      "total_evaluation_suites": 6,
+      "total_unanswerable_null_queries": 301
+    },
+    "target_standard": "DEC-P-005b-LEVEL2"
+  },
+  "gate_id": "H0-1M-CORPUS-CONTRACT",
+  "horizon": "H0",
+  "objective": "Adopt the 1M corpus contract (preflight; grants no scale claim)",
+  "path_map": {
+    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
+    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl",
+    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl",
+    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl",
+    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
+    "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
+    "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl",
+    "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl"
+  },
+  "revision_scope": {
+    "branch": "p11-h0-adopt",
+    "head_commit": "0150fbc19cc25bf2cb080bb797b535c3f4f5499d",
+    "packet_base_commit": "0150fbc19cc25bf2cb080bb797b535c3f4f5499d",
+    "scope": "H0 preflight only: path normalization + gate manifest. No scale claim, no promotion, no capsule-manifest edits."
+  },
+  "signed": false,
+  "sources": [
+    {
+      "dataset_name": "musique",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "partition": "base_100k",
+      "recomputed_bytes_strict": 37343384,
+      "recomputed_docs_strict": 80047,
+      "selected_records_d_manifest": 80047,
+      "selected_text_bytes_manifest": 37343384,
+      "selection_range_manifest": "[0, 80047)",
+      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
+      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
+      "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c"
+    },
+    {
+      "dataset_name": "beir-fiqa",
+      "license": "CC BY-NC-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "partition": "base_100k",
+      "recomputed_bytes_strict": 8141714,
+      "recomputed_docs_strict": 10575,
+      "selected_records_d_manifest": 10575,
+      "selected_text_bytes_manifest": 8141714,
+      "selection_range_manifest": "[0, 10575)",
+      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
+      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
+      "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce"
+    },
+    {
+      "dataset_name": "beir-scifact",
+      "license": "CC BY-NC 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "partition": "base_100k",
+      "recomputed_bytes_strict": 7777523,
+      "recomputed_docs_strict": 5178,
+      "selected_records_d_manifest": 5178,
+      "selected_text_bytes_manifest": 7777523,
+      "selection_range_manifest": "[0, 5183)",
+      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl",
+      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl",
+      "source_file_sha256": "08af2db965a8fd04ad1c4bf03ed5ba91e742c0cbefcb10afc256681084504ff8"
+    },
+    {
+      "dataset_name": "beir-nfcorpus",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "partition": "base_100k",
+      "recomputed_bytes_strict": 5718118,
+      "recomputed_docs_strict": 3591,
+      "selected_records_d_manifest": 3591,
+      "selected_text_bytes_manifest": 5718118,
+      "selection_range_manifest": "[0, 3633)",
+      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl",
+      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl",
+      "source_file_sha256": "f5bfa0bb46b2d592fdddc62e419e5dbf9d2f6f5deabb70745d45fc32573854b9"
+    },
+    {
+      "dataset_name": "multihop-rag",
+      "license": "ODC-By v1.0",
+      "license_url": "https://opendatacommons.org/licenses/by/1-0/",
+      "partition": "base_100k",
+      "recomputed_bytes_strict": 6414182,
+      "recomputed_docs_strict": 609,
+      "selected_records_d_manifest": 609,
+      "selected_text_bytes_manifest": 6414182,
+      "selection_range_manifest": "[0, 609)",
+      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl",
+      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl",
+      "source_file_sha256": "7228d82f926c41a1d742baeffbf1fb4ae5a14e04f405c045aaf9a5da3281f53a"
+    },
+    {
+      "dataset_name": "musique_delta",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "partition": "delta_900k",
+      "recomputed_bytes_strict": 10138960,
+      "recomputed_docs_strict": 21915,
+      "selected_records_d_manifest": 21915,
+      "selected_text_bytes_manifest": 10138960,
+      "selection_range_manifest": "[80047, 101962)",
+      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
+      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
+      "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c"
+    },
+    {
+      "dataset_name": "beir-fiqa_delta",
+      "license": "CC BY-NC-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "partition": "delta_900k",
+      "recomputed_bytes_strict": 36130851,
+      "recomputed_docs_strict": 47015,
+      "selected_records_d_manifest": 47015,
+      "selected_text_bytes_manifest": 36130851,
+      "selection_range_manifest": "[10575, 57600)",
+      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
+      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
+      "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce"
+    },
+    {
+      "dataset_name": "bright_delta",
+      "license": "CC BY-NC 4.0 / Apache-2.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "partition": "delta_900k",
+      "recomputed_bytes_strict": 603263678,
+      "recomputed_docs_strict": 618306,
+      "selected_records_d_manifest": 643710,
+      "selected_text_bytes_manifest": 678354057,
+      "selection_range_manifest": "[0, 643710)",
+      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
+      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
+      "source_file_sha256": "0ac9088e4dca7f910777bd7388bdc4e5281eb2f2c7339c89797ca8e498101b5b"
+    },
+    {
+      "dataset_name": "enron_delta",
+      "license": "Public Domain (FERC Enron Corpus)",
+      "license_url": "https://www.cs.cmu.edu/~./enron/",
+      "partition": "delta_900k",
+      "recomputed_bytes_strict": 124668874,
+      "recomputed_docs_strict": 50000,
+      "selected_records_d_manifest": 50000,
+      "selected_text_bytes_manifest": 124668874,
+      "selection_range_manifest": "[0, 50000)",
+      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl",
+      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl",
+      "source_file_sha256": "4f9cc47b7e00fd6a89ff6e420bc3933b3c474044b8ceeb9c6f41a2491b4b5e6d"
+    },
+    {
+      "dataset_name": "wikipedia_delta",
+      "license": "CC BY-SA 4.0 / GFDL",
+      "license_url": "https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_4.0_International_License",
+      "partition": "delta_900k",
+      "recomputed_bytes_strict": 1361116951,
+      "recomputed_docs_strict": 137360,
+      "selected_records_d_manifest": 137360,
+      "selected_text_bytes_manifest": 1425430486,
+      "selection_range_manifest": "[0, 137360)",
+      "source_file_manifest": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl",
+      "source_file_resolved": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl",
+      "source_file_sha256": "ffe485442095c1f8a6bb141dc14deb4ca8ff9b78edecf15a2bda830825eb978d"
+    }
+  ],
+  "tokenizer_identity": {
+    "content_hash_primitive": "normalize_text: line-ending normalization only (CRLF/CR -> LF); leaf = sha256(normalized.encode('utf-8'))",
+    "lexical_tokenizer": "tokenize: lowercased [A-Za-z0-9_]{2,} word tokens (model-free, deterministic)",
+    "module": "trace.v2.atomizer",
+    "module_path": "src/trace/v2/atomizer.py",
+    "module_sha256": "12026f943ad52b35d2824e246b95f8c7a002d2b4576aa161434c2c7920fb8447",
+    "note": "1M contract pins raw UTF-8 bytes + content hashes; no model tokenizer enters the corpus commitment."
+  },
+  "verdict": "HOLD",
+  "verification": {
+    "argv": [
+      "/usr/bin/python3",
+      "/mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/benchmarks/verify_1m_checksums.py",
+      "--manifest",
+      "/mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/docs/program/inbox/1m-02-corpus-capsule/evidence/1m_corpus_manifest.json",
+      "--emit-json",
+      "/mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/docs/program/inbox/h0-1m-corpus-contract/.verifier_recompute.tmp.json",
+      "--forensic-overrides",
+      "{\"bright_delta\": \"[0, 928750)\", \"wikipedia_delta\": \"[0, 96639)\"}"
+    ],
+    "exit_code": 1,
+    "stdout_tail": "Verifying 1M corpus manifest: /mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/docs/program/inbox/1m-02-corpus-capsule/evidence/1m_corpus_manifest.json\n[FORENSIC-NON-CERTIFYING] alternate selection analysis (does not affect verdict):\n  base_docs: MATCH\n  delta_docs: MATCH\n  union_docs: MATCH\n  base_bytes: MATCH\n  delta_bytes: MATCH\n  total_bytes: MATCH\n  base_merkle: MATCH\n  delta_merkle: MATCH\n  union_merkle: MATCH\nRecompute summary: /mnt/c/Users/anshu/OneDrive/Documents/Code/Utilities/trace/docs/program/inbox/h0-1m-corpus-contract/.verifier_recompute.tmp.json\n[FAIL] 9 verification errors detected:\n  - bright_delta doc count mismatch: manifest claims 643710, recomputed 618306\n  - bright_delta byte total mismatch: manifest claims 678354057, recomputed 603263678\n  - wikipedia_delta byte total mismatch: manifest claims 1425430486, recomputed 1361116951\n  - Delta doc total mismatch: expected 900000, recomputed 874596\n  - Union uniqueness mismatch: 974596 doc_ids / 974596 content_hashes, expected 1000000 each\n  - delta_raw_text_bytes mismatch: manifest claims 1949070823, recomputed 2135319314\n  - total_raw_text_bytes mismatch: manifest claims 2014465744, recomputed 2200714235\n  - delta_merkle_root_sha256 mismatch: manifest claims 9385407a3f90648675467b0a603b2494b3e0c3b72d1fdd4edb7304d7cc10dc30, recomputed f14b18b96bd43592f989d9da5acf76a35a3aaeed756a24c160b16b8c38c31477\n  - union_merkle_root_sha256 mismatch: manifest claims 5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5, recomputed 88768eacc95ef920e146ab3d0d137f961740b856487d5e68daa4ebca17f7cff1\n",
+    "strict_errors": [
+      "bright_delta doc count mismatch: manifest claims 643710, recomputed 618306",
+      "bright_delta byte total mismatch: manifest claims 678354057, recomputed 603263678",
+      "wikipedia_delta byte total mismatch: manifest claims 1425430486, recomputed 1361116951",
+      "Delta doc total mismatch: expected 900000, recomputed 874596",
+      "Union uniqueness mismatch: 974596 doc_ids / 974596 content_hashes, expected 1000000 each",
+      "delta_raw_text_bytes mismatch: manifest claims 1949070823, recomputed 2135319314",
+      "total_raw_text_bytes mismatch: manifest claims 2014465744, recomputed 2200714235",
+      "delta_merkle_root_sha256 mismatch: manifest claims 9385407a3f90648675467b0a603b2494b3e0c3b72d1fdd4edb7304d7cc10dc30, recomputed f14b18b96bd43592f989d9da5acf76a35a3aaeed756a24c160b16b8c38c31477",
+      "union_merkle_root_sha256 mismatch: manifest claims 5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5, recomputed 88768eacc95ef920e146ab3d0d137f961740b856487d5e68daa4ebca17f7cff1"
+    ],
+    "strict_passed": false,
+    "strict_summary": {
+      "path_map": {
+        "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-fiqa/corpus.jsonl",
+        "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-nfcorpus/corpus.jsonl",
+        "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/beir-scifact/corpus.jsonl",
+        "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/multihop-rag/corpus.jsonl",
+        "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/normalized/d2b-20260819/repair-mq-roundtrip-20260820/musique/corpus.jsonl",
+        "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-bench-data/verification/d2b-20260819/independent-replay-20260820/bright/corpus.jsonl",
+        "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/enron/enron_emails.jsonl",
+        "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl": "/mnt/c/Users/anshu/AppData/Local/trace-scale-data/staged_1m/wikipedia_delta.jsonl"
+      },
+      "recomputed_base_bytes": 65394921,
+      "recomputed_base_docs": 100000,
+      "recomputed_base_merkle": "23b99dfe386a99aab8ad283d5d50636a898ba318480f5c460adb60a2e57e6e5b",
+      "recomputed_delta_bytes": 2135319314,
+      "recomputed_delta_docs": 874596,
+      "recomputed_delta_merkle": "f14b18b96bd43592f989d9da5acf76a35a3aaeed756a24c160b16b8c38c31477",
+      "recomputed_total_bytes": 2200714235,
+      "recomputed_union_merkle": "88768eacc95ef920e146ab3d0d137f961740b856487d5e68daa4ebca17f7cff1",
+      "shards": [
+        {
+          "dataset_name": "musique",
+          "partition": "base_100k",
+          "recomputed_bytes": 37343384,
+          "recomputed_docs": 80047,
+          "selection_range_used": "[0, 80047)"
+        },
+        {
+          "dataset_name": "beir-fiqa",
+          "partition": "base_100k",
+          "recomputed_bytes": 8141714,
+          "recomputed_docs": 10575,
+          "selection_range_used": "[0, 10575)"
+        },
+        {
+          "dataset_name": "beir-scifact",
+          "partition": "base_100k",
+          "recomputed_bytes": 7777523,
+          "recomputed_docs": 5178,
+          "selection_range_used": "[0, 5183)"
+        },
+        {
+          "dataset_name": "beir-nfcorpus",
+          "partition": "base_100k",
+          "recomputed_bytes": 5718118,
+          "recomputed_docs": 3591,
+          "selection_range_used": "[0, 3633)"
+        },
+        {
+          "dataset_name": "multihop-rag",
+          "partition": "base_100k",
+          "recomputed_bytes": 6414182,
+          "recomputed_docs": 609,
+          "selection_range_used": "[0, 609)"
+        },
+        {
+          "dataset_name": "musique_delta",
+          "partition": "delta_900k",
+          "recomputed_bytes": 10138960,
+          "recomputed_docs": 21915,
+          "selection_range_used": "[80047, 101962)"
+        },
+        {
+          "dataset_name": "beir-fiqa_delta",
+          "partition": "delta_900k",
+          "recomputed_bytes": 36130851,
+          "recomputed_docs": 47015,
+          "selection_range_used": "[10575, 57600)"
+        },
+        {
+          "dataset_name": "bright_delta",
+          "partition": "delta_900k",
+          "recomputed_bytes": 603263678,
+          "recomputed_docs": 618306,
+          "selection_range_used": "[0, 643710)"
+        },
+        {
+          "dataset_name": "enron_delta",
+          "partition": "delta_900k",
+          "recomputed_bytes": 124668874,
+          "recomputed_docs": 50000,
+          "selection_range_used": "[0, 50000)"
+        },
+        {
+          "dataset_name": "wikipedia_delta",
+          "partition": "delta_900k",
+          "recomputed_bytes": 1361116951,
+          "recomputed_docs": 137360,
+          "selection_range_used": "[0, 137360)"
+        }
+      ]
+    },
+    "verifier": "benchmarks/verify_1m_checksums.py"
+  }
+}

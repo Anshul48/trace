@@ -1,0 +1,320 @@
+{
+  "record": "selection_reconciliation",
+  "status": "HOLD-UNADOPTED",
+  "manifest_generations": {
+    "original_seal": "d14f1a2",
+    "reseal": "34a0df1",
+    "note": "exactly two git generations; capsule untouched since 34a0df1"
+  },
+  "contract_claims": {
+    "target_unique_documents_d": 1000000,
+    "base_100k_documents_count": 100000,
+    "delta_900k_documents_count": 900000,
+    "base_intersect_delta_count": 0,
+    "total_raw_text_bytes": 2014465744,
+    "base_raw_text_bytes": 65394921,
+    "delta_raw_text_bytes": 1949070823,
+    "base_merkle_root_sha256": "23b99dfe386a99aab8ad283d5d50636a898ba318480f5c460adb60a2e57e6e5b",
+    "delta_merkle_root_sha256": "9385407a3f90648675467b0a603b2494b3e0c3b72d1fdd4edb7304d7cc10dc30",
+    "union_merkle_root_sha256": "5039acefca682c7ea1f5c466af7089104781081591ab6f5c2879da5f7a79a5f5"
+  },
+  "strict_recompute_totals": {
+    "recomputed_base_docs": 100000,
+    "recomputed_base_bytes": 65394921,
+    "recomputed_delta_docs": 874596,
+    "recomputed_delta_bytes": 2135319314,
+    "recomputed_total_bytes": 2200714235,
+    "recomputed_base_merkle": "23b99dfe386a99aab8ad283d5d50636a898ba318480f5c460adb60a2e57e6e5b",
+    "recomputed_delta_merkle": "f14b18b96bd43592f989d9da5acf76a35a3aaeed756a24c160b16b8c38c31477",
+    "recomputed_union_merkle": "88768eacc95ef920e146ab3d0d137f961740b856487d5e68daa4ebca17f7cff1"
+  },
+  "strict_error_count": 9,
+  "forensic_claim_matches": {
+    "base_docs": true,
+    "delta_docs": true,
+    "union_docs": true,
+    "base_bytes": true,
+    "delta_bytes": true,
+    "total_bytes": true,
+    "base_merkle": true,
+    "delta_merkle": true,
+    "union_merkle": true
+  },
+  "shards": [
+    {
+      "dataset_name": "musique",
+      "partition": "base_100k",
+      "d14f1a2_original": {
+        "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c",
+        "selection_range": "[0, 80047)",
+        "selected_records_d": 80047,
+        "selected_text_bytes": 37343384
+      },
+      "head_current": {
+        "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c",
+        "selection_range": "[0, 80047)",
+        "selected_records_d": 80047,
+        "selected_text_bytes": 37343384
+      },
+      "strict_recompute_from_staged_bytes": {
+        "selection_range_used": "[0, 80047)",
+        "recomputed_docs": 80047,
+        "recomputed_bytes": 37343384
+      },
+      "forensic_prereseal_recompute": {
+        "selection_range_used": "[0, 80047)",
+        "recomputed_docs": 80047,
+        "recomputed_bytes": 37343384
+      }
+    },
+    {
+      "dataset_name": "beir-fiqa",
+      "partition": "base_100k",
+      "d14f1a2_original": {
+        "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce",
+        "selection_range": "[0, 10575)",
+        "selected_records_d": 10575,
+        "selected_text_bytes": 8141714
+      },
+      "head_current": {
+        "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce",
+        "selection_range": "[0, 10575)",
+        "selected_records_d": 10575,
+        "selected_text_bytes": 8141714
+      },
+      "strict_recompute_from_staged_bytes": {
+        "selection_range_used": "[0, 10575)",
+        "recomputed_docs": 10575,
+        "recomputed_bytes": 8141714
+      },
+      "forensic_prereseal_recompute": {
+        "selection_range_used": "[0, 10575)",
+        "recomputed_docs": 10575,
+        "recomputed_bytes": 8141714
+      }
+    },
+    {
+      "dataset_name": "beir-scifact",
+      "partition": "base_100k",
+      "d14f1a2_original": {
+        "source_file_sha256": "08af2db965a8fd04ad1c4bf03ed5ba91e742c0cbefcb10afc256681084504ff8",
+        "selection_range": "[0, 5183)",
+        "selected_records_d": 5178,
+        "selected_text_bytes": 7777523
+      },
+      "head_current": {
+        "source_file_sha256": "08af2db965a8fd04ad1c4bf03ed5ba91e742c0cbefcb10afc256681084504ff8",
+        "selection_range": "[0, 5183)",
+        "selected_records_d": 5178,
+        "selected_text_bytes": 7777523
+      },
+      "strict_recompute_from_staged_bytes": {
+        "selection_range_used": "[0, 5183)",
+        "recomputed_docs": 5178,
+        "recomputed_bytes": 7777523
+      },
+      "forensic_prereseal_recompute": {
+        "selection_range_used": "[0, 5183)",
+        "recomputed_docs": 5178,
+        "recomputed_bytes": 7777523
+      }
+    },
+    {
+      "dataset_name": "beir-nfcorpus",
+      "partition": "base_100k",
+      "d14f1a2_original": {
+        "source_file_sha256": "f5bfa0bb46b2d592fdddc62e419e5dbf9d2f6f5deabb70745d45fc32573854b9",
+        "selection_range": "[0, 3633)",
+        "selected_records_d": 3591,
+        "selected_text_bytes": 5718118
+      },
+      "head_current": {
+        "source_file_sha256": "f5bfa0bb46b2d592fdddc62e419e5dbf9d2f6f5deabb70745d45fc32573854b9",
+        "selection_range": "[0, 3633)",
+        "selected_records_d": 3591,
+        "selected_text_bytes": 5718118
+      },
+      "strict_recompute_from_staged_bytes": {
+        "selection_range_used": "[0, 3633)",
+        "recomputed_docs": 3591,
+        "recomputed_bytes": 5718118
+      },
+      "forensic_prereseal_recompute": {
+        "selection_range_used": "[0, 3633)",
+        "recomputed_docs": 3591,
+        "recomputed_bytes": 5718118
+      }
+    },
+    {
+      "dataset_name": "multihop-rag",
+      "partition": "base_100k",
+      "d14f1a2_original": {
+        "source_file_sha256": "7228d82f926c41a1d742baeffbf1fb4ae5a14e04f405c045aaf9a5da3281f53a",
+        "selection_range": "[0, 609)",
+        "selected_records_d": 609,
+        "selected_text_bytes": 6414182
+      },
+      "head_current": {
+        "source_file_sha256": "7228d82f926c41a1d742baeffbf1fb4ae5a14e04f405c045aaf9a5da3281f53a",
+        "selection_range": "[0, 609)",
+        "selected_records_d": 609,
+        "selected_text_bytes": 6414182
+      },
+      "strict_recompute_from_staged_bytes": {
+        "selection_range_used": "[0, 609)",
+        "recomputed_docs": 609,
+        "recomputed_bytes": 6414182
+      },
+      "forensic_prereseal_recompute": {
+        "selection_range_used": "[0, 609)",
+        "recomputed_docs": 609,
+        "recomputed_bytes": 6414182
+      }
+    },
+    {
+      "dataset_name": "musique_delta",
+      "partition": "delta_900k",
+      "d14f1a2_original": {
+        "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c",
+        "selection_range": "[80047, 101962)",
+        "selected_records_d": 21915,
+        "selected_text_bytes": 10138960
+      },
+      "head_current": {
+        "source_file_sha256": "371cff5cea0f2daa981e3da6d406389e2010978661bbfac48f3969532df7351c",
+        "selection_range": "[80047, 101962)",
+        "selected_records_d": 21915,
+        "selected_text_bytes": 10138960
+      },
+      "strict_recompute_from_staged_bytes": {
+        "selection_range_used": "[80047, 101962)",
+        "recomputed_docs": 21915,
+        "recomputed_bytes": 10138960
+      },
+      "forensic_prereseal_recompute": {
+        "selection_range_used": "[80047, 101962)",
+        "recomputed_docs": 21915,
+        "recomputed_bytes": 10138960
+      }
+    },
+    {
+      "dataset_name": "beir-fiqa_delta",
+      "partition": "delta_900k",
+      "d14f1a2_original": {
+        "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce",
+        "selection_range": "[10575, 57600)",
+        "selected_records_d": 47015,
+        "selected_text_bytes": 36130851
+      },
+      "head_current": {
+        "source_file_sha256": "99a8681b24ac7f1862e4ab0d18f5711e304817e6bdb1a0b9397b569fc847fcce",
+        "selection_range": "[10575, 57600)",
+        "selected_records_d": 47015,
+        "selected_text_bytes": 36130851
+      },
+      "strict_recompute_from_staged_bytes": {
+        "selection_range_used": "[10575, 57600)",
+        "recomputed_docs": 47015,
+        "recomputed_bytes": 36130851
+      },
+      "forensic_prereseal_recompute": {
+        "selection_range_used": "[10575, 57600)",
+        "recomputed_docs": 47015,
+        "recomputed_bytes": 36130851
+      }
+    },
+    {
+      "dataset_name": "bright_delta",
+      "partition": "delta_900k",
+      "d14f1a2_original": {
+        "source_file_sha256": "0ac9088e4dca7f910777bd7388bdc4e5281eb2f2c7339c89797ca8e498101b5b",
+        "selection_range": "[0, 684431)",
+        "selected_records_d": 684431,
+        "selected_text_bytes": 678354057
+      },
+      "head_current": {
+        "source_file_sha256": "0ac9088e4dca7f910777bd7388bdc4e5281eb2f2c7339c89797ca8e498101b5b",
+        "selection_range": "[0, 643710)",
+        "selected_records_d": 643710,
+        "selected_text_bytes": 678354057
+      },
+      "strict_recompute_from_staged_bytes": {
+        "selection_range_used": "[0, 643710)",
+        "recomputed_docs": 618306,
+        "recomputed_bytes": 603263678
+      },
+      "forensic_prereseal_recompute": {
+        "selection_range_used": "[0, 928750)",
+        "recomputed_docs": 684431,
+        "recomputed_bytes": 678354057
+      }
+    },
+    {
+      "dataset_name": "enron_delta",
+      "partition": "delta_900k",
+      "d14f1a2_original": {
+        "source_file_sha256": "4f9cc47b7e00fd6a89ff6e420bc3933b3c474044b8ceeb9c6f41a2491b4b5e6d",
+        "selection_range": "[0, 50000)",
+        "selected_records_d": 50000,
+        "selected_text_bytes": 124668874
+      },
+      "head_current": {
+        "source_file_sha256": "4f9cc47b7e00fd6a89ff6e420bc3933b3c474044b8ceeb9c6f41a2491b4b5e6d",
+        "selection_range": "[0, 50000)",
+        "selected_records_d": 50000,
+        "selected_text_bytes": 124668874
+      },
+      "strict_recompute_from_staged_bytes": {
+        "selection_range_used": "[0, 50000)",
+        "recomputed_docs": 50000,
+        "recomputed_bytes": 124668874
+      },
+      "forensic_prereseal_recompute": {
+        "selection_range_used": "[0, 50000)",
+        "recomputed_docs": 50000,
+        "recomputed_bytes": 124668874
+      }
+    },
+    {
+      "dataset_name": "wikipedia_delta",
+      "partition": "delta_900k",
+      "d14f1a2_original": {
+        "source_file_sha256": "a5acb6a96d32ac71705e8c5e41daeb6193ada9c198bdd0bfafc6bdb56f2a78a4",
+        "selection_range": "[0, 96639)",
+        "selected_records_d": 96639,
+        "selected_text_bytes": 1099778081
+      },
+      "head_current": {
+        "source_file_sha256": "ffe485442095c1f8a6bb141dc14deb4ca8ff9b78edecf15a2bda830825eb978d",
+        "selection_range": "[0, 137360)",
+        "selected_records_d": 137360,
+        "selected_text_bytes": 1425430486
+      },
+      "strict_recompute_from_staged_bytes": {
+        "selection_range_used": "[0, 137360)",
+        "recomputed_docs": 137360,
+        "recomputed_bytes": 1361116951
+      },
+      "forensic_prereseal_recompute": {
+        "selection_range_used": "[0, 96639)",
+        "recomputed_docs": 96639,
+        "recomputed_bytes": 1099778081
+      }
+    }
+  ],
+  "verdict": {
+    "head_recorded_selection_reproduces_claims": false,
+    "prereseal_selection_reproduces_all_9_claim_fields": true,
+    "reproducing_selection": {
+      "bright_delta": "[0, 928750)",
+      "wikipedia_delta": "[0, 96639)",
+      "rest": "as recorded"
+    },
+    "successor": {
+      "selection_record": "docs/program/inbox/h0-1m-corpus-contract/selection_record.json",
+      "provisional_manifest": "docs/program/inbox/h0-1m-corpus-contract/provisional_1m_manifest.json",
+      "provisional_sha256": "4f4deb50446f8325f676c3ee2618dfc3059eb78b5551e4855aef932bfe3c8c3d"
+    },
+    "gate": "HOLD until a human ballot in 06_DECISION_LOG.md adopts or rejects the successor contract; nothing here is adopted"
+  }
+}
