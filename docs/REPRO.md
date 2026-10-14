@@ -33,9 +33,26 @@ bash freeze-src/run_all.sh stack    # stack unit tests (needs a Python with nump
 bash freeze-src/run_all.sh existing # shipped suites: pending_topk, publication, pool_reuse, serving_pool
 ```
 
-`run_all.sh` defaults to `/tmp/baseline-venv/bin/python`; override with
+`run_all.sh` defaults to `/tmp/baseline-venv/bin/python` (falling back to
+`python3` on a clean host where that venv does not exist); override with
 `PY=python3`. These are the builder's synthetic suites — they do NOT
 reproduce the 10M run and claim nothing about it.
+
+Clean-host / CI exclusions (same in `stack`, `existing`, and the default
+`run_all.sh` / `all` mode): two checks compare against trees that only
+ever existed on the original build host, outside the 207-file freeze.
+When the required tree is absent, only that one check is skipped, with
+an explicit printed notice, and all other checks still run; when the
+tree is present, the full set runs unchanged:
+
+- Stack: 5 of 6 checks; `test_changed_set` is skipped only when the
+  staged overlay at `/tmp/fix1stage/up` is absent (the frozen test
+  hardcodes that path). Full 6 when it exists.
+- Publication (in `existing`, via `tools/run_publication_suite.py`):
+  14 of 15 tests; only
+  `FlagOffIdentity.test_original_source_bytes_unchanged` is excluded
+  when the build host's upstream source tree is absent. Full 15 when
+  it exists (or set `TRACE_BUILD_HOST_SOURCE`).
 
 ## What the 10M run needs (not runnable from this repo)
 

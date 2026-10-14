@@ -138,6 +138,16 @@ bash freeze-src/run_all.sh stack      # stack unit tests (needs Python with nump
 bash freeze-src/run_all.sh existing   # shipped suites: pending_topk, publication, pool_reuse, serving_pool
 ```
 
+Two checks compare against trees that only ever existed on the original
+build host and are not part of the 207-file freeze, so on a clean host
+(or CI) each is skipped with an explicit printed notice and everything
+else still runs: `run_all.sh stack` (and the default `run_all.sh` / `all`
+mode) runs 5 of 6 stack checks, skipping only `test_changed_set` when
+the staged overlay at `/tmp/fix1stage/up` is absent (full 6 when it is
+present), and the publication suite runs 14 of 15 tests, excluding only
+`FlagOffIdentity.test_original_source_bytes_unchanged` when the build
+host's upstream source tree is absent (full 15 when it is present).
+
 Small-scale protocol reproduction with real data is in
 [`repro-20k/`](repro-20k/README.md): an exact 88-document / 20,030-token
 prefix with its real cached vectors runs the frozen harness locally. That
