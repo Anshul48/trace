@@ -1,0 +1,15 @@
+{
+  "source": "derived",
+  "measured_child_marker_s": 157.73176039001555,
+  "measured_atoms": 63441,
+  "measured_docs": 13081,
+  "planned_atoms": 144,
+  "planned_docs": 88,
+  "margin": 2.0,
+  "unit_scaling_scope": "predicted linear max(atom,doc)",
+  "operational_minimum_s": 120,
+  "raw_s": 2.1222222940633544,
+  "wait_s": 120,
+  "remaining_run_clock_s": null,
+  "evidence": "W10 isolated post-failure clone; original child cause inferred"
+}

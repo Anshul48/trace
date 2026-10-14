@@ -58,9 +58,21 @@ reproduce the 10M run and claim nothing about it.
 `LAUNCH.json`. The 3.4 GB `runs/pilot-10M/store/` is excluded (size);
 its sha (`52e88439…`, 229,927 files) is asserted in the acceptance record.
 
+## Small-scale portable reproduction (20k)
+
+[`repro-20k/`](../repro-20k/README.md) ships an exact 88-document /
+20,030-token prefix (SciFact corpus abstracts, ODC-By 1.0 per the upstream
+allenai/scifact LICENSE record; claims annotations CC-BY-4.0 and SciFact
+code Apache-2.0 are not in this export) with derived FP32 vectors from
+`all-MiniLM-L6-v2` (Apache-2.0 per its model card; no weights shipped).
+All 88 exported rows were inspected as numeric SciFact corpus ids. This
+runs the frozen harness locally to PASS and reproduces the *protocol* at
+small scale; it is not full-10M reproduction. Full attribution:
+[`repro-20k/LICENSES-DATA-MODEL.md`](../repro-20k/LICENSES-DATA-MODEL.md).
+
 ## Data / third-party note
 
-The corpus cache is VM-side staged data (see `documents_source` in
-`receipts/input.json`); no corpus, weights, or private data ship here.
+The full corpus cache is VM-side staged data (see `documents_source` in
+`receipts/input.json`); only the inspected 88-document prefix above ships.
 Corpus abstracts licensing follows the source collection's terms; this repo
-adds no new data rights. Code: Apache-2.0 (`LICENSE`).
+adds no new data rights beyond that record. Code: Apache-2.0 (`LICENSE`).

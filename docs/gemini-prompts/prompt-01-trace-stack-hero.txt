@@ -1,0 +1,31 @@
+COPY FROM HERE >>>
+Create a wide landing-hero illustration (16:9, highest resolution available,
+export PNG about 2560x1440) for the open-source release page of TRACE stack
+fork 38c66bef: a frozen, self-organizing retrieval candidate whose
+10-million-token qualification is backed by signed-off receipts and an
+independent replay. This is a schematic concept illustration only. It is
+not a screenshot, not a chart, and must contain NO numbers, NO percentages,
+NO axis-like marks, and NO text of any kind inside the image.
+
+COMPOSITION (three quiet zones, left to right, generous whitespace):
+LEFT: five slim layered "fix cards" slightly fanned, fusing downward onto
+one compact solid core cube, suggesting five small stacked changes on a
+single frozen base. Give each card exactly one abstract glyph, no letters:
+a small dial, a budget gauge, a sorting arrow that stops early, a
+shield-with-check, and a tidy broom swirl. The core cube sits on a thin
+frost plinth to suggest it is frozen and immutable.
+CENTER: a calm three-stage pipeline of rounded shapes joined by simple
+arrows: an inbox/archive tray, then a small hierarchy (one parent node
+branching to two children, then to dots), then a magnifier held over those
+layers. Keep it abstract; it suggests ingest, organization, and guided
+query without depicting software screens.
+RIGHT: an open report page with two plain green checkmarks and one round
+seal, suggesting an audited receipt that was independently re-checked.
+Faint dotted provenance lines connect the frozen core cube to the report.
+
+STYLE: light off-white background (#F7F9FC), flat modern technical
+illustration, navy/slate/blue palette (#0B5CAD primary, #5B7FA6 secondary,
+#222 ink), high contrast, accessible, no tiny details, no photorealism, no
+people, no logos, no dark or cyber aesthetics. Same style family as the
+other TRACE illustrations in this set.
+<<< END COPY (filename suggestion: trace-stack-hero-16x9.png)

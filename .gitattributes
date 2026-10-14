@@ -4,3 +4,6 @@
 freeze-src/** -text
 receipts/** -text
 archive/** -text
+repro-20k/data-20k/** -text
+repro-20k/small-prefix-20k.tar.gz binary
+demo-app/data/** -text

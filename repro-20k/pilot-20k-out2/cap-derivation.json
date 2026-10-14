@@ -1,0 +1,18 @@
+{
+  "source": "derived",
+  "inputs": {
+    "measured_commits": 37117,
+    "measured_atoms": 7035,
+    "measured_docs": 4424,
+    "margin": 2.0,
+    "planned_atoms": 144,
+    "planned_docs": 88,
+    "atom_basis_estimate": 759.7509594882729,
+    "doc_basis_estimate": 738.3128390596745
+  },
+  "outputs": {
+    "derived_raw": 1520,
+    "max_delta_entries": 100000,
+    "max_dedup_rows": 1000000
+  }
+}

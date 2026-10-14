@@ -1,0 +1,18 @@
+{
+ "actual_tokens": 20030,
+ "atoms": 144,
+ "cache_index_sha256": "885d31c0c589e4f284d9cb86d454cf52906294144ee49f4d956bfc743eeb23ed",
+ "cache_meta_sha256": "e5f9c7069420d8494b1ab7533515a3b9fb4ba8e28089af2ecc0253d03efc9761",
+ "cache_misses": 0,
+ "complete_documents": 88,
+ "distinct_chunks": 144,
+ "documents_source": "/home/anshul/beam/pkg/data/docs-100m.jsonl",
+ "export_note": "rows renumbered 0..N-1 in shard_000000; vector bytes, keys, meta.json verbatim; cache_index_sha256 of the subset index differs from this full-cache receipt by construction",
+ "input_wall_s": 4.8917866529664025,
+ "normalization": "cached FP32, unnormalized; cosine normalizes at scoring",
+ "prefix_raw_sha256": "530e51c72c117e0a8a312de19a6263fd8a40326990c6aa98f7f8303a7f4ed119",
+ "target_tokens": 20000,
+ "tokenizer": "regex [^\\W_]+ (staged TOK_V1)",
+ "used_vector_sha256": "94f24ecaa05813c83a7ab9ce834f42513d86ccd9b0dda1e6f13d232e65c6fbbf",
+ "whitespace_tokens": 19089
+}

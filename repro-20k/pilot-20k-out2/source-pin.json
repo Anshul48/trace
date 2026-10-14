@@ -1,0 +1,24 @@
+{
+  "source_root": "/tmp/trace-anima-professional-20261014/repro-staging/../vm-recovery/cand/stack-fork/cand",
+  "frozen_files": 207,
+  "frozen_ok": true,
+  "harness_sha256": "9f516288a098eff7b2a52373ad0eaf6b9ad1664377a9f7be4f974701b8d9b1a0",
+  "data_dir": "/tmp/trace-anima-professional-20261014/repro-staging/data-20k",
+  "input_receipt": {
+    "target_tokens": 20000,
+    "actual_tokens": 20030,
+    "tokenizer": "regex [^\\W_]+ (staged TOK_V1)",
+    "whitespace_tokens": 19089,
+    "complete_documents": 88,
+    "atoms": 144,
+    "distinct_chunks": 144,
+    "cache_misses": 0,
+    "documents_source": "/tmp/trace-anima-professional-20261014/repro-staging/data-20k/docs-100m.jsonl",
+    "prefix_raw_sha256": "530e51c72c117e0a8a312de19a6263fd8a40326990c6aa98f7f8303a7f4ed119",
+    "cache_meta_sha256": "e5f9c7069420d8494b1ab7533515a3b9fb4ba8e28089af2ecc0253d03efc9761",
+    "cache_index_sha256": "a34285239aad303b9973131a548169c8264553a77d10c316f1b3735599f6d26d",
+    "used_vector_sha256": "94f24ecaa05813c83a7ab9ce834f42513d86ccd9b0dda1e6f13d232e65c6fbbf",
+    "normalization": "cached FP32, unnormalized; cosine normalizes at scoring",
+    "input_wall_s": 0.05778071900567738
+  }
+}

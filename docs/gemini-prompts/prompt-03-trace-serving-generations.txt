@@ -1,0 +1,33 @@
+COPY FROM HERE >>>
+Create a wide architecture illustration (16:9, highest resolution
+available, export PNG about 2560x1440) showing, schematically, how the
+TRACE stack fork serves queries: committed data organized into a
+hierarchy, published as verified snapshot generations that pinned readers
+query. NO numbers, NO text, NO measurements, NO screen-like UI inside the
+image.
+
+LEFT THIRD - building upward: many tiny tiles (atoms, small text chunks)
+grouped into a few rounded clusters (per-document holons), and those
+clusters arranged into one tidy two-level tree: parent nodes above,
+children below, atoms as dots at the leaves. One small commit stamp glyph
+(a wax-seal-like disc) touches each cluster, suggesting everything served
+was committed first.
+CENTER - snapshot generations: three translucent layered "snapshot" slabs
+stacked like glass sheets, each containing a faint copy of the tree. The
+top slab has a green verified tick and a small pointer flag marking it
+current; an older slab below is being gently swept aside by a broom glyph
+(garbage collection of old generations), while one older slab stays
+because a paperclip-like pin holds it (a pinned reader still uses it).
+RIGHT THIRD - two readers: two magnifier glyphs: the pinned older reader reading from the retained
+older slab it pins, and a current reader reading from the current slab. From the first magnifier, one path descends the tree step by step -
+parent, then child, then leaf dots (guided hierarchical search). From the
+second, a flat straight scan across a single row of dots (the matched flat
+control). Equal work is a schematic matched scoring budget only; do not encode it
+as physical arrow lengths or latency. No winner, no scores - just the two mechanisms.
+
+STYLE: light off-white background (#F7F9FC), flat modern technical
+illustration, navy/slate/blue palette (#0B5CAD primary, #5B7FA6 secondary,
+#222 ink), generous whitespace, high contrast, accessible, no tiny text,
+no photorealism, no people, no logos. Same style family as the TRACE
+stack hero.
+<<< END COPY (filename suggestion: trace-serving-generations-16x9.png)

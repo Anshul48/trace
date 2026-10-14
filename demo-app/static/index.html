@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRACE — frozen stack-fork demo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="mark" aria-hidden="true">T</span>
+    <div><h1>TRACE <span class="sub">frozen stack-fork demo</span></h1>
+    <p class="tagline">Run the actual frozen guided/flat query code on real receipt probe vectors, and inspect the recorded 10M evidence separately.</p></div>
+  </div>
+  <p class="freeze-chip">Freeze <code>38c66bef…a43a0d54</code> · verified at startup</p>
+</header>
+<nav class="tabs" aria-label="Demo views">
+  <a href="#query">Query</a><a href="#results-view">Results</a><a href="#evidence-view">10M evidence</a><a href="#about-view">How to read this</a>
+</nav>
+<main>
+  <section id="query" aria-labelledby="q-h" class="panel">
+    <h2 id="q-h">Query the sample index</h2>
+    <p class="scope" role="note">Vector-probe mode on a 120-vector sample (the real cached encoder probe vectors). Sample recall is measured against an exact cosine oracle over those 120 vectors only — it is not the 10M result.</p>
+    <form id="query-form">
+      <div class="field grow"><label for="probe">Receipt probe (query vector)</label>
+        <select id="probe" name="probe" required></select>
+        <small>Each probe is a real 384-d vector from the qualification receipts.</small></div>
+      <div class="field"><label for="mode">Search mode</label>
+        <select id="mode" name="mode">
+          <option value="both">Guided + flat (matched budget)</option>
+          <option value="guided">Guided only</option><option value="flat">Flat only</option>
+        </select><small>Flat is given the same scoring budget guided used.</small></div>
+      <div class="field narrow"><label for="topk">Top K</label>
+        <input id="topk" name="topk" type="number" min="1" max="25" value="10" required></div>
+      <div class="field check"><input id="lso" name="lso" type="checkbox">
+        <label for="lso">Leave source out</label><small>Exclude the probe's own source documents.</small></div>
+      <div class="actions"><button type="submit" class="primary">Run frozen query</button>
+        <button type="button" id="evidence-btn">Load 10M evidence</button></div>
+    </form>
+    <p id="status" role="status" aria-live="polite"></p>
+    <p id="error" role="alert"></p>
+  </section>
+
+  <section id="results-view" aria-labelledby="r-h" class="panel">
+    <h2 id="r-h">Results <span class="badge">sample corpus</span></h2>
+    <div id="metrics" class="metrics" aria-label="Result summary"></div>
+    <div id="results"><p class="empty">No query run yet. Pick a probe above and run the frozen query.</p></div>
+  </section>
+
+  <section id="evidence-view" aria-labelledby="e-h" class="panel">
+    <h2 id="e-h">Recorded 10M evidence <span class="badge alt">receipt, not recomputed</span></h2>
+    <div id="evidence"><p class="empty">Use “Load 10M evidence”, or run a query to see that probe's recorded 10M row.</p></div>
+  </section>
+
+  <section id="about-view" aria-labelledby="a-h" class="panel">
+    <h2 id="a-h">How to read this</h2>
+    <ul class="plain">
+      <li><strong>Guided</strong> walks the two-level hierarchy (parents → leaves → atoms); <strong>flat</strong> scans directly with the same scoring budget. Comparing them at equal work is the point of the demo.</li>
+      <li><strong>Recall@K vs sample oracle</strong> asks how many of the exact top-K cosine matches (over the 120 sample vectors) each method found.</li>
+      <li>The <strong>10M evidence</strong> panel is the separate VM qualification record: harness recall and oracle agreement on the recorded probe protocol, not semantic search quality.</li>
+    </ul>
+    <details><summary>Implementation details</summary>
+      <p>Frozen functions exercised: <code>fork/tl-sys/tlsys/query.py:1617</code> guided, <code>:1764</code> flat, <code>tools/product_pilot.py:449</code> tie_recall. SOURCEFREEZE sha256 <code>38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54</code> (207 files; a content digest, not a Git commit). Startup fails if the freeze identity differs.</p>
+    </details>
+  </section>
+</main>
+<footer><p>TRACE stack-fork candidate · Apache-2.0 · sample atom text is a labelled receipt-probe description; original chunk text is not in the recovered receipts.</p></footer>
+<script src="app.js"></script>
+</body>
+</html>

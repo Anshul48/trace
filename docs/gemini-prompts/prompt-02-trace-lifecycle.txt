@@ -1,0 +1,35 @@
+COPY FROM HERE >>>
+Create a wide lifecycle illustration (16:9, highest resolution available,
+export PNG about 2560x1440) that reads as a left-to-right story of how the
+TRACE qualification harness exercises a frozen retrieval candidate.
+Schematic only: NO numbers, NO text, NO chart elements, NO bar lengths or
+sizes carrying quantitative meaning anywhere in the image.
+
+SIX ROUNDED STAGES joined by simple arrows:
+1) Ingest: document pages dropping into an inbox tray and becoming small
+   neat tiles.
+2) Drain: an equal-width stage (all stages the same width; suggest repeated drain passes with a small circular-arrow icon only, no size encoding) - stacked layers with slow circular
+   arrows cycling tiles downward into an ordered hierarchy, suggesting a
+   long, budgeted organizing pass. Make it calm, not busy.
+3) Bounded repair: a few tiles with small cracks being patched by a wrench
+   glyph, some cracks deliberately left for later.
+4) Fault and restart: a small lightning glyph beside a circular restart
+   arrow; the tile stack remains intact underneath, suggesting a killed
+   writer recovered without losing committed work.
+5) Repair-to-zero: the remaining cracked tiles shrinking stage by stage
+   until the stack is clean and level.
+6) Evaluation: two side-by-side query paths starting from one dot - the
+   upper path routed through a small branching hierarchy, the lower path
+   going straight across the same number of tiles - both ending at one
+   shared checkmark medallion, suggesting a guided method compared against
+   a matched-work flat control.
+BELOW the row, a quiet foundation strip: a padlock card (frozen source), a
+rolled receipt card, and a double-check seal (acceptance plus independent
+replay), evenly spaced, smaller than the stages.
+
+STYLE: light off-white background (#F7F9FC), flat modern technical
+illustration, navy/slate/blue palette (#0B5CAD primary, #5B7FA6 secondary,
+#222 ink), generous whitespace, high contrast, accessible, no tiny text,
+no photorealism, no people, no logos. Same style family as the TRACE
+stack hero.
+<<< END COPY (filename suggestion: trace-lifecycle-16x9.png)

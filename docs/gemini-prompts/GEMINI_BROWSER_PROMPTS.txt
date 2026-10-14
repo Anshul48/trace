@@ -1,0 +1,202 @@
+GEMINI BROWSER PROMPTS - TRACE stack 38c66bef + ANIMA (FINAL set)
+Manual generation: paste one COPY block at a time into Gemini, export PNG 16:9 (~2560x1440) with the suggested filename. Grounding and hard rules: REFERENCE.md. No numbers/text inside images; captions live in CAPTIONS.md.
+
+===== prompt-01-trace-stack-hero.txt =====
+COPY FROM HERE >>>
+Create a wide landing-hero illustration (16:9, highest resolution available,
+export PNG about 2560x1440) for the open-source release page of TRACE stack
+fork 38c66bef: a frozen, self-organizing retrieval candidate whose
+10-million-token qualification is backed by signed-off receipts and an
+independent replay. This is a schematic concept illustration only. It is
+not a screenshot, not a chart, and must contain NO numbers, NO percentages,
+NO axis-like marks, and NO text of any kind inside the image.
+
+COMPOSITION (three quiet zones, left to right, generous whitespace):
+LEFT: five slim layered "fix cards" slightly fanned, fusing downward onto
+one compact solid core cube, suggesting five small stacked changes on a
+single frozen base. Give each card exactly one abstract glyph, no letters:
+a small dial, a budget gauge, a sorting arrow that stops early, a
+shield-with-check, and a tidy broom swirl. The core cube sits on a thin
+frost plinth to suggest it is frozen and immutable.
+CENTER: a calm three-stage pipeline of rounded shapes joined by simple
+arrows: an inbox/archive tray, then a small hierarchy (one parent node
+branching to two children, then to dots), then a magnifier held over those
+layers. Keep it abstract; it suggests ingest, organization, and guided
+query without depicting software screens.
+RIGHT: an open report page with two plain green checkmarks and one round
+seal, suggesting an audited receipt that was independently re-checked.
+Faint dotted provenance lines connect the frozen core cube to the report.
+
+STYLE: light off-white background (#F7F9FC), flat modern technical
+illustration, navy/slate/blue palette (#0B5CAD primary, #5B7FA6 secondary,
+#222 ink), high contrast, accessible, no tiny details, no photorealism, no
+people, no logos, no dark or cyber aesthetics. Same style family as the
+other TRACE illustrations in this set.
+<<< END COPY (filename suggestion: trace-stack-hero-16x9.png)
+
+===== prompt-02-trace-lifecycle.txt =====
+COPY FROM HERE >>>
+Create a wide lifecycle illustration (16:9, highest resolution available,
+export PNG about 2560x1440) that reads as a left-to-right story of how the
+TRACE qualification harness exercises a frozen retrieval candidate.
+Schematic only: NO numbers, NO text, NO chart elements, NO bar lengths or
+sizes carrying quantitative meaning anywhere in the image.
+
+SIX ROUNDED STAGES joined by simple arrows:
+1) Ingest: document pages dropping into an inbox tray and becoming small
+   neat tiles.
+2) Drain: an equal-width stage (all stages the same width; suggest repeated drain passes with a small circular-arrow icon only, no size encoding) - stacked layers with slow circular
+   arrows cycling tiles downward into an ordered hierarchy, suggesting a
+   long, budgeted organizing pass. Make it calm, not busy.
+3) Bounded repair: a few tiles with small cracks being patched by a wrench
+   glyph, some cracks deliberately left for later.
+4) Fault and restart: a small lightning glyph beside a circular restart
+   arrow; the tile stack remains intact underneath, suggesting a killed
+   writer recovered without losing committed work.
+5) Repair-to-zero: the remaining cracked tiles shrinking stage by stage
+   until the stack is clean and level.
+6) Evaluation: two side-by-side query paths starting from one dot - the
+   upper path routed through a small branching hierarchy, the lower path
+   going straight across the same number of tiles - both ending at one
+   shared checkmark medallion, suggesting a guided method compared against
+   a matched-work flat control.
+BELOW the row, a quiet foundation strip: a padlock card (frozen source), a
+rolled receipt card, and a double-check seal (acceptance plus independent
+replay), evenly spaced, smaller than the stages.
+
+STYLE: light off-white background (#F7F9FC), flat modern technical
+illustration, navy/slate/blue palette (#0B5CAD primary, #5B7FA6 secondary,
+#222 ink), generous whitespace, high contrast, accessible, no tiny text,
+no photorealism, no people, no logos. Same style family as the TRACE
+stack hero.
+<<< END COPY (filename suggestion: trace-lifecycle-16x9.png)
+
+===== prompt-03-trace-serving-generations.txt =====
+COPY FROM HERE >>>
+Create a wide architecture illustration (16:9, highest resolution
+available, export PNG about 2560x1440) showing, schematically, how the
+TRACE stack fork serves queries: committed data organized into a
+hierarchy, published as verified snapshot generations that pinned readers
+query. NO numbers, NO text, NO measurements, NO screen-like UI inside the
+image.
+
+LEFT THIRD - building upward: many tiny tiles (atoms, small text chunks)
+grouped into a few rounded clusters (per-document holons), and those
+clusters arranged into one tidy two-level tree: parent nodes above,
+children below, atoms as dots at the leaves. One small commit stamp glyph
+(a wax-seal-like disc) touches each cluster, suggesting everything served
+was committed first.
+CENTER - snapshot generations: three translucent layered "snapshot" slabs
+stacked like glass sheets, each containing a faint copy of the tree. The
+top slab has a green verified tick and a small pointer flag marking it
+current; an older slab below is being gently swept aside by a broom glyph
+(garbage collection of old generations), while one older slab stays
+because a paperclip-like pin holds it (a pinned reader still uses it).
+RIGHT THIRD - two readers: two magnifier glyphs: the pinned older reader reading from the retained
+older slab it pins, and a current reader reading from the current slab. From the first magnifier, one path descends the tree step by step -
+parent, then child, then leaf dots (guided hierarchical search). From the
+second, a flat straight scan across a single row of dots (the matched flat
+control). Equal work is a schematic matched scoring budget only; do not encode it
+as physical arrow lengths or latency. No winner, no scores - just the two mechanisms.
+
+STYLE: light off-white background (#F7F9FC), flat modern technical
+illustration, navy/slate/blue palette (#0B5CAD primary, #5B7FA6 secondary,
+#222 ink), generous whitespace, high contrast, accessible, no tiny text,
+no photorealism, no people, no logos. Same style family as the TRACE
+stack hero.
+<<< END COPY (filename suggestion: trace-serving-generations-16x9.png)
+
+===== prompt-04-trace-evidence-chain.txt =====
+COPY FROM HERE >>>
+Create a wide evidence-chain illustration (16:9, highest resolution
+available, export PNG about 2560x1440): a calm left-to-right chain showing
+how a frozen software candidate becomes a trusted, receipt-backed result.
+Abstract document glyphs only. ABSOLUTELY NO numbers, NO percentages, NO
+hash-like strings, NO readable text, and NO chart shapes inside the image;
+every label will be added as a caption outside the image.
+
+FOUR LINKS IN THE CHAIN, connected by a single dotted provenance line:
+1) A solid cube resting on a checklist card whose rows are plain ticks
+   (a frozen source manifest: every file hashed and matched).
+2) A rolled receipt with a clock glyph and a small gauge (the run record:
+   inputs, timing, resource observations).
+3) A clipboard whose boxes are all ticked, with a firm stamp glyph
+   (a hardened acceptance gate passed).
+4) A second, independent magnifier re-examining a copy of the first
+   cube-and-receipt, ending in a double-check seal (an independent
+   read-only oracle replay that left the store untouched).
+Beneath the chain, one thin shelf holds three small honest-cost glyphs,
+drawn neutrally and without scale meaning: an hourglass, a wrench, and
+two overlapping reader glasses - a reminder that costs and negative
+findings are published alongside the result, not hidden.
+
+STYLE: light off-white background (#F7F9FC), flat modern technical
+illustration, navy/slate/blue palette (#0B5CAD primary, #5B7FA6 secondary,
+#222 ink), generous whitespace, high contrast, accessible, no tiny text,
+no photorealism, no people, no logos, no seals of any real institution.
+Same style family as the TRACE stack hero.
+<<< END COPY (filename suggestion: trace-evidence-chain-16x9.png)
+
+===== prompt-05-trace-small-repro.txt =====
+COPY FROM HERE >>>
+Create a wide illustration (16:9, highest resolution available, export
+PNG about 2560x1440) about honest small-scale reproducibility: the same
+frozen engine running a tiny exact slice of the real data on an ordinary
+laptop, while the large recorded run stays a separate, archived record.
+NO numbers, NO text, NO fake screen contents, NO chart elements inside
+the image.
+
+LEFT: a large archive box, closed and sealed with a plain tag shape
+(no writing on it), sitting on a shelf in soft focus-grey-blue: the big
+recorded qualification, preserved but not re-run. From its side, a single
+thin dotted line draws out one small neat slice - a few document pages
+and a tiny stack of vector dots in a small open tray - suggesting an
+exact, hash-checked prefix export.
+RIGHT: a simple open laptop shown from a three-quarter angle, its screen
+left almost blank with only one abstract hierarchy glyph (a parent node
+branching to children and dots) and one green checkmark - no code, no
+words, no dashboards. The small tray of pages and dots feeds into the
+laptop along the dotted line. A small padlock-and-tick badge floats
+beside the tray, suggesting the slice was verified byte-for-byte against
+the original before use.
+Keep the laptop scene clearly small and local; do not depict clouds,
+server racks, or anything suggesting the large run happening again.
+
+STYLE: light off-white background (#F7F9FC), flat modern technical
+illustration, navy/slate/blue palette (#0B5CAD primary, #5B7FA6 secondary,
+#222 ink), generous whitespace, high contrast, accessible, no tiny text,
+no photorealism, no people, no logos. Same style family as the TRACE
+stack hero.
+<<< END COPY (filename suggestion: trace-small-repro-16x9.png)
+
+===== prompt-06-anima-ecosystem.txt =====
+COPY FROM HERE >>>
+Create a wide ecosystem illustration (16:9, highest resolution available,
+export PNG about 2560x1440) for ANIMA: five reusable, independently
+installable Python research components. The key message is independence:
+the five cards must NOT be connected by wires, pipes, arrows, or any
+data-flow lines, and there must be no shared server, cloud, or hub.
+
+SUBJECT: five equal rounded cards standing separately in a row on one
+light shelf, each card carrying exactly one abstract glyph and nothing
+else:
+1) a globe-grid cube - persistent project worlds (substrate),
+2) a branching tree with a circled node - heuristic tree search (sst),
+3) a spec sheet turning into a gear - spec-to-code (stc),
+4) a clock ring with a soft trailing arc - advisory temporal context
+   (entorhinal),
+5) an eye-and-lens glyph over a window frame - perception for computer
+   use (reflex).
+Above the shelf floats ONE small plain namespace tag containing only the
+characters anima.* in a clean sans-serif font - this is the ONLY text
+allowed in the image, and it must look like a label, not a connector:
+no lines from the tag to the cards. Each card stands on its own small
+base shadow to reinforce that each installs and runs on its own.
+
+STYLE: light off-white background (#F7F9FC), flat modern technical
+illustration, navy/slate/blue palette (#0B5CAD primary, #5B7FA6 secondary,
+#222 ink), generous whitespace, high contrast, accessible, no other text,
+no numbers, no photorealism, no people, no logos. Same style family as
+the TRACE illustration set.
+<<< END COPY (filename suggestion: anima-ecosystem-16x9.png)
+

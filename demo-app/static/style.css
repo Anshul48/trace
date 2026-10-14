@@ -1,0 +1,49 @@
+:root{--ink:#17212b;--muted:#3d4c5c;--paper:#f4f6f8;--panel:#fff;--line:#c3ced8;--accent:#0b5cad;--accent2:#0a6e4e;--warn:#8b0000;--chip:#e8eff6}
+*{box-sizing:border-box}
+body{margin:0;font-family:ui-sans-system,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--paper);line-height:1.5}
+.topbar{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;max-width:1120px;margin:0 auto;padding:1.25rem 1rem .5rem}
+.brand{display:flex;gap:.9rem}
+.mark{display:grid;place-items:center;width:52px;height:52px;border-radius:10px;background:var(--ink);color:#fff;font-weight:800;font-size:1.5rem;flex:none}
+h1{margin:0;font-size:1.6rem;line-height:1.15} h1 .sub{font-weight:500;color:var(--muted);font-size:1.05rem}
+.tagline{margin:.25rem 0 0;color:var(--muted);max-width:64ch}
+.freeze-chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:.35rem .75rem;font-size:.85rem;white-space:nowrap;margin:0}
+.tabs{max-width:1120px;margin:.5rem auto 0;padding:0 1rem;display:flex;gap:.4rem;flex-wrap:wrap}
+.tabs a{color:var(--accent);text-decoration:none;font-weight:600;padding:.45rem .8rem;border:1px solid var(--line);border-radius:8px;background:#fff}
+.tabs a:hover{text-decoration:underline}
+main{max-width:1120px;margin:0 auto;padding:1rem;display:grid;gap:1rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.25rem}
+.panel h2{margin:.1rem 0 .6rem;font-size:1.25rem}
+.badge{font-size:.72rem;vertical-align:middle;background:var(--accent);color:#fff;border-radius:999px;padding:.15rem .55rem;font-weight:700}
+.badge.alt{background:var(--accent2)}
+.scope{border:1px solid var(--line);background:#fbfcfe;border-radius:8px;padding:.6rem .8rem;color:var(--muted)}
+form{display:flex;flex-wrap:wrap;gap:1rem;align-items:end;margin-top:.8rem}
+.field{display:flex;flex-direction:column;gap:.25rem;min-width:200px}.field.grow{flex:1}.field.narrow{min-width:110px}
+.field small{color:var(--muted)} .field.check{flex-direction:row;flex-wrap:wrap;align-items:center;min-width:220px}
+.field.check small{flex-basis:100%}
+label{font-weight:650}
+select,input{font:inherit;padding:.55rem;border:1px solid #7d8fa0;border-radius:7px;background:#fff;color:var(--ink)}
+button{font:inherit;padding:.6rem 1rem;border-radius:8px;border:1px solid var(--accent);background:#fff;color:var(--accent);cursor:pointer;font-weight:700}
+button.primary{background:var(--accent);color:#fff}
+:focus-visible{outline:3px solid #b35c00;outline-offset:2px}
+#status{min-height:1.4em;color:var(--muted)} #error{color:var(--warn);font-weight:700}
+.metrics{display:flex;gap:.7rem;flex-wrap:wrap;margin:.4rem 0 .8rem}
+.metric{border:1px solid var(--line);border-radius:10px;padding:.6rem .9rem;min-width:150px;background:#fbfcfe}
+.metric .v{font-size:1.45rem;font-weight:800;line-height:1.1}.metric .k{color:var(--muted);font-size:.85rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.7rem;margin:.5rem 0 1rem}
+.card{border:1px solid var(--line);border-radius:10px;padding:.7rem .85rem;background:#fff}
+.card .head{display:flex;justify-content:space-between;gap:.5rem;font-weight:700}
+.score{color:var(--accent)}
+.path{display:flex;flex-wrap:wrap;gap:.3rem;margin:.45rem 0}
+.path span{background:var(--chip);border-radius:6px;padding:.1rem .45rem;font-family:ui-monospace,Consolas,monospace;font-size:.82rem}
+.path i{font-style:normal;color:var(--muted);align-self:center}
+.card p{margin:.3rem 0;color:var(--muted);font-size:.92rem}
+.hit{color:var(--accent2);font-weight:700;font-size:.85rem}
+table{border-collapse:collapse;width:100%;margin:.5rem 0 1rem}th,td{border:1px solid var(--line);padding:.45rem .6rem;text-align:left}
+caption{text-align:left;font-weight:700;padding:.4rem 0}
+code{font-family:ui-monospace,Consolas,monospace;overflow-wrap:anywhere;font-size:.92em}
+details{margin-top:.6rem}summary{cursor:pointer;font-weight:650}
+pre{background:#f0f3f6;padding:.7rem;border-radius:8px;overflow:auto}
+.empty{color:var(--muted)} .plain li{margin:.35rem 0}
+footer{max-width:1120px;margin:0 auto;padding:0 1rem 1.5rem;color:var(--muted);font-size:.9rem}
+@media(max-width:680px){.topbar{flex-direction:column}.field,.field.check{min-width:100%}button{width:100%}.actions{width:100%;display:grid;gap:.5rem}.freeze-chip{white-space:normal}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

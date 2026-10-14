@@ -1,0 +1,61 @@
+{
+ "task": "portable small-scale reproduction of stack-fork 38c66bef protocol",
+ "freeze": {
+  "sourcefreeze_sha256": "38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54",
+  "files": 207,
+  "harness_tools/product_pilot.py": "9f516288a098eff7b2a52373ad0eaf6b9ad1664377a9f7be4f974701b8d9b1a0",
+  "local_rehash": "207/207 PASS (prep_small_prefix.py verify-freeze)"
+ },
+ "export": {
+  "file": "small-prefix-20k.tar.gz",
+  "bytes": 270494,
+  "sha256": "43a2d589c66ae67f9b788179c7dfc3b5ceed84bf4c4e0f28c4b6513c5a62c112",
+  "method": "read-only gcloud SSH exporter via stdin, tar stream on stdout, no VM writes",
+  "vm": "trace-build500 (reflecting-zone-482108-h0/us-central1-a), observed RUNNING, not started/stopped"
+ },
+ "prefix_20k": {
+  "actual_tokens": 20030,
+  "atoms": 144,
+  "cache_index_sha256": "885d31c0c589e4f284d9cb86d454cf52906294144ee49f4d956bfc743eeb23ed",
+  "cache_meta_sha256": "e5f9c7069420d8494b1ab7533515a3b9fb4ba8e28089af2ecc0253d03efc9761",
+  "cache_misses": 0,
+  "complete_documents": 88,
+  "distinct_chunks": 144,
+  "documents_source": "/home/anshul/beam/pkg/data/docs-100m.jsonl",
+  "export_note": "rows renumbered 0..N-1 in shard_000000; vector bytes, keys, meta.json verbatim; cache_index_sha256 of the subset index differs from this full-cache receipt by construction",
+  "input_wall_s": 4.8917866529664025,
+  "normalization": "cached FP32, unnormalized; cosine normalizes at scoring",
+  "prefix_raw_sha256": "530e51c72c117e0a8a312de19a6263fd8a40326990c6aa98f7f8303a7f4ed119",
+  "target_tokens": 20000,
+  "tokenizer": "regex [^\\W_]+ (staged TOK_V1)",
+  "used_vector_sha256": "94f24ecaa05813c83a7ab9ce834f42513d86ccd9b0dda1e6f13d232e65c6fbbf",
+  "whitespace_tokens": 19089
+ },
+ "verify_local": {
+  "result": "PASS (8/8 checks)",
+  "cache_index_sha256_subset": "a34285239aad303b9973131a548169c8264553a77d10c316f1b3735599f6d26d",
+  "note": "subset index hash differs from full-cache 885d31c0... by construction; prefix/used-vector/meta hashes exact"
+ },
+ "small_pilot": {
+  "dir": "pilot-20k-out2",
+  "status": "PASS",
+  "wall_s": 41.912021860000095,
+  "result_json_sha256": "014d03e993f3dbc49e246e533be9ee12d8486114371a104d38fd10162bc5dbe8",
+  "scope": "88-doc/20k-token prefix only; NOT the 10M qualification"
+ },
+ "script_sha256": "4689e9e3a390569a8755ea7c0e385dd100d0caf18068034713966bbeab250817",
+ "receipts_relied_on": {
+  "vm-recovery/receipts/input.json": "ee2215a03fef42d5ee4858450899fd83abec89f57565356fdbf522719f9f0d87",
+  "vm-recovery/receipts/result.json": "2e0be11cbd100e98de15805572b5cbb5224368fb9375da6a213105b963c0b9d9",
+  "vm-recovery/receipts/probes.json": "b332d62dffb3d64e3ef92cde86578aeae03a07226caca9668676f025cafeace8",
+  "vm-recovery/receipts/source-pin.json": "48a51f30d5eeab30dece731a20ef41821bc840daa9d50599c7810598bac81e41",
+  "vm-recovery/audit/AUDIT-RESULT.json": "a705232003d0917afcd7bd755697cf7e645e2296506b1470cda9a694c4686212",
+  "vm-recovery/audit/ORACLE.json": "6bfba2755f5f6e361bd0f9f7d0627c08a9c363ad3e476f1495fe4e2b1abc9f31",
+  "vm-recovery/audit/VM-10M-ACCEPTANCE.json": "2c174daa5a98e88c0007e8b2a94e4b53b34cbeadd8527e028134eca0c24e5c81"
+ },
+ "not_done": [
+  "no full 10M run",
+  "no VM writes/starts/new runs/billing actions",
+  "no multi-GB corpus or full emb_cache copy (export is 270,494 B)"
+ ]
+}

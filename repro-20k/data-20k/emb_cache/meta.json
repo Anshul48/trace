@@ -1,0 +1,16 @@
+{
+  "config_id": "25989b870b5ccfee",
+  "created_utc": "2026-10-06T07:56:32Z",
+  "dim": 384,
+  "dtype": "float32-le",
+  "format": "tl-gpu-embcache-v1",
+  "key_config_json": "{\"format\":\"tl-gpu-embcache-v1\",\"max_seq_length\":256,\"model\":\"sentence-transformers/all-MiniLM-L6-v2\",\"normalize_embeddings\":false,\"pooling\":\"mean\",\"precision\":\"fp32\",\"revision\":\"1110a243fdf4706b3f48f1d95db1a4f5529b4d41\",\"truncation\":true}",
+  "produced_by": {
+    "device_name": "NVIDIA GeForce RTX 5050 Laptop GPU",
+    "device_requested": "cuda",
+    "precision": "fp32",
+    "sentence_transformers": "2.7.0",
+    "torch": "2.14.0+cu130"
+  },
+  "rows_per_shard": 50000
+}

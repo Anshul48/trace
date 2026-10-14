@@ -1,0 +1,30 @@
+COPY FROM HERE >>>
+Create a wide illustration (16:9, highest resolution available, export
+PNG about 2560x1440) about honest small-scale reproducibility: the same
+frozen engine running a tiny exact slice of the real data on an ordinary
+laptop, while the large recorded run stays a separate, archived record.
+NO numbers, NO text, NO fake screen contents, NO chart elements inside
+the image.
+
+LEFT: a large archive box, closed and sealed with a plain tag shape
+(no writing on it), sitting on a shelf in soft focus-grey-blue: the big
+recorded qualification, preserved but not re-run. From its side, a single
+thin dotted line draws out one small neat slice - a few document pages
+and a tiny stack of vector dots in a small open tray - suggesting an
+exact, hash-checked prefix export.
+RIGHT: a simple open laptop shown from a three-quarter angle, its screen
+left almost blank with only one abstract hierarchy glyph (a parent node
+branching to children and dots) and one green checkmark - no code, no
+words, no dashboards. The small tray of pages and dots feeds into the
+laptop along the dotted line. A small padlock-and-tick badge floats
+beside the tray, suggesting the slice was verified byte-for-byte against
+the original before use.
+Keep the laptop scene clearly small and local; do not depict clouds,
+server racks, or anything suggesting the large run happening again.
+
+STYLE: light off-white background (#F7F9FC), flat modern technical
+illustration, navy/slate/blue palette (#0B5CAD primary, #5B7FA6 secondary,
+#222 ink), generous whitespace, high contrast, accessible, no tiny text,
+no photorealism, no people, no logos. Same style family as the TRACE
+stack hero.
+<<< END COPY (filename suggestion: trace-small-repro-16x9.png)

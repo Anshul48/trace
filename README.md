@@ -25,6 +25,8 @@ staged JSON record.
 | Every benchmark number, gate, and condition | [docs/BENCHMARKS.md](docs/BENCHMARKS.md) |
 | Pins, hardware, and what re-runs locally | [docs/REPRO.md](docs/REPRO.md) |
 | The proposed GitHub About text and topics | [docs/ABOUT.md](docs/ABOUT.md) |
+| Small-scale real-data reproduction (20k prefix) | [repro-20k/README.md](repro-20k/README.md) |
+| Manual Gemini image prompts + captions | [docs/gemini-prompts/README.md](docs/gemini-prompts/README.md) |
 | The previous publication, preserved byte-exact | [archive/previous-c2-publication/INVENTORY.md](archive/previous-c2-publication/INVENTORY.md) |
 
 ## Measured qualification (VM `trace-build500`, 2026-10-13)
@@ -91,6 +93,7 @@ that control is what makes the pairs comparable.
 | Readers | 2 threads, 15,813 + 15,812 requests, 0 errors; p50 116 ms, p95 381 ms |
 | F1 visibility (this run only) | 33/33 queries within 5 s of ACK return (p50 119 ms, p95 130 ms); ack→query 0.12 s after a 331.7 s post-ingest wait |
 | Cap derivation | Experimental, derived: `ceil(2·max(basis))` from a measured 1M run (37,117 commits / 7,035 atoms / 4,424 docs, margin 2.0) → 669,436 |
+| Recorded caps | commits cap 669,436 (used 166,457); intake/other cap 1,000,000 (see `receipts/cap-derivation.json` + closed-ledger row above) |
 | Vectors | Cached FP32, unnormalized; cosine normalizes at scoring |
 
 ### Negative findings (kept visible)
@@ -107,17 +110,23 @@ that control is what makes the pairs comparable.
 Full definitions, probe work budgets, and conditions are in
 [docs/BENCHMARKS.md](docs/BENCHMARKS.md).
 
-## Browser demo
+## Quickstart — browser demo first (one command)
 
-DEMO-SCREENSHOT-PLACEHOLDER
+```bash
+cd demo-app && python3 run_demo.py --port 8765
+# then open http://127.0.0.1:8765/ in a browser
+```
 
-An interactive browser demo (same frozen engine on a clearly labelled small
-corpus, plus a read-only explorer for the full 10M receipt record above)
-lives in [`demo-app/`](demo-app/README.md). The 10M figures in this README
-remain the staged VM receipts; the local demo does not rerun or relabel
-them.
+On a clean checkout that one command creates `demo-app/.venv` and installs
+only numpy if the current interpreter lacks it (the frozen engine needs it),
+verifies the source-freeze identity at startup (mismatch refuses to start),
+and serves the actual frozen guided/flat query code over a labelled
+120-vector sample of real receipt probe vectors, with the recorded 10M
+evidence kept separate. See [`demo-app/README.md`](demo-app/README.md).
 
-## Quickstart (no corpus, no 10M run)
+![TRACE browser demo: query form, metric cards, and guided/flat result cards on the 120-vector sample](demo-app/screenshots/desktop-results.png)
+
+## Developer checks (no corpus, no 10M run)
 
 ```bash
 python3 tools/verify_freeze.py        # expect: entries=207 ok=207 missing=0 mismatch=0
@@ -127,11 +136,13 @@ bash freeze-src/run_all.sh stack      # stack unit tests (needs Python with nump
 bash freeze-src/run_all.sh existing   # shipped suites: pending_topk, publication, pool_reuse, serving_pool
 ```
 
-The 10M run itself is **not** reproducible from this repository alone: it
-needs the VM-side corpus cache and billed multi-hour hardware.
-[docs/REPRO.md](docs/REPRO.md) records the exact command and pins and what
-to re-check locally instead; nothing here should be described as a
-clean-checkout 10M reproduction.
+Small-scale protocol reproduction with real data is in
+[`repro-20k/`](repro-20k/README.md): an exact 88-document / 20,030-token
+prefix with its real cached vectors runs the frozen harness locally. That
+provides portable small-scale protocol reproduction; it does not close or
+claim full-10M reproduction, which needs the VM-side corpus cache and
+billed multi-hour hardware. [docs/REPRO.md](docs/REPRO.md) records the
+exact 10M command, pins, and caps.
 
 ## Layout
 
@@ -139,10 +150,11 @@ clean-checkout 10M reproduction.
 trace/
   freeze-src/cand/      frozen 207-file candidate (tools/, fork/, fix1/, stack/, tests/) + BUILD-REPORT.md
   receipts/             staged VM JSONs verbatim (result, source-pin, input, acceptance, audit, …)
-  docs/                 ARCHITECTURE.md · CODE-TOUR.md · BENCHMARKS.md · REPRO.md · ABOUT.md
+  docs/                 ARCHITECTURE · CODE-TOUR · BENCHMARKS · REPRO · ABOUT · gemini-prompts/
   assets/               hero + architecture + measured charts (SVG, receipt numbers only)
   demo/                 synthetic local demo (no corpus)
   demo-app/             browser demo (see its README; wrappers outside the freeze)
+  repro-20k/            exact 88-doc/20k-token prefix + frozen-harness small-scale reproduction
   tools/                verify_freeze.py · check_receipts.py · check_links.py (outside the freeze)
   archive/              previous publication, every file preserved byte-exact with an inventory
 ```

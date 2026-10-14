@@ -1,0 +1,29 @@
+COPY FROM HERE >>>
+Create a wide evidence-chain illustration (16:9, highest resolution
+available, export PNG about 2560x1440): a calm left-to-right chain showing
+how a frozen software candidate becomes a trusted, receipt-backed result.
+Abstract document glyphs only. ABSOLUTELY NO numbers, NO percentages, NO
+hash-like strings, NO readable text, and NO chart shapes inside the image;
+every label will be added as a caption outside the image.
+
+FOUR LINKS IN THE CHAIN, connected by a single dotted provenance line:
+1) A solid cube resting on a checklist card whose rows are plain ticks
+   (a frozen source manifest: every file hashed and matched).
+2) A rolled receipt with a clock glyph and a small gauge (the run record:
+   inputs, timing, resource observations).
+3) A clipboard whose boxes are all ticked, with a firm stamp glyph
+   (a hardened acceptance gate passed).
+4) A second, independent magnifier re-examining a copy of the first
+   cube-and-receipt, ending in a double-check seal (an independent
+   read-only oracle replay that left the store untouched).
+Beneath the chain, one thin shelf holds three small honest-cost glyphs,
+drawn neutrally and without scale meaning: an hourglass, a wrench, and
+two overlapping reader glasses - a reminder that costs and negative
+findings are published alongside the result, not hidden.
+
+STYLE: light off-white background (#F7F9FC), flat modern technical
+illustration, navy/slate/blue palette (#0B5CAD primary, #5B7FA6 secondary,
+#222 ink), generous whitespace, high contrast, accessible, no tiny text,
+no photorealism, no people, no logos, no seals of any real institution.
+Same style family as the TRACE stack hero.
+<<< END COPY (filename suggestion: trace-evidence-chain-16x9.png)

@@ -1,0 +1,29 @@
+COPY FROM HERE >>>
+Create a wide ecosystem illustration (16:9, highest resolution available,
+export PNG about 2560x1440) for ANIMA: five reusable, independently
+installable Python research components. The key message is independence:
+the five cards must NOT be connected by wires, pipes, arrows, or any
+data-flow lines, and there must be no shared server, cloud, or hub.
+
+SUBJECT: five equal rounded cards standing separately in a row on one
+light shelf, each card carrying exactly one abstract glyph and nothing
+else:
+1) a globe-grid cube - persistent project worlds (substrate),
+2) a branching tree with a circled node - heuristic tree search (sst),
+3) a spec sheet turning into a gear - spec-to-code (stc),
+4) a clock ring with a soft trailing arc - advisory temporal context
+   (entorhinal),
+5) an eye-and-lens glyph over a window frame - perception for computer
+   use (reflex).
+Above the shelf floats ONE small plain namespace tag containing only the
+characters anima.* in a clean sans-serif font - this is the ONLY text
+allowed in the image, and it must look like a label, not a connector:
+no lines from the tag to the cards. Each card stands on its own small
+base shadow to reinforce that each installs and runs on its own.
+
+STYLE: light off-white background (#F7F9FC), flat modern technical
+illustration, navy/slate/blue palette (#0B5CAD primary, #5B7FA6 secondary,
+#222 ink), generous whitespace, high contrast, accessible, no other text,
+no numbers, no photorealism, no people, no logos. Same style family as
+the TRACE illustration set.
+<<< END COPY (filename suggestion: anima-ecosystem-16x9.png)
