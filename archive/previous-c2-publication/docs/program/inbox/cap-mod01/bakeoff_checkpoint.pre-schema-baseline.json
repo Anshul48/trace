@@ -1,0 +1,126 @@
+{
+  "manifest": "bakeoff_clusters_v1.json",
+  "total_clusters": 100,
+  "completed_tiers": {},
+  "cluster_cache": {
+    "gemma4:26b": {
+      "0": {
+        "cluster_idx": 0,
+        "cluster_id": "cluster_001",
+        "prompt_sha256": "fa6b92f54e17e62ab3b244dfd919a019e4de224639808c8cc409b0d9846ec390",
+        "prompt_version": "v2-strict-grounding",
+        "decoding_tag": "holon-skeleton-v1",
+        "faithfulness": 0.0,
+        "tps": 18.73,
+        "latency_ms": 141412.7,
+        "wall_sec": 141.41,
+        "is_invalid": true,
+        "cold_load_sec": 141.41
+      },
+      "1": {
+        "cluster_idx": 1,
+        "cluster_id": "cluster_002",
+        "prompt_sha256": "fa6b92f54e17e62ab3b244dfd919a019e4de224639808c8cc409b0d9846ec390",
+        "prompt_version": "v2-strict-grounding",
+        "decoding_tag": "holon-skeleton-v1",
+        "faithfulness": 0.875,
+        "tps": 18.09,
+        "latency_ms": 33752.2,
+        "wall_sec": 33.75,
+        "is_invalid": false,
+        "cold_load_sec": null
+      },
+      "2": {
+        "cluster_idx": 2,
+        "cluster_id": "cluster_003",
+        "prompt_sha256": "fa6b92f54e17e62ab3b244dfd919a019e4de224639808c8cc409b0d9846ec390",
+        "prompt_version": "v2-strict-grounding",
+        "decoding_tag": "holon-skeleton-v1",
+        "faithfulness": 0.9219,
+        "tps": 19.23,
+        "latency_ms": 33193.5,
+        "wall_sec": 33.19,
+        "is_invalid": false,
+        "cold_load_sec": null
+      },
+      "3": {
+        "cluster_idx": 3,
+        "cluster_id": "cluster_004",
+        "prompt_sha256": "fa6b92f54e17e62ab3b244dfd919a019e4de224639808c8cc409b0d9846ec390",
+        "prompt_version": "v2-strict-grounding",
+        "decoding_tag": "holon-skeleton-v1",
+        "faithfulness": 1.0,
+        "tps": 18.52,
+        "latency_ms": 34891.9,
+        "wall_sec": 34.89,
+        "is_invalid": false,
+        "cold_load_sec": null
+      },
+      "4": {
+        "cluster_idx": 4,
+        "cluster_id": "cluster_005",
+        "prompt_sha256": "fa6b92f54e17e62ab3b244dfd919a019e4de224639808c8cc409b0d9846ec390",
+        "prompt_version": "v2-strict-grounding",
+        "decoding_tag": "holon-skeleton-v1",
+        "faithfulness": 0.9028,
+        "tps": 14.97,
+        "latency_ms": 41433.5,
+        "wall_sec": 41.43,
+        "is_invalid": false,
+        "cold_load_sec": null
+      },
+      "5": {
+        "cluster_idx": 5,
+        "cluster_id": "cluster_006",
+        "prompt_sha256": "fa6b92f54e17e62ab3b244dfd919a019e4de224639808c8cc409b0d9846ec390",
+        "prompt_version": "v2-strict-grounding",
+        "decoding_tag": "holon-skeleton-v1",
+        "faithfulness": 0.8929,
+        "tps": 16.11,
+        "latency_ms": 37689.5,
+        "wall_sec": 37.69,
+        "is_invalid": false,
+        "cold_load_sec": null
+      },
+      "6": {
+        "cluster_idx": 6,
+        "cluster_id": "cluster_007",
+        "prompt_sha256": "fa6b92f54e17e62ab3b244dfd919a019e4de224639808c8cc409b0d9846ec390",
+        "prompt_version": "v2-strict-grounding",
+        "decoding_tag": "holon-skeleton-v1",
+        "faithfulness": 0.8333,
+        "tps": 14.29,
+        "latency_ms": 61593.4,
+        "wall_sec": 61.59,
+        "is_invalid": false,
+        "cold_load_sec": null
+      },
+      "7": {
+        "cluster_idx": 7,
+        "cluster_id": "cluster_008",
+        "prompt_sha256": "fa6b92f54e17e62ab3b244dfd919a019e4de224639808c8cc409b0d9846ec390",
+        "prompt_version": "v2-strict-grounding",
+        "decoding_tag": "holon-skeleton-v1",
+        "faithfulness": 1.0,
+        "tps": 14.83,
+        "latency_ms": 40104.2,
+        "wall_sec": 40.1,
+        "is_invalid": false,
+        "cold_load_sec": null
+      },
+      "8": {
+        "cluster_idx": 8,
+        "cluster_id": "cluster_009",
+        "prompt_sha256": "fa6b92f54e17e62ab3b244dfd919a019e4de224639808c8cc409b0d9846ec390",
+        "prompt_version": "v2-strict-grounding",
+        "decoding_tag": "holon-skeleton-v1",
+        "faithfulness": 0.9,
+        "tps": 14.85,
+        "latency_ms": 40222.2,
+        "wall_sec": 40.22,
+        "is_invalid": false,
+        "cold_load_sec": null
+      }
+    }
+  }
+}

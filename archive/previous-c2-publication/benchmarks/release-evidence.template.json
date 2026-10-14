@@ -1,0 +1,36 @@
+{
+  "load": {
+    "atoms": 1000000,
+    "non_deep_qps": 100,
+    "mix": {"fast": 0.7, "standard": 0.2, "graph": 0.05, "hierarchy": 0.05},
+    "fast_p95_seconds": 2,
+    "standard_p95_seconds": 5,
+    "graph_p95_seconds": 5,
+    "hierarchy_p95_seconds": 5,
+    "deep_p95_seconds": 90
+  },
+  "restore": {"passed": false, "rpo_hours": 24, "rto_hours": 24},
+  "security": {
+    "tenant_leak_test_passed": false,
+    "rls_visibility_test_passed": false,
+    "provider_redaction_test_passed": false,
+    "critical_privacy_defect": true,
+    "critical_destructive_data_defect": true
+  },
+  "replay": {"passed": false, "critical_replay_defect": true},
+  "quality": {
+    "reviewed_query_count": 0,
+    "complete_gold_evidence_coverage": 0,
+    "citation_precision": 0,
+    "quality_delta_from_100k": 1
+  },
+  "freshness": {"zero_hot_data_blind_spots": false},
+  "operations": {
+    "max_queue_age_seconds": 999999,
+    "max_index_lag_seconds": 999999,
+    "max_graph_degree": 999999,
+    "model_cost_usd": 999999,
+    "stale_projection_count": 999999
+  },
+  "shadow": {"passed": false, "stages": [5, 25, 50, 100], "automatic_rollback_triggered": false}
+}
