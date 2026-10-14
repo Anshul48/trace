@@ -17,6 +17,15 @@ jobs:
         run: python3 tools/verify_freeze.py
       - name: Receipt schema and recorded gates
         run: python3 tools/check_receipts.py
+      - name: Demo backend tests (incl. 207-file freeze verification)
+        run: |
+          cd demo-app
+          python3 -B -m unittest discover tests -v
+      - name: 20k repro prep verify (cheap; no full pilot or 10M run)
+        run: |
+          cd repro-20k
+          python3 prep_small_prefix.py verify-freeze --cand ../freeze-src/cand
+          python3 prep_small_prefix.py verify --tokens 20000 --cand ../freeze-src/cand --data-dir data-20k
       - name: Documentation links and SVG well-formedness
         run: |
           python3 tools/check_links.py

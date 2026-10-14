@@ -118,15 +118,17 @@ cd demo-app && python3 run_demo.py --port 8765
 ```
 
 On a clean checkout that one command creates `demo-app/.venv` and installs
-only numpy if the current interpreter lacks it (the frozen engine needs it),
-verifies the source-freeze identity at startup (mismatch refuses to start),
+only numpy if the current interpreter lacks it (the frozen engine needs it;
+Linux/macOS supported, verified on Linux), verifies all 207 actual frozen
+source files against the approved SOURCEFREEZE manifest at startup
+(any mismatch refuses to start),
 and serves the actual frozen guided/flat query code over a labelled
 120-vector sample of real receipt probe vectors, with the recorded 10M
 evidence kept separate. See [`demo-app/README.md`](demo-app/README.md).
 
 ![TRACE browser demo: query form, metric cards, and guided/flat result cards on the 120-vector sample](demo-app/screenshots/desktop-results.png)
 
-## Developer checks (no corpus, no 10M run)
+## Developer checks (no corpus needed, no 10M run)
 
 ```bash
 python3 tools/verify_freeze.py        # expect: entries=207 ok=207 missing=0 mismatch=0
@@ -172,8 +174,13 @@ publication.
 - Harness recall and oracle agreement only: no semantic-relevance, nDCG,
   BM25-quality, SOTA, capability (“notes → clusters/contradictions”), or
   universal-latency claim is made or implied.
-- No corpus, weights, store, or private data ship here (the ~2.9 GB run
-  store is excluded by size; its digest is in the acceptance record).
+- Corpus scope is precise: the only corpus material included is the
+  attributed 88-document / 20,030-token prefix with its 144 cached
+  vectors in [`repro-20k/`](repro-20k/README.md) (SciFact abstracts,
+  ODC-By 1.0; all-MiniLM-L6-v2 vectors, Apache-2.0 — see
+  [`repro-20k/LICENSES-DATA-MODEL.md`](repro-20k/LICENSES-DATA-MODEL.md)).
+  The full 10M corpus and cache, the ~2.9 GB run store (digest in the
+  acceptance record), model weights, and private data are excluded.
 - Frozen bytes are never edited; wrappers live outside `freeze-src/`.
 - Shipping/default adoption and protocol or acceptance changes are
   maintainer decisions, not consequences of this record.

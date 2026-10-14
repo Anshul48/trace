@@ -63,6 +63,36 @@ class TestBackendVsFrozen(unittest.TestCase):
             ev["summary"]["all_sources"]["guided_recall10"], 0.73)
 
 
+class TestFreezeVerification(unittest.TestCase):
+    def test_all_207_actual_files_match_manifest(self):
+        sha, count = backend.verify_freeze_files(backend.SRC)
+        self.assertEqual(sha, backend.EXPECTED_FREEZE_SHA)
+        self.assertEqual(count, 207)
+
+    def test_modified_source_byte_refuses_startup(self):
+        import os
+        import shutil
+        import subprocess
+        import tempfile
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
+            cand = Path(td) / "cand"
+            shutil.copytree(backend.SRC, cand,
+                            ignore=shutil.ignore_patterns("__pycache__"))
+            target = cand / "tools" / "product_pilot.py"
+            data = bytearray(target.read_bytes())
+            data[0] ^= 0xFF  # flip one actual source byte; manifest untouched
+            target.write_bytes(bytes(data))
+            with self.assertRaises(RuntimeError):
+                backend.verify_freeze_files(cand)
+            env = dict(os.environ, TRACE_FREEZE_SRC=str(cand),
+                       PYTHONDONTWRITEBYTECODE="1")
+            proc = subprocess.run(
+                [sys.executable, "-B", "-c", "import backend"],
+                cwd=str(HERE), env=env, capture_output=True, text=True)
+            self.assertNotEqual(proc.returncode, 0)
+            self.assertIn("refusing to start", proc.stderr)
+
+
 class TestHTTP(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

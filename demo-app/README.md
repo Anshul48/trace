@@ -12,10 +12,15 @@ python3 run_demo.py --port 8765   # clean checkout: auto-creates .venv with nump
 # then open http://127.0.0.1:8765/ in a browser
 ```
 
-`TRACE_FREEZE_SRC` defaults to `../freeze-src/cand`. The backend refuses to
-start unless the SOURCEFREEZE sha256 equals the approved `38c66bef…a43a0d54`.
-numpy is required because the frozen engine requires it; `run_demo.py`
-creates `./.venv` and installs only numpy when the current interpreter lacks it.
+`TRACE_FREEZE_SRC` defaults to `../freeze-src/cand`. At startup the backend
+verifies the SOURCEFREEZE manifest sha256 equals the approved
+`38c66bef…a43a0d54` **and** rehashes all 207 actual frozen source files
+against that manifest; any missing or modified file refuses startup (before
+any frozen code is imported). Supported platforms: Linux and macOS (verified
+on Linux); the launcher resolves the Windows venv layout
+(`.venv/Scripts/python.exe`) too, but Windows is not verified. numpy is
+required because the frozen engine requires it; `run_demo.py` creates
+`./.venv` and installs only numpy when the current interpreter lacks it.
 
 ## Scope honesty
 
@@ -62,5 +67,7 @@ creates `./.venv` and installs only numpy when the current interpreter lacks it.
 ```
 
 Includes a backend-vs-frozen-function comparison (direct `HierQuery.guided`
-call must match the API rows/work exactly), API tests, and error cases.
+call must match the API rows/work exactly), API tests, error cases, and
+freeze-verification tests (all 207 actual files match; a single modified
+source byte refuses startup).
 Screenshots from the staging verification run are in `screenshots/`.

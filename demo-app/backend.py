@@ -37,16 +37,50 @@ def freeze_src():
                        + ", ".join(str(c) for c in candidates) + ")")
 
 
+EXPECTED_FREEZE_SHA = "38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54"
+EXPECTED_FREEZE_FILES = 207
+
+
+def verify_freeze_files(src, expected_sha=EXPECTED_FREEZE_SHA,
+                        expected_count=EXPECTED_FREEZE_FILES):
+    """Verify every actual frozen source file against the approved manifest.
+
+    Checks the manifest digest itself, then rehashes all files listed in it
+    (not just the manifest). Returns (manifest_sha256, file_count); raises
+    RuntimeError on any missing/mismatched file so startup refuses to run
+    modified frozen code. Wrapper outside the freeze; reads only.
+    """
+    src = Path(src)
+    manifest_bytes = (src / "SOURCEFREEZE.json").read_bytes()
+    manifest_sha = hashlib.sha256(manifest_bytes).hexdigest()
+    if manifest_sha != expected_sha:
+        raise RuntimeError(
+            f"source-freeze identity mismatch: got {manifest_sha}, "
+            f"expected {expected_sha}; refusing to start")
+    files = json.loads(manifest_bytes)["files"]
+    if len(files) != expected_count:
+        raise RuntimeError(
+            f"source-freeze manifest lists {len(files)} files, "
+            f"expected {expected_count}; refusing to start")
+    bad = []
+    for rel, want in files.items():
+        p = src / rel
+        if not p.is_file() or hashlib.sha256(p.read_bytes()).hexdigest() != want:
+            bad.append(rel)
+    if bad:
+        raise RuntimeError(
+            f"source-freeze file verification failed for {len(bad)} of "
+            f"{len(files)} files (e.g. {', '.join(sorted(bad)[:5])}); "
+            "refusing to start")
+    return manifest_sha, len(files)
+
+
 SRC = freeze_src()
+FREEZE_SHA, FREEZE_FILE_COUNT = verify_freeze_files(SRC)
 sys.path[:0] = [str(SRC / "tools"), str(SRC / "fork" / "tl-sys"), str(SRC)]
 import numpy as np  # noqa: E402
 import product_pilot  # noqa: E402  frozen tools/product_pilot.py
 from tlsys.query import HierQuery  # noqa: E402  frozen fork/tl-sys/tlsys/query.py
-
-EXPECTED_FREEZE_SHA = "38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54"
-FREEZE_SHA = hashlib.sha256((SRC / "SOURCEFREEZE.json").read_bytes()).hexdigest()
-if FREEZE_SHA != EXPECTED_FREEZE_SHA:
-    raise RuntimeError(f"source-freeze identity mismatch: got {FREEZE_SHA}, expected {EXPECTED_FREEZE_SHA}; refusing to start")
 PROBES = json.loads((DATA / "probes.json").read_text())
 RESULT = json.loads((DATA / "result.json").read_text())
 ORACLE = json.loads((DATA / "ORACLE.json").read_text())
@@ -186,6 +220,7 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         if path == "/api/health":
             return self.send_json({"ok": True, "freeze_sha256": FREEZE_SHA,
+                                   "freeze_files_verified": FREEZE_FILE_COUNT,
                                    "freeze_src": str(SRC),
                                    "sample_probes": len(PROBES)})
         if path == "/api/probes":

@@ -1,13 +1,22 @@
 """One-command launch from a clean checkout: python3 run_demo.py [--port 8765]
 
-If the current interpreter cannot import numpy (required by the frozen
-engine), creates ./.venv and installs only numpy into it (explicit,
-bounded), then serves with that interpreter. Set TRACE_FREEZE_SRC if the
-frozen candidate is not at ../freeze-src/cand beside this folder.
+Supported platforms: Linux and macOS (verified on Linux). The venv
+interpreter path also follows the Windows layout (`Scripts/python.exe`),
+but Windows is not verified. If the current interpreter cannot import
+numpy (required by the frozen engine), creates ./.venv and installs only
+numpy into it (explicit, bounded), then serves with that interpreter.
+Set TRACE_FREEZE_SRC if the frozen candidate is not at
+../freeze-src/cand beside this folder.
 """
 import shutil, subprocess, sys
 from pathlib import Path
 HERE = Path(__file__).resolve().parent
+
+
+def venv_python(venv_dir):
+    if sys.platform == "win32":
+        return venv_dir / "Scripts" / "python.exe"
+    return venv_dir / "bin" / "python"
 
 def has_numpy(py):
     return subprocess.call([str(py), "-c", "import numpy"],
@@ -18,7 +27,7 @@ def main():
     if "--port" in sys.argv:
         port = sys.argv[sys.argv.index("--port") + 1]
     py = Path(sys.executable)
-    venv_py = HERE / ".venv" / "bin" / "python"
+    venv_py = venv_python(HERE / ".venv")
     if venv_py.exists() and has_numpy(venv_py):
         py = venv_py
     elif not has_numpy(py):
