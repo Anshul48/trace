@@ -180,25 +180,29 @@ def slice_10m(held: dict[int, tuple[str, str]], derivation: Path, out: Path) -> 
 
 
 def extract_bundle(bundle: Path, out: Path) -> None:
-    """Deterministic extraction of the shipped docs-10m bundle + verify."""
-    import gzip
+    """Extract the shipped docs-10m bundle via the corrected verifier.
+
+    Delegates to ``bundle/verify_docs_10m.py`` (A50/A52: asset/out alias
+    guards + sibling-temp atomic extraction; existing output and asset
+    preserved on every failure). The old inline ``gzip`` copy wrote
+    ``--out`` before verifying and is removed. The read-only bundle
+    hash gate stays first so pin failures name the pin.
+    """
+    import importlib.util
     gate(bundle, "bundle", "shipped bundle docs-10m.jsonl.gz")
-    h = hashlib.sha256()
-    n = 0
-    with gzip.open(bundle, "rb") as fz, open(out, "wb") as fh:
-        for chunk in iter(lambda: fz.read(1 << 20), b""):
-            fh.write(chunk)
-            h.update(chunk)
-    with open(out, "rb") as fh:
-        for _ in fh:
-            n += 1
-    if n != N_10M:
-        fail(f"bundle rows {n} != {N_10M}")
-    if h.hexdigest() != PINS["docs-10m"]:
-        fail(f"bundle content mismatch: got {h.hexdigest()[:16]}…, "
-             f"want {PINS['docs-10m'][:16]}…")
-    if out.stat().st_size != BYTES_10M:
-        fail(f"bundle content bytes {out.stat().st_size} != {BYTES_10M}")
+    verifier = bundle.parent / "verify_docs_10m.py"
+    if not verifier.is_file():
+        verifier = HERE / "bundle" / "verify_docs_10m.py"
+    if not verifier.is_file():
+        fail(f"missing bundle verifier: {verifier}")
+    spec = importlib.util.spec_from_file_location(
+        "bundle_verify_docs_10m", verifier)
+    if spec is None or spec.loader is None:
+        fail(f"cannot load bundle verifier: {verifier}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    if mod.verify(str(bundle), str(out)) != 0:
+        fail("bundle verify failed (see FAIL line above)")
 
 
 def main(argv=None) -> int:

@@ -25,7 +25,7 @@ repository's blanket Apache-2.0 grant.
 | `inputs/INPUTS-REPORT.md` | 17795 | `c3002a40…` | verbatim freeze-lane report (provenance) |
 | `upstream/trace_engineering_curated.json` | 182169 | `210a20a4…` | vendored exact upstream (Apache-2.0 fixture) |
 | `bundle/docs-10m.jsonl.gz` | 21787645 | `31002b8c…` | deterministic gzip (`gzip -n -9`) of exact `docs-10m.jsonl` |
-| `bundle/verify_docs_10m.py` | — | (pinned in `../PINS.sha256`) | adopted standalone bundle verifier (stdlib only) |
+| `bundle/verify_docs_10m.py` | — | (pinned in `../PINS.sha256`) | corrected standalone bundle verifier (A52; stdlib only, alias guards + atomic extraction) |
 | `bundle/{LICENSE-DATA,ATTRIBUTION}.md` | — | (pinned) | asset-level license + per-article attribution notices |
 | `bundle/provenance.json` | — | (pinned) | machine-readable bundle provenance (pins, mix, method) |
 | `reconstruct_inputs.py` | — | (pinned in `../PINS.sha256`) | fetch/reconstruct/verify tool (stdlib only) |
@@ -41,12 +41,16 @@ python c10m/data/reconstruct_inputs.py --out-dir /tmp/c10m-inputs --from-bundle
 # RECONSTRUCT PASS (--from-bundle): 3099 rows, 64291035 B, 04bbbb3e… exact
 ```
 
-The tool hash-gates the bundle (`31002b8c…`), extracts deterministically
-(stdlib `gzip`, no filename/timestamp dependence), and verifies row
-count, byte count, and `04bbbb3e…` — failing closed on any mismatch.
-Standalone equivalent (adopted from the channel data packager, A47):
-`python bundle/verify_docs_10m.py --out FILE` (checks gz bytes/sha,
-gzip mtime 0, raw sha/bytes/rows, JSONL keys; `VERIFY PASS`).
+The tool hash-gates the bundle (`31002b8c…`), then delegates
+extraction+verification to the corrected `bundle/verify_docs_10m.py`
+(A50/A52: asset/out alias guards, sibling-temp atomic extraction,
+existing output and asset preserved on every failure; `VERIFY PASS`
+checks gz bytes/sha, gzip mtime 0, raw sha/bytes/rows, JSONL keys) —
+failing closed on any mismatch. Standalone equivalent (adopted from
+the channel data packager, A47 + corrected A52):
+`python bundle/verify_docs_10m.py --out FILE`. `python
+bundle/verify_docs_10m.py --self-test` runs the 7 bounded
+alias/corruption checks.
 Manual equivalent: `gunzip -c bundle/docs-10m.jsonl.gz | sha256sum`
 must print `04bbbb3e…` (64291035 bytes).
 
@@ -85,17 +89,22 @@ Upstream acquisition:
 
 ## 3. Verification evidence (packager runs, 2026-10-14)
 
-Bundle path (`--from-bundle`):
+Bundle path (`--from-bundle`, via the corrected verifier):
 
 ```text
 small inputs: 3/3 hash-verified
+gz OK: 21787645 bytes, sha256 31002b8c…760a, mtime 0
+raw OK: 64291035 bytes, sha256 04bbbb3e…ce3fd, 3099 rows, keys {doc_id,text}
+VERIFY PASS
 docs-10m: 3099 rows, 64291035 bytes, sha 04bbbb3ea3425a49… exact (from bundle)
 RECONSTRUCT PASS (--from-bundle)
 ```
 
 plus `cmp` byte-identical against the independently recovered exact
-bytes, and gzip determinism confirmed (re-compression reproduces
-`31002b8c…`).
+bytes and `gzip -dc`, and gzip determinism confirmed (re-compression
+reproduces `31002b8c…`). Alias/truncate negatives (same-path,
+symlink, hardlink, truncated asset) all exit 1 with asset + existing
+output preserved and no temp leftovers (see TEST-REPORT.md C3 §).
 
 Upstream path (against the pinned local upstreams):
 

@@ -6,7 +6,8 @@
 |---|---|
 | remote-old main | `a24a937009fec41e6dcb6d2ca31d3c1783ac97f7` (tree `bc5134725425ff56b9fae434cdd77f1a9b7a0a60`) |
 | content commit C1 | `6e931b433b51a6e2f5eeb6530e0c95d9f6e1800d` (tree `88dfc874ebc1adaf97bc90b4582e88c0fcc983e9`) |
-| candidate commit C2 | C1 + this file only (`git diff C1 C2 --stat` proves it; SHA reported in channel W2-requests.md; REVIEW-APPROVED names repo + commit before any push) |
+| candidate commit C2 | `c0eede02255f9418fe8c0cef6411945f9c80c862` (tree `d4544ae5bfb498c3ac1701b6baca8cae793ccfd2`): C1 + this file only — HOLD per A51 (old data verifier) |
+| successor commit C3 | C2 + corrected verifier adoption only (A50–A53; `git diff C2 C3 --stat` proves it; SHA/tree reported in channel W2.md + W2-requests.md; REVIEW-APPROVED names repo + commit before any push) |
 
 C1's parent is remote-old: push fast-forwards, preserving existing
 remote work. No history rewritten, no force. Local commits only (gate).
@@ -18,7 +19,8 @@ store pin `ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:95436`, producer freeze
 `c2-b100m-producer-freeze-002`, **89/89 entries + 44/44 closure verified**.
 Channel provenance: `provenance/CANDIDATE.md` (READY) + `REPRO.md`,
 `producer-recovery/` (85 code), `data-recovery/` (4 inputs),
-`data-public-package/` (adopted bundle + notices, A47).
+`data-public-package/` (adopted bundle + notices, A47; verifier
+corrected per A52 after the A50 alias/atomic fix).
 
 ## Source hashes (re-verified by packager before copy)
 
@@ -48,9 +50,10 @@ Big RUN.json/TREC set: 20 files hash-inventoried
 ```text
 sha256sum -c c10m/PINS.sha256                                  rc=0  110/110 OK
 python demos/demo_c10m_narrow.py --quiet                       rc=0  DEMO PASS 0.83s offline
-python c10m/data/reconstruct_inputs.py --out-dir … --from-bundle rc=0 RECONSTRUCT PASS (cmp byte-identical)
-python c10m/data/reconstruct_inputs.py --out-dir … --scifact … --delta … rc=0 RECONSTRUCT PASS (both corpora exact)
-python c10m/data/bundle/verify_docs_10m.py --out …             rc=0  VERIFY PASS
+python c10m/data/reconstruct_inputs.py --out-dir … --from-bundle rc=0 RECONSTRUCT PASS (via corrected verifier; cmp byte-identical)
+python c10m/data/reconstruct_inputs.py --out-dir … --scifact … --delta … rc=0 RECONSTRUCT PASS (both corpora exact; C2 run, path untouched by C3)
+python c10m/data/bundle/verify_docs_10m.py --out …             rc=0  VERIFY PASS (corrected A52 verifier)
+python c10m/data/bundle/verify_docs_10m.py --self-test         rc=0  SELF-TEST 7/7 (C3 focused; + 5/5 disposable-copy negatives, see TEST-REPORT.md)
 python benchmarks/evidence/repro-fixture/verify_smoke_receipts.py rc=0 SMOKE-VERIFY PASS
 pytest tests/test_c10m_demo.py tests/test_w2_demo_smoke.py -q  rc=0  7 passed
 pytest tests/test_organization_toc.py -q -k "grace_period or 30_day" rc=0 3 passed
@@ -79,6 +82,15 @@ sensitive tables empty, strings scan 0 hits, provenance in co-shipped
 packet → ruling: needed + not shown private → kept. Hashes:
 db `2465f0cf…` (6467584 B), shm `75f25efb…` (32768 B), wal `7124c4fb…`
 (20656 B).
+
+C2 → C3 (successor, A50–A53): 6 files modified, 0 added/deleted —
+verifier adoption only. `c10m/data/bundle/verify_docs_10m.py`
+replaced byte-exact with the corrected package script (`20bfbbf9…`);
+`c10m/data/reconstruct_inputs.py` `--from-bundle` delegates to it
+(unsafe inline `gzip` copy removed); `c10m/PINS.sha256` repinned (3
+entries); `c10m/data/DATA-README.md`, `TEST-REPORT.md`, `MANIFEST.md`
+updated. Asset `docs-10m.jsonl.gz` byte-unchanged (`31002b8c…`,
+21787645 B).
 
 ## Shipped files (203 added)
 
