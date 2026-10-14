@@ -1,0 +1,23 @@
+{
+  "status": "LAUNCHED_RECEIPT_AUDIT",
+  "pid": 69654,
+  "start_utc": "2026-10-13T05:43:25.655944+00:00",
+  "remote_root": "/home/anshul/exec-claude-stack-10m-audit-20261013T054204Z",
+  "deadline_utc": "2026-10-13T14:28:12+00:00",
+  "launch_command": "cd ~/exec-claude-stack-10m-audit-20261013T054204Z && taskset -c 0-2 nice -n 19 env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 /home/anshul/venv/bin/python -B vm_receipt_audit.py >>audit-driver.log 2>&1 (detached via setsid)",
+  "source_manifest": {
+    "remote": "exec-claude-stack-10m-audit-20261013T054204Z",
+    "files": {
+      "PLAN.json": "eb4f0d418a3d9114afe9ccc9325b682bde9d99161cbda3f32f9629d0a5b3a3ba",
+      "vm_receipt_audit.py": "6145b7dd21d10b38e4cbd83593cc503593bff2654e791a824ad4522dce17628b",
+      "vm_acceptance.py": "43a78fefe4c5d386c5861087dcd8bc30b5ca7f5dd7e2638b3952addd2df138fd",
+      "vm_closed_oracle.py": "a09e50418b34ff02df8a6948f18be1a2ec2527e4ef292e2c1ece5daece3603da",
+      "root-fixtures-top.log": "edd22d305af415b2eb2dce600fbeec9d9dfdd0d2092100f51e886467b40b8ec1"
+    },
+    "secret_hits": 0,
+    "same_qualification_root": "exec-claude-stack-20261013T0045Z/stack-fork/cand",
+    "deadline_utc": "2026-10-13T14:28:12+00:00",
+    "adapted_from": "sup-speed-10m-audit-20261012T144657Z",
+    "scope": "closed same stack 10M qualification only; no product edit or new corpus gate"
+  }
+}

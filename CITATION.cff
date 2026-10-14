@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+title: TRACE stack-fork 10M candidate
+version: 0.1.0
+date-released: 2026-10-14
+license: Apache-2.0
+repository-code: https://github.com/Anshul48/trace
+abstract: Frozen stack-fork candidate (SOURCEFREEZE 38c66bef, 207 files) with
+  the first receipt-backed 10M self-organization qualification and staged VM
+  receipts.
+keywords:
+  - trace
+  - self-organization
+  - hierarchical-index
+  - similarity-search
+  - benchmarking

@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+# Packaging metadata for the maintained wrappers in this repository.
+# The frozen candidate under freeze-src/ is a byte-exact snapshot that is
+# run via freeze-src/run_all.sh (see docs/REPRO.md); it is not repackaged
+# as an importable distribution here, so this project intentionally ships
+# no import modules — building it produces metadata only.
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trace-stack-fork"
+version = "0.1.0"
+description = "Frozen TRACE stack-fork candidate (207-file SOURCEFREEZE digest) with a receipt-backed 10M qualification"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+authors = [{ name = "TRACE contributors" }]
+keywords = ["trace", "self-organization", "hierarchical-index", "similarity-search", "benchmarking"]
+dependencies = []
+
+[project.optional-dependencies]
+freeze-tests = ["numpy", "blake3", "pytest"]
+
+[project.urls]
+Repository = "https://github.com/Anshul48/trace"
+
+[tool.setuptools]
+py-modules = []

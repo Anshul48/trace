@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="460" viewBox="0 0 1000 460" role="img" aria-labelledby="tr-arch-t tr-arch-d">
+<title id="tr-arch-t">TRACE stack-fork pilot architecture</title>
+<desc id="tr-arch-d">Corpus flows through ingest, drain cycles, bounded repair, fault plus restart, then evaluation; the frozen candidate serves queries through a two-level store.</desc>
+<rect width="1000" height="460" rx="16" fill="#f6f8fb"/>
+<text x="40" y="48" font-family="sans-serif" font-size="22" font-weight="700" fill="#1a2744">10M pilot data flow</text>
+<g font-family="sans-serif" font-size="12">
+<g><rect x="40" y="80" width="160" height="70" rx="10" fill="#ffffff" stroke="#d5dde9"/><text x="52" y="106" font-weight="700" fill="#1a2744">corpus cache</text><text x="52" y="126" fill="#4a5a75">10M TOK slice</text></g>
+<g><rect x="224" y="80" width="160" height="70" rx="10" fill="#ffffff" stroke="#d5dde9"/><text x="236" y="106" font-weight="700" fill="#1a2744">ingest</text><text x="236" y="126" fill="#4a5a75">917 s · 63k atoms</text></g>
+<g><rect x="408" y="80" width="160" height="70" rx="10" fill="#ffffff" stroke="#1f6feb" stroke-width="2"/><text x="420" y="106" font-weight="700" fill="#1a2744">drain × 18 pubs</text><text x="420" y="126" fill="#4a5a75">fix-3 budget lever</text></g>
+<g><rect x="592" y="80" width="160" height="70" rx="10" fill="#ffffff" stroke="#d5dde9"/><text x="604" y="106" font-weight="700" fill="#1a2744">repair_to_zero</text><text x="604" y="126" fill="#4a5a75">debt 5,314 → 0</text></g>
+<g><rect x="776" y="80" width="160" height="70" rx="10" fill="#ffffff" stroke="#d5dde9"/><text x="788" y="106" font-weight="700" fill="#1a2744">eval 240 rows</text><text x="788" y="126" fill="#4a5a75">0.73 / 0.056</text></g>
+<g><rect x="224" y="190" width="160" height="70" rx="10" fill="#ffffff" stroke="#d5dde9"/><text x="236" y="216" font-weight="700" fill="#1a2744">faults + restart</text><text x="236" y="236" fill="#4a5a75">SIGKILL · resume 1/1/0</text></g>
+<g><rect x="408" y="190" width="160" height="70" rx="10" fill="#ffffff" stroke="#d5dde9"/><text x="420" y="216" font-weight="700" fill="#1a2744">two-level store</text><text x="420" y="236" fill="#4a5a75">3,711 parents · 9,177 leaves</text></g>
+<g><rect x="592" y="190" width="160" height="70" rx="10" fill="#ffffff" stroke="#d5dde9"/><text x="604" y="216" font-weight="700" fill="#1a2744">guided / flat</text><text x="604" y="236" fill="#4a5a75">matched scoring rows</text></g>
+<g stroke="#9fb2cc" stroke-width="1.5" marker-end="none">
+<line x1="200" y1="115" x2="222" y2="115"/><line x1="384" y1="115" x2="406" y2="115"/><line x1="568" y1="115" x2="590" y2="115"/><line x1="752" y1="115" x2="774" y2="115"/><line x1="488" y1="150" x2="488" y2="188"/><line x1="384" y1="225" x2="406" y2="225"/><line x1="568" y1="225" x2="590" y2="225"/>
+</g>
+</g>
+<text x="40" y="300" font-family="sans-serif" font-size="13" font-weight="700" fill="#1a2744">The 5-fix stack (on speed base dd543d0e)</text>
+<g font-family="sans-serif" font-size="12" fill="#4a5a75">
+<text x="40" y="324">Fix-1 pilot params + instrumentation · Fix-3 drain-budget lever (the measured 10M gain) · Fix-6 sort bound (latency-only)</text>
+<text x="40" y="344">Fix-2 suffix-verify + Fix-5 GC: unit-proven, dormant on the org-pilot path (no product callers there)</text>
+</g>
+<text x="40" y="384" font-family="sans-serif" font-size="13" font-weight="700" fill="#1a2744">Serving</text>
+<g font-family="sans-serif" font-size="12" fill="#4a5a75">
+<text x="40" y="408">dossier · relquery / relserve · index · query · generation — see docs/ARCHITECTURE.md for file pointers.</text>
+</g>
+<text x="40" y="440" font-family="sans-serif" font-size="12" fill="#4a5a75">Boxes are pipeline stages; arrows are data flow. Numbers are the measured 10M receipt.</text>
+</svg>

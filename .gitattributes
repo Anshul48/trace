@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Frozen snapshot, staged receipts, and the archived previous publication
+# are byte-exact records: never apply text/CRLF conversion to them.
+freeze-src/** -text
+receipts/** -text
+archive/** -text

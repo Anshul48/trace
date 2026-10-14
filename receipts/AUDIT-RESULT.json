@@ -1,0 +1,31 @@
+{
+  "utc": "2026-10-13T05:45:23.478578+00:00",
+  "status": "VERIFIED_VM_10M_RECEIPT",
+  "qualification_wall_s": 12973.171846087993,
+  "input": {
+    "target_tokens": 10000000,
+    "actual_tokens": 10003381,
+    "tokenizer": "regex [^\\W_]+ (staged TOK_V1)",
+    "whitespace_tokens": 9106861,
+    "complete_documents": 13081,
+    "atoms": 63441,
+    "distinct_chunks": 63441,
+    "cache_misses": 0,
+    "documents_source": "/home/anshul/beam/pkg/data/docs-100m.jsonl",
+    "prefix_raw_sha256": "afaf20a8c8b70c1705b5606a29d17cc1583d177d17a3902fc80fb2cc95354238",
+    "cache_meta_sha256": "e5f9c7069420d8494b1ab7533515a3b9fb4ba8e28089af2ecc0253d03efc9761",
+    "cache_index_sha256": "885d31c0c589e4f284d9cb86d454cf52906294144ee49f4d956bfc743eeb23ed",
+    "used_vector_sha256": "ebd46a7ec917aeaecd669abcea4061ef21469d7d6b541c1e98f4e8a9193e25ba",
+    "normalization": "cached FP32, unnormalized; cosine normalizes at scoring",
+    "input_wall_s": 17.15269720600918
+  },
+  "acceptance": "VM-10M-ACCEPTANCE.json",
+  "independent_oracle": "oracle/ROOT-VM-10M-INDEPENDENT-ORACLE.json",
+  "queries": 240,
+  "closed_ledger_counts": {
+    "commits": 166457,
+    "dedup": 166457,
+    "intake": 0
+  },
+  "scope": "integrated self-organization qualification with experimental derived caps; shipping/default adoption remains user-owned"
+}

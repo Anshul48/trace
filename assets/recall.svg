@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="380" viewBox="0 0 1000 380" role="img" aria-labelledby="tr-rec-t tr-rec-d">
+<title id="tr-rec-t">Guided versus matched-flat recall at 10, both recorded probe modes</title>
+<desc id="tr-rec-d">Four bars from receipts/result.json: all-sources guided 0.73, all-sources flat 0.056, leave-source-out guided 0.476, leave-source-out flat 0.048. Each mode has 120 probes with matched guided and flat scoring rows.</desc>
+<rect width="1000" height="380" rx="16" fill="#f6f8fb"/>
+<text x="40" y="44" font-family="sans-serif" font-size="20" font-weight="700" fill="#1a2744">Recall@10, guided vs matched flat (both recorded modes)</text>
+<g font-family="sans-serif" font-size="13">
+<text x="40" y="92" fill="#1a2744">all sources — guided</text><rect x="300" y="74" width="584" height="24" rx="5" fill="#1f6feb"/><text x="892" y="93" font-weight="700" fill="#1a2744">0.73</text>
+<text x="40" y="132" fill="#1a2744">all sources — flat</text><rect x="300" y="114" width="45" height="24" rx="5" fill="#9fb2cc"/><text x="353" y="133" fill="#4a5a75">0.056</text>
+<text x="40" y="186" fill="#1a2744">leave-source-out — guided</text><rect x="300" y="168" width="381" height="24" rx="5" fill="#1f6feb"/><text x="689" y="187" font-weight="700" fill="#1a2744">0.476</text>
+<text x="40" y="226" fill="#1a2744">leave-source-out — flat</text><rect x="300" y="208" width="39" height="24" rx="5" fill="#9fb2cc"/><text x="347" y="227" fill="#4a5a75">0.048</text>
+</g>
+<g font-family="sans-serif" font-size="12" fill="#4a5a75">
+<text x="40" y="272">120 probes per mode · matched scoring rows (3,865.775 / 3,836.24) · oracle replay 240/240 exact · store before==after</text>
+<text x="40" y="294">F1 visibility this run: 33/33 queries within 5 s of ACK (p50 119 ms, p95 130 ms) · fixtures 121/121</text>
+<text x="40" y="330">Source: receipts/result.json evaluation + receipts/VM-10M-ACCEPTANCE.json.</text>
+<text x="40" y="352">Harness recall / oracle agreement on a shared VM under experimental derived caps — not semantic IR quality or nDCG.</text>
+</g>
+</svg>

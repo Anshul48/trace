@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-labelledby="tr-hero-t tr-hero-d">
+<title id="tr-hero-t">TRACE stack fork: first receipt-backed 10M qualification</title>
+<desc id="tr-hero-d">Freeze 38c66bef, 207 files; 10M tokens in 12,973 seconds; guided recall 0.73 versus flat 0.056; oracle 240 of 240 exact.</desc>
+<rect width="1200" height="300" rx="16" fill="#f6f8fb"/>
+<text x="56" y="64" font-family="sans-serif" font-size="36" font-weight="700" fill="#1a2744">TRACE — stack fork `38c66bef`</text>
+<text x="56" y="96" font-family="sans-serif" font-size="15" fill="#4a5a75">The shipped 10M candidate: 5 fixes on the speed candidate, receipt-backed and independently re-verified.</text>
+<g font-family="sans-serif">
+<g><rect x="56" y="130" width="260" height="120" rx="12" fill="#ffffff" stroke="#d5dde9"/><text x="72" y="162" font-size="26" font-weight="700" fill="#1a2744">10,003,381</text><text x="72" y="186" font-size="13" fill="#4a5a75">tokens · 13,081 docs</text><text x="72" y="206" font-size="13" fill="#4a5a75">63,441 atoms · 0 misses</text></g>
+<g><rect x="332" y="130" width="260" height="120" rx="12" fill="#ffffff" stroke="#d5dde9"/><text x="348" y="162" font-size="26" font-weight="700" fill="#1a2744">12,973 s</text><text x="348" y="186" font-size="13" fill="#4a5a75">qual wall (~3.6 h) · rc 0</text><text x="348" y="206" font-size="13" fill="#4a5a75">status PASS</text></g>
+<g><rect x="608" y="130" width="260" height="120" rx="12" fill="#ffffff" stroke="#d5dde9"/><text x="624" y="162" font-size="26" font-weight="700" fill="#1a2744">0.73 / 0.056</text><text x="624" y="186" font-size="13" fill="#4a5a75">guided / flat recall@10</text><text x="624" y="206" font-size="13" fill="#4a5a75">240 oracle rows exact</text></g>
+<g><rect x="884" y="130" width="260" height="120" rx="12" fill="#ffffff" stroke="#d5dde9"/><text x="900" y="162" font-size="26" font-weight="700" fill="#1a2744">207 files</text><text x="900" y="186" font-size="13" fill="#4a5a75">frozen · drift [] · rehash</text><text x="900" y="206" font-size="13" fill="#4a5a75">207/207 verified</text></g>
+</g>
+<text x="56" y="280" font-family="sans-serif" font-size="13" fill="#4a5a75">Daemon-audited VERIFIED_VM_10M_RECEIPT + independent fresh-verifier concurrence (muse-verified).</text>
+</svg>

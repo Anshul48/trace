@@ -1,0 +1,13 @@
+{
+  "schema": "stack-10m-audit-v1",
+  "utc": "2026-10-13T05:42:29.622225+00:00",
+  "product_root": "exec-claude-stack-20261013T0045Z/stack-fork/cand",
+  "runs_dir": "exec-claude-stack-20261013T0045Z/runs/pilot-10M",
+  "source_freeze_sha256": "38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54",
+  "frozen_files": 207,
+  "harness_sha256": "9f516288a098eff7b2a52373ad0eaf6b9ad1664377a9f7be4f974701b8d9b1a0",
+  "deadline_utc": "2026-10-13T13:48:12+00:00",
+  "audit_deadline_utc": "2026-10-13T14:28:12+00:00",
+  "scope": "closed same stack 10M qualification only; no product edit or new corpus gate",
+  "adapted_from": "sup-speed-10m-audit-20261012T144657Z (mechanical path/pin swap, no logic change)"
+}

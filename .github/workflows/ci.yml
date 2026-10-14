@@ -1,0 +1,47 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test deps
+        run: pip install numpy blake3 pytest
+      - name: Freeze rehash (207/207)
+        run: python3 tools/verify_freeze.py
+      - name: Receipt schema and recorded gates
+        run: python3 tools/check_receipts.py
+      - name: Documentation links and SVG well-formedness
+        run: |
+          python3 tools/check_links.py
+          python3 -c "import xml.etree.ElementTree as E, glob; [E.parse(f) for f in glob.glob('assets/*.svg')]; print('svg ok')"
+      - name: Synthetic demo
+        run: python3 demo/synthetic_recall.py --probes 20 --atoms 2000
+      - name: Stack unit tests (5/6; build-host-only path excluded)
+        run: |
+          CAND="$PWD/freeze-src/cand"
+          export PYTHONPATH="$CAND/tools:$CAND/fork/tl-sys:$CAND/fork/tl-candidate-batch/candidate:$CAND/fork/tl-sys/tlsys/serving/tests:$CAND/tests"
+          for t in test_default_path_identity test_fix3_knob test_fix6_parity test_fix2_suffix test_fix5_gc; do
+            python3 -B "freeze-src/cand/stack/tests/$t.py"
+          done
+          # test_changed_set excluded: its final assert compares against the
+          # original build host's /tmp/fix1stage/ (not part of the freeze);
+          # all in-freeze asserts (manifest, drift, markers) pass locally.
+      - name: Fix1 + existing suites
+        run: |
+          mkdir -p /tmp/baseline-venv/bin
+          ln -sfn "$(which python3)" /tmp/baseline-venv/bin/python
+          bash freeze-src/run_all.sh fix1
+          bash freeze-src/run_all.sh existing
+        env:
+          PY: python3
+      - name: Secret scan (filenames)
+        run: |
+          git ls-files -- . ':!archive' ':!freeze-src' ':!demo-app' | grep -Ei '(\.env$|\.pem$|\.key$|id_rsa|consented_trace)' \
+            | grep -v '.env.example' && exit 1 || echo "filename scan clean"

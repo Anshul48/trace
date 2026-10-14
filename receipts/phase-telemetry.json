@@ -1,0 +1,229 @@
+{
+  "claim": "measured",
+  "phases": [
+    {
+      "phase": "initial_ingest_visible_and_prepare",
+      "wall_s": 934.5764656429819,
+      "phase_walls_s": {
+        "initial_ingest_visible_and_prepare": 917.3581381539989
+      },
+      "counts": {
+        "commits": 50412,
+        "dedup": 50412,
+        "intake": 0
+      },
+      "effective_caps": {
+        "max_delta_entries": 669436,
+        "max_delta_bytes": 536870912,
+        "max_dedup_rows": 1000000,
+        "max_intake_backlog": 10000,
+        "max_reservations": 64,
+        "reserve_deadline_s": 5.0,
+        "retirement_headroom_entries": 1000
+      }
+    },
+    {
+      "phase": "initial_drain_and_prepare",
+      "wall_s": 2715.1339025759953,
+      "phase_walls_s": {
+        "initial_ingest_visible_and_prepare": 917.3581381539989,
+        "initial_drain_and_prepare": 1780.527753967006
+      },
+      "counts": {
+        "commits": 89885,
+        "dedup": 89885,
+        "intake": 0
+      },
+      "effective_caps": {
+        "max_delta_entries": 669436,
+        "max_delta_bytes": 536870912,
+        "max_dedup_rows": 1000000,
+        "max_intake_backlog": 10000,
+        "max_reservations": 64,
+        "reserve_deadline_s": 5.0,
+        "retirement_headroom_entries": 1000
+      }
+    },
+    {
+      "phase": "append_ingest_visible_with_readers",
+      "wall_s": 4603.891757068981,
+      "phase_walls_s": {
+        "initial_ingest_visible_and_prepare": 917.3581381539989,
+        "initial_drain_and_prepare": 1780.527753967006,
+        "append_ingest_visible_with_readers": 1884.9566192979983
+      },
+      "counts": {
+        "commits": 134518,
+        "dedup": 134518,
+        "intake": 0
+      },
+      "effective_caps": {
+        "max_delta_entries": 669436,
+        "max_delta_bytes": 536870912,
+        "max_dedup_rows": 1000000,
+        "max_intake_backlog": 10000,
+        "max_reservations": 64,
+        "reserve_deadline_s": 5.0,
+        "retirement_headroom_entries": 1000
+      }
+    },
+    {
+      "phase": "source_capacity_rejection",
+      "wall_s": 4605.08145723099,
+      "phase_walls_s": {
+        "initial_ingest_visible_and_prepare": 917.3581381539989,
+        "initial_drain_and_prepare": 1780.527753967006,
+        "append_ingest_visible_with_readers": 1884.9566192979983,
+        "source_capacity_rejection": 1.1560429169912823
+      },
+      "counts": {
+        "commits": 134518,
+        "dedup": 134518,
+        "intake": 0
+      },
+      "effective_caps": {
+        "max_delta_entries": 669436,
+        "max_delta_bytes": 536870912,
+        "max_dedup_rows": 1000000,
+        "max_intake_backlog": 10000,
+        "max_reservations": 64,
+        "reserve_deadline_s": 5.0,
+        "retirement_headroom_entries": 1000
+      }
+    },
+    {
+      "phase": "prepare_rejection_fresh_frontier",
+      "wall_s": 5101.721565117972,
+      "phase_walls_s": {
+        "initial_ingest_visible_and_prepare": 917.3581381539989,
+        "initial_drain_and_prepare": 1780.527753967006,
+        "append_ingest_visible_with_readers": 1884.9566192979983,
+        "source_capacity_rejection": 1.1560429169912823,
+        "prepare_rejection_fresh_frontier": 496.6217519719794
+      },
+      "counts": {
+        "commits": 136606,
+        "dedup": 136606,
+        "intake": 0
+      },
+      "effective_caps": {
+        "max_delta_entries": 669436,
+        "max_delta_bytes": 536870912,
+        "max_dedup_rows": 1000000,
+        "max_intake_backlog": 10000,
+        "max_reservations": 64,
+        "reserve_deadline_s": 5.0,
+        "retirement_headroom_entries": 1000
+      }
+    },
+    {
+      "phase": "writer_kill_and_restart",
+      "wall_s": 5812.760463839979,
+      "phase_walls_s": {
+        "initial_ingest_visible_and_prepare": 917.3581381539989,
+        "initial_drain_and_prepare": 1780.527753967006,
+        "append_ingest_visible_with_readers": 1884.9566192979983,
+        "source_capacity_rejection": 1.1560429169912823,
+        "prepare_rejection_fresh_frontier": 496.6217519719794,
+        "writer_kill_and_restart": 710.1474859460141
+      },
+      "counts": {
+        "commits": 136612,
+        "dedup": 136612,
+        "intake": 0
+      },
+      "effective_caps": {
+        "max_delta_entries": 669436,
+        "max_delta_bytes": 536870912,
+        "max_dedup_rows": 1000000,
+        "max_intake_backlog": 10000,
+        "max_reservations": 64,
+        "reserve_deadline_s": 5.0,
+        "retirement_headroom_entries": 1000
+      }
+    },
+    {
+      "phase": "remaining_drain_and_prepare_with_readers",
+      "wall_s": 10678.408164795983,
+      "phase_walls_s": {
+        "initial_ingest_visible_and_prepare": 917.3581381539989,
+        "initial_drain_and_prepare": 1780.527753967006,
+        "append_ingest_visible_with_readers": 1884.9566192979983,
+        "source_capacity_rejection": 1.1560429169912823,
+        "prepare_rejection_fresh_frontier": 496.6217519719794,
+        "writer_kill_and_restart": 710.1474859460141,
+        "remaining_drain_and_prepare_with_readers": 4865.5973767009855
+      },
+      "counts": {
+        "commits": 159997,
+        "dedup": 159997,
+        "intake": 0
+      },
+      "effective_caps": {
+        "max_delta_entries": 669436,
+        "max_delta_bytes": 536870912,
+        "max_dedup_rows": 1000000,
+        "max_intake_backlog": 10000,
+        "max_reservations": 64,
+        "reserve_deadline_s": 5.0,
+        "retirement_headroom_entries": 1000
+      }
+    },
+    {
+      "phase": "repair_to_zero",
+      "wall_s": 12912.839895543992,
+      "phase_walls_s": {
+        "initial_ingest_visible_and_prepare": 917.3581381539989,
+        "initial_drain_and_prepare": 1780.527753967006,
+        "append_ingest_visible_with_readers": 1884.9566192979983,
+        "source_capacity_rejection": 1.1560429169912823,
+        "prepare_rejection_fresh_frontier": 496.6217519719794,
+        "writer_kill_and_restart": 710.1474859460141,
+        "remaining_drain_and_prepare_with_readers": 4865.5973767009855,
+        "repair_to_zero": 2234.411167037004
+      },
+      "counts": {
+        "commits": 166457,
+        "dedup": 166457,
+        "intake": 0
+      },
+      "effective_caps": {
+        "max_delta_entries": 669436,
+        "max_delta_bytes": 536870912,
+        "max_dedup_rows": 1000000,
+        "max_intake_backlog": 10000,
+        "max_reservations": 64,
+        "reserve_deadline_s": 5.0,
+        "retirement_headroom_entries": 1000
+      }
+    },
+    {
+      "phase": "final",
+      "wall_s": 12974.787302195997,
+      "phase_walls_s": {
+        "initial_ingest_visible_and_prepare": 917.3581381539989,
+        "initial_drain_and_prepare": 1780.527753967006,
+        "append_ingest_visible_with_readers": 1884.9566192979983,
+        "source_capacity_rejection": 1.1560429169912823,
+        "prepare_rejection_fresh_frontier": 496.6217519719794,
+        "writer_kill_and_restart": 710.1474859460141,
+        "remaining_drain_and_prepare_with_readers": 4865.5973767009855,
+        "repair_to_zero": 2234.411167037004
+      },
+      "counts": {
+        "commits": 166457,
+        "dedup": 166457,
+        "intake": 0
+      },
+      "effective_caps": {
+        "max_delta_entries": 669436,
+        "max_delta_bytes": 536870912,
+        "max_dedup_rows": 1000000,
+        "max_intake_backlog": 10000,
+        "max_reservations": 64,
+        "reserve_deadline_s": 5.0,
+        "retirement_headroom_entries": 1000
+      }
+    }
+  ]
+}

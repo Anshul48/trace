@@ -1,0 +1,25 @@
+{
+  "stages": {
+    "spawn_entry_s": 0.0,
+    "before_store_open": 9.283400140702724e-05,
+    "after_store_open": 0.03419340300024487,
+    "before_service_open": 0.03447287200833671,
+    "after_service_open": 117.0803250890167,
+    "fault_reached": 162.7258424780157
+  },
+  "effective_caps": {
+    "max_delta_entries": 669436,
+    "max_delta_bytes": 536870912,
+    "max_dedup_rows": 1000000,
+    "max_intake_backlog": 10000,
+    "max_reservations": 64,
+    "reserve_deadline_s": 5.0,
+    "retirement_headroom_entries": 1000
+  },
+  "source_head": [
+    "e8334c07-731d-4ff9-a292-8329b89c41b9",
+    0,
+    136612,
+    "e8334c07-731d-4ff9-a292-8329b89c41b9:0:136612"
+  ]
+}
