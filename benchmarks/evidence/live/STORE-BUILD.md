@@ -19,7 +19,7 @@ PYTHONHASHSEED=0 HF_HUB_OFFLINE=1 python lane-RELAUNCH/b100m_build_c2.py --mode 
 
 | input | required content | source in this tree |
 |---|---|---|
-| `<ROOT>/tl-sys`, `<ROOT>/tl-eval` | producer code tree (store/ingest/index + `gpu_encode` + `gate_runner`) | `c10m/producer/` (89/89 frozen bytes) |
+| `<ROOT>/tl-sys`, `<ROOT>/tl-eval`, `<ROOT>/tl-candidate-batch`, `<ROOT>/coordination` | producer code tree (store/ingest/index + `gpu_encode` + `gate_runner` + candidate committer/store + lane-G profile) | `c10m/producer/` (89/89 frozen bytes) |
 | `<ROOT>/inputs/docs-10m.jsonl` | exact corpus, sha `04bbbb3e…ce3fd`, 64291035 B, 3099 rows | `c10m/data/DATA-README.md` §2 (bundle or upstream path) |
 | `<ROOT>/inputs/relations-10m.anchors-v1.json` | anchors, sha `9728129b…` | `c10m/producer/inputs/` (ships) |
 | `<ROOT>/inputs/prefix-doc-ranges.json` | frozen prefix geometry | `c10m/data/inputs/` (ships) |
@@ -67,7 +67,7 @@ build-serving).
 ```bash
 ROOT=/tmp/lane-relaunch-build/work   # any path; OUT must contain "lane-relaunch"
 mkdir -p $ROOT/inputs
-cp -r c10m/producer/tl-sys c10m/producer/tl-eval $ROOT/
+cp -r c10m/producer/tl-sys c10m/producer/tl-eval c10m/producer/tl-candidate-batch c10m/producer/coordination $ROOT/
 # serving overlay (same assembly as the bench runtime): the only bytes
 # that differ from producer are dossier.py (query assembly; the builder
 # never imports it) and index.py (additive stages=None default; the
