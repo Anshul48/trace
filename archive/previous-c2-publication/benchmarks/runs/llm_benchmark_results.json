@@ -1,0 +1,85 @@
+{
+  "timestamp_utc": "2026-08-28T05:19:33Z",
+  "model_id": "openrouter/deepseek/deepseek-v4-flash-0731",
+  "total_cases_evaluated": 5,
+  "grounded_factual_accuracy": 1.0,
+  "zero_hallucination_rate": 1.0,
+  "total_citations_verified": 11,
+  "latency_metrics_ms": {
+    "p50": 3227.93,
+    "p90": 87531.11,
+    "p95": 87531.11,
+    "mean": 23974.35
+  },
+  "token_metrics": {
+    "total_tokens": 2346,
+    "avg_tokens_per_query": 469.2,
+    "total_cost_usd": 0.0
+  },
+  "schema_proposal_metrics": {
+    "proposals_generated": 0,
+    "latency_ms": 61441.37
+  },
+  "case_telemetry": [
+    {
+      "case_id": "direct_lookup",
+      "lane": "Direct Lookup",
+      "query": "What theory is Trace architecture built on?",
+      "retrieval_ms": 19.42265799152665,
+      "synthesis_ms": 87531.10683098203,
+      "tokens": 344,
+      "cost_usd": 0.0,
+      "grounded": true,
+      "citations_count": 1,
+      "rendering": "Trace is built on Complementary Learning Systems (CLS) theory, involving the hippocampal spine and neocortex."
+    },
+    {
+      "case_id": "multi_hop",
+      "lane": "Multi-Hop Architecture",
+      "query": "How does retrieval combine lexical and graph methods?",
+      "retrieval_ms": 21.46374699077569,
+      "synthesis_ms": 3227.9251409927383,
+      "tokens": 441,
+      "cost_usd": 0.0,
+      "grounded": true,
+      "citations_count": 2,
+      "rendering": "Trace retrieval works by fusing Okapi BM25 lexical ranking with TL2 Personalized PageRank graph spreading activation, replacing legacy lexical-only retrieval with hybrid graph reranking."
+    },
+    {
+      "case_id": "dependency_reasoning",
+      "lane": "Dependency Reasoning",
+      "query": "What must happen before activating Trace version 2.0?",
+      "retrieval_ms": 13.128408987540752,
+      "synthesis_ms": 25048.81942999782,
+      "tokens": 659,
+      "cost_usd": 0.0,
+      "grounded": true,
+      "citations_count": 5,
+      "rendering": "Based on the provided evidence, there is no information about prerequisite steps before activating 2.0. The excerpts discuss migration, versioning, schema proposals, and API gateway authentication, but none directly address activation prerequisites. Therefore, I cannot provide a specific answer from the given context."
+    },
+    {
+      "case_id": "governance_synthesis",
+      "lane": "Governance & Safety",
+      "query": "What validates workspace authentication tokens and scopes?",
+      "retrieval_ms": 13.023352017626166,
+      "synthesis_ms": 2159.593799005961,
+      "tokens": 495,
+      "cost_usd": 0.0,
+      "grounded": true,
+      "citations_count": 1,
+      "rendering": "The API Gateway validates workspace authentication tokens."
+    },
+    {
+      "case_id": "storage_invariants",
+      "lane": "Storage Invariants",
+      "query": "What logging format does the Spine provide?",
+      "retrieval_ms": 11.337058997014537,
+      "synthesis_ms": 1904.2884969967417,
+      "tokens": 407,
+      "cost_usd": 0.0,
+      "grounded": true,
+      "citations_count": 2,
+      "rendering": "The Spine provides bitemporal append-only SQLite WAL logging with exact byte-offset slice preservation."
+    }
+  ]
+}
