@@ -16,23 +16,54 @@ integrity only.
 
 ## Layer 2 — live lane re-run (needs weights + corpora)
 
-Reproduces the smoke lane (6 docs / 6 queries, bundled
-`technical_docs_dev` fixture) end to end:
+Reproduces the smoke lane (6 docs / 6 queries, wheel-bundled
+`technical_docs_dev` fixture) end to end with the real pinned
+encoder. Full guide: `../live/README.md`.
 
 ```bash
 pip install benchmarks/evidence/harness/vendor/trace_bench-0.3.0-py3-none-any.whl
-pip install 'torch==2.14.0+cpu' 'sentence-transformers==2.7.0' \
-    'pyarrow==25.0.1' 'numpy==2.5.3'   # pins of record (../pins/PINS.md)
-export HF_HUB_OFFLINE=1   # MiniLM-L6-v2 rev 1110a243… staged locally
-python benchmarks/evidence/harness/adapters/stage_pinned.py --dataset smoke
-trace-bench run --dataset smoke --backends bm25,python:c2_bench10m:C2Bench10MShipped \
-    --top-k 100 --concurrency 1
+pip install blake3 'numpy==2.5.3' 'pyarrow==25.0.1'   # pins: ../pins/PINS.md
+pip install 'torch==2.14.0+cpu' --index-url https://download.pytorch.org/whl/cpu
+pip install 'sentence-transformers==2.7.0'
+# Do NOT use the wheel trace/dense extras (they demand
+# sentence-transformers>=3.0, contradicting the 2.7.0 pin).
+
+# bounded weight acquisition FIRST (offline runs give no recovery):
+HF_HOME=/tmp/c2-weights python benchmarks/evidence/live/fetch_weights.py
+# WEIGHTS OK …/snapshots/1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+
+# smoke needs NO dataset staging (wheel-bundled); there is no
+# `--dataset smoke` staging flag:
+HF_HOME=/tmp/c2-weights HF_HUB_OFFLINE=1 \
+  python benchmarks/evidence/live/run_live_lane.py --dataset smoke
+# LIVE-LANE PASS dataset=smoke
+#   baselines=bm25,python:c2_bench10m:C2Bench10MShipped rc=0
 ```
+
+(The driver assembles the disposable runtime — producer tree + 7-file
+serving overlay — writes the keyed `--config`, and binds
+`TRACE_ARCHITECTURE_DIR`, adapter `PYTHONPATH`, and `--data-dir`.
+The wheel option is `--baselines`; there is no `--backends`.)
 
 Expected: both arms `success`, 0 failures, metrics matching the smoke
 row of REPORT.md §1 within rerun tolerance (fresh-store birth UUIDs
 differ per run; scores are deterministic given the pinned weights).
-Corpora for the bigger lanes arrive via the same pinned pull
+Verified live 2026-10-14: smoke reproduces bm25 0.903 / A1 0.851
+nDCG@10 exactly; curated (likewise wheel-bundled) reproduces bm25
+0.639 / A1 0.621 exactly (see TEST-REPORT.md C4 §).
+Bigger lanes stage first, then run against the SAME cache dir:
+
+```bash
+python benchmarks/evidence/harness/adapters/stage_pinned.py \
+  --manifest benchmarks/evidence/harness/vendor/upstream-links.json \
+  --cache /tmp/c2-bench-cache
+# STAGE-PINNED: DONE /tmp/c2-bench-cache
+HF_HOME=/tmp/c2-weights HF_HUB_OFFLINE=1 \
+  python benchmarks/evidence/live/run_live_lane.py --dataset scifact \
+  --data-dir /tmp/c2-bench-cache --output-dir /tmp/c2-bench-runs/scifact
+```
+
+Corpora for the bigger lanes arrive via the pinned pull
 (`c2-bench10m-source-record.json` URLs + revisions); CPU ingest walls
 run ~1000 s per 5k-doc fresh store.
 

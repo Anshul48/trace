@@ -23,7 +23,7 @@ The tree carries the exact frozen bytes: 85 producer code files
 pre-176 `query.py`), 3 policy pins, 3 small data inputs + derivation
 maps, and a reconstruction tool that reproduces both corpus files
 byte-exactly (`RECONSTRUCT PASS`: `c098fdac…`, `04bbbb3e…`).
-Evidence: `c10m/PINS.sha256` (105 entries) + `c10m/data/DATA-README.md`
+Evidence: `c10m/PINS.sha256` (110 entries) + `c10m/data/DATA-README.md`
 §3 (verification run) + `benchmarks/evidence/CANDIDATE-PINS.md`.
 
 ## Claim 3 — Fresh-store retrieval quality (1061 queries × arms, 0 failures)

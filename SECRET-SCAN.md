@@ -41,9 +41,12 @@ never printed).
    committed scaffold tests, so removal would break the suite (verified:
    removal flipped 2 tests red; restore flips them green). Content
    check: sensitive tables (`api_keys`, `webhooks`,
-   `model_call_audits`, …) hold 0 rows; sampled content tables hold
-   UUIDs/offsets/hashes/event envelopes (no document text, PII, or
-   credentials observed); `strings` hard-pattern scan → 0 hits.
+   `model_call_audits`, …) hold 0 rows; content tables hold no
+   PII/credentials (0 emails, 0 credential-pattern hits in db bytes)
+   — only short public-reference snippets (`hot_inbox.content`, max
+   1200 chars, public-encyclopedia-style; same bytes in the tracked
+   `objects/…` files) alongside UUIDs/offsets/hashes/event
+   envelopes; `strings` hard-pattern scan → 0 hits.
    Provenance is documented in the co-shipped packet (`packet.md`:
    "admitted real data" experiment + human-gate dossier). Verdict:
    needed + not shown private → kept, with hashes in MANIFEST.md.

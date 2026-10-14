@@ -9,7 +9,8 @@ Producer freeze label: `c2-b100m-producer-freeze-002` (89 files, closure 44)
 Provenance: coordinator channel `provenance/CANDIDATE.md` (READY 2026-10-14T09:50Z)
 + `provenance/REPRO.md` + `producer-recovery/{REPORT.md,RECOVERY.json}`.
 Every hash below was re-verified by the packager before copying; verify again
-with `sha256sum -c c10m/PINS.sha256` from the repo root.
+with `(cd c10m && sha256sum -c PINS.sha256)` (110/110 OK; the manifest
+paths are c10m-relative, so the root form fails).
 
 ## Layout
 

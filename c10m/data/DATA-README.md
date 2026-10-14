@@ -41,6 +41,10 @@ python c10m/data/reconstruct_inputs.py --out-dir /tmp/c10m-inputs --from-bundle
 # RECONSTRUCT PASS (--from-bundle): 3099 rows, 64291035 B, 04bbbb3e… exact
 ```
 
+This extracts the EXACT input bytes — it is NOT a store rebuild (see
+§7: the builder needs a staged producer root, profile/anchors, and a
+prepared embedding cache; extraction alone satisfies none of that).
+
 The tool hash-gates the bundle (`31002b8c…`), then delegates
 extraction+verification to the corrected `bundle/verify_docs_10m.py`
 (A50/A52: asset/out alias guards, sibling-temp atomic extraction,
@@ -190,3 +194,23 @@ the package-level record; the bundle files govern the asset bytes.
 2. The exact enwiki dump date/URL behind the delta chunks is unrecorded
    in the scoped sources; per-row CC BY-SA attribution travels with the
    bundled and reconstructed texts (§5).
+
+## 7. From exact inputs to a 10M store build (recipe, not run)
+
+Full recipe: `benchmarks/evidence/live/STORE-BUILD.md` (+
+`prepare_emb_cache.py`). Summary: stage a disposable producer root
+(`tl-sys` + `tl-eval` + `tl-candidate-batch` from `c10m/producer/`,
+serving overlay applied) with `inputs/` holding the exact
+`docs-10m.jsonl` (§2), `relations-10m.anchors-v1.json`,
+`prefix-doc-ranges.json`, and `c2-profile-100m.json` (all ship in
+`c10m/producer/inputs/` + `c10m/data/inputs/`); prepare the
+`tl-gpu-embcache-v1` embedding cache with the pinned model
+(`prepare_emb_cache.py --docs … --cache-dir …`); then run
+`c10m/producer/lane-RELAUNCH/b100m_build_c2.py --mode 10m` with
+`PYTHONHASHSEED=0 HF_HUB_OFFLINE=1` and `--out` under a
+`lane-relaunch` path. The historical embedding cache is
+machine-local, not portable — the wrapper regenerates an equivalent
+cache (product chunker + product codec, strict coverage check). No
+10M build was executed for this release; store byte-identity with the
+historical pin is not claimed (fresh-build identities vary by
+design).

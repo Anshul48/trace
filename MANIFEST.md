@@ -8,6 +8,7 @@
 | content commit C1 | `6e931b433b51a6e2f5eeb6530e0c95d9f6e1800d` (tree `88dfc874ebc1adaf97bc90b4582e88c0fcc983e9`) |
 | candidate commit C2 | `c0eede02255f9418fe8c0cef6411945f9c80c862` (tree `d4544ae5bfb498c3ac1701b6baca8cae793ccfd2`): C1 + this file only — HOLD per A51 (old data verifier) |
 | successor commit C3 | C2 + corrected verifier adoption only (A50–A53; `git diff C2 C3 --stat` proves it; SHA/tree reported in channel W2.md + W2-requests.md; REVIEW-APPROVED names repo + commit before any push) |
+| successor commit C4 | C3 + benchmark-CLI contract repair only (A56/A58/A60/A61; `git diff C3 C4 --stat` proves it; SHA/tree reported in channel W2.md + W2-requests.md; REVIEW-APPROVED names repo + commit before any push) |
 
 C1's parent is remote-old: push fast-forwards, preserving existing
 remote work. No history rewritten, no force. Local commits only (gate).
@@ -48,7 +49,7 @@ Big RUN.json/TREC set: 20 files hash-inventoried
 ## Verification commands + exits (observed 2026-10-14; full: TEST-REPORT.md)
 
 ```text
-sha256sum -c c10m/PINS.sha256                                  rc=0  110/110 OK
+(cd c10m && sha256sum -c PINS.sha256)                          rc=0  110/110 OK
 python demos/demo_c10m_narrow.py --quiet                       rc=0  DEMO PASS 0.83s offline
 python c10m/data/reconstruct_inputs.py --out-dir … --from-bundle rc=0 RECONSTRUCT PASS (via corrected verifier; cmp byte-identical)
 python c10m/data/reconstruct_inputs.py --out-dir … --scifact … --delta … rc=0 RECONSTRUCT PASS (both corpora exact; C2 run, path untouched by C3)
@@ -61,6 +62,10 @@ pytest tests/test_100k_qualification_scaffold.py -q            rc=0  17 passed
 pytest tests/ -q -p no:cacheprovider -rf                       rc=1  6 failed / 503 passed / 3 xpassed (672s):
    4x test_p4_ballot_pack — PRE-EXISTING (commit a9b4d3b… absent from clone history; fails identically at base)
    2x scaffold — TRANSIENT (run during experimental db removal; 17/17 green after restore; converges to 4/507)
+python benchmarks/evidence/live/run_live_lane.py --dataset smoke rc=0  LIVE-LANE PASS (C4; real pinned encoder: smoke row EXACT, 7/7 serving shas self-authenticated)
+python benchmarks/evidence/live/run_live_lane.py --dataset curated rc=0 LIVE-LANE PASS (C4; curated row EXACT, 0 failures)
+python …/adapters/stage_pinned.py --manifest … --cache …      rc=0  STAGE-PINNED: DONE (C4; 8 files verified, round-trip identical)
+python benchmarks/evidence/live/prepare_emb_cache.py (tiny fixture) rc=0 EMB-CACHE PARTIAL + STRICT-SERVE OK (C4; control flow only, no 10M run)
 ```
 
 Install: `uv sync` + `uv lock` + `uv sync --extra c10m --extra test`
@@ -91,6 +96,25 @@ replaced byte-exact with the corrected package script (`20bfbbf9…`);
 entries); `c10m/data/DATA-README.md`, `TEST-REPORT.md`, `MANIFEST.md`
 updated. Asset `docs-10m.jsonl.gz` byte-unchanged (`31002b8c…`,
 21787645 B).
+
+C3 → C4 (successor, A56/A58/A60/A61): 6 files added, 12 modified,
+0 deleted — benchmark-CLI contract repair (B1–B8) + audit F2/F3 doc
+accuracy only. Added: `benchmarks/evidence/live/` wrappers/config
+(`assemble_runtime.py`, `fetch_weights.py`, `run_live_lane.py`,
+`prepare_emb_cache.py`, `README.md`, `STORE-BUILD.md` — outside
+pinned sources). Modified: `docs/C2-10M-REPRO-APPENDIX.md` (§0 pins
+form + §2 extraction note + §4 live rewrite),
+`benchmarks/evidence/repro-fixture/README.md` (Layer 2 rewrite),
+`benchmarks/evidence/harness/README.md` (protocol + binding),
+`benchmarks/evidence/pins/PINS.md` (tested install),
+`benchmarks/evidence/CANDIDATE-PINS.md` (F2: 105→110),
+`docs/C2-10M-PUBLICATION.md` (F2: 105→110), `c10m/README.md` (F2/B8
+pins form; repinned), `c10m/data/DATA-README.md` (§7 recipe pointer;
+repinned), `c10m/PINS.sha256` (2 doc entries repinned),
+`SECRET-SCAN.md` (F3 db wording), `TEST-REPORT.md` (C4 §),
+`MANIFEST.md` (this file). Zero frozen-byte changes: all 89
+producer/serving entries, the wheel, and the 4 adapters verify
+identical to C3.
 
 ## Shipped files (203 added)
 

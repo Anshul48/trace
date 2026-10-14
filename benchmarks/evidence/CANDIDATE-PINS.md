@@ -18,7 +18,7 @@ for the full file×hash table).
 | `tl-sys/tlsys/serving/generation.py` | `929709390af18e7511197164d399ba71f368c767c2fc2df3680f43254424b22f` |
 | `tl-sys/tlsys/prodstate.py` | `e7a4370c3e6faf122927db34919b2d42838f0b800edc4c8f877b564f405a47b1` |
 
-Bytes live in `c10m/` (`c10m/PINS.sha256`, 105 entries). The RUN.json
+Bytes live in `c10m/` (`c10m/PINS.sha256`, 110 entries). The RUN.json
 `implementation_identity` blocks in the original runs self-authenticate
 these same serving shas per scored run.
 
