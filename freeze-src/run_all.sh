@@ -23,7 +23,11 @@ if [ "$MODE" = fix1 ] || [ "$MODE" = all ]; then
 fi
 if [ "$MODE" = existing ] || [ "$MODE" = all ]; then
   run "existing/test_pending_topk" -m pytest "$CAND/tests/test_pending_topk.py" -q
-  run "existing/test_publication" "$CAND/tests/test_publication.py"
+  # Via the out-of-freeze wrapper: it excludes only the one test that
+  # compares against the build host's upstream tree (absent on CI and
+  # not part of the 207-file freeze) when that tree is not present.
+  ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+  run "existing/test_publication" "$ROOT/tools/run_publication_suite.py" "$CAND/tests/test_publication.py"
   run "existing/test_pool_reuse" "$CAND/tests/test_pool_reuse.py"
   run "existing/test_serving_pool" "$CAND/fork/tl-sys/tlsys/serving/tests/test_serving_pool.py"
 fi
