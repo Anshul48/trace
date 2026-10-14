@@ -1,0 +1,51 @@
+{
+ "analyst_note": "typed analyst relations over frozen doc ids (supplied-input path; no automatic-extraction claim). Polarity/topic assignments are analyst input grounded in the quoted passages recorded in derivation.json.",
+ "qual_signals": [
+  {
+   "doc": "wikipedia:27669",
+   "qualifiers": {
+    "negated": false,
+    "topic": "kashrut-observance"
+   }
+  },
+  {
+   "doc": "wikipedia:16881",
+   "qualifiers": {
+    "negated": true,
+    "topic": "kashrut-observance"
+   }
+  }
+ ],
+ "relations": [
+  {
+   "dst": "wikipedia:31715",
+   "grounding": "shared distinctive vocabulary (case-insensitive): agglutination, morphemes",
+   "qualifiers": {
+    "claim": "tl10m-r1",
+    "negated": false
+   },
+   "rel_type": "links",
+   "src": "wikipedia:18077"
+  },
+  {
+   "dst": "wikipedia:3954",
+   "grounding": "shared biochemistry vocabulary: glutamine, gluconeogenesis, pyruvate, metabolism",
+   "qualifiers": {
+    "claim": "tl10m-r2a",
+    "negated": false
+   },
+   "rel_type": "links",
+   "src": "wikipedia:20941"
+  },
+  {
+   "dst": "14663842",
+   "grounding": "shared vocabulary: glutamine (df=3: A/B/C) + mitochondrial/metabolism (topical, high-df)",
+   "qualifiers": {
+    "claim": "tl10m-r2b",
+    "negated": false
+   },
+   "rel_type": "links",
+   "src": "wikipedia:3954"
+  }
+ ]
+}

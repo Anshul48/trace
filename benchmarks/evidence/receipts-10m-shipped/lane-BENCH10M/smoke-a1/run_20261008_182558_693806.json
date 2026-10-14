@@ -1,0 +1,1826 @@
+{
+  "run_id": "run_20261008_182558_693806",
+  "dataset_name": "trace-technical-docs-dev",
+  "dataset_version": "1.0.0",
+  "timestamp": "2026-10-08T18:25:58.698636+00:00",
+  "corpus_sha256": "dc05ec745d8321a70099bcd524b3f28c19e614b6469f96489b436f3eea6049b5",
+  "total_cases": 6,
+  "cases_sha256": "d0c4a6c9183eeefe2601043042efa1e0f62a7e867c54877cea0a23e5b1a48e35",
+  "indexed_documents_sha256": "0cbdfd7b0c718146d56949a22539ab5ea17b92141406aad748407d72674baf08",
+  "protocol": {
+    "version": "tb-evaluation-v2",
+    "top_k": 100,
+    "concurrency": 1,
+    "warmup_queries": 0,
+    "ndcg_gain": "linear",
+    "precision_denominator": "k",
+    "deduplication": "first_document_occurrence",
+    "split": "fixture",
+    "ignore_identical_ids": false
+  },
+  "metric_availability": {
+    "recall_at_5": true,
+    "recall_at_20": true,
+    "recall_at_100": true,
+    "ndcg_at_10": true,
+    "ndcg_at_30": true,
+    "average_precision_at_10": true,
+    "precision_at_5": true,
+    "complete_gold_coverage_at_10": true,
+    "complete_gold_coverage_at_20": true,
+    "citation_precision_at_5": true,
+    "mrr": true
+  },
+  "dataset_provenance": {},
+  "mode": "regression",
+  "release_authority": false,
+  "is_certification_eligible": false,
+  "hardware_info": {
+    "tb_source_sha256": "ecd670d130eedf666a23a209b689960cbcc0c1db39cdc634698a54d1aa442197",
+    "platform": "Linux-7.0.0-1013-gcp-x86_64-with-glibc2.39",
+    "python_version": "3.12.3",
+    "processor": "x86_64",
+    "cpu_count": 12,
+    "dependency_versions": {
+      "trace-bench": "0.3.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pydantic": "2.14.0",
+      "psutil": "7.2.2",
+      "sentence-transformers": "2.7.0",
+      "torch": "2.14.0+cpu",
+      "blake3": "1.0.10",
+      "pyarrow": "25.0.1"
+    },
+    "thread_settings": {}
+  },
+  "artifact_identity": {
+    "package_name": "trace-lite",
+    "package_version": "unknown",
+    "commit_hash": null,
+    "wheel_hash_sha256": null,
+    "python_version": "3.12.3",
+    "runtime_platform": "Linux-7.0.0-1013-gcp-x86_64-with-glibc2.39",
+    "dependency_fingerprint_sha256": "999b541983ca2c0cedebcadefd248357174a9327ff66c6a815ce7546c7c6b658",
+    "config_hash_sha256": "default",
+    "is_editable": false,
+    "is_pinned": false,
+    "is_certification_eligible": false
+  },
+  "admission": {},
+  "baselines": {
+    "bm25": {
+      "baseline_name": "bm25",
+      "status": "success",
+      "status_detail": "",
+      "overall_recall_at_5": 0.8333333333333334,
+      "overall_recall_at_20": 0.9333333333333333,
+      "overall_ndcg_at_10": 0.9033272111440864,
+      "overall_ndcg_at_30": 0.9033272111440864,
+      "overall_complete_coverage_at_10": 0.8,
+      "overall_complete_coverage_at_20": 0.8,
+      "overall_citation_precision_at_5": 0.5,
+      "overall_mrr": 1.0,
+      "overall_map_at_10": 0.8333333333333333,
+      "overall_precision_at_5": 0.32,
+      "overall_multihop_coverage": 0.9333333333333333,
+      "overall_abstention_accuracy": 0.8333333333333334,
+      "total_cases": 6,
+      "positive_cases_count": 5,
+      "abstention_cases_count": 1,
+      "failed_cases_count": 0,
+      "empty_result_count": 1,
+      "abstention_evaluated": true,
+      "false_accept_rate": 1.0,
+      "false_reject_rate": 0.0,
+      "configuration": {
+        "k1": 1.5,
+        "b": 0.75,
+        "tokenizer": "ascii_word_lower",
+        "implementation": "trace_bench_numpy_bm25",
+        "score_dtype": "float64",
+        "tie_break": "corpus_input_order"
+      },
+      "implementation_identity": {
+        "class": "trace_bench.baselines.bm25_retriever:BM25Retriever",
+        "source_sha256": "4c9114a85e82c5a81b903f02d5f8c108d3a5e4650c7de4d92e2c1e726dc8fb93",
+        "configuration_sha256": "2604cbbd094ac934e903d1b24b838eaf0ca676c7dea4875502219084254fc252",
+        "target_identity_verified": null,
+        "target_identity_note": "no target identity (non-target backend)",
+        "native_pins": null
+      },
+      "category_breakdown": {
+        "direct_lookup": {
+          "count": 1,
+          "positive_count": 1,
+          "recall_at_5": 1.0,
+          "ndcg_at_10": 1.0,
+          "complete_coverage_at_10": 1.0,
+          "citation_precision_at_5": 0.5,
+          "abstention_accuracy": 1.0
+        },
+        "multi_hop": {
+          "count": 1,
+          "positive_count": 1,
+          "recall_at_5": 0.6666666666666666,
+          "ndcg_at_10": 0.7653606369886217,
+          "complete_coverage_at_10": 0.0,
+          "citation_precision_at_5": 1.0,
+          "abstention_accuracy": 1.0
+        },
+        "chronology": {
+          "count": 1,
+          "positive_count": 1,
+          "recall_at_5": 1.0,
+          "ndcg_at_10": 0.9197207891481876,
+          "complete_coverage_at_10": 1.0,
+          "citation_precision_at_5": 0.4,
+          "abstention_accuracy": 1.0
+        },
+        "contradiction": {
+          "count": 1,
+          "positive_count": 1,
+          "recall_at_5": 0.5,
+          "ndcg_at_10": 0.8315546295836225,
+          "complete_coverage_at_10": 1.0,
+          "citation_precision_at_5": 0.2,
+          "abstention_accuracy": 1.0
+        },
+        "historical": {
+          "count": 1,
+          "positive_count": 1,
+          "recall_at_5": 1.0,
+          "ndcg_at_10": 1.0,
+          "complete_coverage_at_10": 1.0,
+          "citation_precision_at_5": 0.4,
+          "abstention_accuracy": 1.0
+        },
+        "out_of_scope": {
+          "count": 1,
+          "positive_count": 0,
+          "recall_at_5": 0.0,
+          "ndcg_at_10": 0.0,
+          "complete_coverage_at_10": 0.0,
+          "citation_precision_at_5": 0.0,
+          "abstention_accuracy": 0.0
+        }
+      },
+      "case_results": [
+        {
+          "case_id": "case-01-direct-lookup",
+          "category": "direct_lookup",
+          "outcome": "success",
+          "is_positive_query": true,
+          "predicted_abstention": false,
+          "retrieved_ids": [
+            "atom-1",
+            "atom-4"
+          ],
+          "retrieved_scores": [
+            6.808425638787932,
+            0.9747876138993212
+          ],
+          "native_query_id": "case-01-direct-lookup",
+          "native_retrieved_ids": [
+            "atom-1",
+            "atom-4"
+          ],
+          "backend_receipt": {},
+          "latency_ms": 0.26516299112699926,
+          "query": "What fuses BM25 and dense candidates?",
+          "gold_ids": [
+            "atom-1"
+          ],
+          "native_gold_ids": [
+            "atom-1"
+          ],
+          "excluded_ids": [],
+          "native_excluded_ids": [],
+          "average_precision_at_10": 1.0,
+          "precision_at_5": 0.2,
+          "recall_at_5": 1.0,
+          "recall_at_20": 1.0,
+          "recall_at_100": 1.0,
+          "ndcg_at_10": 1.0,
+          "ndcg_at_30": 1.0,
+          "complete_gold_coverage_at_10": 1.0,
+          "complete_gold_coverage_at_20": 1.0,
+          "citation_precision_at_5": 0.5,
+          "citation_precision_at_10": 0.5,
+          "mrr": 1.0,
+          "multihop_coverage": 1.0,
+          "abstention_accuracy": 1.0,
+          "error_code": null,
+          "exclusion_reason": null
+        },
+        {
+          "case_id": "case-02-multi-hop",
+          "category": "multi_hop",
+          "outcome": "success",
+          "is_positive_query": true,
+          "predicted_abstention": false,
+          "retrieved_ids": [
+            "atom-0",
+            "atom-2"
+          ],
+          "retrieved_scores": [
+            4.755071509033,
+            1.8223379412313776
+          ],
+          "native_query_id": "case-02-multi-hop",
+          "native_retrieved_ids": [
+            "atom-0",
+            "atom-2"
+          ],
+          "backend_receipt": {},
+          "latency_ms": 0.09202599176205695,
+          "query": "How does a scoped API query reach evidence selection?",
+          "gold_ids": [
+            "atom-0",
+            "atom-1",
+            "atom-2"
+          ],
+          "native_gold_ids": [
+            "atom-0",
+            "atom-1",
+            "atom-2"
+          ],
+          "excluded_ids": [],
+          "native_excluded_ids": [],
+          "average_precision_at_10": 0.6666666666666666,
+          "precision_at_5": 0.4,
+          "recall_at_5": 0.6666666666666666,
+          "recall_at_20": 0.6666666666666666,
+          "recall_at_100": 0.6666666666666666,
+          "ndcg_at_10": 0.7653606369886217,
+          "ndcg_at_30": 0.7653606369886217,
+          "complete_gold_coverage_at_10": 0.0,
+          "complete_gold_coverage_at_20": 0.0,
+          "citation_precision_at_5": 1.0,
+          "citation_precision_at_10": 1.0,
+          "mrr": 1.0,
+          "multihop_coverage": 0.6666666666666666,
+          "abstention_accuracy": 1.0,
+          "error_code": null,
+          "exclusion_reason": null
+        },
+        {
+          "case_id": "case-03-dependency",
+          "category": "chronology",
+          "outcome": "success",
+          "is_positive_query": true,
+          "predicted_abstention": false,
+          "retrieved_ids": [
+            "atom-4",
+            "atom-3",
+            "atom-5",
+            "atom-2",
+            "atom-0"
+          ],
+          "retrieved_scores": [
+            1.9687020512945188,
+            1.3670699400874113,
+            1.312468034196346,
+            0.819989270902708,
+            0.7132061021838665
+          ],
+          "native_query_id": "case-03-dependency",
+          "native_retrieved_ids": [
+            "atom-4",
+            "atom-3",
+            "atom-5",
+            "atom-2",
+            "atom-0"
+          ],
+          "backend_receipt": {},
+          "latency_ms": 0.07803799235261977,
+          "query": "What must happen before version two is enabled?",
+          "gold_ids": [
+            "atom-4",
+            "atom-5"
+          ],
+          "native_gold_ids": [
+            "atom-4",
+            "atom-5"
+          ],
+          "excluded_ids": [],
+          "native_excluded_ids": [],
+          "average_precision_at_10": 0.8333333333333333,
+          "precision_at_5": 0.4,
+          "recall_at_5": 1.0,
+          "recall_at_20": 1.0,
+          "recall_at_100": 1.0,
+          "ndcg_at_10": 0.9197207891481876,
+          "ndcg_at_30": 0.9197207891481876,
+          "complete_gold_coverage_at_10": 1.0,
+          "complete_gold_coverage_at_20": 1.0,
+          "citation_precision_at_5": 0.4,
+          "citation_precision_at_10": 0.4,
+          "mrr": 1.0,
+          "multihop_coverage": 1.0,
+          "abstention_accuracy": 1.0,
+          "error_code": null,
+          "exclusion_reason": null
+        },
+        {
+          "case_id": "case-04-contradiction",
+          "category": "contradiction",
+          "outcome": "success",
+          "is_positive_query": true,
+          "predicted_abstention": false,
+          "retrieved_ids": [
+            "atom-3",
+            "atom-5",
+            "atom-4",
+            "atom-2",
+            "atom-0",
+            "atom-1"
+          ],
+          "retrieved_scores": [
+            4.126587336805352,
+            1.0765668031233169,
+            0.10177918922399565,
+            0.08766932010791494,
+            0.0762525758494887,
+            0.07016139375500292
+          ],
+          "native_query_id": "case-04-contradiction",
+          "native_retrieved_ids": [
+            "atom-3",
+            "atom-5",
+            "atom-4",
+            "atom-2",
+            "atom-0",
+            "atom-1"
+          ],
+          "backend_receipt": {},
+          "latency_ms": 0.08757600153330714,
+          "query": "What replaced the lexical-only path?",
+          "gold_ids": [
+            "atom-3",
+            "atom-1"
+          ],
+          "native_gold_ids": [
+            "atom-3",
+            "atom-1"
+          ],
+          "excluded_ids": [],
+          "native_excluded_ids": [],
+          "average_precision_at_10": 0.6666666666666666,
+          "precision_at_5": 0.2,
+          "recall_at_5": 0.5,
+          "recall_at_20": 1.0,
+          "recall_at_100": 1.0,
+          "ndcg_at_10": 0.8315546295836225,
+          "ndcg_at_30": 0.8315546295836225,
+          "complete_gold_coverage_at_10": 1.0,
+          "complete_gold_coverage_at_20": 1.0,
+          "citation_precision_at_5": 0.2,
+          "citation_precision_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "multihop_coverage": 1.0,
+          "abstention_accuracy": 1.0,
+          "error_code": null,
+          "exclusion_reason": null
+        },
+        {
+          "case_id": "case-05-source-order",
+          "category": "historical",
+          "outcome": "success",
+          "is_positive_query": true,
+          "predicted_abstention": false,
+          "retrieved_ids": [
+            "atom-4",
+            "atom-5",
+            "atom-1",
+            "atom-3",
+            "atom-2",
+            "atom-0"
+          ],
+          "retrieved_scores": [
+            3.8474443435418157,
+            2.389034837319663,
+            1.5285708999771557,
+            1.440150220793701,
+            0.08766932010791494,
+            0.0762525758494887
+          ],
+          "native_query_id": "case-05-source-order",
+          "native_retrieved_ids": [
+            "atom-4",
+            "atom-5",
+            "atom-1",
+            "atom-3",
+            "atom-2",
+            "atom-0"
+          ],
+          "backend_receipt": {},
+          "latency_ms": 0.10633000056259334,
+          "query": "What is the order of migration and enabling version two?",
+          "gold_ids": [
+            "atom-4",
+            "atom-5"
+          ],
+          "native_gold_ids": [
+            "atom-4",
+            "atom-5"
+          ],
+          "excluded_ids": [],
+          "native_excluded_ids": [],
+          "average_precision_at_10": 1.0,
+          "precision_at_5": 0.4,
+          "recall_at_5": 1.0,
+          "recall_at_20": 1.0,
+          "recall_at_100": 1.0,
+          "ndcg_at_10": 1.0,
+          "ndcg_at_30": 1.0,
+          "complete_gold_coverage_at_10": 1.0,
+          "complete_gold_coverage_at_20": 1.0,
+          "citation_precision_at_5": 0.4,
+          "citation_precision_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "multihop_coverage": 1.0,
+          "abstention_accuracy": 1.0,
+          "error_code": null,
+          "exclusion_reason": null
+        },
+        {
+          "case_id": "case-06-out-of-scope",
+          "category": "out_of_scope",
+          "outcome": "empty_result",
+          "is_positive_query": false,
+          "predicted_abstention": false,
+          "retrieved_ids": [],
+          "retrieved_scores": [],
+          "native_query_id": "case-06-out-of-scope",
+          "native_retrieved_ids": [],
+          "backend_receipt": {},
+          "latency_ms": 0.022752996301278472,
+          "query": "Which quantum orchard protocol is supported?",
+          "gold_ids": [],
+          "native_gold_ids": [],
+          "excluded_ids": [],
+          "native_excluded_ids": [],
+          "average_precision_at_10": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_5": 0.0,
+          "recall_at_20": 0.0,
+          "recall_at_100": 0.0,
+          "ndcg_at_10": 0.0,
+          "ndcg_at_30": 0.0,
+          "complete_gold_coverage_at_10": 0.0,
+          "complete_gold_coverage_at_20": 0.0,
+          "citation_precision_at_5": 0.0,
+          "citation_precision_at_10": 0.0,
+          "mrr": 0.0,
+          "multihop_coverage": 0.0,
+          "abstention_accuracy": 0.0,
+          "error_code": null,
+          "exclusion_reason": null
+        }
+      ],
+      "ops": {
+        "total_queries": 6,
+        "latency_p50_ms": 0.08980099664768204,
+        "latency_p95_ms": 0.22545474348589778,
+        "latency_p99_ms": 0.25722134159877896,
+        "latency_mean_ms": 0.10864766227314249,
+        "latency_min_ms": 0.022752996301278472,
+        "latency_max_ms": 0.26516299112699926,
+        "ingestion_duration_sec": 0.0007242339925142005,
+        "ingestion_documents_per_sec": 8284.615279063077,
+        "ingestion_atoms_per_sec": 8284.615279063077,
+        "organization_duration_sec": null,
+        "peak_memory_rss_mb": 53.98046875,
+        "memory_measurement": "sampled_process_rss_20ms; shared process, not isolated backend RSS",
+        "storage_total_bytes": null,
+        "storage_bytes_per_atom": null,
+        "llm_tokens_used": null,
+        "concurrent_qps": 6094.835613587673
+      },
+      "organization": {
+        "total_source_atoms": 6,
+        "preserved_source_atoms": 6,
+        "source_atom_coverage": 1.0,
+        "orphan_atom_count": null,
+        "duplicate_atom_count": null,
+        "routing_purity": null,
+        "tree_navigation_recall_vs_flat": null,
+        "coverage_unit": "document",
+        "evidence": {
+          "preservation": "backend preserved_document_ids"
+        },
+        "is_computed": true
+      },
+      "error_receipts": []
+    },
+    "python:c2_bench10m:C2Bench10MShipped": {
+      "baseline_name": "python:c2_bench10m:C2Bench10MShipped",
+      "status": "success",
+      "status_detail": "",
+      "overall_recall_at_5": 0.8,
+      "overall_recall_at_20": 1.0,
+      "overall_ndcg_at_10": 0.8509255525320505,
+      "overall_ndcg_at_30": 0.8509255525320505,
+      "overall_complete_coverage_at_10": 1.0,
+      "overall_complete_coverage_at_20": 1.0,
+      "overall_citation_precision_at_5": 0.32,
+      "overall_mrr": 0.9,
+      "overall_map_at_10": 0.74,
+      "overall_precision_at_5": 0.32,
+      "overall_multihop_coverage": 1.0,
+      "overall_abstention_accuracy": 0.8333333333333334,
+      "total_cases": 6,
+      "positive_cases_count": 5,
+      "abstention_cases_count": 1,
+      "failed_cases_count": 0,
+      "empty_result_count": 0,
+      "abstention_evaluated": true,
+      "false_accept_rate": 1.0,
+      "false_reject_rate": 0.0,
+      "configuration": {
+        "arm": "shipped-M80-P100-A40",
+        "query_budgets": {
+          "M_REGIONS": 80,
+          "PRUNE_CAP": 100,
+          "MAX_ENTRIES": 40
+        },
+        "budget_policy": "M80-P100-A40 adopted (c2-10m SHIPPED)",
+        "selection_limit": "at most MAX_ENTRIES entries per query; fewer than K distinct documents possible by design",
+        "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+        "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+        "embedding": "raw st.encode, normalize_embeddings=False (shipped CPU convention; cosine is downstream)",
+        "path": "S-04 Narrow",
+        "chunking": "product defaults: 200 tokens, overlap 50",
+        "serving_view": "ServingView",
+        "architecture_provenance": "$TRACE_ARCHITECTURE_DIR",
+        "deployment_condition": "persistent process + resident encoder per run (TB holds one backend instance per run)"
+      },
+      "implementation_identity": {
+        "candidate_revision": "2382f878",
+        "product_sources_sha256": "e0e1649d0c937ec4cf69a301e8caa7a6cd0612696f9acb2783a496570ddf1f0e",
+        "target_role": "TL",
+        "canonical_engine": "c2_bench10m_shipped",
+        "arm": "shipped-M80-P100-A40",
+        "query_budgets": {
+          "M_REGIONS": 80,
+          "PRUNE_CAP": 100,
+          "MAX_ENTRIES": 40
+        },
+        "serving_file_sha256": {
+          "tl-sys/tlsys/dossier.py": "93871fb3e7f63e58d9c48c113efecd551a5271c73184968259f8cce3df4e7ac0",
+          "tl-sys/tlsys/relquery.py": "0fe79c501cf3582face656ff3da7340534ae871780f4e16c7e0f876f6afb45a8",
+          "tl-sys/tlsys/relserve.py": "61b69a84c648717955426e3bbb3ffde7526658483f05a7532f9d145582bc9b71",
+          "tl-sys/tlsys/query.py": "d7756e72e2de65814103e216edfc7d53650cc0fada34cefe7cf41411f03414ce",
+          "tl-sys/tlsys/index.py": "b8bc139008a9da185f3438823836e03b8a171a10d0677faf7448ed21afcebef0",
+          "tl-sys/tlsys/serving/generation.py": "929709390af18e7511197164d399ba71f368c767c2fc2df3680f43254424b22f",
+          "tl-sys/tlsys/prodstate.py": "e7a4370c3e6faf122927db34919b2d42838f0b800edc4c8f877b564f405a47b1"
+        },
+        "target_identity": {
+          "status": "resolved",
+          "target_role": "TL",
+          "tlsys_files": [
+            [
+              "tlsys/__init__.py",
+              "e9eaa6522d12624e24ebadf82ae22ec25d4b4134195637af0ef56ffaf6dd5e44"
+            ],
+            [
+              "tlsys/catalog.py",
+              "de394c021d9aad78a545af3eeea37ad24b7a8cbbcec3e0f06a86f07feff1b1f5"
+            ],
+            [
+              "tlsys/dossier.py",
+              "93871fb3e7f63e58d9c48c113efecd551a5271c73184968259f8cce3df4e7ac0"
+            ],
+            [
+              "tlsys/export.py",
+              "3d4f20b6bc97c2d5896dc25613c378a8c6afbc0be1046a0cb230c98651c61816"
+            ],
+            [
+              "tlsys/fuse.py",
+              "53cdd3382746f00b1ad9e7547e7bc4c42d51ba7d3e241173f403493cd71e5fc3"
+            ],
+            [
+              "tlsys/hierserve.py",
+              "e12276cad8b838c8e107317f4ad4f84a2303fb929abbcb61913260ba00bc94a1"
+            ],
+            [
+              "tlsys/hnsw_candidates.py",
+              "c5c52753696dbcaaf0a8bfb995e421a901c96e024f81960982bab106f7877142"
+            ],
+            [
+              "tlsys/identity.py",
+              "1f0e5a369eff01fda78e3ba1f46468010a2383a641f2b14f4aba4665a7cabffa"
+            ],
+            [
+              "tlsys/index.py",
+              "b8bc139008a9da185f3438823836e03b8a171a10d0677faf7448ed21afcebef0"
+            ],
+            [
+              "tlsys/ingest.py",
+              "b3f60e1d9a895b6c39928ceb5dec0d62866358a70d387d02409c5b30c6a2d4ab"
+            ],
+            [
+              "tlsys/lifecycle.py",
+              "8e1d2a1bb86a17dfda51cf47162a0b8b37ae57d0d3de48e2566cf8641491a429"
+            ],
+            [
+              "tlsys/maint.py",
+              "da637f1b32d129f1cf43583340d35fb7e4b8bd3c5c093e933d3de1a29ec7eb0d"
+            ],
+            [
+              "tlsys/place.py",
+              "9547baeb9632e9ec8276f939b90ff64fe5465dbe00fafea376055c7ce42293d4"
+            ],
+            [
+              "tlsys/prodstate.py",
+              "e7a4370c3e6faf122927db34919b2d42838f0b800edc4c8f877b564f405a47b1"
+            ],
+            [
+              "tlsys/proj.py",
+              "0ab12db84c604676f9bc53b45c8c40e1dc89b0ac7d621521513176ffe9524249"
+            ],
+            [
+              "tlsys/query.py",
+              "d7756e72e2de65814103e216edfc7d53650cc0fada34cefe7cf41411f03414ce"
+            ],
+            [
+              "tlsys/relations.py",
+              "d9a061f9a5b6848cd753c88136a302fd21060f2eaccf9bb12504a06d14b0312c"
+            ],
+            [
+              "tlsys/relquery.py",
+              "0fe79c501cf3582face656ff3da7340534ae871780f4e16c7e0f876f6afb45a8"
+            ],
+            [
+              "tlsys/relserve.py",
+              "61b69a84c648717955426e3bbb3ffde7526658483f05a7532f9d145582bc9b71"
+            ],
+            [
+              "tlsys/store_if.py",
+              "0c170d859de1cab545f697ffdbc80df1dbcadb8907da07706ef46a12cfa0aa89"
+            ],
+            [
+              "tlsys/validate_export.py",
+              "305dc172b4a9940ac1dc74a75b3ec9c59ab53dfd04112e89231e1735325f762a"
+            ]
+          ],
+          "candidate_files": [
+            [
+              "candidate/approval.py",
+              "d18a16765b2065010d86f654c7d61ae9e7383209a319880efe01cc8fa9acd87a"
+            ],
+            [
+              "candidate/committer.py",
+              "2382f878050badff894d4ef719a6c0e75b6007d4dbc97829c6161e1f8eeba42d"
+            ],
+            [
+              "candidate/common.py",
+              "740ba1cb0de61fbaf1115a79dcbf3cd01fdfb019f5088fbf8823d1d5425ac06a"
+            ],
+            [
+              "candidate/excommon.py",
+              "de5c8ea811165aebcb78a2452aac5a8d6b51135627ddcc25de8286d06cc6951d"
+            ],
+            [
+              "candidate/executor.py",
+              "0cdaab58ebb67e02de11833c425d273d98381a28686e22861a8e0e974905a11f"
+            ],
+            [
+              "candidate/intake.py",
+              "7ba7c5d48a79e9f90c4482283de83b45c1ce6b701ece3a9e5319c9d75c589ed5"
+            ],
+            [
+              "candidate/pintable.py",
+              "e3515367a51474ac21cc425223d0eee1930a0ae37467e0f7f7dec4d96ef40bc5"
+            ],
+            [
+              "candidate/preflight.py",
+              "113bfc5abe418d09650693174e7e087b7431bad3d5ab2c9ce664e78a0f43487d"
+            ],
+            [
+              "candidate/recovery.py",
+              "da0664678abed45c4935ed66c29eaa9e444971b06cd977bca3278c2f7c74f3a7"
+            ],
+            [
+              "candidate/replay.py",
+              "d6e79b4090c33caca46e0d6a172fd1d62026df6ee0c21a30b58a91c1a674e458"
+            ],
+            [
+              "candidate/stage_b_common.py",
+              "7f6211581a7921db47ad21ade351ab0b4dc6a8c80c2636f8c014faf8070df43e"
+            ],
+            [
+              "candidate/stage_c_common.py",
+              "b603fb2c60a809e27b8f53bd1671ccdbc664d98409995ab18ce33d0cb91e0a84"
+            ],
+            [
+              "candidate/store.py",
+              "d70df257125c529e7a619996de56cb05fc574dfc6e28c1db41f00b80be56f852"
+            ],
+            [
+              "candidate/w6.py",
+              "b483bc6e67409aea180b2435ec799cde995df72568c557208a004d15721a06f0"
+            ],
+            [
+              "candidate/w7.py",
+              "c03df0aca17013d7653e12524beab791a0378abc3e85865b3a8ea7f342188a6d"
+            ],
+            [
+              "candidate/w8.py",
+              "208d2ba1ea95d40c1499d226b3cd6044497bd2b628f45baf1084eae23f963392"
+            ],
+            [
+              "candidate/w9.py",
+              "b97d35ef380b0c4d2651538c80d130d14cf5ae9e5639b38398a5f7165a72abf0"
+            ]
+          ],
+          "tlsys_sha256": "a7daa261aea9260342eac9568670263b9f1098ebc8b570f711c30d790a2dd494",
+          "substrate_sha256": "d62a7febcbf306f675f5b9c4e5fbb934d7ed517c946787d3e0d2ba4d164ef63d",
+          "combined_sha256": "b44cb48a4a332d799b4bde6c91e8a8d9db6d6dc9191a13e3310467155b02b1d0",
+          "candidate_revision": "2382f878",
+          "candidate_revision_source": "tlsys/__init__.py"
+        },
+        "resolved_modules": {
+          "tlsys": {
+            "imported": true,
+            "init_sha256": "e9eaa6522d12624e24ebadf82ae22ec25d4b4134195637af0ef56ffaf6dd5e44"
+          }
+        },
+        "class": "c2_bench10m:C2Bench10MShipped",
+        "source_sha256": "0f6e7bc3181f9702a453fd5b7fc0c7a1121cf8543d73af1d0a92d2a1b103fc71",
+        "configuration_sha256": "67339fddd4eb6016a4d540d120a231a439d8a29050d7231791b8ff0942161b08",
+        "target_identity_verified": true,
+        "target_identity_note": "target identity verified",
+        "native_pins": {
+          "tl_birth": "027f002f-fadc-4a0b-a756-f8c0891393b0",
+          "tl_epoch": 0,
+          "tl_seq": 18,
+          "tl_triple": "027f002f-fadc-4a0b-a756-f8c0891393b0:0:18"
+        }
+      },
+      "category_breakdown": {
+        "direct_lookup": {
+          "count": 1,
+          "positive_count": 1,
+          "recall_at_5": 1.0,
+          "ndcg_at_10": 1.0,
+          "complete_coverage_at_10": 1.0,
+          "citation_precision_at_5": 0.2,
+          "abstention_accuracy": 1.0
+        },
+        "multi_hop": {
+          "count": 1,
+          "positive_count": 1,
+          "recall_at_5": 1.0,
+          "ndcg_at_10": 0.9674679834891693,
+          "complete_coverage_at_10": 1.0,
+          "citation_precision_at_5": 0.6,
+          "abstention_accuracy": 1.0
+        },
+        "chronology": {
+          "count": 1,
+          "positive_count": 1,
+          "recall_at_5": 1.0,
+          "ndcg_at_10": 0.6240505200038379,
+          "complete_coverage_at_10": 1.0,
+          "citation_precision_at_5": 0.4,
+          "abstention_accuracy": 1.0
+        },
+        "contradiction": {
+          "count": 1,
+          "positive_count": 1,
+          "recall_at_5": 0.5,
+          "ndcg_at_10": 0.8315546295836225,
+          "complete_coverage_at_10": 1.0,
+          "citation_precision_at_5": 0.2,
+          "abstention_accuracy": 1.0
+        },
+        "historical": {
+          "count": 1,
+          "positive_count": 1,
+          "recall_at_5": 0.5,
+          "ndcg_at_10": 0.8315546295836225,
+          "complete_coverage_at_10": 1.0,
+          "citation_precision_at_5": 0.2,
+          "abstention_accuracy": 1.0
+        },
+        "out_of_scope": {
+          "count": 1,
+          "positive_count": 0,
+          "recall_at_5": 0.0,
+          "ndcg_at_10": 0.0,
+          "complete_coverage_at_10": 0.0,
+          "citation_precision_at_5": 0.0,
+          "abstention_accuracy": 0.0
+        }
+      },
+      "case_results": [
+        {
+          "case_id": "case-01-direct-lookup",
+          "category": "direct_lookup",
+          "outcome": "success",
+          "is_positive_query": true,
+          "predicted_abstention": false,
+          "retrieved_ids": [
+            "atom-1",
+            "atom-4",
+            "atom-0",
+            "atom-2",
+            "atom-3",
+            "atom-5"
+          ],
+          "retrieved_scores": [
+            0.025,
+            0.02459016393442623,
+            0.007692307692307693,
+            0.008064516129032258,
+            0.007936507936507936,
+            0.0078125
+          ],
+          "native_query_id": "case-01-direct-lookup",
+          "native_retrieved_ids": [
+            "atom-1",
+            "atom-4",
+            "atom-0",
+            "atom-2",
+            "atom-3",
+            "atom-5"
+          ],
+          "backend_receipt": {
+            "query": "What fuses BM25 and dense candidates?",
+            "pinned_generation": "027f002f-fadc-4a0b-a756-f8c0891393b0:0:18",
+            "execution": {
+              "status": "complete",
+              "reason": null
+            },
+            "support_findings": "supported-results",
+            "selection_outcomes": "selected",
+            "metrics": {
+              "H_hops": 0,
+              "R_regions": 12,
+              "E_edges": 0,
+              "C_candidates": 6,
+              "P_partitions": 0,
+              "T_ms": 12.85,
+              "work_used": 92,
+              "work_budget": 1000000,
+              "op_class_counts": {
+                "seed-lexical": 2,
+                "seed-dense": 12,
+                "seed-dense-atoms": 6,
+                "region-entry": 12,
+                "member-enumeration": 12,
+                "prune-compare": 6,
+                "mmr-pair-compare": 36,
+                "assembly-read": 6
+              },
+              "cost_table": "v1-provisional-unit",
+              "regions_ranked": 12,
+              "prune_survivors": 6,
+              "entries": 6,
+              "top_region_score": 0.03833333333333333,
+              "runnerup_margin": 0.0008928256654327435,
+              "m_effective": 80,
+              "tau_sel": 0.005,
+              "max_entries": 40,
+              "unpruned_reference": false,
+              "emit_dense_atoms": true,
+              "dense_atom_seeds": 6,
+              "dense_cos_top1": 0.571908,
+              "dense_cos_margin": 0.360327,
+              "disclose_top1_cut": 0.3,
+              "top1_trigger_fired": false,
+              "region_dense_atoms": true,
+              "region_dense_terms": 6,
+              "support_counts": {
+                "lex_only": 0,
+                "dense_only": 4,
+                "both": 2,
+                "neither": 0
+              },
+              "funnel": null
+            },
+            "flags": {
+              "routing_uncertain_Q3.3": false,
+              "low_retrieval_similarity_Q3.3": false,
+              "narrow_Q9.2": true
+            },
+            "flags_not_produced": {
+              "activation_drift_Q8.1": "no spreading/activation machinery in Narrow",
+              "qualifier_Q12.1": "atoms carry no qualifier signals (named S-02-ingestion input)",
+              "unresolved_Q12.2": "no qualifier signals to be unrepresentable against",
+              "joint_preservation_Q12.3": "no identified pairs (trigger needs qualifier signals)"
+            },
+            "uncertainty_presentation": "unassessed (similarity above floor; not an answerability claim)",
+            "partials": [],
+            "disclosure_UQ1": {
+              "events": []
+            },
+            "storage_calls": {
+              "commit_batch/ok": {
+                "n": 3,
+                "ms_total": 23.46
+              },
+              "fence.acquire/ok": {
+                "n": 1,
+                "ms_total": 1.32
+              },
+              "pin/ok": {
+                "n": 11,
+                "ms_total": 0.51
+              },
+              "pub_refs/ok": {
+                "n": 4,
+                "ms_total": 0.46
+              },
+              "read_artifact/ok": {
+                "n": 83,
+                "ms_total": 2.88
+              },
+              "read_commits_all/ok": {
+                "n": 9,
+                "ms_total": 3.79
+              }
+            }
+          },
+          "latency_ms": 15.883559011854231,
+          "query": "What fuses BM25 and dense candidates?",
+          "gold_ids": [
+            "atom-1"
+          ],
+          "native_gold_ids": [
+            "atom-1"
+          ],
+          "excluded_ids": [],
+          "native_excluded_ids": [],
+          "average_precision_at_10": 1.0,
+          "precision_at_5": 0.2,
+          "recall_at_5": 1.0,
+          "recall_at_20": 1.0,
+          "recall_at_100": 1.0,
+          "ndcg_at_10": 1.0,
+          "ndcg_at_30": 1.0,
+          "complete_gold_coverage_at_10": 1.0,
+          "complete_gold_coverage_at_20": 1.0,
+          "citation_precision_at_5": 0.2,
+          "citation_precision_at_10": 0.16666666666666666,
+          "mrr": 1.0,
+          "multihop_coverage": 1.0,
+          "abstention_accuracy": 1.0,
+          "error_code": null,
+          "exclusion_reason": null
+        },
+        {
+          "case_id": "case-02-multi-hop",
+          "category": "multi_hop",
+          "outcome": "success",
+          "is_positive_query": true,
+          "predicted_abstention": false,
+          "retrieved_ids": [
+            "atom-0",
+            "atom-2",
+            "atom-5",
+            "atom-1",
+            "atom-3",
+            "atom-4"
+          ],
+          "retrieved_scores": [
+            0.025,
+            0.02459016393442623,
+            0.007692307692307693,
+            0.008064516129032258,
+            0.007936507936507936,
+            0.0078125
+          ],
+          "native_query_id": "case-02-multi-hop",
+          "native_retrieved_ids": [
+            "atom-0",
+            "atom-2",
+            "atom-5",
+            "atom-1",
+            "atom-3",
+            "atom-4"
+          ],
+          "backend_receipt": {
+            "query": "How does a scoped API query reach evidence selection?",
+            "pinned_generation": "027f002f-fadc-4a0b-a756-f8c0891393b0:0:18",
+            "execution": {
+              "status": "complete",
+              "reason": null
+            },
+            "support_findings": "supported-results",
+            "selection_outcomes": "selected",
+            "metrics": {
+              "H_hops": 0,
+              "R_regions": 12,
+              "E_edges": 0,
+              "C_candidates": 6,
+              "P_partitions": 0,
+              "T_ms": 13.84,
+              "work_used": 92,
+              "work_budget": 1000000,
+              "op_class_counts": {
+                "seed-lexical": 2,
+                "seed-dense": 12,
+                "seed-dense-atoms": 6,
+                "region-entry": 12,
+                "member-enumeration": 12,
+                "prune-compare": 6,
+                "mmr-pair-compare": 36,
+                "assembly-read": 6
+              },
+              "cost_table": "v1-provisional-unit",
+              "regions_ranked": 12,
+              "prune_survivors": 6,
+              "entries": 6,
+              "top_region_score": 0.03833333333333333,
+              "runnerup_margin": 0.0008928256654327435,
+              "m_effective": 80,
+              "tau_sel": 0.005,
+              "max_entries": 40,
+              "unpruned_reference": false,
+              "emit_dense_atoms": true,
+              "dense_atom_seeds": 6,
+              "dense_cos_top1": 0.509829,
+              "dense_cos_margin": 0.052878,
+              "disclose_top1_cut": 0.3,
+              "top1_trigger_fired": false,
+              "region_dense_atoms": true,
+              "region_dense_terms": 6,
+              "support_counts": {
+                "lex_only": 0,
+                "dense_only": 4,
+                "both": 2,
+                "neither": 0
+              },
+              "funnel": null
+            },
+            "flags": {
+              "routing_uncertain_Q3.3": false,
+              "low_retrieval_similarity_Q3.3": false,
+              "narrow_Q9.2": true
+            },
+            "flags_not_produced": {
+              "activation_drift_Q8.1": "no spreading/activation machinery in Narrow",
+              "qualifier_Q12.1": "atoms carry no qualifier signals (named S-02-ingestion input)",
+              "unresolved_Q12.2": "no qualifier signals to be unrepresentable against",
+              "joint_preservation_Q12.3": "no identified pairs (trigger needs qualifier signals)"
+            },
+            "uncertainty_presentation": "unassessed (similarity above floor; not an answerability claim)",
+            "partials": [],
+            "disclosure_UQ1": {
+              "events": []
+            },
+            "storage_calls": {
+              "commit_batch/ok": {
+                "n": 3,
+                "ms_total": 23.46
+              },
+              "fence.acquire/ok": {
+                "n": 1,
+                "ms_total": 1.32
+              },
+              "pin/ok": {
+                "n": 12,
+                "ms_total": 0.7
+              },
+              "pub_refs/ok": {
+                "n": 4,
+                "ms_total": 0.46
+              },
+              "read_artifact/ok": {
+                "n": 89,
+                "ms_total": 3.1
+              },
+              "read_commits_all/ok": {
+                "n": 9,
+                "ms_total": 3.79
+              }
+            }
+          },
+          "latency_ms": 13.966079990495928,
+          "query": "How does a scoped API query reach evidence selection?",
+          "gold_ids": [
+            "atom-0",
+            "atom-1",
+            "atom-2"
+          ],
+          "native_gold_ids": [
+            "atom-0",
+            "atom-1",
+            "atom-2"
+          ],
+          "excluded_ids": [],
+          "native_excluded_ids": [],
+          "average_precision_at_10": 0.9166666666666666,
+          "precision_at_5": 0.6,
+          "recall_at_5": 1.0,
+          "recall_at_20": 1.0,
+          "recall_at_100": 1.0,
+          "ndcg_at_10": 0.9674679834891693,
+          "ndcg_at_30": 0.9674679834891693,
+          "complete_gold_coverage_at_10": 1.0,
+          "complete_gold_coverage_at_20": 1.0,
+          "citation_precision_at_5": 0.6,
+          "citation_precision_at_10": 0.5,
+          "mrr": 1.0,
+          "multihop_coverage": 1.0,
+          "abstention_accuracy": 1.0,
+          "error_code": null,
+          "exclusion_reason": null
+        },
+        {
+          "case_id": "case-03-dependency",
+          "category": "chronology",
+          "outcome": "success",
+          "is_positive_query": true,
+          "predicted_abstention": false,
+          "retrieved_ids": [
+            "atom-3",
+            "atom-5",
+            "atom-0",
+            "atom-2",
+            "atom-4",
+            "atom-1"
+          ],
+          "retrieved_scores": [
+            0.024731182795698924,
+            0.024726775956284155,
+            0.0234375,
+            0.023809523809523808,
+            0.024325753569539928,
+            0.007692307692307693
+          ],
+          "native_query_id": "case-03-dependency",
+          "native_retrieved_ids": [
+            "atom-3",
+            "atom-5",
+            "atom-0",
+            "atom-2",
+            "atom-4",
+            "atom-1"
+          ],
+          "backend_receipt": {
+            "query": "What must happen before version two is enabled?",
+            "pinned_generation": "027f002f-fadc-4a0b-a756-f8c0891393b0:0:18",
+            "execution": {
+              "status": "complete",
+              "reason": null
+            },
+            "support_findings": "supported-results",
+            "selection_outcomes": "selected",
+            "metrics": {
+              "H_hops": 0,
+              "R_regions": 12,
+              "E_edges": 0,
+              "C_candidates": 6,
+              "P_partitions": 0,
+              "T_ms": 15.87,
+              "work_used": 95,
+              "work_budget": 1000000,
+              "op_class_counts": {
+                "seed-lexical": 5,
+                "seed-dense": 12,
+                "seed-dense-atoms": 6,
+                "region-entry": 12,
+                "member-enumeration": 12,
+                "prune-compare": 6,
+                "mmr-pair-compare": 36,
+                "assembly-read": 6
+              },
+              "cost_table": "v1-provisional-unit",
+              "regions_ranked": 12,
+              "prune_survivors": 6,
+              "entries": 6,
+              "top_region_score": 0.038060109289617484,
+              "runnerup_margin": 0.0008840119866032059,
+              "m_effective": 80,
+              "tau_sel": 0.005,
+              "max_entries": 40,
+              "unpruned_reference": false,
+              "emit_dense_atoms": true,
+              "dense_atom_seeds": 6,
+              "dense_cos_top1": 0.601624,
+              "dense_cos_margin": 0.186373,
+              "disclose_top1_cut": 0.3,
+              "top1_trigger_fired": false,
+              "region_dense_atoms": true,
+              "region_dense_terms": 6,
+              "support_counts": {
+                "lex_only": 0,
+                "dense_only": 1,
+                "both": 5,
+                "neither": 0
+              },
+              "funnel": null
+            },
+            "flags": {
+              "routing_uncertain_Q3.3": false,
+              "low_retrieval_similarity_Q3.3": false,
+              "narrow_Q9.2": true
+            },
+            "flags_not_produced": {
+              "activation_drift_Q8.1": "no spreading/activation machinery in Narrow",
+              "qualifier_Q12.1": "atoms carry no qualifier signals (named S-02-ingestion input)",
+              "unresolved_Q12.2": "no qualifier signals to be unrepresentable against",
+              "joint_preservation_Q12.3": "no identified pairs (trigger needs qualifier signals)"
+            },
+            "uncertainty_presentation": "unassessed (similarity above floor; not an answerability claim)",
+            "partials": [],
+            "disclosure_UQ1": {
+              "events": []
+            },
+            "storage_calls": {
+              "commit_batch/ok": {
+                "n": 3,
+                "ms_total": 23.46
+              },
+              "fence.acquire/ok": {
+                "n": 1,
+                "ms_total": 1.32
+              },
+              "pin/ok": {
+                "n": 13,
+                "ms_total": 0.75
+              },
+              "pub_refs/ok": {
+                "n": 4,
+                "ms_total": 0.46
+              },
+              "read_artifact/ok": {
+                "n": 95,
+                "ms_total": 3.34
+              },
+              "read_commits_all/ok": {
+                "n": 9,
+                "ms_total": 3.79
+              }
+            }
+          },
+          "latency_ms": 16.0034759901464,
+          "query": "What must happen before version two is enabled?",
+          "gold_ids": [
+            "atom-4",
+            "atom-5"
+          ],
+          "native_gold_ids": [
+            "atom-4",
+            "atom-5"
+          ],
+          "excluded_ids": [],
+          "native_excluded_ids": [],
+          "average_precision_at_10": 0.45,
+          "precision_at_5": 0.4,
+          "recall_at_5": 1.0,
+          "recall_at_20": 1.0,
+          "recall_at_100": 1.0,
+          "ndcg_at_10": 0.6240505200038379,
+          "ndcg_at_30": 0.6240505200038379,
+          "complete_gold_coverage_at_10": 1.0,
+          "complete_gold_coverage_at_20": 1.0,
+          "citation_precision_at_5": 0.4,
+          "citation_precision_at_10": 0.3333333333333333,
+          "mrr": 0.5,
+          "multihop_coverage": 1.0,
+          "abstention_accuracy": 1.0,
+          "error_code": null,
+          "exclusion_reason": null
+        },
+        {
+          "case_id": "case-04-contradiction",
+          "category": "contradiction",
+          "outcome": "success",
+          "is_positive_query": true,
+          "predicted_abstention": false,
+          "retrieved_ids": [
+            "atom-3",
+            "atom-0",
+            "atom-2",
+            "atom-5",
+            "atom-4",
+            "atom-1"
+          ],
+          "retrieved_scores": [
+            0.025,
+            0.023561507936507936,
+            0.02393753200204813,
+            0.023941532258064516,
+            0.02459016393442623,
+            0.023076923076923078
+          ],
+          "native_query_id": "case-04-contradiction",
+          "native_retrieved_ids": [
+            "atom-3",
+            "atom-0",
+            "atom-2",
+            "atom-5",
+            "atom-4",
+            "atom-1"
+          ],
+          "backend_receipt": {
+            "query": "What replaced the lexical-only path?",
+            "pinned_generation": "027f002f-fadc-4a0b-a756-f8c0891393b0:0:18",
+            "execution": {
+              "status": "complete",
+              "reason": null
+            },
+            "support_findings": "supported-results",
+            "selection_outcomes": "selected",
+            "metrics": {
+              "H_hops": 0,
+              "R_regions": 12,
+              "E_edges": 0,
+              "C_candidates": 6,
+              "P_partitions": 0,
+              "T_ms": 13.04,
+              "work_used": 96,
+              "work_budget": 1000000,
+              "op_class_counts": {
+                "seed-lexical": 6,
+                "seed-dense": 12,
+                "seed-dense-atoms": 6,
+                "region-entry": 12,
+                "member-enumeration": 12,
+                "prune-compare": 6,
+                "mmr-pair-compare": 36,
+                "assembly-read": 6
+              },
+              "cost_table": "v1-provisional-unit",
+              "regions_ranked": 12,
+              "prune_survivors": 6,
+              "entries": 6,
+              "top_region_score": 0.03833333333333333,
+              "runnerup_margin": 0.0008928256654327435,
+              "m_effective": 80,
+              "tau_sel": 0.005,
+              "max_entries": 40,
+              "unpruned_reference": false,
+              "emit_dense_atoms": true,
+              "dense_atom_seeds": 6,
+              "dense_cos_top1": 0.680335,
+              "dense_cos_margin": 0.440921,
+              "disclose_top1_cut": 0.3,
+              "top1_trigger_fired": false,
+              "region_dense_atoms": true,
+              "region_dense_terms": 6,
+              "support_counts": {
+                "lex_only": 0,
+                "dense_only": 0,
+                "both": 6,
+                "neither": 0
+              },
+              "funnel": null
+            },
+            "flags": {
+              "routing_uncertain_Q3.3": false,
+              "low_retrieval_similarity_Q3.3": false,
+              "narrow_Q9.2": true
+            },
+            "flags_not_produced": {
+              "activation_drift_Q8.1": "no spreading/activation machinery in Narrow",
+              "qualifier_Q12.1": "atoms carry no qualifier signals (named S-02-ingestion input)",
+              "unresolved_Q12.2": "no qualifier signals to be unrepresentable against",
+              "joint_preservation_Q12.3": "no identified pairs (trigger needs qualifier signals)"
+            },
+            "uncertainty_presentation": "unassessed (similarity above floor; not an answerability claim)",
+            "partials": [],
+            "disclosure_UQ1": {
+              "events": []
+            },
+            "storage_calls": {
+              "commit_batch/ok": {
+                "n": 3,
+                "ms_total": 23.46
+              },
+              "fence.acquire/ok": {
+                "n": 1,
+                "ms_total": 1.32
+              },
+              "pin/ok": {
+                "n": 14,
+                "ms_total": 0.81
+              },
+              "pub_refs/ok": {
+                "n": 4,
+                "ms_total": 0.46
+              },
+              "read_artifact/ok": {
+                "n": 101,
+                "ms_total": 4.14
+              },
+              "read_commits_all/ok": {
+                "n": 9,
+                "ms_total": 3.79
+              }
+            }
+          },
+          "latency_ms": 13.165687007131055,
+          "query": "What replaced the lexical-only path?",
+          "gold_ids": [
+            "atom-3",
+            "atom-1"
+          ],
+          "native_gold_ids": [
+            "atom-3",
+            "atom-1"
+          ],
+          "excluded_ids": [],
+          "native_excluded_ids": [],
+          "average_precision_at_10": 0.6666666666666666,
+          "precision_at_5": 0.2,
+          "recall_at_5": 0.5,
+          "recall_at_20": 1.0,
+          "recall_at_100": 1.0,
+          "ndcg_at_10": 0.8315546295836225,
+          "ndcg_at_30": 0.8315546295836225,
+          "complete_gold_coverage_at_10": 1.0,
+          "complete_gold_coverage_at_20": 1.0,
+          "citation_precision_at_5": 0.2,
+          "citation_precision_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "multihop_coverage": 1.0,
+          "abstention_accuracy": 1.0,
+          "error_code": null,
+          "exclusion_reason": null
+        },
+        {
+          "case_id": "case-05-source-order",
+          "category": "historical",
+          "outcome": "success",
+          "is_positive_query": true,
+          "predicted_abstention": false,
+          "retrieved_ids": [
+            "atom-4",
+            "atom-2",
+            "atom-0",
+            "atom-1",
+            "atom-3",
+            "atom-5"
+          ],
+          "retrieved_scores": [
+            0.024863387978142075,
+            0.023561507936507936,
+            0.023076923076923078,
+            0.023941532258064516,
+            0.02393753200204813,
+            0.024726775956284155
+          ],
+          "native_query_id": "case-05-source-order",
+          "native_retrieved_ids": [
+            "atom-4",
+            "atom-2",
+            "atom-0",
+            "atom-1",
+            "atom-3",
+            "atom-5"
+          ],
+          "backend_receipt": {
+            "query": "What is the order of migration and enabling version two?",
+            "pinned_generation": "027f002f-fadc-4a0b-a756-f8c0891393b0:0:18",
+            "execution": {
+              "status": "complete",
+              "reason": null
+            },
+            "support_findings": "supported-results",
+            "selection_outcomes": "selected",
+            "metrics": {
+              "H_hops": 0,
+              "R_regions": 12,
+              "E_edges": 0,
+              "C_candidates": 6,
+              "P_partitions": 0,
+              "T_ms": 10.86,
+              "work_used": 96,
+              "work_budget": 1000000,
+              "op_class_counts": {
+                "seed-lexical": 6,
+                "seed-dense": 12,
+                "seed-dense-atoms": 6,
+                "region-entry": 12,
+                "member-enumeration": 12,
+                "prune-compare": 6,
+                "mmr-pair-compare": 36,
+                "assembly-read": 6
+              },
+              "cost_table": "v1-provisional-unit",
+              "regions_ranked": 12,
+              "prune_survivors": 6,
+              "entries": 6,
+              "top_region_score": 0.038060109289617484,
+              "runnerup_margin": 0.0003463775780010586,
+              "m_effective": 80,
+              "tau_sel": 0.005,
+              "max_entries": 40,
+              "unpruned_reference": false,
+              "emit_dense_atoms": true,
+              "dense_atom_seeds": 6,
+              "dense_cos_top1": 0.636228,
+              "dense_cos_margin": 0.0369,
+              "disclose_top1_cut": 0.3,
+              "top1_trigger_fired": false,
+              "region_dense_atoms": true,
+              "region_dense_terms": 6,
+              "support_counts": {
+                "lex_only": 0,
+                "dense_only": 0,
+                "both": 6,
+                "neither": 0
+              },
+              "funnel": null
+            },
+            "flags": {
+              "routing_uncertain_Q3.3": false,
+              "low_retrieval_similarity_Q3.3": false,
+              "narrow_Q9.2": true
+            },
+            "flags_not_produced": {
+              "activation_drift_Q8.1": "no spreading/activation machinery in Narrow",
+              "qualifier_Q12.1": "atoms carry no qualifier signals (named S-02-ingestion input)",
+              "unresolved_Q12.2": "no qualifier signals to be unrepresentable against",
+              "joint_preservation_Q12.3": "no identified pairs (trigger needs qualifier signals)"
+            },
+            "uncertainty_presentation": "unassessed (similarity above floor; not an answerability claim)",
+            "partials": [],
+            "disclosure_UQ1": {
+              "events": []
+            },
+            "storage_calls": {
+              "commit_batch/ok": {
+                "n": 3,
+                "ms_total": 23.46
+              },
+              "fence.acquire/ok": {
+                "n": 1,
+                "ms_total": 1.32
+              },
+              "pin/ok": {
+                "n": 15,
+                "ms_total": 0.85
+              },
+              "pub_refs/ok": {
+                "n": 4,
+                "ms_total": 0.46
+              },
+              "read_artifact/ok": {
+                "n": 107,
+                "ms_total": 4.35
+              },
+              "read_commits_all/ok": {
+                "n": 9,
+                "ms_total": 3.79
+              }
+            }
+          },
+          "latency_ms": 10.975788012729026,
+          "query": "What is the order of migration and enabling version two?",
+          "gold_ids": [
+            "atom-4",
+            "atom-5"
+          ],
+          "native_gold_ids": [
+            "atom-4",
+            "atom-5"
+          ],
+          "excluded_ids": [],
+          "native_excluded_ids": [],
+          "average_precision_at_10": 0.6666666666666666,
+          "precision_at_5": 0.2,
+          "recall_at_5": 0.5,
+          "recall_at_20": 1.0,
+          "recall_at_100": 1.0,
+          "ndcg_at_10": 0.8315546295836225,
+          "ndcg_at_30": 0.8315546295836225,
+          "complete_gold_coverage_at_10": 1.0,
+          "complete_gold_coverage_at_20": 1.0,
+          "citation_precision_at_5": 0.2,
+          "citation_precision_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "multihop_coverage": 1.0,
+          "abstention_accuracy": 1.0,
+          "error_code": null,
+          "exclusion_reason": null
+        },
+        {
+          "case_id": "case-06-out-of-scope",
+          "category": "out_of_scope",
+          "outcome": "success",
+          "is_positive_query": false,
+          "predicted_abstention": false,
+          "retrieved_ids": [
+            "atom-1",
+            "atom-0",
+            "atom-4",
+            "atom-2",
+            "atom-3",
+            "atom-5"
+          ],
+          "retrieved_scores": [
+            0.008333333333333333,
+            0.00819672131147541,
+            0.008064516129032258,
+            0.0078125,
+            0.007936507936507936,
+            0.007692307692307693
+          ],
+          "native_query_id": "case-06-out-of-scope",
+          "native_retrieved_ids": [
+            "atom-1",
+            "atom-0",
+            "atom-4",
+            "atom-2",
+            "atom-3",
+            "atom-5"
+          ],
+          "backend_receipt": {
+            "query": "Which quantum orchard protocol is supported?",
+            "pinned_generation": "027f002f-fadc-4a0b-a756-f8c0891393b0:0:18",
+            "execution": {
+              "status": "complete",
+              "reason": null
+            },
+            "support_findings": "supported-results",
+            "selection_outcomes": "selected",
+            "metrics": {
+              "H_hops": 0,
+              "R_regions": 12,
+              "E_edges": 0,
+              "C_candidates": 6,
+              "P_partitions": 0,
+              "T_ms": 17.42,
+              "work_used": 90,
+              "work_budget": 1000000,
+              "op_class_counts": {
+                "seed-lexical": 0,
+                "seed-dense": 12,
+                "seed-dense-atoms": 6,
+                "region-entry": 12,
+                "member-enumeration": 12,
+                "prune-compare": 6,
+                "mmr-pair-compare": 36,
+                "assembly-read": 6
+              },
+              "cost_table": "v1-provisional-unit",
+              "regions_ranked": 12,
+              "prune_survivors": 6,
+              "entries": 6,
+              "top_region_score": 0.021666666666666667,
+              "runnerup_margin": 0.0006196016217169045,
+              "m_effective": 12,
+              "tau_sel": 0.005,
+              "max_entries": 40,
+              "unpruned_reference": false,
+              "emit_dense_atoms": true,
+              "dense_atom_seeds": 6,
+              "dense_cos_top1": 0.151146,
+              "dense_cos_margin": 0.046809,
+              "disclose_top1_cut": 0.3,
+              "top1_trigger_fired": true,
+              "region_dense_atoms": true,
+              "region_dense_terms": 6,
+              "support_counts": {
+                "lex_only": 0,
+                "dense_only": 6,
+                "both": 0,
+                "neither": 0
+              },
+              "funnel": null
+            },
+            "flags": {
+              "routing_uncertain_Q3.3": true,
+              "low_retrieval_similarity_Q3.3": true,
+              "narrow_Q9.2": true
+            },
+            "flags_not_produced": {
+              "activation_drift_Q8.1": "no spreading/activation machinery in Narrow",
+              "qualifier_Q12.1": "atoms carry no qualifier signals (named S-02-ingestion input)",
+              "unresolved_Q12.2": "no qualifier signals to be unrepresentable against",
+              "joint_preservation_Q12.3": "no identified pairs (trigger needs qualifier signals)"
+            },
+            "uncertainty_presentation": "not sure (low retrieval similarity)",
+            "partials": [],
+            "disclosure_UQ1": {
+              "events": []
+            },
+            "storage_calls": {
+              "commit_batch/ok": {
+                "n": 3,
+                "ms_total": 23.46
+              },
+              "fence.acquire/ok": {
+                "n": 1,
+                "ms_total": 1.32
+              },
+              "pin/ok": {
+                "n": 16,
+                "ms_total": 0.9
+              },
+              "pub_refs/ok": {
+                "n": 4,
+                "ms_total": 0.46
+              },
+              "read_artifact/ok": {
+                "n": 113,
+                "ms_total": 4.57
+              },
+              "read_commits_all/ok": {
+                "n": 9,
+                "ms_total": 3.79
+              }
+            }
+          },
+          "latency_ms": 17.54738698946312,
+          "query": "Which quantum orchard protocol is supported?",
+          "gold_ids": [],
+          "native_gold_ids": [],
+          "excluded_ids": [],
+          "native_excluded_ids": [],
+          "average_precision_at_10": 0.0,
+          "precision_at_5": 0.0,
+          "recall_at_5": 0.0,
+          "recall_at_20": 0.0,
+          "recall_at_100": 0.0,
+          "ndcg_at_10": 0.0,
+          "ndcg_at_30": 0.0,
+          "complete_gold_coverage_at_10": 0.0,
+          "complete_gold_coverage_at_20": 0.0,
+          "citation_precision_at_5": 0.0,
+          "citation_precision_at_10": 0.0,
+          "mrr": 0.0,
+          "multihop_coverage": 0.0,
+          "abstention_accuracy": 0.0,
+          "error_code": null,
+          "exclusion_reason": null
+        }
+      ],
+      "ops": {
+        "total_queries": 6,
+        "latency_p50_ms": 14.92481950117508,
+        "latency_p95_ms": 17.16140923963394,
+        "latency_p99_ms": 17.470191439497285,
+        "latency_mean_ms": 14.590329500303293,
+        "latency_min_ms": 10.975788012729026,
+        "latency_max_ms": 17.54738698946312,
+        "ingestion_duration_sec": 6.489535448999959,
+        "ingestion_documents_per_sec": 0.9245654095201227,
+        "ingestion_atoms_per_sec": 0.9245654095201227,
+        "organization_duration_sec": null,
+        "peak_memory_rss_mb": 486.5,
+        "memory_measurement": "sampled_process_rss_20ms; shared process, not isolated backend RSS",
+        "storage_total_bytes": null,
+        "storage_bytes_per_atom": null,
+        "llm_tokens_used": null,
+        "concurrent_qps": 68.12489131376634
+      },
+      "organization": {
+        "total_source_atoms": 6,
+        "preserved_source_atoms": 6,
+        "source_atom_coverage": 1.0,
+        "orphan_atom_count": 0,
+        "duplicate_atom_count": 6,
+        "routing_purity": null,
+        "tree_navigation_recall_vs_flat": null,
+        "coverage_unit": "document",
+        "evidence": {
+          "preservation": "backend preserved_document_ids",
+          "snapshot": {
+            "generation": "027f002f-fadc-4a0b-a756-f8c0891393b0:0:18",
+            "path": "committed per-document holons",
+            "storage_calls": {
+              "commit_batch/ok": {
+                "n": 3,
+                "ms_total": 23.46
+              },
+              "fence.acquire/ok": {
+                "n": 1,
+                "ms_total": 1.32
+              },
+              "pin/ok": {
+                "n": 16,
+                "ms_total": 0.9
+              },
+              "pub_refs/ok": {
+                "n": 4,
+                "ms_total": 0.46
+              },
+              "read_artifact/ok": {
+                "n": 113,
+                "ms_total": 4.57
+              },
+              "read_commits_all/ok": {
+                "n": 9,
+                "ms_total": 3.79
+              }
+            }
+          }
+        },
+        "is_computed": true
+      },
+      "error_receipts": []
+    }
+  },
+  "error_receipts": [],
+  "recipe": {},
+  "run_schema_version": "tb-run-v1",
+  "comparison_context": {}
+}

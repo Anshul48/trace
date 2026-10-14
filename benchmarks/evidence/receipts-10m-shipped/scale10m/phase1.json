@@ -1,0 +1,88 @@
+{
+ "corpus": "scale10m",
+ "docs": 13081,
+ "n_scifact": 5183,
+ "n_curated": 100,
+ "n_delta": 7798,
+ "tok_v1": 10003381,
+ "ingest": {
+  "n_atoms": 63441,
+  "n_holons": 13081,
+  "n_xholon_ops": 18523,
+  "skipped": [],
+  "n_deferred": 0,
+  "pending_placement": [],
+  "pinned": "18869b2e-662c-462d-a695-5bf593e48cbf:0:95045"
+ },
+ "ingest_s": 9451.9,
+ "pinned": "18869b2e-662c-462d-a695-5bf593e48cbf:0:95045",
+ "index_build_s": 203.3,
+ "n_atoms": 63441,
+ "n_holons": 19817,
+ "store_bytes": 1050778172,
+ "store_MB": 1050.8,
+ "peak_rss_kb": 1649440,
+ "n_tuning_tasks": 809,
+ "smoke_rows": [
+  {
+   "ndcg10": 0.0,
+   "rec5": 0.0,
+   "rec20": 0.0,
+   "mrr": 0.0,
+   "qid": "0",
+   "system": "tl",
+   "ms": 2694.42,
+   "err": null,
+   "n_served": 10
+  },
+  {
+   "ndcg10": 0.0,
+   "rec5": 0.0,
+   "rec20": 0.0,
+   "mrr": 0.0,
+   "qid": "0",
+   "system": "tl-unpruned",
+   "ms": 2753.81,
+   "err": null,
+   "n_served": 10
+  },
+  {
+   "ndcg10": 0.0,
+   "rec5": 0.0,
+   "rec20": 0.0,
+   "mrr": 0.0,
+   "qid": "0",
+   "system": "bm25",
+   "ms": 2134.73,
+   "err": null,
+   "n_served": 10
+  },
+  {
+   "ndcg10": 0.3333333333333333,
+   "rec5": 0.0,
+   "rec20": 1.0,
+   "mrr": 0.14285714285714285,
+   "qid": "0",
+   "system": "dense",
+   "ms": 367.04,
+   "err": null,
+   "n_served": 10
+  },
+  {
+   "ndcg10": 0.0,
+   "rec5": 0.0,
+   "rec20": 0.0,
+   "mrr": 0.0,
+   "qid": "0",
+   "system": "hybrid",
+   "ms": 2447.18,
+   "err": null,
+   "n_served": 10
+  }
+ ],
+ "store_path": "/tmp/tl-scale10m-2026-10-04/stores/scale10m",
+ "encoder": "sentence-transformers/all-MiniLM-L6-v2",
+ "tl_cfg": {},
+ "place_xdoc": true,
+ "place_t": null
+}

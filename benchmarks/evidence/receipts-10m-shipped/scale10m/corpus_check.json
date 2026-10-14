@@ -1,0 +1,55 @@
+{
+ "target": 10000000,
+ "manifest_doc_count": 13081,
+ "manifest_prefix_tokens": 10003381,
+ "file_sha_match": {
+  "scifact_corpus.jsonl": true,
+  "trace_engineering_curated.json": false,
+  "wikipedia_delta.jsonl": true
+ },
+ "file_sha_actual": {
+  "scifact_corpus.jsonl": "dec31c8182f3d744c7d2c09423756fd1d17cbef75808db13ba01cc0aab4d1ac6",
+  "trace_engineering_curated.json": "210a20a4d1e7591413ecddc39eeed20b5e487009ddde1f18dfc05bf2e325af84",
+  "wikipedia_delta.jsonl": "ffe485442095c1f8a6bb141dc14deb4ca8ff9b78edecf15a2bda830825eb978d"
+ },
+ "delta_file_lines": 137360,
+ "delta_convention_candidates": {
+  "beir_strip(title\\ntext)": true,
+  "text_verbatim": false,
+  "text_strip": false,
+  "title_nn_text_strip": false
+ },
+ "delta_convention": "beir_strip(title\\ntext)",
+ "n_scifact": 5183,
+ "n_curated": 100,
+ "n_delta": 7798,
+ "prefix_docs": 13081,
+ "prefix_tok_v1": 10003381,
+ "per_doc_mismatches": {
+  "id": 0,
+  "sha": 3,
+  "tok": 0,
+  "cumsum": 0
+ },
+ "first_mismatches": {
+  "sha": {
+   "rank": 1629,
+   "manifest": "9291668",
+   "got": "9291668"
+  }
+ },
+ "minimality": {
+  "prev_cumsum": 9999603,
+  "prev_lt_target": true,
+  "prefix_gte_target": true,
+  "terminal_doc_id": "wikipedia:2372",
+  "terminal_line_ix": 7797
+ },
+ "matches_manifest_total": true,
+ "doc_ids_unique": true,
+ "tuning_qids": 809,
+ "tuning_gold_docs": 565,
+ "gold_in_prefix": 565,
+ "gold_missing": [],
+ "gold_coverage_ok": true
+}

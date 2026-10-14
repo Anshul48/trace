@@ -1,0 +1,337 @@
+{
+ "_meta": {
+  "frozen_utc": "2026-10-06T16:43:45Z",
+  "grounding_rule": "every expected doc in prefix P0 (queryable at every prefix); every span verbatim in an expected doc; every scored span shares an owning-chunker chunk with >=1 query term (r2 bridge spans exempt: bridge arrives via traversal only, fixture-r2 shape); all frozen BEFORE results",
+  "inputs_id": "gate-10m-inputs-v3",
+  "schema": "same per-class case schema as fixture_tier.cases (query/topics/expected/pair_docs/bridge_doc/min_hops_used/outcome_only)",
+  "scope_labels": {
+   "diagnostic": "tail-gap-1..3: dense-window gap passages from closure lane-3 audit; outcome_only; unscored",
+   "scored": "n1-n5, c1-c3, r1-r2, q1, g2a-g2e (frozen bars)"
+  },
+  "seed": 20261006
+ },
+ "cross_topic": [
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:713"
+    ],
+    "spans": [
+     "demonstrated the Actroid at Expo 2005",
+     "originally is used for the actuator"
+    ]
+   },
+   "id": "c1",
+   "query": "Actroid humanoid robot air servosystem actuator",
+   "topics": [
+    "humanoid robots",
+    "pneumatic actuator servosystems"
+   ]
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:35008",
+     "wikipedia:20941"
+    ],
+    "spans": [
+     "Achaean League",
+     "inhibit glutaminase"
+    ]
+   },
+   "id": "c2",
+   "query": "Achaean League conquests and glutaminase inhibition in cancer",
+   "topics": [
+    "Achaean League",
+    "glutaminase inhibition"
+   ]
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:31715",
+     "wikipedia:11812"
+    ],
+    "spans": [
+     "independent suffixes (agglutination)",
+     "F-35Is in two attacks"
+    ]
+   },
+   "id": "c3",
+   "query": "Uralic agglutination suffixes and F-35 airstrikes Iranian positions",
+   "topics": [
+    "Uralic agglutination",
+    "F-35 airstrikes"
+   ]
+  }
+ ],
+ "g2_probes": [
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:34815",
+     "wikipedia:34808",
+     "wikipedia:16032"
+    ],
+    "spans": [
+     "Agrippa"
+    ]
+   },
+   "id": "g2a",
+   "kind": "known-group",
+   "min_traced_hits": 1,
+   "query": "Agrippa Postumus Marcus Vipsanius Judea"
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:31165"
+    ],
+    "spans": [
+     "Norman Conquest",
+     "At least six ravens are kept at the Tower at all times"
+    ]
+   },
+   "grounding": "77,127-char doc; lead topic (offset ~1225) + distant topic (offset ~62602).",
+   "id": "g2b",
+   "kind": "long-multitopic",
+   "min_traced_hits": 1,
+   "query": "Norman Conquest White Tower ravens Ravenmaster"
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:14653"
+    ],
+    "spans": [
+     "humanoid robot Sorena 2",
+     "airstrikes"
+    ]
+   },
+   "grounding": "overlap of n4 airstrikes group + c1 humanoid robotics topic in one doc.",
+   "id": "g2c",
+   "kind": "overlap",
+   "min_traced_hits": 1,
+   "query": "humanoid robot Sorena airstrikes Khamenei"
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:10090"
+    ],
+    "spans": [
+     "Acnasol"
+    ]
+   },
+   "id": "g2d",
+   "kind": "rare-topic",
+   "min_traced_hits": 1,
+   "query": "Acnasol erythromycin brand"
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:7327"
+    ],
+    "spans": [
+     "acentrism"
+    ]
+   },
+   "grounding": "correction probe (fixture-g2e shape): scratch correction exercise appends this query to corpus row 0 and serves it.",
+   "id": "g2e",
+   "kind": "append-correction",
+   "min_traced_hits": 1,
+   "query": "acentrism Copernican principle humans center universe"
+  }
+ ],
+ "narrow": [
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:35008",
+     "wikipedia:18372",
+     "wikipedia:24516"
+    ],
+    "spans": [
+     "Achaean League",
+     "conquer the Achaean League and southern Greece becomes a Roman province"
+    ]
+   },
+   "grounding": "retirement probe case (first narrow case): exact phrase in all 3 docs; province span same sentence in 35008.",
+   "id": "n1",
+   "query": "Achaean League wars Romans conquer Greece"
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:34815",
+     "wikipedia:34808",
+     "wikipedia:16032"
+    ],
+    "spans": [
+     "Claudius makes Agrippa king of Judea",
+     "Marcus Vipsanius Agrippa"
+    ]
+   },
+   "id": "n2",
+   "query": "Agrippa king of Judea Marcus Vipsanius Rome"
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:18077",
+     "wikipedia:31715"
+    ],
+    "spans": [
+     "Agglutination, the compounding of morphemes into a single word",
+     "extensive use of independent suffixes (agglutination)"
+    ]
+   },
+   "id": "n3",
+   "query": "agglutination morphemes Uralic suffixes"
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:14672",
+     "wikipedia:14653",
+     "wikipedia:11812"
+    ],
+    "spans": [
+     "conducting a series of airstrikes notably after the execution",
+     "airstrikes were claimed to target Iranian positions"
+    ]
+   },
+   "id": "n4",
+   "query": "airstrikes coalition Iranian positions"
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:20941"
+    ],
+    "spans": [
+     "acivicin, and CB-839 have been shown to inhibit glutaminase",
+     "reducing cancer cell viability"
+    ]
+   },
+   "id": "n5",
+   "query": "acivicin glutaminase inhibitor cancer cell viability"
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:1029"
+    ],
+    "spans": [
+     "pessimist philosophies from Schopenhauer onward",
+     "Scientific materialism, advanced by Herbert Spencer"
+    ]
+   },
+   "gap": {
+    "doc_id": "wikipedia:1029",
+    "length": 210,
+    "offset": 33782,
+    "source": "closure-20261006T1038Z/lane3-readiness/uncovered-passages.jsonl"
+   },
+   "id": "tail-gap-1",
+   "outcome_only": true,
+   "query": "pessimist philosophies Schopenhauer scientific materialism Herbert Spencer",
+   "scope": "diagnostic tail probe (dense-window gap passage); unscored; outcome_only"
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:32901"
+    ],
+    "spans": [
+     "Magic in the Moonlight is Allen's most gratifyingly airy concoction"
+    ]
+   },
+   "gap": {
+    "doc_id": "wikipedia:32901",
+    "length": 348,
+    "offset": 35373,
+    "source": "closure-20261006T1038Z/lane3-readiness/uncovered-passages.jsonl"
+   },
+   "id": "tail-gap-2",
+   "outcome_only": true,
+   "query": "Magic in the Moonlight Allen airy concoction",
+   "scope": "diagnostic tail probe (dense-window gap passage); unscored; outcome_only"
+  },
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:5211"
+    ],
+    "spans": [
+     "As an initiatory rite into membership of the Family of God, baptismal candidates are symbolically purified"
+    ]
+   },
+   "gap": {
+    "doc_id": "wikipedia:5211",
+    "length": 391,
+    "offset": 72695,
+    "source": "closure-20261006T1038Z/lane3-readiness/uncovered-passages.jsonl"
+   },
+   "id": "tail-gap-3",
+   "outcome_only": true,
+   "query": "initiatory rite baptismal candidates symbolically purified Family of God",
+   "scope": "diagnostic tail probe (dense-window gap passage); unscored; outcome_only"
+  }
+ ],
+ "qualifier": [
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:27669",
+     "wikipedia:16881"
+    ],
+    "spans": [
+     "Observing kashrut regulations",
+     "partially observe kashrut"
+    ]
+   },
+   "grounding": "affirm pole 27669 (Spanish cuisine): Jews and Conversos observed kashrut; limiting pole 16881: many Jews partially observe kashrut; signals supplied in relations file (fixture-q1 shape).",
+   "id": "q1",
+   "pair_docs": [
+    "wikipedia:27669",
+    "wikipedia:16881"
+   ],
+   "query": "kashrut observance pork abstinence"
+  }
+ ],
+ "relational": [
+  {
+   "expected": {
+    "docs": [
+     "wikipedia:18077",
+     "wikipedia:31715"
+    ],
+    "spans": [
+     "Agglutination, the compounding of morphemes into a single word",
+     "extensive use of independent suffixes (agglutination)"
+    ]
+   },
+   "id": "r1",
+   "min_hops_used": 1,
+   "query": "agglutination morphemes independent suffixes"
+  },
+  {
+   "bridge_doc": "14663842",
+   "expected": {
+    "docs": [
+     "14663842"
+    ],
+    "spans": [
+     "IDH1 mutations alter citric acid cycle metabolism",
+     "increased oxidative tricarboxylic acid metabolism"
+    ]
+   },
+   "grounding": "bridge arrives only via lateral traversal: query terms acivicin/glutaminase are df=1 (doc A only) and absent from bridge doc C; edges A->B and B->C supplied in relations file (fixture-r2 shape).",
+   "id": "r2",
+   "min_hops_used": 1,
+   "query": "acivicin glutaminase"
+  }
+ ]
+}

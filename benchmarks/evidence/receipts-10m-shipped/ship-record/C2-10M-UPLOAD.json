@@ -1,0 +1,13 @@
+{
+ "dest": "gs://tl-m2-runs-d1995b06/m2/c2-10m",
+ "manifest_sha256": "54c64001d82176d7389a618ec0e793f6ebd0b4e3e934bb579d8597d661f8059d",
+ "roundtrip": {
+  "BUILD-RECEIPT.json": true,
+  "c2-10m-manifest.json": true,
+  "checkpoints.jsonl": true,
+  "pins.json": true
+ },
+ "rsync_checksum_clean": true,
+ "utc": "2026-10-07T15:03:46Z",
+ "verdict": "PASS"
+}

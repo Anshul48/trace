@@ -1,0 +1,43 @@
+[scale10m] corpus: 13081 docs (scifact 5183 + curated 100 + delta 7798)
+[scale10m] phase2 index: atoms=63441 build_s=158.1 pinned=18869b2e-662c-462d-a695-5bf593e48cbf:0:95045
+[scale10m] phase2 tasks: 809
+[scale10m] query 1/809 elapsed=0s
+[scale10m] query 25/809 elapsed=296s
+[scale10m] query 50/809 elapsed=612s
+[scale10m] query 75/809 elapsed=901s
+[scale10m] query 100/809 elapsed=1185s
+[scale10m] query 125/809 elapsed=1463s
+[scale10m] query 150/809 elapsed=1746s
+[scale10m] query 175/809 elapsed=2053s
+[scale10m] query 200/809 elapsed=2347s
+[scale10m] query 225/809 elapsed=2635s
+[scale10m] query 250/809 elapsed=2930s
+[scale10m] query 275/809 elapsed=3221s
+[scale10m] query 300/809 elapsed=3508s
+[scale10m] query 325/809 elapsed=3801s
+[scale10m] query 350/809 elapsed=4100s
+[scale10m] query 375/809 elapsed=4388s
+[scale10m] query 400/809 elapsed=4679s
+[scale10m] query 425/809 elapsed=4968s
+[scale10m] query 450/809 elapsed=5255s
+[scale10m] query 475/809 elapsed=5540s
+[scale10m] query 500/809 elapsed=5829s
+[scale10m] query 525/809 elapsed=6110s
+[scale10m] query 550/809 elapsed=6404s
+[scale10m] query 575/809 elapsed=6679s
+[scale10m] query 600/809 elapsed=6967s
+[scale10m] query 625/809 elapsed=7250s
+[scale10m] query 650/809 elapsed=7546s
+[scale10m] query 675/809 elapsed=7832s
+[scale10m] query 700/809 elapsed=8132s
+[scale10m] query 725/809 elapsed=8416s
+[scale10m] query 750/809 elapsed=8692s
+[scale10m] query 775/809 elapsed=8967s
+[scale10m] query 800/809 elapsed=9239s
+[scale10m] query 809/809 elapsed=9336s
+S1/tuning/bm25 {'n': 809, 'ndcg10': 0.5642, 'rec5': 0.6227, 'rec20': 0.6831, 'mrr': 0.5343, 'errs': 0, 'p50_ms': 2266.2, 'p99_ms': 5345.9}
+S1/tuning/dense {'n': 809, 'ndcg10': 0.6442, 'rec5': 0.724, 'rec20': 0.7616, 'mrr': 0.6126, 'errs': 0, 'p50_ms': 357.3, 'p99_ms': 2697.8}
+S1/tuning/hybrid {'n': 809, 'ndcg10': 0.6563, 'rec5': 0.724, 'rec20': 0.7917, 'mrr': 0.6203, 'errs': 0, 'p50_ms': 2629.2, 'p99_ms': 5657.2}
+S1/tuning/tl {'n': 809, 'ndcg10': 0.6311, 'rec5': 0.7015, 'rec20': 0.752, 'mrr': 0.6011, 'errs': 0, 'p50_ms': 2778.3, 'p99_ms': 5993.1}
+S1/tuning/tl-unpruned {'n': 809, 'ndcg10': 0.6309, 'rec5': 0.6953, 'rec20': 0.7532, 'mrr': 0.6006, 'errs': 0, 'p50_ms': 2783.8, 'p99_ms': 5987.5}
+[scale10m] PHASE 2 DONE rows=4045 -> /tmp/tl-scale10m-2026-10-04/phase-out

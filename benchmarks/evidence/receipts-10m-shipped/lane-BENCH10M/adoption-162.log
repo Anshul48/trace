@@ -1,0 +1,72 @@
+# lane-BENCH10M adoption log — worker 162 (successor of 156)
+
+Date: 2026-10-09. Predecessor 156 died on a provider-transport
+net-timeout flake (not a task error) after writing adapters but
+before any pull receipt. evidence/ confirmed EMPTY at adoption.
+Staging + runs + probe are 162's.
+
+## Reverification (all four adapters)
+
+- `py_compile` on all four adapters: PASS (no output, exit 0).
+- `c2_bench10m.py` (A1/A2) vs TB 0.3.0 sources (sibling
+  `../trace-bench`):
+  - Mirrors `TraceNarrowRetriever.index/retrieve_with_outcome`
+    line-for-line except the two DOCUMENTED deltas (fixed
+    M80-P100-A40/A100 budgets; raw `normalize_embeddings=False`
+    encoding). Same TLStore lease/ingest/NarrowIndex attach,
+    same abstention rule, same candidate-field mapping.
+  - `discover_architecture_dir(explicit)` returns
+    `(path, provenance)` — matches call-site unpacking.
+  - `NarrowQuery(tlstore, index, embed, cfg=...)` signature
+    matches; `M_REGIONS`/`PRUNE_CAP`/`MAX_ENTRIES` are all
+    accepted cfg keys (query.py allow-list).
+  - `NarrowIndex(tlstore, pinned)` takes the 4-tuple
+    `TLStore.pin()` returns — matches.
+  - `MINILM_REVISION` in-adapter equals the harness constant
+    `1110a243fdf4706b3f48f1d95db1a4f5529b4d41`.
+  - `--config` JSON keyed by engine name incl. full
+    `python:...` selection string — matches
+    `runner.py instantiate_baseline(b_name, config=...)`.
+  - Docstring example `--dataset scifact` is a valid alias
+    (`resolve_dataset` strips `beir-`); canonical id is
+    `beir-scifact`. NOT a defect.
+- `stage_pinned.py` (S1) vs `upstream-links.json` + `BeirAdapter`:
+  - Manifest shape matches: `files[].id/url/bytes/sha256/path/
+    role`, `sources[].repository/revision/file_ids`.
+  - Roles match exactly: BEIR corpus/queries_and_gold/qrels,
+    pony corpus/queries_and_gold. 8 files ≈ 9 MB.
+  - Target layout `<cache>/scifact|nfcorpus/{corpus.jsonl,
+    queries.jsonl,qrels/test.tsv}` matches
+    `BeirAdapter.dataset_dir` + `resolve_dataset` raw-layout
+    candidates; existing-`corpus.jsonl` short-circuit confirmed
+    in `download_or_prepare`.
+  - Self-checks mirror harness requirements: qrels header
+    `query-id/corpus-id/score` (same assertion as
+    `BeirAdapter`), `_id`/`title`/`text` jsonl fields.
+  - Still stages pony bytes: HARMLESS cache bytes, not a pony
+    run. Pony RUNS stay dropped per SCOPE §8 (honored: no pony
+    setup/run/compare, no pony claims).
+- `c2_store_probe.py` (A3): `TLStore(STORE, create=False,
+  lease_owner=...)` + `pin()` 4-tuple indexed `[0:3]` vs
+  (BIRTH, EPOCH, SEQ) — matches `store_if.pin()`. Per-request
+  `NarrowIndex` attach mirrors S5S serve-demo mechanics per
+  SCOPE. Read-only wrt store (fence acquire/release only;
+  rekey is a separate, guarded step on the COPY).
+- `c2_rekey.py`: guard refuses targets outside
+  `/srv/tl/lane-bench10m`; updates only lock_dev/lock_ino meta
+  + fresh committer.lock. Matches the documented B100M/A-2
+  mechanics.
+
+## Fixes applied: NONE
+
+No broken code found. 162 adopts all four adapters byte-identical
+(excluding regenerated `__pycache__` from the compile check).
+
+## Outstanding from 156 (162's work)
+
+1. Pull pinned 10M-tier corpora bytes on VM with hash verify
+   (via S1).
+2. ~18 TB runs (smoke/curated/scifact/nfcorpus; NO pony).
+3. A3 store probe on a GCS-fetched store copy at `:0:95436`.
+4. Per-lane RUN.json + TREC + compare outputs to evidence/.
+5. REPORT.md (top finding first).

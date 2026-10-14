@@ -1,5 +1,12 @@
 # Benchmarks & Live 100K Qualification Guide
 
+> **Legacy scope.** This document describes the older TraceV2-era 100K
+> qualification methodology. It does not certify the C2-10M shipping
+> candidate. For the candidate's benchmark evidence (executable harness,
+> pins, provenance, negatives, fixture reproduction), see
+> [benchmarks/evidence](../benchmarks/evidence/) and the
+> [C2-10M publication record](C2-10M-PUBLICATION.md).
+
 This document describes the benchmark methodology, evaluation datasets, and qualification procedures used to validate **Trace** and the **Cortical Substrate V1.1**.
 
 ---

@@ -15,6 +15,7 @@ Scope:
 from __future__ import annotations
 
 import math
+from datetime import datetime, timezone
 from pathlib import Path
 import random
 import sys
@@ -340,18 +341,23 @@ class TestRealSqliteStorageIntegration:
 
     def test_newborn_grace_period_from_created_at(self) -> None:
         """normalize_holon_member and is_newborn_apoptosis_exempt calculate age from created_at."""
+        # Frozen clock: fixtures use fixed 2026 dates, so pin "now" just
+        # after the young fixture; age assertions stay wall-clock independent.
+        now = datetime(2026, 9, 7, tzinfo=timezone.utc)
         old_item = {"id": "old", "created_at": "2026-08-01T00:00:00Z", "centroid": [0.0] * 384}
-        old_m = normalize_holon_member(old_item)
+        old_m = normalize_holon_member(old_item, now=now)
         assert old_m.age_days > 20.0
-        assert is_newborn_apoptosis_exempt(old_m) is False
+        assert is_newborn_apoptosis_exempt(old_m, now=now) is False
 
         new_item = {"id": "new", "created_at": "2026-09-06T00:00:00Z", "centroid": [0.0] * 384}
-        new_m = normalize_holon_member(new_item)
+        new_m = normalize_holon_member(new_item, now=now)
         assert new_m.age_days < 5.0
-        assert is_newborn_apoptosis_exempt(new_m) is True
+        assert is_newborn_apoptosis_exempt(new_m, now=now) is True
 
     def test_overflow_orphan_apoptosis_30_day_policy(self) -> None:
         """DIVERSE_OVERFLOW nodes are subject to 30-day orphan apoptosis policy."""
+        # Frozen clock (see test_newborn_grace_period_from_created_at).
+        now = datetime(2026, 9, 7, tzinfo=timezone.utc)
         old_ovf = {
             "node_type": NODE_TYPE_DIVERSE_OVERFLOW,
             "created_at": "2026-08-01T00:00:00Z",
@@ -366,13 +372,13 @@ class TestRealSqliteStorageIntegration:
         }
 
         # Mature orphan overflow node is eligible
-        assert is_overflow_orphan_apoptosis_eligible(old_ovf, is_orphaned=True) is True
+        assert is_overflow_orphan_apoptosis_eligible(old_ovf, is_orphaned=True, now=now) is True
         # Young overflow node is not eligible
-        assert is_overflow_orphan_apoptosis_eligible(young_ovf, is_orphaned=True) is False
+        assert is_overflow_orphan_apoptosis_eligible(young_ovf, is_orphaned=True, now=now) is False
         # Non-orphaned overflow node is not eligible
-        assert is_overflow_orphan_apoptosis_eligible(old_ovf, is_orphaned=False) is False
+        assert is_overflow_orphan_apoptosis_eligible(old_ovf, is_orphaned=False, now=now) is False
         # Standard node is not eligible
-        assert is_overflow_orphan_apoptosis_eligible(std_node, is_orphaned=True) is False
+        assert is_overflow_orphan_apoptosis_eligible(std_node, is_orphaned=True, now=now) is False
 
     def test_deadlock_neighbor_reassignment_maintains_sort_and_boundary(self) -> None:
         """Reassigning deadlocked member preserves sorted ID order and updates boundary."""

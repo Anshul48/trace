@@ -1,0 +1,79 @@
+{
+  "docs_jsonl": {
+    "bytes": 622471790,
+    "docs": 30927,
+    "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-architecture\\tl-eval\\evidence\\m2-2026-10-06\\encode-5050\\docs-100m.jsonl",
+    "sha256": "c098fdace3a73efc83f3c71a9e024b3cd77114fd0d7f2348c7c813995e6b0e09",
+    "tok_v1": 100010221
+  },
+  "manifest_sha256": "b551d395d0c0f9391135493b3629b470c4ed98fa83101247ac27e74e531c28b7",
+  "schema": "tl-cloud-corpus-preflight-v1",
+  "selection": "all",
+  "selection_formula": {
+    "curated": "nonblank corpus_text.split('\\n\\n') paragraphs, preserving paragraph bytes",
+    "delta": "(title + '\\n' + text).strip() in original file order, frozen prefix only",
+    "scifact": "(title + '\\n' + text).strip() in original file order"
+  },
+  "sources": {
+    "curated": {
+      "accepted_file_pin_matches": true,
+      "actual_file_sha256": "210a20a4d1e7591413ecddc39eeed20b5e487009ddde1f18dfc05bf2e325af84",
+      "coordinator_binding": false,
+      "counted_text_identity_proven": true,
+      "examples": [],
+      "expected_docs": 100,
+      "expected_file_sha256": "210a20a4d1e7591413ecddc39eeed20b5e487009ddde1f18dfc05bf2e325af84",
+      "mismatches": {
+        "counted_text_utf8_sha256": 0,
+        "id_or_order": 0,
+        "ingest_id": 0,
+        "tok_v1": 0
+      },
+      "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-bench\\src\\trace_bench\\datasets\\trace_engineering_curated.json",
+      "raw_file_pin_matches": true,
+      "rows_compared": 100,
+      "status": "EXACT_FILE_AND_TEXT"
+    },
+    "delta": {
+      "accepted_file_pin_matches": true,
+      "actual_file_sha256": "ffe485442095c1f8a6bb141dc14deb4ca8ff9b78edecf15a2bda830825eb978d",
+      "coordinator_binding": false,
+      "counted_text_identity_proven": true,
+      "examples": [],
+      "expected_docs": 25644,
+      "expected_file_sha256": "ffe485442095c1f8a6bb141dc14deb4ca8ff9b78edecf15a2bda830825eb978d",
+      "mismatches": {
+        "counted_text_utf8_sha256": 0,
+        "id_or_order": 0,
+        "ingest_id": 0,
+        "tok_v1": 0
+      },
+      "path": "C:\\Users\\anshu\\AppData\\Local\\trace-scale-data\\staged_1m\\wikipedia_delta.jsonl",
+      "raw_file_pin_matches": true,
+      "rows_compared": 25644,
+      "status": "EXACT_FILE_AND_TEXT"
+    },
+    "scifact": {
+      "accepted_file_pin_matches": true,
+      "actual_file_sha256": "cf30fea2468ff6237a0ce515c5e7ea28442319e03fd53721b61b7b6a7f4e896a",
+      "coordinator_binding": true,
+      "counted_text_identity_proven": true,
+      "examples": [],
+      "expected_docs": 5183,
+      "expected_file_sha256": "dec31c8182f3d744c7d2c09423756fd1d17cbef75808db13ba01cc0aab4d1ac6",
+      "mismatches": {
+        "counted_text_utf8_sha256": 0,
+        "id_or_order": 0,
+        "ingest_id": 0,
+        "tok_v1": 0
+      },
+      "path": "C:\\Users\\anshu\\OneDrive\\Documents\\Code\\Utilities\\trace-architecture\\local-data\\data\\scifact\\corpus.jsonl",
+      "raw_file_pin_matches": false,
+      "rows_compared": 5183,
+      "status": "RECORDED_REBIND_AND_EXACT_TEXT"
+    }
+  },
+  "tokenizer": "TOK-v1: re.compile(r'[^\\W_]+', re.UNICODE).findall(text)",
+  "vector_sha256": "6ef158d5e37cd76c06532313bfb846b7378312143f24c44ea50f6a7cf9b8cf5c",
+  "verdict": "PASS"
+}

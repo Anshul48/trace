@@ -1,0 +1,44 @@
+Selected backends: bm25, dense, python:c2_bench10m:C2Bench10MShipped, 
+python:c2_bench10m:C2Bench10MK100
+Evaluating baseline (regression): bm25 (concurrency=1) ...
+Indexed 3,633 documents in 1.15s; scoring 323 queries.
+Scored 100/323 queries (0 failures).
+Scored 200/323 queries (0 failures).
+Scored 300/323 queries (0 failures).
+Scored 323/323 queries (0 failures).
+Evaluating baseline (regression): dense (concurrency=1) ...
+Indexed 3,633 documents in 94.69s; scoring 323 queries.
+Scored 100/323 queries (0 failures).
+Scored 200/323 queries (0 failures).
+Scored 300/323 queries (0 failures).
+Scored 323/323 queries (0 failures).
+Evaluating baseline (regression): python:c2_bench10m:C2Bench10MShipped 
+(concurrency=1) ...
+Indexed 3,633 documents in 585.76s; scoring 323 queries.
+Scored 100/323 queries (0 failures).
+Scored 200/323 queries (0 failures).
+Scored 300/323 queries (0 failures).
+Scored 323/323 queries (0 failures).
+Evaluating baseline (regression): python:c2_bench10m:C2Bench10MK100 
+(concurrency=1) ...
+Indexed 3,633 documents in 592.75s; scoring 323 queries.
+Scored 100/323 queries (0 failures).
+Scored 200/323 queries (0 failures).
+Scored 300/323 queries (0 failures).
+Scored 323/323 queries (0 failures).
+          Benchmark Results [REGRESSION]: beir-nfcorpus (323 queries)           
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┓
+┃ Engine                   ┃ nDCG@10 ┃ MAP@10 ┃ Recall@20 ┃     p95 ┃ Failures ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━┩
+│ bm25                     │   0.310 │  0.120 │     0.177 │   0.7ms │        0 │
+│ dense                    │   0.316 │  0.110 │     0.189 │ 122.9ms │        0 │
+│ python:c2_bench10m:C2Ben │   0.295 │  0.106 │     0.170 │ 178.3ms │        0 │
+│ ch10MShipped             │         │        │           │         │          │
+│ python:c2_bench10m:C2Ben │   0.295 │  0.106 │     0.170 │ 163.8ms │        0 │
+│ ch10MK100                │         │        │           │         │          │
+└──────────────────────────┴─────────┴────────┴───────────┴─────────┴──────────┘
+Saved JSON artifact to: 
+/srv/tl/lane-bench10m/runs/nfcorpus/run_20261008_192345_041319.json
+Saved CSV artifact to: 
+/srv/tl/lane-bench10m/runs/nfcorpus/run_20261008_192345_041319.csv
+Saved HTML and native-ID TREC files to: /srv/tl/lane-bench10m/runs/nfcorpus

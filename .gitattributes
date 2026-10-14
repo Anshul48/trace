@@ -1,0 +1,7 @@
+# Byte-exact paths: never normalize line endings or re-encode.
+# These trees are hash-pinned (c10m/PINS.sha256, CANDIDATE-PINS.md,
+# DATA-README.md, smoke verifier) — the committed bytes must equal the
+# verified bytes on every platform.
+c10m/** -text
+benchmarks/evidence/** -text
+demos/fixtures/** -text

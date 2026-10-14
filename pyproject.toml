@@ -68,6 +68,13 @@ test = [
     "jsonschema>=4.20",
     "psutil>=5.9",
 ]
+# C2-10M primary demo (demos/demo_c10m_narrow.py): pinned serving stack needs
+# only numpy + blake3. MiniLM/torch are NOT required: the demo discloses a
+# deterministic sha256-hash stand-in encoder (see demo docstring).
+c10m = [
+    "numpy>=1.26,<3",
+    "blake3>=0.4,<1",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]

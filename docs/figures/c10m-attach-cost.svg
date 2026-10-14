@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 220" width="560" height="220" role="img" aria-labelledby="t2 d2">
+<title id="t2">10M store: index attach versus query latency</title>
+<desc id="d2">Two runs agree: NarrowIndex attach 103 to 122 seconds per request; queries 0.78 to 1.41 seconds. Attach dominates.</desc>
+<text x="14" y="20" font-size="12" font-family="sans-serif">A3 probe, pin :0:95436 (seconds, log scale)</text>
+<line x1="150.0" y1="40" x2="150.0" y2="170" stroke="#ddd"/><text x="150.0" y="186" font-size="10" text-anchor="middle" font-family="sans-serif">0.5s</text>
+<line x1="193.7" y1="40" x2="193.7" y2="170" stroke="#ddd"/><text x="193.7" y="186" font-size="10" text-anchor="middle" font-family="sans-serif">1s</text>
+<line x1="295.3" y1="40" x2="295.3" y2="170" stroke="#ddd"/><text x="295.3" y="186" font-size="10" text-anchor="middle" font-family="sans-serif">5s</text>
+<line x1="339.1" y1="40" x2="339.1" y2="170" stroke="#ddd"/><text x="339.1" y="186" font-size="10" text-anchor="middle" font-family="sans-serif">10s</text>
+<line x1="440.7" y1="40" x2="440.7" y2="170" stroke="#ddd"/><text x="440.7" y="186" font-size="10" text-anchor="middle" font-family="sans-serif">50s</text>
+<line x1="484.4" y1="40" x2="484.4" y2="170" stroke="#ddd"/><text x="484.4" y="186" font-size="10" text-anchor="middle" font-family="sans-serif">100s</text>
+<rect x="178.1" y="60" width="37.4" height="26" fill="#0b5cad"/><text x="14" y="79" font-size="12" font-family="sans-serif">query 0.78–1.41 s</text>
+<rect x="486.3" y="110" width="10.7" height="26" fill="#9a5b00"/><text x="14" y="129" font-size="12" font-family="sans-serif">attach 103–122 s</text>
+</svg>

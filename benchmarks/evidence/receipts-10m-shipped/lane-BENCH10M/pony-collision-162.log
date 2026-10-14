@@ -1,0 +1,78 @@
+# pony staging collision — found and fixed by worker 162 (2026-10-09)
+
+## Finding
+
+`stage_pinned.py` (156's S1) staged raw downloads at
+`raw / sid / Path(f["path"]).name` — the bare basename. For
+bright-pony BOTH files share the basename
+`pony-00000-of-00001.parquet` (`documents/...` = corpus,
+1,125,040 B; `examples/...` = queries_and_gold, 27,722 B), so
+the second fetch overwrote the first. The source record then
+listed BOTH roles against the same local path (examples bytes),
+and the TB-cache placement copied examples bytes into BOTH
+`bright/raw/documents/` and `bright/raw/examples/`.
+
+Proven on VM 2026-10-09:
+- `tb-cache/bright/raw/documents/pony-*.parquet`:
+  27,722 B, sha256 `0c0718d3…` = examples bytes, NOT the
+  pinned corpus bytes (1,125,040 B, `afc23dc0…`).
+- 162 re-verify of `_pinned_raw` against the source record:
+  7/8 OK; `bright-pony:documents/...` MISMATCH (on-disk file
+  was examples bytes).
+
+## Consequence for SCOPE §8
+
+SCOPE §8 ("bright-pony DROPPED") diagnosed the pinned corpus
+file as holding the 112-row examples table — but that
+diagnosis was made on COLLIDED bytes (the staged documents/
+copy was examples bytes, hence `KeyError: 'content'`).
+The TRUE pinned corpus bytes (re-fetched 2026-10-09 from the
+same pinned URL, 1,125,040 B, sha256 `afc23dc0…` verified)
+contain a VALID document pool: 7,894 rows, columns
+`id`/`content` — exactly the SCOPE §4 expectation
+(7,894 docs / 112 queries).
+
+The drop cause was a staging bug, not an upstream defect.
+Pony is recoverable WITHIN the pinned-links requirement
+(same commit `3066d29c…`, same bytes, hash-verified), so 162
+recovered the lane instead of honoring a mistaken drop. No
+upstream substitution of any kind.
+
+## Fix (162)
+
+`adapters/stage_pinned.py`: raw dest is now
+`raw / sid / f["path"]` (mirrors upstream repo layout;
+role dirs disambiguate colliding basenames).
+- Local sha before: `dfa113b8…`; after: `06b279cd…`
+  (`py_compile` PASS).
+- Transited to VM via GCS
+  (`gs://tl-m2-runs-d1995b06/m2/lane-bench10m/code/
+  stage_pinned-162.py`), sha re-verified on arrival.
+- 156's original preserved at `/tmp/stage_pinned-156-orig.py`
+  on the VM (not in the lane tree; reference only).
+
+## Restage (162, fixed script, `--cache tb-cache`)
+
+- Same vendor manifest (`upstream-links.json` sha
+  `e5fb424a…` = local manifest sha).
+- BEIR jsonl byte-identical to 156's (pre/post restage shas):
+  scifact corpus `f4a47c54…`, queries `154a7577…`;
+  nfcorpus corpus `23387b39…`, queries `b248055b…`.
+  Counts identical (5183/1109/339/300; 3633/3237/12334/323).
+  156's `prepared/` + completed BEIR/curated/smoke RUNs are
+  therefore unaffected (inputs provably unchanged).
+- Pony documents now stage the true corpus bytes
+  (`afc23dc0…`, 1,125,040 B); `setup --dataset bright-pony`
+  froze `prepared/bright-pony/test/` (112 cases, 7,894 docs).
+- Collided stray `_pinned_raw/bright-pony/pony-*.parquet`
+  removed after replacement (recorded here).
+- `--cross-check-ukp` NOT re-run (156's record stands:
+  docs+queries identical, qrels bytes differ); restage
+  byte-identity above subsumes it.
+
+## Lesson for larger rungs (also in REPORT.md)
+
+Stage raw files under role-qualified paths (done), and
+schema-check every staged corpus file (row counts + required
+columns) BEFORE setup — the check SCOPE §8 recommended would
+have caught this at staging time.

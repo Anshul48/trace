@@ -1,0 +1,25 @@
+{
+ "chunker": "tlsys.ingest.chunk_text (whitespace tokens, CHUNK_TOKENS=200, CHUNK_OVERLAP=50)",
+ "docs_file": "tl-eval/evidence/m2-2026-10-06/coordination/launch-20261006T1237Z/lane-v3-inputs/docs-10m.jsonl",
+ "docs_sha256": "04bbbb3ea3425a49491559173b20280fb286edeeef49c8293aebc0b92bcce3fd",
+ "exporter": "lane-v3-inputs freeze; export_full_docs.py v1 manifest schema + provenance extension",
+ "n_docs": 3099,
+ "sources": [
+  {
+   "bytes": 622471790,
+   "n_docs": 30927,
+   "selection_rule": "prior-worker slice, opaque to this worker; verified by re-hash, NOT assumed to be a file-order prefix (it is not: parent ordinals span 12..30919 non-contiguously)",
+   "sha256": "c098fdace3a73efc83f3c71a9e024b3cd77114fd0d7f2348c7c813995e6b0e09",
+   "slice_identity": "3099/3099 slice rows byte-identical (doc_id + text sha256) to parent rows; per-row parent ordinals in derivation.json",
+   "slice_rows": 3099,
+   "source": "tl-eval/evidence/m2-2026-10-06/encode-5050/docs-100m.jsonl"
+  }
+ ],
+ "tokenizer": "TOK-v1: re.compile(r'[^\\W_]+', re.UNICODE)",
+ "total_bytes": 64291035,
+ "totals": {
+  "chunks": 58629,
+  "tokens_tok_v1": 10327998,
+  "tokens_ws": 8707790
+ }
+}

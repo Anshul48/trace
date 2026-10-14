@@ -1,0 +1,229 @@
+{
+  "abort_on_missing_capability": true,
+  "candidate_label": "M1-integrated-candidate",
+  "classes": {
+    "cross_topic": {
+      "assess_prefix": "every",
+      "cfg": {
+        "DOSSIER_LATERAL": true,
+        "DOSSIER_MAX_ENTRIES": 20,
+        "DOSSIER_MAX_TOPICS": 8,
+        "DOSSIER_SHAPE": "cross-topic"
+      },
+      "coverage_rule": "ENFORCED: served expected docs span >= min_topics_hit of the case topics (doc_topics derived from case-grounded expected docs)",
+      "entry_point": "tlsys.dossier.DossierQuery.run(query, topics=[...])",
+      "min_topics_hit": 1,
+      "nonvacuity": ">=1 case serves >=1 expected doc",
+      "outcome_rule": "scored cases: ok|partial only; error|refused|empty FAILS",
+      "passage_rule": "every scored case with expected spans serves every span verbatim"
+    },
+    "narrow": {
+      "assess_prefix": "every",
+      "cfg": {},
+      "entry_point": "tlsys.query.NarrowQuery.run(query)",
+      "nonvacuity": ">=1 case serves >=1 expected doc",
+      "outcome_rule": "scored cases: ok|partial only; error|refused|empty FAILS",
+      "passage_rule": "every scored case with expected spans serves every span verbatim"
+    },
+    "qualifier": {
+      "assess_prefix": "final",
+      "cfg": {
+        "NARROW": {
+          "REL_QUALIFIERS": true
+        }
+      },
+      "entry_point": "tlsys.dossier.DossierQuery.run(query) with NARROW.REL_QUALIFIERS=True",
+      "joint_preservation_rule": "on pair cases, every expected counterpart atom's doc is served (no one-sided emission)",
+      "nonvacuity": ">=1 case serves >=1 expected doc",
+      "pairs_rule": "ENFORCED: identify_pairs over the served universe is nonempty AND the receipt discloses rel_consumption",
+      "outcome_rule": "scored cases: ok|partial only; error|refused|empty FAILS",
+      "passage_rule": "every scored case with expected spans serves every span verbatim"
+    },
+    "relational": {
+      "assess_prefix": "final",
+      "cfg": {
+        "DOSSIER_MAX_EDGES": 50,
+        "DOSSIER_REL_HOPS": 2,
+        "DOSSIER_REL_TRAVERSAL": true,
+        "DOSSIER_SHAPE": "relational"
+      },
+      "entry_point": "tlsys.dossier.DossierQuery.run(query) with DOSSIER_SHAPE=relational",
+      "nonvacuity": ">=1 case serves >=1 expected doc",
+      "reachability_rule": "bridge case: expected hop-2 doc served AND hops_used>=min_hops_used AND lateral_edges_examined>0 AND lateral_added>0 (bridge arrived THROUGH declared traversal, not direct retrieval alone)",
+      "outcome_rule": "scored cases: ok|partial only; error|refused|empty FAILS",
+      "passage_rule": "every scored case with expected spans serves every span verbatim"
+    }
+  },
+  "criteria_id": "gate-10m-criteria-v2",
+  "frozen_utc": "2026-10-06T10:15:00Z",
+  "g0": {
+    "checks": [
+      "candidate source/config manifest verifies (SOURCE-SHA256SUMS, all files)",
+      "manifest COVERS required_source_files exactly (full tier bars on omission)",
+      "criteria + inputs files hashed and recorded (frozen before confirmation)",
+      "full tier: docs/queries/relations/corpus files hash-verified against frozen SHAs before the store opens; placeholder hashes refuse",
+      "full tier: source_pins structurally valid (non-placeholder sha256 + identity)",
+      "full tier: encoder pins equal authoritative gpu_encode pins + cache config_id",
+      "corpus manifest pin recorded (fixture: inputs file sha; full: docs manifest sha)",
+      "store pin recorded per prefix (birth, epoch, max_seq, triple)",
+      "full tier only: suite record green AND bound to candidate/inputs (see suite_record_contract); unbound record FAILS G0"
+    ],
+    "required_source_files": [
+      "tl-eval/gate_runner/run_integrated_gate.py",
+      "tl-eval/gate_runner/gate_lib.py",
+      "tl-eval/gate_runner/CRITERIA.v2.json",
+      "tl-eval/gate_runner/CONFIRM-INPUTS.v2.json",
+      "tl-sys/tlsys/store_if.py",
+      "tl-sys/tlsys/ingest.py",
+      "tl-sys/tlsys/index.py",
+      "tl-sys/tlsys/query.py",
+      "tl-sys/tlsys/dossier.py",
+      "tl-sys/tlsys/maint.py",
+      "tl-sys/tlsys/place.py",
+      "tl-sys/tlsys/relations.py",
+      "tl-sys/tlsys/relquery.py",
+      "tl-sys/tlsys/export.py",
+      "tl-eval/gpu_encode/config.py",
+      "tl-eval/gpu_encode/cache.py",
+      "tl-eval/gpu_encode/consume.py",
+      "tl-eval/gpu_encode/chunking.py",
+      "tl-sys/tlsys/lifecycle.py",
+      "tl-sys/tlsys/proj.py",
+      "tl-candidate-batch/candidate/approval.py"
+    ]
+  },
+  "g1": {
+    "export_rule": "every exported atom text is byte-identical to its committed text artifact AND a substring of its source doc bytes; export_id/retry_identity present",
+    "export_scope": {
+      "fixture": "full export_store comparison",
+      "full": "full export_store comparison (streamed)"
+    },
+    "idempotency_rule": "re-ingest of identical docs skips all (n_atoms==0 new, skipped==all)",
+    "recovery_rule": "close + reopen store: pin identical AND export sample identical",
+    "retirement_rule": "behavioral bar: changed-bytes same-doc ingest must refuse (kept); source retirement/exclusion support must be DEMONSTRATED through owning interfaces (retire -> serving-excluded -> export-omits). Interface presence alone never passes. With no owning interface the runner records the capability gap + required interfaces and the full tier FAILS this check. Fixture tier: measured and disclosed only. Retirement effects must be declared to the existing owning approval classifier; committed retiring operations require valid payload/pin/scope-bound approval references. Approved and refused paths are exercised in isolated benchmark fixtures; absent/invalid references must not commit or change serving/export eligibility.",
+    "scope_note": "journal/torn-tail/crash-matrix identity is covered by the suite record (G0), not re-proven here; this cell proves ingest/retry/recovery/export identity on the gate corpus"
+  },
+  "g2": {
+    "ablation": {
+      "arm_on": {
+        "index": "committed segment organization (maint.organize_segments) served at the post-organization pin",
+        "entry": "tlsys.query.HierQuery.guided (parent-routed descent; emission support from exact atom rescoring only)"
+      },
+      "arm_off": {
+        "index": "same committed hierarchy, routing disabled",
+        "entry": "tlsys.query.HierQuery.flat with total_budget = ON-arm measured scoring ops (isolated hierarchy-disabled control; [leaf, atom] paths)"
+      },
+      "match_rule": "flat total_budget equals guided parents_scored + children_scored + atoms_scored; |work_on - work_off| / max(work_on, work_off, 1) <= work_match_tol verified",
+      "record": "per-probe guided/flat work, guided/flat expected hits, resolved-trace hits, resolutions",
+      "work_match_tol": 0.25
+    },
+    "append_correction_rule": "correction ingested under a NEW doc_id (changed-bytes same-id refused per G1); corrected doc served for its query; both revisions' bytes preserved",
+    "bar": ">=1 probe case serves >=1 expected evidence item through a RESOLVED higher->child->evidence route (verified [parent, leaf, atom] against committed seg_parents/seg_leaves/members at the serving pin, expected doc, intact-verified span). Flat [leaf, atom] paths, HNSW graph levels, and presence-only trace fields do NOT pass.",
+    "probes": "g2 cases in CONFIRM-INPUTS (known group, long multi-topic, overlap, rare, overflow/no-fit)",
+    "trace_key_paths": [
+      "entry.holon_path",
+      "entry.via_holon",
+      "entry.hierarchy_path",
+      "entry.holon_hops",
+      "receipt.metrics.hierarchy_trace",
+      "receipt.metrics.holon_descent"
+    ],
+    "trace_note": "RETIRED as a pass predicate: presence-only trace fields accepted a document-container field or an unrelated receipt-global trace. v2 requires resolve_hierarchy_trace(); the old key paths are recorded as disclosure only.",
+    "organization_rule": "maint.organize_segments runs to completion before the ablation; leaves>0 and parents>0 required; post-organization pin is the final serving/export/oracle pin"
+  },
+  "g4": {
+    "cold_attach_rule": "fresh TLStore open (no reuse) + NarrowIndex build at the final pin, timed separately from any warm query; no queries served from the cold handle before timing ends",
+    "mixed_workload": {
+      "blocking_probe": "probe-query p50 latency during drain vs idle, recorded",
+      "publication": "commit a bounded typed-relation batch mid-campaign, advance pin, rebuild serving index once",
+      "queries": "per-class spot queries interleaved",
+      "serving_maintenance": "interleave drain_placement_backlog(budget) with queries"
+    },
+    "prefix_rule": {
+      "rule_id": "fixed-work-v2",
+      "min_prefixes": 3,
+      "nonempty": true,
+      "tol": 0,
+      "target_source": "inputs full_tier_binding.append_workload (target_chunks + target_tokens_tok_v1); fixture fixture_tier.append_workload",
+      "note": "Equal fixed chunk/TOK-v1 additions at >=3 growing nonempty seeded bases. Exact geometry is mandatory (tol=0); document counts are disclosed, not an equality bar. Use compatible independent seeded branches when repeating one fixed append. v1/v2 records remain unchanged."
+    },
+    "resources": "per prefix: whole-process-tree current RSS + HWM + swap, VRAM (or explicit unknown), store bytes, work counters (visited/scored, edge visits, atoms rescored, rows touched), geometry (docs/chunks/tokens)",
+    "tokenizer": {
+      "fixture": "whitespace-v1 (split on whitespace)",
+      "full": "TOK-v1 ([^\\W_]+ runs, same denominator as encoder/verifier); recorded per append from the streamed authoritative path"
+    }
+  },
+  "g5": {
+    "admission_schedule": "declared per-prefix appends + bounded publication batches; runner-stamped admission log gives oldest pending age (manifest backlog carries no timestamps)",
+    "backpressure_rule": "final pending count <= initial pending count (debt must not grow); else FAIL. Draining is explicit caller-scheduled drain_placement_backlog with recorded budgets.",
+    "blocking_rule": "serving continues during drains (blocking probe recorded); a drain that errors or blocks serving indefinitely FAILS",
+    "catchup_rule": "catch-up rate (docs drained per second over the scheduled drains) recorded; keeps-pace holds iff pending reaches zero within the declared schedule OR bounded backpressure holds per backpressure_rule",
+    "measure": [
+      "backlog size",
+      "oldest pending age (s)",
+      "drained",
+      "failed",
+      "catch-up rate",
+      "blocking probe",
+      "retained generations (distinct pins observed)",
+      "association debt (pending + unplaced xdoc versions)"
+    ]
+  },
+  "g6": {
+    "campaign_rule": "full indexed campaign NEVER sets TL_REL_ORACLE; oracle path used only inside isolated oracle workers",
+    "oracle_isolation": "each oracle check runs in a fresh subprocess (runner --oracle-only) with RLIMIT_AS cap + timeout; parent records child peak RSS via RUSAGE_CHILDREN delta and refuses unbounded output (row caps)",
+    "oracle_rule": "sampled (pin, check) pairs per the frozen selection rule; checks: read_relations vs read_relations_fullscan exact equality; RelView vs oracle content agreement; sampled query rerun peak RSS",
+    "sampling_disclosure": "oracle coverage is SAMPLING: selection rule + seed + sampled ids recorded; sampled checks establish their exercised cases only",
+    "selection_rule": "fixture: every prefix pin + every relational/qualifier case query; full: seeded sample (seed 20261006) of >=3 pins x >=5 queries, frozen ids in the run record",
+    "streaming_rule": "per-query rows flushed incrementally (buffer cap 1); NavCounters totals streamed and records cleared after every operation (runner asserts empty); no full rows/traces retained in memory"
+  },
+  "inputs_rule": "SciFact/809/fresh1-3 inputs are regression/development only. Confirmation inputs are the frozen CONFIRM-INPUTS file (fixture tier inline; full tier sealed corpus + query/criteria pins). No manual labeling dependency: expected evidence is grounded automatically in declared source facts (doc ids + span substrings + relation endpoints).",
+  "outcome_taxonomy": {
+    "empty": "complete but nothing served",
+    "error": "the call raised (counted, never silently retried with a different path)",
+    "ok": "complete with >=1 entry",
+    "partial": "bounded-incomplete status OR nonempty partials inventory",
+    "refused": "empty emission explicitly marked as a refusal"
+  },
+  "revision_policy": "D-12/D-15/N01: frozen before confirmation runs; any change requires a criteria revision bump + refreeze + rerun. No invented hard latency/hour/score threshold; no retroactive change after results.",
+  "spec": "tl-eval/evidence/round8prep-2026-10-05/GATE-10M-SPEC.v2.md",
+  "structural_bars": "PASS/FAIL per cell is decided ONLY by the structural bars in g0-g6 above (identity exactness incl. SHA/binding enforcement, entry-point/cfg conformance, outcome completeness, per-class passage/coverage/pair/path bars, resolved hierarchy traces, equality/isolation rules). Per-case quality numbers beyond the bars (recall etc.) are recorded for the coordinator's GO statement, not thresholded here.",
+  "suite_record_contract": {
+    "required_keys": [
+      "candidate_revision",
+      "tlsys_exit",
+      "tleval_exit",
+      "hnsw_checks_rerun",
+      "criteria_sha256",
+      "inputs_sha256"
+    ],
+    "rule": "both exits must be 0; candidate_revision must equal the sha256 of the verified source-manifest file; criteria_sha256/inputs_sha256 must equal the run's frozen files; hnsw_checks_rerun must be true when HNSW is the serving backend (serving_backend declares the backend)"
+  },
+  "verdict_rule": "GO/NO-GO is a single coordinator statement citing G0-G6 cells with candidate/configuration/pin, conditions, traces and limitations. The runner emits per-cell PASS/FAIL + measurements; it does not declare GO. NO-GO names the failing cell + repair round.",
+  "supersedes": {
+    "criteria_id": "gate-10m-criteria-v1",
+    "criteria_sha256": "b7c851040c00cec041bd5267b8e71b3efa60fe119292f42aee3cfbbbb133d7bb",
+    "changes": [
+      "g0: source manifest must COVER required_source_files (full tier bars)",
+      "g0: full-tier file SHAs verified against frozen digests before ingest; placeholder hashes refuse",
+      "g0: encoder pins must equal authoritative gpu_encode pins + cache config",
+      "g0: suite record must bind candidate_revision + criteria/inputs SHAs; hnsw conditional rule implemented",
+      "g2: hierarchy ablation is organize_segments + HierQuery.guided vs HierQuery.flat at matched work; traces must resolve 3-legged; presence-only trace predicate retired",
+      "g3: enforce min_topics_hit; per-class outcome/passage/pair/path bars",
+      "g4: fixed-work-v2 append rule (seeded bases, tol-banded workload, TOK-v1 denominator); exact-equal-v1 retained for fixture/v1 runs",
+      "g1: retirement bar requires demonstrated behavior; gap blocks full tier"
+    ]
+  },
+  "serving_backend": "cpu-partition-or-none",
+  "codex_decision": {
+    "revision": "v3",
+    "issued_utc": "2026-10-06 12:36 UTC",
+    "supersedes_criteria_sha256": "0b12f1cce0ed04c1ead31e12380a64aa3685b111f682131990834aac996a5b23",
+    "changes": [
+      "G4 tolerance fixed at zero to implement the previously issued equal-work decision.",
+      "G1 explicitly preserves the governing consequential-retirement approval invariant.",
+      "G0 requires the lifecycle, projection, and existing owning approval classifier source pins."
+    ],
+    "unchanged": "All remaining G0-G6 rules, G6 >=3 pins x >=5 queries, FP32 profile and 10-operation cap retained."
+  }
+}

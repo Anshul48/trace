@@ -1,0 +1,36 @@
+Selected backends: bm25, dense, python:c2_bench10m:C2Bench10MShipped, 
+python:c2_bench10m:C2Bench10MK100
+Evaluating baseline (regression): bm25 (concurrency=1) ...
+Indexed 7,894 documents in 0.37s; scoring 112 queries.
+Scored 100/112 queries (0 failures).
+Scored 112/112 queries (0 failures).
+Evaluating baseline (regression): dense (concurrency=1) ...
+Indexed 7,894 documents in 83.33s; scoring 112 queries.
+Scored 100/112 queries (0 failures).
+Scored 112/112 queries (0 failures).
+Evaluating baseline (regression): python:c2_bench10m:C2Bench10MShipped 
+(concurrency=1) ...
+Indexed 7,894 documents in 1355.47s; scoring 112 queries.
+Scored 100/112 queries (0 failures).
+Scored 112/112 queries (0 failures).
+Evaluating baseline (regression): python:c2_bench10m:C2Bench10MK100 
+(concurrency=1) ...
+Indexed 7,894 documents in 1419.94s; scoring 112 queries.
+Scored 100/112 queries (0 failures).
+Scored 112/112 queries (0 failures).
+           Benchmark Results [REGRESSION]: bright-pony (112 queries)            
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┓
+┃ Engine                   ┃ nDCG@10 ┃ MAP@10 ┃ Recall@20 ┃     p95 ┃ Failures ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━┩
+│ bm25                     │   0.055 │  0.011 │     0.064 │   3.6ms │        0 │
+│ dense                    │   0.033 │  0.006 │     0.034 │ 138.7ms │        0 │
+│ python:c2_bench10m:C2Ben │   0.064 │  0.012 │     0.066 │ 190.8ms │        0 │
+│ ch10MShipped             │         │        │           │         │          │
+│ python:c2_bench10m:C2Ben │   0.064 │  0.012 │     0.066 │ 185.2ms │        0 │
+│ ch10MK100                │         │        │           │         │          │
+└──────────────────────────┴─────────┴────────┴───────────┴─────────┴──────────┘
+Saved JSON artifact to: 
+/srv/tl/lane-bench10m/runs/pony/run_20261009_012143_577818.json
+Saved CSV artifact to: 
+/srv/tl/lane-bench10m/runs/pony/run_20261009_012143_577818.csv
+Saved HTML and native-ID TREC files to: /srv/tl/lane-bench10m/runs/pony

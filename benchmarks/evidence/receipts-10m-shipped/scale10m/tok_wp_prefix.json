@@ -1,0 +1,22 @@
+{
+ "tok_class": "BertTokenizerFast",
+ "vocab": 30522,
+ "scifact": {
+  "docs": 5183,
+  "tok_wp": 1737313,
+  "max_doc_wp": 1937
+ },
+ "curated": {
+  "docs": 100,
+  "tok_wp": 2561,
+  "max_doc_wp": 36
+ },
+ "delta": {
+  "docs": 7798,
+  "tok_wp": 13672133,
+  "max_doc_wp": 56086
+ },
+ "prefix_docs": 13081,
+ "prefix_tok_wp": 15412007,
+ "_method": "AutoTokenizer all-MiniLM-L6-v2 local-only, add_special_tokens=False, BEIR ingestion texts."
+}

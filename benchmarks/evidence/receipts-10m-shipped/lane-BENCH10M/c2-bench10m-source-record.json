@@ -1,0 +1,106 @@
+{
+ "files": {
+  "beir-nfcorpus:corpus/corpus-00000-of-00001.parquet": {
+   "bytes": 3157570,
+   "local": "tb-cache/_pinned_raw/beir-nfcorpus/corpus/corpus-00000-of-00001.parquet",
+   "sha256": "f2a1c0b570a5efdf23cfa36f5e573d062cc113c6e7251e22c69b323a33ea895e",
+   "status": "fetched-verified",
+   "url": "https://huggingface.co/datasets/BeIR/nfcorpus/resolve/b5026a0e96e8a7ac4f95f482a596389289d46269/corpus/corpus-00000-of-00001.parquet"
+  },
+  "beir-nfcorpus:queries/queries-00000-of-00001.parquet": {
+   "bytes": 80929,
+   "local": "tb-cache/_pinned_raw/beir-nfcorpus/queries/queries-00000-of-00001.parquet",
+   "sha256": "edd2b878b8130fb3b5e3c4b9428ddc1e67fbd6eedf8ae099fca3b87838ba6b29",
+   "status": "fetched-verified",
+   "url": "https://huggingface.co/datasets/BeIR/nfcorpus/resolve/b5026a0e96e8a7ac4f95f482a596389289d46269/queries/queries-00000-of-00001.parquet"
+  },
+  "beir-nfcorpus:test.tsv": {
+   "bytes": 279572,
+   "local": "tb-cache/_pinned_raw/beir-nfcorpus/test.tsv",
+   "sha256": "f8fba6ef3d4dd9c3a242a8ba4ae38276fc3622fce7dcbae764766d564542fd2a",
+   "status": "reused-verified",
+   "url": "https://huggingface.co/datasets/BeIR/nfcorpus-qrels/resolve/a451b3b26d3ae1358f259c1a3a4dd61fcea35a65/test.tsv"
+  },
+  "beir-scifact:corpus/corpus-00000-of-00001.parquet": {
+   "bytes": 4469916,
+   "local": "tb-cache/_pinned_raw/beir-scifact/corpus/corpus-00000-of-00001.parquet",
+   "sha256": "243324b35f03d82bd6d98a5f575966876e86cad7ce16e5333a35b1b793dc4f45",
+   "status": "fetched-verified",
+   "url": "https://huggingface.co/datasets/BeIR/scifact/resolve/b3b5335604bf5ee3c4447671af975ea25143d4f5/corpus/corpus-00000-of-00001.parquet"
+  },
+  "beir-scifact:queries/queries-00000-of-00001.parquet": {
+   "bytes": 64982,
+   "local": "tb-cache/_pinned_raw/beir-scifact/queries/queries-00000-of-00001.parquet",
+   "sha256": "1c37956c5dc8b810b60302323c24d1a9e79e26411ba8f5ad9d0888642e2a9034",
+   "status": "fetched-verified",
+   "url": "https://huggingface.co/datasets/BeIR/scifact/resolve/b3b5335604bf5ee3c4447671af975ea25143d4f5/queries/queries-00000-of-00001.parquet"
+  },
+  "beir-scifact:test.tsv": {
+   "bytes": 5389,
+   "local": "tb-cache/_pinned_raw/beir-scifact/test.tsv",
+   "sha256": "0864bb985e0ca2367ba217977e72004d549054b2b06666ed9d4825ac7c21284c",
+   "status": "reused-verified",
+   "url": "https://huggingface.co/datasets/BeIR/scifact-qrels/resolve/2938d17dc3b09882fdb8c12bbbe2e2dc0e75a029/test.tsv"
+  },
+  "bright-pony:documents/pony-00000-of-00001.parquet": {
+   "bytes": 1125040,
+   "local": "tb-cache/_pinned_raw/bright-pony/documents/pony-00000-of-00001.parquet",
+   "sha256": "afc23dc0a1db170b2e86364b85cbc0bc17a713b583d360668cdce0135a173fc3",
+   "status": "fetched-verified",
+   "url": "https://huggingface.co/datasets/xlangai/BRIGHT/resolve/3066d29c9651a576c8aba4832d249807b181ecae/documents/pony-00000-of-00001.parquet"
+  },
+  "bright-pony:examples/pony-00000-of-00001.parquet": {
+   "bytes": 27722,
+   "local": "tb-cache/_pinned_raw/bright-pony/examples/pony-00000-of-00001.parquet",
+   "sha256": "0c0718d3e0ef05da42f75b7c03e755d3e03d9fcdbd32b67dddd221768a8377d7",
+   "status": "fetched-verified",
+   "url": "https://huggingface.co/datasets/xlangai/BRIGHT/resolve/3066d29c9651a576c8aba4832d249807b181ecae/examples/pony-00000-of-00001.parquet"
+  }
+ },
+ "manifest_files": "bench10m/vendor/upstream-links.json",
+ "sources": {
+  "beir-nfcorpus": {
+   "repository": "BeIR/nfcorpus",
+   "revision": "b5026a0e96e8a7ac4f95f482a596389289d46269",
+   "roles": {
+    "corpus": "tb-cache/_pinned_raw/beir-nfcorpus/corpus/corpus-00000-of-00001.parquet",
+    "qrels": "tb-cache/_pinned_raw/beir-nfcorpus/test.tsv",
+    "queries_and_gold": "tb-cache/_pinned_raw/beir-nfcorpus/queries/queries-00000-of-00001.parquet"
+   },
+   "verified": {
+    "cross_check_ukp": null,
+    "docs": 3633,
+    "qrel_rows": 12334,
+    "query_rows": 3237,
+    "round_trip": "parquet<->jsonl id+text identical",
+    "test_queries": 323
+   }
+  },
+  "beir-scifact": {
+   "repository": "BeIR/scifact",
+   "revision": "b3b5335604bf5ee3c4447671af975ea25143d4f5",
+   "roles": {
+    "corpus": "tb-cache/_pinned_raw/beir-scifact/corpus/corpus-00000-of-00001.parquet",
+    "qrels": "tb-cache/_pinned_raw/beir-scifact/test.tsv",
+    "queries_and_gold": "tb-cache/_pinned_raw/beir-scifact/queries/queries-00000-of-00001.parquet"
+   },
+   "verified": {
+    "cross_check_ukp": null,
+    "docs": 5183,
+    "qrel_rows": 339,
+    "query_rows": 1109,
+    "round_trip": "parquet<->jsonl id+text identical",
+    "test_queries": 300
+   }
+  },
+  "bright-pony": {
+   "repository": "xlangai/BRIGHT",
+   "revision": "3066d29c9651a576c8aba4832d249807b181ecae",
+   "roles": {
+    "corpus": "tb-cache/_pinned_raw/bright-pony/documents/pony-00000-of-00001.parquet",
+    "queries_and_gold": "tb-cache/_pinned_raw/bright-pony/examples/pony-00000-of-00001.parquet"
+   },
+   "tb_layout": "bright/raw/{documents,examples}/pony-00000-of-00001.parquet"
+  }
+ }
+}

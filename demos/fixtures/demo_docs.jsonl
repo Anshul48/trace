@@ -1,0 +1,3 @@
+{"record_id": "demo-001", "document_name": "Epoch_RCU.md", "file_uri": "file:///docs/epoch_rcu.md", "content": "Active reader leases track process IDs to prevent file unlinking during mmap reads.", "metadata": {"subsystem": "storage"}}
+{"record_id": "demo-002", "document_name": "Provenance.md", "file_uri": "file:///docs/provenance.md", "content": "Every matched evidence span carries byte-exact offsets with SHA-256 and BLAKE3 content identifiers.", "metadata": {"subsystem": "retrieval"}}
+{"record_id": "demo-003", "document_name": "FailClosed.md", "file_uri": "file:///docs/fail_closed.md", "content": "When no relevant evidence is found, Trace returns insufficient_evidence instead of hallucinating an answer.", "metadata": {"subsystem": "verification"}}

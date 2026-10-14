@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C2-10M Narrow demo inspector (offline)</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.55; max-width: 62rem; margin: 0 auto; padding: 1rem 1.25rem 3rem;
+    color: #1a1a1a; background: #ffffff; }
+  a { color: #0b5cad; }
+  a:visited { color: #6a1fb0; }
+  a:focus-visible, button:focus-visible { outline: 3px solid #0b5cad; outline-offset: 2px; }
+  .skip { position: absolute; left: -9999px; top: 0; background: #0b5cad; color: #fff;
+    padding: .5rem 1rem; z-index: 10; }
+  .skip:focus { left: 0; color: #fff; }
+  header, nav, main, section, footer { display: block; }
+  nav.toc { background: #f2f5f9; border: 1px solid #c9d4e0; border-radius: .5rem;
+    padding: .75rem 1rem; }
+  nav.toc ul { margin: .25rem 0; padding-left: 1.25rem; }
+  code, pre { font-family: ui-monospace, Consolas, monospace; }
+  footer code { overflow-wrap: anywhere; }
+  pre { background: #f2f5f9; border: 1px solid #c9d4e0; border-radius: .5rem;
+    padding: .75rem 1rem; overflow-x: auto; }
+  table { border-collapse: collapse; margin: 1rem 0; width: 100%; }
+  th, td { border: 1px solid #5a6b7c; padding: .4rem .6rem; text-align: left; }
+  th { background: #e8eef4; }
+  .note { border-left: 4px solid #0b5cad; background: #f2f7fc; padding: .5rem 1rem; }
+  .warn { border-left: 4px solid #9a5b00; background: #fdf6ea; padding: .5rem 1rem; }
+  figure { margin: 1rem 0; }
+  figcaption { font-size: .95rem; color: #333; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none; transition: none; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header>
+<h1>C2-10M Narrow demo inspector</h1>
+<p>Offline walkthrough of the primary demo
+<code>demos/demo_c10m_narrow.py</code>: the pinned C2-10M freeze-v2 serving
+stack answering queries over a 6-document synthetic corpus. This page is fully
+static (no scripts, no network) and pre-rendered from a real demo run.</p>
+</header>
+<nav class="toc" aria-label="Page contents">
+<strong>Contents</strong>
+<ul>
+<li><a href="#run">Run it</a></li>
+<li><a href="#pipeline">Pipeline</a></li>
+<li><a href="#corpus">Corpus</a></li>
+<li><a href="#queries">Queries and receipts</a></li>
+<li><a href="#limits">What this does not show</a></li>
+</ul>
+</nav>
+<main id="main">
+<section id="run" aria-labelledby="run-h">
+<h2 id="run-h">Run it</h2>
+<pre><code>pip install -e .[c10m]
+python demos/demo_c10m_narrow.py</code></pre>
+<p>Expected verdict: <code>DEMO PASS: pinned C2-10M serving stack ran offline
+(6 synth docs, 3 queries, budgets M80-P100-A40).</code>
+Linux/POSIX only (the pinned store uses <code>fcntl</code> locking).</p>
+</section>
+<section id="pipeline" aria-labelledby="pipe-h">
+<h2 id="pipe-h">Pipeline</h2>
+<figure>
+<svg role="img" aria-labelledby="pipe-title pipe-desc" viewBox="0 0 640 120"
+    width="640" height="120" style="max-width:100%;height:auto">
+<title id="pipe-title">Demo pipeline diagram</title>
+<desc id="pipe-desc">Six boxes left to right: verify pins, assemble runtime,
+ingest 6 docs, build Narrow index, run 3 queries, check receipts.</desc>
+<g font-family="sans-serif" font-size="13" text-anchor="middle">
+<rect x="4" y="30" width="100" height="60" rx="8" fill="#e8eef4" stroke="#0b5cad" stroke-width="2"/>
+<text x="54" y="55">verify</text><text x="54" y="72">110 pins</text>
+<rect x="114" y="30" width="100" height="60" rx="8" fill="#e8eef4" stroke="#0b5cad" stroke-width="2"/>
+<text x="164" y="55">assemble</text><text x="164" y="72">runtime</text>
+<rect x="224" y="30" width="100" height="60" rx="8" fill="#e8eef4" stroke="#0b5cad" stroke-width="2"/>
+<text x="274" y="55">ingest</text><text x="274" y="72">6 docs</text>
+<rect x="334" y="30" width="100" height="60" rx="8" fill="#e8eef4" stroke="#0b5cad" stroke-width="2"/>
+<text x="384" y="55">Narrow</text><text x="384" y="72">index</text>
+<rect x="444" y="30" width="80" height="60" rx="8" fill="#e8eef4" stroke="#0b5cad" stroke-width="2"/>
+<text x="484" y="55">3</text><text x="484" y="72">queries</text>
+<rect x="534" y="30" width="100" height="60" rx="8" fill="#dff0d8" stroke="#2e7d32" stroke-width="2"/>
+<text x="584" y="55">check</text><text x="584" y="72">receipts</text>
+</g>
+</svg>
+<figcaption>Pipeline: verify 110 c10m pins, assemble producer + serving overlay
+into a temp runtime, ingest 6 docs, build the Narrow index, run 3 queries at
+M80-P100-A40, verify receipts.</figcaption>
+</figure>
+</section>
+<section id="corpus" aria-labelledby="corpus-h">
+<h2 id="corpus-h">Corpus</h2>
+<p>Fixture: <code>demos/fixtures/c10m_synth_docs.jsonl</code> (synthetic,
+public-domain placeholder text written for this demo).</p>
+<table>
+<caption>Demo corpus: 6 synthetic documents</caption>
+<thead><tr><th scope="col">doc_id</th><th scope="col">text</th></tr></thead>
+<tbody>
+<tr><td>syn-001</td><td>The wug test measures how children generalize plural rules to novel words.</td></tr>
+<tr><td>syn-002</td><td>Photosynthesis in desert succulents uses crassulacean acid metabolism at night.</td></tr>
+<tr><td>syn-003</td><td>The treaty of Tordesillas divided newly discovered lands between Portugal and Spain.</td></tr>
+<tr><td>syn-004</td><td>Quantum error correction protects logical qubits with redundant physical qubits.</td></tr>
+<tr><td>syn-005</td><td>Sourdough starter fermentation relies on wild yeast and lactobacillus cultures.</td></tr>
+<tr><td>syn-006</td><td>The wug experiment was designed by Jean Berko Gleason in nineteen fifty eight.</td></tr>
+</tbody>
+</table>
+<p>Observed ingest: <code>atoms=6 holons=6 skipped=[]</code>, store triple
+<code>&lt;birth-uuid&gt;:0:18</code> (birth UUID is fresh per run; counts are
+deterministic).</p>
+</section>
+<section id="queries" aria-labelledby="q-h">
+<h2 id="q-h">Queries and receipts</h2>
+<p>Pre-rendered from a real run. Every query returned
+<code>status=complete</code>, <code>support=supported-results</code>.
+Stable across fresh runs: doc ids, scores, spans, returned order, status,
+support. Varying identity fields (fresh store each run, preserved verbatim
+in saved <code>--out</code> JSON, never byte-compared): store birth UUID /
+pin and per-entry <code>atom_id</code> hashes.</p>
+<table>
+<caption>Query 1: Who designed the wug experiment? (top 3)</caption>
+<thead><tr><th scope="col">rank</th><th scope="col">doc_id</th>
+<th scope="col">score</th><th scope="col">span</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>syn-006</td><td>0.025</td><td>[0, 78]</td></tr>
+<tr><td>2</td><td>syn-003</td><td>0.0242</td><td>[0, 84]</td></tr>
+<tr><td>3</td><td>syn-001</td><td>0.0246</td><td>[0, 74]</td></tr>
+</tbody>
+</table>
+<table>
+<caption>Query 2: What protects logical qubits? (top 3)</caption>
+<thead><tr><th scope="col">rank</th><th scope="col">doc_id</th>
+<th scope="col">score</th><th scope="col">span</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>syn-004</td><td>0.025</td><td>[0, 80]</td></tr>
+<tr><td>2</td><td>syn-001</td><td>0.0082</td><td>[0, 74]</td></tr>
+<tr><td>3</td><td>syn-002</td><td>0.0081</td><td>[0, 79]</td></tr>
+</tbody>
+</table>
+<table>
+<caption>Query 3 (off-topic): completely unrelated zebra query about astrophysics (top 1)</caption>
+<thead><tr><th scope="col">rank</th><th scope="col">doc_id</th>
+<th scope="col">score</th><th scope="col">span</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>syn-001</td><td>0.0083</td><td>[0, 74]</td></tr>
+</tbody>
+</table>
+<div class="note"><p>The demo harness checks: topical top-1 doc ids
+(<code>syn-006</code>, <code>syn-004</code>), topical floor 0.020, off-topic
+ceiling 0.015. These thresholds are fixture-specific harness checks, not
+product claims; the off-topic low score is recorded signal, not an
+abstention verdict.</p></div>
+</section>
+<section id="limits" aria-labelledby="lim-h">
+<h2 id="lim-h">What this does not show</h2>
+<div class="warn"><p>Encoder stand-in: the shipped stack encodes with
+MiniLM-L6-v2 (weights + torch, not vendored); the demo uses a deterministic
+SHA-256 token-hash encoder. Scores and ranking here are NOT 10M measurements.
+The 10M evidence (frozen Narrow rung, BENCH10M lanes, store probes, campaign
+receipts) lives under <code>benchmarks/evidence/</code> with its original
+denominators, units, and failures preserved.</p></div>
+<p>Static equivalent of this page:
+<a href="c10m_tutorial.md">c10m_tutorial.md</a> (same content as Markdown).</p>
+</section>
+</main>
+<footer><p>Pinned bytes: query.py
+<code>d7756e72e2de65814103e216edfc7d53650cc0fada34cefe7cf41411f03414ce</code>;
+budgets M80-P100-A40. See <code>c10m/README.md</code> for full pins.</p></footer>
+</body>
+</html>

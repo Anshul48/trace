@@ -1,0 +1,173 @@
+{
+ "archive_wall_s_total": 1.273,
+ "archives": [
+  {
+   "docs": 3099,
+   "manifest_bytes": 4836658,
+   "phase": "archive-final",
+   "wall_s": 0.457
+  },
+  {
+   "docs": 1009,
+   "manifest_bytes": 1166581,
+   "phase": "archive-p0",
+   "wall_s": 0.142
+  },
+  {
+   "docs": 2033,
+   "manifest_bytes": 2340002,
+   "phase": "archive-p1",
+   "wall_s": 0.27
+  },
+  {
+   "docs": 3099,
+   "manifest_bytes": 3531968,
+   "phase": "archive-p2",
+   "wall_s": 0.404
+  }
+ ],
+ "arm": "C2",
+ "build_wall_s": 1340.711,
+ "cache_stats_total": {
+  "fallback_uses": 0,
+  "hits": 58629,
+  "lookup_s": 10.800957363995622,
+  "lookups": 3099,
+  "misses": 0,
+  "vectors": 58629
+ },
+ "candidate_binding": {
+  "archive_policy": "explicit-only",
+  "backend": "keyed-sqlite",
+  "bound_at_seq": 3203,
+  "compact": {
+   "max_journal_bytes": 1048576,
+   "max_journal_lines": 4096,
+   "max_journal_ratio": 0.25
+  },
+  "generation": [
+   "ee06a4e4-83f7-4315-9e23-bd6e5034cccb",
+   0
+  ],
+  "profile": {
+   "catalog_routing": true,
+   "profile_id": "c2-100m-producer-001",
+   "profile_sha256": "351c7e52531eff84a661c84d26c843f83edb716c2a27ca5e6058e365d26d9a33",
+   "rcat": 65536
+  },
+  "scheme": "tlsys-v2-revision",
+  "sidecar_format": 1,
+  "version": "c2-keyed-1"
+ },
+ "catalog": {
+  "bytes": {
+   "leaf": 93916188520,
+   "parent": 15194533200,
+   "xholon": 8892717680
+  },
+  "calls": {
+   "leaf": 20846,
+   "parent": 5539,
+   "xholon": 3099
+  },
+  "decisions": 19061,
+  "max_rows_per_decision": 5539,
+  "over_budget_any": false,
+  "pops": [
+   "leaf",
+   "parent",
+   "xholon"
+  ],
+  "rejected": 0,
+  "rows": {
+   "leaf": 30492269,
+   "parent": 4933290,
+   "xholon": 2887246
+  },
+  "ties": 0
+ },
+ "docs_sha256": "04bbbb3ea3425a49491559173b20280fb286edeeef49c8293aebc0b92bcce3fd",
+ "drain_budget": 2,
+ "final_pin": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:95436",
+ "final_store": {
+  "bytes": 1886665268,
+  "files": 154074
+ },
+ "keyed_state": true,
+ "lease_owner": "b100m-10m-c2-relaunch",
+ "loaded_modules": {
+  "__main__": "lane-RELAUNCH/b100m_build_c2.py",
+  "approval": "tl-candidate-batch/candidate/approval.py",
+  "committer": "tl-candidate-batch/candidate/committer.py",
+  "common": "tl-candidate-batch/candidate/common.py",
+  "gate_lib": "tl-eval/gate_runner/gate_lib.py",
+  "gpu_encode": "tl-eval/gpu_encode/__init__.py",
+  "gpu_encode.cache": "tl-eval/gpu_encode/cache.py",
+  "gpu_encode.config": "tl-eval/gpu_encode/config.py",
+  "gpu_encode.consume": "tl-eval/gpu_encode/consume.py",
+  "intake": "tl-candidate-batch/candidate/intake.py",
+  "replay": "tl-candidate-batch/candidate/replay.py",
+  "run_integrated_gate": "tl-eval/gate_runner/run_integrated_gate.py",
+  "store": "tl-candidate-batch/candidate/store.py",
+  "tlsys": "tl-sys/tlsys/__init__.py",
+  "tlsys.catalog": "tl-sys/tlsys/catalog.py",
+  "tlsys.dossier": "tl-sys/tlsys/dossier.py",
+  "tlsys.export": "tl-sys/tlsys/export.py",
+  "tlsys.fuse": "tl-sys/tlsys/fuse.py",
+  "tlsys.hnsw_candidates": "tl-sys/tlsys/hnsw_candidates.py",
+  "tlsys.identity": "tl-sys/tlsys/identity.py",
+  "tlsys.index": "tl-sys/tlsys/index.py",
+  "tlsys.ingest": "tl-sys/tlsys/ingest.py",
+  "tlsys.maint": "tl-sys/tlsys/maint.py",
+  "tlsys.place": "tl-sys/tlsys/place.py",
+  "tlsys.prodstate": "tl-sys/tlsys/prodstate.py",
+  "tlsys.proj": "tl-sys/tlsys/proj.py",
+  "tlsys.query": "tl-sys/tlsys/query.py",
+  "tlsys.relations": "tl-sys/tlsys/relations.py",
+  "tlsys.relquery": "tl-sys/tlsys/relquery.py",
+  "tlsys.relserve": "tl-sys/tlsys/relserve.py",
+  "tlsys.serving": "tl-sys/tlsys/serving/__init__.py",
+  "tlsys.serving.counters": "tl-sys/tlsys/serving/counters.py",
+  "tlsys.serving.delta": "tl-sys/tlsys/serving/delta.py",
+  "tlsys.serving.dense": "tl-sys/tlsys/serving/dense.py",
+  "tlsys.serving.digest": "tl-sys/tlsys/serving/digest.py",
+  "tlsys.serving.faults": "tl-sys/tlsys/serving/faults.py",
+  "tlsys.serving.generation": "tl-sys/tlsys/serving/generation.py",
+  "tlsys.serving.lexical": "tl-sys/tlsys/serving/lexical.py",
+  "tlsys.serving.manifest": "tl-sys/tlsys/serving/manifest.py",
+  "tlsys.serving.provisional": "tl-sys/tlsys/serving/provisional.py",
+  "tlsys.serving.segments": "tl-sys/tlsys/serving/segments.py",
+  "tlsys.serving.tombstones": "tl-sys/tlsys/serving/tombstones.py",
+  "tlsys.serving.view": "tl-sys/tlsys/serving/view.py",
+  "tlsys.store_if": "tl-sys/tlsys/store_if.py"
+ },
+ "mode": "10m",
+ "pins": {
+  "archive-final": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:95436",
+  "archive-p0": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:21596",
+  "archive-p1": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:43256",
+  "archive-p2": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:65064",
+  "bind": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:21596",
+  "drain-p0": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:21596",
+  "drain-p1": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:43256",
+  "drain-p2": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:65064",
+  "ingest-p0": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:21596",
+  "ingest-p1": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:43256",
+  "ingest-p2": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:65064",
+  "organize-final": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:95436",
+  "publication": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:65069",
+  "snap-final": "ee06a4e4-83f7-4315-9e23-bd6e5034cccb:0:95436"
+ },
+ "place_budget": null,
+ "place_xdoc": true,
+ "profile": {
+  "R_cat": 65536,
+  "calibration_manifest_id": "topk-vm-54e24e870585",
+  "profile_id": "c2-100m-producer-001",
+  "session_bound": true,
+  "sha256": "351c7e52531eff84a661c84d26c843f83edb716c2a27ca5e6058e365d26d9a33"
+ },
+ "store_id": "gate-full",
+ "utc": "2026-10-07T13:24:19Z",
+ "verdict": "ok"
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="512" viewBox="0 0 1024 512" role="img" aria-labelledby="hero-title hero-desc">
+  <title id="hero-title">Trace release illustration placeholder</title>
+  <desc id="hero-desc">Dark navy panel with centered white text reading Trace: evidence-preserving retrieval, and a small caption noting the final public illustration is pending.</desc>
+  <rect width="1024" height="512" fill="#0b1020"/>
+  <rect x="24" y="24" width="976" height="464" fill="none" stroke="#e8ecf4" stroke-width="4"/>
+  <text x="512" y="228" text-anchor="middle" font-family="sans-serif" font-size="64" fill="#ffffff">Trace</text>
+  <text x="512" y="292" text-anchor="middle" font-family="sans-serif" font-size="30" fill="#c9d2e8">evidence-preserving retrieval</text>
+  <text x="512" y="352" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#8b95b3">final public illustration pending</text>
+</svg>

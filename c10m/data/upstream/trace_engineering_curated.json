@@ -1,0 +1,4896 @@
+{
+  "name": "trace-engineering-curated",
+  "version": "1.0.0",
+  "description": "Generated 320-query technical regression fixture; not an independently reviewed quality benchmark.",
+  "corpus_sha256": "e8bd5f8dfccce98be1684a848ccf38f30389ee81cd656c4fea1213a21e2d78fd",
+  "corpus_text": "Consensus Protocol: Raft leader election occurs when the follower heartbeat timer exceeds the randomized election timeout between 150ms and 300ms.\n\nLog Replication: The Raft leader appends incoming mutations to its local log before broadcasting AppendEntries RPCs to all follower replicas.\n\nCommit Safety: A log entry is committed once a quorum of replicas (floor(N/2) + 1) acknowledge receipt and persist it to durable storage.\n\nLeader Term Epochs: Each election cycle increments the 64-bit term epoch counter to reject stale messages from deposed leaders.\n\nJoint Consensus: Cluster membership changes execute through a two-phase joint consensus transition to prevent split-brain quorums.\n\nSnapshot Compaction: Log entries prior to the last applied state machine index are truncated after an atomic state machine snapshot.\n\nFollower Catch-Up: Lagging replicas receive InstallSnapshot RPCs when required log entries have already been compacted by the leader.\n\nRead-Index Optimization: Read requests query the leader without log writes by verifying leadership leases with a majority heartbeat round.\n\nPre-Vote Phase: Replicas initiate a pre-vote phase before incrementing terms to prevent partitioned nodes from disrupting the cluster.\n\nWitness Nodes: Non-voting witness nodes participate in consensus quorum calculations without storing state machine payload data.\n\nAsynchronous Replication: Asynchronous follower pools maintain an eventual consistency lag under 500ms for read-only analytics.\n\nQuorum Loss Recovery: In the event of majority hardware loss, an emergency operator override forces a single-node survivor reconfiguration.\n\nLog Compaction Lock: Active log truncation acquires a read-write rwlock on the state machine to prevent concurrent index corruption.\n\nHeartbeat Cadence: Leaders emit heartbeat beacons every 50ms to maintain follower lease holds and prevent spurious elections.\n\nDynamic Membership: Adding a node requires staging the configuration in pending state before committing the final voter set.\n\nSplit-Brain Guard: Network partitions isolate minority nodes, causing their AppendEntries broadcasts to fail consensus quorum.\n\nElection Timeout Jitter: Randomized jitter between 150ms and 300ms prevents synchronized vote splitting across healthy nodes.\n\nLog Sequence Monotonicity: Log index numbers increase monotonically without gaps; missing indices trigger immediate consistency checks.\n\nState Machine Isolation: The state machine executes committed entries strictly in sequential log index order.\n\nConsensus Metric Export: Prometheus metrics export raft_leader_term, raft_commit_index, and raft_applied_index every 10s.\n\nWrite-Ahead Log: The write-ahead log (WAL) synchronously flushes all row mutations to disk before updating in-memory memtables.\n\nMemtable Architecture: Active memtables use concurrent skip-lists to maintain sorted key order under high write concurrency.\n\nFlushing Threshold: When active memtable size exceeds 64MB, it becomes immutable and queues for background disk flushing.\n\nSSTable Format: Immutable SSTables consist of data blocks, index blocks, filter blocks, and footer metadata blocks.\n\nBloom Filters: Block-level Bloom filters with 10 bits per key reduce point lookup disk IOPS by over 98%.\n\nSize-Tiered Compaction: Tiered compaction merges SSTables of similar sizes to reduce write amplification during bulk ingestion.\n\nLeveled Compaction: Leveled compaction organizes SSTables into exponential levels (L0 to L6) to guarantee fast read bounds.\n\nBlock Cache: An LRU block cache caches decompressed 4KB data blocks in RAM with an eviction threshold of 2GB.\n\nRow Versioning: Multi-version concurrency control (MVCC) appends a 64-bit timestamp suffix to keys to support snapshot isolation.\n\nTombstone GC: Soft-deleted keys write tombstone markers that are purged during compaction after the drop-tombstone grace period.\n\nCompression Codec: SSTable data blocks compress using LZ4 by default, with Zstandard level 3 for cold archive levels.\n\nWAL Direct IO: WAL writes bypass OS page cache using O_DIRECT and fdatasync to ensure crash consistency on power loss.\n\nDirect Block Alignment: Data blocks are 4096-byte aligned to maximize NVMe direct sequential read throughput.\n\nConcurrent Compaction Workers: Up to 4 background compaction threads execute parallel merges without blocking write ingestion.\n\nIndex Block Partitioning: Two-level index blocks partition primary SSTable indices to keep index memory overhead under 1% of data size.\n\nCompaction Backlog Throttling: If L0 SSTable count exceeds 12, write ingestion rate-limits to prevent uncompacted read stalls.\n\nChecksum Verification: CRC32C checksums validate every 4KB block during disk reads, flagging corrupted blocks immediately.\n\nKey Prefix Encoding: Prefix encoding shares common key prefixes across consecutive rows to minimize SSTable storage size.\n\nSparse Primary Index: Sparse index entries point to the first key of each 4KB data block to allow fast binary searching.\n\nStorage Engine Health: Periodic background scans verify SSTable footer CRC integrity across all storage partitions.\n\nSpine Immutability: The source Spine captures raw source documents with immutable SHA-256 content hashes and strict atomization.\n\nAtom Granularity: Source artifacts are segmented into self-contained atoms of 1 to 5 sentences with preserved byte offsets.\n\nProvenance Tracking: Every atom records its parent artifact_id, byte start/end positions, creation timestamp, and metadata.\n\nRAPTOR Tree Builder: RAPTOR clusters related leaf atoms using vector embeddings and generates hierarchical multi-level summaries.\n\nLATTICE Traversal: LATTICE search navigates top-down from root summary trees before combining results with flat dense retrieval.\n\nEnergy Decay Model: Node access counts and recency timestamps calculate energy scores, pruning cold stale nodes over time.\n\nFail-Closed Retrieval: Query execution raises QueryBlockedError if pending captures exist or derived index integrity is untrusted.\n\nAtomic Activation: Staged index builds replace the active derived index atomically without downtime or partial visibility.\n\nOrphan Prevention: Index hardening enforces 100% source atom coverage, verifying that zero atoms are dropped during build.\n\nDuplicate Exclusion: Atoms belong to exactly one tree leaf partition to prevent score inflation and redundant retrieval.\n\nForest Index Store: ForestIndex persists tree hierarchies, node relationships, summary text, and routing metadata in SQLite.\n\nVector Storage Backend: LanceDB provides fast vector indexing with IVF-PQ quantization and zero-copy Arrow memory mapping.\n\nSummary Faithfulness: Generated node summaries pass title and content validation to ensure zero hallucinated entities.\n\nDiagnostic Sink: Build diagnostics log all atom assignments, cluster radii, and token costs during index consolidation.\n\nEnergy Half-Life: The default energy model half-life is 14 days, reducing retrieval priority for unaccessed historical nodes.\n\nConsolidation Queue: Ingested source captures enter the pending queue, requiring explicit consolidation before tree activation.\n\nSpine Event Log: Spine events record append-only audit entries for all source ingestions, rebuilds, and migrations.\n\nMetadata Preservation: Document tags, timestamps, authors, and source URIs propagate faithfully from artifacts to all derived atoms.\n\nExport-Import Parity: Exported zip bundles contain full SQLite databases, vector stores, and manifests for exact replica restore.\n\nSubstrate Scalability: Hierarchical indexing replaces global pairwise clustering with local subtree partitioning at scale.\n\nWorkspace Scope Validation: The API gateway inspects bearer tokens and validates workspace tenant isolation on every request.\n\nHMAC Request Signatures: Webhook payloads require SHA-256 HMAC cryptographic signatures verified against workspace secrets.\n\nToken Bucket Rate Limiter: Ingress routes enforce token bucket rate limiting at 100 requests per second with burst capacity of 20.\n\nTLS 1.3 Termination: Ingress gateways terminate TLS 1.3 with AES-256-GCM cipher suites and enforce strict HSTS headers.\n\nMutual TLS Authentication: Internal microservice communication requires mTLS with SPIFFE/SPIRE workload identities.\n\nRow-Level Security: Database queries inject tenant_id filter predicates to guarantee zero cross-workspace data leakage.\n\nProvider Key Redaction: LLM API keys are encrypted with AES-256-GCM at rest and redacted from all logs and error traces.\n\nJWT Expiration Policy: User authentication tokens expire after 1 hour, requiring refresh token rotation for session renewal.\n\nCORS Policy: Web UI endpoints restrict origins to authorized domains with credentials enabled and explicit method allowlists.\n\nAudit Trail Logging: All administrative actions, model changes, and key rotations record immutable audit events.\n\nIP Allowlisting: Enterprise endpoints allow configuring CIDR IP allowlists to restrict access to corporate VPNs.\n\nHeader Sanitization: Ingress proxies strip proxy headers and trace context to prevent header injection attacks.\n\nRate Limit Response: Exceeded rate limits return HTTP 429 Too Many Requests with Retry-After header in seconds.\n\nData-at-Rest Encryption: Database volumes use LUKS / BitLocker AES-XTS-256 full disk encryption.\n\nSecret Zero Management: Master encryption keys are fetched at boot from HashiCorp Vault or cloud KMS providers.\n\nSession Revocation: Password changes and security alerts trigger immediate global session and token revocation.\n\nTenant Isolation Test: Automated CI integration tests assert that cross-tenant queries return zero rows and log security alerts.\n\nAPI Gateway Routing: Ingress dispatches requests based on path prefixes /api/ingest, /api/organize, /api/query, and /api/status.\n\nRequest Trace IDs: Every incoming HTTP request is assigned a unique X-Request-ID UUID for distributed tracing.\n\nFail-Closed Security: If the token authorization service is unreachable, all protected endpoints immediately fail closed with 503.\n\nMigration Step 1: Execute database backup snapshot and verify snapshot SHA-256 checksum prior to running schema migrations.\n\nMigration Step 2: Acquire global DDL lock on metadata store and apply non-destructive column additions.\n\nMigration Step 3: Backfill new column values in batches of 1,000 rows to prevent storage engine write stalls.\n\nMigration Step 4: Rebuild vector indices and derived hierarchical trees against the updated schema tables.\n\nMigration Step 5: Switch active query router to version two endpoints only after index validation succeeds.\n\nRollback Procedure: In the event of migration failure, restore the pre-migration snapshot and re-enable version one routing.\n\nDeployment Runbook: Canary deployment routes 5% of traffic to version two nodes, monitoring error rates for 15 minutes.\n\nHealth Probe Endpoint: Kubernetes liveness probes check /health/live every 5s; readiness probes check /health/ready.\n\nZero-Downtime Rolling Update: Rolling updates deploy one replica at a time with graceful connection draining over 30s.\n\nState Machine Checkpoint: Pre-deployment scripts verify that all pending transactions are committed before triggering node restarts.\n\nSchema Version Table: The schema_migrations table tracks executed migration versions, checksums, and execution durations.\n\nDry-Run Mode: All database migration CLI commands support --dry-run to validate SQL syntax without modifying production tables.\n\nStale Index Purging: Post-migration cleanup tasks delete deprecated L0 and L1 index partitions after 48 hours.\n\nPost-Deployment Smoke Test: Automated smoke tests execute direct lookup, hybrid query, and ingestion tests on canary nodes.\n\nStorage Capacity Alert: High-watermark alerts trigger when disk utilization exceeds 85%, initiating automated compaction.\n\nGraceful Shutdown: SIGTERM signal handler completes active in-flight queries and closes SQLite handles within 15 seconds.\n\nConfig Hot-Reloading: Provider configuration and model routing rules reload dynamically upon SIGHUP without restarting services.\n\nShadow Traffic Testing: Shadow proxy duplicates 10% of production queries to staging cluster to measure regression deltas.\n\nDisaster Recovery RPO: Automated continuous snapshot shipping guarantees a Recovery Point Objective (RPO) under 15 minutes.\n\nDisaster Recovery RTO: Cold standby cluster bootstrapping achieves a Recovery Time Objective (RTO) under 30 minutes.",
+  "corpus_file": null,
+  "release_authority": false,
+  "cases": [
+    {
+      "id": "curated-cat1-direct-01",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Raft leader election occurs when?",
+      "gold_atom_ids": [
+        "atom-0"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Consensus Protocol: Raft leader election occurs when the follower heartbeat timer exceeds the randomized election timeout between 150ms and 300ms."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-02",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding The Raft leader appends incoming?",
+      "gold_atom_ids": [
+        "atom-1"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Log Replication: The Raft leader appends incoming mutations to its local log before broadcasting AppendEntries RPCs to all follower replicas."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-03",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding A log entry is committed?",
+      "gold_atom_ids": [
+        "atom-2"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Commit Safety: A log entry is committed once a quorum of replicas (floor(N/2) + 1) acknowledge receipt and persist it to durable storage."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-04",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Epochs: Each election cycle increments?",
+      "gold_atom_ids": [
+        "atom-3"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Leader Term Epochs: Each election cycle increments the 64-bit term epoch counter to reject stale messages from deposed leaders."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-05",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Cluster membership changes execute through?",
+      "gold_atom_ids": [
+        "atom-4"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Joint Consensus: Cluster membership changes execute through a two-phase joint consensus transition to prevent split-brain quorums."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-06",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Log entries prior to the?",
+      "gold_atom_ids": [
+        "atom-5"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Snapshot Compaction: Log entries prior to the last applied state machine index are truncated after an atomic state machine snapshot."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-07",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Lagging replicas receive InstallSnapshot RPCs?",
+      "gold_atom_ids": [
+        "atom-6"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Follower Catch-Up: Lagging replicas receive InstallSnapshot RPCs when required log entries have already been compacted by the leader."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-08",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Read requests query the leader?",
+      "gold_atom_ids": [
+        "atom-7"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Read-Index Optimization: Read requests query the leader without log writes by verifying leadership leases with a majority heartbeat round."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-09",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Replicas initiate a pre-vote phase?",
+      "gold_atom_ids": [
+        "atom-8"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Pre-Vote Phase: Replicas initiate a pre-vote phase before incrementing terms to prevent partitioned nodes from disrupting the cluster."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-10",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Non-voting witness nodes participate in?",
+      "gold_atom_ids": [
+        "atom-9"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Witness Nodes: Non-voting witness nodes participate in consensus quorum calculations without storing state machine payload data."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-11",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Asynchronous follower pools maintain an?",
+      "gold_atom_ids": [
+        "atom-10"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Asynchronous Replication: Asynchronous follower pools maintain an eventual consistency lag under 500ms for read-only analytics."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-12",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Recovery: In the event of?",
+      "gold_atom_ids": [
+        "atom-11"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Quorum Loss Recovery: In the event of majority hardware loss, an emergency operator override forces a single-node survivor reconfiguration."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-13",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Lock: Active log truncation acquires?",
+      "gold_atom_ids": [
+        "atom-12"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Log Compaction Lock: Active log truncation acquires a read-write rwlock on the state machine to prevent concurrent index corruption."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-14",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Leaders emit heartbeat beacons every?",
+      "gold_atom_ids": [
+        "atom-13"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Heartbeat Cadence: Leaders emit heartbeat beacons every 50ms to maintain follower lease holds and prevent spurious elections."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-15",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Adding a node requires staging?",
+      "gold_atom_ids": [
+        "atom-14"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Dynamic Membership: Adding a node requires staging the configuration in pending state before committing the final voter set."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-16",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Network partitions isolate minority nodes,?",
+      "gold_atom_ids": [
+        "atom-15"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Split-Brain Guard: Network partitions isolate minority nodes, causing their AppendEntries broadcasts to fail consensus quorum."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-17",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Jitter: Randomized jitter between 150ms?",
+      "gold_atom_ids": [
+        "atom-16"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Election Timeout Jitter: Randomized jitter between 150ms and 300ms prevents synchronized vote splitting across healthy nodes."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-18",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Monotonicity: Log index numbers increase?",
+      "gold_atom_ids": [
+        "atom-17"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Log Sequence Monotonicity: Log index numbers increase monotonically without gaps; missing indices trigger immediate consistency checks."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-19",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Isolation: The state machine executes?",
+      "gold_atom_ids": [
+        "atom-18"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "State Machine Isolation: The state machine executes committed entries strictly in sequential log index order."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-20",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Export: Prometheus metrics export raft_leader_term,?",
+      "gold_atom_ids": [
+        "atom-19"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Consensus Metric Export: Prometheus metrics export raft_leader_term, raft_commit_index, and raft_applied_index every 10s."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-21",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding The write-ahead log (WAL) synchronously?",
+      "gold_atom_ids": [
+        "atom-20"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Write-Ahead Log: The write-ahead log (WAL) synchronously flushes all row mutations to disk before updating in-memory memtables."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-22",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Active memtables use concurrent skip-lists?",
+      "gold_atom_ids": [
+        "atom-21"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Memtable Architecture: Active memtables use concurrent skip-lists to maintain sorted key order under high write concurrency."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-23",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding When active memtable size exceeds?",
+      "gold_atom_ids": [
+        "atom-22"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Flushing Threshold: When active memtable size exceeds 64MB, it becomes immutable and queues for background disk flushing."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-24",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Immutable SSTables consist of data?",
+      "gold_atom_ids": [
+        "atom-23"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "SSTable Format: Immutable SSTables consist of data blocks, index blocks, filter blocks, and footer metadata blocks."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-25",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Block-level Bloom filters with 10?",
+      "gold_atom_ids": [
+        "atom-24"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Bloom Filters: Block-level Bloom filters with 10 bits per key reduce point lookup disk IOPS by over 98%."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-26",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Tiered compaction merges SSTables of?",
+      "gold_atom_ids": [
+        "atom-25"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Size-Tiered Compaction: Tiered compaction merges SSTables of similar sizes to reduce write amplification during bulk ingestion."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-27",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Leveled compaction organizes SSTables into?",
+      "gold_atom_ids": [
+        "atom-26"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Leveled Compaction: Leveled compaction organizes SSTables into exponential levels (L0 to L6) to guarantee fast read bounds."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-28",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding An LRU block cache caches?",
+      "gold_atom_ids": [
+        "atom-27"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Block Cache: An LRU block cache caches decompressed 4KB data blocks in RAM with an eviction threshold of 2GB."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-29",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Multi-version concurrency control (MVCC) appends?",
+      "gold_atom_ids": [
+        "atom-28"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Row Versioning: Multi-version concurrency control (MVCC) appends a 64-bit timestamp suffix to keys to support snapshot isolation."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-30",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Soft-deleted keys write tombstone markers?",
+      "gold_atom_ids": [
+        "atom-29"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Tombstone GC: Soft-deleted keys write tombstone markers that are purged during compaction after the drop-tombstone grace period."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-31",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding SSTable data blocks compress using?",
+      "gold_atom_ids": [
+        "atom-30"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Compression Codec: SSTable data blocks compress using LZ4 by default, with Zstandard level 3 for cold archive levels."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-32",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding IO: WAL writes bypass OS?",
+      "gold_atom_ids": [
+        "atom-31"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "WAL Direct IO: WAL writes bypass OS page cache using O_DIRECT and fdatasync to ensure crash consistency on power loss."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-33",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Alignment: Data blocks are 4096-byte?",
+      "gold_atom_ids": [
+        "atom-32"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Direct Block Alignment: Data blocks are 4096-byte aligned to maximize NVMe direct sequential read throughput."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-34",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Workers: Up to 4 background?",
+      "gold_atom_ids": [
+        "atom-33"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Concurrent Compaction Workers: Up to 4 background compaction threads execute parallel merges without blocking write ingestion."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-35",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Partitioning: Two-level index blocks partition?",
+      "gold_atom_ids": [
+        "atom-34"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Index Block Partitioning: Two-level index blocks partition primary SSTable indices to keep index memory overhead under 1% of data size."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-36",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Throttling: If L0 SSTable count?",
+      "gold_atom_ids": [
+        "atom-35"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Compaction Backlog Throttling: If L0 SSTable count exceeds 12, write ingestion rate-limits to prevent uncompacted read stalls."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-37",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding CRC32C checksums validate every 4KB?",
+      "gold_atom_ids": [
+        "atom-36"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Checksum Verification: CRC32C checksums validate every 4KB block during disk reads, flagging corrupted blocks immediately."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-38",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Encoding: Prefix encoding shares common?",
+      "gold_atom_ids": [
+        "atom-37"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Key Prefix Encoding: Prefix encoding shares common key prefixes across consecutive rows to minimize SSTable storage size."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-39",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Index: Sparse index entries point?",
+      "gold_atom_ids": [
+        "atom-38"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Sparse Primary Index: Sparse index entries point to the first key of each 4KB data block to allow fast binary searching."
+      }
+    },
+    {
+      "id": "curated-cat1-direct-40",
+      "category": "direct_lookup",
+      "query": "What is the specification or rule regarding Health: Periodic background scans verify?",
+      "gold_atom_ids": [
+        "atom-39"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "topic_paragraph": "Storage Engine Health: Periodic background scans verify SSTable footer CRC integrity across all storage partitions."
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-01",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 1: Execute database ...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-80",
+        "atom-81"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 1: Execute database backup snapshot and verify snapshot SHA-256 checksum prior to running schema migrations.",
+          "Migration Step 2: Acquire global DDL lock on metadata store and apply non-destructive column additions."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-02",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 2: Acquire global DD...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-81",
+        "atom-82"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 2: Acquire global DDL lock on metadata store and apply non-destructive column additions.",
+          "Migration Step 3: Backfill new column values in batches of 1,000 rows to prevent storage engine write stalls."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-03",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 3: Backfill new colu...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-82",
+        "atom-83"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 3: Backfill new column values in batches of 1,000 rows to prevent storage engine write stalls.",
+          "Migration Step 4: Rebuild vector indices and derived hierarchical trees against the updated schema tables."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-04",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 4: Rebuild vector in...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-83",
+        "atom-84"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 4: Rebuild vector indices and derived hierarchical trees against the updated schema tables.",
+          "Migration Step 5: Switch active query router to version two endpoints only after index validation succeeds."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-05",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 5: Switch active que...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 5: Switch active query router to version two endpoints only after index validation succeeds.",
+          "Rollback Procedure: In the event of migration failure, restore the pre-migration snapshot and re-enable version one routing."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-06",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Rollback Procedure: In the event of...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-85",
+        "atom-86"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Rollback Procedure: In the event of migration failure, restore the pre-migration snapshot and re-enable version one routing.",
+          "Deployment Runbook: Canary deployment routes 5% of traffic to version two nodes, monitoring error rates for 15 minutes."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-07",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Deployment Runbook: Canary deployme...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-86",
+        "atom-87"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Deployment Runbook: Canary deployment routes 5% of traffic to version two nodes, monitoring error rates for 15 minutes.",
+          "Health Probe Endpoint: Kubernetes liveness probes check /health/live every 5s; readiness probes check /health/ready."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-08",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Health Probe Endpoint: Kubernetes l...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-87",
+        "atom-88"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Health Probe Endpoint: Kubernetes liveness probes check /health/live every 5s; readiness probes check /health/ready.",
+          "Zero-Downtime Rolling Update: Rolling updates deploy one replica at a time with graceful connection draining over 30s."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-09",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Zero-Downtime Rolling Update: Rolli...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-88",
+        "atom-89"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Zero-Downtime Rolling Update: Rolling updates deploy one replica at a time with graceful connection draining over 30s.",
+          "State Machine Checkpoint: Pre-deployment scripts verify that all pending transactions are committed before triggering node restarts."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-10",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'State Machine Checkpoint: Pre-deplo...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-89",
+        "atom-90"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "State Machine Checkpoint: Pre-deployment scripts verify that all pending transactions are committed before triggering node restarts.",
+          "Schema Version Table: The schema_migrations table tracks executed migration versions, checksums, and execution durations."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-11",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Schema Version Table: The schema_mi...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-90",
+        "atom-91"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Schema Version Table: The schema_migrations table tracks executed migration versions, checksums, and execution durations.",
+          "Dry-Run Mode: All database migration CLI commands support --dry-run to validate SQL syntax without modifying production tables."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-12",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Dry-Run Mode: All database migratio...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-91",
+        "atom-92"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Dry-Run Mode: All database migration CLI commands support --dry-run to validate SQL syntax without modifying production tables.",
+          "Stale Index Purging: Post-migration cleanup tasks delete deprecated L0 and L1 index partitions after 48 hours."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-13",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Stale Index Purging: Post-migration...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-92",
+        "atom-93"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Stale Index Purging: Post-migration cleanup tasks delete deprecated L0 and L1 index partitions after 48 hours.",
+          "Post-Deployment Smoke Test: Automated smoke tests execute direct lookup, hybrid query, and ingestion tests on canary nodes."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-14",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Post-Deployment Smoke Test: Automat...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-93",
+        "atom-94"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Post-Deployment Smoke Test: Automated smoke tests execute direct lookup, hybrid query, and ingestion tests on canary nodes.",
+          "Storage Capacity Alert: High-watermark alerts trigger when disk utilization exceeds 85%, initiating automated compaction."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-15",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Storage Capacity Alert: High-waterm...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-94",
+        "atom-95"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Storage Capacity Alert: High-watermark alerts trigger when disk utilization exceeds 85%, initiating automated compaction.",
+          "Graceful Shutdown: SIGTERM signal handler completes active in-flight queries and closes SQLite handles within 15 seconds."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-16",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Graceful Shutdown: SIGTERM signal h...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-95",
+        "atom-96"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Graceful Shutdown: SIGTERM signal handler completes active in-flight queries and closes SQLite handles within 15 seconds.",
+          "Config Hot-Reloading: Provider configuration and model routing rules reload dynamically upon SIGHUP without restarting services."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-17",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Config Hot-Reloading: Provider conf...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-96",
+        "atom-97"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Config Hot-Reloading: Provider configuration and model routing rules reload dynamically upon SIGHUP without restarting services.",
+          "Shadow Traffic Testing: Shadow proxy duplicates 10% of production queries to staging cluster to measure regression deltas."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-18",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Shadow Traffic Testing: Shadow prox...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-97",
+        "atom-98"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Shadow Traffic Testing: Shadow proxy duplicates 10% of production queries to staging cluster to measure regression deltas.",
+          "Disaster Recovery RPO: Automated continuous snapshot shipping guarantees a Recovery Point Objective (RPO) under 15 minutes."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-19",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 1: Execute database ...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-80",
+        "atom-81"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 1: Execute database backup snapshot and verify snapshot SHA-256 checksum prior to running schema migrations.",
+          "Migration Step 2: Acquire global DDL lock on metadata store and apply non-destructive column additions."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-20",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 2: Acquire global DD...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-81",
+        "atom-82"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 2: Acquire global DDL lock on metadata store and apply non-destructive column additions.",
+          "Migration Step 3: Backfill new column values in batches of 1,000 rows to prevent storage engine write stalls."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-21",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 3: Backfill new colu...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-82",
+        "atom-83"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 3: Backfill new column values in batches of 1,000 rows to prevent storage engine write stalls.",
+          "Migration Step 4: Rebuild vector indices and derived hierarchical trees against the updated schema tables."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-22",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 4: Rebuild vector in...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-83",
+        "atom-84"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 4: Rebuild vector indices and derived hierarchical trees against the updated schema tables.",
+          "Migration Step 5: Switch active query router to version two endpoints only after index validation succeeds."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-23",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 5: Switch active que...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 5: Switch active query router to version two endpoints only after index validation succeeds.",
+          "Rollback Procedure: In the event of migration failure, restore the pre-migration snapshot and re-enable version one routing."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-24",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Rollback Procedure: In the event of...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-85",
+        "atom-86"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Rollback Procedure: In the event of migration failure, restore the pre-migration snapshot and re-enable version one routing.",
+          "Deployment Runbook: Canary deployment routes 5% of traffic to version two nodes, monitoring error rates for 15 minutes."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-25",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Deployment Runbook: Canary deployme...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-86",
+        "atom-87"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Deployment Runbook: Canary deployment routes 5% of traffic to version two nodes, monitoring error rates for 15 minutes.",
+          "Health Probe Endpoint: Kubernetes liveness probes check /health/live every 5s; readiness probes check /health/ready."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-26",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Health Probe Endpoint: Kubernetes l...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-87",
+        "atom-88"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Health Probe Endpoint: Kubernetes liveness probes check /health/live every 5s; readiness probes check /health/ready.",
+          "Zero-Downtime Rolling Update: Rolling updates deploy one replica at a time with graceful connection draining over 30s."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-27",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Zero-Downtime Rolling Update: Rolli...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-88",
+        "atom-89"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Zero-Downtime Rolling Update: Rolling updates deploy one replica at a time with graceful connection draining over 30s.",
+          "State Machine Checkpoint: Pre-deployment scripts verify that all pending transactions are committed before triggering node restarts."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-28",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'State Machine Checkpoint: Pre-deplo...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-89",
+        "atom-90"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "State Machine Checkpoint: Pre-deployment scripts verify that all pending transactions are committed before triggering node restarts.",
+          "Schema Version Table: The schema_migrations table tracks executed migration versions, checksums, and execution durations."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-29",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Schema Version Table: The schema_mi...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-90",
+        "atom-91"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Schema Version Table: The schema_migrations table tracks executed migration versions, checksums, and execution durations.",
+          "Dry-Run Mode: All database migration CLI commands support --dry-run to validate SQL syntax without modifying production tables."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-30",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Dry-Run Mode: All database migratio...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-91",
+        "atom-92"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Dry-Run Mode: All database migration CLI commands support --dry-run to validate SQL syntax without modifying production tables.",
+          "Stale Index Purging: Post-migration cleanup tasks delete deprecated L0 and L1 index partitions after 48 hours."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-31",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Stale Index Purging: Post-migration...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-92",
+        "atom-93"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Stale Index Purging: Post-migration cleanup tasks delete deprecated L0 and L1 index partitions after 48 hours.",
+          "Post-Deployment Smoke Test: Automated smoke tests execute direct lookup, hybrid query, and ingestion tests on canary nodes."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-32",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Post-Deployment Smoke Test: Automat...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-93",
+        "atom-94"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Post-Deployment Smoke Test: Automated smoke tests execute direct lookup, hybrid query, and ingestion tests on canary nodes.",
+          "Storage Capacity Alert: High-watermark alerts trigger when disk utilization exceeds 85%, initiating automated compaction."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-33",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Storage Capacity Alert: High-waterm...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-94",
+        "atom-95"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Storage Capacity Alert: High-watermark alerts trigger when disk utilization exceeds 85%, initiating automated compaction.",
+          "Graceful Shutdown: SIGTERM signal handler completes active in-flight queries and closes SQLite handles within 15 seconds."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-34",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Graceful Shutdown: SIGTERM signal h...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-95",
+        "atom-96"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Graceful Shutdown: SIGTERM signal handler completes active in-flight queries and closes SQLite handles within 15 seconds.",
+          "Config Hot-Reloading: Provider configuration and model routing rules reload dynamically upon SIGHUP without restarting services."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-35",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Config Hot-Reloading: Provider conf...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-96",
+        "atom-97"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Config Hot-Reloading: Provider configuration and model routing rules reload dynamically upon SIGHUP without restarting services.",
+          "Shadow Traffic Testing: Shadow proxy duplicates 10% of production queries to staging cluster to measure regression deltas."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-36",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Shadow Traffic Testing: Shadow prox...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-97",
+        "atom-98"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Shadow Traffic Testing: Shadow proxy duplicates 10% of production queries to staging cluster to measure regression deltas.",
+          "Disaster Recovery RPO: Automated continuous snapshot shipping guarantees a Recovery Point Objective (RPO) under 15 minutes."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-37",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 1: Execute database ...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-80",
+        "atom-81"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 1: Execute database backup snapshot and verify snapshot SHA-256 checksum prior to running schema migrations.",
+          "Migration Step 2: Acquire global DDL lock on metadata store and apply non-destructive column additions."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-38",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 2: Acquire global DD...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-81",
+        "atom-82"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 2: Acquire global DDL lock on metadata store and apply non-destructive column additions.",
+          "Migration Step 3: Backfill new column values in batches of 1,000 rows to prevent storage engine write stalls."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-39",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 3: Backfill new colu...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-82",
+        "atom-83"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 3: Backfill new column values in batches of 1,000 rows to prevent storage engine write stalls.",
+          "Migration Step 4: Rebuild vector indices and derived hierarchical trees against the updated schema tables."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat2-chronology-40",
+      "category": "chronology",
+      "query": "What is the sequential procedure and prerequisite connecting 'Migration Step 4: Rebuild vector in...' to the subsequent stage?",
+      "gold_atom_ids": [
+        "atom-83",
+        "atom-84"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "sequence": [
+          "Migration Step 4: Rebuild vector indices and derived hierarchical trees against the updated schema tables.",
+          "Migration Step 5: Switch active query router to version two endpoints only after index validation succeeds."
+        ]
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-01",
+      "category": "contradiction",
+      "query": "Query 1: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-02",
+      "category": "contradiction",
+      "query": "Query 2: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-03",
+      "category": "contradiction",
+      "query": "Query 3: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-04",
+      "category": "contradiction",
+      "query": "Query 4: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-05",
+      "category": "contradiction",
+      "query": "Query 5: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-06",
+      "category": "contradiction",
+      "query": "Query 6: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-07",
+      "category": "contradiction",
+      "query": "Query 7: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-08",
+      "category": "contradiction",
+      "query": "Query 8: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-09",
+      "category": "contradiction",
+      "query": "Query 9: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-10",
+      "category": "contradiction",
+      "query": "Query 10: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-11",
+      "category": "contradiction",
+      "query": "Query 11: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-12",
+      "category": "contradiction",
+      "query": "Query 12: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-13",
+      "category": "contradiction",
+      "query": "Query 13: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-14",
+      "category": "contradiction",
+      "query": "Query 14: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-15",
+      "category": "contradiction",
+      "query": "Query 15: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-16",
+      "category": "contradiction",
+      "query": "Query 16: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-17",
+      "category": "contradiction",
+      "query": "Query 17: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-18",
+      "category": "contradiction",
+      "query": "Query 18: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-19",
+      "category": "contradiction",
+      "query": "Query 19: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-20",
+      "category": "contradiction",
+      "query": "Query 20: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-21",
+      "category": "contradiction",
+      "query": "Query 21: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-22",
+      "category": "contradiction",
+      "query": "Query 22: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-23",
+      "category": "contradiction",
+      "query": "Query 23: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-24",
+      "category": "contradiction",
+      "query": "Query 24: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-25",
+      "category": "contradiction",
+      "query": "Query 25: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-26",
+      "category": "contradiction",
+      "query": "Query 26: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-27",
+      "category": "contradiction",
+      "query": "Query 27: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-28",
+      "category": "contradiction",
+      "query": "Query 28: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-29",
+      "category": "contradiction",
+      "query": "Query 29: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-30",
+      "category": "contradiction",
+      "query": "Query 30: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-31",
+      "category": "contradiction",
+      "query": "Query 31: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-32",
+      "category": "contradiction",
+      "query": "Query 32: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-33",
+      "category": "contradiction",
+      "query": "Query 33: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-34",
+      "category": "contradiction",
+      "query": "Query 34: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-35",
+      "category": "contradiction",
+      "query": "Query 35: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-36",
+      "category": "contradiction",
+      "query": "Query 36: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-37",
+      "category": "contradiction",
+      "query": "Query 37: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-38",
+      "category": "contradiction",
+      "query": "Query 38: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-39",
+      "category": "contradiction",
+      "query": "Query 39: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat3-contradiction-40",
+      "category": "contradiction",
+      "query": "Query 40: What replaces legacy v1 routing, and under what failure conditions is it reversed?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-85"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "revision_theme": "version switch and rollback"
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-01",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Workspace Scope Validation: Th' intersect with storage substrate operation 'Spine Immutability: The source'?",
+      "gold_atom_ids": [
+        "atom-60",
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-02",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'HMAC Request Signatures: Webho' intersect with storage substrate operation 'Atom Granularity: Source artif'?",
+      "gold_atom_ids": [
+        "atom-61",
+        "atom-41"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-03",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Token Bucket Rate Limiter: Ing' intersect with storage substrate operation 'Provenance Tracking: Every ato'?",
+      "gold_atom_ids": [
+        "atom-62",
+        "atom-42"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-04",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'TLS 1.3 Termination: Ingress g' intersect with storage substrate operation 'RAPTOR Tree Builder: RAPTOR cl'?",
+      "gold_atom_ids": [
+        "atom-63",
+        "atom-43"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-05",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Mutual TLS Authentication: Int' intersect with storage substrate operation 'LATTICE Traversal: LATTICE sea'?",
+      "gold_atom_ids": [
+        "atom-64",
+        "atom-44"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-06",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Row-Level Security: Database q' intersect with storage substrate operation 'Energy Decay Model: Node acces'?",
+      "gold_atom_ids": [
+        "atom-65",
+        "atom-45"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-07",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Provider Key Redaction: LLM AP' intersect with storage substrate operation 'Fail-Closed Retrieval: Query e'?",
+      "gold_atom_ids": [
+        "atom-66",
+        "atom-46"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-08",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'JWT Expiration Policy: User au' intersect with storage substrate operation 'Atomic Activation: Staged inde'?",
+      "gold_atom_ids": [
+        "atom-67",
+        "atom-47"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-09",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'CORS Policy: Web UI endpoints ' intersect with storage substrate operation 'Orphan Prevention: Index harde'?",
+      "gold_atom_ids": [
+        "atom-68",
+        "atom-48"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-10",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Audit Trail Logging: All admin' intersect with storage substrate operation 'Duplicate Exclusion: Atoms bel'?",
+      "gold_atom_ids": [
+        "atom-69",
+        "atom-49"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-11",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'IP Allowlisting: Enterprise en' intersect with storage substrate operation 'Forest Index Store: ForestInde'?",
+      "gold_atom_ids": [
+        "atom-70",
+        "atom-50"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-12",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Header Sanitization: Ingress p' intersect with storage substrate operation 'Vector Storage Backend: LanceD'?",
+      "gold_atom_ids": [
+        "atom-71",
+        "atom-51"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-13",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Rate Limit Response: Exceeded ' intersect with storage substrate operation 'Summary Faithfulness: Generate'?",
+      "gold_atom_ids": [
+        "atom-72",
+        "atom-52"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-14",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Data-at-Rest Encryption: Datab' intersect with storage substrate operation 'Diagnostic Sink: Build diagnos'?",
+      "gold_atom_ids": [
+        "atom-73",
+        "atom-53"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-15",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Secret Zero Management: Master' intersect with storage substrate operation 'Energy Half-Life: The default '?",
+      "gold_atom_ids": [
+        "atom-74",
+        "atom-54"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-16",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Session Revocation: Password c' intersect with storage substrate operation 'Consolidation Queue: Ingested '?",
+      "gold_atom_ids": [
+        "atom-75",
+        "atom-55"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-17",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Tenant Isolation Test: Automat' intersect with storage substrate operation 'Spine Event Log: Spine events '?",
+      "gold_atom_ids": [
+        "atom-76",
+        "atom-56"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-18",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'API Gateway Routing: Ingress d' intersect with storage substrate operation 'Metadata Preservation: Documen'?",
+      "gold_atom_ids": [
+        "atom-77",
+        "atom-57"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-19",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Request Trace IDs: Every incom' intersect with storage substrate operation 'Export-Import Parity: Exported'?",
+      "gold_atom_ids": [
+        "atom-78",
+        "atom-58"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-20",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Fail-Closed Security: If the t' intersect with storage substrate operation 'Substrate Scalability: Hierarc'?",
+      "gold_atom_ids": [
+        "atom-79",
+        "atom-59"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-21",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Workspace Scope Validation: Th' intersect with storage substrate operation 'Spine Immutability: The source'?",
+      "gold_atom_ids": [
+        "atom-60",
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-22",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'HMAC Request Signatures: Webho' intersect with storage substrate operation 'Atom Granularity: Source artif'?",
+      "gold_atom_ids": [
+        "atom-61",
+        "atom-41"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-23",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Token Bucket Rate Limiter: Ing' intersect with storage substrate operation 'Provenance Tracking: Every ato'?",
+      "gold_atom_ids": [
+        "atom-62",
+        "atom-42"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-24",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'TLS 1.3 Termination: Ingress g' intersect with storage substrate operation 'RAPTOR Tree Builder: RAPTOR cl'?",
+      "gold_atom_ids": [
+        "atom-63",
+        "atom-43"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-25",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Mutual TLS Authentication: Int' intersect with storage substrate operation 'LATTICE Traversal: LATTICE sea'?",
+      "gold_atom_ids": [
+        "atom-64",
+        "atom-44"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-26",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Row-Level Security: Database q' intersect with storage substrate operation 'Energy Decay Model: Node acces'?",
+      "gold_atom_ids": [
+        "atom-65",
+        "atom-45"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-27",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Provider Key Redaction: LLM AP' intersect with storage substrate operation 'Fail-Closed Retrieval: Query e'?",
+      "gold_atom_ids": [
+        "atom-66",
+        "atom-46"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-28",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'JWT Expiration Policy: User au' intersect with storage substrate operation 'Atomic Activation: Staged inde'?",
+      "gold_atom_ids": [
+        "atom-67",
+        "atom-47"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-29",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'CORS Policy: Web UI endpoints ' intersect with storage substrate operation 'Orphan Prevention: Index harde'?",
+      "gold_atom_ids": [
+        "atom-68",
+        "atom-48"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-30",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Audit Trail Logging: All admin' intersect with storage substrate operation 'Duplicate Exclusion: Atoms bel'?",
+      "gold_atom_ids": [
+        "atom-69",
+        "atom-49"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-31",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'IP Allowlisting: Enterprise en' intersect with storage substrate operation 'Forest Index Store: ForestInde'?",
+      "gold_atom_ids": [
+        "atom-70",
+        "atom-50"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-32",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Header Sanitization: Ingress p' intersect with storage substrate operation 'Vector Storage Backend: LanceD'?",
+      "gold_atom_ids": [
+        "atom-71",
+        "atom-51"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-33",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Rate Limit Response: Exceeded ' intersect with storage substrate operation 'Summary Faithfulness: Generate'?",
+      "gold_atom_ids": [
+        "atom-72",
+        "atom-52"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-34",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Data-at-Rest Encryption: Datab' intersect with storage substrate operation 'Diagnostic Sink: Build diagnos'?",
+      "gold_atom_ids": [
+        "atom-73",
+        "atom-53"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-35",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Secret Zero Management: Master' intersect with storage substrate operation 'Energy Half-Life: The default '?",
+      "gold_atom_ids": [
+        "atom-74",
+        "atom-54"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-36",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Session Revocation: Password c' intersect with storage substrate operation 'Consolidation Queue: Ingested '?",
+      "gold_atom_ids": [
+        "atom-75",
+        "atom-55"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-37",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Tenant Isolation Test: Automat' intersect with storage substrate operation 'Spine Event Log: Spine events '?",
+      "gold_atom_ids": [
+        "atom-76",
+        "atom-56"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-38",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'API Gateway Routing: Ingress d' intersect with storage substrate operation 'Metadata Preservation: Documen'?",
+      "gold_atom_ids": [
+        "atom-77",
+        "atom-57"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-39",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Request Trace IDs: Every incom' intersect with storage substrate operation 'Export-Import Parity: Exported'?",
+      "gold_atom_ids": [
+        "atom-78",
+        "atom-58"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat4-crossdomain-40",
+      "category": "cross_domain",
+      "query": "How does the security policy in 'Fail-Closed Security: If the t' intersect with storage substrate operation 'Substrate Scalability: Hierarc'?",
+      "gold_atom_ids": [
+        "atom-79",
+        "atom-59"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "domains": [
+          "security",
+          "storage"
+        ]
+      }
+    },
+    {
+      "id": "curated-cat5-global-01",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Consensus Protocol.",
+      "gold_atom_ids": [
+        "atom-0"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Consensus Protocol: Raft leader election occurs when the follower heartbeat timer exceeds the randomized election timeout between 150ms and 300ms."
+      }
+    },
+    {
+      "id": "curated-cat5-global-02",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Write-Ahead Log.",
+      "gold_atom_ids": [
+        "atom-20"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Write-Ahead Log: The write-ahead log (WAL) synchronously flushes all row mutations to disk before updating in-memory memtables."
+      }
+    },
+    {
+      "id": "curated-cat5-global-03",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Spine Immutability.",
+      "gold_atom_ids": [
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Spine Immutability: The source Spine captures raw source documents with immutable SHA-256 content hashes and strict atomization."
+      }
+    },
+    {
+      "id": "curated-cat5-global-04",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Workspace Scope Validation.",
+      "gold_atom_ids": [
+        "atom-60"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Workspace Scope Validation: The API gateway inspects bearer tokens and validates workspace tenant isolation on every request."
+      }
+    },
+    {
+      "id": "curated-cat5-global-05",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Migration Step 1.",
+      "gold_atom_ids": [
+        "atom-80"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Migration Step 1: Execute database backup snapshot and verify snapshot SHA-256 checksum prior to running schema migrations."
+      }
+    },
+    {
+      "id": "curated-cat5-global-06",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Consensus Protocol.",
+      "gold_atom_ids": [
+        "atom-0"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Consensus Protocol: Raft leader election occurs when the follower heartbeat timer exceeds the randomized election timeout between 150ms and 300ms."
+      }
+    },
+    {
+      "id": "curated-cat5-global-07",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Write-Ahead Log.",
+      "gold_atom_ids": [
+        "atom-20"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Write-Ahead Log: The write-ahead log (WAL) synchronously flushes all row mutations to disk before updating in-memory memtables."
+      }
+    },
+    {
+      "id": "curated-cat5-global-08",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Spine Immutability.",
+      "gold_atom_ids": [
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Spine Immutability: The source Spine captures raw source documents with immutable SHA-256 content hashes and strict atomization."
+      }
+    },
+    {
+      "id": "curated-cat5-global-09",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Workspace Scope Validation.",
+      "gold_atom_ids": [
+        "atom-60"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Workspace Scope Validation: The API gateway inspects bearer tokens and validates workspace tenant isolation on every request."
+      }
+    },
+    {
+      "id": "curated-cat5-global-10",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Migration Step 1.",
+      "gold_atom_ids": [
+        "atom-80"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Migration Step 1: Execute database backup snapshot and verify snapshot SHA-256 checksum prior to running schema migrations."
+      }
+    },
+    {
+      "id": "curated-cat5-global-11",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Consensus Protocol.",
+      "gold_atom_ids": [
+        "atom-0"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Consensus Protocol: Raft leader election occurs when the follower heartbeat timer exceeds the randomized election timeout between 150ms and 300ms."
+      }
+    },
+    {
+      "id": "curated-cat5-global-12",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Write-Ahead Log.",
+      "gold_atom_ids": [
+        "atom-20"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Write-Ahead Log: The write-ahead log (WAL) synchronously flushes all row mutations to disk before updating in-memory memtables."
+      }
+    },
+    {
+      "id": "curated-cat5-global-13",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Spine Immutability.",
+      "gold_atom_ids": [
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Spine Immutability: The source Spine captures raw source documents with immutable SHA-256 content hashes and strict atomization."
+      }
+    },
+    {
+      "id": "curated-cat5-global-14",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Workspace Scope Validation.",
+      "gold_atom_ids": [
+        "atom-60"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Workspace Scope Validation: The API gateway inspects bearer tokens and validates workspace tenant isolation on every request."
+      }
+    },
+    {
+      "id": "curated-cat5-global-15",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Migration Step 1.",
+      "gold_atom_ids": [
+        "atom-80"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Migration Step 1: Execute database backup snapshot and verify snapshot SHA-256 checksum prior to running schema migrations."
+      }
+    },
+    {
+      "id": "curated-cat5-global-16",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Consensus Protocol.",
+      "gold_atom_ids": [
+        "atom-0"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Consensus Protocol: Raft leader election occurs when the follower heartbeat timer exceeds the randomized election timeout between 150ms and 300ms."
+      }
+    },
+    {
+      "id": "curated-cat5-global-17",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Write-Ahead Log.",
+      "gold_atom_ids": [
+        "atom-20"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Write-Ahead Log: The write-ahead log (WAL) synchronously flushes all row mutations to disk before updating in-memory memtables."
+      }
+    },
+    {
+      "id": "curated-cat5-global-18",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Spine Immutability.",
+      "gold_atom_ids": [
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Spine Immutability: The source Spine captures raw source documents with immutable SHA-256 content hashes and strict atomization."
+      }
+    },
+    {
+      "id": "curated-cat5-global-19",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Workspace Scope Validation.",
+      "gold_atom_ids": [
+        "atom-60"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Workspace Scope Validation: The API gateway inspects bearer tokens and validates workspace tenant isolation on every request."
+      }
+    },
+    {
+      "id": "curated-cat5-global-20",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Migration Step 1.",
+      "gold_atom_ids": [
+        "atom-80"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Migration Step 1: Execute database backup snapshot and verify snapshot SHA-256 checksum prior to running schema migrations."
+      }
+    },
+    {
+      "id": "curated-cat5-global-21",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Consensus Protocol.",
+      "gold_atom_ids": [
+        "atom-0"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Consensus Protocol: Raft leader election occurs when the follower heartbeat timer exceeds the randomized election timeout between 150ms and 300ms."
+      }
+    },
+    {
+      "id": "curated-cat5-global-22",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Write-Ahead Log.",
+      "gold_atom_ids": [
+        "atom-20"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Write-Ahead Log: The write-ahead log (WAL) synchronously flushes all row mutations to disk before updating in-memory memtables."
+      }
+    },
+    {
+      "id": "curated-cat5-global-23",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Spine Immutability.",
+      "gold_atom_ids": [
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Spine Immutability: The source Spine captures raw source documents with immutable SHA-256 content hashes and strict atomization."
+      }
+    },
+    {
+      "id": "curated-cat5-global-24",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Workspace Scope Validation.",
+      "gold_atom_ids": [
+        "atom-60"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Workspace Scope Validation: The API gateway inspects bearer tokens and validates workspace tenant isolation on every request."
+      }
+    },
+    {
+      "id": "curated-cat5-global-25",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Migration Step 1.",
+      "gold_atom_ids": [
+        "atom-80"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Migration Step 1: Execute database backup snapshot and verify snapshot SHA-256 checksum prior to running schema migrations."
+      }
+    },
+    {
+      "id": "curated-cat5-global-26",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Consensus Protocol.",
+      "gold_atom_ids": [
+        "atom-0"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Consensus Protocol: Raft leader election occurs when the follower heartbeat timer exceeds the randomized election timeout between 150ms and 300ms."
+      }
+    },
+    {
+      "id": "curated-cat5-global-27",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Write-Ahead Log.",
+      "gold_atom_ids": [
+        "atom-20"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Write-Ahead Log: The write-ahead log (WAL) synchronously flushes all row mutations to disk before updating in-memory memtables."
+      }
+    },
+    {
+      "id": "curated-cat5-global-28",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Spine Immutability.",
+      "gold_atom_ids": [
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Spine Immutability: The source Spine captures raw source documents with immutable SHA-256 content hashes and strict atomization."
+      }
+    },
+    {
+      "id": "curated-cat5-global-29",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Workspace Scope Validation.",
+      "gold_atom_ids": [
+        "atom-60"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Workspace Scope Validation: The API gateway inspects bearer tokens and validates workspace tenant isolation on every request."
+      }
+    },
+    {
+      "id": "curated-cat5-global-30",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Migration Step 1.",
+      "gold_atom_ids": [
+        "atom-80"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Migration Step 1: Execute database backup snapshot and verify snapshot SHA-256 checksum prior to running schema migrations."
+      }
+    },
+    {
+      "id": "curated-cat5-global-31",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Consensus Protocol.",
+      "gold_atom_ids": [
+        "atom-0"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Consensus Protocol: Raft leader election occurs when the follower heartbeat timer exceeds the randomized election timeout between 150ms and 300ms."
+      }
+    },
+    {
+      "id": "curated-cat5-global-32",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Write-Ahead Log.",
+      "gold_atom_ids": [
+        "atom-20"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Write-Ahead Log: The write-ahead log (WAL) synchronously flushes all row mutations to disk before updating in-memory memtables."
+      }
+    },
+    {
+      "id": "curated-cat5-global-33",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Spine Immutability.",
+      "gold_atom_ids": [
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Spine Immutability: The source Spine captures raw source documents with immutable SHA-256 content hashes and strict atomization."
+      }
+    },
+    {
+      "id": "curated-cat5-global-34",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Workspace Scope Validation.",
+      "gold_atom_ids": [
+        "atom-60"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Workspace Scope Validation: The API gateway inspects bearer tokens and validates workspace tenant isolation on every request."
+      }
+    },
+    {
+      "id": "curated-cat5-global-35",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Migration Step 1.",
+      "gold_atom_ids": [
+        "atom-80"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Migration Step 1: Execute database backup snapshot and verify snapshot SHA-256 checksum prior to running schema migrations."
+      }
+    },
+    {
+      "id": "curated-cat5-global-36",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Consensus Protocol.",
+      "gold_atom_ids": [
+        "atom-0"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Consensus Protocol: Raft leader election occurs when the follower heartbeat timer exceeds the randomized election timeout between 150ms and 300ms."
+      }
+    },
+    {
+      "id": "curated-cat5-global-37",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Write-Ahead Log.",
+      "gold_atom_ids": [
+        "atom-20"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Write-Ahead Log: The write-ahead log (WAL) synchronously flushes all row mutations to disk before updating in-memory memtables."
+      }
+    },
+    {
+      "id": "curated-cat5-global-38",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Spine Immutability.",
+      "gold_atom_ids": [
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Spine Immutability: The source Spine captures raw source documents with immutable SHA-256 content hashes and strict atomization."
+      }
+    },
+    {
+      "id": "curated-cat5-global-39",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Workspace Scope Validation.",
+      "gold_atom_ids": [
+        "atom-60"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Workspace Scope Validation: The API gateway inspects bearer tokens and validates workspace tenant isolation on every request."
+      }
+    },
+    {
+      "id": "curated-cat5-global-40",
+      "category": "global_context",
+      "query": "Provide high-level architecture overview and design principles for Migration Step 1.",
+      "gold_atom_ids": [
+        "atom-80"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "thematic_root": "Migration Step 1: Execute database backup snapshot and verify snapshot SHA-256 checksum prior to running schema migrations."
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-01",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 1: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-0",
+        "atom-20",
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-02",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 2: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-1",
+        "atom-21",
+        "atom-41"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-03",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 3: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-2",
+        "atom-22",
+        "atom-42"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-04",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 4: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-3",
+        "atom-23",
+        "atom-43"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-05",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 5: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-4",
+        "atom-24",
+        "atom-44"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-06",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 6: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-5",
+        "atom-25",
+        "atom-45"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-07",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 7: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-6",
+        "atom-26",
+        "atom-46"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-08",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 8: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-7",
+        "atom-27",
+        "atom-47"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-09",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 9: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-8",
+        "atom-28",
+        "atom-48"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-10",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 10: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-9",
+        "atom-29",
+        "atom-49"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-11",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 11: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-10",
+        "atom-30",
+        "atom-50"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-12",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 12: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-11",
+        "atom-31",
+        "atom-51"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-13",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 13: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-12",
+        "atom-32",
+        "atom-52"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-14",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 14: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-13",
+        "atom-33",
+        "atom-53"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-15",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 15: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-14",
+        "atom-34",
+        "atom-54"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-16",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 16: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-0",
+        "atom-20",
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-17",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 17: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-1",
+        "atom-21",
+        "atom-41"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-18",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 18: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-2",
+        "atom-22",
+        "atom-42"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-19",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 19: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-3",
+        "atom-23",
+        "atom-43"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-20",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 20: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-4",
+        "atom-24",
+        "atom-44"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-21",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 21: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-5",
+        "atom-25",
+        "atom-45"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-22",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 22: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-6",
+        "atom-26",
+        "atom-46"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-23",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 23: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-7",
+        "atom-27",
+        "atom-47"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-24",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 24: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-8",
+        "atom-28",
+        "atom-48"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-25",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 25: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-9",
+        "atom-29",
+        "atom-49"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-26",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 26: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-10",
+        "atom-30",
+        "atom-50"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-27",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 27: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-11",
+        "atom-31",
+        "atom-51"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-28",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 28: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-12",
+        "atom-32",
+        "atom-52"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-29",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 29: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-13",
+        "atom-33",
+        "atom-53"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-30",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 30: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-14",
+        "atom-34",
+        "atom-54"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-31",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 31: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-0",
+        "atom-20",
+        "atom-40"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-32",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 32: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-1",
+        "atom-21",
+        "atom-41"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-33",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 33: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-2",
+        "atom-22",
+        "atom-42"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-34",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 34: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-3",
+        "atom-23",
+        "atom-43"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-35",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 35: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-4",
+        "atom-24",
+        "atom-44"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-36",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 36: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-5",
+        "atom-25",
+        "atom-45"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-37",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 37: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-6",
+        "atom-26",
+        "atom-46"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-38",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 38: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-7",
+        "atom-27",
+        "atom-47"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-39",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 39: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-8",
+        "atom-28",
+        "atom-48"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat6-multihop-40",
+      "category": "multi_hop",
+      "query": "Multi-hop chain 40: How does a consensus quorum decision propagate through WAL persistence to spine atomization?",
+      "gold_atom_ids": [
+        "atom-9",
+        "atom-29",
+        "atom-49"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "hops": 3
+      }
+    },
+    {
+      "id": "curated-cat7-historical-01",
+      "category": "historical",
+      "query": "Historical audit query 1: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-80",
+        "atom-90"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-02",
+      "category": "historical",
+      "query": "Historical audit query 2: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-81",
+        "atom-91"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-03",
+      "category": "historical",
+      "query": "Historical audit query 3: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-82",
+        "atom-92"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-04",
+      "category": "historical",
+      "query": "Historical audit query 4: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-83",
+        "atom-93"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-05",
+      "category": "historical",
+      "query": "Historical audit query 5: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-94"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-06",
+      "category": "historical",
+      "query": "Historical audit query 6: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-85",
+        "atom-95"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-07",
+      "category": "historical",
+      "query": "Historical audit query 7: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-86",
+        "atom-96"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-08",
+      "category": "historical",
+      "query": "Historical audit query 8: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-87",
+        "atom-97"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-09",
+      "category": "historical",
+      "query": "Historical audit query 9: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-88",
+        "atom-98"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-10",
+      "category": "historical",
+      "query": "Historical audit query 10: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-89",
+        "atom-99"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-11",
+      "category": "historical",
+      "query": "Historical audit query 11: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-80",
+        "atom-90"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-12",
+      "category": "historical",
+      "query": "Historical audit query 12: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-81",
+        "atom-91"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-13",
+      "category": "historical",
+      "query": "Historical audit query 13: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-82",
+        "atom-92"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-14",
+      "category": "historical",
+      "query": "Historical audit query 14: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-83",
+        "atom-93"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-15",
+      "category": "historical",
+      "query": "Historical audit query 15: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-94"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-16",
+      "category": "historical",
+      "query": "Historical audit query 16: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-85",
+        "atom-95"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-17",
+      "category": "historical",
+      "query": "Historical audit query 17: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-86",
+        "atom-96"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-18",
+      "category": "historical",
+      "query": "Historical audit query 18: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-87",
+        "atom-97"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-19",
+      "category": "historical",
+      "query": "Historical audit query 19: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-88",
+        "atom-98"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-20",
+      "category": "historical",
+      "query": "Historical audit query 20: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-89",
+        "atom-99"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-21",
+      "category": "historical",
+      "query": "Historical audit query 21: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-80",
+        "atom-90"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-22",
+      "category": "historical",
+      "query": "Historical audit query 22: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-81",
+        "atom-91"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-23",
+      "category": "historical",
+      "query": "Historical audit query 23: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-82",
+        "atom-92"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-24",
+      "category": "historical",
+      "query": "Historical audit query 24: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-83",
+        "atom-93"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-25",
+      "category": "historical",
+      "query": "Historical audit query 25: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-94"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-26",
+      "category": "historical",
+      "query": "Historical audit query 26: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-85",
+        "atom-95"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-27",
+      "category": "historical",
+      "query": "Historical audit query 27: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-86",
+        "atom-96"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-28",
+      "category": "historical",
+      "query": "Historical audit query 28: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-87",
+        "atom-97"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-29",
+      "category": "historical",
+      "query": "Historical audit query 29: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-88",
+        "atom-98"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-30",
+      "category": "historical",
+      "query": "Historical audit query 30: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-89",
+        "atom-99"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-31",
+      "category": "historical",
+      "query": "Historical audit query 31: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-80",
+        "atom-90"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-32",
+      "category": "historical",
+      "query": "Historical audit query 32: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-81",
+        "atom-91"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-33",
+      "category": "historical",
+      "query": "Historical audit query 33: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-82",
+        "atom-92"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-34",
+      "category": "historical",
+      "query": "Historical audit query 34: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-83",
+        "atom-93"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-35",
+      "category": "historical",
+      "query": "Historical audit query 35: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-84",
+        "atom-94"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-36",
+      "category": "historical",
+      "query": "Historical audit query 36: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-85",
+        "atom-95"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-37",
+      "category": "historical",
+      "query": "Historical audit query 37: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-86",
+        "atom-96"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-38",
+      "category": "historical",
+      "query": "Historical audit query 38: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-87",
+        "atom-97"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-39",
+      "category": "historical",
+      "query": "Historical audit query 39: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-88",
+        "atom-98"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat7-historical-40",
+      "category": "historical",
+      "query": "Historical audit query 40: What was the recorded state and checksum of schema migrations before rolling update?",
+      "gold_atom_ids": [
+        "atom-89",
+        "atom-99"
+      ],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": false,
+      "difficulty": "medium",
+      "metadata": {
+        "audit": true
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-01",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for quantum entanglement photon transport protocol in cluster zone 1?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-02",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for sub-zero cryogenic coolant specification in cluster zone 2?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-03",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for hyperloop magnetic levitation switching frequency in cluster zone 3?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-04",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for warp drive plasma injector calibration in cluster zone 4?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-05",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for astrophysical dark matter detection sensor in cluster zone 5?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-06",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for photosynthetic solar chlorophyll efficiency in cluster zone 6?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-07",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for geothermal magma pressure regulation valve in cluster zone 7?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-08",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for orbital satellite ion thruster propellant in cluster zone 8?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-09",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for quantum entanglement photon transport protocol in cluster zone 9?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-10",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for sub-zero cryogenic coolant specification in cluster zone 10?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-11",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for hyperloop magnetic levitation switching frequency in cluster zone 11?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-12",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for warp drive plasma injector calibration in cluster zone 12?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-13",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for astrophysical dark matter detection sensor in cluster zone 13?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-14",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for photosynthetic solar chlorophyll efficiency in cluster zone 14?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-15",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for geothermal magma pressure regulation valve in cluster zone 15?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-16",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for orbital satellite ion thruster propellant in cluster zone 16?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-17",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for quantum entanglement photon transport protocol in cluster zone 17?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-18",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for sub-zero cryogenic coolant specification in cluster zone 18?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-19",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for hyperloop magnetic levitation switching frequency in cluster zone 19?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-20",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for warp drive plasma injector calibration in cluster zone 20?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-21",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for astrophysical dark matter detection sensor in cluster zone 21?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-22",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for photosynthetic solar chlorophyll efficiency in cluster zone 22?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-23",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for geothermal magma pressure regulation valve in cluster zone 23?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-24",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for orbital satellite ion thruster propellant in cluster zone 24?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-25",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for quantum entanglement photon transport protocol in cluster zone 25?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-26",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for sub-zero cryogenic coolant specification in cluster zone 26?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-27",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for hyperloop magnetic levitation switching frequency in cluster zone 27?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-28",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for warp drive plasma injector calibration in cluster zone 28?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-29",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for astrophysical dark matter detection sensor in cluster zone 29?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-30",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for photosynthetic solar chlorophyll efficiency in cluster zone 30?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-31",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for geothermal magma pressure regulation valve in cluster zone 31?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-32",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for orbital satellite ion thruster propellant in cluster zone 32?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-33",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for quantum entanglement photon transport protocol in cluster zone 33?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-34",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for sub-zero cryogenic coolant specification in cluster zone 34?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-35",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for hyperloop magnetic levitation switching frequency in cluster zone 35?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-36",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for warp drive plasma injector calibration in cluster zone 36?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-37",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for astrophysical dark matter detection sensor in cluster zone 37?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-38",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for photosynthetic solar chlorophyll efficiency in cluster zone 38?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-39",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for geothermal magma pressure regulation valve in cluster zone 39?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    },
+    {
+      "id": "curated-cat8-abstention-40",
+      "category": "out_of_scope",
+      "query": "What is the system implementation requirement for orbital satellite ion thruster propellant in cluster zone 40?",
+      "gold_atom_ids": [],
+      "acceptable_alternative_ids": [],
+      "expected_abstention": true,
+      "difficulty": "medium",
+      "metadata": {
+        "expected_action": "abstain"
+      }
+    }
+  ],
+  "metadata": {
+    "evidence_type": "synthetic_regression_fixture",
+    "total_paragraphs": 100,
+    "total_cases": 320
+  }
+}

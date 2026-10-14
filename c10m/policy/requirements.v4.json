@@ -1,0 +1,699 @@
+{
+  "cells": {
+    "D1": {
+      "amendment": null,
+      "applicable_stages": [
+        "10M-readiness",
+        "100M-acceptance"
+      ],
+      "cell_id": "D1",
+      "class": "D",
+      "entry_criteria": [
+        "identical-pins-and-consumed-top-k",
+        "reference-NarrowIndex-bm25-K1-1.2-B-0.75",
+        "reference-tlsys-query-_dense_rank",
+        "duplicate-zero-vector-cutoff-cases",
+        "per-query-shortlist-certificate-with-widening-fallback"
+      ],
+      "lane_harness": "lane-G diff_harness.d1_check (Lane S adapter)",
+      "mandatory": true,
+      "params": {
+        "B": 0.75,
+        "K1": 1.2,
+        "tie_tol": 1e-12,
+        "tokenization": "lower().split()"
+      },
+      "rule_text": "D1: compare against the actual reference `NarrowIndex.bm25` (K1=1.2, B=0.75) and `tlsys.query._dense_rank` at identical pins and consumed top-k. Lexical scores/order are bit-identical. Dense exact order/scores are the target; reported exact/near ties \u22641e-12 are the only admitted tie qualification, never a general recall allowance. Include duplicate, zero-vector and cutoff cases. Shortlisting requires a per-query correctness certificate and automatic widening/fallback, not an empirical error maximum alone.",
+      "rule_text_sha256": "7903d78c6c891852b4569d2a663e8166ddfd71efe311846be0da60be509027ea",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 113,
+          "mode": "prose",
+          "start": 107
+        }
+      ],
+      "title": "serving parity vs C1 reference legs",
+      "verdict": {
+        "FAIL": "any non-tie mismatch, uncertified shortlist, or missing edge-case coverage",
+        "PASS": "lexical scores/order bit-identical; dense exact order/scores with only <=1e-12 tie qualifications; dup/zero-vector/cutoff cases pass; shortlist certificates hold with widening/fallback",
+        "evidence": [
+          "per-query leg comparisons",
+          "tie classifications",
+          "certificate log"
+        ]
+      }
+    },
+    "D2": {
+      "amendment": null,
+      "applicable_stages": [
+        "10M-readiness",
+        "100M-acceptance"
+      ],
+      "cell_id": "D2",
+      "class": "D",
+      "entry_criteria": [
+        "C1-10M-slice-inputs",
+        "exact-threshold-ties-classified-and-reviewed",
+        "preserved-C1-baseline-unmutated"
+      ],
+      "lane_harness": "lane-G diff_harness.d2_check (Lane O adapter)",
+      "mandatory": true,
+      "params": {
+        "slice": "10M"
+      },
+      "rule_text": "D2: same organization decisions and committed semantics as C1 at the 10M slice, with any exact-threshold tie differences explicitly classified and reviewed.",
+      "rule_text_sha256": "0c42f341cb1449157cceb46087dbb654a35d72b4ac80dcf8dafa19b549c6f603",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 119,
+          "marker": "D2:",
+          "mode": "prose-split",
+          "start": 115
+        }
+      ],
+      "title": "organization parity vs C1 at 10M slice",
+      "verdict": {
+        "FAIL": "any non-tie decision/op difference, or unreviewed tie difference",
+        "PASS": "identical organization decisions and committed semantics vs C1 at the 10M slice; exact-threshold ties explicitly classified and reviewed",
+        "evidence": [
+          "decision traces ref vs cand",
+          "tie classifications"
+        ]
+      }
+    },
+    "D3": {
+      "amendment": null,
+      "applicable_stages": [
+        "10M-readiness",
+        "100M-acceptance"
+      ],
+      "cell_id": "D3",
+      "class": "D",
+      "entry_criteria": [
+        "same-pin-incremental-and-cold-views",
+        "canonical-logical-digest-equal-headers"
+      ],
+      "lane_harness": "lane-G digest + diff_harness.d3_check",
+      "mandatory": true,
+      "params": {},
+      "rule_text": "D3: incremental and cold views have equal canonical logical digests at the same pin.",
+      "rule_text_sha256": "8c43f2e06e93e6bf50cf8d2be9647be0597ca0bdbd58524bad943e6d3fefc476",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 119,
+          "marker": "D3:",
+          "mode": "prose-split",
+          "start": 115
+        }
+      ],
+      "title": "incremental == cold canonical digests",
+      "verdict": {
+        "FAIL": "digest mismatch at equal headers",
+        "PASS": "incremental and cold views have equal canonical logical digests at the same pin (equal headers)",
+        "evidence": [
+          "both digests with headers"
+        ]
+      }
+    },
+    "D4": {
+      "amendment": null,
+      "applicable_stages": [
+        "10M-readiness",
+        "100M-acceptance"
+      ],
+      "cell_id": "D4",
+      "class": "D",
+      "entry_criteria": [
+        "acked-eligible-atoms",
+        "checked-before-placement-completes"
+      ],
+      "lane_harness": "lane-G diff_harness.d4_coverage_check",
+      "mandatory": true,
+      "params": {},
+      "rule_text": "D4: every acknowledged eligible atom is indexed/discoverable before placement completes; it need not be returned for every unrelated query.",
+      "rule_text_sha256": "e992820789e00b073893f6e20e5f556005dd374a81820534639ca29cc19b9e8c",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 119,
+          "marker": "D4:",
+          "mode": "prose-split",
+          "start": 115
+        }
+      ],
+      "title": "acked eligible atoms indexed/discoverable",
+      "verdict": {
+        "FAIL": "any acked eligible atom missing from the index",
+        "PASS": "every acknowledged eligible atom indexed and discoverable before placement completes",
+        "evidence": [
+          "coverage check over acked atoms"
+        ]
+      }
+    },
+    "F1": {
+      "amendment": {
+        "rule_text": "Report TL-side and substrate-owned components separately, without changing the full edit\u2192ACK bar or excluding any time other than measured encoding. If the complete F1 growth bar fails, it remains **NOT ACCEPTED** even if all excess is substrate-owned. That attribution informs a concrete repair or user decision; it cannot manufacture PASS. Try same-contract scheduling, read/write elimination and pipelining before proposing durability changes.",
+        "rule_text_sha256": "a4d9bd9f69f1f2f87ad0fef965170cbe497dbe163bd018d92eac43d763e9bdb9",
+        "spans": [
+          {
+            "doc": "v2",
+            "end": 32,
+            "mode": "prose",
+            "start": 27
+          }
+        ]
+      },
+      "applicable_stages": [
+        "10M-readiness",
+        "100M-acceptance"
+      ],
+      "cell_id": "F1",
+      "class": "F",
+      "entry_criteria": [
+        "frozen-change-classes-8-combos",
+        "homogeneous-encoder-cache-identity",
+        "genuine-cache-miss-edits",
+        "isolated-seeded-branches-or-validated-snapshots",
+        "calibrated-profile-frozen-pre-confirmation",
+        "matched-changes-paired-10M-100M",
+        "bootstrap-seed-20261006-replicates-20000",
+        "no-ACK-delay-no-artificial-wait"
+      ],
+      "lane_harness": "lane-G fcell.Trial F1 split timers",
+      "mandatory": true,
+      "params": {
+        "bootstrap_seed": 20261006,
+        "endpoints": [
+          "10M",
+          "100M"
+        ],
+        "exclude_from_clock": [
+          "encode_s"
+        ],
+        "ratio_bar": 1.5,
+        "replicates": 20000
+      },
+      "rule_text": "Measure edit arrival\u2192durable ACK, splitting chunking, cache lookup, actual encode, commit/fsync and foreground placement. Exclude only measured encoding time from its acceptance clock. For matched changes, the one-sided 95% upper bootstrap bounds of both p50 and p95 ratios, 100M/10M, must be \u22641.5. Report absolute latency; no absolute F1 ceiling is introduced.",
+      "rule_text_sha256": "3682352cc238f3e70d2ae17eb805060eb331d1da26de8ec698b29e5791c5e214",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 43,
+          "mode": "table",
+          "start": 43
+        }
+      ],
+      "title": "edit arrival->durable ACK growth",
+      "verdict": {
+        "FAIL": "either bound > 1.5; full bar NOT ACCEPTED even if all excess is substrate-owned (v2)",
+        "PASS": "one-sided 95% upper bootstrap bounds of p50 AND p95 100M/10M ratios <= 1.5 on matched changes (acceptance clock excludes only measured encode)",
+        "evidence": [
+          "per-trial F1 split timers",
+          "paired ratios",
+          "bootstrap bounds",
+          "absolute latencies",
+          "TL-side vs substrate split (v2)"
+        ]
+      }
+    },
+    "F2": {
+      "amendment": {
+        "rule_text": "Use **124 confirmation trials per frozen size/class/mode, with at most two 5-second exceedances**. This replaces v1's 59/zero primary design; do not switch between designs after confirmation results. Retain every observation, root-cause every exceedance, and fail any unresolved product-attributable defect regardless of the count. An observed systematic 5\u201310 s attach path is a product performance finding, not an infrastructure exception.\n\nCodex independently checked exact binomial probabilities at p=0.05: P[X\u22640 | n=59] = 0.04849453; P[X\u22642 | n=124] = 0.04952978. Both support the same 95% one-sided per-stratum p95 ceiling. Neither is a simultaneous 95% confidence claim across all strata. Scouting is not confirmation; preserve separate scope labels. Existing bootstrap growth rules, 5 s / 1.5\u00d7 targets and n\u2265300 for a p99 claim remain unchanged.",
+        "rule_text_sha256": "b9377bc5cefb78f45c3de76abeb5259d6ff617e8ebe08c26fc9ae6695e680f16",
+        "spans": [
+          {
+            "doc": "v2",
+            "end": 23,
+            "mode": "paras",
+            "start": 11
+          }
+        ]
+      },
+      "applicable_stages": [
+        "10M-readiness",
+        "100M-acceptance"
+      ],
+      "cell_id": "F2",
+      "class": "F",
+      "entry_criteria": [
+        "frozen-change-classes-8-combos",
+        "modes-same-process-and-fresh-reader-process",
+        "new-evidence-in-lexical-AND-dense-legs",
+        "full-publish-attach-query-assembly-in-clock",
+        "confirmation-design-124-2-declared-before-results",
+        "all-observations-retained-every-exceedance-root-caused",
+        "calibrated-profile-frozen-pre-confirmation"
+      ],
+      "lane_harness": "lane-G fcell.Trial + baseline_probe fresh_answer_markers",
+      "mandatory": true,
+      "params": {
+        "ceiling_s": 5.0,
+        "design_alpha": 0.05,
+        "design_k": 2,
+        "design_n": 124,
+        "design_p_tail": 0.05,
+        "legs": [
+          "lexical",
+          "dense"
+        ],
+        "modes": [
+          "same-process",
+          "fresh-reader-process"
+        ]
+      },
+      "rule_text": "Durable ACK\u2192first fresh-pin answer demonstrating new evidence in both lexical and dense legs: p95 \u22645 s for every frozen change class, in same-process and fresh-reader-process modes. Include necessary publication, attach, query and evidence assembly in the clock. Never delay ACK or add artificial waiting to improve a ratio.",
+      "rule_text_sha256": "ff8603d43cc7157027e346cc56d89947171e48afbe76698c03fa1ae2805f5ced",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 44,
+          "mode": "table",
+          "start": 44
+        }
+      ],
+      "title": "ACK->first fresh-pin answer ceiling",
+      "verdict": {
+        "FAIL": "> 2 exceedances in any stratum, or any unresolved product-attributable defect regardless of count; systematic 5-10 s attach is a product finding (v2)",
+        "PASS": "p95 <= 5 s in EVERY frozen class/action/mode stratum under the declared 124/<=2 design (v2 primary); zero unresolved product-attributable defects",
+        "evidence": [
+          "124 observations per stratum",
+          "every exceedance with trace + root cause + attribution"
+        ]
+      }
+    },
+    "F3": {
+      "amendment": null,
+      "applicable_stages": [
+        "10M-readiness",
+        "100M-acceptance"
+      ],
+      "cell_id": "F3",
+      "class": "F",
+      "entry_criteria": [
+        "F2-evidence-at-10M-and-100M-plus-mid-growth-point",
+        "matched-changes-paired",
+        "bootstrap-seed-20261006-replicates-20000"
+      ],
+      "lane_harness": "lane-G sampling bootstrap over F2 evidence",
+      "mandatory": true,
+      "params": {
+        "bootstrap_seed": 20261006,
+        "endpoints": [
+          "10M",
+          "mid",
+          "100M"
+        ],
+        "ratio_bar": 1.5,
+        "replicates": 20000
+      },
+      "rule_text": "For F2, both p50 and p95 100M/10M ratios have one-sided 95% upper bootstrap bounds \u22641.5. Record the mid-growth point too.",
+      "rule_text_sha256": "0029eb4016ab441f01d6978942047920da7d46a694f8aef1653dcc7c7e7fcd85",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 45,
+          "mode": "table",
+          "start": 45
+        }
+      ],
+      "title": "F2 growth 100M/10M",
+      "verdict": {
+        "FAIL": "either bound > 1.5, or mid-growth point missing",
+        "PASS": "one-sided 95% upper bootstrap bounds of p50 AND p95 100M/10M F2 ratios <= 1.5; mid-growth point recorded",
+        "evidence": [
+          "F2 distributions at 10M/mid/100M",
+          "paired ratios",
+          "bootstrap bounds"
+        ]
+      }
+    },
+    "F4": {
+      "amendment": null,
+      "applicable_stages": [
+        "10M-readiness",
+        "100M-acceptance"
+      ],
+      "cell_id": "F4",
+      "class": "F",
+      "entry_criteria": [
+        "pin-advance-and-compaction-swap-coverage",
+        "warm-latency-by-all-required-retrieval-classes",
+        "cold-labels-accurate",
+        "n300-per-stratum-for-any-p99-claim"
+      ],
+      "lane_harness": "lane-G trial receipts by class/condition",
+      "mandatory": true,
+      "params": {
+        "p99_min_n": 300
+      },
+      "rule_text": "Report first-query latency after pin advance and compaction swap, and warm latency by all required retrieval classes. Include relation refresh, pruning, MMR and dossier/evidence assembly. Label process-cold and storage-cache-cold separately. Any p99 claim requires at least 300 observations in the claimed stratum.",
+      "rule_text_sha256": "27fae21a18a7ad5bfb56f2265b3b62e885951ff777463d858b094adde00966dc",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 46,
+          "mode": "table",
+          "start": 46
+        }
+      ],
+      "title": "first-query / warm latency reporting",
+      "verdict": {
+        "FAIL": "missing coverage, mislabeled cold conditions, or p99 claimed with n<300",
+        "PASS": "first-query latency after pin advance and compaction swap reported; warm latency by all required classes; cold labels accurate; p99 claims only with n>=300 in stratum",
+        "evidence": [
+          "latency tables by class/condition",
+          "sample counts"
+        ]
+      }
+    },
+    "F5": {
+      "amendment": null,
+      "applicable_stages": [
+        "10M-readiness",
+        "100M-acceptance"
+      ],
+      "cell_id": "F5",
+      "class": "F",
+      "entry_criteria": [
+        "calibrated-profile-frozen-all-terms-named-capped",
+        "counters-on-edit-ACK-fresh-answer-path",
+        "native-and-failed-retried-work-counted",
+        "no-whole-population-copies-or-replays-hidden",
+        "separate-bounds-for-scans-construction-compaction"
+      ],
+      "lane_harness": "lane-G counters.Counters + frozen profile budgets",
+      "mandatory": true,
+      "params": {
+        "budget_source": "frozen-profile-derived-limits"
+      },
+      "rule_text": "Enforce profile budgets over the entire edit\u2192ACK\u2192fresh-answer path: catalog rows, candidate/atom scoring, bytes read/written/copied, files/artifacts, log replay, ancestor versions and relevant relation work. Count native work and failed/retried work. Every store-size-dependent term is named, capped and measured; exceedance or growth beyond its declared bound FAILS. Publication and placement cannot hide whole-population copies or replays. Normal query scans, cold construction and background compaction have separate explicit bounds and accounting; they are not mislabeled as constant work. Their actual contribution still counts in F1\u2013F4 when on that path.",
+      "rule_text_sha256": "5b81819191c454e8b76cb7664f82b8c308127ab20680fd46b61114c44c298f02",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 47,
+          "mode": "table",
+          "start": 47
+        }
+      ],
+      "title": "profile budget enforcement",
+      "verdict": {
+        "FAIL": "any exceedance or growth beyond a declared bound",
+        "PASS": "every named store-size-dependent term within its declared bound on the edit->ACK->fresh-answer path; all work counted incl. native/failed/retried",
+        "evidence": [
+          "counter snapshots per scope",
+          "budget checks",
+          "declared bounds"
+        ]
+      }
+    },
+    "F6": {
+      "amendment": null,
+      "applicable_stages": [
+        "10M-readiness",
+        "100M-acceptance"
+      ],
+      "cell_id": "F6",
+      "class": "F",
+      "entry_criteria": [
+        "frozen-mixed-admission-drain-compaction-schedule",
+        "stalled-compactor-test",
+        "slow-reader-test",
+        "matched-idle-workload-tail-comparison"
+      ],
+      "lane_harness": "lane-G counters + mixed-schedule driver (pending C2 seams)",
+      "mandatory": true,
+      "params": {
+        "schedule": "frozen-mixed-admission-drain-compaction"
+      },
+      "rule_text": "Under the frozen mixed admission/drain/compaction schedule, debt stays within declared limits and drains or invokes bounded backpressure; coverage is never dropped. Enforce delta, segment, retained-view, WAL, memory, oldest-debt and mixed-load tail ceilings from the frozen profile. Test a stalled compactor and slow reader. Compare tails with the matched idle workload; report confidence and sample scope.",
+      "rule_text_sha256": "b18166fa3aba585ed9ebca7b22d98f6d584346d36ae8d1aad55700e149afead5",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 48,
+          "mode": "table",
+          "start": 48
+        }
+      ],
+      "title": "mixed-load debt / backpressure",
+      "verdict": {
+        "FAIL": "debt over limit, coverage dropped, or missing stall/slow-reader evidence",
+        "PASS": "debt within declared limits under the frozen mixed schedule; drains or bounded backpressure; coverage never dropped; stalled-compactor and slow-reader tests pass; tails compared vs matched idle",
+        "evidence": [
+          "debt time series",
+          "ceiling checks",
+          "tail comparison with confidence + scope"
+        ]
+      }
+    },
+    "F7": {
+      "amendment": {
+        "rule_text": "Preserve v1's positive lower-bound guided-minus-matched-flat rule and each stratum's nonnegative observed mean, source-grounded probe battery, resolved routes and xholon ablation. Add a full Narrow lexical+dense baseline at the same pin, with its actual work and consumed-head configuration frozen. Report recall/work relative to that baseline and evidence supplied through resolved hierarchy routes that this flat consumed head misses, by stratum. This is a retrieval reference ceiling, not proof of perfect corpus recall.\n\nIn addition to the original F7 rule, require either:\n\n- a one-sided 95% lower bound of paired guided-minus-full-flat recall \u22650 (zero noninferiority margin), with a one-sided 95% upper bound of the calibrated total-work ratio strictly <1; or - at least one independently source-verified additional expected evidence item supplied by a resolved hierarchy route but absent from the frozen flat head, with all original F7 and per-class capability bars still passing.\n\nFreeze pairing, resampling units and calibrated work accounting before C2 arm results. Use actual routing/scoring and auxiliary work, never returned candidate count alone. These additions cannot justify weakening the old matched-work rule, cherry-picking inputs, or broadening the flat head after results. If both alternatives fail, record a usefulness finding; do not add depth or lower the bar as a substitute for capability.",
+        "rule_text_sha256": "8bb39e82df11b4380ae96a3d0269e47be14471872d6ab7e4517ccbc459ef907f",
+        "spans": [
+          {
+            "doc": "v2",
+            "end": 58,
+            "mode": "paras",
+            "start": 36
+          }
+        ]
+      },
+      "applicable_stages": [
+        "10M-readiness",
+        "100M-acceptance"
+      ],
+      "cell_id": "F7",
+      "class": "F",
+      "entry_criteria": [
+        "probe-groups-200-plus-40-per-stratum-frozen-pre-arms",
+        "expected-evidence-group-assignments-dedup-resampling-frozen",
+        "identical-pins-guided-vs-flat",
+        "matched-total-scoring-work-mismatch-le-0.25",
+        "full-Narrow-baseline-at-same-pin-frozen-v2",
+        "pairing-resampling-calibrated-work-accounting-frozen-v2",
+        "per-class-passage-pair-reachability-bars",
+        "resolved-parent-leaf-atom-routes",
+        "xholon-on-off-ablation"
+      ],
+      "lane_harness": "lane-G f7_control + frozen probe battery",
+      "mandatory": true,
+      "params": {
+        "bootstrap_seed": 20261006,
+        "matched_work_mismatch_max": 0.25,
+        "per_stratum_min": 40,
+        "probe_groups_min": 200,
+        "replicates": 20000,
+        "strata": [
+          "rare",
+          "cross-topic",
+          "overlapping",
+          "late-arriving",
+          "long-multi-topic"
+        ]
+      },
+      "rule_text": "Execute the useful-organization test below, retain v3 G2's resolved parent\u2192leaf\u2192atom route requirement, and report leaf/parent coherence and xholon ablation.\n\nFreeze at least 200 source-grounded probe groups, with at least 40 assigned to each of rare, cross-topic, overlapping, late-arriving and long multi-topic. Freeze expected evidence, group assignments, deduplication and resampling units before running the arms. Related probes share a resampling group.\n\nCompare guided and flat arms at identical pins using v3's resolved traces and matched-total-scoring-work rule (relative mismatch \u22640.25, with all routing and atom scoring included). Disclose bytes, auxiliary work and wall time for both; returned candidate count alone is not a work measure. Score recall of the frozen expected evidence items. The one-sided 95% lower bound of the mean paired guided-minus-flat recall must be **strictly positive**, and each of the five strata's observed mean difference must be nonnegative. Existing per-class passage/pair/reachability bars remain mandatory.\n\nRun a separate xholon-on/off ablation with the same declared work accounting. Report within-/between-group similarity, source diversity, overlap and size distributions as diagnostics. These do not authorize changing memberships, removing the xholon layer or lowering the usefulness bar. If F7 fails, preserve the evidence and repair or refer the necessary semantic decision to Codex.",
+      "rule_text_sha256": "acad9833c2ee7ced7a9d100fd888f5f9dfe319856d6bc42459e49c93db8a7ae8",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 49,
+          "mode": "table",
+          "start": 49
+        },
+        {
+          "doc": "v1",
+          "end": 103,
+          "mode": "paras",
+          "start": 85
+        }
+      ],
+      "title": "useful-organization test",
+      "verdict": {
+        "FAIL": "v1 rule fails, or per-class bars fail, or both v2 alternatives fail (recorded as usefulness finding; no depth/bar change as substitute)",
+        "PASS": "v1: lower95 guided-minus-matched-flat recall > 0 AND every stratum mean >= 0 AND per-class bars pass; v2: PLUS either (lower95 guided-minus-full-flat >= 0 AND upper95 work-ratio < 1) OR (>=1 source-verified additive evidence item via a resolved route, absent from the flat head)",
+        "evidence": [
+          "frozen probe battery",
+          "paired recalls",
+          "bootstrap bounds",
+          "work accounting",
+          "ceiling comparison",
+          "additive items",
+          "ablation + diagnostics"
+        ]
+      }
+    },
+    "FI": {
+      "amendment": null,
+      "applicable_stages": [
+        "10M-readiness",
+        "100M-acceptance"
+      ],
+      "cell_id": "FI",
+      "class": "D",
+      "entry_criteria": [
+        "mandatory-rows-4-5-6-7-10-15-18-22-plus-16-17-19-before-10M",
+        "all-remaining-applicable-rows-before-100M",
+        "future-only-claims-carry-recorded-applicability-reason",
+        "mixed-generation-consistency-ten-op-cap-prefixes"
+      ],
+      "lane_harness": "lane-G fi_harness matrix + product seams",
+      "mandatory": true,
+      "params": {
+        "mandatory_rows": [
+          4,
+          5,
+          6,
+          7,
+          10,
+          15,
+          16,
+          17,
+          18,
+          19,
+          22
+        ],
+        "ten_op_cap": 10
+      },
+      "rule_text": "Mandatory before C2 10M: architecture fault-surface rows 4, 5, 6, **7**, 10, 15, 18, 22, plus organization accounting/stability/reverse-map tests 16, 17, 19. Complete all remaining applicable rows before 100M acceptance. A genuinely future-only feature has a recorded applicability reason; deployed behavior cannot be marked future-only. Mixed-generation consistency and valid prefixes under the ten-op cap are required, not inferred from unit parity.",
+      "rule_text_sha256": "d387f13a4b129836f10c0063a6d7ae3a129cfdaad16f777dcbd8721265b717f5",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 126,
+          "mode": "prose",
+          "start": 121
+        }
+      ],
+      "title": "fault-surface + organization accounting tests",
+      "verdict": {
+        "FAIL": "any applicable row unexecuted/failing, or a deployed behavior marked future-only",
+        "PASS": "all mandatory rows executed and passing before 10M; all remaining applicable rows executed and passing before 100M; mixed-generation + ten-op-cap prefix checks pass",
+        "evidence": [
+          "per-row verdicts with seams/fault logs",
+          "applicability record"
+        ]
+      }
+    }
+  },
+  "global_rules": {
+    "aggregation": {
+      "FAIL_CLOSED": "missing, skipped, unexecuted, unknown or unbound mandatory checks cannot yield PASS; unknown cell ids, missing evidence for PASS, and undeclared PENDING all FAIL",
+      "PASS": "every applicable mandatory cell executed with evidence and passing; declared size-gated PENDING allowed only at 10M-readiness for the 100M endpoints of F1/F3",
+      "REFUSED": "unsupported requirements versions refuse before opening a writable store; a runner that ignores F/D fields is not a v4 runner"
+    },
+    "governing_preservation": {
+      "rule_text": "Preserve all v3 G0\u2013G6 behavioral requirements, class configurations, source-span fidelity, approval-bound retirement, G4 exact equal chunk/TOK-v1 work at at least three growing nonempty seeded bases, and G6 at least three pins \u00d7 five queries with its 8192 MiB oracle-worker address-space limit. That limit is not a cap on the whole deployment. Record whole-process-tree resources separately.\n\nG4's serving-publication mechanism becomes validated incremental publication on the actual C2 backend. Preserve its fresh-pin correctness, mixed workload and cold-attach obligations. Time actual product attach/publication/query work; time a separate reference reconstruction explicitly as oracle work. Neither an untimed production rebuild nor an oracle-only backend can pass C2 freshness.",
+      "rule_text_sha256": "2936f78b2f50105f495f4c78a886c9da4160090714803720fc26c7e04f824901",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 26,
+          "mode": "paras",
+          "start": 16
+        }
+      ]
+    },
+    "gpu_scope_v2": {
+      "rule_text": "## 4. GPU scope Reuse the existing verified 100M corpus/cache. The two-worker Windows encode supervisor stays unbuilt until a genuine missing-key/new-corpus trigger. Cloud GPU availability is not a dependency for this accepted 100M campaign.",
+      "rule_text_sha256": "e56b83e4ab3cde4c3bb067e48b8e946042b23ab81a2af680204e44746cc2b978",
+      "spans": [
+        {
+          "doc": "v2",
+          "end": 64,
+          "mode": "prose",
+          "start": 60
+        }
+      ]
+    },
+    "profile_bindings_admission": {
+      "rule_text": "Keep all tunables in one versioned profile. The architecture's numeric seeds are provisional: derive limits from VM calibration, workload and end-to-end scouting before confirmation. Preserve semantic thresholds and caps for parity. Record target budgets, derivation, measured unit costs, safety allowance and the selected rows/bytes/count/time ceilings, including cumulative per-edit catalog cost. Bounds cannot depend on the live population or expand silently as N grows. The initial 8 ms catalog and 10% tail-inflation targets are tuning seeds; replace them only in the recorded pre-confirmation profile, while preserving Q1/P-4 and the semantic contract. No post-result accommodation.\n\nFreeze source/dependency manifest, executable gate capabilities, compiled criteria, profile/calibration, corpus/order, queries/relations, geometry/cache, runtime, suite record, store-build provenance and store pins. Changing any bound item requires a new identified freeze and affected requalification. Profile/serving changes can reuse a compatible store; a store-determining change needs recorded differential applicability proof or a rebuild.\n\nIndependent review challenges C2 10M readiness and final 100M acceptance; at 100M independently reproduce F2/F3 and sample D1\u2013D3 on isolated branches. Only actual independent PASS of all applicable final requirements satisfies the standing conditional acceptance policy.",
+      "rule_text_sha256": "25fc8535f14d9f770a7449efc164b9f73cffd444946a13b834fac353a4048b90",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 150,
+          "mode": "paras",
+          "start": 130
+        }
+      ]
+    },
+    "stage_scope": {
+      "rule_text": "At 10M, execute all applicable G/F/D checks and the required fault tests; the 100M endpoint of F1/F3 remains explicitly PENDING. A 10M readiness PASS does not certify the 10M\u2192100M growth claim. At 100M, those pending obligations must execute and pass before acceptance. Smaller development prefixes provide early slope evidence; they do not replace the frozen 10M and 100M endpoints.",
+      "rule_text_sha256": "b0e26b5f67bfabc0073f6b7b9800939ea158d6871ea1f609290fcf7cb74ff788",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 37,
+          "mode": "prose",
+          "start": 33
+        }
+      ]
+    },
+    "stages": {
+      "100M-acceptance": {
+        "note": "pending obligations must execute and pass before acceptance",
+        "pending_allowed": []
+      },
+      "10M-readiness": {
+        "note": "a 10M readiness PASS does not certify the 10M->100M growth claim",
+        "pending_allowed": [
+          {
+            "cell": "F1",
+            "reason": "size-gated-100M",
+            "what": "100M endpoint of the growth ratio"
+          },
+          {
+            "cell": "F3",
+            "reason": "size-gated-100M",
+            "what": "100M endpoint of the growth ratio"
+          }
+        ]
+      }
+    },
+    "version_refusal": {
+      "rule_text": "The runner must refuse unsupported requirement versions **before opening a writable store**. A v3 runner that ignores F/D fields is not a v4 runner. Missing, skipped, unexecuted, unknown or unbound mandatory checks cannot yield PASS. Record each check's applicability and actual execution evidence.",
+      "rule_text_sha256": "a685926af4e257900522e634b687c8e4e97ad35c3e4859a0c80084179afa53a5",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 31,
+          "mode": "prose",
+          "start": 28
+        }
+      ]
+    },
+    "workload_and_statistics": {
+      "rule_text": "Freeze four change classes: 6 chunks; 18 chunks; 111 chunks; a batch of ten 18-chunk documents. Each is tested as add and as correction (new document ID plus approval-bound retirement). That gives eight class/action combinations. Ground query expectations in actual source bytes before results. Preserve the homogeneous encoder/cache identity. Include genuine cache-miss edits and report actual CPU encoding separately; a cache-only run cannot stand for that workload. Large-document tails beyond these classes are disclosed diagnostics.\n\nScouting/tuning: at least 30 observations per size/class. Confirmation: at least 59 observations per size/class/mode, with zero F2 exceedances of 5 s. The latter supports each tested stratum's p95 ceiling at 95% one-sided confidence because 0.95^59 <0.05; it is not a simultaneous 95% claim for every stratum. If a simultaneous claim is made, freeze the appropriate multiplicity adjustment and sample size first. Raw exceedances are failures; do not erase them by optional resampling. Corrections after a defect require new separately identified confirmation evidence with the old failure preserved.\n\nFreeze bootstrap seed 20261006, 20,000 replicates, a one-sided 95% upper percentile bound for F1/F3 and lower bound for F7. Resample independent workload units; use paired/block or cluster resampling where seeds, documents or runs are shared. Record the frozen pairing/grouping and independence assumptions. No changing estimator, sample population, workload or seed after seeing results.\n\nDeclare hardware, reader mode, cache condition and concurrency before each confirmation. Label cold/warm conditions accurately and report their limits; fresh process does not imply cold OS page cache. Use isolated seeded branches or validated snapshots, with all post-edit population changes recorded. Avoid an unnecessary full physical store copy per trial. Never mutate the preserved C1 baseline, the sealed C2 bulk base, or a live campaign during a side probe.",
+      "rule_text_sha256": "7341a32093e0cae83de272ebf3254a6a67fd63f55cfef4fab0f4cdb733ca4cb8",
+      "spans": [
+        {
+          "doc": "v1",
+          "end": 81,
+          "mode": "paras",
+          "start": 53
+        }
+      ]
+    }
+  },
+  "requirements_id": "c2-criteria-v4-20261007",
+  "requirements_schema_version": "1.0.0",
+  "sources": [
+    {
+      "doc": "v1",
+      "path": "tl-eval/evidence/m2-2026-10-06/coordination/c2-delivery-20261006T1846Z/C2-CRITERIA-REQUIREMENTS.v1.md",
+      "role": "frozen criteria (Codex freeze v1)",
+      "sha256": "81c6a3cf584ec63e08db79e4ff3b9279e9382e0c8ca4d86af4105452f10eb038"
+    },
+    {
+      "doc": "v2",
+      "path": "tl-eval/evidence/m2-2026-10-06/coordination/c2-review-20261007T0210Z/C2-CRITERIA-AMENDMENT.v2.md",
+      "role": "pre-confirmation amendment (F2 design, F1 attribution, F7 ceiling, GPU scope)",
+      "sha256": "c9a909d2925d4789613c55d807aff53be61066c26ae95803fdb68c9dc0f8bc16"
+    }
+  ]
+}
