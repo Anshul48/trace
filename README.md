@@ -1,203 +1,208 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-# TRACE — stack-fork candidate with a receipt-backed 10M qualification
+# TRACE — Self-Organizing Retrieval Engine (10M Qualification & Reproducible Stack)
+
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Source Freeze SHA-256](https://img.shields.io/badge/SOURCEFREEZE-38c66bef-success.svg)](freeze-src/cand/SOURCEFREEZE.json)
+[![Qualification Status](https://img.shields.io/badge/10M_Qualification-PASS_(12,973s)-brightgreen.svg)](docs/BENCHMARKS.md)
+[![Oracle Replay](https://img.shields.io/badge/Oracle_Replay-240%2F240_Exact-brightgreen.svg)](receipts/result.json)
 
 ![TRACE 10M receipt: 10,003,381 tokens, 12,973 s wall, guided recall 0.73 vs flat 0.056 in all-sources mode, 207 frozen files](assets/trace-hero.svg)
 
-TRACE ingests a token corpus into a two-level self-organizing store, drains
-it through publication cycles, and serves hierarchy-routed (**guided**) and
-brute-force (**flat**) similarity queries over the same vectors. This
-repository publishes one exact candidate — the stack fork in
-[`freeze-src/`](freeze-src/cand/SOURCEFREEZE.json) — together with the VM
-receipts that qualify it, so every headline number below can be traced to a
-staged JSON record.
+TRACE is an experimental research retrieval engine designed for self-organizing, hierarchical similarity search over dense token corpora. It ingests document streams, groups vector representations into a two-level hierarchical index via centroid averaging and adaptive leaf/parent placement, bounds partition skew with local repair, and serves both hierarchy-routed (**guided**) and brute-force (**flat**) queries over identical vector sets.
 
-> **Identity, precisely.** `38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54`
-> is the SHA-256 of the `SOURCEFREEZE.json` manifest file (207 pinned files).
-> It is a **source-freeze digest, not a Git commit**. Run
-> `python3 tools/verify_freeze.py` to rehash all 207 files against it.
+This repository publishes one exact, immutable candidate — the stack-fork in [`freeze-src/cand/`](freeze-src/cand/SOURCEFREEZE.json) — together with raw qualification receipts documenting a complete **10,003,381-token / 13,081-document / 63,441-atom** run executed on GCP VM `trace-build500`. Every headline metric reported below is derived verbatim from staged JSON records.
 
-## Start here
+> **Identity & Source Integrity:** `38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54` is the SHA-256 digest of the [`SOURCEFREEZE.json`](freeze-src/cand/SOURCEFREEZE.json) manifest across all 207 pinned candidate source files. It is an immutable source freeze, not a Git commit. Run `python3 tools/verify_freeze.py` to rehash all 207 files locally.
 
-| If you want… | Read |
-|---|---|
-| The design and the 5-fix stack | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| A file-by-file tour of the frozen code | [docs/CODE-TOUR.md](docs/CODE-TOUR.md) |
-| Every benchmark number, gate, and condition | [docs/BENCHMARKS.md](docs/BENCHMARKS.md) |
-| Pins, hardware, and what re-runs locally | [docs/REPRO.md](docs/REPRO.md) |
-| The proposed GitHub About text and topics | [docs/ABOUT.md](docs/ABOUT.md) |
-| Small-scale real-data reproduction (20k prefix) | [repro-20k/README.md](repro-20k/README.md) |
-| Manual Gemini image prompts + captions | [docs/gemini-prompts/README.md](docs/gemini-prompts/README.md) |
-| The previous publication, preserved byte-exact | [archive/previous-c2-publication/INVENTORY.md](archive/previous-c2-publication/INVENTORY.md) |
+---
 
-## Measured qualification (VM `trace-build500`, 2026-10-13)
+## Three Ways to Explore TRACE
 
-All values are read from [`receipts/`](receipts/result.json)
-(`result.json`, `VM-10M-ACCEPTANCE.json`, `AUDIT-RESULT.json`,
-`source-pin.json`, `cap-derivation.json`). **Scope labels, not fine print:**
-these are shared-VM measurements under *experimental derived caps*; the
-recall figures are **harness recall and oracle agreement on the recorded
-probe protocol — not semantic IR quality, nDCG, BM25 comparison, SOTA, or a
-universal “5-second” guarantee**. No numbers from any other campaign are
-mixed into this record.
+### 1. [Explore the Qualified 10M Run (Browser Explorer)](docs/explorer/index.html)
+Launch the zero-dependency interactive explorer in [`docs/explorer/`](docs/explorer/index.html) (or via GitHub Pages):
+* **Deterministic Structural Hierarchy**: Progressively inspect the qualified 2-tier tree (Root &rarr; 3,711 Parents &rarr; 9,177 Leaves &rarr; 63,441 Atoms). Coordinates represent structural topology, not dimensionality reduction or embedding distance.
+* **Per-Query Work & Routing Replay**: Step through algorithm routing stages (parent scoring &rarr; top-parent selection &rarr; DFS child descent &rarr; leaf atom ranking) with work distributions across 240 evaluation queries.
+* **Lifecycle & Resilience Timeline**: Trace the 9 qualification phases, reader concurrency under ingestion, SIGKILL crash recovery (exit code -9), and repair to zero debt.
+* *Note on 10M Topology Export*: When read-only VM export is pending, the explorer displays full qualification telemetry, per-query distributions, and the verified local 20k execution artifact with clear status demarcation.
 
-| Outcome (measured) | Value |
-|---|---|
-| Corpus | 10,003,381 TOK_V1 tokens / 13,081 docs / 63,441 atoms, 0 cache misses |
-| Qualification wall | 12,973.17 s (~3.6 h), rc 0, status PASS |
-| Convergence | 0 pending documents; `repair_to_zero` debt 5,314 → 0 (5 iterations) |
-| Closed ledger | 166,457 commits / 166,457 dedup / 0 intake (caps 669,436 / 1,000,000) |
-| Acceptance gate | `VM-10M-ACCEPTANCE.json`: PASS, hardened, `manifest_match true`, fixtures 121/121 |
-| Audit gate | `AUDIT-RESULT.json`: `VERIFIED_VM_10M_RECEIPT` (240 queries) |
-| Oracle replay | `VERIFIED_PASS_READONLY_ORACLE_REPLAY`: 240/240 exact, store before == after (229,927 files) |
-| Final source head | `e8334c07-731d-4ff9-a292-8329b89c41b9:0:166457` |
+### 2. [Inspect Authentic Recorded Evidence & Receipts](receipts/result.json)
+Every claim is backed by immutable receipts generated on GCP instance `trace-build500` (2026-10-13):
+* [`receipts/result.json`](receipts/result.json): Complete qualification run record (`status: PASS`, wall 12,973.17 s, 166,457 closed ledger commits).
+* [`receipts/VM-10M-ACCEPTANCE.json`](receipts/VM-10M-ACCEPTANCE.json): Acceptance gate pass, 121/121 fixtures passing, store manifest match.
+* [`receipts/AUDIT-RESULT.json`](receipts/AUDIT-RESULT.json): Independent oracle verification with **240/240 exact matches** (worst absolute score difference: 0.0).
+* Retained store digest: `52e884393b2abd66b46ead13d1831238510dbf5f6738e5b398ea9334f0edca38` over 229,927 store files (~2.87 GB).
 
-### Both recorded probe modes, with matched-flat controls
+### 3. [Run the Frozen 20k Engine Locally](repro-20k/README.md)
+Execute the actual frozen candidate harness (`product_pilot.py`) over a portable, verified 20k-token prefix (88 documents, 144 atoms) in an isolated environment without global package modification:
+```bash
+./install_and_run.sh
+```
+The installer automatically discovers `uv` or Python 3.12, sets up `.trace-demo-env`, verifies the 207 frozen files, unpacks and hashes the 20k prefix data, executes the frozen pilot to a `PASS` verdict, exports the run topology, and serves the local explorer at `http://127.0.0.1:8765/`. All prior runs are preserved under `local-runs/` with zero file deletions.
 
-The harness ran 120 probes in **each** of two modes. Guided and flat arms
-score the same mean number of rows per query in each mode (matched work);
-that control is what makes the pairs comparable.
+---
 
-| Mode | Guided recall@10 | Matched-flat recall@10 | Mean scoring rows (guided = flat) | Guided p50 wall |
-|---|---:|---:|---:|---:|
-| `all_sources` (LSO off) | 0.73 | 0.0558 | 3,865.775 | 33.19 ms |
-| `leave_source_out` (LSO on) | 0.4758 | 0.0483 | 3,836.24 | 33.24 ms |
+## Core Mechanism & Self-Organization
 
-| Family | `all_sources` guided / flat | `leave_source_out` guided / flat |
+TRACE implements two-level dynamic hierarchical clustering directly inside the storage engine:
+
+```text
+[Document Stream] ──> Tokenization (TOK_V1) ──> Atom Chunking (Vectors)
+                              │
+                              ▼
+                       Intake Ledger
+                              │
+                      [Batched Drain]
+                              │
+      ┌───────────────────────┴───────────────────────┐
+      ▼                                               ▼
+Leaf Placement (decide_leaf)            Parent Placement (decide_parent)
+- Clustered via centroid similarity     - Groups leaves into parent holons
+- Centroids updated incrementally       - Centroids computed by leaf averaging
+      │                                               │
+      └───────────────────────┬───────────────────────┘
+                              ▼
+                    [Local Repair Hook]
+                    - Rebalances skewed leaves (threshold 0.55)
+                    - Rebalances parent edges (threshold 0.45)
+                    - repair_to_zero drains residual debt to 0
+```
+
+1. **Document Intake & Batched Drain**: Input text is tokenized into word chunks ("atoms") and appended into a journaled intake backlog. During periodic batched drain cycles (`_drain_locked_batched` in [`tlsys/org_service.py`](freeze-src/cand/fork/tl-sys/tlsys/org_service.py)), unindexed atoms are transferred into the hierarchical index.
+2. **Centroid Placement & Adaptive Membership**:
+   - Atoms are assigned to leaf clusters via `decide_leaf` in [`tlsys/place.py`](freeze-src/cand/fork/tl-sys/tlsys/place.py), updating leaf centroids incrementally (`join_descriptor`).
+   - Leaves are clustered into parents via `decide_parent` in [`tlsys/place.py`](freeze-src/cand/fork/tl-sys/tlsys/place.py), maintaining parent centroids as member averages.
+3. **Local Repair**: Skewed clusters are rebalanced via [`tlsys/local_repair.py`](freeze-src/cand/fork/tl-sys/tlsys/local_repair.py). In qualification, `repair_to_zero` executed 5 iterations, reducing initial repair debt from 5,314 to 0.
+4. **Query Routing (`guided()`)**:
+   - **Phase 1 (Parent Scoring)**: With `parent_budget=None`, scores the query against all **3,711 root parent centroids** in [`tlsys/query.py`](freeze-src/cand/fork/tl-sys/tlsys/query.py).
+   - **Phase 2 (Child Descent)**: Selects top parents (`top_parents=4`), traverses child edges via DFS stack, and scores candidate leaf partitions.
+   - **Phase 3 (Atom Ranking)**: Selects top leaves (`top_children=8`), scores candidate member atoms against the query, and returns the top-k ranked results.
+
+### Query Work: Clarifying the 3,711 &rarr; 18 &rarr; 145 Smoke Probe
+Previous summaries cited "3,711 parents &rarr; 18 children &rarr; 145 atoms" as universal query work. As verified in [`tools/product_pilot.py:967`](freeze-src/cand/tools/product_pilot.py) and [`SOURCE-CONTRACT.md`](/tmp/trace-source-audit-agy2-20261015/SOURCE-CONTRACT.md), **18/145 was a single post-drain smoke probe**, not the invariant for all queries:
+* **Parents scored**: Fixed at **3,711** across all 240 evaluation queries (full parent scoring).
+* **Children scored**: **Varies dynamically from 6 to 54** across evaluation queries (mean: **25.52**).
+* **Atoms scored**: **Varies dynamically from 8 to 197** across evaluation queries (mean: **114.49**).
+* **Member visits**: **Varies dynamically from 9 to 197** across evaluation queries (mean: **129.26**).
+
+---
+
+## Measured 10M Qualification Benchmarks
+
+All metrics were captured during the 10M qualification execution on GCP VM `trace-build500` (PID 63255, 2026-10-13T01:48:12Z &rarr; 05:24:36Z, CPUs 0–2 solo, `nice 19`, single-threaded BLAS).
+
+### Summary Table
+
+| Metric | Measured Value | Standard / Condition |
 |---|---|---|
-| chunk | 0.81 / 0.0575 | 0.5775 / 0.04 |
-| noisy | 0.75 / 0.05 | 0.5125 / 0.035 |
-| cross | 0.63 / 0.06 | 0.3375 / 0.07 |
+| **Corpus Scale** | **10,003,381 TOK_V1 tokens** | 13,081 docs / 63,441 atoms, 0 cache misses |
+| **Qualification Wall** | **12,973.17 s (~3.6 h)** | Status `PASS`, exit code 0 |
+| **Convergence** | **0 pending documents** | `repair_to_zero` debt 5,314 &rarr; 0 (5 iterations) |
+| **Closed Ledger** | **166,457 commits** / 166,457 dedup / 0 intake | Derived cap: 669,436 (headroom: 502,979) |
+| **Acceptance Gate** | `VM-10M-ACCEPTANCE.json`: PASS | `manifest_match: true`, fixtures 121/121 |
+| **Audit Gate** | `AUDIT-RESULT.json`: VERIFIED | 240 evaluation queries verified |
+| **Oracle Replay** | Independent native einsum/argpartition | **240/240 exact matches** (worst diff 0.0) |
+| **Final Store Pin** | `e8334c07-731d-4ff9-a292-8329b89c41b9:0:166457` | Digest `52e884393b2abd66...` (229,927 files) |
+
+### Both Recorded Evaluation Modes (Guided vs Matched-Flat Control)
+
+The evaluation harness ran 120 probes in each of two modes:
+1. `leave_source_out: false` (LSO off / all sources included).
+2. `leave_source_out: true` (LSO on / probe source excluded from index).
+
+Crucially, the flat baseline arm was constrained to score the **exact same mean number of rows** per query as the guided arm (matched work), ensuring an apples-to-apples comparison:
+
+| Mode | Guided Recall@10 | Matched-Flat Recall@10 | Mean Scoring Rows (Guided = Flat) | Guided p50 Latency |
+|---|---:|---:|---:|---:|
+| `leave_source_out: false` (All Sources) | **0.7300** | 0.0558 | 3,865.78 rows | 33.19 ms |
+| `leave_source_out: true` (Source Excluded) | **0.4758** | 0.0483 | 3,836.24 rows | 33.24 ms |
+
+| Probe Family | `leave_source_out: false` (Guided / Flat) | `leave_source_out: true` (Guided / Flat) |
+|---|---|---|
+| **chunk** (in-domain text chunk) | 0.8100 / 0.0575 | 0.5775 / 0.0400 |
+| **noisy** (perturbed text chunk) | 0.7500 / 0.0500 | 0.5125 / 0.0350 |
+| **cross** (cross-document query) | 0.6300 / 0.0600 | 0.3375 / 0.0700 |
 
 ![Recall at 10 for both recorded modes, guided versus matched flat](assets/recall.svg)
 
-### Phase walls, memory, caps, hardware
+### Measured Qualification Phase Breakdown
 
-| Phase | Wall (s) | Share |
-|---|---:|---:|
-| Ingest (visible + prepare) | 917 | 7% |
-| Initial drain + prepare | 1,781 | 14% |
-| Append ingest with readers | 1,885 | 15% |
-| Source-capacity rejection | 1 | <1% |
-| Prepare rejection (fresh frontier) | 497 | 4% |
-| Writer kill + restart (SIGKILL, exit −9, 0 recommits) | 710 | 5% |
-| Remaining drain + prepare with readers | 4,866 | 38% |
-| `repair_to_zero` | 2,234 | 17% |
+| Phase | Observed Wall (s) | Share | Details |
+|---|---:|---:|---|
+| **Ingest (Visible + Prepare)** | 917.4 s | 7.1% | Initial backlog population |
+| **Initial Drain & Prepare** | 1,780.5 s | 13.7% | 3 drain cycles, initial hierarchy formation |
+| **Append Ingest with Readers** | 1,885.0 s | 14.5% | Concurrent ingestion with 2 active reader threads |
+| **Source Capacity Rejection** | 1.2 s | <0.1% | Verified capacity limits enforced |
+| **Prepare Rejection (Fresh Frontier)** | 496.6 s | 3.8% | Fault injection at uncommitted frontier |
+| **Writer Kill & Restart** | 710.1 s | 5.5% | Unannounced `SIGKILL` (exit code -9), 0 duplicate commits |
+| **Remaining Drain with Readers** | 4,865.6 s | 37.5% | Final 1 cycle under reader contention |
+| **`repair_to_zero`** | 2,234.4 s | 17.2% | 5 bounded repair iterations, debt 5,314 &rarr; 0 |
+| **Total Qualification Wall** | **12,973.17 s (~3.6 h)** | 100.0% | Complete run from empty state to final pin |
 
 ![10M phase walls: remaining drain dominates at 4,866 s](assets/phase-walls.svg)
 
-| Field | Recorded value |
-|---|---|
-| Hardware | GCP `n2-highmem-16` (16 vCPU, ~125 GiB), solo on CPUs 0–2, `nice 19`, single-thread BLAS |
-| Peak RSS | Parent 22,566 MiB; child 15,669 MiB (tripwire 46,811,848,704 B) |
-| Retained disk | 2,868,578,536 B (2.87 GB) |
-| Readers | 2 threads, 15,813 + 15,812 requests, 0 errors; p50 116 ms, p95 381 ms |
-| F1 visibility (this run only) | 33/33 queries within 5 s of ACK return (p50 119 ms, p95 130 ms); ack→query 0.12 s after a 331.7 s post-ingest wait |
-| Cap derivation | Experimental, derived: `ceil(2·max(basis))` from a measured 1M run (37,117 commits / 7,035 atoms / 4,424 docs, margin 2.0) → 669,436 |
-| Recorded caps | commits cap 669,436 (used 166,457); intake/other cap 1,000,000 (see `receipts/cap-derivation.json` + closed-ledger row above) |
-| Vectors | Cached FP32, unnormalized; cosine normalizes at scoring |
+### Hardware, Resources & Caps
 
-### Negative findings (kept visible)
+* **Hardware Environment**: GCP `n2-highmem-16` (16 vCPUs, ~125 GiB RAM). Execution pinned solo to CPUs 0–2 at `nice 19` with single-threaded BLAS (`OPENBLAS_NUM_THREADS=1`).
+* **Memory Watermarks**: Parent process peak RSS: **22,566 MiB** (22.0 GiB); Child process peak RSS: **15,669 MiB** (15.3 GiB). Both remained safely below the 43.6 GiB tripwire ceiling (>21 GiB margin).
+* **Storage Footprint**: Total retained disk footprint: **2,868,578,536 bytes (~2.87 GB)** across 229,927 files.
+* **Reader Concurrency**: 2 concurrent reader threads executed 15,813 + 15,812 requests (31,625 total) with 0 errors (p50: 116 ms, p95: 381 ms).
 
-- Per-document drain cost grows about **N^1.5** (remaining phase ≈1.49 s/doc
-  at 10M); drain is ~85%+ of wall and is the 100M blocker, not publication.
-- `repair_to_zero` cost **2,234 s (~17% of wall)** even with repair off in
-  the default path.
-- Concurrent readers roughly **halve drain throughput (~2× penalty)** in
-  reader phases.
-- A **cosine cache gave no gain** (slower with readers); constant-factor
-  fixes do not bend the drain curve.
+### Negative Findings & Operational Bottlenecks (Kept Prominent)
 
-Full definitions, probe work budgets, and conditions are in
-[docs/BENCHMARKS.md](docs/BENCHMARKS.md).
+1. **Superlinear Drain Scaling**: Drain cost per document scales approximately **$O(N^{1.5})$** (the final drain phase required ~1.49 s/doc). Drain compute represents >85% of total wall time and constitutes the primary scaling bottleneck toward 100M tokens.
+2. **Substantial Repair Cost**: `repair_to_zero` consumed **2,234 seconds (~17.2% of total wall time)** even with local repair disabled in the default path.
+3. **Reader Contention Overhead**: Concurrent read traffic roughly **halves drain throughput (~2&times; penalty)** during background publication cycles.
+4. **Ineffective Cosine Cache**: Staged cosine caching yielded no measurable throughput gain under concurrent readers; constant-factor software caches do not bend the $O(N^{1.5})$ drain curve.
 
-## Quickstart — browser demo first (one command)
+---
 
-```bash
-cd demo-app && python3 run_demo.py --port 8765
-# then open http://127.0.0.1:8765/ in a browser
-```
+## Code Tour & Deep Architecture Links
 
-On a clean checkout that one command creates `demo-app/.venv` and installs
-only numpy if the current interpreter lacks it (the frozen engine needs it;
-Linux/macOS supported, verified on Linux), verifies all 207 actual frozen
-source files against the approved SOURCEFREEZE manifest at startup
-(any mismatch refuses to start),
-and serves the actual frozen guided/flat query code over a labelled
-120-vector sample of real receipt probe vectors, with the recorded 10M
-evidence kept separate. See [`demo-app/README.md`](demo-app/README.md).
+* [**ARCHITECTURE.md**](docs/ARCHITECTURE.md): Structural layout of the 5-fix candidate stack, storage ledger, and reader isolation.
+* [**CODE-TOUR.md**](docs/CODE-TOUR.md): File-by-file walkthrough of the 207 frozen files in [`freeze-src/cand/`](freeze-src/cand/).
+* [**BENCHMARKS.md**](docs/BENCHMARKS.md): Unabridged benchmark records, gate definitions, and derivation formulas.
+* [**REPRO.md**](docs/REPRO.md): Exact reproduction commands, VM environment prerequisites, and pin hashes.
+* [**20k Small Reproduction**](repro-20k/README.md): Portable protocol reproduction using 88 real SciFact abstracts and precomputed vector cache.
+* [**Licenses & Data Model**](repro-20k/LICENSES-DATA-MODEL.md): Attribution for SciFact (ODC-By 1.0) and all-MiniLM-L6-v2 vector embeddings (Apache-2.0).
 
-![TRACE browser demo: query form, metric cards, and guided/flat result cards on the 120-vector sample](demo-app/screenshots/desktop-results.png)
+---
 
-## Developer checks (no corpus needed, no 10M run)
+## Local Development & CI Verification
 
 ```bash
-python3 tools/verify_freeze.py        # expect: entries=207 ok=207 missing=0 mismatch=0
-python3 tools/check_receipts.py       # receipt schema + recorded gate values
-python3 demo/synthetic_recall.py      # synthetic guided-vs-flat shape demo (illustrative, not a benchmark)
-bash freeze-src/run_all.sh stack      # stack unit tests (needs Python with numpy+blake3; set PY=)
-bash freeze-src/run_all.sh existing   # shipped suites: pending_topk, publication, pool_reuse, serving_pool
+# 1. Verify frozen source bytes (207/207 OK)
+python3 tools/verify_freeze.py
+
+# 2. Check staged qualification receipt schemas and gate values
+python3 tools/check_receipts.py
+
+# 3. Check documentation links and SVG asset well-formedness
+python3 tools/check_links.py
+
+# 4. Run small-scale 20k prefix verification (NumPy required)
+python3 repro-20k/prep_small_prefix.py verify --tokens 20000 --cand freeze-src/cand --data-dir repro-20k/data-20k
+
+# 5. Run stack unit test suite (5 of 6 tests runnable outside build host)
+bash freeze-src/run_all.sh stack
+
+# 6. Run shipped integration suites (publication, pool reuse, serving pool)
+bash freeze-src/run_all.sh existing
 ```
 
-Two checks compare against trees that only ever existed on the original
-build host and are not part of the 207-file freeze, so on a clean host
-(or CI) each is skipped with an explicit printed notice and everything
-else still runs: `run_all.sh stack` (and the default `run_all.sh` / `all`
-mode) runs 5 of 6 stack checks, skipping only `test_changed_set` when
-the staged overlay at `/tmp/fix1stage/up` is absent (full 6 when it is
-present), and the publication suite runs 14 of 15 tests, excluding only
-`FlagOffIdentity.test_original_source_bytes_unchanged` when the build
-host's upstream source tree is absent (full 15 when it is present).
+### In-Memory 120-Probe Demo App (Distinctly Scoped)
+The standalone interactive app in [`demo-app/`](demo-app/README.md) (`python3 demo-app/run_demo.py --port 8765`) serves an in-memory sample corpus constructed strictly from the 120 qualification probe vectors. It demonstrates the frozen `HierQuery.guided` and `HierQuery.flat` scoring implementations in isolation. It is distinctly scoped as an educational vector probe viewer, separate from the multi-phase storage engine harness.
 
-Small-scale protocol reproduction with real data is in
-[`repro-20k/`](repro-20k/README.md): an exact 88-document / 20,030-token
-prefix with its real cached vectors runs the frozen harness locally. That
-provides portable small-scale protocol reproduction; it does not close or
-claim full-10M reproduction, which needs the VM-side corpus cache and
-billed multi-hour hardware. [docs/REPRO.md](docs/REPRO.md) records the
-exact 10M command, pins, and caps.
+---
 
-## Layout
+## Precise Scope & Research Limitations
 
-```text
-trace/
-  freeze-src/cand/      frozen 207-file candidate (tools/, fork/, fix1/, stack/, tests/) + BUILD-REPORT.md
-  receipts/             staged VM JSONs verbatim (result, source-pin, input, acceptance, audit, …)
-  docs/                 ARCHITECTURE · CODE-TOUR · BENCHMARKS · REPRO · ABOUT · gemini-prompts/
-  assets/               hero + architecture + measured charts (SVG, receipt numbers only)
-  demo/                 synthetic local demo (no corpus)
-  demo-app/             browser demo (see its README; wrappers outside the freeze)
-  repro-20k/            exact 88-doc/20k-token prefix + frozen-harness small-scale reproduction
-  tools/                verify_freeze.py · check_receipts.py · check_links.py (outside the freeze)
-  archive/              previous publication, every file preserved byte-exact with an inventory
-```
+* **Experimental Derived Caps**: Measurements reflect derived experimental caps (`max_delta_entries: 669,436`), not arbitrary infinite headroom.
+* **Harness Agreement vs Semantic IR**: Metrics measure recall agreement against the exact oracle probe protocol on the staged vector corpus. They do **not** represent semantic IR relevance, nDCG, BM25 ranking superiority, or a universal latency guarantee.
+* **Corpus Redistribution**: The full 10M token corpus (`docs-100m.jsonl`) and the 2.87 GB store are retained on the qualification VM; this repository redistributes only the portable 20k prefix (88 documents) and full receipts.
+* **No Public Remote Writes**: All actions, tests, and verifications in this release operate strictly in local read-only and local execution modes.
 
-![TRACE pilot data flow and the 5-fix stack](assets/trace-architecture.svg)
-
-Files whose names contain `c2` **inside** the 207-file snapshot (for example
-frozen tests under `freeze-src/cand/`) are implementation names in the exact
-qualified source; they stay byte-exact and are not the archived previous
-publication.
-
-## Limits (read these)
-
-- Experimental derived caps and shared-VM timing — non-reference numbers.
-- Harness recall and oracle agreement only: no semantic-relevance, nDCG,
-  BM25-quality, SOTA, capability (“notes → clusters/contradictions”), or
-  universal-latency claim is made or implied.
-- Corpus scope is precise: the only corpus material included is the
-  attributed 88-document / 20,030-token prefix with its 144 cached
-  vectors in [`repro-20k/`](repro-20k/README.md) (SciFact abstracts,
-  ODC-By 1.0; all-MiniLM-L6-v2 vectors, Apache-2.0 — see
-  [`repro-20k/LICENSES-DATA-MODEL.md`](repro-20k/LICENSES-DATA-MODEL.md)).
-  The full 10M corpus and cache, the ~2.9 GB run store (digest in the
-  acceptance record), model weights, and private data are excluded.
-- Frozen bytes are never edited; wrappers live outside `freeze-src/`.
-- Shipping/default adoption and protocol or acceptance changes are
-  maintainer decisions, not consequences of this record.
+---
 
 ## License
 
-Apache-2.0 ([LICENSE](LICENSE), SPDX `Apache-2.0`). Corpus-cache licensing
-follows the source collection; this repository adds no data rights.
-Third-party and data terms recorded inside the frozen snapshot and receipts
-are retained as-is.
+Apache-2.0 ([LICENSE](LICENSE), SPDX `Apache-2.0`). Corpus text excerpts and vector models retain their respective open-access upstream licenses as documented in [`repro-20k/LICENSES-DATA-MODEL.md`](repro-20k/LICENSES-DATA-MODEL.md).

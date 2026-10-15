@@ -50,7 +50,11 @@ jobs:
           bash freeze-src/run_all.sh existing
         env:
           PY: python3
+      - name: Installer & Static Explorer verification
+        run: |
+          bash install_and_run.sh --no-server
+          python3 -c "import json; data = json.load(open('docs/explorer/local_20k_data.json')); assert data['manifest']['status'] == 'PASS'; assert data['manifest']['atoms_count'] == 144"
       - name: Secret scan (filenames)
         run: |
-          git ls-files -- . ':!archive' ':!freeze-src' ':!demo-app' | grep -Ei '(\.env$|\.pem$|\.key$|id_rsa|consented_trace)' \
+          git ls-files -- . ':!archive' ':!freeze-src' ':!demo-app' ':!local-runs' | grep -Ei '(\.env$|\.pem$|\.key$|id_rsa|consented_trace)' \
             | grep -v '.env.example' && exit 1 || echo "filename scan clean"

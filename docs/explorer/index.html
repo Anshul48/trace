@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRACE Research Explorer — 10M Qualification & Self-Organizing Engine</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-group">
+        <span class="brand-badge">RESEARCH EXPLORER</span>
+        <h1>TRACE Explorer</h1>
+      </div>
+      <div class="header-tags">
+        <span class="tag tag-provenance" title="Source Freeze Digest">Freeze: <code>38c66bef</code></span>
+        <span class="tag tag-vm">VM: <code>trace-build500</code></span>
+        <span class="tag tag-pass">Status: PASS (240/240 Oracle)</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- Notice Banner -->
+    <section class="banner-notice" aria-label="Grounding Notice">
+      <div class="notice-icon" aria-hidden="true">ℹ️</div>
+      <div class="notice-content">
+        <strong>Grounding & Provenance Notice:</strong>
+        This static research explorer displays verified measurements from the 10,003,381-token qualification run on GCP VM <code>trace-build500</code> (store pin <code>e8334c07-731d-4ff9-a292-8329b89c41b9:0:166457</code>) and the authentic local 20k reproduction run.
+        Coordinates represent <em>deterministic structural hierarchy layout</em> (Root &rarr; Parents &rarr; Leaves &rarr; Atoms), not embedding distance or semantic clustering. Clear recorded/static inspection; no active training backend.
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" role="tablist" aria-label="Explorer Sections">
+      <button class="tab-btn active" id="tab-btn-overview" data-tab="tab-overview" role="tab" aria-selected="true" aria-controls="tab-overview">10M Qualification Overview</button>
+      <button class="tab-btn" id="tab-btn-topology" data-tab="tab-topology" role="tab" aria-selected="false" aria-controls="tab-topology">Structural Topology</button>
+      <button class="tab-btn" id="tab-btn-queries" data-tab="tab-queries" role="tab" aria-selected="false" aria-controls="tab-queries">Query Routing Replay</button>
+      <button class="tab-btn" id="tab-btn-lifecycle" data-tab="tab-lifecycle" role="tab" aria-selected="false" aria-controls="tab-lifecycle">Lifecycle & Resilience</button>
+      <button class="tab-btn" id="tab-btn-audit" data-tab="tab-audit" role="tab" aria-selected="false" aria-controls="tab-audit">Receipts & Gates</button>
+      <button class="tab-btn" id="tab-btn-local" data-tab="tab-local" role="tab" aria-selected="false" aria-controls="tab-local">Run Locally (20k Prefix)</button>
+    </nav>
+
+    <!-- TAB 1: 10M Overview -->
+    <section id="tab-overview" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-overview">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Corpus Scale</div>
+          <div class="stat-value" id="val-tokens">10,003,381</div>
+          <div class="stat-sub">TOK_V1 Tokens (13,081 Docs)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Indexing Units</div>
+          <div class="stat-value" id="val-atoms">63,441</div>
+          <div class="stat-sub">Atoms across 9,177 Leaves / 3,711 Parents</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Qualification Wall</div>
+          <div class="stat-value" id="val-wall">12,973 s</div>
+          <div class="stat-sub">~3.6 hours (solo CPUs 0–2, nice 19)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Closed Ledger Commits</div>
+          <div class="stat-value" id="val-commits">166,457</div>
+          <div class="stat-sub">Cap: 669,436 (Headroom: 502,979)</div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <h2>Measured Phase Breakdown (9 Qualification Phases)</h2>
+        <p class="section-desc">Observed wall durations from <code>receipts/phase-telemetry.json</code> on GCP VM <code>trace-build500</code>.</p>
+        <div class="phase-bar" id="phase-timeline-bar" aria-label="Phase Duration Timeline">
+          <!-- Rendered via JS -->
+        </div>
+        <div class="phase-legend" id="phase-legend">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <div class="dual-grid">
+        <div class="content-block">
+          <h2>Memory RSS Watermarks</h2>
+          <div class="watermark-container">
+            <div class="meter-group">
+              <div class="meter-label">
+                <span>Parent Process Peak RSS</span>
+                <span class="meter-val">22,566 MiB (22.0 GiB)</span>
+              </div>
+              <div class="meter-track">
+                <div class="meter-fill parent-fill" style="width: 50.5%;"></div>
+              </div>
+            </div>
+            <div class="meter-group">
+              <div class="meter-label">
+                <span>Child Process Peak RSS</span>
+                <span class="meter-val">15,669 MiB (15.3 GiB)</span>
+              </div>
+              <div class="meter-track">
+                <div class="meter-fill child-fill" style="width: 35.1%;"></div>
+              </div>
+            </div>
+            <div class="meter-group">
+              <div class="meter-label">
+                <span>Tripwire Enforcement Ceiling</span>
+                <span class="meter-val">44,643 MiB (43.6 GiB)</span>
+              </div>
+              <div class="meter-track tripwire-track">
+                <div class="meter-fill tripwire-marker" style="width: 100%;"></div>
+              </div>
+            </div>
+          </div>
+          <p class="footnote">Observed headroom: &gt;21 GiB margin maintained beneath kill tripwire ceiling.</p>
+        </div>
+
+        <div class="content-block">
+          <h2>Measured Retrieval Quality (Both Modes, Matched Work)</h2>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Evaluation Mode</th>
+                <th>Guided Recall@10</th>
+                <th>Matched Flat</th>
+                <th>Scored Rows</th>
+                <th>Guided p50</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>LSO Off</strong> (<code>leave_source_out: false</code>)</td>
+                <td class="highlight-val">0.7300</td>
+                <td>0.0558</td>
+                <td>3,865.8</td>
+                <td>33.19 ms</td>
+              </tr>
+              <tr>
+                <td><strong>LSO On</strong> (<code>leave_source_out: true</code>)</td>
+                <td class="highlight-val">0.4758</td>
+                <td>0.0483</td>
+                <td>3,836.2</td>
+                <td>33.24 ms</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="footnote">Matched-work control: guided and flat arms score the exact same mean rows per mode.</p>
+        </div>
+      </div>
+
+      <div class="content-block" style="margin-top: 1.5rem;">
+        <h2>Negative Findings & Bottlenecks (Research Transparency)</h2>
+        <div class="negative-findings-box">
+          <ul>
+            <li><strong>Superlinear Drain Scaling:</strong> Drain cost per document grows at approximately <strong>O(N<sup>1.5</sup>)</strong> (~1.49 s/doc in remaining phase); drain accounts for &gt;85% of total wall time.</li>
+            <li><strong>Repair Overhead:</strong> <code>repair_to_zero</code> consumed <strong>2,234 s (~17.2% of wall)</strong> even with repair disabled in default paths.</li>
+            <li><strong>Reader Contention:</strong> Concurrent reader threads roughly <strong>halve drain throughput (~2&times; penalty)</strong> during background drain cycles.</li>
+            <li><strong>Cosine Cache Null Result:</strong> An in-memory cosine cache yielded no throughput gain under concurrency; constant-factor software caches do not bend the drain curve.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: Structural Topology -->
+    <section id="tab-topology" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-topology">
+      <div class="canvas-controls">
+        <div class="control-group">
+          <label for="topology-dataset-select">Active Dataset:</label>
+          <select id="topology-dataset-select" class="select-input">
+            <option value="20k" selected>Local 20k Run (51 Parents, 81 Leaves, 144 Atoms — Active)</option>
+            <option value="10m">10M Qualification Run (3,711 Parents, 9,177 Leaves — Summary)</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="tree-level-select">Hierarchy Tier:</label>
+          <select id="tree-level-select" class="select-input">
+            <option value="all">Full Hierarchy (Parents + Leaves + Atoms)</option>
+            <option value="parents">Parents Only (Macro Clusters)</option>
+            <option value="leaves">Leaves & Atoms</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <button id="btn-zoom-in" class="btn btn-secondary" aria-label="Zoom In">Zoom +</button>
+          <button id="btn-zoom-out" class="btn btn-secondary" aria-label="Zoom Out">Zoom -</button>
+          <button id="btn-reset-zoom" class="btn btn-secondary">Reset View</button>
+        </div>
+      </div>
+
+      <div class="canvas-wrapper" style="position: relative;">
+        <canvas id="topology-canvas" width="1000" height="520" aria-label="Structural Hierarchy Graph Canvas" tabindex="0"></canvas>
+        <div id="canvas-tooltip" class="canvas-tooltip" aria-hidden="true"></div>
+      </div>
+
+      <!-- Node Inspector Panel -->
+      <div class="node-inspector-panel" id="node-inspector-panel">
+        <h3>Node Inspector (Click any node above)</h3>
+        <div id="node-inspector-content" class="inspector-content">
+          <p class="text-muted">Select any parent cluster, leaf partition, or atom node on the canvas to inspect its authentic ID, parent linkage, member count, and document text snippet.</p>
+        </div>
+      </div>
+
+      <div class="topology-legend" style="margin-top: 1rem;">
+        <div class="legend-item"><span class="legend-dot" style="background: #38bdf8;"></span><span>Root Index</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background: #818cf8;"></span><span>Parent Cluster (Centroid)</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background: #34d399;"></span><span>Leaf Partition (Postings)</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background: #fbbf24;"></span><span>Document Atom (SciFact Abstract Chunk)</span></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: Query Replay -->
+    <section id="tab-queries" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-queries">
+      <div class="query-browser-header">
+        <div class="query-select-group">
+          <label for="query-select">Select Evaluation Probe:</label>
+          <select id="query-select" class="select-input" style="max-width: 420px;">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div class="mode-toggle-group" role="radiogroup" aria-label="Leave-Source-Out Mode">
+          <label class="radio-label">
+            <input type="radio" name="lso-mode" value="false" checked>
+            <span>LSO Off (All Sources)</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="lso-mode" value="true">
+            <span>LSO On (Leave Source Out)</span>
+          </label>
+        </div>
+
+        <div class="replay-controls" style="display: flex; gap: 0.5rem; align-items: center;">
+          <button id="btn-step-prev" class="btn btn-secondary" aria-label="Previous Step">&larr; Prev</button>
+          <button id="btn-play-pause" class="btn btn-secondary" aria-label="Play / Pause Replay">&#9654; Play</button>
+          <button id="btn-step-next" class="btn btn-secondary" aria-label="Next Step">Next &rarr;</button>
+          <label for="replay-speed" style="font-size: 0.8rem; margin-left: 0.5rem;">Speed:</label>
+          <select id="replay-speed" class="select-input" style="padding: 2px 6px; font-size: 0.8rem;">
+            <option value="1">1x</option>
+            <option value="2">2x</option>
+            <option value="5">5x</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Dissecting 18/145 Callout -->
+      <div class="dissect-notice" style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem;">
+        <strong>Per-Query Work Truth:</strong>
+        Across all 240 evaluation queries, parent scoring was invariant at <strong>3,711</strong>, but children scored varied dynamically from <strong>6 to 54</strong> (mean: 25.52), and atoms scored varied from <strong>8 to 197</strong> (mean: 114.49). The widely cited "18 children / 145 atoms" was a single post-drain smoke probe check.
+      </div>
+
+      <!-- Stepper Progress Cards -->
+      <div class="stepper-container" role="tablist" aria-label="Routing Stages">
+        <div class="step-card active" data-step="1" tabindex="0" role="tab" aria-selected="true">
+          <div class="step-num">Stage 1</div>
+          <div class="step-title">Query Ingest</div>
+          <div class="step-desc">Vector lookup & probe scope</div>
+        </div>
+        <div class="step-arrow" aria-hidden="true">&rarr;</div>
+        <div class="step-card" data-step="2" tabindex="0" role="tab" aria-selected="false">
+          <div class="step-num">Stage 2</div>
+          <div class="step-title">Parent Scoring</div>
+          <div class="step-desc">Score root parent centroids</div>
+        </div>
+        <div class="step-arrow" aria-hidden="true">&rarr;</div>
+        <div class="step-card" data-step="3" tabindex="0" role="tab" aria-selected="false">
+          <div class="step-num">Stage 3</div>
+          <div class="step-title">Child Descent</div>
+          <div class="step-desc">DFS traversal to top leaves</div>
+        </div>
+        <div class="step-arrow" aria-hidden="true">&rarr;</div>
+        <div class="step-card" data-step="4" tabindex="0" role="tab" aria-selected="false">
+          <div class="step-num">Stage 4</div>
+          <div class="step-title">Atom Ranking</div>
+          <div class="step-desc">Score candidate atoms</div>
+        </div>
+        <div class="step-arrow" aria-hidden="true">&rarr;</div>
+        <div class="step-card" data-step="5" tabindex="0" role="tab" aria-selected="false">
+          <div class="step-num">Stage 5</div>
+          <div class="step-title">Matched Control</div>
+          <div class="step-desc">Compare vs equal-row flat scan</div>
+        </div>
+      </div>
+
+      <!-- Step Detail Panel -->
+      <div class="step-detail-panel" id="step-detail-panel" aria-live="polite">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- TAB 4: Lifecycle & Resilience -->
+    <section id="tab-lifecycle" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-lifecycle">
+      <h2>Transaction & Resilience State Machine</h2>
+      <p class="section-desc">TRACE protects index integrity across background drain cycles, reader contention, and unexpected process termination.</p>
+
+      <div class="lifecycle-grid">
+        <div class="lifecycle-card">
+          <span class="lifecycle-badge">PHASE 1-3</span>
+          <h3>Ingest Backlog & Batched Drain</h3>
+          <p>Documents are appended to the intake ledger and periodically drained in <code>_drain_locked_batched</code> into leaves and parents via centroid updates.</p>
+          <div class="metric-pill">166,457 Commits Recorded</div>
+        </div>
+
+        <div class="lifecycle-card">
+          <span class="lifecycle-badge alert-badge">PHASE 6</span>
+          <h3>SIGKILL Crash Recovery (Exit -9)</h3>
+          <p>The writer process was forcefully terminated via unannounced <code>SIGKILL</code> during active publication. The replacement reader successfully restarted with 0 duplicate commits.</p>
+          <div class="metric-pill">exit -9 &bull; source_recommit_count: 0</div>
+        </div>
+
+        <div class="lifecycle-card">
+          <span class="lifecycle-badge">PHASE 3 & 7</span>
+          <h3>Concurrent Reader Isolation</h3>
+          <p>Two concurrent reader threads executed 31,625 queries while the background drain modified the index, verifying zero read lock contention errors.</p>
+          <div class="metric-pill">31,625 Reader Queries &bull; 0 Errors</div>
+        </div>
+
+        <div class="lifecycle-card">
+          <span class="lifecycle-badge">PHASE 8</span>
+          <h3>Local Repair to Zero Debt</h3>
+          <p>Local repair hook rebalanced skewed leaf and parent clusters over 5 iterations, reducing initial repair debt from 5,314 to exactly 0.</p>
+          <div class="metric-pill">Debt: 5,314 &rarr; 0 (5 iters)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: Receipts & Gates -->
+    <section id="tab-audit" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-audit">
+      <h2>Immutable Receipts & Audit Gate Records</h2>
+      <p class="section-desc">Every headline number is backed by verifiable JSON records stored in <code>receipts/</code>.</p>
+
+      <div class="receipts-list">
+        <div class="receipt-row">
+          <div class="receipt-col-title">Source Freeze Manifest (207 files)</div>
+          <div class="receipt-col-hash"><code>38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54</code></div>
+          <div class="receipt-col-status"><span class="badge-pass">VERIFIED 207/207</span></div>
+        </div>
+        <div class="receipt-row">
+          <div class="receipt-col-title">Final Qualified Store Head Pin</div>
+          <div class="receipt-col-hash"><code>e8334c07-731d-4ff9-a292-8329b89c41b9:0:166457</code></div>
+          <div class="receipt-col-status"><span class="badge-pass">QUALIFIED PIN</span></div>
+        </div>
+        <div class="receipt-row">
+          <div class="receipt-col-title">Retained Store Digest (229,927 files)</div>
+          <div class="receipt-col-hash"><code>52e884393b2abd66b46ead13d1831238510dbf5f6738e5b398ea9334f0edca38</code></div>
+          <div class="receipt-col-status"><span class="badge-pass">BEFORE == AFTER</span></div>
+        </div>
+        <div class="receipt-row">
+          <div class="receipt-col-title">Audit Acceptance Gate</div>
+          <div class="receipt-col-hash"><code>VM-10M-ACCEPTANCE.json &bull; AUDIT-RESULT.json</code></div>
+          <div class="receipt-col-status"><span class="badge-pass">121/121 PASS</span></div>
+        </div>
+        <div class="receipt-row">
+          <div class="receipt-col-title">Oracle Replay Agreement (240 queries)</div>
+          <div class="receipt-col-hash"><code>Independent einsum / argpartition replay</code></div>
+          <div class="receipt-col-status"><span class="badge-pass">240/240 EXACT</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: Local Installer -->
+    <section id="tab-local" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-local">
+      <h2>Run the Frozen 20k Engine Locally (One Command)</h2>
+      <p class="section-desc">Execute the authentic frozen candidate harness (<code>product_pilot.py</code>) on a portable 20k-token prefix (88 SciFact documents, 144 atoms) in an isolated local virtualenv.</p>
+
+      <div class="code-box">
+        <div class="code-header">
+          <span>Linux Bash (Verified Python 3.12 Baseline)</span>
+          <button class="btn btn-secondary btn-copy" onclick="navigator.clipboard.writeText('./install_and_run.sh')">Copy</button>
+        </div>
+        <pre><code>./install_and_run.sh</code></pre>
+      </div>
+
+      <div class="install-features-grid">
+        <div class="feat-box">
+          <h4>Zero Global Changes</h4>
+          <p>Uses isolated <code>.trace-demo-env</code>; preserves existing <code>.venv</code> and system packages.</p>
+        </div>
+        <div class="feat-box">
+          <h4>Cryptographic Rehash</h4>
+          <p>Rehashes all 207 frozen files against <code>SOURCEFREEZE.json</code> before starting.</p>
+        </div>
+        <div class="feat-box">
+          <h4>Genuine 20k Pilot Run</h4>
+          <p>Executes <code>product_pilot.py</code> producing authentic store, telemetry, and <code>PASS</code> verdict.</p>
+        </div>
+        <div class="feat-box">
+          <h4>Preserved Run History</h4>
+          <p>Preserves all historical runs under <code>local-runs/</code> with zero file deletions.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p>TRACE Self-Organizing Retrieval Engine &bull; Apache-2.0 License &bull; Candidate Freeze <code>38c66bef</code></p>
+      <p style="margin-top: 0.35rem;"><a href="../ARCHITECTURE.md">Architecture</a> &bull; <a href="../CODE-TOUR.md">Code Tour</a> &bull; <a href="../BENCHMARKS.md">Benchmarks</a> &bull; <a href="../REPRO.md">Repro</a></p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
