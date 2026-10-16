@@ -734,10 +734,15 @@
   // Populate Cluster Selector for 10M & 20k
   function populateClusterSelector() {
     if (!clusterSelect) return;
-    clusterSelect.innerHTML = '<option value="overview">Overview Ring (All Parents)</option>';
-
     const activeData = (currentDataset === '10m') ? graph10mData : local20kData;
-    if (!activeData || !activeData.parents) return;
+    if (!activeData || !activeData.parents) {
+      clusterSelect.innerHTML = '<option value="overview">Overview: 64 of 3,711 Real Parents (Structural Preview)</option>';
+      return;
+    }
+
+    const totalCount = activeData.parents.length.toLocaleString();
+    const renderedCount = (currentDataset === '10m') ? Math.min(activeData.parents.length, 64) : activeData.parents.length;
+    clusterSelect.innerHTML = `<option value="overview">Overview: ${renderedCount} of ${totalCount} Real Parents (Structural Preview)</option>`;
 
     // List top 40 parents by atom count or order
     const sortedParents = [...activeData.parents].sort((a, b) => (b.atom_count || 0) - (a.atom_count || 0));

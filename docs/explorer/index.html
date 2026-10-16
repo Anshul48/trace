@@ -211,10 +211,10 @@
         <h2>Negative Findings &amp; Bottlenecks (Research Transparency)</h2>
         <div class="negative-findings-box">
           <ul>
-            <li><strong>Superlinear Drain Scaling:</strong> Drain cost per document grows at approximately <strong>O(N<sup>1.5</sup>)</strong> (~1.49 s/doc in remaining phase); drain accounts for &gt;85% of total wall time.</li>
-            <li><strong>Substantial Repair Cost:</strong> <code>repair_to_zero</code> consumed <strong>2,234 s (~17.2% of wall)</strong> to drain residual debt from 5,314 to 0 across 5 iterations.</li>
-            <li><strong>Reader Contention:</strong> Concurrent reader threads roughly <strong>halve drain throughput (~2&times; penalty)</strong> during background drain cycles.</li>
-            <li><strong>Cosine Cache Null Result:</strong> An in-memory cosine cache yielded no throughput gain under concurrency; constant-factor software caches do not bend the drain curve.</li>
+            <li><strong>Drain Scaling Bottleneck (100M Not Qualified):</strong> Background drain is the primary operational scaling bottleneck toward 100M tokens (100M not qualified). In the measured 10M qualification run, remaining drain under reader traffic consumed <strong>4,865.6 s (37.5% of total qualification wall)</strong> and initial drain consumed <strong>1,780.5 s (13.7%)</strong>.</li>
+            <li><strong>Substantial Repair Cost:</strong> <code>repair_to_zero</code> consumed <strong>2,234.4 s (17.2% of total qualification wall)</strong> across 5 bounded iterations to drain residual debt from 5,314 to 0.</li>
+            <li><strong>Reader Traffic Overhead:</strong> Background publication and drain cycles operated under concurrent reader traffic conditions (2 active reader threads executing 31,625 total queries), incurring substantial synchronization and contention overhead during drain execution.</li>
+            <li><strong>Cosine Cache Ineffective:</strong> Software cosine caching yielded no measurable throughput improvement under reader traffic conditions; caching did not resolve the background drain scaling bottleneck.</li>
           </ul>
         </div>
       </div>

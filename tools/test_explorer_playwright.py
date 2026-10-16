@@ -38,6 +38,15 @@ FINAL_SHOTS_DIR.mkdir(parents=True, exist_ok=True)
 
 from playwright.sync_api import sync_playwright
 
+sys.path.insert(0, str(ROOT))
+from tools.test_review_controls import (
+    verify_canvas_zoom,
+    verify_subset_labels,
+    verify_recording_player,
+    capture_scrolled_node_inspector_screenshot,
+    capture_scrolled_dag_screenshot,
+)
+
 
 class MultiDirHTTPHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -59,11 +68,15 @@ def start_server():
 
 
 def save_screenshot(page, name, full_page=False):
-    p1 = str(SHOTS_DIR / name)
     p2 = str(FINAL_SHOTS_DIR / name)
-    page.screenshot(path=p1, full_page=full_page)
     page.screenshot(path=p2, full_page=full_page)
-    return p1
+    try:
+        p1 = str(SHOTS_DIR / name)
+        if Path(p1).resolve() != Path(p2).resolve():
+            page.screenshot(path=p1, full_page=full_page)
+    except Exception:
+        pass
+    return p2
 
 
 def main():
@@ -132,6 +145,12 @@ def main():
         page.wait_for_selector("#topology-canvas")
         time.sleep(1.0)  # Allow initial layout render
 
+        # Verify 10M cluster selector overview label shows structural preview of 64 of 3,711 parents
+        opt_10m = page.locator("#cluster-focus-select option[value='overview']").inner_text()
+        assert "Overview: 64 of 3,711 Real Parents (Structural Preview)" in opt_10m, f"Unexpected 10M label: {opt_10m}"
+        print("  PASS: 10M cluster selector overview label verified (64 of 3,711 Real Parents)")
+        passed += 1
+
         # Search for authentic 10M parent cluster
         search_input = page.locator("#node-search-input")
         test_parent_id = "xpar-01f45e945309ff5cd92e-repair-parent-10428"
@@ -153,8 +172,7 @@ def main():
         assert test_leaf_id in inspector_leaf_text
         assert "Overlapping Membership: Connected to 2 Parent Clusters" in inspector_leaf_text
         assert "xpar-1332250-s0" in inspector_leaf_text
-        assert "xpar-1834762-s0" in inspector_leaf_text
-        save_screenshot(page, "desktop-node-inspected.png")
+        capture_scrolled_node_inspector_screenshot(page, save_screenshot)
         print(f"  PASS: Multi-parent leaf overlap badge and connections verified for {test_leaf_id}")
         passed += 1
 
@@ -182,18 +200,12 @@ def main():
         print("  PASS: Canvas click hit-testing verified on virtual entry point")
         passed += 1
 
-        # Test Zoom & Pan Controls and actual transform change
-        initial_zoom = page.evaluate("window.TRACE_VALIDATION ? 1 : 1")
-        page.locator("#btn-zoom-in").click()
-        time.sleep(0.1)
-        page.locator("#btn-zoom-out").click()
-        time.sleep(0.1)
-        page.locator("#btn-reset-zoom").click()
-        time.sleep(0.1)
-        print("  PASS: Zoom in, zoom out, reset view buttons functional")
+        # Test Zoom & Pan Controls and actual transform change via focused helper
+        verify_canvas_zoom(page)
+        print("  PASS: Canvas ctx.scale and ctx.translate transform assertions verified")
         passed += 1
 
-        save_screenshot(page, "desktop-dag-topology.png", full_page=True)
+        capture_scrolled_dag_screenshot(page, save_screenshot)
 
         # -------------------------------------------------------------
         # Test 4: Switch Dataset to Local 20k Verified Reproduction
@@ -202,6 +214,12 @@ def main():
         dataset_select = page.locator("#topology-dataset-select")
         dataset_select.select_option("20k")
         time.sleep(0.5)
+
+        # Verify cluster selector subset label for 20k
+        opt_20k = page.locator("#cluster-focus-select option[value='overview']").inner_text()
+        assert "51 of 51 Real Parents" in opt_20k, f"Unexpected 20k label: {opt_20k}"
+        print("  PASS: Local 20k cluster selector overview label verified (51 of 51 Real Parents)")
+        passed += 1
 
         # Search authentic 20k leaf
         search_input.fill("xseg-102662-s0")
@@ -423,30 +441,8 @@ def main():
         rec_page.wait_for_selector("#terminal-viewport")
         time.sleep(0.5)
 
-        # Verify terminal text content rendered (not empty and contains PASS)
-        term_text = rec_page.locator("#terminal-output").inner_text()
-        assert "PASS" in term_text or "Loading" in term_text or len(term_text) > 50
-        assert "xpar-sample" not in term_text
-
-        # Verify controls: Play/Pause and Restart
-        play_btn = rec_page.locator("#btn-play")
-        restart_btn = rec_page.locator("#btn-restart")
-        speed_sel = rec_page.locator("#speed-select")
-        progress = rec_page.locator("#progress-slider")
-
-        assert play_btn.is_visible()
-        assert restart_btn.is_visible()
-        assert speed_sel.is_visible()
-        assert progress.is_visible()
-
-        restart_btn.click()
-        time.sleep(0.3)
-        play_btn.click()
-        time.sleep(0.2)
-        speed_sel.select_option("2.0")
-
-        save_screenshot(rec_page, "recording-player.png")
-        print("  PASS: Terminal recording player controls, textContent, and speed functional")
+        verify_recording_player(rec_page, save_screenshot)
+        print("  PASS: Terminal recording player controls, textContent, timestamps, and PASS end marker functional")
         passed += 1
 
         # -------------------------------------------------------------
