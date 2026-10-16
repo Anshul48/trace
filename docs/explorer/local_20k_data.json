@@ -1,6 +1,6 @@
 {
   "manifest": {
-    "scope": "Local 20k Prefix Reproduction Run (Actual Frozen Engine Execution)",
+    "scope": "Local 20k Prefix Reproduction Run (Pure Stdlib Reader)",
     "source_freeze_sha256": "38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54",
     "run_dir": "/tmp/trace-anima-agy2-20261015/trace/local-run-20k",
     "store_head_pin": [
@@ -14,6 +14,12 @@
     "atoms_count": 144,
     "leaves_count": 81,
     "parents_count": 51,
+    "parent_child_edges": 89,
+    "leaf_atom_edges": 144,
+    "multi_parent_leaves": 8,
+    "multi_leaf_atoms": 0,
+    "orphan_leaves": 0,
+    "orphan_atoms": 0,
     "status": "PASS",
     "wall_s": 45.69710995100013,
     "layout_mode": "deterministic_structural_hierarchy"
@@ -21,356 +27,312 @@
   "parents": [
     {
       "id": "xpar-102662-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-102662-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-103007-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-103007-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-106301-s0",
-      "leaf_count": 5,
-      "atom_count": 6,
-      "leaf_ids": [
+      "children": [
         "xseg-106301-s0",
         "xseg-317204-s0",
         "xseg-323030-s0",
         "xseg-368506-s0",
         "xseg-427082-s0"
-      ]
+      ],
+      "atom_count": 6
     },
     {
       "id": "xpar-116792-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-116792-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-118568-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-118568-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-123859-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-123859-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-152245-s0",
-      "leaf_count": 1,
-      "atom_count": 3,
-      "leaf_ids": [
+      "children": [
         "xseg-152245-s0"
-      ]
+      ],
+      "atom_count": 3
     },
     {
       "id": "xpar-153744-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-153744-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-159469-s0",
-      "leaf_count": 1,
-      "atom_count": 3,
-      "leaf_ids": [
+      "children": [
         "xseg-159469-s0"
-      ]
+      ],
+      "atom_count": 3
     },
     {
       "id": "xpar-169264-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-169264-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-18670-s0",
-      "leaf_count": 3,
-      "atom_count": 6,
-      "leaf_ids": [
+      "children": [
         "xseg-140874-s0",
         "xseg-175735-s0",
         "xseg-18670-s0"
-      ]
+      ],
+      "atom_count": 6
     },
     {
       "id": "xpar-19238-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-19238-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-202259-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-202259-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-253672-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-253672-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-263364-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-263364-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-275294-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-275294-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-279052-s0",
-      "leaf_count": 2,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-279052-s0",
         "xseg-427082-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-285794-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-285794-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-293661-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-293661-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-301866-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-301866-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-306311-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-306311-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-308862-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-308862-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-313394-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-313394-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-313403-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-313403-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-323335-s0",
-      "leaf_count": 1,
-      "atom_count": 3,
-      "leaf_ids": [
+      "children": [
         "xseg-323335-s0"
-      ]
+      ],
+      "atom_count": 3
     },
     {
       "id": "xpar-327319-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-327319-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-335029-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-335029-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-341324-s0",
-      "leaf_count": 1,
-      "atom_count": 3,
-      "leaf_ids": [
+      "children": [
         "xseg-341324-s0"
-      ]
+      ],
+      "atom_count": 3
     },
     {
       "id": "xpar-344240-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-344240-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-350542-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-350542-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-356218-s0",
-      "leaf_count": 2,
-      "atom_count": 4,
-      "leaf_ids": [
+      "children": [
         "xseg-356218-s0",
         "xseg-439670-s0"
-      ]
+      ],
+      "atom_count": 4
     },
     {
       "id": "xpar-371289-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-371289-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-374902-s0",
-      "leaf_count": 2,
-      "atom_count": 4,
-      "leaf_ids": [
+      "children": [
         "xseg-374902-s0",
         "xseg-437924-s0"
-      ]
+      ],
+      "atom_count": 4
     },
     {
       "id": "xpar-380526-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-380526-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-393001-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-393001-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-409280-s0",
-      "leaf_count": 2,
-      "atom_count": 4,
-      "leaf_ids": [
+      "children": [
         "xseg-409280-s0",
         "xseg-437924-s0"
-      ]
+      ],
+      "atom_count": 4
     },
     {
       "id": "xpar-410286-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-410286-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-427865-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-427865-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-432261-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-432261-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-456304-s0",
-      "leaf_count": 2,
-      "atom_count": 4,
-      "leaf_ids": [
+      "children": [
         "xseg-456304-s0",
         "xseg-457630-s0"
-      ]
+      ],
+      "atom_count": 4
     },
     {
       "id": "xpar-4983-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-4983-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-54440-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-54440-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-5836-s0",
-      "leaf_count": 16,
-      "atom_count": 30,
-      "leaf_ids": [
+      "children": [
         "xseg-104130-s0",
         "xseg-143251-s0",
         "xseg-164189-s0",
@@ -387,29 +349,26 @@
         "xseg-36474-s0",
         "xseg-5836-s0",
         "xseg-92499-s0"
-      ]
+      ],
+      "atom_count": 30
     },
     {
       "id": "xpar-70115-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-70115-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-70490-s0",
-      "leaf_count": 1,
-      "atom_count": 1,
-      "leaf_ids": [
+      "children": [
         "xseg-70490-s0"
-      ]
+      ],
+      "atom_count": 1
     },
     {
       "id": "xpar-72159-s0",
-      "leaf_count": 7,
-      "atom_count": 13,
-      "leaf_ids": [
+      "children": [
         "xseg-207972-s0",
         "xseg-238409-s0",
         "xseg-266641-s0",
@@ -417,1632 +376,3263 @@
         "xseg-364522-s0",
         "xseg-418246-s0",
         "xseg-72159-s0"
-      ]
+      ],
+      "atom_count": 13
     },
     {
       "id": "xpar-7912-s0",
-      "leaf_count": 5,
-      "atom_count": 8,
-      "leaf_ids": [
+      "children": [
         "xseg-236204-s0",
         "xseg-365896-s0",
         "xseg-418246-s0",
         "xseg-435529-s0",
         "xseg-7912-s0"
-      ]
+      ],
+      "atom_count": 8
     },
     {
       "id": "xpar-79447-s0",
-      "leaf_count": 2,
-      "atom_count": 4,
-      "leaf_ids": [
+      "children": [
         "xseg-120626-s0",
         "xseg-79447-s0"
-      ]
+      ],
+      "atom_count": 4
     },
     {
       "id": "xpar-87758-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-87758-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-92308-s0",
-      "leaf_count": 1,
-      "atom_count": 2,
-      "leaf_ids": [
+      "children": [
         "xseg-92308-s0"
-      ]
+      ],
+      "atom_count": 2
     },
     {
       "id": "xpar-97884-s0",
-      "leaf_count": 2,
-      "atom_count": 4,
-      "leaf_ids": [
+      "children": [
         "xseg-343052-s0",
         "xseg-97884-s0"
-      ]
+      ],
+      "atom_count": 4
     }
   ],
   "leaves": [
     {
       "id": "xseg-102662-s0",
-      "parent_id": "xpar-102662-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-102662-s0"
+      ],
       "atom_ids": [
         "1451e4a21a977d21eb4d6c6066c369064f2857afa20e51a05a965ca14584cbd5"
+      ],
+      "doc_ids": [
+        "102662"
       ]
     },
     {
       "id": "xseg-103007-s0",
-      "parent_id": "xpar-103007-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-103007-s0"
+      ],
       "atom_ids": [
         "1be7112c0eab96c3a2b7ab5190e4bd3e2865d695eae87ff6092f6173378ebfb0"
+      ],
+      "doc_ids": [
+        "103007"
       ]
     },
     {
       "id": "xseg-104130-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-5836-s0"
+      ],
       "atom_ids": [
         "c86b3071d81b43b4a2714275e00c29087142a5673272a7ac163490555248bbda"
+      ],
+      "doc_ids": [
+        "104130"
       ]
     },
     {
       "id": "xseg-106301-s0",
-      "parent_id": "xpar-106301-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-106301-s0"
+      ],
       "atom_ids": [
         "d878b42cd2023f4512ae27ed1e86da8be1d32535de95010f56c6a63169bf4099"
+      ],
+      "doc_ids": [
+        "106301"
       ]
     },
     {
       "id": "xseg-116792-s0",
-      "parent_id": "xpar-116792-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-116792-s0"
+      ],
       "atom_ids": [
         "0d047b3e1b09c2de457449dcdc212aa85e335bed09829e3d91e695ee522f0938",
         "0e6c8f31874ccb70a82deb9d9d1f15425399784426650b8b5cc27b83be35f344"
+      ],
+      "doc_ids": [
+        "116792"
       ]
     },
     {
       "id": "xseg-118568-s0",
-      "parent_id": "xpar-118568-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-118568-s0"
+      ],
       "atom_ids": [
         "8643a889a481bc398d4827e6fb28f5dfbf644601c3e5a73fbacb6333967ec4cd",
         "90682ef6587988b377937692ada715d056b46bed0bf3734e94f48ae37c368b06"
+      ],
+      "doc_ids": [
+        "118568"
       ]
     },
     {
       "id": "xseg-120626-s0",
-      "parent_id": "xpar-79447-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-79447-s0"
+      ],
       "atom_ids": [
         "12648c8c05224ee3df098e12026e739e2b84f543c08a0245012f34e5cc7af2b1",
         "a371a2a37599546bb8516428912c7fec03d422b969766278813cab4908bcdf38"
+      ],
+      "doc_ids": [
+        "120626",
+        "195352"
       ]
     },
     {
       "id": "xseg-123859-s0",
-      "parent_id": "xpar-123859-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-123859-s0"
+      ],
       "atom_ids": [
         "853cfd16a2eb2b72fd75dfc3317ae3c9d7251abe13acf56ccc7ffd451dc01704"
+      ],
+      "doc_ids": [
+        "123859"
       ]
     },
     {
       "id": "xseg-140874-s0",
-      "parent_id": "xpar-18670-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-18670-s0"
+      ],
       "atom_ids": [
         "21c4e991f84864ce5f7f2f21fa8b2b20797fbd5ccc7ea4637d02a1eea21dd51c",
         "c12f217366924d1554c2671044d54130d3850023a938ad872814d05c5609e263"
+      ],
+      "doc_ids": [
+        "140874"
       ]
     },
     {
       "id": "xseg-143251-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 3,
+      "parent_ids": [
+        "xpar-5836-s0"
+      ],
       "atom_ids": [
         "690588cbe7f5336c4e160fb45467bb188e4200ade3da432edcbbd3277066ee1f",
         "e93ea4c094886dba14b0cf35a0ee6adcd563a381edb7258f1b425455542f22e9",
         "fc9d41957acedf0110a28ff568628b6209258818b1844121846f1a060668d89c"
+      ],
+      "doc_ids": [
+        "143251",
+        "213017"
       ]
     },
     {
       "id": "xseg-152245-s0",
-      "parent_id": "xpar-152245-s0",
-      "atom_count": 3,
+      "parent_ids": [
+        "xpar-152245-s0"
+      ],
       "atom_ids": [
         "54ee9ef27d6f7a9ced33744f045febba8323769be4ccaabd585301316995ec67",
         "5a75e649a4e0ce99a9011307557ec91d7da9298793def72e80564107c2f0c88d",
         "b79d9c0a42e884701e29cafd4a4b96f7266e5db429a2e72e5f881baee282392e"
+      ],
+      "doc_ids": [
+        "152245"
       ]
     },
     {
       "id": "xseg-153744-s0",
-      "parent_id": "xpar-153744-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-153744-s0"
+      ],
       "atom_ids": [
         "5348e84a5ae32ac7e284b7b926a8720736eeedf4eb9bc6632ce23aa4640d1d90"
+      ],
+      "doc_ids": [
+        "153744"
       ]
     },
     {
       "id": "xseg-159469-s0",
-      "parent_id": "xpar-159469-s0",
-      "atom_count": 3,
+      "parent_ids": [
+        "xpar-159469-s0"
+      ],
       "atom_ids": [
         "3054fabf2f17db0ff34c69faeb3afdb0f8126c098aed6a5219e6f9bc3ff7ed04",
         "3d9d040134cd9e5c6cd1839f66501686f53da7573b87acd91b9035c266b80ce0",
         "ff4931f17e49ad124a78e4d7c468955f10a2a2a2f9d0dd951c7206c55b61444b"
+      ],
+      "doc_ids": [
+        "159469"
       ]
     },
     {
       "id": "xseg-164189-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-5836-s0"
+      ],
       "atom_ids": [
         "a1506fb821afd512cf6fb76f9ab64bb110e651528d0abb8ce05f3c2e72876a74"
+      ],
+      "doc_ids": [
+        "164189"
       ]
     },
     {
       "id": "xseg-164985-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-5836-s0"
+      ],
       "atom_ids": [
         "b16e6661a8d2842291607231a95d962610e130fda2ac2aeea19eee531fb77d7b"
+      ],
+      "doc_ids": [
+        "164985"
       ]
     },
     {
       "id": "xseg-169264-s0",
-      "parent_id": "xpar-169264-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-169264-s0"
+      ],
       "atom_ids": [
         "5e153b12420278a7b5bca23f5029c7c32aeef2c75e79454f60d73ab505b381f5",
         "6cc8fe584a2af388b2dda70e709544ce715047e4c2af1f3ddbb500daf17842c4"
+      ],
+      "doc_ids": [
+        "169264"
       ]
     },
     {
       "id": "xseg-175735-s0",
-      "parent_id": "xpar-18670-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-18670-s0"
+      ],
       "atom_ids": [
         "992745dd294c25af4aa8d0b695fe16e57a6bf54c2c46ae4dd585a77604d1ec81",
         "c3bf9175b7207b898bd17d8abc1421fd7427cd6f89c206eeb88420bc862c4908"
+      ],
+      "doc_ids": [
+        "175735",
+        "406733"
       ]
     },
     {
       "id": "xseg-18670-s0",
-      "parent_id": "xpar-18670-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-18670-s0"
+      ],
       "atom_ids": [
         "723c06f74ee6b0fafe4f877789359d0e0a78dc2ee42e5410cf47777ebdbaa45c",
         "f6d3c90e15464b5a9a8865dd70aadf6c49ff6d1d85680ab1bf751e2dcd67dc8e"
+      ],
+      "doc_ids": [
+        "18670"
       ]
     },
     {
       "id": "xseg-188911-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-5836-s0"
+      ],
       "atom_ids": [
         "200c5b8cbd613a4d58eff7ea17a0113bbae83eea786875c00ffe957aba0e6b32",
         "f0f4a47d365b8107fd4c269161bc7857188e4c4be22bc47f672507e309f32090"
+      ],
+      "doc_ids": [
+        "188911"
       ]
     },
     {
       "id": "xseg-19238-s0",
-      "parent_id": "xpar-19238-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-19238-s0"
+      ],
       "atom_ids": [
         "d6924d2c5e0947b1050f75953fa0c14f80897fa5b5ecc279916401f320d93caa",
         "ef3aa61e6df2799288df7fa96718d49b78cc1804511aa3b12043c880ca49bfa5"
+      ],
+      "doc_ids": [
+        "19238"
       ]
     },
     {
       "id": "xseg-202259-s0",
-      "parent_id": "xpar-202259-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-202259-s0"
+      ],
       "atom_ids": [
         "a4da1913a3ab57b6b0f7a7b190032445dc4fab63fccecf6764665bf42b6626c5",
         "f42c75bfd5297f059615d12c79f69071caf29d31efdba598c603a5135b9966fc"
+      ],
+      "doc_ids": [
+        "202259"
       ]
     },
     {
       "id": "xseg-207972-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-5836-s0",
+        "xpar-72159-s0"
+      ],
       "atom_ids": [
         "35c86d8ebff6017ecd7c5f02c10be9bf69c6e0f6eacc47fb3b67636a8f6e34c3",
         "e089f983e344262b0b299935022134501d062151dc9246b4284ecc5b9615a399"
+      ],
+      "doc_ids": [
+        "207972"
       ]
     },
     {
       "id": "xseg-226488-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-5836-s0"
+      ],
       "atom_ids": [
         "baecc62647427ff5f069e21b890938b778bd82009003af153f418eecc8965ede"
+      ],
+      "doc_ids": [
+        "226488"
       ]
     },
     {
       "id": "xseg-236204-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-5836-s0",
+        "xpar-7912-s0"
+      ],
       "atom_ids": [
         "0cf63ed5cd608aaeedc1423e09f2db32d00b8f901dbb4b40beb83e258a43ceba",
         "5b22b4ce512a7513b0d8096b870f043af8d33373bd4bcd001c8e5dd04155ddcd"
+      ],
+      "doc_ids": [
+        "236204"
       ]
     },
     {
       "id": "xseg-238409-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-5836-s0",
+        "xpar-72159-s0"
+      ],
       "atom_ids": [
         "073b5f81a109563ab2eade3a1cd238a7566d5e9f5633f3f48c655848c934149f",
         "9fc9c14a177f60df0a4aaf587b1169838b44d51a00b09a44b1b4be7e3f9d1ee8"
+      ],
+      "doc_ids": [
+        "238409"
       ]
     },
     {
       "id": "xseg-253672-s0",
-      "parent_id": "xpar-253672-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-253672-s0"
+      ],
       "atom_ids": [
         "03b351cc2500538239598be83bfe1a45bf02cae147f3eec767a31b1119e16bb1",
         "0ce0b3a10355ef00a8e8b3748ea5829354d00e326be60018e58b86ce960973a5"
+      ],
+      "doc_ids": [
+        "253672"
       ]
     },
     {
       "id": "xseg-263364-s0",
-      "parent_id": "xpar-263364-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-263364-s0"
+      ],
       "atom_ids": [
         "92da856afb4a97bab3e1c65cf3c3d242ed9cfad85e7bde042ea97c06f3cdf9b5",
         "fe529fc085725fcb0d90d8ceff91eb4b61372e5e837a9a29bbb233dd1148b83f"
+      ],
+      "doc_ids": [
+        "263364"
       ]
     },
     {
       "id": "xseg-266641-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-5836-s0",
+        "xpar-72159-s0"
+      ],
       "atom_ids": [
         "7a2280479768c5a419743129c2b02642d888fac81dd7f96f97d01c4200422cdf",
         "abf29cc5a579cf600c835d1b50d3372845851fe7ce94541130930aa83bce10fb"
+      ],
+      "doc_ids": [
+        "266641"
       ]
     },
     {
       "id": "xseg-275294-s0",
-      "parent_id": "xpar-275294-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-275294-s0"
+      ],
       "atom_ids": [
         "63ab48868cbff9adcae01d28bd7c39b8ddcab905ef3b394fe962614c6e6dd34f",
         "7d745e9f2a39864a228d3814304adc5a389397d83edbe515a7a987d40d34ef6c"
+      ],
+      "doc_ids": [
+        "275294"
       ]
     },
     {
       "id": "xseg-279052-s0",
-      "parent_id": "xpar-279052-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-279052-s0"
+      ],
       "atom_ids": [
         "a3060237a968129313c64f545b387e57026ef7530302f2ab02031fcab5b55ba2"
+      ],
+      "doc_ids": [
+        "279052"
       ]
     },
     {
       "id": "xseg-285794-s0",
-      "parent_id": "xpar-285794-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-285794-s0"
+      ],
       "atom_ids": [
         "98dcabf1d912404120e08de9687a5c296413d51153cdf3e38162f678818298c1"
+      ],
+      "doc_ids": [
+        "285794"
       ]
     },
     {
       "id": "xseg-293661-s0",
-      "parent_id": "xpar-293661-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-293661-s0"
+      ],
       "atom_ids": [
         "ad8619b02031dffcd55aace1b01c02a4bf403349e2f96a35f9ba23c1584b267c"
+      ],
+      "doc_ids": [
+        "293661"
       ]
     },
     {
       "id": "xseg-301838-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-5836-s0"
+      ],
       "atom_ids": [
         "23d9eed1e54ca442c194e6256d408509f9c54ce59f9f6c3c1c20716129253ac8"
+      ],
+      "doc_ids": [
+        "301838"
       ]
     },
     {
       "id": "xseg-301866-s0",
-      "parent_id": "xpar-301866-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-301866-s0"
+      ],
       "atom_ids": [
         "443442b68b8c4713e9405e2a88dd55886a927757191e439242f67b76e1dc8023"
+      ],
+      "doc_ids": [
+        "301866"
       ]
     },
     {
       "id": "xseg-306006-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-5836-s0"
+      ],
       "atom_ids": [
         "89b85628b507026818ad66c3e34780457f13441cd2fb49c4df416b4aeceff756"
+      ],
+      "doc_ids": [
+        "306006"
       ]
     },
     {
       "id": "xseg-306311-s0",
-      "parent_id": "xpar-306311-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-306311-s0"
+      ],
       "atom_ids": [
         "1f73790cc4ab4d4666e700078bb8d769f788a8029a51c4f1b357dae0f0f1228e"
+      ],
+      "doc_ids": [
+        "306311"
       ]
     },
     {
       "id": "xseg-308862-s0",
-      "parent_id": "xpar-308862-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-308862-s0"
+      ],
       "atom_ids": [
         "59bd0ff69a4c9e8440fa7ca45a5d30b4707f6d657389e85b1a27d701eea57a3a",
         "7b362579c7645fe39d9541c8ebc45578bad40c258cebf5717a679b96c07d0c30"
+      ],
+      "doc_ids": [
+        "308862"
       ]
     },
     {
       "id": "xseg-313394-s0",
-      "parent_id": "xpar-313394-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-313394-s0"
+      ],
       "atom_ids": [
         "7131b44bd980a6892e5b1f2ba6d19f3f1c1cf586b575347121d7cc63bd1dccc4",
         "a425416f2e1c6d78baad5c99aeb1af0e84736d8efd776c8db7a2c763f820c1f4"
+      ],
+      "doc_ids": [
+        "313394"
       ]
     },
     {
       "id": "xseg-313403-s0",
-      "parent_id": "xpar-313403-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-313403-s0"
+      ],
       "atom_ids": [
         "46a4cadf9e6bf31b8dc30ed4fa27a8613199355d23ddfef6f67e8b7a8ff6fe75",
         "4cd9fe9745563e5ead3d06649260559a617458acf3ee707320b6cf6bce87bf82"
+      ],
+      "doc_ids": [
+        "313403"
       ]
     },
     {
       "id": "xseg-317204-s0",
-      "parent_id": "xpar-106301-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-106301-s0"
+      ],
       "atom_ids": [
         "ae39c8d52e6bea1b5002d55582277f903c718f46e2232f47d62c021fa02e2689",
         "b3770e5532fe577163856fcd42fff693658226aa5405f61e8940e04020e2cd38"
+      ],
+      "doc_ids": [
+        "317204"
       ]
     },
     {
       "id": "xseg-323030-s0",
-      "parent_id": "xpar-106301-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-106301-s0"
+      ],
       "atom_ids": [
         "15ecc8e5901d0ee933830d830c34d0653e487f8c0f90fb86406bb3c11ae08821"
+      ],
+      "doc_ids": [
+        "323030"
       ]
     },
     {
       "id": "xseg-323335-s0",
-      "parent_id": "xpar-323335-s0",
-      "atom_count": 3,
+      "parent_ids": [
+        "xpar-323335-s0"
+      ],
       "atom_ids": [
         "b20d6f3bf3407f8a2706b58936d0f372399e38b149d75141feb75ac4b0fa2a99",
         "bd10fd1bbec8e87d6e847eae50e7147e728cc0a6740657cbf3939d6473a278b1",
         "fc117cef33c0886cca3671601251541a127d6558a5f3636743ee7a1a05acad22"
+      ],
+      "doc_ids": [
+        "323335"
       ]
     },
     {
       "id": "xseg-327319-s0",
-      "parent_id": "xpar-327319-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-327319-s0"
+      ],
       "atom_ids": [
         "a770f310535dcded17dacefd07d76e0990a52930a8d8100f7b7dfdf6cbcf5db7"
+      ],
+      "doc_ids": [
+        "327319"
       ]
     },
     {
       "id": "xseg-33370-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-5836-s0"
+      ],
       "atom_ids": [
         "1dfb352c7fdc69c47231bf1a7ac4265ddfc9c87ff75d1f85b916445f4b259843",
         "822eed3e32ff43ec53edcf22c870026106ceaf88d31aae144d5bca3700aa5109"
+      ],
+      "doc_ids": [
+        "33370"
       ]
     },
     {
       "id": "xseg-335029-s0",
-      "parent_id": "xpar-335029-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-335029-s0"
+      ],
       "atom_ids": [
         "3ca6d2332526e9e18c6cb956042de9869cad15992332d035d57895ea19aca28b"
+      ],
+      "doc_ids": [
+        "335029"
       ]
     },
     {
       "id": "xseg-341324-s0",
-      "parent_id": "xpar-341324-s0",
-      "atom_count": 3,
+      "parent_ids": [
+        "xpar-341324-s0"
+      ],
       "atom_ids": [
         "3f96a60d8c1013ec3af51d5812d6e37874c30fbea60a5eec9456ed8901e08abe",
         "6e4c90c6c0a68a339e48dc363035a6ad2ac35a4f2e3e4084fe57b39afcd2e270",
         "b5f11e4ef2f6f9840ee62feceb661f93868b9f8c88e4480ef55597d9a90bff71"
+      ],
+      "doc_ids": [
+        "341324"
       ]
     },
     {
       "id": "xseg-343052-s0",
-      "parent_id": "xpar-72159-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-72159-s0",
+        "xpar-97884-s0"
+      ],
       "atom_ids": [
         "3352f99e84b0e1cbb431b7fb34bace491a8277ee8548effc39c20506aa2ccbb3",
         "585f66a7d4ffe32b380ac0b253952c5b01cf8cbf2558be30367881a13f1bf47e"
+      ],
+      "doc_ids": [
+        "343052"
       ]
     },
     {
       "id": "xseg-344240-s0",
-      "parent_id": "xpar-344240-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-344240-s0"
+      ],
       "atom_ids": [
         "2dc71f89dddc5f192627ebaf7c4a87ab3ed32faea07e8d98863513affc39b256",
         "c16b316a5187e2b053b6c1fc7d9d0618ba9e72a6e859e42b3272492711b7a79c"
+      ],
+      "doc_ids": [
+        "344240"
       ]
     },
     {
       "id": "xseg-350542-s0",
-      "parent_id": "xpar-350542-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-350542-s0"
+      ],
       "atom_ids": [
         "0cfb39a065fbda097934f0c52b7b32d41961588a59f548859f090e61dac2bfc6",
         "d794587e16d04342d68325378d8075961afa514901a678f1655fe8bd808ab478"
+      ],
+      "doc_ids": [
+        "350542"
       ]
     },
     {
       "id": "xseg-356218-s0",
-      "parent_id": "xpar-356218-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-356218-s0"
+      ],
       "atom_ids": [
         "67d173ed9d01b764bf00bcacbbb226a96e5ef7bfd7eb2d89bae417323728e9a9",
         "ca67f5b85880b7ff9b90a338e4167c47b2c6ab21956e5a9be5775de22961e547"
+      ],
+      "doc_ids": [
+        "356218"
       ]
     },
     {
       "id": "xseg-364522-s0",
-      "parent_id": "xpar-72159-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-72159-s0"
+      ],
       "atom_ids": [
         "8c2b1744c70f5c1caddf55bad425451e9a7f1afab63044c46f43cd39fdeacf73",
         "ef5a8da249807c63780675f6eb0d524b2b4b46447b7b8d03832a00c67583aaf0"
+      ],
+      "doc_ids": [
+        "364522"
       ]
     },
     {
       "id": "xseg-36474-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-5836-s0"
+      ],
       "atom_ids": [
         "bc8a67ba7a34764a87b23206101a1ea5f7bd299172a798a713f7f6b1d5d81421"
+      ],
+      "doc_ids": [
+        "36474"
       ]
     },
     {
       "id": "xseg-365896-s0",
-      "parent_id": "xpar-7912-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-7912-s0"
+      ],
       "atom_ids": [
         "176a74da55633cc8bf8f6602877456e0e303485308c48cec6a9b19977f63c0bc",
         "59de49c10c801ce649f6fe640a9a60cd92308f8061deb327206b6e73e075d30c"
+      ],
+      "doc_ids": [
+        "365896"
       ]
     },
     {
       "id": "xseg-368506-s0",
-      "parent_id": "xpar-106301-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-106301-s0"
+      ],
       "atom_ids": [
         "e71f5388fd7bd948d662edbe9c85c8ccfe66946232fdeb074e12c23b53f8a540"
+      ],
+      "doc_ids": [
+        "368506"
       ]
     },
     {
       "id": "xseg-371289-s0",
-      "parent_id": "xpar-371289-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-371289-s0"
+      ],
       "atom_ids": [
         "2f5006f3d977a8a40feedd48f3b84765afae364a3951bf8e5d5c878f37ae6056",
         "3ad96ccdb9f76551c08716e2f47d91da73bd0cf8d4b90dc5eaba92dccb3ca24f"
+      ],
+      "doc_ids": [
+        "371289"
       ]
     },
     {
       "id": "xseg-374902-s0",
-      "parent_id": "xpar-374902-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-374902-s0"
+      ],
       "atom_ids": [
         "1b44e441b9606f5dc12cd1d254632339f39e858e588d1a72f352e2918e65af6e",
         "8aff696819e314f3047256792c8b61fe49e3666f46db4f38b9f55920ea26cfa8"
+      ],
+      "doc_ids": [
+        "374902"
       ]
     },
     {
       "id": "xseg-380526-s0",
-      "parent_id": "xpar-380526-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-380526-s0"
+      ],
       "atom_ids": [
         "ef5ac213997d5b81894877b5d1efb3ae7f5454b8fc652af05625f618d734067d",
         "f5e90a16fa1d34b8f7cbdf012cd973a3df14e7835809ca827425efc04534ba07"
+      ],
+      "doc_ids": [
+        "380526"
       ]
     },
     {
       "id": "xseg-393001-s0",
-      "parent_id": "xpar-393001-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-393001-s0"
+      ],
       "atom_ids": [
         "14a3e4cb1da00b8d34c34a66eaed3a0d7425ac01b3aaa00a29977e4e7e690a5b",
         "458c4bc7d43072b18712f41b1acf86acd6d08371524c20b8381aebbf16673d45"
+      ],
+      "doc_ids": [
+        "393001"
       ]
     },
     {
       "id": "xseg-409280-s0",
-      "parent_id": "xpar-409280-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-409280-s0"
+      ],
       "atom_ids": [
         "34817ee45a27e2cfebef7f367ab35807d4ac637b3156100d91cf43509058a9cc",
         "661fbb7062761c9eadbcfdb6a90882a37b176c87b8c474b375ef61f6e3662c6c"
+      ],
+      "doc_ids": [
+        "409280"
       ]
     },
     {
       "id": "xseg-410286-s0",
-      "parent_id": "xpar-410286-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-410286-s0"
+      ],
       "atom_ids": [
         "6f1970f646c01bbb6ecfc8b96785117c54e20fbcb053183f572cbfdeab93a102"
+      ],
+      "doc_ids": [
+        "410286"
       ]
     },
     {
       "id": "xseg-418246-s0",
-      "parent_id": "xpar-72159-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-72159-s0",
+        "xpar-7912-s0"
+      ],
       "atom_ids": [
         "8605f9179787a4f6b0521cf1963fb848aaca649b7fc7a896c3aea10c9694c358"
+      ],
+      "doc_ids": [
+        "418246"
       ]
     },
     {
       "id": "xseg-427082-s0",
-      "parent_id": "xpar-106301-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-106301-s0",
+        "xpar-279052-s0"
+      ],
       "atom_ids": [
         "e5c137776217994df04cb4cdc1012358d3460382ecc29d4b4833549f900bc686"
+      ],
+      "doc_ids": [
+        "427082"
       ]
     },
     {
       "id": "xseg-427865-s0",
-      "parent_id": "xpar-427865-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-427865-s0"
+      ],
       "atom_ids": [
         "c72ea2d66a8d42749c276c8b011628f420ffc35f0aa1c6dd64282b0e48c2ed80"
+      ],
+      "doc_ids": [
+        "427865"
       ]
     },
     {
       "id": "xseg-432261-s0",
-      "parent_id": "xpar-432261-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-432261-s0"
+      ],
       "atom_ids": [
         "20db4268ad98f5b7a8a97e44d0929b33bf30fbd4e70506256122e4bb7006f852",
         "7be27e5b6e487fc43bf4f1751f0bc192247847ac8066ce0768e10f3138e75a67"
+      ],
+      "doc_ids": [
+        "432261",
+        "461550"
       ]
     },
     {
       "id": "xseg-435529-s0",
-      "parent_id": "xpar-7912-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-7912-s0"
+      ],
       "atom_ids": [
         "143870e2d2838eca557f8c9125b37dc3f5791641c7ad285e28ac8fc33988ec4c",
         "854b6a969a0ca5ad6985e7fb9f00250993270783491638170527fdb6af463fb5"
+      ],
+      "doc_ids": [
+        "435529"
       ]
     },
     {
       "id": "xseg-437924-s0",
-      "parent_id": "xpar-374902-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-374902-s0",
+        "xpar-409280-s0"
+      ],
       "atom_ids": [
         "5dc6d363cd22d77d96bc4fe7bd12c24c2448f1ed107db25ebe222a8fc7532b52",
         "64f5fb5c2c8aeb86a3fa46ebb1d9aa63993694e44c1aaa5d9a77a967987fd6c7"
+      ],
+      "doc_ids": [
+        "437924"
       ]
     },
     {
       "id": "xseg-439670-s0",
-      "parent_id": "xpar-356218-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-356218-s0"
+      ],
       "atom_ids": [
         "7d1f5e686d57993a912db81ed51eef46d2003c5829b7a209a8e49cfa1d1612f0",
         "b768cc6072160d821b1772b5e5145ee11a1674c8c6a6dc1717bf35e81657393f"
+      ],
+      "doc_ids": [
+        "439670"
       ]
     },
     {
       "id": "xseg-456304-s0",
-      "parent_id": "xpar-456304-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-456304-s0"
+      ],
       "atom_ids": [
         "500775d858b445cafe492b4fe0f9991bce2c32b5a04e6f58d515731e28f27403",
         "d25a62586396d6dc74330851b6a1d51ab71325a7f16efda6d9dc9f0d4c9aeb7f"
+      ],
+      "doc_ids": [
+        "456304"
       ]
     },
     {
       "id": "xseg-457630-s0",
-      "parent_id": "xpar-456304-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-456304-s0"
+      ],
       "atom_ids": [
         "628eb022cc9e2fb98606a76d5c3fc220b88f6fea3b141d6914070c6e77228d99",
         "93940d2c4404f202e65022f96d7e02f59317bc5bcd941dc95d03fa9378f220fd"
+      ],
+      "doc_ids": [
+        "457630"
       ]
     },
     {
       "id": "xseg-4983-s0",
-      "parent_id": "xpar-4983-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-4983-s0"
+      ],
       "atom_ids": [
         "5820a2cc6161a427231d41fe956614f403282c324abf3f08d4793a693edfec25",
         "f6114051b2d643d529e1c43a6b77429ae015c84ed4364c65df77e2002befd1ae"
+      ],
+      "doc_ids": [
+        "4983"
       ]
     },
     {
       "id": "xseg-54440-s0",
-      "parent_id": "xpar-54440-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-54440-s0"
+      ],
       "atom_ids": [
         "152064eb8e6ffa4c7a84bc9d1687bf3b7fdd065082eab056137fd033a008a00d",
         "bc9f7f92fa4b5bb5d22580e3225e25c6bfd3c2b93db99aca60a7fdd780e00115"
+      ],
+      "doc_ids": [
+        "54440"
       ]
     },
     {
       "id": "xseg-5836-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 5,
+      "parent_ids": [
+        "xpar-5836-s0"
+      ],
       "atom_ids": [
         "ad6ecc661aab7c83665da515d32cbfcc08ecea0f1745691b0db0c2534bca0896",
         "adfd63d3025df5a1c5d61b676ee5e0b1eeee3f5786ce4d861c97aedcbb8ed97f",
         "c73244314bf2d702eba5182ebd41f6c4c36ef55972c80dc6591d9a5ed5638a28",
         "d79107f67b21c7952de588b84565663cbd847554474479848cbcdddb8ec0d211",
         "f681ddbd1c5c553baed0238046ca71da6a874ff41b97af4e2697654807195f9e"
+      ],
+      "doc_ids": [
+        "219475",
+        "381602",
+        "5836"
       ]
     },
     {
       "id": "xseg-70115-s0",
-      "parent_id": "xpar-70115-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-70115-s0"
+      ],
       "atom_ids": [
         "4948edffd177b5cbb23dbc9986d2e86b3dfd53e23c0f4e3f717c2231132df19e",
         "cebb937108cc83357a592f4b8fd0f315e5e0f00563dcd22a71b675dde1f731d3"
+      ],
+      "doc_ids": [
+        "70115"
       ]
     },
     {
       "id": "xseg-70490-s0",
-      "parent_id": "xpar-70490-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-70490-s0"
+      ],
       "atom_ids": [
         "9ff2821fcf84ef7a70a5635b631dee8ca8c72ad76c1428dec2acb278184add58"
+      ],
+      "doc_ids": [
+        "70490"
       ]
     },
     {
       "id": "xseg-72159-s0",
-      "parent_id": "xpar-72159-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-72159-s0"
+      ],
       "atom_ids": [
         "b4a9edb2d8d90bd40fdaa05d31499fca3324639e37002aed0f75ca00e064a83d",
         "bb3ceadd071ada9dae528cb434c118f4de42b9937859b2adb09ce5c709b0c8f3"
+      ],
+      "doc_ids": [
+        "72159"
       ]
     },
     {
       "id": "xseg-7912-s0",
-      "parent_id": "xpar-7912-s0",
-      "atom_count": 1,
+      "parent_ids": [
+        "xpar-7912-s0"
+      ],
       "atom_ids": [
         "816d634f1f1a29f51625272530cf569f920d7c865c7018a497bfa3f9b6a80f3c"
+      ],
+      "doc_ids": [
+        "7912"
       ]
     },
     {
       "id": "xseg-79447-s0",
-      "parent_id": "xpar-79447-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-79447-s0"
+      ],
       "atom_ids": [
         "1ac476ac9a617de241f328569fe0ed51cd22fea9c87b264cf915509c15e04ad4",
         "797f328cac05822832641685247aa6ce37736f5d0368cb37358c2514740e1031"
+      ],
+      "doc_ids": [
+        "79447"
       ]
     },
     {
       "id": "xseg-87758-s0",
-      "parent_id": "xpar-87758-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-87758-s0"
+      ],
       "atom_ids": [
         "480c6675dd9da686eda1aee5b3a57cd69e0362f354fcdcbae13afbb16c7541ff",
         "6387a0792f9c61369043e2f3103481bd54a2b9baab98cd7035f73036d02374a3"
+      ],
+      "doc_ids": [
+        "87758"
       ]
     },
     {
       "id": "xseg-92308-s0",
-      "parent_id": "xpar-92308-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-92308-s0"
+      ],
       "atom_ids": [
         "1e9c745c198c7c705f6d21928048bff09365ad8e7e9a5c3e1e8c73102760a5fc",
         "dcf94eb0f5bf15e9955eb2294e57629d6710ce25198fec5e99bd9d5388f1a4a0"
+      ],
+      "doc_ids": [
+        "92308"
       ]
     },
     {
       "id": "xseg-92499-s0",
-      "parent_id": "xpar-5836-s0",
-      "atom_count": 3,
+      "parent_ids": [
+        "xpar-5836-s0"
+      ],
       "atom_ids": [
         "30162dda8dc450d03dece7177d5cdde37384d9cb6cafaeaf9d7f92717e8ea487",
         "6f0d93d5841432f8f3211c753d040e469dfc3b00dfa41c9e81aede054c42422f",
         "8ed313aaeed1ffc0e7928ca71c8ec08bb20259211de7337a72170a4b347f50e0"
+      ],
+      "doc_ids": [
+        "243694",
+        "92499"
       ]
     },
     {
       "id": "xseg-97884-s0",
-      "parent_id": "xpar-97884-s0",
-      "atom_count": 2,
+      "parent_ids": [
+        "xpar-97884-s0"
+      ],
       "atom_ids": [
         "201772abf517534f0c13eded1fb50404746d453db81df894a9cc8db93e553414",
         "a8fffa794bace855a35f235d0312b051c6ddcf43e1837227f564ef530c04a9f3"
+      ],
+      "doc_ids": [
+        "97884"
       ]
     }
   ],
   "atoms": [
     {
-      "id": "03b351cc2500538239598be83bfe1a45bf02cae147f3eec767a31b1119e16bb1",
-      "doc_id": "253672",
-      "title": "Probable person to person transmission of novel avian influenza A (H7N9) virus in Eastern China, 2013: epidemiological i",
-      "snippet": "OBJECTIVE To determine whether the novel avian influenza H7N9 virus can transmit from person to person and its efficiency. DESIGN Epidemiological investigations conducted after a family cluster of two"
-    },
-    {
-      "id": "073b5f81a109563ab2eade3a1cd238a7566d5e9f5633f3f48c655848c934149f",
-      "doc_id": "238409",
-      "title": "Mechanisms of Renal Cell Apoptosis Induced by Cyclosporine A: A Systematic Review of in vitro Studies",
-      "snippet": "Background:Chronic cyclosporine A (CsA) nephrotoxicity (CCN) is a major cause of chronic renal dysfunction and has no effective clinical interventions yet. Objective: To reveal the mechanisms of renal"
-    },
-    {
-      "id": "0ce0b3a10355ef00a8e8b3748ea5829354d00e326be60018e58b86ce960973a5",
-      "doc_id": "253672",
-      "title": "Probable person to person transmission of novel avian influenza A (H7N9) virus in Eastern China, 2013: epidemiological i",
-      "snippet": "OBJECTIVE To determine whether the novel avian influenza H7N9 virus can transmit from person to person and its efficiency. DESIGN Epidemiological investigations conducted after a family cluster of two"
-    },
-    {
-      "id": "0cf63ed5cd608aaeedc1423e09f2db32d00b8f901dbb4b40beb83e258a43ceba",
-      "doc_id": "236204",
-      "title": "Distinct RNA-dependent RNA polymerases are required for RNAi triggered by double-stranded RNA versus truncated transgene",
-      "snippet": "In many eukaryotes, RNA-dependent RNA polymerases (RdRPs) play key roles in the RNAi pathway. They have been implicated in the recognition and processing of aberrant transcripts triggering the process"
-    },
-    {
-      "id": "0cfb39a065fbda097934f0c52b7b32d41961588a59f548859f090e61dac2bfc6",
-      "doc_id": "350542",
-      "title": "Antimicrobial peptide pleurocidin synergizes with antibiotics through hydroxyl radical formation and membrane damage, an",
-      "snippet": "BACKGROUND Pleurocidin, a 25-mer antimicrobial peptide (AMP), is known to exert bactericidal activity. However, the synergistic activity and mechanism(s) of pleurocidin in combination with conventiona"
-    },
-    {
-      "id": "0d047b3e1b09c2de457449dcdc212aa85e335bed09829e3d91e695ee522f0938",
-      "doc_id": "116792",
-      "title": "The mammalian target of rapamycin signaling pathway mediates epileptogenesis in a model of temporal lobe epilepsy.",
-      "snippet": "Understanding molecular mechanisms mediating epileptogenesis is critical for developing more effective therapies for epilepsy. We recently found that the mammalian target of rapamycin (mTOR) signaling"
-    },
-    {
-      "id": "0e6c8f31874ccb70a82deb9d9d1f15425399784426650b8b5cc27b83be35f344",
-      "doc_id": "116792",
-      "title": "The mammalian target of rapamycin signaling pathway mediates epileptogenesis in a model of temporal lobe epilepsy.",
-      "snippet": "Understanding molecular mechanisms mediating epileptogenesis is critical for developing more effective therapies for epilepsy. We recently found that the mammalian target of rapamycin (mTOR) signaling"
-    },
-    {
-      "id": "12648c8c05224ee3df098e12026e739e2b84f543c08a0245012f34e5cc7af2b1",
-      "doc_id": "120626",
-      "title": "Mechanisms linking obesity to insulin resistance and type 2 diabetes",
-      "snippet": "Obesity is associated with an increased risk of developing insulin resistance and type 2 diabetes. In obese individuals, adipose tissue releases increased amounts of non-esterified fatty acids, glycer"
-    },
-    {
-      "id": "143870e2d2838eca557f8c9125b37dc3f5791641c7ad285e28ac8fc33988ec4c",
-      "doc_id": "435529",
-      "title": "Uridylation of miRNAs by HEN1 SUPPRESSOR1 in Arabidopsis",
-      "snippet": "HEN1-mediated 2'-O-methylation has been shown to be a key mechanism to protect plant microRNAs (miRNAs) and small interfering RNAs (siRNAs) as well as animal piwi-interacting RNAs (piRNAs) from degrad"
-    },
-    {
       "id": "1451e4a21a977d21eb4d6c6066c369064f2857afa20e51a05a965ca14584cbd5",
       "doc_id": "102662",
+      "leaf_ids": [
+        "xseg-102662-s0"
+      ],
       "title": "A rapid method for extraction of cotton (Gossypium spp.) genomic DNA suitable for RFLP or PCR analysis",
-      "snippet": "Extraction of high-quality genomic DNA fromGossypium (cotton) species is difficult due to high levels of polysaccharide, oxidizable quinones, and other interfering substances. We describe a procedure "
-    },
-    {
-      "id": "14a3e4cb1da00b8d34c34a66eaed3a0d7425ac01b3aaa00a29977e4e7e690a5b",
-      "doc_id": "393001",
-      "title": "High Km soluble 5'-nucleotidase from human placenta. Properties and allosteric regulation by IMP and ATP.",
-      "snippet": "A human placental soluble \"high Km\" 5'-nucleotidase has been separated from \"low Km\" 5'-nucleotidase and nonspecific phosphatase by AMP-Sepharose affinity chromatography. The enzyme was purified 8000-"
-    },
-    {
-      "id": "152064eb8e6ffa4c7a84bc9d1687bf3b7fdd065082eab056137fd033a008a00d",
-      "doc_id": "54440",
-      "title": "Empirical Bayesian models for analysing molecular serotyping microarrays",
-      "snippet": "BACKGROUND Microarrays offer great potential as a platform for molecular diagnostics, testing clinical samples for the presence of numerous biomarkers in highly multiplexed assays. In this study appli"
-    },
-    {
-      "id": "15ecc8e5901d0ee933830d830c34d0653e487f8c0f90fb86406bb3c11ae08821",
-      "doc_id": "323030",
-      "title": "Dynamics of adherens junctions in epithelial establishment, maintenance, and remodeling",
-      "snippet": "The epithelial cadherin (E-cadherin)-catenin complex binds to cytoskeletal components and regulatory and signaling molecules to form a mature adherens junction (AJ). This dynamic structure physically "
-    },
-    {
-      "id": "176a74da55633cc8bf8f6602877456e0e303485308c48cec6a9b19977f63c0bc",
-      "doc_id": "365896",
-      "title": "RiboSys, a high-resolution, quantitative approach to measure the in vivo kinetics of pre-mRNA splicing and 3'-end proces",
-      "snippet": "We describe methods for obtaining a quantitative description of RNA processing at high resolution in budding yeast. As a model gene expression system, we constructed tetON (for induction studies) and "
-    },
-    {
-      "id": "1ac476ac9a617de241f328569fe0ed51cd22fea9c87b264cf915509c15e04ad4",
-      "doc_id": "79447",
-      "title": "Arteriolar function in visceral adipose tissue is impaired in human obesity.",
-      "snippet": "OBJECTIVE The purpose of this study was to characterize the relationship between adipose tissue phenotype and depot-specific microvascular function in fat. METHODS AND RESULTS In 30 obese subjects (ag"
-    },
-    {
-      "id": "1b44e441b9606f5dc12cd1d254632339f39e858e588d1a72f352e2918e65af6e",
-      "doc_id": "374902",
-      "title": "Universal voluntary HIV testing with immediate antiretroviral therapy as a strategy for elimination of HIV transmission:",
-      "snippet": "BACKGROUND Roughly 3 million people worldwide were receiving antiretroviral therapy (ART) at the end of 2007, but an estimated 6.7 million were still in need of treatment and a further 2.7 million bec"
+      "snippet": "Extraction of high-quality genomic DNA fromGossypium (cotton) species is difficult due to high levels of polysaccharide, oxidizable quinones, and other interfering substances. We describe a procedure ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        669
+      ],
+      "seq": 61
     },
     {
       "id": "1be7112c0eab96c3a2b7ab5190e4bd3e2865d695eae87ff6092f6173378ebfb0",
       "doc_id": "103007",
+      "leaf_ids": [
+        "xseg-103007-s0"
+      ],
       "title": "Cross sectional stature and weight reference curves for the UK, 1990.",
-      "snippet": "The current reference curves of stature and weight for the UK were first published in 1966 and have been used ever since despite increasing concern that they may not adequately describe the growth of "
-    },
-    {
-      "id": "1dfb352c7fdc69c47231bf1a7ac4265ddfc9c87ff75d1f85b916445f4b259843",
-      "doc_id": "33370",
-      "title": "Targeting A20 Decreases Glioma Stem Cell Survival and Tumor Growth",
-      "snippet": "Glioblastomas are deadly cancers that display a functional cellular hierarchy maintained by self-renewing glioblastoma stem cells (GSCs). GSCs are regulated by molecular pathways distinct from the bul"
-    },
-    {
-      "id": "1e9c745c198c7c705f6d21928048bff09365ad8e7e9a5c3e1e8c73102760a5fc",
-      "doc_id": "92308",
-      "title": "Loss of immune escape mutations during persistent HCV infection in pregnancy enhances replication of vertically transmit",
-      "snippet": "Globally, about 1% of pregnant women are persistently infected with the hepatitis C virus (HCV). Mother-to-child transmission of HCV occurs in 3-5% of pregnancies and accounts for most new childhood i"
-    },
-    {
-      "id": "1f73790cc4ab4d4666e700078bb8d769f788a8029a51c4f1b357dae0f0f1228e",
-      "doc_id": "306311",
-      "title": "Control of glutamate clearance and synaptic efficacy by glial coverage of neurons.",
-      "snippet": "Analysis of excitatory synaptic transmission in the rat hypothalamic supraoptic nucleus revealed that glutamate clearance and, as a consequence, glutamate concentration and diffusion in the extracellu"
-    },
-    {
-      "id": "200c5b8cbd613a4d58eff7ea17a0113bbae83eea786875c00ffe957aba0e6b32",
-      "doc_id": "188911",
-      "title": "Generation of large numbers of dendritic cells from mouse bone marrow cultures supplemented with granulocyte/macrophage ",
-      "snippet": "Antigen-presenting, major histocompatibility complex (MHC) class II-rich dendritic cells are known to arise from bone marrow. However, marrow lacks mature dendritic cells, and substantial numbers of p"
-    },
-    {
-      "id": "201772abf517534f0c13eded1fb50404746d453db81df894a9cc8db93e553414",
-      "doc_id": "97884",
-      "title": "The sacroiliac joint in the spondyloarthropathies.",
-      "snippet": "The term spondyloarthropathy (SpA) describes and defines a group of related inflammatory joint disease that share characteristic clinical features and a unique association with the major histocompatib"
-    },
-    {
-      "id": "20db4268ad98f5b7a8a97e44d0929b33bf30fbd4e70506256122e4bb7006f852",
-      "doc_id": "461550",
-      "title": "Multiplex genome engineering using CRISPR/Cas systems.",
-      "snippet": "Functional elucidation of causal genetic variants and elements requires precise genome editing technologies. The type II prokaryotic CRISPR (clustered regularly interspaced short palindromic repeats)/"
-    },
-    {
-      "id": "21c4e991f84864ce5f7f2f21fa8b2b20797fbd5ccc7ea4637d02a1eea21dd51c",
-      "doc_id": "140874",
-      "title": "CTCF binding at the H19 imprinting control region mediates maternally inherited higher-order chromatin conformation to r",
-      "snippet": "It is thought that the H19 imprinting control region (ICR) directs the silencing of the maternally inherited Igf2 allele through a CTCF-dependent chromatin insulator. The ICR has been shown to interac"
-    },
-    {
-      "id": "23d9eed1e54ca442c194e6256d408509f9c54ce59f9f6c3c1c20716129253ac8",
-      "doc_id": "301838",
-      "title": "Rank Signaling Links the Development of Invariant \u03b3\u03b4 T Cell Progenitors and Aire+ Medullary Epithelium",
-      "snippet": "The thymic medulla provides a specialized microenvironment for the negative selection of T cells, with the presence of autoimmune regulator (Aire)-expressing medullary thymic epithelial cells (mTECs) "
-    },
-    {
-      "id": "2dc71f89dddc5f192627ebaf7c4a87ab3ed32faea07e8d98863513affc39b256",
-      "doc_id": "344240",
-      "title": "Loss of IGF-IEa or IGF-IEb impairs myogenic differentiation.",
-      "snippet": "Actions of protein products resulting from alternative splicing of the Igf1 gene have received increasing attention in recent years. However, the significance and functional relevance of these observa"
-    },
-    {
-      "id": "2f5006f3d977a8a40feedd48f3b84765afae364a3951bf8e5d5c878f37ae6056",
-      "doc_id": "371289",
-      "title": "A Triple-Stain Flow Cytometric Method to Assess Plasma- and Acrosome-Membrane Integrity of Cryopreserved Bovine Sperm Im",
-      "snippet": "Abstract Simultaneously evaluating postthaw viability and acrosome integrity of spermatozoa by flow cytometry would provide a valuable testing tool in both research and routine work. In the present st"
-    },
-    {
-      "id": "30162dda8dc450d03dece7177d5cdde37384d9cb6cafaeaf9d7f92717e8ea487",
-      "doc_id": "92499",
-      "title": "The journey of developing hematopoietic stem cells.",
-      "snippet": "Hematopoietic stem cells (HSCs) develop during embryogenesis in a complex process that involves multiple anatomical sites. Once HSC precursors have been specified from mesoderm, they have to mature in"
-    },
-    {
-      "id": "3054fabf2f17db0ff34c69faeb3afdb0f8126c098aed6a5219e6f9bc3ff7ed04",
-      "doc_id": "159469",
-      "title": "HTRF: A Technology Tailored for Drug Discovery \u2013A Review of Theoretical Aspects and Recent Applications",
-      "snippet": "HTRF (Homogeneous Time Resolved Fluorescence) is the most frequently used generic assay technology to measure analytes in a homogenous format, which is the ideal platform used for drug target studies "
-    },
-    {
-      "id": "3352f99e84b0e1cbb431b7fb34bace491a8277ee8548effc39c20506aa2ccbb3",
-      "doc_id": "343052",
-      "title": "Curcumin attenuates inflammatory response in IL-1beta-induced human synovial fibroblasts and collagen-induced arthritis ",
-      "snippet": "Curcumin, a major component of turmeric, has been shown to exhibit anti-oxidant and anti-inflammatory activities. The present study was performed to determine whether curcumin is efficacious against b"
-    },
-    {
-      "id": "34817ee45a27e2cfebef7f367ab35807d4ac637b3156100d91cf43509058a9cc",
-      "doc_id": "409280",
-      "title": "National study of physician awareness and adherence to cardiovascular disease prevention guidelines.",
-      "snippet": "BACKGROUND Few data have evaluated physician adherence to cardiovascular disease (CVD) prevention guidelines according to physician specialty or patient characteristics, particularly gender. METHODS A"
-    },
-    {
-      "id": "35c86d8ebff6017ecd7c5f02c10be9bf69c6e0f6eacc47fb3b67636a8f6e34c3",
-      "doc_id": "207972",
-      "title": "Interaction of an adenovirus E3 14.7-kilodalton protein with a novel tumor necrosis factor alpha-inducible cellular prot",
-      "snippet": "Early region 3 (E3) of group C human adenoviruses (Ad) encodes several inhibitors of tumor necrosis factor alpha (TNF-alpha) cytolysis, including an E3 14.7-kDa protein (E3-14.7K) and a heterodimer co"
-    },
-    {
-      "id": "3ad96ccdb9f76551c08716e2f47d91da73bd0cf8d4b90dc5eaba92dccb3ca24f",
-      "doc_id": "371289",
-      "title": "A Triple-Stain Flow Cytometric Method to Assess Plasma- and Acrosome-Membrane Integrity of Cryopreserved Bovine Sperm Im",
-      "snippet": "Abstract Simultaneously evaluating postthaw viability and acrosome integrity of spermatozoa by flow cytometry would provide a valuable testing tool in both research and routine work. In the present st"
-    },
-    {
-      "id": "3ca6d2332526e9e18c6cb956042de9869cad15992332d035d57895ea19aca28b",
-      "doc_id": "335029",
-      "title": "Condensin-mediated remodeling of the mitotic chromatin landscape in fission yeast",
-      "snippet": "The eukaryotic genome consists of DNA molecules far longer than the cells that contain them. They reach their greatest compaction during chromosome condensation in mitosis. This process is aided by co"
-    },
-    {
-      "id": "3d9d040134cd9e5c6cd1839f66501686f53da7573b87acd91b9035c266b80ce0",
-      "doc_id": "159469",
-      "title": "HTRF: A Technology Tailored for Drug Discovery \u2013A Review of Theoretical Aspects and Recent Applications",
-      "snippet": "HTRF (Homogeneous Time Resolved Fluorescence) is the most frequently used generic assay technology to measure analytes in a homogenous format, which is the ideal platform used for drug target studies "
-    },
-    {
-      "id": "3f96a60d8c1013ec3af51d5812d6e37874c30fbea60a5eec9456ed8901e08abe",
-      "doc_id": "341324",
-      "title": "Efficacy of the 6-month thrice-weekly regimen in the treatment of new sputum smear-positive pulmonary tuberculosis under",
-      "snippet": "BACKGROUND Under the Revised National Tuberculosis Control Programme of India, patients with new smear-positive pulmonary tuberculosis are treated with a thrice-weekly regimen of antitubercular drugs "
-    },
-    {
-      "id": "443442b68b8c4713e9405e2a88dd55886a927757191e439242f67b76e1dc8023",
-      "doc_id": "301866",
-      "title": "Long-term immune deficiency after allogeneic stem cell transplantation: B-cell deficiency is associated with late infect",
-      "snippet": "Immune reconstitution was analyzed in 140 consecutive patients who were 2-year disease-free and who underwent myeloablative allogeneic transplantation. A CD4 and CD8 defect was observed involving naiv"
-    },
-    {
-      "id": "458c4bc7d43072b18712f41b1acf86acd6d08371524c20b8381aebbf16673d45",
-      "doc_id": "393001",
-      "title": "High Km soluble 5'-nucleotidase from human placenta. Properties and allosteric regulation by IMP and ATP.",
-      "snippet": "A human placental soluble \"high Km\" 5'-nucleotidase has been separated from \"low Km\" 5'-nucleotidase and nonspecific phosphatase by AMP-Sepharose affinity chromatography. The enzyme was purified 8000-"
-    },
-    {
-      "id": "46a4cadf9e6bf31b8dc30ed4fa27a8613199355d23ddfef6f67e8b7a8ff6fe75",
-      "doc_id": "313403",
-      "title": "High-Infiltration of Tumor-Associated Macrophages Predicts Unfavorable Clinical Outcome for Node-Negative Breast Cancer",
-      "snippet": "The tumor microenvironment is composed of tumor cells, fibroblasts, endothelial cells and infiltrating immune cells, which may inhibit or promote tumor growth and progression. The objectives of this r"
-    },
-    {
-      "id": "480c6675dd9da686eda1aee5b3a57cd69e0362f354fcdcbae13afbb16c7541ff",
-      "doc_id": "87758",
-      "title": "Common Carotid Intima Media Thickness and Ankle-Brachial Pressure Index Correlate with Local but Not Global Atheroma Bur",
-      "snippet": "BACKGROUND Common carotid intima media thickness (CIMT) and ankle brachial pressure index (ABPI) are used as surrogate marker of atherosclerosis, and have been shown to correlate with arterial stiffne"
-    },
-    {
-      "id": "4948edffd177b5cbb23dbc9986d2e86b3dfd53e23c0f4e3f717c2231132df19e",
-      "doc_id": "70115",
-      "title": "Bayesian measures of model complexity and fit",
-      "snippet": "Summary. We consider the problem of comparing complex hierarchical models in which the number of parameters is not clearly defined. Using an information theoretic argument we derive a measure pD for t"
-    },
-    {
-      "id": "4cd9fe9745563e5ead3d06649260559a617458acf3ee707320b6cf6bce87bf82",
-      "doc_id": "313403",
-      "title": "High-Infiltration of Tumor-Associated Macrophages Predicts Unfavorable Clinical Outcome for Node-Negative Breast Cancer",
-      "snippet": "The tumor microenvironment is composed of tumor cells, fibroblasts, endothelial cells and infiltrating immune cells, which may inhibit or promote tumor growth and progression. The objectives of this r"
-    },
-    {
-      "id": "500775d858b445cafe492b4fe0f9991bce2c32b5a04e6f58d515731e28f27403",
-      "doc_id": "456304",
-      "title": "Multiple risk behaviour: increasing socio-economic gap over time?",
-      "snippet": "BACKGROUND Unhealthy behaviours often occur in combination. In this study the relationship between education and lifestyle, defined as a cluster of risk behaviours, has been analysed with the purpose "
-    },
-    {
-      "id": "5348e84a5ae32ac7e284b7b926a8720736eeedf4eb9bc6632ce23aa4640d1d90",
-      "doc_id": "153744",
-      "title": "Down-regulation of a host microRNA by a Herpesvirus saimiri noncoding RNA.",
-      "snippet": "T cells transformed by Herpesvirus saimiri express seven viral U-rich noncoding RNAs of unknown function called HSURs. We noted that conserved sequences in HSURs 1 and 2 constitute potential binding s"
-    },
-    {
-      "id": "54ee9ef27d6f7a9ced33744f045febba8323769be4ccaabd585301316995ec67",
-      "doc_id": "152245",
-      "title": "Effects of an opal termination codon preceding the nsP4 gene sequence in the O'Nyong-Nyong virus genome on Anopheles gam",
-      "snippet": "The genomic RNA of an alphavirus encodes four different nonstructural proteins, nsP1, nsP2, nsP3, and nsP4. The polyprotein P123 is produced when translation terminates at an opal termination codon be"
-    },
-    {
-      "id": "5820a2cc6161a427231d41fe956614f403282c324abf3f08d4793a693edfec25",
-      "doc_id": "4983",
-      "title": "Microstructural development of human newborn cerebral white matter assessed in vivo by diffusion tensor magnetic resonan",
-      "snippet": "Alterations of the architecture of cerebral white matter in the developing human brain can affect cortical development and result in functional disabilities. A line scan diffusion-weighted magnetic re"
-    },
-    {
-      "id": "585f66a7d4ffe32b380ac0b253952c5b01cf8cbf2558be30367881a13f1bf47e",
-      "doc_id": "343052",
-      "title": "Curcumin attenuates inflammatory response in IL-1beta-induced human synovial fibroblasts and collagen-induced arthritis ",
-      "snippet": "Curcumin, a major component of turmeric, has been shown to exhibit anti-oxidant and anti-inflammatory activities. The present study was performed to determine whether curcumin is efficacious against b"
-    },
-    {
-      "id": "59bd0ff69a4c9e8440fa7ca45a5d30b4707f6d657389e85b1a27d701eea57a3a",
-      "doc_id": "308862",
-      "title": "Duration of androgen suppression in the treatment of prostate cancer.",
-      "snippet": "BACKGROUND The combination of radiotherapy plus long-term medical suppression of androgens (> or = 2 years) improves overall survival in patients with locally advanced prostate cancer. We compared the"
-    },
-    {
-      "id": "59de49c10c801ce649f6fe640a9a60cd92308f8061deb327206b6e73e075d30c",
-      "doc_id": "365896",
-      "title": "RiboSys, a high-resolution, quantitative approach to measure the in vivo kinetics of pre-mRNA splicing and 3'-end proces",
-      "snippet": "We describe methods for obtaining a quantitative description of RNA processing at high resolution in budding yeast. As a model gene expression system, we constructed tetON (for induction studies) and "
-    },
-    {
-      "id": "5a75e649a4e0ce99a9011307557ec91d7da9298793def72e80564107c2f0c88d",
-      "doc_id": "152245",
-      "title": "Effects of an opal termination codon preceding the nsP4 gene sequence in the O'Nyong-Nyong virus genome on Anopheles gam",
-      "snippet": "The genomic RNA of an alphavirus encodes four different nonstructural proteins, nsP1, nsP2, nsP3, and nsP4. The polyprotein P123 is produced when translation terminates at an opal termination codon be"
-    },
-    {
-      "id": "5b22b4ce512a7513b0d8096b870f043af8d33373bd4bcd001c8e5dd04155ddcd",
-      "doc_id": "236204",
-      "title": "Distinct RNA-dependent RNA polymerases are required for RNAi triggered by double-stranded RNA versus truncated transgene",
-      "snippet": "In many eukaryotes, RNA-dependent RNA polymerases (RdRPs) play key roles in the RNAi pathway. They have been implicated in the recognition and processing of aberrant transcripts triggering the process"
-    },
-    {
-      "id": "5dc6d363cd22d77d96bc4fe7bd12c24c2448f1ed107db25ebe222a8fc7532b52",
-      "doc_id": "437924",
-      "title": "Pre-Exposure Prophylaxis to Prevent HIV Infection: Current Status, Future Opportunities and Challenges",
-      "snippet": "As the global incidence of HIV exceeds 2 million new infections annually, effective interventions to decrease HIV transmission are needed. Randomized, placebo-controlled studies have demonstrated that"
-    },
-    {
-      "id": "5e153b12420278a7b5bca23f5029c7c32aeef2c75e79454f60d73ab505b381f5",
-      "doc_id": "169264",
-      "title": "Analysis of SiO2 nanoparticles binding proteins in rat blood and brain homogenate",
-      "snippet": "A multitude of nanoparticles, such as titanium oxide (TiO2), zinc oxide, aluminum oxide, gold oxide, silver oxide, iron oxide, and silica oxide, are found in many chemical, cosmetic, pharmaceutical, a"
-    },
-    {
-      "id": "628eb022cc9e2fb98606a76d5c3fc220b88f6fea3b141d6914070c6e77228d99",
-      "doc_id": "457630",
-      "title": "Variations and Trends in Health Burden of Visual Impairment Due to Cataract: A Global Analysis.",
-      "snippet": "Purpose To evaluate the global trends in health burden of people visually impaired from cataract in terms of disability-adjusted life years (DALY) and its correlations with national levels of socioeco"
-    },
-    {
-      "id": "6387a0792f9c61369043e2f3103481bd54a2b9baab98cd7035f73036d02374a3",
-      "doc_id": "87758",
-      "title": "Common Carotid Intima Media Thickness and Ankle-Brachial Pressure Index Correlate with Local but Not Global Atheroma Bur",
-      "snippet": "BACKGROUND Common carotid intima media thickness (CIMT) and ankle brachial pressure index (ABPI) are used as surrogate marker of atherosclerosis, and have been shown to correlate with arterial stiffne"
-    },
-    {
-      "id": "63ab48868cbff9adcae01d28bd7c39b8ddcab905ef3b394fe962614c6e6dd34f",
-      "doc_id": "275294",
-      "title": "Environmental factors that influence the cutaneous production of vitamin D",
-      "snippet": "All vertebrates, including humans, obtain most of their daily vitamin D requirement from casual exposure to sunlight. During exposure to sunlight, the solar ultraviolet B photons (290-315 nm) penetrat"
-    },
-    {
-      "id": "64f5fb5c2c8aeb86a3fa46ebb1d9aa63993694e44c1aaa5d9a77a967987fd6c7",
-      "doc_id": "437924",
-      "title": "Pre-Exposure Prophylaxis to Prevent HIV Infection: Current Status, Future Opportunities and Challenges",
-      "snippet": "As the global incidence of HIV exceeds 2 million new infections annually, effective interventions to decrease HIV transmission are needed. Randomized, placebo-controlled studies have demonstrated that"
-    },
-    {
-      "id": "661fbb7062761c9eadbcfdb6a90882a37b176c87b8c474b375ef61f6e3662c6c",
-      "doc_id": "409280",
-      "title": "National study of physician awareness and adherence to cardiovascular disease prevention guidelines.",
-      "snippet": "BACKGROUND Few data have evaluated physician adherence to cardiovascular disease (CVD) prevention guidelines according to physician specialty or patient characteristics, particularly gender. METHODS A"
-    },
-    {
-      "id": "67d173ed9d01b764bf00bcacbbb226a96e5ef7bfd7eb2d89bae417323728e9a9",
-      "doc_id": "356218",
-      "title": "Outcome of pregnancy in women with moderate or severe renal insufficiency.",
-      "snippet": "BACKGROUND Pregnant women with mild preexisting renal disease have relatively few complications of pregnancy, but the risks of maternal and obstetrical complications in women with moderate or severe r"
-    },
-    {
-      "id": "690588cbe7f5336c4e160fb45467bb188e4200ade3da432edcbbd3277066ee1f",
-      "doc_id": "143251",
-      "title": "De novo assembly of a PML nuclear subcompartment occurs through multiple pathways and induces telomere elongation.",
-      "snippet": "Telomerase-negative tumor cells use an alternative lengthening of telomeres (ALT) pathway that involves DNA recombination and repair to maintain their proliferative potential. The cytological hallmark"
-    },
-    {
-      "id": "6cc8fe584a2af388b2dda70e709544ce715047e4c2af1f3ddbb500daf17842c4",
-      "doc_id": "169264",
-      "title": "Analysis of SiO2 nanoparticles binding proteins in rat blood and brain homogenate",
-      "snippet": "A multitude of nanoparticles, such as titanium oxide (TiO2), zinc oxide, aluminum oxide, gold oxide, silver oxide, iron oxide, and silica oxide, are found in many chemical, cosmetic, pharmaceutical, a"
-    },
-    {
-      "id": "6e4c90c6c0a68a339e48dc363035a6ad2ac35a4f2e3e4084fe57b39afcd2e270",
-      "doc_id": "341324",
-      "title": "Efficacy of the 6-month thrice-weekly regimen in the treatment of new sputum smear-positive pulmonary tuberculosis under",
-      "snippet": "BACKGROUND Under the Revised National Tuberculosis Control Programme of India, patients with new smear-positive pulmonary tuberculosis are treated with a thrice-weekly regimen of antitubercular drugs "
-    },
-    {
-      "id": "6f0d93d5841432f8f3211c753d040e469dfc3b00dfa41c9e81aede054c42422f",
-      "doc_id": "243694",
-      "title": "Blood stem cells emerge from aortic endothelium by a novel type of cell transition",
-      "snippet": "The ontogeny of haematopoietic stem cells (HSCs) during embryonic development is still highly debated, especially their possible lineage relationship to vascular endothelial cells. The first anatomica"
-    },
-    {
-      "id": "6f1970f646c01bbb6ecfc8b96785117c54e20fbcb053183f572cbfdeab93a102",
-      "doc_id": "410286",
-      "title": "TECHNICAL ADVANCE Floral dip: a simplified method for Agrobacterium-mediated",
-      "snippet": "The Agrobacterium vacuum infiltration method has made it possible to transform Arabidopsis thaliana without plant tissue culture or regeneration. In the present study, this method was evaluated and a "
-    },
-    {
-      "id": "7131b44bd980a6892e5b1f2ba6d19f3f1c1cf586b575347121d7cc63bd1dccc4",
-      "doc_id": "313394",
-      "title": "A Functional Neuroimaging Study of Sound Localization: Visual Cortex Activity Predicts Performance in Early-Blind Indivi",
-      "snippet": "Blind individuals often demonstrate enhanced nonvisual perceptual abilities. However, the neural substrate that underlies this improved performance remains to be fully understood. An earlier behaviora"
-    },
-    {
-      "id": "723c06f74ee6b0fafe4f877789359d0e0a78dc2ee42e5410cf47777ebdbaa45c",
-      "doc_id": "18670",
-      "title": "The DNA Methylome of Human Peripheral Blood Mononuclear Cells",
-      "snippet": "DNA methylation plays an important role in biological processes in human health and disease. Recent technological advances allow unbiased whole-genome DNA methylation (methylome) analysis to be carrie"
-    },
-    {
-      "id": "797f328cac05822832641685247aa6ce37736f5d0368cb37358c2514740e1031",
-      "doc_id": "79447",
-      "title": "Arteriolar function in visceral adipose tissue is impaired in human obesity.",
-      "snippet": "OBJECTIVE The purpose of this study was to characterize the relationship between adipose tissue phenotype and depot-specific microvascular function in fat. METHODS AND RESULTS In 30 obese subjects (ag"
-    },
-    {
-      "id": "7a2280479768c5a419743129c2b02642d888fac81dd7f96f97d01c4200422cdf",
-      "doc_id": "266641",
-      "title": "CD127 expression inversely correlates with FoxP3 and suppressive function of human CD4+ T reg cells",
-      "snippet": "Regulatory T (T reg) cells are critical regulators of immune tolerance. Most T reg cells are defined based on expression of CD4, CD25, and the transcription factor, FoxP3. However, these markers have "
-    },
-    {
-      "id": "7b362579c7645fe39d9541c8ebc45578bad40c258cebf5717a679b96c07d0c30",
-      "doc_id": "308862",
-      "title": "Duration of androgen suppression in the treatment of prostate cancer.",
-      "snippet": "BACKGROUND The combination of radiotherapy plus long-term medical suppression of androgens (> or = 2 years) improves overall survival in patients with locally advanced prostate cancer. We compared the"
-    },
-    {
-      "id": "7be27e5b6e487fc43bf4f1751f0bc192247847ac8066ce0768e10f3138e75a67",
-      "doc_id": "432261",
-      "title": "Generation of gene-edited rats by delivery of CRISPR/Cas9 protein and donor DNA into intact zygotes using electroporatio",
-      "snippet": "The generation of gene-edited animals using the CRISPRs/Cas9 system is based on microinjection into zygotes which is inefficient, time consuming and demands high technical skills. We report the optimi"
-    },
-    {
-      "id": "7d1f5e686d57993a912db81ed51eef46d2003c5829b7a209a8e49cfa1d1612f0",
-      "doc_id": "439670",
-      "title": "Prepregnancy BMI and the risk of gestational diabetes: a systematic review of the literature with meta-analysis.",
-      "snippet": "The objective of this study is to assess and quantify the risk for gestational diabetes mellitus (GDM) according to prepregnancy maternal body mass index (BMI). The design is a systematic review of ob"
-    },
-    {
-      "id": "7d745e9f2a39864a228d3814304adc5a389397d83edbe515a7a987d40d34ef6c",
-      "doc_id": "275294",
-      "title": "Environmental factors that influence the cutaneous production of vitamin D",
-      "snippet": "All vertebrates, including humans, obtain most of their daily vitamin D requirement from casual exposure to sunlight. During exposure to sunlight, the solar ultraviolet B photons (290-315 nm) penetrat"
-    },
-    {
-      "id": "816d634f1f1a29f51625272530cf569f920d7c865c7018a497bfa3f9b6a80f3c",
-      "doc_id": "7912",
-      "title": "BC1 RNA, the transcript from a master gene for ID element amplification, is able to prime its own reverse transcription.",
-      "snippet": "ID elements are short interspersed elements (SINEs) found in high copy number in many rodent genomes. BC1 RNA, an ID-related transcript, is derived from the single copy BC1 RNA gene. The BC1 RNA gene "
-    },
-    {
-      "id": "822eed3e32ff43ec53edcf22c870026106ceaf88d31aae144d5bca3700aa5109",
-      "doc_id": "33370",
-      "title": "Targeting A20 Decreases Glioma Stem Cell Survival and Tumor Growth",
-      "snippet": "Glioblastomas are deadly cancers that display a functional cellular hierarchy maintained by self-renewing glioblastoma stem cells (GSCs). GSCs are regulated by molecular pathways distinct from the bul"
-    },
-    {
-      "id": "853cfd16a2eb2b72fd75dfc3317ae3c9d7251abe13acf56ccc7ffd451dc01704",
-      "doc_id": "123859",
-      "title": "Tracking the fate of glomerular epithelial cells in vivo using serial multiphoton imaging in novel mouse models with flu",
-      "snippet": "Podocytes are critical in the maintenance of a healthy glomerular filter; however, they have been difficult to study in the intact kidney because of technical limitations. Here we report the developme"
-    },
-    {
-      "id": "854b6a969a0ca5ad6985e7fb9f00250993270783491638170527fdb6af463fb5",
-      "doc_id": "435529",
-      "title": "Uridylation of miRNAs by HEN1 SUPPRESSOR1 in Arabidopsis",
-      "snippet": "HEN1-mediated 2'-O-methylation has been shown to be a key mechanism to protect plant microRNAs (miRNAs) and small interfering RNAs (siRNAs) as well as animal piwi-interacting RNAs (piRNAs) from degrad"
-    },
-    {
-      "id": "8605f9179787a4f6b0521cf1963fb848aaca649b7fc7a896c3aea10c9694c358",
-      "doc_id": "418246",
-      "title": "Pathway connectivity and signaling coordination in the yeast stress-activated signaling network",
-      "snippet": "Stressed cells coordinate a multi-faceted response spanning many levels of physiology. Yet knowledge of the complete stress-activated regulatory network as well as design principles for signal integra"
-    },
-    {
-      "id": "8643a889a481bc398d4827e6fb28f5dfbf644601c3e5a73fbacb6333967ec4cd",
-      "doc_id": "118568",
-      "title": "Acute administration of recombinant Angiopoietin-1 ameliorates multiple-organ dysfunction syndrome and improves survival",
-      "snippet": "INTRODUCTION Endothelial activation leading to vascular barrier breakdown plays an essential role in the pathophysiology of multiple-organ dysfunction syndrome (MODS) in sepsis. Increasing evidence su"
-    },
-    {
-      "id": "89b85628b507026818ad66c3e34780457f13441cd2fb49c4df416b4aeceff756",
-      "doc_id": "306006",
-      "title": "The stimulatory potency of T cell antigens is influenced by the formation of the immunological synapse.",
-      "snippet": "T cell activation is predicated on the interaction between the T cell receptor and peptide-major histocompatibility (pMHC) ligands. The factors that determine the stimulatory potency of a pMHC molecul"
-    },
-    {
-      "id": "8aff696819e314f3047256792c8b61fe49e3666f46db4f38b9f55920ea26cfa8",
-      "doc_id": "374902",
-      "title": "Universal voluntary HIV testing with immediate antiretroviral therapy as a strategy for elimination of HIV transmission:",
-      "snippet": "BACKGROUND Roughly 3 million people worldwide were receiving antiretroviral therapy (ART) at the end of 2007, but an estimated 6.7 million were still in need of treatment and a further 2.7 million bec"
-    },
-    {
-      "id": "8c2b1744c70f5c1caddf55bad425451e9a7f1afab63044c46f43cd39fdeacf73",
-      "doc_id": "364522",
-      "title": "High-mobility group box-1 protein induces osteogenic phenotype changes in aortic valve interstitial cells.",
-      "snippet": "OBJECTIVES Calcific aortic valve (AV) disease is known to be an inflammation-related process. High-mobility group box-1 (HMGB1) protein and Toll-like receptor 4 (TLR4) have been reported to participat"
-    },
-    {
-      "id": "8ed313aaeed1ffc0e7928ca71c8ec08bb20259211de7337a72170a4b347f50e0",
-      "doc_id": "243694",
-      "title": "Blood stem cells emerge from aortic endothelium by a novel type of cell transition",
-      "snippet": "The ontogeny of haematopoietic stem cells (HSCs) during embryonic development is still highly debated, especially their possible lineage relationship to vascular endothelial cells. The first anatomica"
-    },
-    {
-      "id": "90682ef6587988b377937692ada715d056b46bed0bf3734e94f48ae37c368b06",
-      "doc_id": "118568",
-      "title": "Acute administration of recombinant Angiopoietin-1 ameliorates multiple-organ dysfunction syndrome and improves survival",
-      "snippet": "INTRODUCTION Endothelial activation leading to vascular barrier breakdown plays an essential role in the pathophysiology of multiple-organ dysfunction syndrome (MODS) in sepsis. Increasing evidence su"
-    },
-    {
-      "id": "92da856afb4a97bab3e1c65cf3c3d242ed9cfad85e7bde042ea97c06f3cdf9b5",
-      "doc_id": "263364",
-      "title": "Genetic Variation in the Interleukin-28B Gene Is Associated with Spontaneous Clearance and Progression of Hepatitis C Vi",
-      "snippet": "BACKGROUND Genetic variation in the IL28B gene has been strongly associated with treatment outcomes, spontaneous clearance and progression of the hepatitis C virus infection (HCV). The aim of the pres"
-    },
-    {
-      "id": "93940d2c4404f202e65022f96d7e02f59317bc5bcd941dc95d03fa9378f220fd",
-      "doc_id": "457630",
-      "title": "Variations and Trends in Health Burden of Visual Impairment Due to Cataract: A Global Analysis.",
-      "snippet": "Purpose To evaluate the global trends in health burden of people visually impaired from cataract in terms of disability-adjusted life years (DALY) and its correlations with national levels of socioeco"
-    },
-    {
-      "id": "98dcabf1d912404120e08de9687a5c296413d51153cdf3e38162f678818298c1",
-      "doc_id": "285794",
-      "title": "Quantitative Detection of Hepatitis C Virus RNA by Light Cycler PCR and Comparison with Two Different PCR Assays",
-      "snippet": "The new Light Cycler technology was adapted to the detection of hepatitis C virus (HCV) RNA in clinical samples. Sera from 81 patients were tested by Light Cycler PCR, AMPLICOR HCV Monitor assay, and "
-    },
-    {
-      "id": "992745dd294c25af4aa8d0b695fe16e57a6bf54c2c46ae4dd585a77604d1ec81",
-      "doc_id": "175735",
-      "title": "Inferring nucleosome positions with their histone mark annotation from ChIP data",
-      "snippet": "MOTIVATION The nucleosome is the basic repeating unit of chromatin. It contains two copies each of the four core histones H2A, H2B, H3 and H4 and about 147 bp of DNA. The residues of the histone prote"
-    },
-    {
-      "id": "9fc9c14a177f60df0a4aaf587b1169838b44d51a00b09a44b1b4be7e3f9d1ee8",
-      "doc_id": "238409",
-      "title": "Mechanisms of Renal Cell Apoptosis Induced by Cyclosporine A: A Systematic Review of in vitro Studies",
-      "snippet": "Background:Chronic cyclosporine A (CsA) nephrotoxicity (CCN) is a major cause of chronic renal dysfunction and has no effective clinical interventions yet. Objective: To reveal the mechanisms of renal"
-    },
-    {
-      "id": "9ff2821fcf84ef7a70a5635b631dee8ca8c72ad76c1428dec2acb278184add58",
-      "doc_id": "70490",
-      "title": "Simplifying likelihood ratios",
-      "snippet": "Likelihood ratios are one of the best measures of diagnostic accuracy, although they are seldom used, because interpreting them requires a calculator to convert back and forth between \u201cprobability\u201d an"
-    },
-    {
-      "id": "a1506fb821afd512cf6fb76f9ab64bb110e651528d0abb8ce05f3c2e72876a74",
-      "doc_id": "164189",
-      "title": "Chk1 inhibits replication factory activation but allows dormant origin firing in existing factories",
-      "snippet": "Replication origins are licensed by loading MCM2-7 hexamers before entry into S phase. However, only \u223c10% of licensed origins are normally used in S phase, with the others remaining dormant. When fork"
-    },
-    {
-      "id": "a3060237a968129313c64f545b387e57026ef7530302f2ab02031fcab5b55ba2",
-      "doc_id": "279052",
-      "title": "Genomic imprinting in development, growth, behavior and stem cells.",
-      "snippet": "Genes that are subject to genomic imprinting in mammals are preferentially expressed from a single parental allele. This imprinted expression of a small number of genes is crucial for normal developme"
-    },
-    {
-      "id": "a371a2a37599546bb8516428912c7fec03d422b969766278813cab4908bcdf38",
-      "doc_id": "195352",
-      "title": "Insulin action and resistance in obesity and type 2 diabetes",
-      "snippet": "Nutritional excess is a major forerunner of type 2 diabetes. It enhances the secretion of insulin, but attenuates insulin's metabolic actions in the liver, skeletal muscle and adipose tissue. However,"
-    },
-    {
-      "id": "a425416f2e1c6d78baad5c99aeb1af0e84736d8efd776c8db7a2c763f820c1f4",
-      "doc_id": "313394",
-      "title": "A Functional Neuroimaging Study of Sound Localization: Visual Cortex Activity Predicts Performance in Early-Blind Indivi",
-      "snippet": "Blind individuals often demonstrate enhanced nonvisual perceptual abilities. However, the neural substrate that underlies this improved performance remains to be fully understood. An earlier behaviora"
-    },
-    {
-      "id": "a4da1913a3ab57b6b0f7a7b190032445dc4fab63fccecf6764665bf42b6626c5",
-      "doc_id": "202259",
-      "title": "Effect of lowering blood pressure on cardiovascular events and mortality in patients on dialysis: a systematic review an",
-      "snippet": "BACKGROUND Patients undergoing dialysis have a substantially increased risk of cardiovascular mortality and morbidity. Although several trials have shown the cardiovascular benefits of lowering blood "
-    },
-    {
-      "id": "a770f310535dcded17dacefd07d76e0990a52930a8d8100f7b7dfdf6cbcf5db7",
-      "doc_id": "327319",
-      "title": "ZINC 15 \u2013 Ligand Discovery for Everyone",
-      "snippet": "Many questions about the biological activity and availability of small molecules remain inaccessible to investigators who could most benefit from their answers. To narrow the gap between chemoinformat"
-    },
-    {
-      "id": "a8fffa794bace855a35f235d0312b051c6ddcf43e1837227f564ef530c04a9f3",
-      "doc_id": "97884",
-      "title": "The sacroiliac joint in the spondyloarthropathies.",
-      "snippet": "The term spondyloarthropathy (SpA) describes and defines a group of related inflammatory joint disease that share characteristic clinical features and a unique association with the major histocompatib"
-    },
-    {
-      "id": "abf29cc5a579cf600c835d1b50d3372845851fe7ce94541130930aa83bce10fb",
-      "doc_id": "266641",
-      "title": "CD127 expression inversely correlates with FoxP3 and suppressive function of human CD4+ T reg cells",
-      "snippet": "Regulatory T (T reg) cells are critical regulators of immune tolerance. Most T reg cells are defined based on expression of CD4, CD25, and the transcription factor, FoxP3. However, these markers have "
-    },
-    {
-      "id": "ad6ecc661aab7c83665da515d32cbfcc08ecea0f1745691b0db0c2534bca0896",
-      "doc_id": "219475",
-      "title": "Gr-1+CD11b+ myeloid cells tip the balance of immune protection to tumor promotion in the premetastatic lung.",
-      "snippet": "The mechanisms by which a primary tumor affects a selected distant organ before tumor cell arrival remain to be elucidated. This report shows that Gr-1+CD11b+ cells are significantly increased in lung"
-    },
-    {
-      "id": "ad8619b02031dffcd55aace1b01c02a4bf403349e2f96a35f9ba23c1584b267c",
-      "doc_id": "293661",
-      "title": "Targeting arginine metabolism pathway to treat arginine-dependent cancers.",
-      "snippet": "The significant disparities in metabolism between tumor and normal cells have inspired the development of metabolism-based anti-tumor therapeutics. Arginine is a semi-essential amino acid because norm"
-    },
-    {
-      "id": "adfd63d3025df5a1c5d61b676ee5e0b1eeee3f5786ce4d861c97aedcbb8ed97f",
-      "doc_id": "5836",
-      "title": "Induction of myelodysplasia by myeloid-derived suppressor cells.",
-      "snippet": "Myelodysplastic syndromes (MDS) are age-dependent stem cell malignancies that share biological features of activated adaptive immune response and ineffective hematopoiesis. Here we report that myeloid"
-    },
-    {
-      "id": "ae39c8d52e6bea1b5002d55582277f903c718f46e2232f47d62c021fa02e2689",
-      "doc_id": "317204",
-      "title": "Murine Dishevelled 3 Functions in Redundant Pathways with Dishevelled 1 and 2 in Normal Cardiac Outflow Tract, Cochlea, ",
-      "snippet": "Dishevelled (Dvl) proteins are important signaling components of both the canonical beta-catenin/Wnt pathway, which controls cell proliferation and patterning, and the planar cell polarity (PCP) pathw"
-    },
-    {
-      "id": "b16e6661a8d2842291607231a95d962610e130fda2ac2aeea19eee531fb77d7b",
-      "doc_id": "164985",
-      "title": "Fra-1 protooncogene regulates IL-6 expression in macrophages and promotes the generation of M2d macrophages",
-      "snippet": "The tumor microenvironment (TME) plays a prominent role in the growth of tumor cells. As the major inflammatory component of the TME, M2d macrophages are educated by the TME such that they adopt an im"
-    },
-    {
-      "id": "b20d6f3bf3407f8a2706b58936d0f372399e38b149d75141feb75ac4b0fa2a99",
-      "doc_id": "323335",
-      "title": "Long-term outcome of patients with asystole induced by head-up tilt test.",
-      "snippet": "AIMS To analyse the long-term outcome of the largest reported cohort of patients presenting asystole during head-up tilt test. METHODS AND RESULTS Since 1990, 1322 patients with syncope of unknown ori"
-    },
-    {
-      "id": "b3770e5532fe577163856fcd42fff693658226aa5405f61e8940e04020e2cd38",
-      "doc_id": "317204",
-      "title": "Murine Dishevelled 3 Functions in Redundant Pathways with Dishevelled 1 and 2 in Normal Cardiac Outflow Tract, Cochlea, ",
-      "snippet": "Dishevelled (Dvl) proteins are important signaling components of both the canonical beta-catenin/Wnt pathway, which controls cell proliferation and patterning, and the planar cell polarity (PCP) pathw"
-    },
-    {
-      "id": "b4a9edb2d8d90bd40fdaa05d31499fca3324639e37002aed0f75ca00e064a83d",
-      "doc_id": "72159",
-      "title": "induction of early IFN-inducible genes in the absence of type",
-      "snippet": "On recognition of influenza virus (Flu) by TLR7, plasmacytoid dendritic cells (pDCs) produce type I IFN in significant amounts. Synthetic TLR7 ligands induce the maturation of pDCs, as evidenced by th"
-    },
-    {
-      "id": "b5f11e4ef2f6f9840ee62feceb661f93868b9f8c88e4480ef55597d9a90bff71",
-      "doc_id": "341324",
-      "title": "Efficacy of the 6-month thrice-weekly regimen in the treatment of new sputum smear-positive pulmonary tuberculosis under",
-      "snippet": "BACKGROUND Under the Revised National Tuberculosis Control Programme of India, patients with new smear-positive pulmonary tuberculosis are treated with a thrice-weekly regimen of antitubercular drugs "
-    },
-    {
-      "id": "b768cc6072160d821b1772b5e5145ee11a1674c8c6a6dc1717bf35e81657393f",
-      "doc_id": "439670",
-      "title": "Prepregnancy BMI and the risk of gestational diabetes: a systematic review of the literature with meta-analysis.",
-      "snippet": "The objective of this study is to assess and quantify the risk for gestational diabetes mellitus (GDM) according to prepregnancy maternal body mass index (BMI). The design is a systematic review of ob"
-    },
-    {
-      "id": "b79d9c0a42e884701e29cafd4a4b96f7266e5db429a2e72e5f881baee282392e",
-      "doc_id": "152245",
-      "title": "Effects of an opal termination codon preceding the nsP4 gene sequence in the O'Nyong-Nyong virus genome on Anopheles gam",
-      "snippet": "The genomic RNA of an alphavirus encodes four different nonstructural proteins, nsP1, nsP2, nsP3, and nsP4. The polyprotein P123 is produced when translation terminates at an opal termination codon be"
-    },
-    {
-      "id": "baecc62647427ff5f069e21b890938b778bd82009003af153f418eecc8965ede",
-      "doc_id": "226488",
-      "title": "Activin/Nodal signalling in stem cells.",
-      "snippet": "Activin/Nodal growth factors control a broad range of biological processes, including early cell fate decisions, organogenesis and adult tissue homeostasis. Here, we provide an overview of the mechani"
-    },
-    {
-      "id": "bb3ceadd071ada9dae528cb434c118f4de42b9937859b2adb09ce5c709b0c8f3",
-      "doc_id": "72159",
-      "title": "induction of early IFN-inducible genes in the absence of type",
-      "snippet": "On recognition of influenza virus (Flu) by TLR7, plasmacytoid dendritic cells (pDCs) produce type I IFN in significant amounts. Synthetic TLR7 ligands induce the maturation of pDCs, as evidenced by th"
-    },
-    {
-      "id": "bc8a67ba7a34764a87b23206101a1ea5f7bd299172a798a713f7f6b1d5d81421",
-      "doc_id": "36474",
-      "title": "Efficient targeting of expressed and silent genes in human ESCs and iPSCs using zinc-finger nucleases",
-      "snippet": "Realizing the full potential of human embryonic stem cells (hESCs) and induced pluripotent stem cells (hiPSCs) requires efficient methods for genetic modification. However, techniques to generate cell"
-    },
-    {
-      "id": "bc9f7f92fa4b5bb5d22580e3225e25c6bfd3c2b93db99aca60a7fdd780e00115",
-      "doc_id": "54440",
-      "title": "Empirical Bayesian models for analysing molecular serotyping microarrays",
-      "snippet": "BACKGROUND Microarrays offer great potential as a platform for molecular diagnostics, testing clinical samples for the presence of numerous biomarkers in highly multiplexed assays. In this study appli"
-    },
-    {
-      "id": "bd10fd1bbec8e87d6e847eae50e7147e728cc0a6740657cbf3939d6473a278b1",
-      "doc_id": "323335",
-      "title": "Long-term outcome of patients with asystole induced by head-up tilt test.",
-      "snippet": "AIMS To analyse the long-term outcome of the largest reported cohort of patients presenting asystole during head-up tilt test. METHODS AND RESULTS Since 1990, 1322 patients with syncope of unknown ori"
-    },
-    {
-      "id": "c12f217366924d1554c2671044d54130d3850023a938ad872814d05c5609e263",
-      "doc_id": "140874",
-      "title": "CTCF binding at the H19 imprinting control region mediates maternally inherited higher-order chromatin conformation to r",
-      "snippet": "It is thought that the H19 imprinting control region (ICR) directs the silencing of the maternally inherited Igf2 allele through a CTCF-dependent chromatin insulator. The ICR has been shown to interac"
-    },
-    {
-      "id": "c16b316a5187e2b053b6c1fc7d9d0618ba9e72a6e859e42b3272492711b7a79c",
-      "doc_id": "344240",
-      "title": "Loss of IGF-IEa or IGF-IEb impairs myogenic differentiation.",
-      "snippet": "Actions of protein products resulting from alternative splicing of the Igf1 gene have received increasing attention in recent years. However, the significance and functional relevance of these observa"
-    },
-    {
-      "id": "c3bf9175b7207b898bd17d8abc1421fd7427cd6f89c206eeb88420bc862c4908",
-      "doc_id": "406733",
-      "title": "Histones are incorporated in trans during reassembly of the yeast PHO5 promoter.",
-      "snippet": "In yeast, remodeling of PHO5 promoter chromatin upon activation is accompanied by transient hyperacetylation and subsequent eviction of histones from the promoter in trans. In the course of rerepressi"
-    },
-    {
-      "id": "c72ea2d66a8d42749c276c8b011628f420ffc35f0aa1c6dd64282b0e48c2ed80",
-      "doc_id": "427865",
-      "title": "Implementing the ESHRE 'poor responder' criteria in research studies: methodological implications.",
-      "snippet": "The Bologna criteria for defining poor ovarian response (POR) during IVF provide a useful template for new research in this field of assisted conception. However, designing studies around the European"
-    },
-    {
-      "id": "c73244314bf2d702eba5182ebd41f6c4c36ef55972c80dc6591d9a5ed5638a28",
-      "doc_id": "381602",
-      "title": "Neutrophils Suppress Intraluminal NK Cell-Mediated Tumor Cell Clearance and Enhance Extravasation of Disseminated Carcin",
-      "snippet": "UNLABELLED Immune cells promote the initial metastatic dissemination of carcinoma cells from primary tumors. In contrast to their well-studied functions in the initial stages of metastasis, the specif"
+      "snippet": "The current reference curves of stature and weight for the UK were first published in 1966 and have been used ever since despite increasing concern that they may not adequately describe the growth of ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        921
+      ],
+      "seq": 64
     },
     {
       "id": "c86b3071d81b43b4a2714275e00c29087142a5673272a7ac163490555248bbda",
       "doc_id": "104130",
+      "leaf_ids": [
+        "xseg-104130-s0"
+      ],
       "title": "The suture provides a niche for mesenchymal stem cells of craniofacial bones",
-      "snippet": "Bone tissue undergoes constant turnover supported by stem cells. Recent studies showed that perivascular mesenchymal stem cells (MSCs) contribute to the turnover of long bones. Craniofacial bones are "
-    },
-    {
-      "id": "ca67f5b85880b7ff9b90a338e4167c47b2c6ab21956e5a9be5775de22961e547",
-      "doc_id": "356218",
-      "title": "Outcome of pregnancy in women with moderate or severe renal insufficiency.",
-      "snippet": "BACKGROUND Pregnant women with mild preexisting renal disease have relatively few complications of pregnancy, but the risks of maternal and obstetrical complications in women with moderate or severe r"
-    },
-    {
-      "id": "cebb937108cc83357a592f4b8fd0f315e5e0f00563dcd22a71b675dde1f731d3",
-      "doc_id": "70115",
-      "title": "Bayesian measures of model complexity and fit",
-      "snippet": "Summary. We consider the problem of comparing complex hierarchical models in which the number of parameters is not clearly defined. Using an information theoretic argument we derive a measure pD for t"
-    },
-    {
-      "id": "d25a62586396d6dc74330851b6a1d51ab71325a7f16efda6d9dc9f0d4c9aeb7f",
-      "doc_id": "456304",
-      "title": "Multiple risk behaviour: increasing socio-economic gap over time?",
-      "snippet": "BACKGROUND Unhealthy behaviours often occur in combination. In this study the relationship between education and lifestyle, defined as a cluster of risk behaviours, has been analysed with the purpose "
-    },
-    {
-      "id": "d6924d2c5e0947b1050f75953fa0c14f80897fa5b5ecc279916401f320d93caa",
-      "doc_id": "19238",
-      "title": "The human myelin basic protein gene is included within a 179-kilobase transcription unit: expression in the immune and c",
-      "snippet": "Two human Golli (for gene expressed in the oligodendrocyte lineage)-MBP (for myelin basic protein) cDNAs have been isolated from a human oligodendroglioma cell line. Analysis of these cDNAs has enable"
-    },
-    {
-      "id": "d79107f67b21c7952de588b84565663cbd847554474479848cbcdddb8ec0d211",
-      "doc_id": "5836",
-      "title": "Induction of myelodysplasia by myeloid-derived suppressor cells.",
-      "snippet": "Myelodysplastic syndromes (MDS) are age-dependent stem cell malignancies that share biological features of activated adaptive immune response and ineffective hematopoiesis. Here we report that myeloid"
-    },
-    {
-      "id": "d794587e16d04342d68325378d8075961afa514901a678f1655fe8bd808ab478",
-      "doc_id": "350542",
-      "title": "Antimicrobial peptide pleurocidin synergizes with antibiotics through hydroxyl radical formation and membrane damage, an",
-      "snippet": "BACKGROUND Pleurocidin, a 25-mer antimicrobial peptide (AMP), is known to exert bactericidal activity. However, the synergistic activity and mechanism(s) of pleurocidin in combination with conventiona"
+      "snippet": "Bone tissue undergoes constant turnover supported by stem cells. Recent studies showed that perivascular mesenchymal stem cells (MSCs) contribute to the turnover of long bones. Craniofacial bones are ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1134
+      ],
+      "seq": 67
     },
     {
       "id": "d878b42cd2023f4512ae27ed1e86da8be1d32535de95010f56c6a63169bf4099",
       "doc_id": "106301",
+      "leaf_ids": [
+        "xseg-106301-s0"
+      ],
       "title": "Cardiac neural crest cells contribute to the dormant multipotent stem cell in the mammalian heart",
-      "snippet": "Arodent cardiac side population cell fraction formed clonal spheroids in serum-free medium, which expressed nestin, Musashi-1, and multi-drug resistance transporter gene 1, markers of undifferentiated"
+      "snippet": "Arodent cardiac side population cell fraction formed clonal spheroids in serum-free medium, which expressed nestin, Musashi-1, and multi-drug resistance transporter gene 1, markers of undifferentiated",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1305
+      ],
+      "seq": 70
     },
     {
-      "id": "dcf94eb0f5bf15e9955eb2294e57629d6710ce25198fec5e99bd9d5388f1a4a0",
-      "doc_id": "92308",
-      "title": "Loss of immune escape mutations during persistent HCV infection in pregnancy enhances replication of vertically transmit",
-      "snippet": "Globally, about 1% of pregnant women are persistently infected with the hepatitis C virus (HCV). Mother-to-child transmission of HCV occurs in 3-5% of pregnancies and accounts for most new childhood i"
+      "id": "0d047b3e1b09c2de457449dcdc212aa85e335bed09829e3d91e695ee522f0938",
+      "doc_id": "116792",
+      "leaf_ids": [
+        "xseg-116792-s0"
+      ],
+      "title": "The mammalian target of rapamycin signaling pathway mediates epileptogenesis in a model of temporal lobe epilepsy.",
+      "snippet": "Understanding molecular mechanisms mediating epileptogenesis is critical for developing more effective therapies for epilepsy. We recently found that the mammalian target of rapamycin (mTOR) signaling",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1401
+      ],
+      "seq": 73
     },
     {
-      "id": "e089f983e344262b0b299935022134501d062151dc9246b4284ecc5b9615a399",
-      "doc_id": "207972",
-      "title": "Interaction of an adenovirus E3 14.7-kilodalton protein with a novel tumor necrosis factor alpha-inducible cellular prot",
-      "snippet": "Early region 3 (E3) of group C human adenoviruses (Ad) encodes several inhibitors of tumor necrosis factor alpha (TNF-alpha) cytolysis, including an E3 14.7-kDa protein (E3-14.7K) and a heterodimer co"
+      "id": "0e6c8f31874ccb70a82deb9d9d1f15425399784426650b8b5cc27b83be35f344",
+      "doc_id": "116792",
+      "leaf_ids": [
+        "xseg-116792-s0"
+      ],
+      "title": "The mammalian target of rapamycin signaling pathway mediates epileptogenesis in a model of temporal lobe epilepsy.",
+      "snippet": "Understanding molecular mechanisms mediating epileptogenesis is critical for developing more effective therapies for epilepsy. We recently found that the mammalian target of rapamycin (mTOR) signaling",
+      "chunk_ix": 1,
+      "span": [
+        1032,
+        1883
+      ],
+      "seq": 74
     },
     {
-      "id": "e5c137776217994df04cb4cdc1012358d3460382ecc29d4b4833549f900bc686",
-      "doc_id": "427082",
-      "title": "Premigratory and migratory neural crest cells are multipotent in vivo.",
-      "snippet": "The neural crest (NC) is an embryonic stem/progenitor cell population that generates a diverse array of cell lineages, including peripheral neurons, myelinating Schwann cells, and melanocytes, among o"
+      "id": "8643a889a481bc398d4827e6fb28f5dfbf644601c3e5a73fbacb6333967ec4cd",
+      "doc_id": "118568",
+      "leaf_ids": [
+        "xseg-118568-s0"
+      ],
+      "title": "Acute administration of recombinant Angiopoietin-1 ameliorates multiple-organ dysfunction syndrome and improves survival",
+      "snippet": "INTRODUCTION Endothelial activation leading to vascular barrier breakdown plays an essential role in the pathophysiology of multiple-organ dysfunction syndrome (MODS) in sepsis. Increasing evidence su",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1533
+      ],
+      "seq": 77
     },
     {
-      "id": "e71f5388fd7bd948d662edbe9c85c8ccfe66946232fdeb074e12c23b53f8a540",
-      "doc_id": "368506",
-      "title": "Generation of mice with a conditional allele for the p75(NTR) neurotrophin receptor gene.",
-      "snippet": "The p75(NTR) neurotrophin receptor has been implicated in multiple biological and pathological processes. While significant advances have recently been made in understanding the physiologic role of p7"
+      "id": "90682ef6587988b377937692ada715d056b46bed0bf3734e94f48ae37c368b06",
+      "doc_id": "118568",
+      "leaf_ids": [
+        "xseg-118568-s0"
+      ],
+      "title": "Acute administration of recombinant Angiopoietin-1 ameliorates multiple-organ dysfunction syndrome and improves survival",
+      "snippet": "INTRODUCTION Endothelial activation leading to vascular barrier breakdown plays an essential role in the pathophysiology of multiple-organ dysfunction syndrome (MODS) in sepsis. Increasing evidence su",
+      "chunk_ix": 1,
+      "span": [
+        1143,
+        2059
+      ],
+      "seq": 78
     },
     {
-      "id": "e93ea4c094886dba14b0cf35a0ee6adcd563a381edb7258f1b425455542f22e9",
-      "doc_id": "213017",
-      "title": "PML induces compaction, TRF2 depletion and DNA damage signaling at telomeres and promotes their alternative lengthening.",
-      "snippet": "The alternative lengthening of telomeres (ALT) mechanism allows cancer cells to escape senescence and apoptosis in the absence of active telomerase. A characteristic feature of this pathway is the ass"
+      "id": "12648c8c05224ee3df098e12026e739e2b84f543c08a0245012f34e5cc7af2b1",
+      "doc_id": "120626",
+      "leaf_ids": [
+        "xseg-120626-s0"
+      ],
+      "title": "Mechanisms linking obesity to insulin resistance and type 2 diabetes",
+      "snippet": "Obesity is associated with an increased risk of developing insulin resistance and type 2 diabetes. In obese individuals, adipose tissue releases increased amounts of non-esterified fatty acids, glycer",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        808
+      ],
+      "seq": 81
     },
     {
-      "id": "ef3aa61e6df2799288df7fa96718d49b78cc1804511aa3b12043c880ca49bfa5",
-      "doc_id": "19238",
-      "title": "The human myelin basic protein gene is included within a 179-kilobase transcription unit: expression in the immune and c",
-      "snippet": "Two human Golli (for gene expressed in the oligodendrocyte lineage)-MBP (for myelin basic protein) cDNAs have been isolated from a human oligodendroglioma cell line. Analysis of these cDNAs has enable"
+      "id": "853cfd16a2eb2b72fd75dfc3317ae3c9d7251abe13acf56ccc7ffd451dc01704",
+      "doc_id": "123859",
+      "leaf_ids": [
+        "xseg-123859-s0"
+      ],
+      "title": "Tracking the fate of glomerular epithelial cells in vivo using serial multiphoton imaging in novel mouse models with flu",
+      "snippet": "Podocytes are critical in the maintenance of a healthy glomerular filter; however, they have been difficult to study in the intact kidney because of technical limitations. Here we report the developme",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1208
+      ],
+      "seq": 84
     },
     {
-      "id": "ef5a8da249807c63780675f6eb0d524b2b4b46447b7b8d03832a00c67583aaf0",
-      "doc_id": "364522",
-      "title": "High-mobility group box-1 protein induces osteogenic phenotype changes in aortic valve interstitial cells.",
-      "snippet": "OBJECTIVES Calcific aortic valve (AV) disease is known to be an inflammation-related process. High-mobility group box-1 (HMGB1) protein and Toll-like receptor 4 (TLR4) have been reported to participat"
+      "id": "21c4e991f84864ce5f7f2f21fa8b2b20797fbd5ccc7ea4637d02a1eea21dd51c",
+      "doc_id": "140874",
+      "leaf_ids": [
+        "xseg-140874-s0"
+      ],
+      "title": "CTCF binding at the H19 imprinting control region mediates maternally inherited higher-order chromatin conformation to r",
+      "snippet": "It is thought that the H19 imprinting control region (ICR) directs the silencing of the maternally inherited Igf2 allele through a CTCF-dependent chromatin insulator. The ICR has been shown to interac",
+      "chunk_ix": 1,
+      "span": [
+        991,
+        1589
+      ],
+      "seq": 88
     },
     {
-      "id": "ef5ac213997d5b81894877b5d1efb3ae7f5454b8fc652af05625f618d734067d",
-      "doc_id": "380526",
-      "title": "Common variants in DGKK are strongly associated with risk of hypospadias",
-      "snippet": "Hypospadias is a common congenital malformation of the male external genitalia. We performed a genome-wide association study using pooled DNA from 436 individuals with hypospadias (cases) and 494 cont"
+      "id": "c12f217366924d1554c2671044d54130d3850023a938ad872814d05c5609e263",
+      "doc_id": "140874",
+      "leaf_ids": [
+        "xseg-140874-s0"
+      ],
+      "title": "CTCF binding at the H19 imprinting control region mediates maternally inherited higher-order chromatin conformation to r",
+      "snippet": "It is thought that the H19 imprinting control region (ICR) directs the silencing of the maternally inherited Igf2 allele through a CTCF-dependent chromatin insulator. The ICR has been shown to interac",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1271
+      ],
+      "seq": 87
     },
     {
-      "id": "f0f4a47d365b8107fd4c269161bc7857188e4c4be22bc47f672507e309f32090",
-      "doc_id": "188911",
-      "title": "Generation of large numbers of dendritic cells from mouse bone marrow cultures supplemented with granulocyte/macrophage ",
-      "snippet": "Antigen-presenting, major histocompatibility complex (MHC) class II-rich dendritic cells are known to arise from bone marrow. However, marrow lacks mature dendritic cells, and substantial numbers of p"
-    },
-    {
-      "id": "f42c75bfd5297f059615d12c79f69071caf29d31efdba598c603a5135b9966fc",
-      "doc_id": "202259",
-      "title": "Effect of lowering blood pressure on cardiovascular events and mortality in patients on dialysis: a systematic review an",
-      "snippet": "BACKGROUND Patients undergoing dialysis have a substantially increased risk of cardiovascular mortality and morbidity. Although several trials have shown the cardiovascular benefits of lowering blood "
-    },
-    {
-      "id": "f5e90a16fa1d34b8f7cbdf012cd973a3df14e7835809ca827425efc04534ba07",
-      "doc_id": "380526",
-      "title": "Common variants in DGKK are strongly associated with risk of hypospadias",
-      "snippet": "Hypospadias is a common congenital malformation of the male external genitalia. We performed a genome-wide association study using pooled DNA from 436 individuals with hypospadias (cases) and 494 cont"
-    },
-    {
-      "id": "f6114051b2d643d529e1c43a6b77429ae015c84ed4364c65df77e2002befd1ae",
-      "doc_id": "4983",
-      "title": "Microstructural development of human newborn cerebral white matter assessed in vivo by diffusion tensor magnetic resonan",
-      "snippet": "Alterations of the architecture of cerebral white matter in the developing human brain can affect cortical development and result in functional disabilities. A line scan diffusion-weighted magnetic re"
-    },
-    {
-      "id": "f681ddbd1c5c553baed0238046ca71da6a874ff41b97af4e2697654807195f9e",
-      "doc_id": "381602",
-      "title": "Neutrophils Suppress Intraluminal NK Cell-Mediated Tumor Cell Clearance and Enhance Extravasation of Disseminated Carcin",
-      "snippet": "UNLABELLED Immune cells promote the initial metastatic dissemination of carcinoma cells from primary tumors. In contrast to their well-studied functions in the initial stages of metastasis, the specif"
-    },
-    {
-      "id": "f6d3c90e15464b5a9a8865dd70aadf6c49ff6d1d85680ab1bf751e2dcd67dc8e",
-      "doc_id": "18670",
-      "title": "The DNA Methylome of Human Peripheral Blood Mononuclear Cells",
-      "snippet": "DNA methylation plays an important role in biological processes in human health and disease. Recent technological advances allow unbiased whole-genome DNA methylation (methylome) analysis to be carrie"
-    },
-    {
-      "id": "fc117cef33c0886cca3671601251541a127d6558a5f3636743ee7a1a05acad22",
-      "doc_id": "323335",
-      "title": "Long-term outcome of patients with asystole induced by head-up tilt test.",
-      "snippet": "AIMS To analyse the long-term outcome of the largest reported cohort of patients presenting asystole during head-up tilt test. METHODS AND RESULTS Since 1990, 1322 patients with syncope of unknown ori"
+      "id": "690588cbe7f5336c4e160fb45467bb188e4200ade3da432edcbbd3277066ee1f",
+      "doc_id": "143251",
+      "leaf_ids": [
+        "xseg-143251-s0"
+      ],
+      "title": "De novo assembly of a PML nuclear subcompartment occurs through multiple pathways and induces telomere elongation.",
+      "snippet": "Telomerase-negative tumor cells use an alternative lengthening of telomeres (ALT) pathway that involves DNA recombination and repair to maintain their proliferative potential. The cytological hallmark",
+      "chunk_ix": 1,
+      "span": [
+        1012,
+        1619
+      ],
+      "seq": 92
     },
     {
       "id": "fc9d41957acedf0110a28ff568628b6209258818b1844121846f1a060668d89c",
       "doc_id": "143251",
+      "leaf_ids": [
+        "xseg-143251-s0"
+      ],
       "title": "De novo assembly of a PML nuclear subcompartment occurs through multiple pathways and induces telomere elongation.",
-      "snippet": "Telomerase-negative tumor cells use an alternative lengthening of telomeres (ALT) pathway that involves DNA recombination and repair to maintain their proliferative potential. The cytological hallmark"
+      "snippet": "Telomerase-negative tumor cells use an alternative lengthening of telomeres (ALT) pathway that involves DNA recombination and repair to maintain their proliferative potential. The cytological hallmark",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1351
+      ],
+      "seq": 91
     },
     {
-      "id": "fe529fc085725fcb0d90d8ceff91eb4b61372e5e837a9a29bbb233dd1148b83f",
-      "doc_id": "263364",
-      "title": "Genetic Variation in the Interleukin-28B Gene Is Associated with Spontaneous Clearance and Progression of Hepatitis C Vi",
-      "snippet": "BACKGROUND Genetic variation in the IL28B gene has been strongly associated with treatment outcomes, spontaneous clearance and progression of the hepatitis C virus infection (HCV). The aim of the pres"
+      "id": "54ee9ef27d6f7a9ced33744f045febba8323769be4ccaabd585301316995ec67",
+      "doc_id": "152245",
+      "leaf_ids": [
+        "xseg-152245-s0"
+      ],
+      "title": "Effects of an opal termination codon preceding the nsP4 gene sequence in the O'Nyong-Nyong virus genome on Anopheles gam",
+      "snippet": "The genomic RNA of an alphavirus encodes four different nonstructural proteins, nsP1, nsP2, nsP3, and nsP4. The polyprotein P123 is produced when translation terminates at an opal termination codon be",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1292
+      ],
+      "seq": 95
+    },
+    {
+      "id": "5a75e649a4e0ce99a9011307557ec91d7da9298793def72e80564107c2f0c88d",
+      "doc_id": "152245",
+      "leaf_ids": [
+        "xseg-152245-s0"
+      ],
+      "title": "Effects of an opal termination codon preceding the nsP4 gene sequence in the O'Nyong-Nyong virus genome on Anopheles gam",
+      "snippet": "The genomic RNA of an alphavirus encodes four different nonstructural proteins, nsP1, nsP2, nsP3, and nsP4. The polyprotein P123 is produced when translation terminates at an opal termination codon be",
+      "chunk_ix": 2,
+      "span": [
+        1885,
+        2467
+      ],
+      "seq": 97
+    },
+    {
+      "id": "b79d9c0a42e884701e29cafd4a4b96f7266e5db429a2e72e5f881baee282392e",
+      "doc_id": "152245",
+      "leaf_ids": [
+        "xseg-152245-s0"
+      ],
+      "title": "Effects of an opal termination codon preceding the nsP4 gene sequence in the O'Nyong-Nyong virus genome on Anopheles gam",
+      "snippet": "The genomic RNA of an alphavirus encodes four different nonstructural proteins, nsP1, nsP2, nsP3, and nsP4. The polyprotein P123 is produced when translation terminates at an opal termination codon be",
+      "chunk_ix": 1,
+      "span": [
+        1007,
+        2199
+      ],
+      "seq": 96
+    },
+    {
+      "id": "5348e84a5ae32ac7e284b7b926a8720736eeedf4eb9bc6632ce23aa4640d1d90",
+      "doc_id": "153744",
+      "leaf_ids": [
+        "xseg-153744-s0"
+      ],
+      "title": "Down-regulation of a host microRNA by a Herpesvirus saimiri noncoding RNA.",
+      "snippet": "T cells transformed by Herpesvirus saimiri express seven viral U-rich noncoding RNAs of unknown function called HSURs. We noted that conserved sequences in HSURs 1 and 2 constitute potential binding s",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        880
+      ],
+      "seq": 100
+    },
+    {
+      "id": "3054fabf2f17db0ff34c69faeb3afdb0f8126c098aed6a5219e6f9bc3ff7ed04",
+      "doc_id": "159469",
+      "leaf_ids": [
+        "xseg-159469-s0"
+      ],
+      "title": "HTRF: A Technology Tailored for Drug Discovery \u2013A Review of Theoretical Aspects and Recent Applications",
+      "snippet": "HTRF (Homogeneous Time Resolved Fluorescence) is the most frequently used generic assay technology to measure analytes in a homogenous format, which is the ideal platform used for drug target studies ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1418
+      ],
+      "seq": 103
+    },
+    {
+      "id": "3d9d040134cd9e5c6cd1839f66501686f53da7573b87acd91b9035c266b80ce0",
+      "doc_id": "159469",
+      "leaf_ids": [
+        "xseg-159469-s0"
+      ],
+      "title": "HTRF: A Technology Tailored for Drug Discovery \u2013A Review of Theoretical Aspects and Recent Applications",
+      "snippet": "HTRF (Homogeneous Time Resolved Fluorescence) is the most frequently used generic assay technology to measure analytes in a homogenous format, which is the ideal platform used for drug target studies ",
+      "chunk_ix": 1,
+      "span": [
+        1056,
+        2477
+      ],
+      "seq": 104
     },
     {
       "id": "ff4931f17e49ad124a78e4d7c468955f10a2a2a2f9d0dd951c7206c55b61444b",
       "doc_id": "159469",
+      "leaf_ids": [
+        "xseg-159469-s0"
+      ],
       "title": "HTRF: A Technology Tailored for Drug Discovery \u2013A Review of Theoretical Aspects and Recent Applications",
-      "snippet": "HTRF (Homogeneous Time Resolved Fluorescence) is the most frequently used generic assay technology to measure analytes in a homogenous format, which is the ideal platform used for drug target studies "
+      "snippet": "HTRF (Homogeneous Time Resolved Fluorescence) is the most frequently used generic assay technology to measure analytes in a homogenous format, which is the ideal platform used for drug target studies ",
+      "chunk_ix": 2,
+      "span": [
+        2153,
+        2521
+      ],
+      "seq": 105
+    },
+    {
+      "id": "a1506fb821afd512cf6fb76f9ab64bb110e651528d0abb8ce05f3c2e72876a74",
+      "doc_id": "164189",
+      "leaf_ids": [
+        "xseg-164189-s0"
+      ],
+      "title": "Chk1 inhibits replication factory activation but allows dormant origin firing in existing factories",
+      "snippet": "Replication origins are licensed by loading MCM2-7 hexamers before entry into S phase. However, only \u223c10% of licensed origins are normally used in S phase, with the others remaining dormant. When fork",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1263
+      ],
+      "seq": 108
+    },
+    {
+      "id": "b16e6661a8d2842291607231a95d962610e130fda2ac2aeea19eee531fb77d7b",
+      "doc_id": "164985",
+      "leaf_ids": [
+        "xseg-164985-s0"
+      ],
+      "title": "Fra-1 protooncogene regulates IL-6 expression in macrophages and promotes the generation of M2d macrophages",
+      "snippet": "The tumor microenvironment (TME) plays a prominent role in the growth of tumor cells. As the major inflammatory component of the TME, M2d macrophages are educated by the TME such that they adopt an im",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1276
+      ],
+      "seq": 111
+    },
+    {
+      "id": "5e153b12420278a7b5bca23f5029c7c32aeef2c75e79454f60d73ab505b381f5",
+      "doc_id": "169264",
+      "leaf_ids": [
+        "xseg-169264-s0"
+      ],
+      "title": "Analysis of SiO2 nanoparticles binding proteins in rat blood and brain homogenate",
+      "snippet": "A multitude of nanoparticles, such as titanium oxide (TiO2), zinc oxide, aluminum oxide, gold oxide, silver oxide, iron oxide, and silica oxide, are found in many chemical, cosmetic, pharmaceutical, a",
+      "chunk_ix": 1,
+      "span": [
+        1050,
+        2172
+      ],
+      "seq": 115
+    },
+    {
+      "id": "6cc8fe584a2af388b2dda70e709544ce715047e4c2af1f3ddbb500daf17842c4",
+      "doc_id": "169264",
+      "leaf_ids": [
+        "xseg-169264-s0"
+      ],
+      "title": "Analysis of SiO2 nanoparticles binding proteins in rat blood and brain homogenate",
+      "snippet": "A multitude of nanoparticles, such as titanium oxide (TiO2), zinc oxide, aluminum oxide, gold oxide, silver oxide, iron oxide, and silica oxide, are found in many chemical, cosmetic, pharmaceutical, a",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1377
+      ],
+      "seq": 114
+    },
+    {
+      "id": "992745dd294c25af4aa8d0b695fe16e57a6bf54c2c46ae4dd585a77604d1ec81",
+      "doc_id": "175735",
+      "leaf_ids": [
+        "xseg-175735-s0"
+      ],
+      "title": "Inferring nucleosome positions with their histone mark annotation from ChIP data",
+      "snippet": "MOTIVATION The nucleosome is the basic repeating unit of chromatin. It contains two copies each of the four core histones H2A, H2B, H3 and H4 and about 147 bp of DNA. The residues of the histone prote",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1450
+      ],
+      "seq": 118
+    },
+    {
+      "id": "723c06f74ee6b0fafe4f877789359d0e0a78dc2ee42e5410cf47777ebdbaa45c",
+      "doc_id": "18670",
+      "leaf_ids": [
+        "xseg-18670-s0"
+      ],
+      "title": "The DNA Methylome of Human Peripheral Blood Mononuclear Cells",
+      "snippet": "DNA methylation plays an important role in biological processes in human health and disease. Recent technological advances allow unbiased whole-genome DNA methylation (methylome) analysis to be carrie",
+      "chunk_ix": 1,
+      "span": [
+        1059,
+        1747
+      ],
+      "seq": 13
+    },
+    {
+      "id": "f6d3c90e15464b5a9a8865dd70aadf6c49ff6d1d85680ab1bf751e2dcd67dc8e",
+      "doc_id": "18670",
+      "leaf_ids": [
+        "xseg-18670-s0"
+      ],
+      "title": "The DNA Methylome of Human Peripheral Blood Mononuclear Cells",
+      "snippet": "DNA methylation plays an important role in biological processes in human health and disease. Recent technological advances allow unbiased whole-genome DNA methylation (methylome) analysis to be carrie",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1418
+      ],
+      "seq": 12
+    },
+    {
+      "id": "200c5b8cbd613a4d58eff7ea17a0113bbae83eea786875c00ffe957aba0e6b32",
+      "doc_id": "188911",
+      "leaf_ids": [
+        "xseg-188911-s0"
+      ],
+      "title": "Generation of large numbers of dendritic cells from mouse bone marrow cultures supplemented with granulocyte/macrophage ",
+      "snippet": "Antigen-presenting, major histocompatibility complex (MHC) class II-rich dendritic cells are known to arise from bone marrow. However, marrow lacks mature dendritic cells, and substantial numbers of p",
+      "chunk_ix": 1,
+      "span": [
+        1022,
+        1854
+      ],
+      "seq": 122
+    },
+    {
+      "id": "f0f4a47d365b8107fd4c269161bc7857188e4c4be22bc47f672507e309f32090",
+      "doc_id": "188911",
+      "leaf_ids": [
+        "xseg-188911-s0"
+      ],
+      "title": "Generation of large numbers of dendritic cells from mouse bone marrow cultures supplemented with granulocyte/macrophage ",
+      "snippet": "Antigen-presenting, major histocompatibility complex (MHC) class II-rich dendritic cells are known to arise from bone marrow. However, marrow lacks mature dendritic cells, and substantial numbers of p",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1371
+      ],
+      "seq": 121
+    },
+    {
+      "id": "d6924d2c5e0947b1050f75953fa0c14f80897fa5b5ecc279916401f320d93caa",
+      "doc_id": "19238",
+      "leaf_ids": [
+        "xseg-19238-s0"
+      ],
+      "title": "The human myelin basic protein gene is included within a 179-kilobase transcription unit: expression in the immune and c",
+      "snippet": "Two human Golli (for gene expressed in the oligodendrocyte lineage)-MBP (for myelin basic protein) cDNAs have been isolated from a human oligodendroglioma cell line. Analysis of these cDNAs has enable",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1293
+      ],
+      "seq": 16
+    },
+    {
+      "id": "ef3aa61e6df2799288df7fa96718d49b78cc1804511aa3b12043c880ca49bfa5",
+      "doc_id": "19238",
+      "leaf_ids": [
+        "xseg-19238-s0"
+      ],
+      "title": "The human myelin basic protein gene is included within a 179-kilobase transcription unit: expression in the immune and c",
+      "snippet": "Two human Golli (for gene expressed in the oligodendrocyte lineage)-MBP (for myelin basic protein) cDNAs have been isolated from a human oligodendroglioma cell line. Analysis of these cDNAs has enable",
+      "chunk_ix": 1,
+      "span": [
+        965,
+        1701
+      ],
+      "seq": 17
+    },
+    {
+      "id": "a371a2a37599546bb8516428912c7fec03d422b969766278813cab4908bcdf38",
+      "doc_id": "195352",
+      "leaf_ids": [
+        "xseg-120626-s0"
+      ],
+      "title": "Insulin action and resistance in obesity and type 2 diabetes",
+      "snippet": "Nutritional excess is a major forerunner of type 2 diabetes. It enhances the secretion of insulin, but attenuates insulin's metabolic actions in the liver, skeletal muscle and adipose tissue. However,",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1124
+      ],
+      "seq": 125
+    },
+    {
+      "id": "a4da1913a3ab57b6b0f7a7b190032445dc4fab63fccecf6764665bf42b6626c5",
+      "doc_id": "202259",
+      "leaf_ids": [
+        "xseg-202259-s0"
+      ],
+      "title": "Effect of lowering blood pressure on cardiovascular events and mortality in patients on dialysis: a systematic review an",
+      "snippet": "BACKGROUND Patients undergoing dialysis have a substantially increased risk of cardiovascular mortality and morbidity. Although several trials have shown the cardiovascular benefits of lowering blood ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1425
+      ],
+      "seq": 128
+    },
+    {
+      "id": "f42c75bfd5297f059615d12c79f69071caf29d31efdba598c603a5135b9966fc",
+      "doc_id": "202259",
+      "leaf_ids": [
+        "xseg-202259-s0"
+      ],
+      "title": "Effect of lowering blood pressure on cardiovascular events and mortality in patients on dialysis: a systematic review an",
+      "snippet": "BACKGROUND Patients undergoing dialysis have a substantially increased risk of cardiovascular mortality and morbidity. Although several trials have shown the cardiovascular benefits of lowering blood ",
+      "chunk_ix": 1,
+      "span": [
+        1087,
+        1848
+      ],
+      "seq": 129
+    },
+    {
+      "id": "35c86d8ebff6017ecd7c5f02c10be9bf69c6e0f6eacc47fb3b67636a8f6e34c3",
+      "doc_id": "207972",
+      "leaf_ids": [
+        "xseg-207972-s0"
+      ],
+      "title": "Interaction of an adenovirus E3 14.7-kilodalton protein with a novel tumor necrosis factor alpha-inducible cellular prot",
+      "snippet": "Early region 3 (E3) of group C human adenoviruses (Ad) encodes several inhibitors of tumor necrosis factor alpha (TNF-alpha) cytolysis, including an E3 14.7-kDa protein (E3-14.7K) and a heterodimer co",
+      "chunk_ix": 1,
+      "span": [
+        1022,
+        1900
+      ],
+      "seq": 133
+    },
+    {
+      "id": "e089f983e344262b0b299935022134501d062151dc9246b4284ecc5b9615a399",
+      "doc_id": "207972",
+      "leaf_ids": [
+        "xseg-207972-s0"
+      ],
+      "title": "Interaction of an adenovirus E3 14.7-kilodalton protein with a novel tumor necrosis factor alpha-inducible cellular prot",
+      "snippet": "Early region 3 (E3) of group C human adenoviruses (Ad) encodes several inhibitors of tumor necrosis factor alpha (TNF-alpha) cytolysis, including an E3 14.7-kDa protein (E3-14.7K) and a heterodimer co",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1337
+      ],
+      "seq": 132
+    },
+    {
+      "id": "e93ea4c094886dba14b0cf35a0ee6adcd563a381edb7258f1b425455542f22e9",
+      "doc_id": "213017",
+      "leaf_ids": [
+        "xseg-143251-s0"
+      ],
+      "title": "PML induces compaction, TRF2 depletion and DNA damage signaling at telomeres and promotes their alternative lengthening.",
+      "snippet": "The alternative lengthening of telomeres (ALT) mechanism allows cancer cells to escape senescence and apoptosis in the absence of active telomerase. A characteristic feature of this pathway is the ass",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1394
+      ],
+      "seq": 136
+    },
+    {
+      "id": "ad6ecc661aab7c83665da515d32cbfcc08ecea0f1745691b0db0c2534bca0896",
+      "doc_id": "219475",
+      "leaf_ids": [
+        "xseg-5836-s0"
+      ],
+      "title": "Gr-1+CD11b+ myeloid cells tip the balance of immune protection to tumor promotion in the premetastatic lung.",
+      "snippet": "The mechanisms by which a primary tumor affects a selected distant organ before tumor cell arrival remain to be elucidated. This report shows that Gr-1+CD11b+ cells are significantly increased in lung",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1263
+      ],
+      "seq": 139
+    },
+    {
+      "id": "baecc62647427ff5f069e21b890938b778bd82009003af153f418eecc8965ede",
+      "doc_id": "226488",
+      "leaf_ids": [
+        "xseg-226488-s0"
+      ],
+      "title": "Activin/Nodal signalling in stem cells.",
+      "snippet": "Activin/Nodal growth factors control a broad range of biological processes, including early cell fate decisions, organogenesis and adult tissue homeostasis. Here, we provide an overview of the mechani",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        739
+      ],
+      "seq": 142
+    },
+    {
+      "id": "0cf63ed5cd608aaeedc1423e09f2db32d00b8f901dbb4b40beb83e258a43ceba",
+      "doc_id": "236204",
+      "leaf_ids": [
+        "xseg-236204-s0"
+      ],
+      "title": "Distinct RNA-dependent RNA polymerases are required for RNAi triggered by double-stranded RNA versus truncated transgene",
+      "snippet": "In many eukaryotes, RNA-dependent RNA polymerases (RdRPs) play key roles in the RNAi pathway. They have been implicated in the recognition and processing of aberrant transcripts triggering the process",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1365
+      ],
+      "seq": 145
+    },
+    {
+      "id": "5b22b4ce512a7513b0d8096b870f043af8d33373bd4bcd001c8e5dd04155ddcd",
+      "doc_id": "236204",
+      "leaf_ids": [
+        "xseg-236204-s0"
+      ],
+      "title": "Distinct RNA-dependent RNA polymerases are required for RNAi triggered by double-stranded RNA versus truncated transgene",
+      "snippet": "In many eukaryotes, RNA-dependent RNA polymerases (RdRPs) play key roles in the RNAi pathway. They have been implicated in the recognition and processing of aberrant transcripts triggering the process",
+      "chunk_ix": 1,
+      "span": [
+        1045,
+        1525
+      ],
+      "seq": 146
+    },
+    {
+      "id": "073b5f81a109563ab2eade3a1cd238a7566d5e9f5633f3f48c655848c934149f",
+      "doc_id": "238409",
+      "leaf_ids": [
+        "xseg-238409-s0"
+      ],
+      "title": "Mechanisms of Renal Cell Apoptosis Induced by Cyclosporine A: A Systematic Review of in vitro Studies",
+      "snippet": "Background:Chronic cyclosporine A (CsA) nephrotoxicity (CCN) is a major cause of chronic renal dysfunction and has no effective clinical interventions yet. Objective: To reveal the mechanisms of renal",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1282
+      ],
+      "seq": 149
+    },
+    {
+      "id": "9fc9c14a177f60df0a4aaf587b1169838b44d51a00b09a44b1b4be7e3f9d1ee8",
+      "doc_id": "238409",
+      "leaf_ids": [
+        "xseg-238409-s0"
+      ],
+      "title": "Mechanisms of Renal Cell Apoptosis Induced by Cyclosporine A: A Systematic Review of in vitro Studies",
+      "snippet": "Background:Chronic cyclosporine A (CsA) nephrotoxicity (CCN) is a major cause of chronic renal dysfunction and has no effective clinical interventions yet. Objective: To reveal the mechanisms of renal",
+      "chunk_ix": 1,
+      "span": [
+        971,
+        1406
+      ],
+      "seq": 150
+    },
+    {
+      "id": "6f0d93d5841432f8f3211c753d040e469dfc3b00dfa41c9e81aede054c42422f",
+      "doc_id": "243694",
+      "leaf_ids": [
+        "xseg-92499-s0"
+      ],
+      "title": "Blood stem cells emerge from aortic endothelium by a novel type of cell transition",
+      "snippet": "The ontogeny of haematopoietic stem cells (HSCs) during embryonic development is still highly debated, especially their possible lineage relationship to vascular endothelial cells. The first anatomica",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1360
+      ],
+      "seq": 153
+    },
+    {
+      "id": "8ed313aaeed1ffc0e7928ca71c8ec08bb20259211de7337a72170a4b347f50e0",
+      "doc_id": "243694",
+      "leaf_ids": [
+        "xseg-92499-s0"
+      ],
+      "title": "Blood stem cells emerge from aortic endothelium by a novel type of cell transition",
+      "snippet": "The ontogeny of haematopoietic stem cells (HSCs) during embryonic development is still highly debated, especially their possible lineage relationship to vascular endothelial cells. The first anatomica",
+      "chunk_ix": 1,
+      "span": [
+        1021,
+        1573
+      ],
+      "seq": 154
+    },
+    {
+      "id": "03b351cc2500538239598be83bfe1a45bf02cae147f3eec767a31b1119e16bb1",
+      "doc_id": "253672",
+      "leaf_ids": [
+        "xseg-253672-s0"
+      ],
+      "title": "Probable person to person transmission of novel avian influenza A (H7N9) virus in Eastern China, 2013: epidemiological i",
+      "snippet": "OBJECTIVE To determine whether the novel avian influenza H7N9 virus can transmit from person to person and its efficiency. DESIGN Epidemiological investigations conducted after a family cluster of two",
+      "chunk_ix": 1,
+      "span": [
+        1083,
+        2059
+      ],
+      "seq": 158
+    },
+    {
+      "id": "0ce0b3a10355ef00a8e8b3748ea5829354d00e326be60018e58b86ce960973a5",
+      "doc_id": "253672",
+      "leaf_ids": [
+        "xseg-253672-s0"
+      ],
+      "title": "Probable person to person transmission of novel avian influenza A (H7N9) virus in Eastern China, 2013: epidemiological i",
+      "snippet": "OBJECTIVE To determine whether the novel avian influenza H7N9 virus can transmit from person to person and its efficiency. DESIGN Epidemiological investigations conducted after a family cluster of two",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1379
+      ],
+      "seq": 157
+    },
+    {
+      "id": "92da856afb4a97bab3e1c65cf3c3d242ed9cfad85e7bde042ea97c06f3cdf9b5",
+      "doc_id": "263364",
+      "leaf_ids": [
+        "xseg-263364-s0"
+      ],
+      "title": "Genetic Variation in the Interleukin-28B Gene Is Associated with Spontaneous Clearance and Progression of Hepatitis C Vi",
+      "snippet": "BACKGROUND Genetic variation in the IL28B gene has been strongly associated with treatment outcomes, spontaneous clearance and progression of the hepatitis C virus infection (HCV). The aim of the pres",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1322
+      ],
+      "seq": 161
+    },
+    {
+      "id": "fe529fc085725fcb0d90d8ceff91eb4b61372e5e837a9a29bbb233dd1148b83f",
+      "doc_id": "263364",
+      "leaf_ids": [
+        "xseg-263364-s0"
+      ],
+      "title": "Genetic Variation in the Interleukin-28B Gene Is Associated with Spontaneous Clearance and Progression of Hepatitis C Vi",
+      "snippet": "BACKGROUND Genetic variation in the IL28B gene has been strongly associated with treatment outcomes, spontaneous clearance and progression of the hepatitis C virus infection (HCV). The aim of the pres",
+      "chunk_ix": 1,
+      "span": [
+        1021,
+        1876
+      ],
+      "seq": 162
+    },
+    {
+      "id": "7a2280479768c5a419743129c2b02642d888fac81dd7f96f97d01c4200422cdf",
+      "doc_id": "266641",
+      "leaf_ids": [
+        "xseg-266641-s0"
+      ],
+      "title": "CD127 expression inversely correlates with FoxP3 and suppressive function of human CD4+ T reg cells",
+      "snippet": "Regulatory T (T reg) cells are critical regulators of immune tolerance. Most T reg cells are defined based on expression of CD4, CD25, and the transcription factor, FoxP3. However, these markers have ",
+      "chunk_ix": 1,
+      "span": [
+        948,
+        1314
+      ],
+      "seq": 166
+    },
+    {
+      "id": "abf29cc5a579cf600c835d1b50d3372845851fe7ce94541130930aa83bce10fb",
+      "doc_id": "266641",
+      "leaf_ids": [
+        "xseg-266641-s0"
+      ],
+      "title": "CD127 expression inversely correlates with FoxP3 and suppressive function of human CD4+ T reg cells",
+      "snippet": "Regulatory T (T reg) cells are critical regulators of immune tolerance. Most T reg cells are defined based on expression of CD4, CD25, and the transcription factor, FoxP3. However, these markers have ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1248
+      ],
+      "seq": 165
+    },
+    {
+      "id": "63ab48868cbff9adcae01d28bd7c39b8ddcab905ef3b394fe962614c6e6dd34f",
+      "doc_id": "275294",
+      "leaf_ids": [
+        "xseg-275294-s0"
+      ],
+      "title": "Environmental factors that influence the cutaneous production of vitamin D",
+      "snippet": "All vertebrates, including humans, obtain most of their daily vitamin D requirement from casual exposure to sunlight. During exposure to sunlight, the solar ultraviolet B photons (290-315 nm) penetrat",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1369
+      ],
+      "seq": 169
+    },
+    {
+      "id": "7d745e9f2a39864a228d3814304adc5a389397d83edbe515a7a987d40d34ef6c",
+      "doc_id": "275294",
+      "leaf_ids": [
+        "xseg-275294-s0"
+      ],
+      "title": "Environmental factors that influence the cutaneous production of vitamin D",
+      "snippet": "All vertebrates, including humans, obtain most of their daily vitamin D requirement from casual exposure to sunlight. During exposure to sunlight, the solar ultraviolet B photons (290-315 nm) penetrat",
+      "chunk_ix": 1,
+      "span": [
+        1068,
+        1772
+      ],
+      "seq": 170
+    },
+    {
+      "id": "a3060237a968129313c64f545b387e57026ef7530302f2ab02031fcab5b55ba2",
+      "doc_id": "279052",
+      "leaf_ids": [
+        "xseg-279052-s0"
+      ],
+      "title": "Genomic imprinting in development, growth, behavior and stem cells.",
+      "snippet": "Genes that are subject to genomic imprinting in mammals are preferentially expressed from a single parental allele. This imprinted expression of a small number of genes is crucial for normal developme",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        741
+      ],
+      "seq": 173
+    },
+    {
+      "id": "98dcabf1d912404120e08de9687a5c296413d51153cdf3e38162f678818298c1",
+      "doc_id": "285794",
+      "leaf_ids": [
+        "xseg-285794-s0"
+      ],
+      "title": "Quantitative Detection of Hepatitis C Virus RNA by Light Cycler PCR and Comparison with Two Different PCR Assays",
+      "snippet": "The new Light Cycler technology was adapted to the detection of hepatitis C virus (HCV) RNA in clinical samples. Sera from 81 patients were tested by Light Cycler PCR, AMPLICOR HCV Monitor assay, and ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        442
+      ],
+      "seq": 176
+    },
+    {
+      "id": "ad8619b02031dffcd55aace1b01c02a4bf403349e2f96a35f9ba23c1584b267c",
+      "doc_id": "293661",
+      "leaf_ids": [
+        "xseg-293661-s0"
+      ],
+      "title": "Targeting arginine metabolism pathway to treat arginine-dependent cancers.",
+      "snippet": "The significant disparities in metabolism between tumor and normal cells have inspired the development of metabolism-based anti-tumor therapeutics. Arginine is a semi-essential amino acid because norm",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1091
+      ],
+      "seq": 179
+    },
+    {
+      "id": "23d9eed1e54ca442c194e6256d408509f9c54ce59f9f6c3c1c20716129253ac8",
+      "doc_id": "301838",
+      "leaf_ids": [
+        "xseg-301838-s0"
+      ],
+      "title": "Rank Signaling Links the Development of Invariant \u03b3\u03b4 T Cell Progenitors and Aire+ Medullary Epithelium",
+      "snippet": "The thymic medulla provides a specialized microenvironment for the negative selection of T cells, with the presence of autoimmune regulator (Aire)-expressing medullary thymic epithelial cells (mTECs) ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1188
+      ],
+      "seq": 182
+    },
+    {
+      "id": "443442b68b8c4713e9405e2a88dd55886a927757191e439242f67b76e1dc8023",
+      "doc_id": "301866",
+      "leaf_ids": [
+        "xseg-301866-s0"
+      ],
+      "title": "Long-term immune deficiency after allogeneic stem cell transplantation: B-cell deficiency is associated with late infect",
+      "snippet": "Immune reconstitution was analyzed in 140 consecutive patients who were 2-year disease-free and who underwent myeloablative allogeneic transplantation. A CD4 and CD8 defect was observed involving naiv",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1184
+      ],
+      "seq": 185
+    },
+    {
+      "id": "89b85628b507026818ad66c3e34780457f13441cd2fb49c4df416b4aeceff756",
+      "doc_id": "306006",
+      "leaf_ids": [
+        "xseg-306006-s0"
+      ],
+      "title": "The stimulatory potency of T cell antigens is influenced by the formation of the immunological synapse.",
+      "snippet": "T cell activation is predicated on the interaction between the T cell receptor and peptide-major histocompatibility (pMHC) ligands. The factors that determine the stimulatory potency of a pMHC molecul",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        888
+      ],
+      "seq": 188
+    },
+    {
+      "id": "1f73790cc4ab4d4666e700078bb8d769f788a8029a51c4f1b357dae0f0f1228e",
+      "doc_id": "306311",
+      "leaf_ids": [
+        "xseg-306311-s0"
+      ],
+      "title": "Control of glutamate clearance and synaptic efficacy by glial coverage of neurons.",
+      "snippet": "Analysis of excitatory synaptic transmission in the rat hypothalamic supraoptic nucleus revealed that glutamate clearance and, as a consequence, glutamate concentration and diffusion in the extracellu",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        738
+      ],
+      "seq": 191
+    },
+    {
+      "id": "59bd0ff69a4c9e8440fa7ca45a5d30b4707f6d657389e85b1a27d701eea57a3a",
+      "doc_id": "308862",
+      "leaf_ids": [
+        "xseg-308862-s0"
+      ],
+      "title": "Duration of androgen suppression in the treatment of prostate cancer.",
+      "snippet": "BACKGROUND The combination of radiotherapy plus long-term medical suppression of androgens (> or = 2 years) improves overall survival in patients with locally advanced prostate cancer. We compared the",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1364
+      ],
+      "seq": 194
+    },
+    {
+      "id": "7b362579c7645fe39d9541c8ebc45578bad40c258cebf5717a679b96c07d0c30",
+      "doc_id": "308862",
+      "leaf_ids": [
+        "xseg-308862-s0"
+      ],
+      "title": "Duration of androgen suppression in the treatment of prostate cancer.",
+      "snippet": "BACKGROUND The combination of radiotherapy plus long-term medical suppression of androgens (> or = 2 years) improves overall survival in patients with locally advanced prostate cancer. We compared the",
+      "chunk_ix": 1,
+      "span": [
+        1061,
+        2074
+      ],
+      "seq": 195
+    },
+    {
+      "id": "7131b44bd980a6892e5b1f2ba6d19f3f1c1cf586b575347121d7cc63bd1dccc4",
+      "doc_id": "313394",
+      "leaf_ids": [
+        "xseg-313394-s0"
+      ],
+      "title": "A Functional Neuroimaging Study of Sound Localization: Visual Cortex Activity Predicts Performance in Early-Blind Indivi",
+      "snippet": "Blind individuals often demonstrate enhanced nonvisual perceptual abilities. However, the neural substrate that underlies this improved performance remains to be fully understood. An earlier behaviora",
+      "chunk_ix": 1,
+      "span": [
+        1111,
+        1893
+      ],
+      "seq": 199
+    },
+    {
+      "id": "a425416f2e1c6d78baad5c99aeb1af0e84736d8efd776c8db7a2c763f820c1f4",
+      "doc_id": "313394",
+      "leaf_ids": [
+        "xseg-313394-s0"
+      ],
+      "title": "A Functional Neuroimaging Study of Sound Localization: Visual Cortex Activity Predicts Performance in Early-Blind Indivi",
+      "snippet": "Blind individuals often demonstrate enhanced nonvisual perceptual abilities. However, the neural substrate that underlies this improved performance remains to be fully understood. An earlier behaviora",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1445
+      ],
+      "seq": 198
+    },
+    {
+      "id": "46a4cadf9e6bf31b8dc30ed4fa27a8613199355d23ddfef6f67e8b7a8ff6fe75",
+      "doc_id": "313403",
+      "leaf_ids": [
+        "xseg-313403-s0"
+      ],
+      "title": "High-Infiltration of Tumor-Associated Macrophages Predicts Unfavorable Clinical Outcome for Node-Negative Breast Cancer",
+      "snippet": "The tumor microenvironment is composed of tumor cells, fibroblasts, endothelial cells and infiltrating immune cells, which may inhibit or promote tumor growth and progression. The objectives of this r",
+      "chunk_ix": 1,
+      "span": [
+        1132,
+        1476
+      ],
+      "seq": 203
+    },
+    {
+      "id": "4cd9fe9745563e5ead3d06649260559a617458acf3ee707320b6cf6bce87bf82",
+      "doc_id": "313403",
+      "leaf_ids": [
+        "xseg-313403-s0"
+      ],
+      "title": "High-Infiltration of Tumor-Associated Macrophages Predicts Unfavorable Clinical Outcome for Node-Negative Breast Cancer",
+      "snippet": "The tumor microenvironment is composed of tumor cells, fibroblasts, endothelial cells and infiltrating immune cells, which may inhibit or promote tumor growth and progression. The objectives of this r",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1468
+      ],
+      "seq": 202
+    },
+    {
+      "id": "ae39c8d52e6bea1b5002d55582277f903c718f46e2232f47d62c021fa02e2689",
+      "doc_id": "317204",
+      "leaf_ids": [
+        "xseg-317204-s0"
+      ],
+      "title": "Murine Dishevelled 3 Functions in Redundant Pathways with Dishevelled 1 and 2 in Normal Cardiac Outflow Tract, Cochlea, ",
+      "snippet": "Dishevelled (Dvl) proteins are important signaling components of both the canonical beta-catenin/Wnt pathway, which controls cell proliferation and patterning, and the planar cell polarity (PCP) pathw",
+      "chunk_ix": 1,
+      "span": [
+        1053,
+        2065
+      ],
+      "seq": 207
+    },
+    {
+      "id": "b3770e5532fe577163856fcd42fff693658226aa5405f61e8940e04020e2cd38",
+      "doc_id": "317204",
+      "leaf_ids": [
+        "xseg-317204-s0"
+      ],
+      "title": "Murine Dishevelled 3 Functions in Redundant Pathways with Dishevelled 1 and 2 in Normal Cardiac Outflow Tract, Cochlea, ",
+      "snippet": "Dishevelled (Dvl) proteins are important signaling components of both the canonical beta-catenin/Wnt pathway, which controls cell proliferation and patterning, and the planar cell polarity (PCP) pathw",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1394
+      ],
+      "seq": 206
+    },
+    {
+      "id": "15ecc8e5901d0ee933830d830c34d0653e487f8c0f90fb86406bb3c11ae08821",
+      "doc_id": "323030",
+      "leaf_ids": [
+        "xseg-323030-s0"
+      ],
+      "title": "Dynamics of adherens junctions in epithelial establishment, maintenance, and remodeling",
+      "snippet": "The epithelial cadherin (E-cadherin)-catenin complex binds to cytoskeletal components and regulatory and signaling molecules to form a mature adherens junction (AJ). This dynamic structure physically ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        948
+      ],
+      "seq": 210
+    },
+    {
+      "id": "b20d6f3bf3407f8a2706b58936d0f372399e38b149d75141feb75ac4b0fa2a99",
+      "doc_id": "323335",
+      "leaf_ids": [
+        "xseg-323335-s0"
+      ],
+      "title": "Long-term outcome of patients with asystole induced by head-up tilt test.",
+      "snippet": "AIMS To analyse the long-term outcome of the largest reported cohort of patients presenting asystole during head-up tilt test. METHODS AND RESULTS Since 1990, 1322 patients with syncope of unknown ori",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1238
+      ],
+      "seq": 213
+    },
+    {
+      "id": "bd10fd1bbec8e87d6e847eae50e7147e728cc0a6740657cbf3939d6473a278b1",
+      "doc_id": "323335",
+      "leaf_ids": [
+        "xseg-323335-s0"
+      ],
+      "title": "Long-term outcome of patients with asystole induced by head-up tilt test.",
+      "snippet": "AIMS To analyse the long-term outcome of the largest reported cohort of patients presenting asystole during head-up tilt test. METHODS AND RESULTS Since 1990, 1322 patients with syncope of unknown ori",
+      "chunk_ix": 1,
+      "span": [
+        929,
+        2125
+      ],
+      "seq": 214
+    },
+    {
+      "id": "fc117cef33c0886cca3671601251541a127d6558a5f3636743ee7a1a05acad22",
+      "doc_id": "323335",
+      "leaf_ids": [
+        "xseg-323335-s0"
+      ],
+      "title": "Long-term outcome of patients with asystole induced by head-up tilt test.",
+      "snippet": "AIMS To analyse the long-term outcome of the largest reported cohort of patients presenting asystole during head-up tilt test. METHODS AND RESULTS Since 1990, 1322 patients with syncope of unknown ori",
+      "chunk_ix": 2,
+      "span": [
+        1801,
+        2218
+      ],
+      "seq": 215
+    },
+    {
+      "id": "a770f310535dcded17dacefd07d76e0990a52930a8d8100f7b7dfdf6cbcf5db7",
+      "doc_id": "327319",
+      "leaf_ids": [
+        "xseg-327319-s0"
+      ],
+      "title": "ZINC 15 \u2013 Ligand Discovery for Everyone",
+      "snippet": "Many questions about the biological activity and availability of small molecules remain inaccessible to investigators who could most benefit from their answers. To narrow the gap between chemoinformat",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1188
+      ],
+      "seq": 218
+    },
+    {
+      "id": "1dfb352c7fdc69c47231bf1a7ac4265ddfc9c87ff75d1f85b916445f4b259843",
+      "doc_id": "33370",
+      "leaf_ids": [
+        "xseg-33370-s0"
+      ],
+      "title": "Targeting A20 Decreases Glioma Stem Cell Survival and Tumor Growth",
+      "snippet": "Glioblastomas are deadly cancers that display a functional cellular hierarchy maintained by self-renewing glioblastoma stem cells (GSCs). GSCs are regulated by molecular pathways distinct from the bul",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1419
+      ],
+      "seq": 20
+    },
+    {
+      "id": "822eed3e32ff43ec53edcf22c870026106ceaf88d31aae144d5bca3700aa5109",
+      "doc_id": "33370",
+      "leaf_ids": [
+        "xseg-33370-s0"
+      ],
+      "title": "Targeting A20 Decreases Glioma Stem Cell Survival and Tumor Growth",
+      "snippet": "Glioblastomas are deadly cancers that display a functional cellular hierarchy maintained by self-renewing glioblastoma stem cells (GSCs). GSCs are regulated by molecular pathways distinct from the bul",
+      "chunk_ix": 1,
+      "span": [
+        1080,
+        2047
+      ],
+      "seq": 21
+    },
+    {
+      "id": "3ca6d2332526e9e18c6cb956042de9869cad15992332d035d57895ea19aca28b",
+      "doc_id": "335029",
+      "leaf_ids": [
+        "xseg-335029-s0"
+      ],
+      "title": "Condensin-mediated remodeling of the mitotic chromatin landscape in fission yeast",
+      "snippet": "The eukaryotic genome consists of DNA molecules far longer than the cells that contain them. They reach their greatest compaction during chromosome condensation in mitosis. This process is aided by co",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1171
+      ],
+      "seq": 221
+    },
+    {
+      "id": "3f96a60d8c1013ec3af51d5812d6e37874c30fbea60a5eec9456ed8901e08abe",
+      "doc_id": "341324",
+      "leaf_ids": [
+        "xseg-341324-s0"
+      ],
+      "title": "Efficacy of the 6-month thrice-weekly regimen in the treatment of new sputum smear-positive pulmonary tuberculosis under",
+      "snippet": "BACKGROUND Under the Revised National Tuberculosis Control Programme of India, patients with new smear-positive pulmonary tuberculosis are treated with a thrice-weekly regimen of antitubercular drugs ",
+      "chunk_ix": 1,
+      "span": [
+        1113,
+        2384
+      ],
+      "seq": 225
+    },
+    {
+      "id": "6e4c90c6c0a68a339e48dc363035a6ad2ac35a4f2e3e4084fe57b39afcd2e270",
+      "doc_id": "341324",
+      "leaf_ids": [
+        "xseg-341324-s0"
+      ],
+      "title": "Efficacy of the 6-month thrice-weekly regimen in the treatment of new sputum smear-positive pulmonary tuberculosis under",
+      "snippet": "BACKGROUND Under the Revised National Tuberculosis Control Programme of India, patients with new smear-positive pulmonary tuberculosis are treated with a thrice-weekly regimen of antitubercular drugs ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1418
+      ],
+      "seq": 224
+    },
+    {
+      "id": "b5f11e4ef2f6f9840ee62feceb661f93868b9f8c88e4480ef55597d9a90bff71",
+      "doc_id": "341324",
+      "leaf_ids": [
+        "xseg-341324-s0"
+      ],
+      "title": "Efficacy of the 6-month thrice-weekly regimen in the treatment of new sputum smear-positive pulmonary tuberculosis under",
+      "snippet": "BACKGROUND Under the Revised National Tuberculosis Control Programme of India, patients with new smear-positive pulmonary tuberculosis are treated with a thrice-weekly regimen of antitubercular drugs ",
+      "chunk_ix": 2,
+      "span": [
+        2020,
+        2418
+      ],
+      "seq": 226
+    },
+    {
+      "id": "3352f99e84b0e1cbb431b7fb34bace491a8277ee8548effc39c20506aa2ccbb3",
+      "doc_id": "343052",
+      "leaf_ids": [
+        "xseg-343052-s0"
+      ],
+      "title": "Curcumin attenuates inflammatory response in IL-1beta-induced human synovial fibroblasts and collagen-induced arthritis ",
+      "snippet": "Curcumin, a major component of turmeric, has been shown to exhibit anti-oxidant and anti-inflammatory activities. The present study was performed to determine whether curcumin is efficacious against b",
+      "chunk_ix": 1,
+      "span": [
+        1109,
+        1709
+      ],
+      "seq": 230
+    },
+    {
+      "id": "585f66a7d4ffe32b380ac0b253952c5b01cf8cbf2558be30367881a13f1bf47e",
+      "doc_id": "343052",
+      "leaf_ids": [
+        "xseg-343052-s0"
+      ],
+      "title": "Curcumin attenuates inflammatory response in IL-1beta-induced human synovial fibroblasts and collagen-induced arthritis ",
+      "snippet": "Curcumin, a major component of turmeric, has been shown to exhibit anti-oxidant and anti-inflammatory activities. The present study was performed to determine whether curcumin is efficacious against b",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1475
+      ],
+      "seq": 229
+    },
+    {
+      "id": "2dc71f89dddc5f192627ebaf7c4a87ab3ed32faea07e8d98863513affc39b256",
+      "doc_id": "344240",
+      "leaf_ids": [
+        "xseg-344240-s0"
+      ],
+      "title": "Loss of IGF-IEa or IGF-IEb impairs myogenic differentiation.",
+      "snippet": "Actions of protein products resulting from alternative splicing of the Igf1 gene have received increasing attention in recent years. However, the significance and functional relevance of these observa",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1353
+      ],
+      "seq": 233
+    },
+    {
+      "id": "c16b316a5187e2b053b6c1fc7d9d0618ba9e72a6e859e42b3272492711b7a79c",
+      "doc_id": "344240",
+      "leaf_ids": [
+        "xseg-344240-s0"
+      ],
+      "title": "Loss of IGF-IEa or IGF-IEb impairs myogenic differentiation.",
+      "snippet": "Actions of protein products resulting from alternative splicing of the Igf1 gene have received increasing attention in recent years. However, the significance and functional relevance of these observa",
+      "chunk_ix": 1,
+      "span": [
+        1037,
+        1633
+      ],
+      "seq": 234
+    },
+    {
+      "id": "0cfb39a065fbda097934f0c52b7b32d41961588a59f548859f090e61dac2bfc6",
+      "doc_id": "350542",
+      "leaf_ids": [
+        "xseg-350542-s0"
+      ],
+      "title": "Antimicrobial peptide pleurocidin synergizes with antibiotics through hydroxyl radical formation and membrane damage, an",
+      "snippet": "BACKGROUND Pleurocidin, a 25-mer antimicrobial peptide (AMP), is known to exert bactericidal activity. However, the synergistic activity and mechanism(s) of pleurocidin in combination with conventiona",
+      "chunk_ix": 1,
+      "span": [
+        1204,
+        2114
+      ],
+      "seq": 238
+    },
+    {
+      "id": "d794587e16d04342d68325378d8075961afa514901a678f1655fe8bd808ab478",
+      "doc_id": "350542",
+      "leaf_ids": [
+        "xseg-350542-s0"
+      ],
+      "title": "Antimicrobial peptide pleurocidin synergizes with antibiotics through hydroxyl radical formation and membrane damage, an",
+      "snippet": "BACKGROUND Pleurocidin, a 25-mer antimicrobial peptide (AMP), is known to exert bactericidal activity. However, the synergistic activity and mechanism(s) of pleurocidin in combination with conventiona",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1558
+      ],
+      "seq": 237
+    },
+    {
+      "id": "67d173ed9d01b764bf00bcacbbb226a96e5ef7bfd7eb2d89bae417323728e9a9",
+      "doc_id": "356218",
+      "leaf_ids": [
+        "xseg-356218-s0"
+      ],
+      "title": "Outcome of pregnancy in women with moderate or severe renal insufficiency.",
+      "snippet": "BACKGROUND Pregnant women with mild preexisting renal disease have relatively few complications of pregnancy, but the risks of maternal and obstetrical complications in women with moderate or severe r",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1281
+      ],
+      "seq": 481
+    },
+    {
+      "id": "ca67f5b85880b7ff9b90a338e4167c47b2c6ab21956e5a9be5775de22961e547",
+      "doc_id": "356218",
+      "leaf_ids": [
+        "xseg-356218-s0"
+      ],
+      "title": "Outcome of pregnancy in women with moderate or severe renal insufficiency.",
+      "snippet": "BACKGROUND Pregnant women with mild preexisting renal disease have relatively few complications of pregnancy, but the risks of maternal and obstetrical complications in women with moderate or severe r",
+      "chunk_ix": 1,
+      "span": [
+        960,
+        1802
+      ],
+      "seq": 482
+    },
+    {
+      "id": "8c2b1744c70f5c1caddf55bad425451e9a7f1afab63044c46f43cd39fdeacf73",
+      "doc_id": "364522",
+      "leaf_ids": [
+        "xseg-364522-s0"
+      ],
+      "title": "High-mobility group box-1 protein induces osteogenic phenotype changes in aortic valve interstitial cells.",
+      "snippet": "OBJECTIVES Calcific aortic valve (AV) disease is known to be an inflammation-related process. High-mobility group box-1 (HMGB1) protein and Toll-like receptor 4 (TLR4) have been reported to participat",
+      "chunk_ix": 1,
+      "span": [
+        1063,
+        1691
+      ],
+      "seq": 486
+    },
+    {
+      "id": "ef5a8da249807c63780675f6eb0d524b2b4b46447b7b8d03832a00c67583aaf0",
+      "doc_id": "364522",
+      "leaf_ids": [
+        "xseg-364522-s0"
+      ],
+      "title": "High-mobility group box-1 protein induces osteogenic phenotype changes in aortic valve interstitial cells.",
+      "snippet": "OBJECTIVES Calcific aortic valve (AV) disease is known to be an inflammation-related process. High-mobility group box-1 (HMGB1) protein and Toll-like receptor 4 (TLR4) have been reported to participat",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1421
+      ],
+      "seq": 485
+    },
+    {
+      "id": "bc8a67ba7a34764a87b23206101a1ea5f7bd299172a798a713f7f6b1d5d81421",
+      "doc_id": "36474",
+      "leaf_ids": [
+        "xseg-36474-s0"
+      ],
+      "title": "Efficient targeting of expressed and silent genes in human ESCs and iPSCs using zinc-finger nucleases",
+      "snippet": "Realizing the full potential of human embryonic stem cells (hESCs) and induced pluripotent stem cells (hiPSCs) requires efficient methods for genetic modification. However, techniques to generate cell",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1035
+      ],
+      "seq": 24
+    },
+    {
+      "id": "176a74da55633cc8bf8f6602877456e0e303485308c48cec6a9b19977f63c0bc",
+      "doc_id": "365896",
+      "leaf_ids": [
+        "xseg-365896-s0"
+      ],
+      "title": "RiboSys, a high-resolution, quantitative approach to measure the in vivo kinetics of pre-mRNA splicing and 3'-end proces",
+      "snippet": "We describe methods for obtaining a quantitative description of RNA processing at high resolution in budding yeast. As a model gene expression system, we constructed tetON (for induction studies) and ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1436
+      ],
+      "seq": 489
+    },
+    {
+      "id": "59de49c10c801ce649f6fe640a9a60cd92308f8061deb327206b6e73e075d30c",
+      "doc_id": "365896",
+      "leaf_ids": [
+        "xseg-365896-s0"
+      ],
+      "title": "RiboSys, a high-resolution, quantitative approach to measure the in vivo kinetics of pre-mRNA splicing and 3'-end proces",
+      "snippet": "We describe methods for obtaining a quantitative description of RNA processing at high resolution in budding yeast. As a model gene expression system, we constructed tetON (for induction studies) and ",
+      "chunk_ix": 1,
+      "span": [
+        1051,
+        1518
+      ],
+      "seq": 490
+    },
+    {
+      "id": "e71f5388fd7bd948d662edbe9c85c8ccfe66946232fdeb074e12c23b53f8a540",
+      "doc_id": "368506",
+      "leaf_ids": [
+        "xseg-368506-s0"
+      ],
+      "title": "Generation of mice with a conditional allele for the p75(NTR) neurotrophin receptor gene.",
+      "snippet": "The p75(NTR) neurotrophin receptor has been implicated in multiple biological and pathological processes. While significant advances have recently been made in understanding the physiologic role of p7",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1190
+      ],
+      "seq": 493
+    },
+    {
+      "id": "2f5006f3d977a8a40feedd48f3b84765afae364a3951bf8e5d5c878f37ae6056",
+      "doc_id": "371289",
+      "leaf_ids": [
+        "xseg-371289-s0"
+      ],
+      "title": "A Triple-Stain Flow Cytometric Method to Assess Plasma- and Acrosome-Membrane Integrity of Cryopreserved Bovine Sperm Im",
+      "snippet": "Abstract Simultaneously evaluating postthaw viability and acrosome integrity of spermatozoa by flow cytometry would provide a valuable testing tool in both research and routine work. In the present st",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1500
+      ],
+      "seq": 496
+    },
+    {
+      "id": "3ad96ccdb9f76551c08716e2f47d91da73bd0cf8d4b90dc5eaba92dccb3ca24f",
+      "doc_id": "371289",
+      "leaf_ids": [
+        "xseg-371289-s0"
+      ],
+      "title": "A Triple-Stain Flow Cytometric Method to Assess Plasma- and Acrosome-Membrane Integrity of Cryopreserved Bovine Sperm Im",
+      "snippet": "Abstract Simultaneously evaluating postthaw viability and acrosome integrity of spermatozoa by flow cytometry would provide a valuable testing tool in both research and routine work. In the present st",
+      "chunk_ix": 1,
+      "span": [
+        1095,
+        1911
+      ],
+      "seq": 497
+    },
+    {
+      "id": "1b44e441b9606f5dc12cd1d254632339f39e858e588d1a72f352e2918e65af6e",
+      "doc_id": "374902",
+      "leaf_ids": [
+        "xseg-374902-s0"
+      ],
+      "title": "Universal voluntary HIV testing with immediate antiretroviral therapy as a strategy for elimination of HIV transmission:",
+      "snippet": "BACKGROUND Roughly 3 million people worldwide were receiving antiretroviral therapy (ART) at the end of 2007, but an estimated 6.7 million were still in need of treatment and a further 2.7 million bec",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1313
+      ],
+      "seq": 500
+    },
+    {
+      "id": "8aff696819e314f3047256792c8b61fe49e3666f46db4f38b9f55920ea26cfa8",
+      "doc_id": "374902",
+      "leaf_ids": [
+        "xseg-374902-s0"
+      ],
+      "title": "Universal voluntary HIV testing with immediate antiretroviral therapy as a strategy for elimination of HIV transmission:",
+      "snippet": "BACKGROUND Roughly 3 million people worldwide were receiving antiretroviral therapy (ART) at the end of 2007, but an estimated 6.7 million were still in need of treatment and a further 2.7 million bec",
+      "chunk_ix": 1,
+      "span": [
+        997,
+        2144
+      ],
+      "seq": 501
+    },
+    {
+      "id": "ef5ac213997d5b81894877b5d1efb3ae7f5454b8fc652af05625f618d734067d",
+      "doc_id": "380526",
+      "leaf_ids": [
+        "xseg-380526-s0"
+      ],
+      "title": "Common variants in DGKK are strongly associated with risk of hypospadias",
+      "snippet": "Hypospadias is a common congenital malformation of the male external genitalia. We performed a genome-wide association study using pooled DNA from 436 individuals with hypospadias (cases) and 494 cont",
+      "chunk_ix": 1,
+      "span": [
+        886,
+        1162
+      ],
+      "seq": 505
+    },
+    {
+      "id": "f5e90a16fa1d34b8f7cbdf012cd973a3df14e7835809ca827425efc04534ba07",
+      "doc_id": "380526",
+      "leaf_ids": [
+        "xseg-380526-s0"
+      ],
+      "title": "Common variants in DGKK are strongly associated with risk of hypospadias",
+      "snippet": "Hypospadias is a common congenital malformation of the male external genitalia. We performed a genome-wide association study using pooled DNA from 436 individuals with hypospadias (cases) and 494 cont",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1149
+      ],
+      "seq": 504
+    },
+    {
+      "id": "c73244314bf2d702eba5182ebd41f6c4c36ef55972c80dc6591d9a5ed5638a28",
+      "doc_id": "381602",
+      "leaf_ids": [
+        "xseg-5836-s0"
+      ],
+      "title": "Neutrophils Suppress Intraluminal NK Cell-Mediated Tumor Cell Clearance and Enhance Extravasation of Disseminated Carcin",
+      "snippet": "UNLABELLED Immune cells promote the initial metastatic dissemination of carcinoma cells from primary tumors. In contrast to their well-studied functions in the initial stages of metastasis, the specif",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1553
+      ],
+      "seq": 508
+    },
+    {
+      "id": "f681ddbd1c5c553baed0238046ca71da6a874ff41b97af4e2697654807195f9e",
+      "doc_id": "381602",
+      "leaf_ids": [
+        "xseg-5836-s0"
+      ],
+      "title": "Neutrophils Suppress Intraluminal NK Cell-Mediated Tumor Cell Clearance and Enhance Extravasation of Disseminated Carcin",
+      "snippet": "UNLABELLED Immune cells promote the initial metastatic dissemination of carcinoma cells from primary tumors. In contrast to their well-studied functions in the initial stages of metastasis, the specif",
+      "chunk_ix": 1,
+      "span": [
+        1161,
+        1603
+      ],
+      "seq": 509
+    },
+    {
+      "id": "14a3e4cb1da00b8d34c34a66eaed3a0d7425ac01b3aaa00a29977e4e7e690a5b",
+      "doc_id": "393001",
+      "leaf_ids": [
+        "xseg-393001-s0"
+      ],
+      "title": "High Km soluble 5'-nucleotidase from human placenta. Properties and allosteric regulation by IMP and ATP.",
+      "snippet": "A human placental soluble \"high Km\" 5'-nucleotidase has been separated from \"low Km\" 5'-nucleotidase and nonspecific phosphatase by AMP-Sepharose affinity chromatography. The enzyme was purified 8000-",
+      "chunk_ix": 1,
+      "span": [
+        995,
+        1952
+      ],
+      "seq": 513
+    },
+    {
+      "id": "458c4bc7d43072b18712f41b1acf86acd6d08371524c20b8381aebbf16673d45",
+      "doc_id": "393001",
+      "leaf_ids": [
+        "xseg-393001-s0"
+      ],
+      "title": "High Km soluble 5'-nucleotidase from human placenta. Properties and allosteric regulation by IMP and ATP.",
+      "snippet": "A human placental soluble \"high Km\" 5'-nucleotidase has been separated from \"low Km\" 5'-nucleotidase and nonspecific phosphatase by AMP-Sepharose affinity chromatography. The enzyme was purified 8000-",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1306
+      ],
+      "seq": 512
+    },
+    {
+      "id": "c3bf9175b7207b898bd17d8abc1421fd7427cd6f89c206eeb88420bc862c4908",
+      "doc_id": "406733",
+      "leaf_ids": [
+        "xseg-175735-s0"
+      ],
+      "title": "Histones are incorporated in trans during reassembly of the yeast PHO5 promoter.",
+      "snippet": "In yeast, remodeling of PHO5 promoter chromatin upon activation is accompanied by transient hyperacetylation and subsequent eviction of histones from the promoter in trans. In the course of rerepressi",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        965
+      ],
+      "seq": 516
+    },
+    {
+      "id": "34817ee45a27e2cfebef7f367ab35807d4ac637b3156100d91cf43509058a9cc",
+      "doc_id": "409280",
+      "leaf_ids": [
+        "xseg-409280-s0"
+      ],
+      "title": "National study of physician awareness and adherence to cardiovascular disease prevention guidelines.",
+      "snippet": "BACKGROUND Few data have evaluated physician adherence to cardiovascular disease (CVD) prevention guidelines according to physician specialty or patient characteristics, particularly gender. METHODS A",
+      "chunk_ix": 1,
+      "span": [
+        1179,
+        1999
+      ],
+      "seq": 520
+    },
+    {
+      "id": "661fbb7062761c9eadbcfdb6a90882a37b176c87b8c474b375ef61f6e3662c6c",
+      "doc_id": "409280",
+      "leaf_ids": [
+        "xseg-409280-s0"
+      ],
+      "title": "National study of physician awareness and adherence to cardiovascular disease prevention guidelines.",
+      "snippet": "BACKGROUND Few data have evaluated physician adherence to cardiovascular disease (CVD) prevention guidelines according to physician specialty or patient characteristics, particularly gender. METHODS A",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1506
+      ],
+      "seq": 519
+    },
+    {
+      "id": "6f1970f646c01bbb6ecfc8b96785117c54e20fbcb053183f572cbfdeab93a102",
+      "doc_id": "410286",
+      "leaf_ids": [
+        "xseg-410286-s0"
+      ],
+      "title": "TECHNICAL ADVANCE Floral dip: a simplified method for Agrobacterium-mediated",
+      "snippet": "The Agrobacterium vacuum infiltration method has made it possible to transform Arabidopsis thaliana without plant tissue culture or regeneration. In the present study, this method was evaluated and a ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1428
+      ],
+      "seq": 523
+    },
+    {
+      "id": "8605f9179787a4f6b0521cf1963fb848aaca649b7fc7a896c3aea10c9694c358",
+      "doc_id": "418246",
+      "leaf_ids": [
+        "xseg-418246-s0"
+      ],
+      "title": "Pathway connectivity and signaling coordination in the yeast stress-activated signaling network",
+      "snippet": "Stressed cells coordinate a multi-faceted response spanning many levels of physiology. Yet knowledge of the complete stress-activated regulatory network as well as design principles for signal integra",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1224
+      ],
+      "seq": 526
+    },
+    {
+      "id": "e5c137776217994df04cb4cdc1012358d3460382ecc29d4b4833549f900bc686",
+      "doc_id": "427082",
+      "leaf_ids": [
+        "xseg-427082-s0"
+      ],
+      "title": "Premigratory and migratory neural crest cells are multipotent in vivo.",
+      "snippet": "The neural crest (NC) is an embryonic stem/progenitor cell population that generates a diverse array of cell lineages, including peripheral neurons, myelinating Schwann cells, and melanocytes, among o",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1112
+      ],
+      "seq": 529
+    },
+    {
+      "id": "c72ea2d66a8d42749c276c8b011628f420ffc35f0aa1c6dd64282b0e48c2ed80",
+      "doc_id": "427865",
+      "leaf_ids": [
+        "xseg-427865-s0"
+      ],
+      "title": "Implementing the ESHRE 'poor responder' criteria in research studies: methodological implications.",
+      "snippet": "The Bologna criteria for defining poor ovarian response (POR) during IVF provide a useful template for new research in this field of assisted conception. However, designing studies around the European",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1052
+      ],
+      "seq": 532
+    },
+    {
+      "id": "7be27e5b6e487fc43bf4f1751f0bc192247847ac8066ce0768e10f3138e75a67",
+      "doc_id": "432261",
+      "leaf_ids": [
+        "xseg-432261-s0"
+      ],
+      "title": "Generation of gene-edited rats by delivery of CRISPR/Cas9 protein and donor DNA into intact zygotes using electroporatio",
+      "snippet": "The generation of gene-edited animals using the CRISPRs/Cas9 system is based on microinjection into zygotes which is inefficient, time consuming and demands high technical skills. We report the optimi",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1045
+      ],
+      "seq": 535
+    },
+    {
+      "id": "143870e2d2838eca557f8c9125b37dc3f5791641c7ad285e28ac8fc33988ec4c",
+      "doc_id": "435529",
+      "leaf_ids": [
+        "xseg-435529-s0"
+      ],
+      "title": "Uridylation of miRNAs by HEN1 SUPPRESSOR1 in Arabidopsis",
+      "snippet": "HEN1-mediated 2'-O-methylation has been shown to be a key mechanism to protect plant microRNAs (miRNAs) and small interfering RNAs (siRNAs) as well as animal piwi-interacting RNAs (piRNAs) from degrad",
+      "chunk_ix": 1,
+      "span": [
+        1035,
+        1455
+      ],
+      "seq": 539
+    },
+    {
+      "id": "854b6a969a0ca5ad6985e7fb9f00250993270783491638170527fdb6af463fb5",
+      "doc_id": "435529",
+      "leaf_ids": [
+        "xseg-435529-s0"
+      ],
+      "title": "Uridylation of miRNAs by HEN1 SUPPRESSOR1 in Arabidopsis",
+      "snippet": "HEN1-mediated 2'-O-methylation has been shown to be a key mechanism to protect plant microRNAs (miRNAs) and small interfering RNAs (siRNAs) as well as animal piwi-interacting RNAs (piRNAs) from degrad",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1401
+      ],
+      "seq": 538
+    },
+    {
+      "id": "5dc6d363cd22d77d96bc4fe7bd12c24c2448f1ed107db25ebe222a8fc7532b52",
+      "doc_id": "437924",
+      "leaf_ids": [
+        "xseg-437924-s0"
+      ],
+      "title": "Pre-Exposure Prophylaxis to Prevent HIV Infection: Current Status, Future Opportunities and Challenges",
+      "snippet": "As the global incidence of HIV exceeds 2 million new infections annually, effective interventions to decrease HIV transmission are needed. Randomized, placebo-controlled studies have demonstrated that",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1542
+      ],
+      "seq": 542
+    },
+    {
+      "id": "64f5fb5c2c8aeb86a3fa46ebb1d9aa63993694e44c1aaa5d9a77a967987fd6c7",
+      "doc_id": "437924",
+      "leaf_ids": [
+        "xseg-437924-s0"
+      ],
+      "title": "Pre-Exposure Prophylaxis to Prevent HIV Infection: Current Status, Future Opportunities and Challenges",
+      "snippet": "As the global incidence of HIV exceeds 2 million new infections annually, effective interventions to decrease HIV transmission are needed. Randomized, placebo-controlled studies have demonstrated that",
+      "chunk_ix": 1,
+      "span": [
+        1150,
+        2026
+      ],
+      "seq": 543
+    },
+    {
+      "id": "7d1f5e686d57993a912db81ed51eef46d2003c5829b7a209a8e49cfa1d1612f0",
+      "doc_id": "439670",
+      "leaf_ids": [
+        "xseg-439670-s0"
+      ],
+      "title": "Prepregnancy BMI and the risk of gestational diabetes: a systematic review of the literature with meta-analysis.",
+      "snippet": "The objective of this study is to assess and quantify the risk for gestational diabetes mellitus (GDM) according to prepregnancy maternal body mass index (BMI). The design is a systematic review of ob",
+      "chunk_ix": 1,
+      "span": [
+        989,
+        1453
+      ],
+      "seq": 547
+    },
+    {
+      "id": "b768cc6072160d821b1772b5e5145ee11a1674c8c6a6dc1717bf35e81657393f",
+      "doc_id": "439670",
+      "leaf_ids": [
+        "xseg-439670-s0"
+      ],
+      "title": "Prepregnancy BMI and the risk of gestational diabetes: a systematic review of the literature with meta-analysis.",
+      "snippet": "The objective of this study is to assess and quantify the risk for gestational diabetes mellitus (GDM) according to prepregnancy maternal body mass index (BMI). The design is a systematic review of ob",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1265
+      ],
+      "seq": 546
+    },
+    {
+      "id": "500775d858b445cafe492b4fe0f9991bce2c32b5a04e6f58d515731e28f27403",
+      "doc_id": "456304",
+      "leaf_ids": [
+        "xseg-456304-s0"
+      ],
+      "title": "Multiple risk behaviour: increasing socio-economic gap over time?",
+      "snippet": "BACKGROUND Unhealthy behaviours often occur in combination. In this study the relationship between education and lifestyle, defined as a cluster of risk behaviours, has been analysed with the purpose ",
+      "chunk_ix": 1,
+      "span": [
+        991,
+        1757
+      ],
+      "seq": 551
+    },
+    {
+      "id": "d25a62586396d6dc74330851b6a1d51ab71325a7f16efda6d9dc9f0d4c9aeb7f",
+      "doc_id": "456304",
+      "leaf_ids": [
+        "xseg-456304-s0"
+      ],
+      "title": "Multiple risk behaviour: increasing socio-economic gap over time?",
+      "snippet": "BACKGROUND Unhealthy behaviours often occur in combination. In this study the relationship between education and lifestyle, defined as a cluster of risk behaviours, has been analysed with the purpose ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1298
+      ],
+      "seq": 550
+    },
+    {
+      "id": "628eb022cc9e2fb98606a76d5c3fc220b88f6fea3b141d6914070c6e77228d99",
+      "doc_id": "457630",
+      "leaf_ids": [
+        "xseg-457630-s0"
+      ],
+      "title": "Variations and Trends in Health Burden of Visual Impairment Due to Cataract: A Global Analysis.",
+      "snippet": "Purpose To evaluate the global trends in health burden of people visually impaired from cataract in terms of disability-adjusted life years (DALY) and its correlations with national levels of socioeco",
+      "chunk_ix": 1,
+      "span": [
+        1036,
+        2023
+      ],
+      "seq": 555
+    },
+    {
+      "id": "93940d2c4404f202e65022f96d7e02f59317bc5bcd941dc95d03fa9378f220fd",
+      "doc_id": "457630",
+      "leaf_ids": [
+        "xseg-457630-s0"
+      ],
+      "title": "Variations and Trends in Health Burden of Visual Impairment Due to Cataract: A Global Analysis.",
+      "snippet": "Purpose To evaluate the global trends in health burden of people visually impaired from cataract in terms of disability-adjusted life years (DALY) and its correlations with national levels of socioeco",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1375
+      ],
+      "seq": 554
+    },
+    {
+      "id": "20db4268ad98f5b7a8a97e44d0929b33bf30fbd4e70506256122e4bb7006f852",
+      "doc_id": "461550",
+      "leaf_ids": [
+        "xseg-432261-s0"
+      ],
+      "title": "Multiplex genome engineering using CRISPR/Cas systems.",
+      "snippet": "Functional elucidation of causal genetic variants and elements requires precise genome editing technologies. The type II prokaryotic CRISPR (clustered regularly interspaced short palindromic repeats)/",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        920
+      ],
+      "seq": 558
+    },
+    {
+      "id": "5820a2cc6161a427231d41fe956614f403282c324abf3f08d4793a693edfec25",
+      "doc_id": "4983",
+      "leaf_ids": [
+        "xseg-4983-s0"
+      ],
+      "title": "Microstructural development of human newborn cerebral white matter assessed in vivo by diffusion tensor magnetic resonan",
+      "snippet": "Alterations of the architecture of cerebral white matter in the developing human brain can affect cortical development and result in functional disabilities. A line scan diffusion-weighted magnetic re",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1332
+      ],
+      "seq": 1
+    },
+    {
+      "id": "f6114051b2d643d529e1c43a6b77429ae015c84ed4364c65df77e2002befd1ae",
+      "doc_id": "4983",
+      "leaf_ids": [
+        "xseg-4983-s0"
+      ],
+      "title": "Microstructural development of human newborn cerebral white matter assessed in vivo by diffusion tensor magnetic resonan",
+      "snippet": "Alterations of the architecture of cerebral white matter in the developing human brain can affect cortical development and result in functional disabilities. A line scan diffusion-weighted magnetic re",
+      "chunk_ix": 1,
+      "span": [
+        1020,
+        1941
+      ],
+      "seq": 2
+    },
+    {
+      "id": "152064eb8e6ffa4c7a84bc9d1687bf3b7fdd065082eab056137fd033a008a00d",
+      "doc_id": "54440",
+      "leaf_ids": [
+        "xseg-54440-s0"
+      ],
+      "title": "Empirical Bayesian models for analysing molecular serotyping microarrays",
+      "snippet": "BACKGROUND Microarrays offer great potential as a platform for molecular diagnostics, testing clinical samples for the presence of numerous biomarkers in highly multiplexed assays. In this study appli",
+      "chunk_ix": 1,
+      "span": [
+        1080,
+        2246
+      ],
+      "seq": 28
+    },
+    {
+      "id": "bc9f7f92fa4b5bb5d22580e3225e25c6bfd3c2b93db99aca60a7fdd780e00115",
+      "doc_id": "54440",
+      "leaf_ids": [
+        "xseg-54440-s0"
+      ],
+      "title": "Empirical Bayesian models for analysing molecular serotyping microarrays",
+      "snippet": "BACKGROUND Microarrays offer great potential as a platform for molecular diagnostics, testing clinical samples for the presence of numerous biomarkers in highly multiplexed assays. In this study appli",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1420
+      ],
+      "seq": 27
+    },
+    {
+      "id": "adfd63d3025df5a1c5d61b676ee5e0b1eeee3f5786ce4d861c97aedcbb8ed97f",
+      "doc_id": "5836",
+      "leaf_ids": [
+        "xseg-5836-s0"
+      ],
+      "title": "Induction of myelodysplasia by myeloid-derived suppressor cells.",
+      "snippet": "Myelodysplastic syndromes (MDS) are age-dependent stem cell malignancies that share biological features of activated adaptive immune response and ineffective hematopoiesis. Here we report that myeloid",
+      "chunk_ix": 1,
+      "span": [
+        1178,
+        1654
+      ],
+      "seq": 6
+    },
+    {
+      "id": "d79107f67b21c7952de588b84565663cbd847554474479848cbcdddb8ec0d211",
+      "doc_id": "5836",
+      "leaf_ids": [
+        "xseg-5836-s0"
+      ],
+      "title": "Induction of myelodysplasia by myeloid-derived suppressor cells.",
+      "snippet": "Myelodysplastic syndromes (MDS) are age-dependent stem cell malignancies that share biological features of activated adaptive immune response and ineffective hematopoiesis. Here we report that myeloid",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1597
+      ],
+      "seq": 5
+    },
+    {
+      "id": "4948edffd177b5cbb23dbc9986d2e86b3dfd53e23c0f4e3f717c2231132df19e",
+      "doc_id": "70115",
+      "leaf_ids": [
+        "xseg-70115-s0"
+      ],
+      "title": "Bayesian measures of model complexity and fit",
+      "snippet": "Summary. We consider the problem of comparing complex hierarchical models in which the number of parameters is not clearly defined. Using an information theoretic argument we derive a measure pD for t",
+      "chunk_ix": 1,
+      "span": [
+        949,
+        1381
+      ],
+      "seq": 32
+    },
+    {
+      "id": "cebb937108cc83357a592f4b8fd0f315e5e0f00563dcd22a71b675dde1f731d3",
+      "doc_id": "70115",
+      "leaf_ids": [
+        "xseg-70115-s0"
+      ],
+      "title": "Bayesian measures of model complexity and fit",
+      "snippet": "Summary. We consider the problem of comparing complex hierarchical models in which the number of parameters is not clearly defined. Using an information theoretic argument we derive a measure pD for t",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1318
+      ],
+      "seq": 31
+    },
+    {
+      "id": "9ff2821fcf84ef7a70a5635b631dee8ca8c72ad76c1428dec2acb278184add58",
+      "doc_id": "70490",
+      "leaf_ids": [
+        "xseg-70490-s0"
+      ],
+      "title": "Simplifying likelihood ratios",
+      "snippet": "Likelihood ratios are one of the best measures of diagnostic accuracy, although they are seldom used, because interpreting them requires a calculator to convert back and forth between \u201cprobability\u201d an",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        516
+      ],
+      "seq": 35
+    },
+    {
+      "id": "b4a9edb2d8d90bd40fdaa05d31499fca3324639e37002aed0f75ca00e064a83d",
+      "doc_id": "72159",
+      "leaf_ids": [
+        "xseg-72159-s0"
+      ],
+      "title": "induction of early IFN-inducible genes in the absence of type",
+      "snippet": "On recognition of influenza virus (Flu) by TLR7, plasmacytoid dendritic cells (pDCs) produce type I IFN in significant amounts. Synthetic TLR7 ligands induce the maturation of pDCs, as evidenced by th",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1335
+      ],
+      "seq": 38
+    },
+    {
+      "id": "bb3ceadd071ada9dae528cb434c118f4de42b9937859b2adb09ce5c709b0c8f3",
+      "doc_id": "72159",
+      "leaf_ids": [
+        "xseg-72159-s0"
+      ],
+      "title": "induction of early IFN-inducible genes in the absence of type",
+      "snippet": "On recognition of influenza virus (Flu) by TLR7, plasmacytoid dendritic cells (pDCs) produce type I IFN in significant amounts. Synthetic TLR7 ligands induce the maturation of pDCs, as evidenced by th",
+      "chunk_ix": 1,
+      "span": [
+        1005,
+        1383
+      ],
+      "seq": 39
+    },
+    {
+      "id": "816d634f1f1a29f51625272530cf569f920d7c865c7018a497bfa3f9b6a80f3c",
+      "doc_id": "7912",
+      "leaf_ids": [
+        "xseg-7912-s0"
+      ],
+      "title": "BC1 RNA, the transcript from a master gene for ID element amplification, is able to prime its own reverse transcription.",
+      "snippet": "ID elements are short interspersed elements (SINEs) found in high copy number in many rodent genomes. BC1 RNA, an ID-related transcript, is derived from the single copy BC1 RNA gene. The BC1 RNA gene ",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1317
+      ],
+      "seq": 9
+    },
+    {
+      "id": "1ac476ac9a617de241f328569fe0ed51cd22fea9c87b264cf915509c15e04ad4",
+      "doc_id": "79447",
+      "leaf_ids": [
+        "xseg-79447-s0"
+      ],
+      "title": "Arteriolar function in visceral adipose tissue is impaired in human obesity.",
+      "snippet": "OBJECTIVE The purpose of this study was to characterize the relationship between adipose tissue phenotype and depot-specific microvascular function in fat. METHODS AND RESULTS In 30 obese subjects (ag",
+      "chunk_ix": 1,
+      "span": [
+        1247,
+        1718
+      ],
+      "seq": 43
+    },
+    {
+      "id": "797f328cac05822832641685247aa6ce37736f5d0368cb37358c2514740e1031",
+      "doc_id": "79447",
+      "leaf_ids": [
+        "xseg-79447-s0"
+      ],
+      "title": "Arteriolar function in visceral adipose tissue is impaired in human obesity.",
+      "snippet": "OBJECTIVE The purpose of this study was to characterize the relationship between adipose tissue phenotype and depot-specific microvascular function in fat. METHODS AND RESULTS In 30 obese subjects (ag",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1608
+      ],
+      "seq": 42
+    },
+    {
+      "id": "480c6675dd9da686eda1aee5b3a57cd69e0362f354fcdcbae13afbb16c7541ff",
+      "doc_id": "87758",
+      "leaf_ids": [
+        "xseg-87758-s0"
+      ],
+      "title": "Common Carotid Intima Media Thickness and Ankle-Brachial Pressure Index Correlate with Local but Not Global Atheroma Bur",
+      "snippet": "BACKGROUND Common carotid intima media thickness (CIMT) and ankle brachial pressure index (ABPI) are used as surrogate marker of atherosclerosis, and have been shown to correlate with arterial stiffne",
+      "chunk_ix": 1,
+      "span": [
+        1056,
+        2244
+      ],
+      "seq": 47
+    },
+    {
+      "id": "6387a0792f9c61369043e2f3103481bd54a2b9baab98cd7035f73036d02374a3",
+      "doc_id": "87758",
+      "leaf_ids": [
+        "xseg-87758-s0"
+      ],
+      "title": "Common Carotid Intima Media Thickness and Ankle-Brachial Pressure Index Correlate with Local but Not Global Atheroma Bur",
+      "snippet": "BACKGROUND Common carotid intima media thickness (CIMT) and ankle brachial pressure index (ABPI) are used as surrogate marker of atherosclerosis, and have been shown to correlate with arterial stiffne",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1352
+      ],
+      "seq": 46
+    },
+    {
+      "id": "1e9c745c198c7c705f6d21928048bff09365ad8e7e9a5c3e1e8c73102760a5fc",
+      "doc_id": "92308",
+      "leaf_ids": [
+        "xseg-92308-s0"
+      ],
+      "title": "Loss of immune escape mutations during persistent HCV infection in pregnancy enhances replication of vertically transmit",
+      "snippet": "Globally, about 1% of pregnant women are persistently infected with the hepatitis C virus (HCV). Mother-to-child transmission of HCV occurs in 3-5% of pregnancies and accounts for most new childhood i",
+      "chunk_ix": 1,
+      "span": [
+        1062,
+        1571
+      ],
+      "seq": 51
+    },
+    {
+      "id": "dcf94eb0f5bf15e9955eb2294e57629d6710ce25198fec5e99bd9d5388f1a4a0",
+      "doc_id": "92308",
+      "leaf_ids": [
+        "xseg-92308-s0"
+      ],
+      "title": "Loss of immune escape mutations during persistent HCV infection in pregnancy enhances replication of vertically transmit",
+      "snippet": "Globally, about 1% of pregnant women are persistently infected with the hepatitis C virus (HCV). Mother-to-child transmission of HCV occurs in 3-5% of pregnancies and accounts for most new childhood i",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1426
+      ],
+      "seq": 50
+    },
+    {
+      "id": "30162dda8dc450d03dece7177d5cdde37384d9cb6cafaeaf9d7f92717e8ea487",
+      "doc_id": "92499",
+      "leaf_ids": [
+        "xseg-92499-s0"
+      ],
+      "title": "The journey of developing hematopoietic stem cells.",
+      "snippet": "Hematopoietic stem cells (HSCs) develop during embryogenesis in a complex process that involves multiple anatomical sites. Once HSC precursors have been specified from mesoderm, they have to mature in",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        767
+      ],
+      "seq": 54
+    },
+    {
+      "id": "201772abf517534f0c13eded1fb50404746d453db81df894a9cc8db93e553414",
+      "doc_id": "97884",
+      "leaf_ids": [
+        "xseg-97884-s0"
+      ],
+      "title": "The sacroiliac joint in the spondyloarthropathies.",
+      "snippet": "The term spondyloarthropathy (SpA) describes and defines a group of related inflammatory joint disease that share characteristic clinical features and a unique association with the major histocompatib",
+      "chunk_ix": 0,
+      "span": [
+        0,
+        1460
+      ],
+      "seq": 57
+    },
+    {
+      "id": "a8fffa794bace855a35f235d0312b051c6ddcf43e1837227f564ef530c04a9f3",
+      "doc_id": "97884",
+      "leaf_ids": [
+        "xseg-97884-s0"
+      ],
+      "title": "The sacroiliac joint in the spondyloarthropathies.",
+      "snippet": "The term spondyloarthropathy (SpA) describes and defines a group of related inflammatory joint disease that share characteristic clinical features and a unique association with the major histocompatib",
+      "chunk_ix": 1,
+      "span": [
+        1119,
+        1629
+      ],
+      "seq": 58
     }
   ],
   "evaluation_queries": [
@@ -6132,5 +7722,34 @@
     "max_drains": 4096,
     "iterations": 0,
     "final_debt": 0
+  },
+  "configured_caps": {
+    "main": {
+      "max_delta_entries": 100000,
+      "max_delta_bytes": 536870912,
+      "max_dedup_rows": 1000000,
+      "max_intake_backlog": 10000,
+      "max_reservations": 64,
+      "reserve_deadline_s": 5.0,
+      "retirement_headroom_entries": 1000
+    },
+    "child": {
+      "max_delta_entries": 100000,
+      "max_delta_bytes": 536870912,
+      "max_dedup_rows": 1000000,
+      "max_intake_backlog": 10000,
+      "max_reservations": 64,
+      "reserve_deadline_s": 5.0,
+      "retirement_headroom_entries": 1000
+    },
+    "restart": {
+      "max_delta_entries": 100000,
+      "max_delta_bytes": 536870912,
+      "max_dedup_rows": 1000000,
+      "max_intake_backlog": 10000,
+      "max_reservations": 64,
+      "reserve_deadline_s": 5.0,
+      "retirement_headroom_entries": 1000
+    }
   }
 }
