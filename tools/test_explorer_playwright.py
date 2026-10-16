@@ -135,6 +135,7 @@ def main():
         assert "Overlapping Membership: Connected to 2 Parent Clusters" in inspector_leaf_text
         assert "xpar-1332250-s0" in inspector_leaf_text
         assert "xpar-1834762-s0" in inspector_leaf_text
+        page.screenshot(path=str(SHOTS_DIR / "desktop-node-inspected.png"))
         print(f"  PASS: Multi-parent leaf overlap badge and connections verified for {test_leaf_id}")
         passed += 1
 
