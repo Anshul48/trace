@@ -27,38 +27,8 @@
       <div class="hero-intro">
         <h2>Self-Organizing Continuous Memory & Retrieval</h2>
         <p class="hero-desc">
-          TRACE is an experimental research retrieval architecture that organizes continuous document streams into an overlapping multi-tier directed acyclic graph (DAG) — without global clustering recomputation. It enables guided branch-descent retrieval that concentrates scoring compute on high-affinity clusters, achieving <strong>0.73 recall@10</strong> under matched-work budgets where flat scanning achieves 0.056.
+          TRACE is an experimental research retrieval architecture that organizes continuous document streams into an overlapping multi-tier directed acyclic graph (DAG) — without global clustering recomputation. It enables guided branch-descent retrieval that concentrates scoring compute on high-affinity clusters, achieving <strong>0.73 recall@10</strong> under a prototype evaluation protocol (all-sources mode; <a href="#eval-modes-table" class="hero-inline-link">compare both measured modes</a>, including 0.4758 in leave-source-out mode), without broad semantic IR benchmark claims.
         </p>
-      </div>
-
-      <!-- 3-Step Visitor Story Cards -->
-      <div class="story-grid" role="region" aria-label="3-Step Self-Organization Mechanism">
-        <div class="story-card">
-          <div class="story-step-num">STEP 1</div>
-          <div class="story-title">Ingest &amp; Atomization</div>
-          <div class="story-sub">Documents &rarr; Sequence Atoms</div>
-          <p class="story-body">
-            Streaming text documents are tokenized and partitioned into contiguous lexical/dense atoms with sequence preservation, appending into a durable write-ahead ledger.
-          </p>
-        </div>
-
-        <div class="story-card">
-          <div class="story-step-num">STEP 2</div>
-          <div class="story-title">Centroid Placement &amp; DAG</div>
-          <div class="story-sub">Overlapping Leaves &amp; Parents</div>
-          <p class="story-body">
-            Atoms attach to leaf holons via centroid similarity (<code>decide_leaf</code>); leaves group beneath parent holons (<code>decide_parent</code>) forming an overlapping DAG (4,370 leaves share multiple parents; 9,540 atoms belong to multiple leaves).
-          </p>
-        </div>
-
-        <div class="story-card">
-          <div class="story-step-num">STEP 3</div>
-          <div class="story-title">Guided Query Routing</div>
-          <div class="story-sub">Bounded Branch Descent</div>
-          <p class="story-body">
-            Queries score 3,711 parent centroids, select top branches, and descend candidate child leaves to rank atoms, concentrating compute on high-likelihood branches under bounded row budgets.
-          </p>
-        </div>
       </div>
 
       <!-- Primary Action CTAs -->
@@ -67,6 +37,42 @@
         <button class="btn btn-secondary cta-btn" id="cta-explore-20k">Inspect Local 20k Verification</button>
         <button class="btn btn-secondary cta-btn" id="cta-query-replay">Step Through Query Routing Replay</button>
       </div>
+
+      <!-- 3-Step Visitor Story Cards -->
+      <details class="story-collapsible">
+        <summary class="story-summary">
+          <span class="story-summary-title">3-Step Mechanism: Ingest &bull; Centroid Placement &bull; Bounded Routing</span>
+          <span class="story-summary-hint">Expand &darr;</span>
+        </summary>
+        <div class="story-grid" role="region" aria-label="3-Step Self-Organization Mechanism">
+          <div class="story-card">
+            <div class="story-step-num">STEP 1</div>
+            <div class="story-title">Ingest &amp; Atomization</div>
+            <div class="story-sub">Documents &rarr; Sequence Atoms</div>
+            <p class="story-body">
+              Streaming text documents are tokenized and partitioned into contiguous lexical/dense atoms with sequence preservation, appending into a durable write-ahead ledger.
+            </p>
+          </div>
+
+          <div class="story-card">
+            <div class="story-step-num">STEP 2</div>
+            <div class="story-title">Centroid Placement &amp; DAG</div>
+            <div class="story-sub">Overlapping Leaves &amp; Parents</div>
+            <p class="story-body">
+              Atoms attach to leaf holons via centroid similarity (<code>decide_leaf</code>); leaves group beneath parent holons (<code>decide_parent</code>) forming an overlapping DAG (4,370 leaves share multiple parents; 9,540 atoms belong to multiple leaves).
+            </p>
+          </div>
+
+          <div class="story-card">
+            <div class="story-step-num">STEP 3</div>
+            <div class="story-title">Guided Query Routing</div>
+            <div class="story-sub">Bounded Branch Descent</div>
+            <p class="story-body">
+              Queries score 3,711 parent centroids, select top branches, and descend candidate child leaves to rank atoms, concentrating compute on high-likelihood branches under bounded row budgets.
+            </p>
+          </div>
+        </div>
+      </details>
 
       <!-- Collapsible Provenance Details -->
       <details class="provenance-collapsible">
@@ -168,34 +174,36 @@
 
         <div class="content-block">
           <h2>Measured Retrieval Quality (Both Modes, Matched Work)</h2>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Evaluation Mode</th>
-                <th>Guided Recall@10</th>
-                <th>Matched Flat</th>
-                <th>Scored Rows</th>
-                <th>Guided p50</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>LSO Off</strong> (<code>leave_source_out: false</code>)</td>
-                <td class="highlight-val">0.7300</td>
-                <td>0.0558</td>
-                <td>3,865.8</td>
-                <td>33.19 ms</td>
-              </tr>
-              <tr>
-                <td><strong>LSO On</strong> (<code>leave_source_out: true</code>)</td>
-                <td class="highlight-val">0.4758</td>
-                <td>0.0483</td>
-                <td>3,836.2</td>
-                <td>33.24 ms</td>
-              </tr>
-            </tbody>
-          </table>
-          <p class="footnote">Matched-work control: guided and flat arms score the exact same mean rows per mode.</p>
+          <div class="table-wrapper">
+            <table class="data-table" id="eval-modes-table">
+              <thead>
+                <tr>
+                  <th>Evaluation Mode</th>
+                  <th>Guided Recall@10</th>
+                  <th>Matched Flat</th>
+                  <th>Scored Rows</th>
+                  <th>Guided p50</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>LSO Off</strong> (<code>leave_source_out: false</code>, all-sources)</td>
+                  <td class="highlight-val">0.7300</td>
+                  <td>0.0558</td>
+                  <td>3,865.8</td>
+                  <td>33.19 ms</td>
+                </tr>
+                <tr>
+                  <td><strong>LSO On</strong> (<code>leave_source_out: true</code>, disjoint-source)</td>
+                  <td class="highlight-val">0.4758</td>
+                  <td>0.0483</td>
+                  <td>3,836.2</td>
+                  <td>33.24 ms</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="footnote">Matched-work control: guided and flat arms score the exact same mean rows per mode. Prototype evaluation protocol (all-sources vs disjoint); not a broad semantic IR benchmark claim.</p>
         </div>
       </div>
 
@@ -225,7 +233,7 @@
         <div class="control-group">
           <label for="cluster-focus-select">Parent Cluster View:</label>
           <select id="cluster-focus-select" class="select-input">
-            <option value="overview">Overview Ring (All Parents)</option>
+            <option value="overview">Overview: 64 of 3,711 Real Parents (Structural Preview)</option>
             <!-- Populated via JS -->
           </select>
         </div>
@@ -260,7 +268,7 @@
       <div class="node-inspector-panel" id="node-inspector-panel">
         <h3>Node Inspector (Click any node on canvas or select a cluster)</h3>
         <div id="node-inspector-content" class="inspector-content">
-          <p class="text-muted">Select any parent cluster, leaf partition, or atom node on the canvas to inspect its authentic ID, parent linkages, overlapping memberships, member count, and document metadata.</p>
+          <p class="text-muted">Select any parent cluster, leaf partition, or atom node on the canvas to inspect its authentic ID, parent linkages, overlapping memberships, member count, and document metadata. When focusing clusters, a representative preview subset (first 12 atoms per leaf) is rendered on canvas, with complete membership lists accessible via inspector links below. Coordinates represent deterministic structural layout, not embedding distance.</p>
         </div>
       </div>
 
@@ -278,7 +286,7 @@
       <div class="query-browser-header">
         <div class="query-select-group">
           <label for="query-select">Select Evaluation Probe:</label>
-          <select id="query-select" class="select-input" style="max-width: 420px;">
+          <select id="query-select" class="select-input">
             <!-- Populated via JS -->
           </select>
         </div>
@@ -309,8 +317,8 @@
 
       <!-- Dissecting 18/145 Callout -->
       <div class="dissect-notice">
-        <strong>Per-Query Work Truth:</strong>
-        Across all 240 evaluation queries, parent scoring was invariant at <strong>3,711</strong>, but children scored varied dynamically from <strong>6 to 54</strong> (mean: 25.52), and atoms scored varied from <strong>8 to 197</strong> (mean: 114.49). Individual node IDs visited are NOT identified in historical scalar receipts; the walkthrough below models the recorded work distribution across tiers.
+        <strong>Per-Query Work Truth &amp; Benchmark Scope:</strong>
+        Across all 240 evaluation queries, parent scoring was invariant at <strong>3,711</strong>, but children scored varied dynamically from <strong>6 to 54</strong> (mean: 25.52), and atoms scored varied from <strong>8 to 197</strong> (mean: 114.49). These figures represent recorded benchmark qualification query statistics, not a live arbitrary query processor. Traversal path node IDs were not recorded in historical scalar receipts; actual membership graph navigation is inspected separately in the Structural Topology (DAG) tab.
       </div>
 
       <!-- Stepper Progress Cards -->
@@ -411,47 +419,49 @@
       <h2>Qualification Gate Verifications &amp; SHA-256 Hashes</h2>
       <p class="section-desc">Independent proof receipts generated on VM <code>trace-build500</code> and verifiable in local clone.</p>
 
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Receipt / Gate</th>
-            <th>Measured Value / Digest</th>
-            <th>Verification Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Source Freeze Digest</strong></td>
-            <td><code>38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54</code></td>
-            <td><span class="tag tag-pass">207 / 207 OK</span></td>
-          </tr>
-          <tr>
-            <td><strong>Retained Store Digest</strong></td>
-            <td><code>52e884393b2abd66b46ead13d1831238510dbf5f6738e5b398ea9334f0edca38</code></td>
-            <td><span class="tag tag-pass">229,927 Files Exact</span></td>
-          </tr>
-          <tr>
-            <td><strong>VM Acceptance Gate</strong></td>
-            <td><code>receipts/VM-10M-ACCEPTANCE.json</code></td>
-            <td><span class="tag tag-pass">121 / 121 Fixtures PASS</span></td>
-          </tr>
-          <tr>
-            <td><strong>Oracle Verification</strong></td>
-            <td><code>receipts/AUDIT-RESULT.json</code> (einsum / argpartition)</td>
-            <td><span class="tag tag-pass">240 / 240 Exact (diff 0.0)</span></td>
-          </tr>
-          <tr>
-            <td><strong>Verified 10M Export Gzip</strong></td>
-            <td><code>15d2b2ebde19b5f183a3a40da7f1057601d2503ba15259627d7296de57344089</code></td>
-            <td><span class="tag tag-pass">7,254,185 B Verified</span></td>
-          </tr>
-          <tr>
-            <td><strong>Generation Memberships</strong></td>
-            <td><code>d21a3aefe980b621caa785060fd5ca83dccff04f5f9bf983ee8fa3eb919c0033</code></td>
-            <td><span class="tag tag-pass">12,888 Revisions PASS</span></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Receipt / Gate</th>
+              <th>Measured Value / Digest</th>
+              <th>Verification Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Source Freeze Digest</strong></td>
+              <td><code>38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54</code></td>
+              <td><span class="tag tag-pass">207 / 207 OK</span></td>
+            </tr>
+            <tr>
+              <td><strong>Retained Store Digest</strong></td>
+              <td><code>52e884393b2abd66b46ead13d1831238510dbf5f6738e5b398ea9334f0edca38</code></td>
+              <td><span class="tag tag-pass">229,927 Files Exact</span></td>
+            </tr>
+            <tr>
+              <td><strong>VM Acceptance Gate</strong></td>
+              <td><code>receipts/VM-10M-ACCEPTANCE.json</code></td>
+              <td><span class="tag tag-pass">121 / 121 Fixtures PASS</span></td>
+            </tr>
+            <tr>
+              <td><strong>Oracle Verification</strong></td>
+              <td><code>receipts/AUDIT-RESULT.json</code> (einsum / argpartition)</td>
+              <td><span class="tag tag-pass">240 / 240 Exact (diff 0.0)</span></td>
+            </tr>
+            <tr>
+              <td><strong>Verified 10M Export Gzip</strong></td>
+              <td><code>15d2b2ebde19b5f183a3a40da7f1057601d2503ba15259627d7296de57344089</code></td>
+              <td><span class="tag tag-pass">7,254,185 B Verified</span></td>
+            </tr>
+            <tr>
+              <td><strong>Generation Memberships</strong></td>
+              <td><code>d21a3aefe980b621caa785060fd5ca83dccff04f5f9bf983ee8fa3eb919c0033</code></td>
+              <td><span class="tag tag-pass">12,888 Revisions PASS</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <!-- TAB 6: Run Locally -->

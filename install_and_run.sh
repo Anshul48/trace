@@ -20,7 +20,12 @@ for arg in "$@"; do
             NO_SERVER=1
             ;;
         --port=*)
-            PORT="${arg#*=}"
+            PORT_VAL="${arg#*=}"
+            if ! [[ "${PORT_VAL}" =~ ^[0-9]+$ ]] || [ "${PORT_VAL}" -lt 1 ] || [ "${PORT_VAL}" -gt 65535 ]; then
+                echo "ERROR: Invalid port: ${PORT_VAL}. Must be an integer between 1 and 65535." >&2
+                exit 1
+            fi
+            PORT="${PORT_VAL}"
             ;;
         --help|-h)
             echo "Usage: ./install_and_run.sh [--rerun] [--no-server] [--port=PORT]"
@@ -28,7 +33,7 @@ for arg in "$@"; do
             echo "Options:"
             echo "  --rerun      Execute a new frozen 20k pilot run into a new unique directory"
             echo "  --no-server  Complete installation and pilot verification without launching server"
-            echo "  --port=PORT  Set local viewer port (default: 8765)"
+            echo "  --port=PORT  Set local viewer port (default: 8765, valid: 1..65535)"
             exit 0
             ;;
         *)
@@ -69,8 +74,6 @@ fi
 UV_BIN=""
 if command -v uv >/dev/null 2>&1; then
     UV_BIN="$(command -v uv)"
-elif [ -x "/home/anshul/.local/bin/uv" ]; then
-    UV_BIN="/home/anshul/.local/bin/uv"
 elif [ -x "${HOME}/.local/bin/uv" ]; then
     UV_BIN="${HOME}/.local/bin/uv"
 elif [ -x "${HOME}/.cargo/bin/uv" ]; then
@@ -106,11 +109,25 @@ fi
 
 # 3. Installing Minimal Dependencies (numpy, blake3)
 echo ""
-echo "[3/7] Installing minimal baseline dependencies (numpy, blake3)..."
-if [ -n "${UV_BIN}" ]; then
-    "${UV_BIN}" pip install --python "${PYTHON_BIN}" numpy blake3
+echo "[3/7] Checking minimal baseline dependencies (numpy, blake3)..."
+DEPS_OK=$("${PYTHON_BIN}" -c '
+try:
+    import numpy
+    import blake3
+    print("OK")
+except ImportError:
+    print("NO")
+')
+
+if [ "${DEPS_OK}" = "OK" ]; then
+    echo "  Dependencies already installed in isolated virtual environment."
 else
-    "${PYTHON_BIN}" -m pip install numpy blake3
+    echo "  Installing numpy and blake3 into isolated environment..."
+    if [ -n "${UV_BIN}" ]; then
+        "${UV_BIN}" pip install --python "${PYTHON_BIN}" numpy blake3
+    else
+        "${PYTHON_BIN}" -m pip install numpy blake3
+    fi
 fi
 
 # 4. Source Integrity Check (207 pinned files against manifest digest)
@@ -122,9 +139,15 @@ echo "[4/7] Verifying 207 immutable source files against SOURCEFREEZE..."
 echo ""
 echo "[5/7] Verifying 20k token prefix data..."
 DATA_DIR="${SCRIPT_DIR}/repro-20k/data-20k"
+TAR_FILE="${SCRIPT_DIR}/repro-20k/small-prefix-20k.tar.gz"
+
 if [ ! -d "${DATA_DIR}" ]; then
+    if [ ! -f "${TAR_FILE}" ]; then
+        echo "ERROR: Missing prefix data directory and archive at ${TAR_FILE}" >&2
+        exit 1
+    fi
     echo "  Unpacking repro-20k/small-prefix-20k.tar.gz..."
-    "${PYTHON_BIN}" repro-20k/prep_small_prefix.py unpack --tar repro-20k/small-prefix-20k.tar.gz --data-dir "${DATA_DIR}"
+    "${PYTHON_BIN}" repro-20k/prep_small_prefix.py unpack --tar "${TAR_FILE}" --data-dir "${DATA_DIR}"
 fi
 "${PYTHON_BIN}" repro-20k/prep_small_prefix.py verify --tokens 20000 --cand freeze-src/cand --data-dir "${DATA_DIR}"
 
@@ -150,15 +173,28 @@ except Exception:
     pass' "${ACTIVE_POINTER}")
 
     if [ -n "${CANDIDATE_DIR}" ]; then
-        # Comprehensive verification of existing PASS run
+        # Comprehensive verification of existing PASS run:
+        # Must be strictly under owned local-runs, correct status, prefix, tokens, atoms, and sourcefreeze
         VERIFIED=$("${PYTHON_BIN}" -c 'import json, sys, os
-path = sys.argv[1]
-res = json.load(open(os.path.join(path, "result.json")))
-status_ok = (res.get("status") == "PASS")
-prefix_ok = (res.get("input", {}).get("prefix_raw_sha256") == "530e51c72c117e0a8a312de19a6263fd8a40326990c6aa98f7f8303a7f4ed119")
-tokens_ok = (res.get("input", {}).get("actual_tokens") == 20030)
-atoms_ok = (res.get("final", {}).get("atoms") == 144)
-print("OK" if (status_ok and prefix_ok and tokens_ok and atoms_ok) else "NO")' "${CANDIDATE_DIR}")
+cand_real = os.path.realpath(sys.argv[1])
+runs_real = os.path.realpath(sys.argv[2])
+try:
+    if os.path.commonpath([cand_real, runs_real]) != runs_real or cand_real == runs_real:
+        print("NO_PATH")
+        sys.exit(0)
+except Exception:
+    print("NO_PATH")
+    sys.exit(0)
+try:
+    res = json.load(open(os.path.join(cand, "result.json")))
+    status_ok = (res.get("status") == "PASS")
+    prefix_ok = (res.get("input", {}).get("prefix_raw_sha256") == "530e51c72c117e0a8a312de19a6263fd8a40326990c6aa98f7f8303a7f4ed119")
+    tokens_ok = (res.get("input", {}).get("actual_tokens") == 20030)
+    atoms_ok = (res.get("final", {}).get("atoms") == 144)
+    freeze_ok = (res.get("manifest_harness_sha256") == "9f516288a098eff7b2a52373ad0eaf6b9ad1664377a9f7be4f974701b8d9b1a0")
+    print("OK" if (status_ok and prefix_ok and tokens_ok and atoms_ok and freeze_ok) else "NO")
+except Exception:
+    print("NO")' "${CANDIDATE_DIR}" "${RUNS_DIR}")
 
         if [ "${VERIFIED}" = "OK" ]; then
             ACTIVE_RUN_DIR="${CANDIDATE_DIR}"
@@ -168,27 +204,10 @@ print("OK" if (status_ok and prefix_ok and tokens_ok and atoms_ok) else "NO")' "
     fi
 fi
 
-# Also check legacy local-run-20k if present and verified
-if [ -z "${ACTIVE_RUN_DIR}" ] && [ "${RERUN}" -eq 0 ] && [ -f "${SCRIPT_DIR}/local-run-20k/result.json" ]; then
-    LEGACY_VERIFIED=$("${PYTHON_BIN}" -c 'import json, sys, os
-path = sys.argv[1]
-try:
-    res = json.load(open(os.path.join(path, "result.json")))
-    status_ok = (res.get("status") == "PASS")
-    prefix_ok = (res.get("input", {}).get("prefix_raw_sha256") == "530e51c72c117e0a8a312de19a6263fd8a40326990c6aa98f7f8303a7f4ed119")
-    print("OK" if (status_ok and prefix_ok) else "NO")
-except Exception:
-    print("NO")' "${SCRIPT_DIR}/local-run-20k")
-
-    if [ "${LEGACY_VERIFIED}" = "OK" ]; then
-        ACTIVE_RUN_DIR="${SCRIPT_DIR}/local-run-20k"
-        echo "  Found verified existing 20k run in: ${ACTIVE_RUN_DIR}"
-    fi
-fi
-
 if [ -z "${ACTIVE_RUN_DIR}" ] || [ "${RERUN}" -eq 1 ]; then
+    RUN_UUID=$("${PYTHON_BIN}" -c 'import uuid; print(uuid.uuid4())')
     TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
-    NEW_RUN_DIR="${RUNS_DIR}/run-${TIMESTAMP}"
+    NEW_RUN_DIR="${RUNS_DIR}/run-${TIMESTAMP}-${RUN_UUID}"
     echo "  Creating new unique run directory: ${NEW_RUN_DIR}"
 
     echo "  Executing frozen harness product_pilot.py against data-20k..."
@@ -225,7 +244,7 @@ fi
 
 # Export selected run data for explorer
 echo "  Exporting run topology and queries for explorer from ${ACTIVE_RUN_DIR}..."
-"${PYTHON_BIN}" tools/export_20k_viewer.py --run-dir "${ACTIVE_RUN_DIR}"
+"${PYTHON_BIN}" tools/export_20k_viewer.py --run-dir "${ACTIVE_RUN_DIR}" --data-dir "${DATA_DIR}"
 
 # 7. Launch Local Demonstration Server
 echo ""

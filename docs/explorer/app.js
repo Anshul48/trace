@@ -6,7 +6,11 @@
   // Verified Constants
   const VERIFIED_SOURCEFREEZE = '38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54';
   const VERIFIED_10M_PIN = 'e8334c07-731d-4ff9-a292-8329b89c41b9:0:166457';
-  const VERIFIED_20K_TRIPLE = 'a86a91d3-b4e6-4874-8a31-27d363fa53d5:0:645';
+  const EXPECTED_10M_GZIP_BYTES = 7254185;
+  const EXPECTED_10M_GZIP_SHA256 = '15d2b2ebde19b5f183a3a40da7f1057601d2503ba15259627d7296de57344089';
+  const EXPECTED_10M_PLAIN_BYTES = 21695279;
+  const EXPECTED_10M_PLAIN_SHA256 = '4dfc96ed7276eb5cbe42f4bed40808adb00811c7d55a8b7a1b6711b9a76a96b0';
+  const MAX_PAYLOAD_BYTES = 32 * 1024 * 1024; // 32 MiB response/decompression bound
 
   // State
   let local20kData = null;
@@ -18,6 +22,10 @@
   let currentProbeIndex = 0;
   let currentStep = 1;
   let selectedLso = false;
+  let datasetErrors = {
+    '10m': null,
+    '20k': null
+  };
 
   // Canvas State
   let zoomLevel = 1.0;
@@ -116,6 +124,8 @@
           datasetSelect.value = '10m';
           currentDataset = '10m';
           resetView();
+          populateClusterSelector();
+          updateStatusBanner();
           layoutAndDrawTopology();
         }
       });
@@ -129,6 +139,8 @@
           datasetSelect.value = '20k';
           currentDataset = '20k';
           resetView();
+          populateClusterSelector();
+          updateStatusBanner();
           layoutAndDrawTopology();
         }
       });
@@ -160,74 +172,324 @@
     }
   }
 
-  // DecompressionStream Gzip Loader with Plain JSON Fallback
-  async function loadGzipOrJson(gzPath, jsonPath) {
-    if (window.DecompressionStream) {
+  // Web Crypto SHA-256 Buffer Hasher
+  async function computeSha256Hex(buffer) {
+    if (!window.crypto || !window.crypto.subtle || typeof window.crypto.subtle.digest !== 'function') {
+      throw new Error('Web Cryptography API (window.crypto.subtle.digest) is required for SHA-256 validation');
+    }
+    const digest = await window.crypto.subtle.digest('SHA-256', buffer);
+    const bytes = new Uint8Array(digest);
+    let hex = '';
+    for (let i = 0; i < bytes.length; i++) {
+      hex += bytes[i].toString(16).padStart(2, '0');
+    }
+    return hex;
+  }
+
+  // DecompressionStream Gzip Loader with Plain JSON Fallback & Pre-JSON SHA-256 Verification
+  async function loadGzipOrJson(gzPath, jsonPath, options = {}) {
+    const expectedGzBytes = options.expectedGzBytes || EXPECTED_10M_GZIP_BYTES;
+    const expectedGzSha = options.expectedGzSha || EXPECTED_10M_GZIP_SHA256;
+    const expectedPlainBytes = options.expectedPlainBytes || EXPECTED_10M_PLAIN_BYTES;
+    const expectedPlainSha = options.expectedPlainSha || EXPECTED_10M_PLAIN_SHA256;
+    const maxBytes = options.maxBytes || MAX_PAYLOAD_BYTES;
+
+    const hasDS = typeof DecompressionStream !== 'undefined';
+
+    if (hasDS) {
+      let gzResp = null;
       try {
-        const resp = await fetch(gzPath);
-        if (resp.ok) {
-          const ds = new DecompressionStream('gzip');
-          const decompressed = resp.body.pipeThrough(ds);
-          const text = await new Response(decompressed).text();
-          return JSON.parse(text);
+        gzResp = await fetch(gzPath);
+      } catch (e) {
+        console.warn(`Gzip fetch failed for ${gzPath}, checking plain fallback:`, e);
+      }
+
+      if (gzResp && gzResp.ok) {
+        // Read verified byte buffer
+        const gzBuffer = await gzResp.arrayBuffer();
+        if (gzBuffer.byteLength > maxBytes) {
+          throw new Error(`10M gzip payload exceeds 32MiB bound: ${gzBuffer.byteLength} bytes`);
         }
-      } catch (err) {
-        console.warn('DecompressionStream fetch fallback to plain JSON:', err);
+        if (gzBuffer.byteLength !== expectedGzBytes) {
+          throw new Error(`10M gzip byte length mismatch: got ${gzBuffer.byteLength}, expected ${expectedGzBytes}`);
+        }
+
+        // Crypto Subtle SHA-256 check BEFORE any JSON use
+        const gzSha = await computeSha256Hex(gzBuffer);
+        if (gzSha !== expectedGzSha) {
+          throw new Error(`10M gzip SHA-256 mismatch: got ${gzSha}, expected ${expectedGzSha}`);
+        }
+
+        // Real browser DecompressionStream decompression
+        const ds = new DecompressionStream('gzip');
+        const writer = ds.writable.getWriter();
+        writer.write(new Uint8Array(gzBuffer));
+        writer.close();
+
+        const reader = ds.readable.getReader();
+        const chunks = [];
+        let totalDecompressed = 0;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          totalDecompressed += value.byteLength;
+          if (totalDecompressed > maxBytes) {
+            throw new Error(`10M decompressed payload exceeds 32MiB bound: ${totalDecompressed} bytes`);
+          }
+          chunks.push(value);
+        }
+
+        const plainBuffer = new Uint8Array(totalDecompressed);
+        let offset = 0;
+        for (const chunk of chunks) {
+          plainBuffer.set(chunk, offset);
+          offset += chunk.byteLength;
+        }
+
+        if (plainBuffer.byteLength !== expectedPlainBytes) {
+          throw new Error(`10M decompressed byte length mismatch: got ${plainBuffer.byteLength}, expected ${expectedPlainBytes}`);
+        }
+
+        // Validate plain hash after decompression
+        const plainSha = await computeSha256Hex(plainBuffer.buffer);
+        if (plainSha !== expectedPlainSha) {
+          throw new Error(`10M decompressed plain SHA-256 mismatch: got ${plainSha}, expected ${expectedPlainSha}`);
+        }
+
+        const text = new TextDecoder('utf-8').decode(plainBuffer);
+        return JSON.parse(text);
       }
     }
+
+    // Fallback: fetch plain JSON (only when DS absent or gzip fetch returns !ok)
     const plainResp = await fetch(jsonPath);
     if (!plainResp.ok) {
       throw new Error(`Failed to load ${jsonPath}: HTTP ${plainResp.status}`);
     }
-    return await plainResp.json();
+    const plainBuffer = await plainResp.arrayBuffer();
+    if (plainBuffer.byteLength > maxBytes) {
+      throw new Error(`Plain payload exceeds 32MiB bound: ${plainBuffer.byteLength} bytes`);
+    }
+    if (plainBuffer.byteLength !== expectedPlainBytes) {
+      throw new Error(`Plain payload byte length mismatch: got ${plainBuffer.byteLength}, expected ${expectedPlainBytes}`);
+    }
+    const plainSha = await computeSha256Hex(plainBuffer);
+    if (plainSha !== expectedPlainSha) {
+      throw new Error(`Plain payload SHA-256 mismatch: got ${plainSha}, expected ${expectedPlainSha}`);
+    }
+    const text = new TextDecoder('utf-8').decode(plainBuffer);
+    return JSON.parse(text);
   }
 
-  // Load All Artifacts
-  async function loadData() {
-    showStatus('Loading verified DAG topology and qualification telemetry...', false);
-
-    try {
-      const [resResp, localResp, probesResp, g10m] = await Promise.all([
-        fetch('qualification_10m.json').catch(() => null),
-        fetch('local_20k_data.json').catch(() => null),
-        fetch('probes_summary.json').catch(() => null),
-        loadGzipOrJson('graph_10m.json.gz', 'graph_10m.json').catch(e => {
-          console.warn('10M graph load error:', e);
-          return null;
-        })
-      ]);
-
-      if (resResp && resResp.ok) {
-        qualificationData = await resResp.json();
-      }
-      if (localResp && localResp.ok) {
-        local20kData = await localResp.json();
-        validate20kData(local20kData);
-      }
-      if (probesResp && probesResp.ok) {
-        probeList = await probesResp.json();
-      }
-      if (g10m) {
-        validate10mData(g10m);
-        graph10mData = g10m;
-      }
-
-      hideStatus();
-    } catch (err) {
-      console.error('Data loading error:', err);
-      showStatus(`Validation Error: ${err.message}`, true);
+  // Linear O(V + E) Referential Integrity & Overlap Validator (Maps/Sets)
+  // Derived UI root is excluded from validation.
+  function validateGraphIntegrity(data, scopePrefix, expectedCounts = {}) {
+    if (!data || typeof data !== 'object') {
+      throw new Error(`${scopePrefix} data must be an object`);
+    }
+    if (!Array.isArray(data.parents) || data.parents.length === 0) {
+      throw new Error(`${scopePrefix} parents must be a non-empty array`);
+    }
+    if (!Array.isArray(data.leaves) || data.leaves.length === 0) {
+      throw new Error(`${scopePrefix} leaves must be a non-empty array`);
+    }
+    if (!Array.isArray(data.atoms) || data.atoms.length === 0) {
+      throw new Error(`${scopePrefix} atoms must be a non-empty array`);
     }
 
-    renderPhaseTimeline();
-    populateQuerySelector();
-    populateClusterSelector();
-    layoutAndDrawTopology();
-    renderStepDetail();
+    if (expectedCounts.parents !== undefined && data.parents.length !== expectedCounts.parents) {
+      throw new Error(`${scopePrefix} parents length mismatch: got ${data.parents.length}, expected ${expectedCounts.parents}`);
+    }
+    if (expectedCounts.leaves !== undefined && data.leaves.length !== expectedCounts.leaves) {
+      throw new Error(`${scopePrefix} leaves length mismatch: got ${data.leaves.length}, expected ${expectedCounts.leaves}`);
+    }
+    if (expectedCounts.atoms !== undefined && data.atoms.length !== expectedCounts.atoms) {
+      throw new Error(`${scopePrefix} atoms length mismatch: got ${data.atoms.length}, expected ${expectedCounts.atoms}`);
+    }
+
+    const parentIdSet = new Set();
+    const parentChildSet = new Set();
+    let totalParentChildEdges = 0;
+
+    for (let i = 0; i < data.parents.length; i++) {
+      const p = data.parents[i];
+      if (!p || typeof p.id !== 'string' || !p.id) {
+        throw new Error(`${scopePrefix} parent at index ${i} has invalid or missing id`);
+      }
+      if (parentIdSet.has(p.id)) {
+        throw new Error(`${scopePrefix} duplicate parent id: ${p.id}`);
+      }
+      parentIdSet.add(p.id);
+
+      if (!Array.isArray(p.children)) {
+        throw new Error(`${scopePrefix} parent ${p.id} children must be an array`);
+      }
+      if (!Number.isFinite(p.atom_count) || p.atom_count < 0) {
+        throw new Error(`${scopePrefix} parent ${p.id} atom_count must be a non-negative finite number`);
+      }
+
+      for (let j = 0; j < p.children.length; j++) {
+        const cid = p.children[j];
+        if (typeof cid !== 'string' || !cid) {
+          throw new Error(`${scopePrefix} parent ${p.id} has invalid child leaf id at index ${j}`);
+        }
+        parentChildSet.add(p.id + '\0' + cid);
+      }
+      totalParentChildEdges += p.children.length;
+    }
+
+    if (expectedCounts.parentChildEdges !== undefined && totalParentChildEdges !== expectedCounts.parentChildEdges) {
+      throw new Error(`${scopePrefix} parent->child edge count mismatch: got ${totalParentChildEdges}, expected ${expectedCounts.parentChildEdges}`);
+    }
+    if (parentChildSet.size !== totalParentChildEdges) {
+      throw new Error(`${scopePrefix} duplicate parent->child edges detected: unique ${parentChildSet.size} vs total ${totalParentChildEdges}`);
+    }
+
+    const leafIdSet = new Set();
+    const leafAtomSet = new Set();
+    let totalLeafParentEdges = 0;
+    let totalLeafAtomEdges = 0;
+    let overlappingLeavesCount = 0;
+
+    for (let i = 0; i < data.leaves.length; i++) {
+      const l = data.leaves[i];
+      if (!l || typeof l.id !== 'string' || !l.id) {
+        throw new Error(`${scopePrefix} leaf at index ${i} has invalid or missing id`);
+      }
+      if (leafIdSet.has(l.id)) {
+        throw new Error(`${scopePrefix} duplicate leaf id: ${l.id}`);
+      }
+      leafIdSet.add(l.id);
+
+      if (!Array.isArray(l.parent_ids)) {
+        throw new Error(`${scopePrefix} leaf ${l.id} parent_ids must be an array`);
+      }
+      if (l.parent_ids.length === 0) {
+        throw new Error(`${scopePrefix} orphan leaf detected: ${l.id} has 0 parents`);
+      }
+      if (l.parent_ids.length > 1) {
+        overlappingLeavesCount++;
+      }
+      totalLeafParentEdges += l.parent_ids.length;
+
+      for (let j = 0; j < l.parent_ids.length; j++) {
+        const pid = l.parent_ids[j];
+        if (!parentIdSet.has(pid)) {
+          throw new Error(`${scopePrefix} leaf ${l.id} references non-existent parent: ${pid}`);
+        }
+        const key = pid + '\0' + l.id;
+        if (!parentChildSet.has(key)) {
+          throw new Error(`${scopePrefix} forward/reverse parent-child mismatch: leaf ${l.id} lists parent ${pid}, but parent does not list leaf`);
+        }
+      }
+
+      if (!Array.isArray(l.atom_ids)) {
+        throw new Error(`${scopePrefix} leaf ${l.id} atom_ids must be an array`);
+      }
+      for (let j = 0; j < l.atom_ids.length; j++) {
+        const aid = l.atom_ids[j];
+        if (typeof aid !== 'string' || !aid) {
+          throw new Error(`${scopePrefix} leaf ${l.id} has invalid atom id at index ${j}`);
+        }
+        leafAtomSet.add(l.id + '\0' + aid);
+      }
+      totalLeafAtomEdges += l.atom_ids.length;
+
+      if (!Array.isArray(l.doc_ids)) {
+        throw new Error(`${scopePrefix} leaf ${l.id} doc_ids must be an array`);
+      }
+    }
+
+    if (totalLeafParentEdges !== totalParentChildEdges) {
+      throw new Error(`${scopePrefix} reverse leaf->parent edge count (${totalLeafParentEdges}) mismatch with parent->child edge count (${totalParentChildEdges})`);
+    }
+    if (expectedCounts.overlappingLeaves !== undefined && overlappingLeavesCount !== expectedCounts.overlappingLeaves) {
+      throw new Error(`${scopePrefix} overlapping leaves count mismatch: got ${overlappingLeavesCount}, expected ${expectedCounts.overlappingLeaves}`);
+    }
+    if (expectedCounts.leafAtomEdges !== undefined && totalLeafAtomEdges !== expectedCounts.leafAtomEdges) {
+      throw new Error(`${scopePrefix} leaf->atom edge count mismatch: got ${totalLeafAtomEdges}, expected ${expectedCounts.leafAtomEdges}`);
+    }
+    if (leafAtomSet.size !== totalLeafAtomEdges) {
+      throw new Error(`${scopePrefix} duplicate leaf->atom edges detected: unique ${leafAtomSet.size} vs total ${totalLeafAtomEdges}`);
+    }
+
+    const atomIdSet = new Set();
+    let totalAtomLeafEdges = 0;
+    let overlappingAtomsCount = 0;
+
+    for (let i = 0; i < data.atoms.length; i++) {
+      const a = data.atoms[i];
+      if (!a || typeof a.id !== 'string' || !a.id) {
+        throw new Error(`${scopePrefix} atom at index ${i} has invalid or missing id`);
+      }
+      if (atomIdSet.has(a.id)) {
+        throw new Error(`${scopePrefix} duplicate atom id: ${a.id}`);
+      }
+      atomIdSet.add(a.id);
+
+      if (typeof a.doc_id !== 'string') {
+        throw new Error(`${scopePrefix} atom ${a.id} doc_id must be a string`);
+      }
+      if (!Array.isArray(a.leaf_ids)) {
+        throw new Error(`${scopePrefix} atom ${a.id} leaf_ids must be an array`);
+      }
+      if (a.leaf_ids.length === 0) {
+        throw new Error(`${scopePrefix} orphan atom detected: ${a.id} has 0 leaves`);
+      }
+      if (a.leaf_ids.length > 1) {
+        overlappingAtomsCount++;
+      }
+      totalAtomLeafEdges += a.leaf_ids.length;
+
+      for (let j = 0; j < a.leaf_ids.length; j++) {
+        const lid = a.leaf_ids[j];
+        if (!leafIdSet.has(lid)) {
+          throw new Error(`${scopePrefix} atom ${a.id} references non-existent leaf: ${lid}`);
+        }
+        const key = lid + '\0' + a.id;
+        if (!leafAtomSet.has(key)) {
+          throw new Error(`${scopePrefix} forward/reverse leaf-atom mismatch: atom ${a.id} lists leaf ${lid}, but leaf does not list atom`);
+        }
+      }
+
+      if (!Number.isFinite(a.chunk_ix)) {
+        throw new Error(`${scopePrefix} atom ${a.id} chunk_ix must be a finite number`);
+      }
+      if (!Array.isArray(a.span) || a.span.length !== 2) {
+        throw new Error(`${scopePrefix} atom ${a.id} span must be a 2-tuple`);
+      }
+      if (!Array.isArray(a.byte_span) || a.byte_span.length !== 2) {
+        throw new Error(`${scopePrefix} atom ${a.id} byte_span must be a 2-tuple`);
+      }
+      if (!Number.isFinite(a.seq)) {
+        throw new Error(`${scopePrefix} atom ${a.id} seq must be a finite number`);
+      }
+    }
+
+    if (totalAtomLeafEdges !== totalLeafAtomEdges) {
+      throw new Error(`${scopePrefix} reverse atom->leaf edge count (${totalAtomLeafEdges}) mismatch with leaf->atom edge count (${totalLeafAtomEdges})`);
+    }
+    if (expectedCounts.overlappingAtoms !== undefined && overlappingAtomsCount !== expectedCounts.overlappingAtoms) {
+      throw new Error(`${scopePrefix} overlapping atoms count mismatch: got ${overlappingAtomsCount}, expected ${expectedCounts.overlappingAtoms}`);
+    }
+
+    return {
+      parentsCount: parentIdSet.size,
+      leavesCount: leafIdSet.size,
+      atomsCount: atomIdSet.size,
+      parentChildEdges: totalParentChildEdges,
+      leafAtomEdges: totalLeafAtomEdges,
+      overlappingLeaves: overlappingLeavesCount,
+      overlappingAtoms: overlappingAtomsCount
+    };
   }
 
+  // 10M Qualification Topology Validator
   function validate10mData(data) {
-    if (!data || !data.manifest) throw new Error('Missing 10M manifest');
+    if (!data || typeof data !== 'object') throw new Error('Missing or invalid 10M data object');
+    if (!data.manifest || typeof data.manifest !== 'object') throw new Error('Missing 10M manifest');
     const m = data.manifest;
+
     if (m.source_freeze_sha256 !== VERIFIED_SOURCEFREEZE) {
       throw new Error(`10M Source freeze mismatch: ${m.source_freeze_sha256}`);
     }
@@ -237,36 +499,197 @@
     if (m.total_parents !== 3711 || m.total_leaves !== 9177 || m.total_atoms !== 63441) {
       throw new Error(`10M count mismatch: ${m.total_parents}/${m.total_leaves}/${m.total_atoms}`);
     }
-    if (data.parents.length !== 3711 || data.leaves.length !== 9177 || data.atoms.length !== 63441) {
-      throw new Error('10M array length mismatch with manifest');
-    }
+
+    validateGraphIntegrity(data, '10M', {
+      parents: 3711,
+      leaves: 9177,
+      atoms: 63441,
+      parentChildEdges: 13547,
+      leafAtomEdges: 72981,
+      overlappingLeaves: 4370,
+      overlappingAtoms: 9540
+    });
   }
 
+  // Fresh Local 20k Contract & Dynamic Graph Validator
   function validate20kData(data) {
-    if (!data || !data.manifest) throw new Error('Missing 20k manifest');
+    if (!data || typeof data !== 'object') throw new Error('Missing or invalid 20k data object');
+    if (!data.manifest || typeof data.manifest !== 'object') throw new Error('Missing 20k manifest');
     const m = data.manifest;
+
+    // 1. manifest.scope
+    if (typeof m.scope !== 'string' || !m.scope.trim()) {
+      throw new Error('Unsupported 20k recording: manifest.scope must be a non-empty string');
+    }
+
+    // 2. manifest.source_freeze_sha256
     if (m.source_freeze_sha256 !== VERIFIED_SOURCEFREEZE) {
       throw new Error(`20k Source freeze mismatch: ${m.source_freeze_sha256}`);
     }
-    if (m.store_head_pin && m.store_head_pin[3] !== VERIFIED_20K_TRIPLE) {
-      throw new Error(`20k Store pin mismatch: ${m.store_head_pin[3]}`);
+
+    // 3. run_uuid (UUID)
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!m.run_uuid || typeof m.run_uuid !== 'string' || !UUID_REGEX.test(m.run_uuid)) {
+      throw new Error('Unsupported 20k recording: manifest.run_uuid missing or invalid UUID (fresh contract required)');
     }
-    if (data.parents.length !== 51 || data.leaves.length !== 81 || data.atoms.length !== 144) {
-      throw new Error('20k array length mismatch');
+
+    // 4. result_sha256 (hex64)
+    const HEX64_REGEX = /^[0-9a-f]{64}$/i;
+    if (!m.result_sha256 || typeof m.result_sha256 !== 'string' || !HEX64_REGEX.test(m.result_sha256)) {
+      throw new Error('Unsupported 20k recording: manifest.result_sha256 missing or invalid hex64 (fresh contract required)');
     }
+
+    // 5. store_head_pin: [uuid, 0, 645, uuid+':0:645'] (numbers may vary legit fresh; no hardcoded pin triple)
+    if (!Array.isArray(m.store_head_pin) || m.store_head_pin.length !== 4) {
+      throw new Error('Unsupported 20k recording: manifest.store_head_pin must be a 4-element tuple');
+    }
+    const [pinUuid, pinOffset, pinGen, pinTriple] = m.store_head_pin;
+    if (typeof pinUuid !== 'string' || !UUID_REGEX.test(pinUuid)) {
+      throw new Error(`20k store_head_pin[0] must be a valid UUID: ${pinUuid}`);
+    }
+    if (!Number.isInteger(pinOffset) || pinOffset < 0) {
+      throw new Error(`20k store_head_pin[1] must be a non-negative integer: ${pinOffset}`);
+    }
+    if (!Number.isInteger(pinGen) || pinGen < 0) {
+      throw new Error(`20k store_head_pin[2] must be a non-negative integer: ${pinGen}`);
+    }
+    const expectedPinTriple = `${pinUuid}:${pinOffset}:${pinGen}`;
+    if (pinTriple !== expectedPinTriple) {
+      throw new Error(`20k store_head_pin tuple internal inconsistency: pin[3] "${pinTriple}" does not match "${expectedPinTriple}"`);
+    }
+
+    // 6. actual_tokens: 20030
+    if (m.actual_tokens !== 20030) {
+      throw new Error(`20k manifest.actual_tokens mismatch: got ${m.actual_tokens}, expected 20030`);
+    }
+
+    // 7. complete_documents: 88
+    if (m.complete_documents !== 88) {
+      throw new Error(`20k manifest.complete_documents mismatch: got ${m.complete_documents}, expected 88`);
+    }
+
+    // 8. status: PASS
+    if (m.status !== 'PASS') {
+      throw new Error(`20k manifest.status mismatch: got ${m.status}, expected PASS`);
+    }
+
+    // 9. evaluation_queries: full original 240 query dicts
+    if (!Array.isArray(data.evaluation_queries) || data.evaluation_queries.length !== 240) {
+      throw new Error(`Unsupported 20k recording: evaluation_queries must contain full original 240 query dicts (got ${data.evaluation_queries ? data.evaluation_queries.length : 'none'})`);
+    }
+
+    // 10. phase_telemetry
+    if (!data.phase_telemetry || typeof data.phase_telemetry !== 'object') {
+      throw new Error('Unsupported 20k recording: phase_telemetry missing');
+    }
+
+    // 11. Dynamic graph referential integrity & counts
+    const expectedParents = m.parents_count !== undefined ? m.parents_count : m.total_parents;
+    const expectedLeaves = m.leaves_count !== undefined ? m.leaves_count : m.total_leaves;
+    const expectedAtoms = m.atoms_count !== undefined ? m.atoms_count : m.total_atoms;
+    const expectedParentChildEdges = m.parent_child_edges;
+    const expectedLeafAtomEdges = m.leaf_atom_edges;
+    const expectedOverlappingLeaves = m.multi_parent_leaves !== undefined ? m.multi_parent_leaves : m.overlapping_leaves;
+    const expectedOverlappingAtoms = m.multi_leaf_atoms !== undefined ? m.multi_leaf_atoms : m.overlapping_atoms;
+
+    validateGraphIntegrity(data, '20k', {
+      parents: expectedParents,
+      leaves: expectedLeaves,
+      atoms: expectedAtoms,
+      parentChildEdges: expectedParentChildEdges,
+      leafAtomEdges: expectedLeafAtomEdges,
+      overlappingLeaves: expectedOverlappingLeaves,
+      overlappingAtoms: expectedOverlappingAtoms
+    });
   }
 
   function showStatus(msg, isError) {
     if (!statusBanner) return;
     statusBanner.style.display = 'block';
     statusBanner.style.backgroundColor = isError ? 'rgba(244, 63, 94, 0.15)' : 'rgba(56, 189, 248, 0.12)';
-    statusBanner.style.borderColor = isError ? 'var(--accent-rose)' : 'var(--accent-cyan)';
+    statusBanner.style.borderColor = isError ? 'var(--accent-rose, #f43f5e)' : 'var(--accent-cyan, #38bdf8)';
     statusBanner.style.color = isError ? '#fecdd3' : '#e0f2fe';
     statusBanner.textContent = msg;
   }
 
   function hideStatus() {
     if (statusBanner) statusBanner.style.display = 'none';
+  }
+
+  function updateStatusBanner() {
+    const err = datasetErrors[currentDataset];
+    if (err) {
+      showStatus(`${currentDataset.toUpperCase()} Dataset Unavailable: ${err}`, true);
+    } else if (datasetErrors['10m'] && currentDataset === '20k') {
+      showStatus(`Viewing verified 20k dataset (10M dataset is unavailable: ${datasetErrors['10m']}).`, false);
+    } else {
+      hideStatus();
+    }
+  }
+
+  // Load All Artifacts (Fail-Closed)
+  async function loadData() {
+    showStatus('Loading verified DAG topology datasets (10M / 20k)...', false);
+
+    datasetErrors['10m'] = null;
+    datasetErrors['20k'] = null;
+
+    // 1. Qualification Telemetry
+    try {
+      const resResp = await fetch('qualification_10m.json');
+      if (resResp.ok) {
+        qualificationData = await resResp.json();
+      } else {
+        console.warn(`qualification_10m.json fetch failed: HTTP ${resResp.status}`);
+      }
+    } catch (err) {
+      console.warn('qualification_10m.json load error:', err);
+    }
+
+    // 2. Probes Summary
+    try {
+      const probesResp = await fetch('probes_summary.json');
+      if (probesResp.ok) {
+        probeList = await probesResp.json();
+      }
+    } catch (err) {
+      console.warn('probes_summary.json load error:', err);
+    }
+
+    // 3. Local 20k Dataset (Fail-Closed: assign only after validated)
+    try {
+      const localResp = await fetch('local_20k_data.json');
+      if (!localResp.ok) {
+        throw new Error(`Failed to load local_20k_data.json: HTTP ${localResp.status}`);
+      }
+      const raw20k = await localResp.json();
+      validate20kData(raw20k);
+      local20kData = raw20k; // Assigned only after validated
+      datasetErrors['20k'] = null;
+    } catch (err) {
+      local20kData = null; // Clear invalid data on error (fail-closed)
+      datasetErrors['20k'] = err.message;
+      console.warn('20k validation error (fail-closed):', err.message);
+    }
+
+    // 4. 10M Dataset (Fail-Closed: assign only after validated)
+    try {
+      const g10m = await loadGzipOrJson('graph_10m.json.gz', 'graph_10m.json');
+      validate10mData(g10m);
+      graph10mData = g10m; // Assigned only after validated
+      datasetErrors['10m'] = null;
+    } catch (err) {
+      graph10mData = null; // Clear invalid data on error (fail-closed)
+      datasetErrors['10m'] = err.message;
+      console.warn('10M load/validation error (fail-closed):', err.message);
+    }
+
+    updateStatusBanner();
+    renderPhaseTimeline();
+    populateQuerySelector();
+    populateClusterSelector();
+    layoutAndDrawTopology();
+    renderStepDetail();
   }
 
   // Render Phase Timeline Bar
@@ -457,55 +880,127 @@
     if (!stepDetailPanel) return;
 
     const probe = probeList[currentProbeIndex] || {};
-    const family = probe.family || (currentProbeIndex < 13 ? 'chunk' : (currentProbeIndex < 26 ? 'noisy' : 'cross'));
+    const probeId = (typeof probe.id === 'number') ? probe.id : currentProbeIndex;
     const modeLabel = selectedLso ? 'LSO On (Leave Source Out)' : 'LSO Off (All Sources)';
-    const guidedRecall = selectedLso ? '47.6' : '73.0';
-    const flatRecall = selectedLso ? '4.8' : '5.6';
-    const scoringRows = selectedLso ? '3,836' : '3,866';
+
+    // Lookup recorded historical query row from qualificationData.queries (240 rows)
+    const queryRow = (qualificationData && Array.isArray(qualificationData.queries))
+      ? qualificationData.queries.find(q => q.probe === probeId && q.leave_source_out === selectedLso)
+      : null;
+
+    if (!queryRow) {
+      stepDetailPanel.innerHTML = `
+        <div style="padding: 1.5rem; border: 1px solid var(--accent-rose, #f43f5e); background: rgba(244, 63, 94, 0.08); border-radius: 8px;">
+          <h3 style="color: var(--accent-rose, #f43f5e); margin-top: 0;">Recorded Query Row Unavailable</h3>
+          <p>No recorded historical telemetry row found for <strong>Probe #${probeId}</strong> with <strong>${modeLabel}</strong>.</p>
+          <p class="footnote" style="margin-top: 1rem; color: #94a3b8;">
+            Telemetry is retrieved directly from <code>qualificationData.queries</code> (240 recorded benchmark rows).
+            Global averages or default zeros are strictly not substituted when a row is unavailable.
+          </p>
+        </div>
+      `;
+      return;
+    }
+
+    // Strict required finite field guard and explicit record unavailable/error if missing
+    const missingFields = [];
+    if (!queryRow.work || typeof queryRow.work !== 'object') {
+      missingFields.push('work (object)');
+    } else {
+      if (!Number.isFinite(queryRow.work.parents_scored)) missingFields.push('work.parents_scored');
+      if (!Number.isFinite(queryRow.work.children_scored)) missingFields.push('work.children_scored');
+      if (!Number.isFinite(queryRow.work.atoms_scored)) missingFields.push('work.atoms_scored');
+      if (!Number.isFinite(queryRow.work.member_visits)) missingFields.push('work.member_visits');
+    }
+    if (!Number.isFinite(queryRow.guided_recall10)) missingFields.push('guided_recall10');
+    if (!Number.isFinite(queryRow.flat_recall10)) missingFields.push('flat_recall10');
+    if (!Number.isFinite(queryRow.guided_wall_s)) missingFields.push('guided_wall_s');
+    if (!Number.isFinite(queryRow.guided_scoring_rows)) missingFields.push('guided_scoring_rows');
+    if (!Number.isFinite(queryRow.flat_scoring_rows)) missingFields.push('flat_scoring_rows');
+    if (typeof queryRow.matched_work !== 'boolean') missingFields.push('matched_work');
+    if (typeof queryRow.family !== 'string' || !queryRow.family.trim()) missingFields.push('family');
+    if (!Number.isFinite(queryRow.eligible_atoms)) missingFields.push('eligible_atoms');
+    if (!Number.isFinite(queryRow.guided_distinct_returned)) missingFields.push('guided_distinct_returned');
+
+    if (missingFields.length > 0) {
+      stepDetailPanel.innerHTML = `
+        <div style="padding: 1.5rem; border: 1px solid var(--accent-rose, #f43f5e); background: rgba(244, 63, 94, 0.08); border-radius: 8px;">
+          <h3 style="color: var(--accent-rose, #f43f5e); margin-top: 0;">Recorded Query Row Incomplete</h3>
+          <p>Recorded historical telemetry row for <strong>Probe #${probeId}</strong> with <strong>${modeLabel}</strong> is missing required finite fields:</p>
+          <ul style="color: var(--accent-rose, #f43f5e); margin: 0.5rem 0 1rem 1.5rem;">
+            ${missingFields.map(f => `<li><code>${f}</code></li>`).join('')}
+          </ul>
+          <p class="footnote" style="margin-top: 1rem; color: #94a3b8;">
+            Telemetry is retrieved strictly from authentic recorded benchmark rows.
+            Global means, default zeros, or fallback values are never substituted.
+          </p>
+        </div>
+      `;
+      return;
+    }
+
+    const work = queryRow.work;
+    const parentsScored = work.parents_scored;
+    const childrenScored = work.children_scored;
+    const atomsScored = work.atoms_scored;
+    const memberVisits = work.member_visits;
+    const guidedRows = queryRow.guided_scoring_rows;
+    const flatRows = queryRow.flat_scoring_rows;
+    const guidedRecallPct = (queryRow.guided_recall10 * 100).toFixed(1);
+    const flatRecallPct = (queryRow.flat_recall10 * 100).toFixed(1);
+    const wallMs = (queryRow.guided_wall_s * 1000).toFixed(2);
+    const family = queryRow.family;
+    const eligibleAtoms = queryRow.eligible_atoms;
+    const guidedDistinctReturned = queryRow.guided_distinct_returned;
 
     let html = '';
     switch (currentStep) {
       case 1:
         html = `
           <h3>Stage 1: Parent Scoring (Phase 1 Routing)</h3>
-          <p>The query vector is scored against all <strong>3,711 seg_parent centroids</strong> in storage via dense dot product. Parent scoring is fixed across all queries.</p>
+          <p>The query vector is scored against all <strong>${parentsScored.toLocaleString()} seg_parent centroids</strong> in storage via dense dot product. Parent scoring is fixed across all queries.</p>
           <div class="stats-grid" style="margin: 1rem 0;">
             <div class="stat-card">
-              <div class="stat-label">Parents Scored</div>
-              <div class="stat-value" style="color: var(--accent-cyan);">3,711</div>
-              <div class="stat-sub">Fixed full scan across all parent holons</div>
+              <div class="stat-label">Parents Scored (Recorded)</div>
+              <div class="stat-value" style="color: var(--accent-cyan);">${parentsScored.toLocaleString()}</div>
+              <div class="stat-sub">Full scan across all parent holons</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Evaluation Mode</div>
-              <div class="stat-value" style="font-size: 1.1rem; color: #f8fafc;">${modeLabel}</div>
-              <div class="stat-sub">Probe Family: ${family}</div>
+              <div class="stat-label">Evaluation Identity</div>
+              <div class="stat-value" style="font-size: 1.1rem; color: #f8fafc;">Probe #${probeId} [${family}]</div>
+              <div class="stat-sub">${modeLabel}</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Parent Budget</div>
-              <div class="stat-value" style="color: var(--accent-emerald);">None</div>
-              <div class="stat-sub">Scans all seg_parents</div>
+              <div class="stat-value" style="color: var(--accent-emerald);">Full Scan</div>
+              <div class="stat-sub">Scans all ${parentsScored.toLocaleString()} seg_parents in 10M store</div>
             </div>
           </div>
-          <p class="footnote">Verification Note: Query router scans all 3,711 seg_parents (not all are root parents; hierarchy supports recursive child edges).</p>
+          <p class="footnote">Verification Note: Query router scans all 3,711 seg_parents in the storage pin (hierarchy supports recursive child edges). Recorded query telemetry confirms ${parentsScored.toLocaleString()} parents evaluated.</p>
         `;
         break;
       case 2:
         html = `
           <h3>Stage 2: Top Parent Selection (Phase 2 Branch Filter)</h3>
-          <p>The router ranks all scored parents and selects the top-scoring branches for recursive child descent.</p>
+          <p>The router ranks all scored parents and selects the top-scoring branches (budget: top_parents = 4) for recursive child descent.</p>
           <div class="stats-grid" style="margin: 1rem 0;">
             <div class="stat-card">
-              <div class="stat-label">Top Parents Selected</div>
+              <div class="stat-label">Top Parents Budget</div>
               <div class="stat-value" style="color: var(--accent-cyan);">4</div>
               <div class="stat-sub">top_parents parameter</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Selected Branches</div>
-              <div class="stat-value" style="font-size: 0.95rem; color: #f8fafc; font-family: var(--font-mono);">xpar-01f4..., xpar-1332..., xpar-1834..., xpar-2536...</div>
-              <div class="stat-sub">High-affinity centroid clusters</div>
+              <div class="stat-label">Traversed Branch IDs</div>
+              <div class="stat-value" style="font-size: 1rem; color: var(--accent-amber, #fbbf24);">Not Persisted</div>
+              <div class="stat-sub">Query path IDs were not recorded in telemetry</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Expansion Mechanism</div>
+              <div class="stat-value" style="font-size: 1rem; color: #f8fafc;">DFS Stack</div>
+              <div class="stat-sub">Top 4 parents push child edges onto stack</div>
             </div>
           </div>
-          <p class="footnote">DFS branch expansion: Top parents push child edges onto traversal stack.</p>
+          <p class="footnote">Notice: Specific query traversal branch IDs were not recorded in the benchmark run. Stages explain the routing algorithm only; authentic 10M graph membership navigation remains available separately in the DAG Topology tab.</p>
         `;
         break;
       case 3:
@@ -514,22 +1009,22 @@
           <p>Traverses candidate child edges from selected parents, evaluating candidate leaves. Because leaves can belong to multiple parents (4,370 overlapping leaves in 10M), the router deduplicates visited leaves.</p>
           <div class="stats-grid" style="margin: 1rem 0;">
             <div class="stat-card">
-              <div class="stat-label">Children Scored (Mean)</div>
-              <div class="stat-value" style="color: var(--accent-cyan);">25.52</div>
-              <div class="stat-sub">Dynamic range: 6 to 54 children</div>
+              <div class="stat-label">Children Scored (Recorded)</div>
+              <div class="stat-value" style="color: var(--accent-cyan);">${childrenScored}</div>
+              <div class="stat-sub">Probe #${probeId} actual recorded work</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Top Children Budget</div>
               <div class="stat-value" style="color: var(--accent-emerald);">8</div>
-              <div class="stat-sub">top_children parameter</div>
+              <div class="stat-sub">top_children parameter limit</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Smoke Probe vs Invariant</div>
-              <div class="stat-value" style="font-size: 0.95rem; color: var(--accent-amber);">18 was smoke check</div>
-              <div class="stat-sub">Mean work across 240 queries is 25.52</div>
+              <div class="stat-label">240-Query Benchmark Context</div>
+              <div class="stat-value" style="font-size: 1.1rem; color: #f8fafc;">6 &ndash; 54 (mean 25.5)</div>
+              <div class="stat-sub">Aggregate range across all 240 queries</div>
             </div>
           </div>
-          <p class="footnote">Overlapping DAG traversal: 4,370 multi-parent leaves ensure multi-faceted document clusters are reachable via alternate descent paths.</p>
+          <p class="footnote">Overlapping DAG traversal: 4,370 multi-parent leaves ensure multi-faceted document clusters are reachable via alternate descent paths. Candidate leaves are dynamically deduplicated.</p>
         `;
         break;
       case 4:
@@ -538,46 +1033,57 @@
           <p>Selected top leaves yield candidate atom vectors. The router evaluates candidate atoms against the query, deduplicating atoms across leaves (9,540 multi-leaf atoms in 10M).</p>
           <div class="stats-grid" style="margin: 1rem 0;">
             <div class="stat-card">
-              <div class="stat-label">Atoms Scored (Mean)</div>
-              <div class="stat-value" style="color: var(--accent-cyan);">114.49</div>
-              <div class="stat-sub">Dynamic range: 8 to 197 atoms</div>
+              <div class="stat-label">Atoms Scored (Recorded)</div>
+              <div class="stat-value" style="color: var(--accent-cyan);">${atomsScored}</div>
+              <div class="stat-sub">Probe #${probeId} recorded atom evaluations</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Member Visits (Mean)</div>
-              <div class="stat-value" style="color: var(--accent-emerald);">129.26</div>
-              <div class="stat-sub">Dynamic range: 9 to 197 visits</div>
+              <div class="stat-label">Member Visits (Recorded)</div>
+              <div class="stat-value" style="color: var(--accent-emerald);">${memberVisits}</div>
+              <div class="stat-sub">Probe #${probeId} leaf member visits</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Total Mean Rows</div>
-              <div class="stat-value" style="color: #f8fafc;">${scoringRows}</div>
-              <div class="stat-sub">3,711 parents + 25.5 leaves + 114.5 atoms</div>
+              <div class="stat-label">Total Scoring Rows (Recorded)</div>
+              <div class="stat-value" style="color: #f8fafc;">${guidedRows.toLocaleString()}</div>
+              <div class="stat-sub">${parentsScored.toLocaleString()} parents + ${childrenScored} leaves + ${atomsScored} atoms</div>
             </div>
           </div>
-          <p class="footnote">Compute concentration: Guided search evaluates only ~114 atoms out of 63,441 (&lt;0.2% of corpus).</p>
+          <p class="footnote">Compute concentration: This recorded query evaluated only ${atomsScored} atoms out of ${eligibleAtoms.toLocaleString()} eligible atoms (${((atomsScored / eligibleAtoms) * 100).toFixed(2)}%). (240-query benchmark context: atoms 8&ndash;197, mean 114.5; visits 9&ndash;197, mean 129.3).</p>
         `;
         break;
       case 5:
+        const recallAdvantage = (queryRow.flat_recall10 > 0)
+          ? `${(queryRow.guided_recall10 / queryRow.flat_recall10).toFixed(1)}&times;`
+          : (queryRow.guided_recall10 > 0 ? '&gt; Flat (Flat=0%)' : 'N/A');
+        const aggMeanGuided = selectedLso ? '47.6%' : '73.0%';
+        const aggMeanFlat = selectedLso ? '4.8%' : '5.6%';
+
         html = `
           <h3>Stage 5: Retrieval Accuracy (Matched Work Benchmark)</h3>
-          <p>Final top-10 ranked results are evaluated against the oracle top-10 ground truth under matched compute budgets.</p>
+          <p>Top-10 ranked results evaluated against the oracle top-10 ground truth under matched compute budgets.</p>
           <div class="stats-grid" style="margin: 1rem 0;">
             <div class="stat-card">
-              <div class="stat-label">Guided Recall@10</div>
-              <div class="stat-value" style="color: var(--accent-emerald);">${guidedRecall}%</div>
-              <div class="stat-sub">Scored ~${scoringRows} rows</div>
+              <div class="stat-label">Guided Recall@10 (Recorded)</div>
+              <div class="stat-value" style="color: var(--accent-emerald);">${guidedRecallPct}%</div>
+              <div class="stat-sub">Scored ${guidedRows.toLocaleString()} rows (${guidedDistinctReturned}/10 returned)</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Matched-Flat Recall@10</div>
-              <div class="stat-value" style="color: var(--accent-rose);">${flatRecall}%</div>
-              <div class="stat-sub">Constrained to identical ${scoringRows} rows</div>
+              <div class="stat-label">Matched-Flat Recall@10 (Recorded)</div>
+              <div class="stat-value" style="color: var(--accent-rose);">${flatRecallPct}%</div>
+              <div class="stat-sub">Constrained to identical ${flatRows.toLocaleString()} rows</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Recall Advantage</div>
-              <div class="stat-value" style="color: var(--accent-cyan);">&gt; 10&times;</div>
-              <div class="stat-sub">Under matched row compute budget</div>
+              <div class="stat-label">Recall Advantage (Recorded)</div>
+              <div class="stat-value" style="color: var(--accent-cyan);">${recallAdvantage}</div>
+              <div class="stat-sub">Wall: ${wallMs} ms &bull; Matched: ${queryRow.matched_work ? 'Yes' : 'No'}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Aggregate 240-Query Context</div>
+              <div class="stat-value" style="font-size: 1.1rem; color: #f8fafc;">${aggMeanGuided} vs ${aggMeanFlat}</div>
+              <div class="stat-sub">Benchmark mean (${modeLabel})</div>
             </div>
           </div>
-          <p class="footnote">Conclusion: Self-organizing DAG clustering concentrates compute on high-likelihood branches, delivering over 10&times; higher recall under identical row-scoring budgets.</p>
+          <p class="footnote">Benchmark Note: Evaluated against brute-force oracle over ${eligibleAtoms.toLocaleString()} atoms under matched row compute budget (${guidedRows.toLocaleString()} rows). Probe #${probeId} [${family}] (${modeLabel}) recorded ${(queryRow.guided_wall_s).toFixed(4)}s wall time.</p>
         `;
         break;
     }
@@ -606,10 +1112,18 @@
 
     if (!activeData || !activeData.parents) {
       ctx.restore();
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '14px ' + getComputedStyle(document.body).fontFamily;
-      ctx.textAlign = 'center';
-      ctx.fillText('Loading verified graph dataset...', w / 2, h / 2);
+      const err = datasetErrors[currentDataset];
+      if (err) {
+        ctx.fillStyle = '#f43f5e';
+        ctx.font = '14px ' + getComputedStyle(document.body).fontFamily;
+        ctx.textAlign = 'center';
+        ctx.fillText(`${currentDataset.toUpperCase()} Dataset Unavailable: ${err}`, w / 2, h / 2);
+      } else {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '14px ' + getComputedStyle(document.body).fontFamily;
+        ctx.textAlign = 'center';
+        ctx.fillText(`Loading verified ${currentDataset.toUpperCase()} dataset...`, w / 2, h / 2);
+      }
       return;
     }
 
@@ -624,8 +1138,8 @@
       radius: 10,
       color: '#38bdf8',
       label: currentDataset === '20k'
-        ? 'Unified Entry (Virtual Root — 51 seg_parents)'
-        : 'Unified Entry (Virtual Root — 3,711 seg_parents)'
+        ? `Unified Entry (Virtual Root — ${activeData.parents.length} seg_parents)`
+        : `Unified Entry (Virtual Root — ${activeData.parents.length.toLocaleString()} seg_parents)`
     };
     nodesToRender.push(rootNode);
 
@@ -686,7 +1200,7 @@
     ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
     ctx.textAlign = 'center';
     const statusText = (currentDataset === '20k')
-      ? 'Local 20k Verified Reproduction: 51 Parents, 81 Leaves (8 multi-parent), 144 Atoms — Click any node to inspect'
+      ? `Local 20k Verified Reproduction: ${parents.length} Parents, ${leaves.length} Leaves, ${atoms.length} Atoms — Click any node to inspect`
       : (currentClusterFocus === 'overview')
         ? '10M Verified DAG: 3,711 Parents, 9,177 Leaves (4,370 multi-parent), 63,441 Atoms — Select cluster or click node'
         : `10M Focus Cluster: ${currentClusterFocus} — Showing authentic child leaves and member atoms`;
@@ -958,7 +1472,7 @@
       html = `
         <div class="inspector-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-weight: 700;">VIRTUAL UI ENTRY POINT</div>
         <p><strong>Corpus Scale:</strong> ${currentDataset === '20k' ? '20,030 TOK_V1 tokens (88 complete documents)' : '10,003,381 TOK_V1 tokens (13,081 complete documents)'}</p>
-        <p><strong>Storage Topology:</strong> ${currentDataset === '20k' ? '51 seg_parents, 81 seg_leaves, 144 atoms' : '3,711 seg_parents, 9,177 seg_leaves, 63,441 atoms'}</p>
+        <p><strong>Storage Topology:</strong> ${currentDataset === '20k' ? `${(local20kData && local20kData.parents ? local20kData.parents.length : 'N/A')} seg_parents, ${(local20kData && local20kData.leaves ? local20kData.leaves.length : 'N/A')} seg_leaves, ${(local20kData && local20kData.atoms ? local20kData.atoms.length : 'N/A')} atoms` : '3,711 seg_parents, 9,177 seg_leaves, 63,441 atoms'}</p>
         <p><strong>DAG Connectivity:</strong> Overlapping directed acyclic graph. Query router scores all <code>seg_parents</code> centroids without global clustering recomputation.</p>
       `;
     } else if (node.type === 'parent') {
@@ -1084,6 +1598,7 @@
         currentDataset = e.target.value;
         resetView();
         populateClusterSelector();
+        updateStatusBanner();
         layoutAndDrawTopology();
       });
     }
@@ -1195,5 +1710,27 @@
     initCanvasInteractions();
     loadData();
   });
+
+  // Read-only QA Test & Pure Validation API (pure functions / getters, non-mutating)
+  if (typeof window !== 'undefined') {
+    window.TRACE_VALIDATION = Object.freeze({
+      validate10mData,
+      validate20kData,
+      validateGraphIntegrity,
+      computeSha256Hex,
+      loadGzipOrJson,
+      getDatasetErrors: () => ({ ...datasetErrors }),
+      getLocal20kData: () => local20kData,
+      getGraph10mData: () => graph10mData,
+      getQualificationData: () => qualificationData,
+      VERIFIED_SOURCEFREEZE,
+      VERIFIED_10M_PIN,
+      EXPECTED_10M_GZIP_BYTES,
+      EXPECTED_10M_GZIP_SHA256,
+      EXPECTED_10M_PLAIN_BYTES,
+      EXPECTED_10M_PLAIN_SHA256,
+      MAX_PAYLOAD_BYTES
+    });
+  }
 
 })();

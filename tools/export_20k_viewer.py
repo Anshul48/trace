@@ -8,7 +8,7 @@ STRICT SAFETY CONSTRAINTS:
 3. ZERO store/database constructor calls (NO TLStore, Store, Committer, Fence, keeper).
 4. Pure disk read operations (mode 'r' and 'rb'). Never mutates run store or lock files.
 5. Inverts parent-child and leaf-atom relationships preserving full overlapping DAG memberships.
-6. Emits docs/explorer/local_20k_data.json adhering strictly to the native schema.
+6. Emits local_20k_data.json adhering strictly to the native schema.
 """
 
 import argparse
@@ -17,11 +17,11 @@ import datetime
 import hashlib
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT_FILE = ROOT / "docs" / "explorer" / "local_20k_data.json"
 SOURCEFREEZE_SHA256 = "38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54"
 
 
@@ -42,17 +42,16 @@ def resolve_run_dir(given_path=None):
         except Exception:
             pass
 
-    fallback = ROOT / "local-run-20k"
-    if (fallback / "result.json").exists():
-        return fallback.resolve()
-
     raise FileNotFoundError("No verified 20k run directory found. Run ./install_and_run.sh first.")
 
 
-def load_doc_texts():
+def load_doc_texts(data_dir=None):
     """Load licensed SciFact abstract texts from repro-20k prefix data."""
     docs = {}
-    docs_file = ROOT / "repro-20k" / "data-20k" / "docs-100m.jsonl"
+    if data_dir:
+        docs_file = Path(data_dir) / "docs-100m.jsonl"
+    else:
+        docs_file = ROOT / "repro-20k" / "data-20k" / "docs-100m.jsonl"
     if docs_file.exists():
         with open(docs_file, "r", encoding="utf-8") as f:
             for line in f:
@@ -66,8 +65,8 @@ def load_doc_texts():
     return docs
 
 
-def replay_projections_pure(store_path: Path, target_frontier: int):
-    """Pure disk read and replay of layout-2 projections without any constructor."""
+def replay_projections_pure(store_path: Path, expected_pin: list):
+    """Pure disk read and replay matching frozen proj.py journal replacement semantics."""
     meta_path = store_path / "tl_projections.json"
     docs_path = store_path / "tl_projections_docs.json"
     hier_path = store_path / "tl_projections_hier.json"
@@ -80,66 +79,148 @@ def replay_projections_pure(store_path: Path, target_frontier: int):
     with open(meta_path, "r", encoding="utf-8") as f:
         meta = json.load(f)
 
-    if meta.get("version") != 1 or meta.get("layout") != 2:
-        raise ValueError(f"Unsupported projection version/layout in {meta_path}")
+    if not isinstance(meta, dict):
+        raise ValueError(f"Projection meta at {meta_path} is not a dict")
+    if meta.get("version") != 1:
+        raise ValueError(f"Unsupported projection version: {meta.get('version')}")
+    if meta.get("layout") != 2:
+        raise ValueError(f"Expected layout 2, got: {meta.get('layout')}")
 
-    with open(hier_path, "r", encoding="utf-8") as f:
-        base_hier = json.load(f)
-    leaves = dict(base_hier.get("leaves", {}))
-    parents = dict(base_hier.get("parents", {}))
+    target_frontier = int(expected_pin[2])
+    target_triple = expected_pin[3]
 
-    with open(docs_path, "r", encoding="utf-8") as f:
-        docs = json.load(f)
+    base_frontier = meta.get("frontier", 0)
+    current_frontier = base_frontier
+    current_triple = meta.get("triple")
 
-    current_frontier = meta.get("frontier", 0)
+    docs_new = {}
+    hier_new = {"leaves": {}, "parents": {}}
+    xdoc = dict(meta.get("xdoc", {}))
+    retired = dict(meta.get("retired", {}))
+
+    targets = (
+        ("docs", docs_new),
+        ("leaves", hier_new["leaves"]),
+        ("parents", hier_new["parents"]),
+        ("xdoc", xdoc),
+        ("retired", retired),
+    )
 
     if journal_path.is_file():
         with open(journal_path, "r", encoding="utf-8") as f:
             for line_no, line in enumerate(f, 1):
                 if not line.strip():
                     continue
-                rec = json.loads(line)
+                try:
+                    rec = json.loads(line)
+                except (ValueError, json.JSONDecodeError) as e:
+                    raise RuntimeError(f"Journal line {line_no} JSON parse failure: {e}") from e
+                if not isinstance(rec, dict):
+                    raise ValueError(f"Journal line {line_no} is not a dict")
                 fline = rec.get("frontier")
                 if not isinstance(fline, int) or fline <= current_frontier:
-                    continue
+                    raise ValueError(f"Journal line {line_no}: out-of-order frontier {fline} <= {current_frontier}")
                 if fline > target_frontier:
-                    break
+                    raise ValueError(f"Journal line {line_no}: frontier {fline} exceeds pin {target_frontier}")
 
-                leaves.update(rec.get("leaves", {}))
-                parents.update(rec.get("parents", {}))
-                docs_part = rec.get("docs", {})
-                for doc, recs in docs_part.items():
-                    if doc in docs:
-                        docs[doc].update(recs)
-                    else:
-                        docs[doc] = dict(recs)
+                for key, target in targets:
+                    part = rec.get(key, {})
+                    if not isinstance(part, dict):
+                        raise ValueError(f"Journal line {line_no} key '{key}' is not a dict")
+                    target.update(part)
+
                 current_frontier = fline
+                current_triple = rec.get("triple")
+
+    if current_frontier != target_frontier:
+        raise RuntimeError(f"Journal replay halted at frontier {current_frontier}, expected pin {target_frontier}")
+    if current_triple != target_triple:
+        raise RuntimeError(f"Journal replay triple {current_triple} != expected {target_triple}")
+
+    with open(hier_path, "r", encoding="utf-8") as f:
+        base_hier = json.load(f)
+    if not isinstance(base_hier, dict):
+        raise ValueError(f"Base hierarchy at {hier_path} is not a dict")
+    leaves = dict(base_hier.get("leaves", {}))
+    parents = dict(base_hier.get("parents", {}))
+    leaves.update(hier_new["leaves"])
+    parents.update(hier_new["parents"])
+
+    with open(docs_path, "r", encoding="utf-8") as f:
+        base_docs = json.load(f)
+    if not isinstance(base_docs, dict):
+        raise ValueError(f"Base docs at {docs_path} is not a dict")
+    docs = dict(base_docs)
+    for doc, recs in docs_new.items():
+        if doc in docs:
+            docs[doc].update(recs)
+        else:
+            docs[doc] = dict(recs)
 
     return parents, leaves, docs
+
+
+def extract_run_uuid(run_dir: Path) -> str:
+    # Match UUID pattern in directory name e.g. run-YYYYMMDDTHHMMSSZ-<UUID>
+    m = re.search(r"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})", run_dir.name, re.I)
+    if m:
+        return m.group(1).lower()
+    return run_dir.name
 
 
 def main():
     parser = argparse.ArgumentParser(description="Pure stdlib read-only 20k run exporter")
     parser.add_argument("--run-dir", default=None, help="Path to pilot run directory")
-    parser.add_argument("--out", default=str(OUT_FILE), help="Output JSON path")
+    parser.add_argument("--data-dir", default=None, help="Path to prefix data-20k directory")
+    parser.add_argument("--out", default=None, help="Output JSON path")
     args = parser.parse_args()
 
     run_dir = resolve_run_dir(args.run_dir)
     print(f"Exporting from 20k run directory (pure stdlib reader): {run_dir}")
 
     result_path = run_dir / "result.json"
-    result = json.loads(result_path.read_text(encoding="utf-8"))
+    result_raw = result_path.read_bytes()
+    result_sha256 = hashlib.sha256(result_raw).hexdigest()
+    result = json.loads(result_raw.decode("utf-8"))
+
     status = result.get("status")
     if status != "PASS":
         print(f"ERROR: Run status is {status}, expected PASS", file=sys.stderr)
         sys.exit(1)
 
     pin = result["final"]["source_head"]
-    target_frontier = int(pin[2])
+    run_uuid = extract_run_uuid(run_dir)
     store_path = run_dir / "store"
 
-    parents_raw, leaves_raw, docs_raw = replay_projections_pure(store_path, target_frontier)
-    doc_texts = load_doc_texts()
+    if args.out:
+        out_p = Path(args.out)
+    else:
+        out_p = run_dir / "local_20k_data.json"
+
+    # Destination safety and reuse check:
+    # If out_p exists, it must strictly be a valid export matching run_uuid, result_sha256, and PASS.
+    # If malformed, mismatch, directory, or non-file, fail closed non-zero without modifying output or store.
+    if out_p.exists():
+        if not out_p.is_file():
+            print(f"ERROR: Destination {out_p} already exists and is not a regular file.", file=sys.stderr)
+            sys.exit(1)
+        try:
+            existing = json.loads(out_p.read_text(encoding="utf-8"))
+            ex_manifest = existing.get("manifest", {})
+            if (ex_manifest.get("run_uuid") == run_uuid and
+                ex_manifest.get("result_sha256") == result_sha256 and
+                ex_manifest.get("status") == "PASS"):
+                print(f"Verified existing valid export at {out_p} (run_uuid={run_uuid}). Reusing unchanged.")
+                return
+            else:
+                print(f"ERROR: Destination {out_p} already exists but does not match run identity/result SHA. Refusing to overwrite.", file=sys.stderr)
+                sys.exit(1)
+        except Exception as e:
+            print(f"ERROR: Destination {out_p} already exists but is corrupt or invalid JSON: {e}. Refusing to overwrite.", file=sys.stderr)
+            sys.exit(1)
+
+    parents_raw, leaves_raw, docs_raw = replay_projections_pure(store_path, pin)
+    doc_texts = load_doc_texts(args.data_dir)
 
     # Invert child -> parents
     child_parents = collections.defaultdict(list)
@@ -177,25 +258,26 @@ def main():
             "doc_ids": doc_ids,
         })
 
-    # Format atoms (preserve doc_id, leaf_ids, title, snippet)
+    # Format atoms (preserve doc_id, leaf_ids, title, snippet, chunk_ix, span, byte_span, seq)
+    # Vectors explicitly omitted per presentation contract
     export_atoms = []
-    total_atoms_count = 0
     for doc_id in sorted(docs_raw.keys()):
         doc_atoms = docs_raw[doc_id]
         for aid in sorted(doc_atoms.keys()):
             arec = doc_atoms[aid]
-            doc_meta = doc_texts.get(doc_id, {"title": f"Doc {doc_id}", "snippet": ""})
-            export_atoms.append({
+            atom_entry = {
                 "id": aid,
                 "doc_id": doc_id,
                 "leaf_ids": sorted(atom_leaves[aid]),
-                "title": doc_meta["title"],
-                "snippet": doc_meta["snippet"],
                 "chunk_ix": arec.get("chunk_ix", 0),
                 "span": arec.get("span"),
+                "byte_span": arec.get("byte_span", arec.get("span")),
                 "seq": arec.get("seq"),
-            })
-            total_atoms_count += 1
+            }
+            if doc_id in doc_texts:
+                atom_entry["title"] = doc_texts[doc_id]["title"]
+                atom_entry["snippet"] = doc_texts[doc_id]["snippet"]
+            export_atoms.append(atom_entry)
 
     # Graph connectivity assertions
     parent_child_edges = sum(len(p["children"]) for p in export_parents)
@@ -212,21 +294,39 @@ def main():
     if len(export_atoms) != result["final"]["atoms"]:
         raise ValueError(f"Atom count mismatch: {len(export_atoms)} != {result['final']['atoms']}")
 
-    # Load 240 Evaluation Rows
+    # Bidirectional resolution verification
+    p_ids = {p["id"] for p in export_parents}
+    l_ids = {l["id"] for l in export_leaves}
+    a_ids = {a["id"] for a in export_atoms}
+    d_ids = set(docs_raw.keys())
+
+    for p in export_parents:
+        for cid in p["children"]:
+            if cid not in l_ids:
+                raise ValueError(f"Parent child {cid} not in leaves")
+    for l in export_leaves:
+        for pid in l["parent_ids"]:
+            if pid not in p_ids:
+                raise ValueError(f"Leaf parent {pid} not in parents")
+        for aid in l["atom_ids"]:
+            if aid not in a_ids:
+                raise ValueError(f"Leaf atom {aid} not in atoms")
+        for did in l["doc_ids"]:
+            if did not in d_ids:
+                raise ValueError(f"Leaf doc {did} not in docs")
+    for a in export_atoms:
+        for lid in a["leaf_ids"]:
+            if lid not in l_ids:
+                raise ValueError(f"Atom leaf {lid} not in leaves")
+        if a["doc_id"] not in d_ids:
+            raise ValueError(f"Atom doc {a['doc_id']} not in docs")
+
+    # Evaluation queries from fresh result.json - retain EXACT complete dictionaries verbatim
     eval_queries = []
     if "evaluation" in result and "queries" in result["evaluation"]:
         for q in result["evaluation"]["queries"]:
-            eval_queries.append({
-                "probe": q["probe"],
-                "family": q.get("family", ""),
-                "leave_source_out": q.get("leave_source_out", False),
-                "guided_recall10": q.get("guided_recall10", 0.0),
-                "flat_recall10": q.get("flat_recall10", 0.0),
-                "work": q.get("work", {}),
-                "guided_scoring_rows": q.get("guided_scoring_rows", 0),
-                "flat_scoring_rows": q.get("flat_scoring_rows", 0),
-                "guided_wall_s": q.get("guided_wall_s", 0.0)
-            })
+            # Copy exact complete dictionary from fresh result.json
+            eval_queries.append(dict(q))
 
     # Phase Telemetry
     phase_file = run_dir / "phase-telemetry.json"
@@ -236,6 +336,8 @@ def main():
         "manifest": {
             "scope": "Local 20k Prefix Reproduction Run (Pure Stdlib Reader)",
             "source_freeze_sha256": SOURCEFREEZE_SHA256,
+            "run_uuid": run_uuid,
+            "result_sha256": result_sha256,
             "run_dir": str(run_dir),
             "store_head_pin": pin,
             "actual_tokens": result["input"]["actual_tokens"],
@@ -263,11 +365,10 @@ def main():
         "configured_caps": result.get("configured_caps", {})
     }
 
-    out_p = Path(args.out)
     out_p.parent.mkdir(parents=True, exist_ok=True)
     out_p.write_text(json.dumps(output, indent=2), encoding="utf-8")
     print(f"Exported pure 20k viewer data to {out_p} ({out_p.stat().st_size} bytes, "
-          f"{len(export_parents)} parents, {len(export_leaves)} leaves, {len(export_atoms)} atoms)")
+          f"{len(export_parents)} parents, {len(export_leaves)} leaves, {len(export_atoms)} atoms, {len(eval_queries)} queries)")
 
 
 if __name__ == "__main__":
