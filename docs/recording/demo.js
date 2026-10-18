@@ -1,5 +1,6 @@
 // TRACE "Using TRACE" illustrated walkthrough — vanilla canvas, no dependencies.
 // Simplified visuals; every number shown is measured (20K run + seam12a 10M freeze).
+// Scene 3 group sizes are measured (top 4 of the 51 real 20K schemas); dot positions are schematic.
 (function () {
   'use strict';
 
@@ -22,8 +23,12 @@
     green: '#3fb950', amber: '#d29922', blue: '#58a6ff', red: '#f85149',
     panel: '#161b22', line: '#30363d'
   };
-  var CLUSTER_COLORS = [C.green, C.amber, C.blue, C.red];
-  var CLUSTER_NAMES = ['schema A', 'schema B', 'schema C', 'schema D'];
+  // Top 4 of the 51 real 20K schemas by atom count (30/7/6/6); group 4 (gray,
+  // ungrouped) is the other 95 atoms in the remaining 47 schemas. Sizes and
+  // labels measured; dot positions schematic.
+  var CLUSTER_COLORS = [C.green, C.amber, C.blue, C.red, C.muted];
+  var CLUSTER_NAMES = ['xpar-5836-s0 · 30', 'xpar-72159-s0 · 7', 'xpar-106301-s0 · 6', 'xpar-18670-s0 · 6'];
+  var REST_LABEL = 'other 47 schemas · 95 (ungrouped)';
 
   function mulberry32(seed) {
     var a = seed >>> 0;
@@ -81,10 +86,13 @@
       var j = Math.floor(rnd() * (i + 1));
       var tmp = order[i]; order[i] = order[j]; order[j] = tmp;
     }
+    // Real size proportions: shuffled rank decides the group, so the four
+    // schema groups hold exactly 30 / 7 / 6 / 6 atoms and group 4 holds 95.
     for (i = 0; i < 144; i++) {
+      var g = order[i] < 30 ? 0 : order[i] < 37 ? 1 : order[i] < 43 ? 2 : order[i] < 49 ? 3 : 4;
       ATOMS.push({
         sx: rnd(), sy: rnd(),
-        cluster: order[i] % 4,
+        cluster: g,
         r: 2 + rnd() * 2.2,
         tag: i < 6 ? (Math.floor(rnd() * 0xffff)).toString(16) : null
       });
@@ -98,6 +106,11 @@
   }
 
   function atomPos(a, k, w, h, rr) {
+    // Group 4 (other 47 schemas) stays scattered where Scene 2 left it:
+    // ungrouped by design, not a fifth cluster.
+    if (a.cluster === 4) {
+      return { x: a.sx * (w - 32) + 16, y: 70 + a.sy * (h - 110) };
+    }
     // Pseudo-random point inside the cluster's ellipse, stable per atom.
     var c = clusterCenter(a.cluster, w, h);
     var ang = rr * Math.PI * 2;
@@ -176,6 +189,8 @@
 
   function paint3(t) {
     sceneBoxTitle(3, 'It self-organizes into schemas');
+    drawText('dot positions schematic', W - 8, 24,
+      { color: C.muted, font: '11px monospace, monospace', align: 'right' });
     var e = ease(t), i, k;
     for (k = 0; k < 4; k++) {
       var c = clusterCenter(k, W, H);
@@ -186,8 +201,10 @@
       ctx.stroke();
       ctx.lineWidth = 1;
       drawText(CLUSTER_NAMES[k], c.x - W * 0.16, c.y - H * 0.19 - 6,
-        { color: CLUSTER_COLORS[k], font: 'bold 12px monospace, monospace' });
+        { color: CLUSTER_COLORS[k], font: 'bold 11px monospace, monospace' });
     }
+    drawText(REST_LABEL, W - 8, H - 36,
+      { color: C.muted, font: '11px monospace, monospace', align: 'right' });
     for (i = 0; i < ATOMS.length; i++) {
       var a = ATOMS[i];
       var fromX = a.sx * (W - 32) + 16, fromY = 70 + a.sy * (H - 110);
@@ -198,9 +215,10 @@
       ctx.arc(lerp(fromX, to.x, se), lerp(fromY, to.y, se), a.r, 0, Math.PI * 2);
       ctx.fill();
     }
-    var counts = [0, 0, 0, 0];
+    var counts = [0, 0, 0, 0, 0];
     for (i = 0; i < ATOMS.length; i++) counts[ATOMS[i].cluster]++;
-    drawText('144 atoms in 4 labeled groups (' + counts.join(' / ') + ')', 16, H - 18,
+    drawText('144 atoms · top 4 schemas ' + counts.slice(0, 4).join(' / ') +
+      ' + ' + counts[4] + ' in 47 other', 16, H - 18,
       { font: '13px monospace, monospace' });
   }
 
@@ -214,6 +232,8 @@
 
   function paint4(t) {
     sceneBoxTitle(4, 'Ask a question — answers, ranked');
+    drawText('ILLUSTRATIVE query + rank bars', W - 8, 24,
+      { color: C.muted, font: '11px monospace, monospace', align: 'right' });
     var e = ease(t);
     // Query bar.
     var qx = W * 0.08, qw = W * 0.84, qy = 62, qh = 30;
@@ -291,8 +311,8 @@
   var CAPTIONS = [
     'Scene 1 — Feed it documents: 88 complete documents (20,030 tokens in the recorded 20K run) fly into the store.',
     'Scene 2 — It breaks them into atoms: 144 content-addressed atoms, each tagged by its content hash.',
-    'Scene 3 — It self-organizes into schemas: atoms cluster into labeled groups the engine can reason over.',
-    'Scene 4 — Ask a question: retrieval paths light up and answers come back ranked — guided recall@10 0.7367 (all) / 0.4883 (leave-source-out).',
+    'Scene 3 — It self-organizes into schemas: top 4 of 51 real schemas by primary membership hold 30 / 7 / 6 / 6 atoms (gray dots: 95 atoms in the other 47 schemas). Group sizes and labels real, from the recorded 20K run; dot positions schematic.',
+    'Scene 4 — Ask a question: retrieval paths light up and answers come back ranked (query and rank bars illustrative) — guided recall@10 0.7367 (all) / 0.4883 (leave-source-out) measured.',
     'Scene 5 — It repairs itself: 5,847 open issues drain to 0 over 6 iterations — measured at 10M tokens: 10,003,381 tok / 63,441 atoms / ~8.5 GB RAM / 0.7367 recall@10.'
   ];
   var DUR = [4.2, 4.2, 4.6, 5.0, 6.0]; // seconds per scene

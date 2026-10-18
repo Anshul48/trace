@@ -1,8 +1,15 @@
 // TRACE landing hero + proof counters — vanilla JS, no dependencies.
 //
-// Canvas: abstract "memory self-organizing" — amber particles drift in a dark
-// slate field, then gather into teal schema constellations with thin threads.
-// Abstract art only: no data, numbers, or text are ever drawn on the canvas.
+// Canvas: REAL membership from the recorded 20K run
+// (docs/assets/hero20k.json, built by tools/build_hero20k.py from
+// docs/explorer/local_20k_data.json): 144 atoms gather toward their real
+// schema anchors (51 parents). Atoms in one of the 8 multi-parent leaves
+// draw a second dashed pink edge to their other parent, mirroring the
+// explorer's layout20kFull pattern. Layout is illustrative (deterministic
+// ellipse + id-hash jitter); membership is real. No data, numbers, or text
+// are ever drawn on the canvas.
+// If the sidecar payload cannot be fetched (e.g. file:// preview), the hero
+// falls back to abstract art so the page never breaks.
 // Counters: elements with [data-countup] animate to their exact final value
 // when scrolled into view. Final values live in the DOM as text first, so
 // no-JS and prefers-reduced-motion readers see correct numbers.
@@ -93,14 +100,109 @@
   var IW = 880;
   var IH = 360;
 
-  function mulberry32(seed) {
-    var a = seed >>> 0;
-    return function () {
-      a |= 0; a = (a + 0x6D2B79F5) | 0;
-      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+  // FNV-1a over a short hex id: deterministic jitter per atom, no RNG state.
+  function hash32(str) {
+    var h = 0x811c9dc5;
+    for (var i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return h >>> 0;
+  }
+
+  // Real-membership sim: 51 parent anchors on a deterministic ellipse
+  // (explorer layout20kFull pattern), 144 atoms bound to their real parent
+  // anchor(s). part.a = primary anchor idx, part.b = secondary or -1.
+  function buildRealSim(payload) {
+    var parents = payload.parents;
+    var anchors = [];
+    var i;
+    for (i = 0; i < parents.length; i++) {
+      var angle = (i / parents.length) * Math.PI * 2;
+      anchors.push({
+        x: IW / 2 + Math.cos(angle) * 372,
+        y: IH / 2 + Math.sin(angle) * 126
+      });
+    }
+    var parts = [];
+    for (i = 0; i < payload.atoms.length; i++) {
+      var cells = String(payload.atoms[i]).split(':');
+      var a = parseInt(cells[1], 10);
+      var b = cells.length > 2 ? parseInt(cells[2], 10) : -1;
+      if (!(a >= 0 && a < anchors.length)) return null;
+      if (b !== -1 && !(b >= 0 && b < anchors.length)) return null;
+      var h1 = hash32(cells[0] + 'p');
+      var h2 = hash32(cells[0] + 'q');
+      var ja = (h1 % 360) / 360 * Math.PI * 2;
+      var jr = 10 + (h1 % 40);
+      parts.push({
+        x: anchors[a].x + Math.cos(ja) * jr,
+        y: anchors[a].y + Math.sin(ja) * jr * 0.6,
+        vx: ((h2 % 200) - 100) / 100 * 11,
+        vy: (((h2 >> 8) % 200) - 100) / 100 * 11,
+        r: 1.5 + (h1 % 12) / 10,
+        a: a,
+        b: b,
+        ph: (h2 % 628) / 100
+      });
+    }
+    return { anchors: anchors, parts: parts };
+  }
+
+  // Abstract fallback: 5 centers, round-robin parts. Page never breaks when
+  // the sidecar is unreachable; the caption's real-membership claim applies
+  // to the served site, which always ships the sidecar next to this file.
+  function buildFallbackSim() {
+    var anchors = [
+      { x: 0.16 * IW, y: 0.44 * IH },
+      { x: 0.36 * IW, y: 0.62 * IH },
+      { x: 0.56 * IW, y: 0.36 * IH },
+      { x: 0.74 * IW, y: 0.60 * IH },
+      { x: 0.89 * IW, y: 0.38 * IH }
+    ];
+    var seed = 20261018;
+    function rnd() {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
       t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
+    }
+    var parts = [];
+    for (var i = 0; i < 140; i++) {
+      var k = i % anchors.length;
+      parts.push({
+        x: rnd() * IW,
+        y: rnd() * IH,
+        vx: (rnd() - 0.5) * 22,
+        vy: (rnd() - 0.5) * 22,
+        r: 1.5 + rnd() * 1.2,
+        a: k,
+        b: -1,
+        ph: rnd() * Math.PI * 2
+      });
+    }
+    return { anchors: anchors, parts: parts };
+  }
+
+  function loadPayload() {
+    if (!window.fetch) return Promise.resolve(null);
+    // Landing serves this file from docs/; the recording page reuses it from
+    // docs/recording/, so try both relative sidecar paths.
+    var urls = ['assets/hero20k.json', '../assets/hero20k.json'];
+    function attempt(i) {
+      if (i >= urls.length) return Promise.resolve(null);
+      return window.fetch(urls[i]).then(function (res) {
+        if (!res || !res.ok) return attempt(i + 1);
+        return res.json().then(function (data) {
+          if (!data || !data.parents || !data.atoms) return attempt(i + 1);
+          if (data.parents.length !== 51 || data.atoms.length !== 144) {
+            return attempt(i + 1);
+          }
+          return data;
+        }, function () { return attempt(i + 1); });
+      }, function () { return attempt(i + 1); });
+    }
+    return attempt(0);
   }
 
   function initHero() {
@@ -109,158 +211,159 @@
     var ctx = canvas.getContext('2d');
     var reduced = reduceMotion();
 
-    var clusters = [
-      { x: 0.16 * IW, y: 0.44 * IH },
-      { x: 0.36 * IW, y: 0.62 * IH },
-      { x: 0.56 * IW, y: 0.36 * IH },
-      { x: 0.74 * IW, y: 0.60 * IH },
-      { x: 0.89 * IW, y: 0.38 * IH }
-    ];
+    // Paint the field immediately so no frame is ever blank.
+    ctx.fillStyle = '#0b1220';
+    ctx.fillRect(0, 0, IW, IH);
 
-    var narrow = (canvas.clientWidth || IW) < 640;
-    var count = narrow ? 70 : 140;
-    var rnd = mulberry32(20261018);
-    var parts = [];
-    for (var i = 0; i < count; i++) {
-      parts.push({
-        x: rnd() * IW,
-        y: rnd() * IH,
-        vx: (rnd() - 0.5) * 22,
-        vy: (rnd() - 0.5) * 22,
-        r: 1.5 + rnd() * 1.2,
-        k: i % clusters.length,
-        ph: rnd() * Math.PI * 2
-      });
-    }
+    loadPayload().then(function (data) {
+      var sim = data ? buildRealSim(data) : null;
+      if (!sim) sim = buildFallbackSim();
+      run(sim);
+    });
 
-    function resize() {
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      var cssW = canvas.clientWidth || IW;
-      var cssH = Math.round(cssW * IH / IW);
-      canvas.width = Math.max(1, Math.round(cssW * dpr));
-      canvas.height = Math.max(1, Math.round(cssH * dpr));
-      ctx.setTransform(canvas.width / IW, 0, 0, canvas.height / IH, 0, 0);
-    }
-    window.addEventListener('resize', resize);
-    resize();
+    function run(sim) {
+      var anchors = sim.anchors;
+      var parts = sim.parts;
 
-    // pull in [0,1]: 0 = free drift, 1 = gathered into constellations.
-    function step(dt, pull, nowMs) {
-      for (var i = 0; i < parts.length; i++) {
-        var p = parts[i];
-        var c = clusters[p.k];
-        var spring = pull * 0.55;
-        p.vx += ((c.x - p.x) * spring + Math.cos(nowMs / 1700 + p.ph) * 5) * dt;
-        p.vy += ((c.y - p.y) * spring + Math.sin(nowMs / 2100 + p.ph) * 5) * dt;
-        var damp = Math.max(0, 1 - 1.6 * dt);
-        p.vx *= damp;
-        p.vy *= damp;
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        if (p.x < 0) p.x += IW; else if (p.x > IW) p.x -= IW;
-        if (p.y < 0) p.y += IH; else if (p.y > IH) p.y -= IH;
+      function resize() {
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var cssW = canvas.clientWidth || IW;
+        var cssH = Math.round(cssW * IH / IW);
+        canvas.width = Math.max(1, Math.round(cssW * dpr));
+        canvas.height = Math.max(1, Math.round(cssH * dpr));
+        ctx.setTransform(canvas.width / IW, 0, 0, canvas.height / IH, 0, 0);
       }
-    }
+      window.addEventListener('resize', resize);
+      resize();
 
-    function draw(pull, nowMs) {
-      ctx.fillStyle = '#0b1220';
-      ctx.fillRect(0, 0, IW, IH);
-      var i, p, c, dx, dy, d2;
-      // Threads between same-cluster neighbours.
-      ctx.lineWidth = 1;
-      for (i = 0; i < parts.length; i++) {
-        p = parts[i];
-        for (var j = i + 1; j < parts.length; j++) {
-          var q = parts[j];
-          if (q.k !== p.k) continue;
-          dx = q.x - p.x; dy = q.y - p.y;
-          d2 = dx * dx + dy * dy;
-          if (d2 < 8100) {
-            var a = (0.04 + 0.22 * pull) * (1 - Math.sqrt(d2) / 90);
-            if (a > 0.01) {
-              ctx.strokeStyle = 'rgba(45,212,191,' + a.toFixed(3) + ')';
-              ctx.beginPath();
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(q.x, q.y);
-              ctx.stroke();
-            }
+      // pull in [0,1]: 0 = free drift, 1 = gathered onto real anchors.
+      function step(dt, pull, nowMs) {
+        for (var i = 0; i < parts.length; i++) {
+          var p = parts[i];
+          var c = anchors[p.a];
+          var spring = pull * 0.55;
+          p.vx += ((c.x - p.x) * spring + Math.cos(nowMs / 1700 + p.ph) * 5) * dt;
+          p.vy += ((c.y - p.y) * spring + Math.sin(nowMs / 2100 + p.ph) * 5) * dt;
+          if (p.b >= 0) {
+            // Weaker pull toward the second real parent (multi-parent leaf).
+            var d = anchors[p.b];
+            var weak = pull * 0.14;
+            p.vx += (d.x - p.x) * weak * dt;
+            p.vy += (d.y - p.y) * weak * dt;
           }
+          var damp = Math.max(0, 1 - 1.6 * dt);
+          p.vx *= damp;
+          p.vy *= damp;
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          if (p.x < 0) p.x += IW; else if (p.x > IW) p.x -= IW;
+          if (p.y < 0) p.y += IH; else if (p.y > IH) p.y -= IH;
         }
       }
-      // Teal constellation nodes.
-      for (i = 0; i < clusters.length; i++) {
-        c = clusters[i];
-        var pulse = 4.5 + Math.sin(nowMs / 2400 + i * 1.3) * 0.8;
-        ctx.fillStyle = '#2dd4bf';
+
+      function draw(pull, nowMs) {
+        ctx.fillStyle = '#0b1220';
+        ctx.fillRect(0, 0, IW, IH);
+        var i, p, c, dx, dy;
+        // Solid teal spokes: every atom to its REAL primary parent anchor.
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(45,212,191,' + (0.05 + 0.20 * pull).toFixed(3) + ')';
         ctx.beginPath();
-        ctx.arc(c.x, c.y, 4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(45,212,191,' + (0.35 + 0.3 * pull).toFixed(3) + ')';
-        ctx.beginPath();
-        ctx.arc(c.x, c.y, 4 + pulse * (0.5 + pull), 0, Math.PI * 2);
+        for (i = 0; i < parts.length; i++) {
+          p = parts[i];
+          c = anchors[p.a];
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(c.x, c.y);
+        }
         ctx.stroke();
-      }
-      // Amber particles, warming toward the clusters as pull rises.
-      for (i = 0; i < parts.length; i++) {
-        p = parts[i];
-        c = clusters[p.k];
-        dx = c.x - p.x; dy = c.y - p.y;
-        var near = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / 320);
-        var warm = Math.round(245 - 35 * near * pull);
-        ctx.fillStyle = 'rgb(' + warm + ',' +
-          Math.round(165 + 20 * near * pull) + ',' +
-          Math.round(36 + 140 * near * pull) + ')';
+        // Dashed pink spokes: second edge for multi-parent atoms only.
+        ctx.strokeStyle = 'rgba(236,72,153,' + (0.10 + 0.40 * pull).toFixed(3) + ')';
+        ctx.setLineDash([4, 3]);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
+        for (i = 0; i < parts.length; i++) {
+          p = parts[i];
+          if (p.b < 0) continue;
+          c = anchors[p.b];
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(c.x, c.y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // Teal schema anchors.
+        for (i = 0; i < anchors.length; i++) {
+          c = anchors[i];
+          var pulse = 4.5 + Math.sin(nowMs / 2400 + i * 1.3) * 0.8;
+          ctx.fillStyle = '#2dd4bf';
+          ctx.beginPath();
+          ctx.arc(c.x, c.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(45,212,191,' + (0.35 + 0.3 * pull).toFixed(3) + ')';
+          ctx.beginPath();
+          ctx.arc(c.x, c.y, 4 + pulse * (0.5 + pull), 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        // Amber particles, warming toward teal as they settle on anchors.
+        for (i = 0; i < parts.length; i++) {
+          p = parts[i];
+          c = anchors[p.a];
+          dx = c.x - p.x; dy = c.y - p.y;
+          var near = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / 320);
+          var warm = Math.round(245 - 35 * near * pull);
+          ctx.fillStyle = 'rgb(' + warm + ',' +
+            Math.round(165 + 20 * near * pull) + ',' +
+            Math.round(36 + 140 * near * pull) + ')';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
-    }
 
-    if (reduced) {
-      // Single static composed frame: settle the simulation, draw once.
-      for (var s = 0; s < 1500; s++) step(1 / 60, 1, s * 16.7);
-      draw(1, 0);
-      return;
-    }
+      if (reduced) {
+        // Single static composed frame: settle the simulation, draw once.
+        for (var s = 0; s < 1500; s++) step(1 / 60, 1, s * 16.7);
+        draw(1, 0);
+        return;
+      }
 
-    var startMs = 0;
-    var visible = true;
-    var rafId = null;
-    var last = 0;
+      var startMs = 0;
+      var visible = true;
+      var rafId = null;
+      var last = 0;
 
-    function frame(nowMs) {
-      rafId = null;
-      if (!visible || (document.hidden)) return;
-      var dt = (nowMs - last) / 1000;
-      last = nowMs;
-      if (!(dt > 0)) dt = 0.016;
-      if (dt > 0.1) dt = 0.1;
-      if (startMs === 0) startMs = nowMs;
-      var phase = (nowMs - startMs) / 24000;
-      if (phase > 1) phase = 1;
-      var pull = phase * phase * (3 - 2 * phase);
-      step(dt, pull, nowMs);
-      draw(pull, nowMs);
-      rafId = window.requestAnimationFrame(frame);
-    }
-
-    function kick() {
-      if (rafId === null && visible && !document.hidden) {
-        last = window.performance ? window.performance.now() : Date.now();
+      function frame(nowMs) {
+        rafId = null;
+        if (!visible || (document.hidden)) return;
+        var dt = (nowMs - last) / 1000;
+        last = nowMs;
+        if (!(dt > 0)) dt = 0.016;
+        if (dt > 0.1) dt = 0.1;
+        if (startMs === 0) startMs = nowMs;
+        var phase = (nowMs - startMs) / 24000;
+        if (phase > 1) phase = 1;
+        var pull = phase * phase * (3 - 2 * phase);
+        step(dt, pull, nowMs);
+        draw(pull, nowMs);
         rafId = window.requestAnimationFrame(frame);
       }
-    }
 
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) {
-        visible = entries.length ? entries[0].isIntersecting : true;
-        if (visible) kick();
-      }, { threshold: 0.05 }).observe(canvas);
+      function kick() {
+        if (rafId === null && visible && !document.hidden) {
+          last = window.performance ? window.performance.now() : Date.now();
+          rafId = window.requestAnimationFrame(frame);
+        }
+      }
+
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (entries) {
+          visible = entries.length ? entries[0].isIntersecting : true;
+          if (visible) kick();
+        }, { threshold: 0.05 }).observe(canvas);
+      }
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) kick();
+      });
+      kick();
     }
-    document.addEventListener('visibilitychange', function () {
-      if (!document.hidden) kick();
-    });
-    kick();
   }
 
   initCounters();
