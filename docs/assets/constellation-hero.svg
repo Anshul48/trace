@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="ch-t ch-d">
+<title id="ch-t">TRACE memory self-organizing: abstract constellation</title>
+<desc id="ch-d">Abstract illustration. Amber particles drift across a dark slate field and gather into four teal schema constellations joined by thin threads. No data is shown.</desc>
+<style>
+  .d1,.d2{fill:#f5a524}
+  .node{fill:#2dd4bf}
+  .ring{fill:none;stroke:#2dd4bf;stroke-width:1.5;opacity:.55}
+  .thread{stroke:#2dd4bf;stroke-width:1;opacity:.28}
+  .d1{animation:drift1 11s ease-in-out infinite alternate}
+  .d2{animation:drift2 14s ease-in-out infinite alternate}
+  .clus{animation:sway 18s ease-in-out infinite alternate}
+  .ring{animation:breathe 6s ease-in-out infinite alternate}
+  @keyframes drift1{from{transform:translate(0,0);opacity:.75}to{transform:translate(10px,-12px);opacity:1}}
+  @keyframes drift2{from{transform:translate(0,0);opacity:1}to{transform:translate(-12px,10px);opacity:.7}}
+  @keyframes sway{from{transform:translate(0,0)}to{transform:translate(8px,6px)}}
+  @keyframes breathe{from{opacity:.35}to{opacity:.7}}
+  @media (prefers-reduced-motion: reduce){.d1,.d2,.clus,.ring{animation:none}}
+</style>
+<rect width="1200" height="360" rx="16" fill="#0f172a"/>
+<rect x="1" y="1" width="1198" height="358" rx="15" fill="none" stroke="#334155" stroke-width="2"/>
+<!-- cluster 1 -->
+<g class="clus" style="animation-delay:0s">
+<line x1="190" y1="235" x2="260" y2="215" class="thread"/>
+<line x1="260" y1="215" x2="332" y2="191" class="thread"/>
+<line x1="220" y1="163" x2="304" y2="263" class="thread"/>
+<circle class="d1" cx="283.4" cy="196.2" r="3.8" style="animation-delay:-7.8s"/>
+<circle class="d2" cx="196.6" cy="214.4" r="2.4" style="animation-delay:-2s"/>
+<circle class="d1" cx="300.3" cy="224.5" r="3.4" style="animation-delay:-7.7s"/>
+<circle class="d2" cx="284.8" cy="252.1" r="4" style="animation-delay:-2.2s"/>
+<circle class="d1" cx="286.5" cy="160.1" r="2.4" style="animation-delay:-5.3s"/>
+<circle class="d2" cx="321.2" cy="195.9" r="3.8" style="animation-delay:-7.9s"/>
+<circle class="d1" cx="171.5" cy="214.5" r="2.4" style="animation-delay:-8.2s"/>
+<circle class="d2" cx="176.3" cy="220" r="3.3" style="animation-delay:-6.2s"/>
+<circle class="d1" cx="275.4" cy="171.7" r="4" style="animation-delay:-5.1s"/>
+<circle class="d2" cx="322.3" cy="223.2" r="3.6" style="animation-delay:-8.1s"/>
+<circle class="d1" cx="282" cy="224.9" r="3.6" style="animation-delay:-4.1s"/>
+<circle class="d2" cx="273.1" cy="276.2" r="3.1" style="animation-delay:-4.6s"/>
+<circle class="node" cx="260" cy="215" r="5"/>
+<circle class="ring" cx="260" cy="215" r="11"/>
+</g>
+<!-- cluster 2 -->
+<g class="clus" style="animation-delay:-2.5s">
+<line x1="450" y1="170" x2="520" y2="150" class="thread"/>
+<line x1="520" y1="150" x2="592" y2="126" class="thread"/>
+<line x1="480" y1="98" x2="564" y2="198" class="thread"/>
+<circle class="d2" cx="557.2" cy="124.2" r="2.6" style="animation-delay:-6.7s"/>
+<circle class="d1" cx="581.9" cy="136.4" r="3.9" style="animation-delay:-1.8s"/>
+<circle class="d2" cx="552.4" cy="148" r="2.4" style="animation-delay:-3.6s"/>
+<circle class="d1" cx="547.2" cy="204.6" r="2.9" style="animation-delay:-6.3s"/>
+<circle class="d2" cx="528.9" cy="169.1" r="3.4" style="animation-delay:-5.6s"/>
+<circle class="d1" cx="523.9" cy="171.5" r="3.2" style="animation-delay:-0.7s"/>
+<circle class="d2" cx="568.2" cy="143" r="3.6" style="animation-delay:-3.7s"/>
+<circle class="d1" cx="445.9" cy="184.7" r="3.4" style="animation-delay:-4s"/>
+<circle class="d2" cx="535.2" cy="125.1" r="3" style="animation-delay:-7.5s"/>
+<circle class="d1" cx="509.7" cy="164" r="4" style="animation-delay:-0.4s"/>
+<circle class="d2" cx="573" cy="126.9" r="3.7" style="animation-delay:-8.6s"/>
+<circle class="d1" cx="545.9" cy="149.4" r="3.7" style="animation-delay:-3.6s"/>
+<circle class="node" cx="520" cy="150" r="5"/>
+<circle class="ring" cx="520" cy="150" r="11"/>
+</g>
+<!-- cluster 3 -->
+<g class="clus" style="animation-delay:-5s">
+<line x1="710" y1="270" x2="780" y2="250" class="thread"/>
+<line x1="780" y1="250" x2="852" y2="226" class="thread"/>
+<line x1="740" y1="198" x2="824" y2="298" class="thread"/>
+<circle class="d1" cx="780.4" cy="217.5" r="3.8" style="animation-delay:-7.1s"/>
+<circle class="d2" cx="823.8" cy="272.3" r="2.5" style="animation-delay:-0.9s"/>
+<circle class="d1" cx="790.3" cy="271.5" r="4.1" style="animation-delay:-8s"/>
+<circle class="d2" cx="817" cy="198.1" r="2.3" style="animation-delay:-6.4s"/>
+<circle class="d1" cx="814.9" cy="287.9" r="3.4" style="animation-delay:-5.6s"/>
+<circle class="d2" cx="771.1" cy="280.3" r="3.3" style="animation-delay:-5.2s"/>
+<circle class="d1" cx="779.9" cy="232.9" r="2.6" style="animation-delay:-6.1s"/>
+<circle class="d2" cx="747.1" cy="297.4" r="2.3" style="animation-delay:-9s"/>
+<circle class="d1" cx="745" cy="296.7" r="4.2" style="animation-delay:-6.2s"/>
+<circle class="d2" cx="798.3" cy="228.5" r="2.5" style="animation-delay:-6.4s"/>
+<circle class="d1" cx="741.3" cy="215.3" r="2.9" style="animation-delay:-3.6s"/>
+<circle class="d2" cx="804.6" cy="271.6" r="2.8" style="animation-delay:-4s"/>
+<circle class="node" cx="780" cy="250" r="5"/>
+<circle class="ring" cx="780" cy="250" r="11"/>
+</g>
+<!-- cluster 4 -->
+<g class="clus" style="animation-delay:-7.5s">
+<line x1="950" y1="185" x2="1020" y2="165" class="thread"/>
+<line x1="1020" y1="165" x2="1092" y2="141" class="thread"/>
+<line x1="980" y1="113" x2="1064" y2="213" class="thread"/>
+<circle class="d2" cx="1017.2" cy="205.4" r="3.8" style="animation-delay:-2s"/>
+<circle class="d1" cx="1011.2" cy="126.4" r="3.4" style="animation-delay:-0.5s"/>
+<circle class="d2" cx="1084" cy="173.8" r="2.4" style="animation-delay:-5.9s"/>
+<circle class="d1" cx="958" cy="134.8" r="2.7" style="animation-delay:-8.8s"/>
+<circle class="d2" cx="1054.6" cy="189" r="3.4" style="animation-delay:-3.6s"/>
+<circle class="d1" cx="1056.7" cy="209.1" r="2.5" style="animation-delay:-8.6s"/>
+<circle class="d2" cx="953.8" cy="200.1" r="2.6" style="animation-delay:-5s"/>
+<circle class="d1" cx="957.3" cy="124.4" r="4.1" style="animation-delay:-1.2s"/>
+<circle class="d2" cx="957.7" cy="144.5" r="3.1" style="animation-delay:-5.7s"/>
+<circle class="d1" cx="1068.1" cy="173" r="4" style="animation-delay:-8.5s"/>
+<circle class="d2" cx="1092.9" cy="203.8" r="4.1" style="animation-delay:-6.7s"/>
+<circle class="d1" cx="1062" cy="137" r="4.1" style="animation-delay:-5.9s"/>
+<circle class="node" cx="1020" cy="165" r="5"/>
+<circle class="ring" cx="1020" cy="165" r="11"/>
+</g>
+</svg>
