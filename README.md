@@ -9,6 +9,16 @@
 
 **TRACE is a self-organizing memory database: a 10-million-token persistent memory for LLMs and agents, filing every arrival into schemas and deltas without rebuilding the index.** In one frozen, receipt-backed run, 10,003,381 tokens across 13,081 documents settled into an overlapping graph of 3,711 parent groups and 9,177 leaf partitions, guided routing put the right answer in the top 10 for roughly three out of four test queries, and a bounded repair pass drained every leftover item to zero.
 
+**New here? [Take the 60-second tour](https://anshul48.github.io/trace/explorer/)** — feed documents in, watch them break into atoms, self-organize into schemas, answer a question, and repair itself, on the real graph.
+
+[Try it](#run-it-in-5-minutes) · [See it](#see-it) · [Proof](#proof-strip-freeze-seam12a-run-o94-scale10m) · [Deep dive](#deep-dive) · [Reproduce](#reproduce-the-10m-benchmark)
+
+| Start here | Pick a path |
+|---|---|
+| Researchers | [Proof strip](#proof-strip-freeze-seam12a-run-o94-scale10m) · [Benchmarks](docs/BENCHMARKS.md) · [Architecture](docs/ARCHITECTURE.md) |
+| Developers | [Run it in 5 minutes](#run-it-in-5-minutes) · [Portable 20k reproduction](repro-20k/README.md) · [Code tour](docs/CODE-TOUR.md) |
+| Judges | [60-second tour](https://anshul48.github.io/trace/explorer/) · [Animated demo](https://anshul48.github.io/trace/recording/) · [Raw recorded run](https://anshul48.github.io/trace/recording/#raw-run) |
+
 ## What it does for you
 
 **Researchers** — use it to explore long-horizon agent memory on a frozen run you can cite: retrieval-at-scale experiments with guided-versus-flat routing under matched work budgets, crash-recovery gates, fresh-item visibility probes, and cross-domain schema linking through the overlapping parent/leaf graph.
@@ -40,8 +50,9 @@ Labels: `all` means all-sources mode, `leave-source-out` means the probe's own d
 
 ## See it
 
+- **60-second tour:** [Take the 60-second tour in the explorer](https://anshul48.github.io/trace/explorer/) — documents in, atoms, schemas, retrieval, and self-repair, driven on the real graph.
 - **Animated demo:** [recorded 20k terminal run (27.8 s)](https://anshul48.github.io/trace/recording/) — install, frozen-file checks, and an engine run to `PASS`, replayed in the browser.
-- **Explorer:** [interactive 10M graph](https://anshul48.github.io/trace/explorer/) — structural DAG view, node inspector, and query-routing replay.
+- **Raw recording:** [unedited terminal capture](https://anshul48.github.io/trace/recording/#raw-run) — the authentic frozen-harness output on the portable 20k prefix, slowest path last.
 - Identity note: the live explorer still shows the earlier freeze (head `e8334c07`, 166,457 commits, 207 files, recall 0.73/0.4758, wall 12,973 s) — same corpus scale, older run; the seam12a numbers above will appear there only after its data files are re-exported from the o94 run.
 
 ---
@@ -185,6 +196,10 @@ Receipt-recorded requirements: wall 9,494.9 s (~2.6 h); peak RAM ~8.5 GB (parent
 
 `--data-dir` must contain `docs-100m.jsonl` (one JSON object per line, fields `doc_id` plus `text`) and an `emb_cache/` directory holding `meta.json` (format `tl-gpu-embcache-v1`, dim 384, float32 little-endian), `index.jsonl` rows (`key`, `chunk_sha256`, `byte_len`, dim 384, `shard`, `row`), and `shard_NNNNNN.f32` FP32 little-endian 384-dim memmaps. Tokenizer is TOK_V1; only complete documents count; cache misses are fatal. No corpus generator ships in the package — the only in-repo reference for the layout is the `cache_fixture` in `tests/test_prefix_shards.py`.
 
+
+<details>
+<summary>Why a full 10M reproduction is blocked (2 blockers, stated honestly)</summary>
+
 ### Two blockers, stated honestly
 
 There is no one-click 10M reproduction today. A full run is blocked by both of these:
@@ -194,9 +209,14 @@ There is no one-click 10M reproduction today. A full run is blocked by both of t
 
 Labeling rule: running the command above on your own corpus is a **your-corpus 10M-scale run**. **Reproducing the measured o94 numbers** (the proof strip: 0.7367/0.4883, 9,494.9 s, and the rest) additionally requires the o94 corpus and the build VM, and is not possible today.
 
+</details>
+
 ---
 
 ## Benchmarks (measured, receipt-backed)
+
+<details>
+<summary>Full benchmark table (measured, receipt-backed — click to expand)</summary>
 
 | Area | Measured result | Receipt / condition |
 |---|---|---|
@@ -212,6 +232,8 @@ Labeling rule: running the command above on your own corpus is a **your-corpus 1
 | Repair | 6 iterations, 5,847 → 0 | `result.json` |
 | Derived caps | `max_delta_entries` 669,436 (37,117 commits / 7,035 atoms measured, margin 2.0); kill wait 316 s; drain k=32, cold-scan chunk 4,096 | `result.json` |
 | Pins | probes `b332d62d…`, harness `9f78479a…` (= freeze entry for `tools/product_pilot.py`), final commits 164,195 | `result.json` source pins |
+
+</details>
 
 ---
 
