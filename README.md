@@ -32,38 +32,96 @@ Labels used above are the receipt labels: `all` means all-sources mode, `LSO` me
 
 ## Run it in 5 minutes
 
-This is the exact path that was executed and verified on a clean host (WSL2 Ubuntu, Python 3.12.3). Every command below ran successfully; expected outputs are quoted from that run.
+This is the exact path that was executed and verified on a clean host (WSL2 Ubuntu, Python 3.12.3), re-verified from a fresh tarball extract with the environment created inside the extracted tree. Every command below ran successfully; expected outputs are quoted from those runs.
 
 ```bash
 # 1. Get the frozen source and verify it (1.2 MB source-only tarball).
 sha256sum -c seam12a-fork.tar.gz.sha256
 # expect: seam12a-fork.tar.gz: OK
-# Extract it; the runnable tree is cand/ (set CAND to that path).
+# Extract it; the runnable tree is fix7/cand/ (set CAND to that path).
+tar xzf seam12a-fork.tar.gz
+CAND=$PWD/fix7/cand
+cd "$CAND"
 
-# 2. Environment. The tarball ships no README, setup.py, pyproject.toml,
-#    or requirements file, so there is nothing to pip-install from the
-#    package itself: create a venv and add the two runtime dependencies
-#    (blake3 is hard-required by tlsys/identity.py; receipts pin numpy 2.5.3).
-uv venv /tmp/seam12a/run-test/venv --python /usr/bin/python3
-uv pip install --python /tmp/seam12a/run-test/venv/bin/python numpy blake3
-cd /tmp/seam12a/fix7/cand
+# 2. Environment, created INSIDE the extracted tree (needs uv;
+#    without uv: python3 -m venv .venv). The tarball ships no README,
+#    setup.py, pyproject.toml, or requirements file, so there is nothing
+#    to pip-install from the package itself: create a venv and add the two
+#    runtime dependencies (blake3 is hard-required by tlsys/identity.py;
+#    verified with numpy 2.5.4; o94 run receipts record numpy 2.5.3).
+uv venv .venv --python /usr/bin/python3
+uv pip install --python .venv/bin/python "numpy==2.5.4" "blake3==1.0.11"
 
-# 3. Smoke checks.
-SUP_PYTHON=/tmp/seam12a/run-test/venv/bin/python bash runtime.sh tools/product_pilot.py --help
+# 3. Smoke checks (all paths relative to $CAND).
+SUP_PYTHON=$CAND/.venv/bin/python bash runtime.sh tools/product_pilot.py --help
 # expect: exit 0, full usage printed (all o94 flags present).
-PYTHONPATH=/tmp/seam12a/fix7/cand/fork/tl-sys /tmp/seam12a/run-test/venv/bin/python -B fork/tl-sys/tests/test_o93_repair_columnar.py
+PYTHONPATH=$CAND/fork/tl-sys $CAND/.venv/bin/python -B fork/tl-sys/tests/test_o93_repair_columnar.py
 # expect: o93 repair-columnar: all groups PASS (221 checks).
 # The package integration suite also passes unmodified:
-/tmp/seam12a/run-test/venv/bin/python -B -m unittest tests.test_integration
-# expect: Ran 6 tests ... OK (about 8 s).
+$CAND/.venv/bin/python -B -m unittest tests.test_integration
+# expect: Ran 6 tests ... OK (about 3 s).
 
-# 4. A real 10K-token pilot through the genuine entry point
-#    (synthetic corpus built in the tl-gpu-embcache-v1 layout;
-#    corpus synthetic, pipeline 100% genuine).
-SUP_PYTHON=/tmp/seam12a/run-test/venv/bin/python bash runtime.sh tools/product_pilot.py --tokens 10000 --profile local --source-root /tmp/seam12a/fix7/cand --data-dir /tmp/seam12a/run-test/synth-data --out /tmp/seam12a/run-test/out-pilot --drain-attribution --drain-census --holon-descriptor-columnar --overrides-columnar --descriptor-matrix-all --per-view-sharing --cold-scan-chunk 4096 --repair-columnar --candidate-source hnsw --drain-bounded-k 32 --candidate-shadow-audit 8
+# 4. Build the synthetic 10K corpus (layout tl-gpu-embcache-v1; corpus
+#    synthetic, pipeline 100% genuine). No corpus generator ships in the
+#    tarball, so this inline step builds synth-data/ from the shipped
+#    chunker (same seeded content as the reference run: 48 docs).
+$CAND/.venv/bin/python - <<'EOF'
+import hashlib, json, sys
+from pathlib import Path
+import numpy as np
+sys.path.insert(0, 'fork/tl-sys')
+from tlsys.ingest import chunk_text
+OUT = Path('synth-data'); CACHE = OUT / 'emb_cache'
+RPS, NDOCS = 256, 48
+TOPICS = [
+    ('sport', ['match', 'team', 'score', 'player', 'coach', 'season', 'league', 'goal', 'field', 'training', 'victory', 'rival', 'trophy']),
+    ('harbor', ['tide', 'dock', 'vessel', 'cargo', 'anchor', 'harbor', 'sailor', 'lighthouse', 'storm', 'channel', 'ferry', 'net', 'catch']),
+    ('orchard', ['apple', 'harvest', 'soil', 'rain', 'branch', 'blossom', 'farmer', 'basket', 'cider', 'frost', 'seed', 'grove']),
+    ('circuit', ['voltage', 'resistor', 'signal', 'wire', 'current', 'board', 'sensor', 'diode', 'ground', 'meter', 'switch', 'relay']),
+]
+rng = np.random.default_rng(0)
+OUT.mkdir(parents=True, exist_ok=True); CACHE.mkdir(parents=True, exist_ok=True)
+docs = []
+for i in range(NDOCS):
+    topic, words = TOPICS[i % len(TOPICS)]
+    sents = []
+    for s in range(14):
+        w = rng.choice(words, size=14, replace=True)
+        sents.append('Document %d sentence %d about %s: %s.' % (i, s, topic, ' '.join(w)))
+    docs.append({'doc_id': 'synth-doc-%03d' % i, 'text': ' '.join(sents)})
+with open(OUT / 'docs-100m.jsonl', 'wb') as f:
+    for d in docs:
+        f.write((json.dumps(d) + '\n').encode())
+config = json.dumps({'normalize_embeddings': False}, separators=(',', ':'))
+meta = {'format': 'tl-gpu-embcache-v1', 'dim': 384, 'dtype': 'float32-le',
+        'key_config_json': config,
+        'config_id': hashlib.sha256(config.encode()).hexdigest()[:16],
+        'rows_per_shard': RPS}
+(CACHE / 'meta.json').write_text(json.dumps(meta))
+prefix = b'tl-gpu-embcache-v1\0' + config.encode() + b'\0'
+rows = []
+for d in docs:
+    chunks = chunk_text(d['text']) or [(0, 0, '', 0, 0)]
+    for ch in chunks:
+        body = ch[2].encode('utf-8')
+        key = hashlib.sha256(prefix + body).hexdigest()
+        rows.append((key, hashlib.sha256(body).hexdigest(), len(body)))
+vecs = rng.standard_normal((len(rows), 384)).astype(np.float32)
+with open(CACHE / 'index.jsonl', 'w') as f:
+    for g, (key, csha, blen) in enumerate(rows):
+        f.write(json.dumps({'key': key, 'chunk_sha256': csha, 'byte_len': blen,
+                            'dim': 384, 'shard': g // RPS, 'row': g}) + '\n')
+for sh in range((len(rows) + RPS - 1) // RPS):
+    vecs[sh * RPS:(sh + 1) * RPS].astype('<f4').tofile(CACHE / ('shard_%06d.f32' % sh))
+print(json.dumps({'docs': len(docs), 'chunks': len(rows), 'shards': (len(rows) + RPS - 1) // RPS}))
+EOF
+# expect: {"docs": 48, "chunks": 96, "shards": 1}
+
+# 5. A real 10K-token pilot through the genuine entry point.
+SUP_PYTHON=$CAND/.venv/bin/python bash runtime.sh tools/product_pilot.py --tokens 10000 --profile local --source-root $CAND --data-dir $CAND/synth-data --out $CAND/out-pilot --drain-attribution --drain-census --holon-descriptor-columnar --overrides-columnar --descriptor-matrix-all --per-view-sharing --cold-scan-chunk 4096 --repair-columnar --candidate-source hnsw --drain-bounded-k 32 --candidate-shadow-audit 8
 ```
 
-Real output of step 4 (from `out-pilot/result.json`): `claim=measured, status=PASS`; input 10,080 actual tokens, 36 complete documents, 72 atoms, 0 cache misses; guided recall@10 0.40 (all-sources, 120 probes), flat recall@10 1.0; final 72 atoms, 0 pending documents; repair 0 iterations, final debt 0; peak parent 87.3 / peak child 81.3 MiB; retained 8,098,072 bytes; wall 39.8 s. No Docker is needed: the run path is `runtime.sh` (PYTHONPATH + env + `exec python`), and everything above completed without a container. Mini-run footprint: ~90 MiB peak RSS, ~7 MB output directory, ~40 s wall on 2 cores.
+Real output of step 5 (from `out-pilot/result.json`): `claim=measured, status=PASS`; input 10,080 actual tokens, 36 complete documents, 72 atoms, 0 cache misses; guided recall@10 0.40 (all-sources, 120 probes), flat recall@10 1.0; final 72 atoms, 0 pending documents; repair 0 iterations, final debt 0; peak parent 87.1 / peak child 81.2 MiB; retained ~8.1 MB; wall ~26 s (39.8 s in the RUNLOG reference run — host-dependent). No Docker is needed: the run path is `runtime.sh` (PYTHONPATH + env + `exec python`), and everything above completed without a container. Mini-run footprint: ~90 MiB peak RSS, ~8 MB output directory, under a minute wall on 2 cores.
 
 ---
 
