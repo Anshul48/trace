@@ -3,13 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRACE 20k Local Run Terminal Recording</title>
+  <title>TRACE 20k Local Run — Recorded Terminal Replay (27.8s)</title>
+  <meta name="description" content="Replay of a recorded real 20K TRACE run (27.8s): PASS verdict over 20,030 tokens / 88 documents / 144 atoms. Separate from the measured seam12a 10M benchmarks (guided recall@10 0.7367 all / 0.4883 LSO).">
+  <link rel="canonical" href="https://anshul48.github.io/trace/recording/">
+  <meta property="og:title" content="TRACE 20k Local Run — Recorded Terminal Replay">
+  <meta property="og:description" content="Replay of a recorded real 20K run (27.8s, PASS). Measured 10M benchmarks: guided recall@10 0.7367 all / 0.4883 LSO (seam12a, run o94-scale10m).">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://anshul48.github.io/trace/recording/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="TRACE 20k Local Run — Recorded Terminal Replay">
+  <meta name="twitter:description" content="Replay of a recorded real 20K run (27.8s, PASS). Measured 10M: guided recall@10 0.7367 / 0.4883 LSO.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="player.css">
 </head>
 <body>
   <main class="player-container">
     <header class="header-panel">
       <h1 class="header-title">TRACE Research Engine: Fresh 20k Local Run Terminal Recording</h1>
+      <p class="replay-label">Replay of a recorded real 20K run (27.8s).
+        Measured 10M benchmarks are separate:
+        <a href="../explorer/">interactive explorer</a> ·
+        <a href="https://github.com/Anshul48/trace/blob/main/docs/BENCHMARKS.md">BENCHMARKS.md</a>
+      </p>
       <div class="header-badges">
         <span class="badge badge-success">Status: PASS</span>
         <span class="badge">Prefix: 20,030 TOK_V1 tokens</span>
@@ -19,41 +34,137 @@
         <span class="badge badge-warning">Scope: Local 20k reproduction only (not 10M qualification)</span>
       </div>
       <p class="header-notice">
-        This terminal recording plays the authentic captured execution output of the frozen engine harness on the portable 20k prefix in an isolated directory with path spaces.
+        This player replays the authentic captured execution output of the frozen engine harness
+        on the portable 20k prefix. Playback starts at t=0 with an empty terminal; use the
+        chapters below to step through the run. The raw capture is available as a secondary
+        download: <a href="run20k.cast" download>run20k.cast</a> (asciicast v2, 41 events).
       </p>
     </header>
 
-    <section class="terminal-viewport" id="terminal-viewport" aria-label="Terminal output display">
-      <pre class="terminal-output" id="terminal-output" tabindex="0">Loading recording...</pre>
+    <div class="demo-grid">
+      <section class="terminal-col">
+        <div class="terminal-viewport" id="terminal-viewport" aria-label="Terminal output display">
+          <pre class="terminal-output" id="terminal-output" tabindex="0"></pre>
+        </div>
+
+        <div class="controls-panel">
+          <div class="scrubber-row">
+            <input type="range" class="progress-slider" id="progress-slider" min="0" max="100" value="0" step="0.1" aria-label="Recording progress scrub">
+            <span class="time-display" id="time-display" aria-live="off">00:00.0 / 00:27.8</span>
+          </div>
+
+          <div class="buttons-row">
+            <div class="btn-group">
+              <button type="button" class="btn btn-play" id="btn-play" aria-label="Play replay of the recorded real 20K run (27.8 seconds)">Play</button>
+              <button type="button" class="btn" id="btn-restart" aria-label="Restart replay from the beginning">Restart</button>
+            </div>
+
+            <div class="btn-group">
+              <span class="step-counter" id="step-counter" aria-live="polite">Chapter 1 of 5</span>
+            </div>
+
+            <div class="btn-group">
+              <label for="speed-select" class="speed-label">Speed:</label>
+              <select id="speed-select" class="speed-select" aria-label="Playback speed selector">
+                <option value="0.5">0.5x</option>
+                <option value="1.0" selected>1.0x</option>
+                <option value="1.5">1.5x</option>
+                <option value="2.0">2.0x</option>
+                <option value="4.0">4.0x</option>
+              </select>
+            </div>
+          </div>
+
+          <p class="chapter-caption" id="chapter-caption" aria-live="polite"></p>
+
+          <div class="hash-row">
+            <span>Asciicast SHA-256: <code>7ef2cca320a25690756528524095d9f350bb0187a16a3060d5ec58b1eb5b3d58</code></span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="guide-col" aria-label="Replay guide">
+        <section class="guide-block">
+          <h2>Chapters</h2>
+          <ol class="chapter-list" id="chapter-list"></ol>
+        </section>
+
+        <section class="guide-block">
+          <h2>Annotated transcript</h2>
+          <ol class="transcript">
+            <li>Banner: local installer for the 20k-token prefix. The on-screen freeze line names the recorded run's own manifest; measured 10M figures are listed below under seam12a.</li>
+            <li>[1/7] Python check: suitable Python found (<code>/usr/bin/python3.12</code>, 3.12.3); <code>uv</code> 0.12.9 located.</li>
+            <li>[2/7] Isolated virtual environment created at <code>.trace-demo-env</code> (no global packages touched).</li>
+            <li>[3/7] Baseline dependencies installed into the isolated env: <code>blake3==1.0.11</code>, <code>numpy==2.5.4</code>.</li>
+            <li>[4/7] Source-freeze check of the recorded run: <code>entries=207 ok=207 missing=0 mismatch=0</code>.</li>
+            <li>[5/7] Prefix-data verification: 8 gates PASS (actual_tokens, complete_documents, atoms, distinct_chunks, cache_misses==0 and three hashes); 20,030 tokens, 88 documents, 144 atoms; VERIFY PASS.</li>
+            <li>[6/7] Pilot run starts in a fresh unique run directory (prior runs preserved, none deleted).</li>
+            <li>Ingest and resilience: drain cycles complete with 0 remaining; append ACK-to-searchable 0.022s; SIGKILL/restart passes with no duplicate source commits; repair finishes at 0 debt in 0 iterations.</li>
+            <li>Verdict JSON: <code>status PASS</code>, 51 parents, 81 leaves, 144 atoms, 0 pending documents; run wall 25.9s of the 27.8s capture.</li>
+            <li>[7/7] Viewer data exported (<code>local_20k_data.json</code>, 262,412 bytes, 240 queries); server start skipped (<code>--no-server</code>); installation and pilot verified.</li>
+          </ol>
+        </section>
+      </aside>
+    </div>
+
+    <section class="info-block">
+      <h2>Measured 10M benchmarks (seam12a, run o94-scale10m)</h2>
+      <p>
+        Freeze <code>seam12a</code>, tarball sha256
+        <code>8d3bbb6b…928dbf64</code>; probes pin <code>b332d62d…</code>,
+        harness pin <code>9f78479a…</code>, final commits <code>164195</code>
+        (253 frozen files, frozen_ok=true).
+      </p>
+      <ul>
+        <li>Corpus: 10,003,381 tokens / 13,081 documents / 63,441 atoms; 5,353 source commits / 164,195 final commits.</li>
+        <li>Wall 9,494.9 s; repair 6 iterations, debt 5,847 to 0; 0 pending documents.</li>
+        <li>Guided recall@10 0.7367 all / 0.4883 LSO (120 probes across chunk / noisy / cross); flat recall@10 0.055 / 0.0017.</li>
+        <li>Query visibility: q-complete p50/p95 96.8/115.5 ms (n=33, all within 5s); append ack-to-query 0.114 s; readers: 2 threads, 27,796 requests, p50 74.7 ms.</li>
+        <li>Memory: tree 9,700.9 MiB at t=3,097 s / parent 8,489.1 / child 7,169.2 MiB; 2.85 GiB retained on disk.</li>
+      </ul>
+      <p>
+        Full tables: <a href="../explorer/">interactive explorer</a> ·
+        <a href="https://github.com/Anshul48/trace/blob/main/docs/BENCHMARKS.md">BENCHMARKS.md</a>.
+        No broad semantic-IR or SOTA claims: recall figures are protocol agreement
+        against an oracle top-10 on staged vectors.
+      </p>
     </section>
 
-    <footer class="controls-panel">
-      <div class="scrubber-row">
-        <input type="range" class="progress-slider" id="progress-slider" min="0" max="100" value="0" step="0.1" aria-label="Recording progress scrub">
-        <span class="time-display" id="time-display" aria-live="off">00:00.0 / 00:00.0</span>
-      </div>
+    <section class="info-block">
+      <h2>Prefer doing it yourself?</h2>
+      <p>
+        Run the same pipeline locally instead of watching: the
+        <a href="https://github.com/Anshul48/trace">README</a> section
+        “Run the Frozen 20k Engine Locally” (<code>./install_and_run.sh</code>)
+        executes the genuine <code>product_pilot.py</code> pilot on your machine.
+        RUNLOG-verified 10K pilot over a synthetic corpus with the exact
+        <code>tl-gpu-embcache-v1</code> layout: status PASS in 39.8 s
+        (10,080 tokens / 36 documents / 72 atoms, cache_misses 0,
+        guided_recall10 0.40, flat_recall10 1.0, pipeline 100% genuine).
+      </p>
+    </section>
 
-      <div class="buttons-row">
-        <div class="btn-group">
-          <button type="button" class="btn btn-primary" id="btn-play" aria-label="Play recording">Play</button>
-          <button type="button" class="btn" id="btn-restart" aria-label="Restart recording from beginning">Restart</button>
-        </div>
+    <section class="info-block">
+      <h2>Full-10M reproduction: two blockers</h2>
+      <p>
+        There is no one-click 10M reproduction today. Both of these block it:
+      </p>
+      <ol>
+        <li>External corpus absent: <code>docs-100m.jsonl</code> plus <code>emb_cache/</code>
+          are not shipped (source-only 1.2 MB tarball) and are missing on a general host.</li>
+        <li>VM profile guard: <code>--profile vm</code> exits unless the hostname is
+          <code>trace-build500</code> (<code>tools/product_pilot.py:871-872</code>);
+          on your own machine the maximum is 1M tokens via <code>--profile local</code>.</li>
+      </ol>
+      <p>100M–500M+ scale is roadmap, not claimed.</p>
+    </section>
 
-        <div class="btn-group">
-          <label for="speed-select" style="font-size: 0.85rem; color: var(--text-muted);">Speed:</label>
-          <select id="speed-select" class="speed-select" aria-label="Playback speed selector">
-            <option value="0.5">0.5x</option>
-            <option value="1.0" selected>1.0x</option>
-            <option value="1.5">1.5x</option>
-            <option value="2.0">2.0x</option>
-            <option value="4.0">4.0x</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="hash-row">
-        <span>Asciicast SHA-256: <code>7ef2cca320a25690756528524095d9f350bb0187a16a3060d5ec58b1eb5b3d58</code></span>
-      </div>
+    <footer class="page-footer">
+      <p>
+        Recording page provenance: replay file <code>run20k.cast</code> (asciicast v2, 41 events,
+        27.825728 s, sha256 <code>7ef2cca3…b5b3d58</code>).
+        10M numbers above are seam12a / o94-scale10m receipts per the project audit sheet.
+      </p>
     </footer>
   </main>
   <script src="player.js"></script>
