@@ -2,60 +2,217 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url=explorer/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRACE Research Engine</title>
-  <script>
-    window.location.replace("explorer/");
-  </script>
+  <title>TRACE — 10M-token retrieval freeze seam12a</title>
+  <meta name="description" content="TRACE freeze seam12a (run o94-scale10m): 10,003,381 tokens / 13,081 docs routed through an overlapping document graph. Guided recall@10 0.7367 all-sources / 0.4883 leave-source-out. Receipt-backed, no benchmark claims beyond the stated protocol.">
+  <link rel="canonical" href="https://anshul48.github.io/trace/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TRACE — 10M-token retrieval freeze seam12a">
+  <meta property="og:description" content="10,003,381 tokens / 13,081 docs. Guided recall@10 0.7367 all-sources / 0.4883 leave-source-out (run o94-scale10m). Receipt-backed research prototype.">
+  <meta property="og:url" content="https://anshul48.github.io/trace/">
+  <meta property="og:image" content="https://anshul48.github.io/trace/assets/trace-hero.svg">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="TRACE — 10M-token retrieval freeze seam12a">
+  <meta name="twitter:description" content="Guided recall@10 0.7367 all-sources / 0.4883 leave-source-out over 10,003,381 tokens. Receipt-backed; no broad benchmark claims.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: #0f172a;
       color: #f8fafc;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
       margin: 0;
-      padding: 1rem;
-      text-align: center;
+      padding: 0 1rem 3rem;
+      line-height: 1.55;
     }
-    a {
-      color: #38bdf8;
+    main { max-width: 880px; margin: 0 auto; }
+    header.top { max-width: 880px; margin: 0 auto; padding: 1.5rem 0 0; }
+    .kicker {
+      display: inline-block;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: #7dd3fc;
+      border: 1px solid #155e75;
+      border-radius: 999px;
+      padding: 0.2rem 0.7rem;
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2rem; margin: 0 0 0.5rem; line-height: 1.2; }
+    h2 { font-size: 1.25rem; margin: 2rem 0 0.5rem; color: #e2e8f0; }
+    h3 { font-size: 1rem; margin: 1.25rem 0 0.4rem; color: #e2e8f0; }
+    p { margin: 0.5rem 0; color: #cbd5e1; }
+    .lede { font-size: 1.1rem; color: #f1f5f9; }
+    a { color: #7dd3fc; }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.85em;
+      background: #1e293b;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      color: #e2e8f0;
+    }
+    pre {
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+    pre code { background: none; padding: 0; }
+    .strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.6rem;
+      margin: 1.25rem 0;
+    }
+    .stat {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 0.7rem 0.85rem;
+    }
+    .stat .v { font-size: 1.25rem; font-weight: 700; color: #ffffff; }
+    .stat .l { font-size: 0.78rem; color: #94a3b8; }
+    .paths { display: grid; gap: 0.75rem; margin: 1rem 0; }
+    @media (min-width: 640px) { .paths { grid-template-columns: 1fr 1fr 1fr; } }
+    .path {
+      display: block;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1rem;
       text-decoration: none;
     }
-    a:hover {
-      text-decoration: underline;
-    }
-    .card {
-      background: #1e293b;
-      padding: 2rem;
-      border-radius: 8px;
-      border: 1px solid #334155;
-      max-width: 480px;
-    }
+    .path:hover { border-color: #0284c7; }
+    .path .t { font-weight: 700; color: #ffffff; font-size: 1rem; }
+    .path .d { font-size: 0.85rem; color: #94a3b8; margin-top: 0.3rem; }
+    .btn-row { margin-top: 0.6rem; }
     .btn {
       display: inline-block;
-      margin-top: 1rem;
-      padding: 0.6rem 1.2rem;
+      padding: 0.55rem 1.1rem;
       background: #0284c7;
-      color: white;
+      color: #ffffff;
       border-radius: 6px;
-      font-weight: 500;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .note {
+      background: #1e293b;
+      border-left: 3px solid #0284c7;
+      border-radius: 0 8px 8px 0;
+      padding: 0.7rem 1rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .warn {
+      background: #1e293b;
+      border-left: 3px solid #f59e0b;
+      border-radius: 0 8px 8px 0;
+      padding: 0.7rem 1rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    table.facts { border-collapse: collapse; width: 100%; font-size: 0.86rem; margin: 0.75rem 0; }
+    table.facts th, table.facts td { border: 1px solid #334155; padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
+    table.facts th { background: #1e293b; color: #e2e8f0; }
+    table.facts td { color: #cbd5e1; }
+    footer { max-width: 880px; margin: 2.5rem auto 0; font-size: 0.8rem; color: #64748b; border-top: 1px solid #334155; padding-top: 1rem; }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
     }
   </style>
+  <noscript><style>.path:hover { border-color: #334155; }</style></noscript>
 </head>
 <body>
-  <div class="card">
-    <h1>TRACE Research Engine</h1>
-    <p>Organizing continuous document streams into an overlapping multi-tier DAG.</p>
-    <p>Redirecting to interactive research explorer...</p>
-    <div>
-      <a href="explorer/" class="btn">Launch Explorer</a>
-      <a href="recording/" class="btn" style="background: #334155; margin-left: 0.5rem;">View Terminal Recording</a>
-    </div>
-  </div>
+  <header class="top">
+    <span class="kicker">RESEARCH PROTOTYPE &middot; FROZEN RUN</span>
+    <h1>TRACE: a document stream that files itself</h1>
+    <p class="lede">TRACE is an experimental retrieval engine. It sorts a continuous stream of documents into a living, overlapping folder tree, so a brand-new arrival is searchable immediately &mdash; no full-index rebuild. Each question is routed down the few most promising branches instead of scoring everything.</p>
+  </header>
+
+  <main>
+    <section aria-label="30 second summary">
+      <h2>The 30-second version</h2>
+      <p><strong>What:</strong> documents are cut into short passages (&ldquo;atoms&rdquo;), attached to groups (&ldquo;leaves&rdquo;) by similarity, and groups hang under topic hubs (&ldquo;parents&rdquo;) &mdash; an overlapping graph, not one rigid tree.</p>
+      <p><strong>Why:</strong> new items become searchable the moment they arrive, without recomputing clusters over the whole corpus.</p>
+      <p><strong>Proof:</strong> frozen run <code>o94-scale10m</code> over 10,003,381 tokens / 13,081 documents &mdash; guided recall@10 of <strong>0.7367</strong> (all-sources) and <strong>0.4883</strong> (leave-source-out), each against a matched flat baseline (0.055 / 0.0017) scoring the same rows.</p>
+      <p><strong>Scope:</strong> a prototype evaluation protocol (all-sources vs disjoint-source), not a broad search-engine benchmark. No SOTA claims.</p>
+    </section>
+
+    <section aria-label="Frozen numbers">
+      <h2>Frozen numbers &mdash; freeze <code>seam12a</code>, run <code>o94-scale10m</code></h2>
+      <div class="strip">
+        <div class="stat"><div class="v">10,003,381</div><div class="l">tokens / 13,081 docs / 63,441 atoms</div></div>
+        <div class="stat"><div class="v">0.7367 / 0.4883</div><div class="l">guided recall@10: all-sources / leave-source-out (120 probes)</div></div>
+        <div class="stat"><div class="v">0.055 / 0.0017</div><div class="l">matched flat recall@10, same rows</div></div>
+        <div class="stat"><div class="v">9,494.9 s</div><div class="l">wall (~2.6 h); repair 6 iters, debt 5,847 &rarr; 0</div></div>
+        <div class="stat"><div class="v">96.8 / 115.5 ms</div><div class="l">fresh-item query p50 / p95 (n=33, all within 5 s)</div></div>
+        <div class="stat"><div class="v">253 files</div><div class="l">frozen sources, verified 0-diff; 164,195 final commits</div></div>
+      </div>
+      <p>Identity pins: tarball sha256 <code>8d3bbb6bf53e1731811065a9de156a9997be740d598cd1dfa0a3d946928dbf64</code> &middot; probes <code>b332d62d&hellip;</code> &middot; harness <code>9f78479a&hellip;</code> &middot; 9,177 leaves / 3,711 parents &middot; parent RSS peak 8,489.1 MiB / child 7,169.2 MiB.</p>
+    </section>
+
+    <section aria-label="Three ways in">
+      <h2>Three ways in</h2>
+      <div class="paths">
+        <a class="path" href="explorer/">
+          <div class="t">Explore the graph</div>
+          <div class="d">Clickable map of the qualified 10M document graph: topic hubs, bundles, passages, and a step-by-step replay of how a question is routed.</div>
+        </a>
+        <a class="path" href="recording/">
+          <div class="t">Watch the guided demo</div>
+          <div class="d">Terminal recording of the authentic local verification run &mdash; install, frozen-file checks, engine run to PASS.</div>
+        </a>
+        <a class="path" href="https://github.com/Anshul48/trace/releases/tag/seam12a-10m-freeze">
+          <div class="t">Download &amp; run</div>
+          <div class="d">Release <code>seam12a-10m-freeze</code>: frozen source tarball (sha256 <code>8d3bbb6b&hellip;928dbf64</code>). Mini-run instructions below.</div>
+        </a>
+      </div>
+      <div class="note"><strong>Heads-up on the explorer:</strong> the live graph still shows the <em>earlier</em> October qualification campaign (freeze <code>38c66bef</code>, 207 files, recall 0.73 / 0.4758, wall 12,973 s) &mdash; same corpus scale, older run. Its numbers are labelled on the page. The <code>seam12a</code> numbers above are the latest.</div>
+    </section>
+
+    <section aria-label="Run it yourself">
+      <h2>Run it yourself (mini path, verified 2026-10-18)</h2>
+      <p>These exact commands were executed against a fresh extract of the <code>seam12a</code> tarball (Python 3.12). The environment lives <em>inside</em> the extracted directory. Example outcome on a small synthetic corpus: status <code>PASS</code>, 10,080 tokens / 36 docs / 72 atoms in ~25&ndash;40 s.</p>
+      <pre><code>cd &lt;extracted-seam12a-dir&gt;
+uv venv .venv --python /usr/bin/python3
+uv pip install --python .venv/bin/python numpy==2.5.4 blake3==1.0.11
+SUP_PYTHON=$PWD/.venv/bin/python bash runtime.sh tools/product_pilot.py --help</code></pre>
+      <h3>Mini engine run (up to 1M tokens on your own machine)</h3>
+      <pre><code>SUP_PYTHON=$PWD/.venv/bin/python bash runtime.sh tools/product_pilot.py \
+  --tokens 10000 --profile local --source-root $PWD \
+  --data-dir &lt;your-data-dir&gt; --out $PWD/out-mini \
+  --drain-attribution --drain-census --holon-descriptor-columnar \
+  --overrides-columnar --descriptor-matrix-all --per-view-sharing \
+  --cold-scan-chunk 4096 --repair-columnar --candidate-source hnsw \
+  --drain-bounded-k 32 --candidate-shadow-audit 8</code></pre>
+      <p>Your <code>--data-dir</code> must hold <code>docs-100m.jsonl</code> (one JSON object per line, fields <code>doc_id</code> + <code>text</code>) plus an <code>emb_cache/</code> directory in <code>tl-gpu-embcache-v1</code> layout (384-dim float32 vectors). Only complete documents are ingested; cache misses are fatal. Non-VM runs are capped at 1M tokens (<code>--profile local</code>).</p>
+      <div class="warn"><strong>No one-click 10M reproduction today.</strong> A full 10M rerun has two blockers, both required: (a) the external 10M corpus (<code>docs-100m.jsonl</code> + embedding cache) is not shipped with the 1.2 MB source-only tarball; (b) <code>--profile vm</code> only runs on the host <code>trace-build500</code> (hostname guard in <code>tools/product_pilot.py</code>). Scales of 100M&ndash;500M+ are roadmap, not measured.</div>
+    </section>
+
+    <section aria-label="Measured facts">
+      <h2>Measured facts (receipt-backed)</h2>
+      <table class="facts">
+        <tr><th>Fact</th><th>Value (run <code>o94-scale10m</code>)</th></tr>
+        <tr><td>Corpus</td><td>10,003,381 tokens, 13,081 docs, 63,441 atoms; 5,353 source commits &rarr; 164,195 final commits</td></tr>
+        <tr><td>Retrieval quality</td><td>guided recall@10 0.7367 all-sources / 0.4883 leave-source-out; flat 0.055 / 0.0017 (120 probes: chunk / noisy / cross families)</td></tr>
+        <tr><td>Phase walls (s)</td><td>ingest 586.9, drain 999.4, append 1,163.2, rejection 1.83, prep-rejection 170.3, kill-restart 516.5, remaining drain 4,654.4, repair 1,162.1; pending 0</td></tr>
+        <tr><td>Fresh-item visibility</td><td>q-complete p50/p95 96.8/115.5 ms (n=33, all within 5 s); append ack-to-query 0.114 s; 2 reader threads, 27,796 reqs, p50 74.7 ms</td></tr>
+        <tr><td>Memory</td><td>tree 9,700.9 MiB @3,097 s (restart window), parent 8,489.1, child 7,169.2; floor 3 GB</td></tr>
+        <tr><td>Derived caps</td><td>max_delta_entries 669,436; kill wait 316 s; drain k=32, chunk 4,096</td></tr>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    TRACE research prototype &middot; Apache-2.0 &middot; freeze <code>seam12a</code> (<code>8d3bbb6b&hellip;928dbf64</code>) &middot; run <code>o94-scale10m</code> &middot; pins probes <code>b332d62d&hellip;</code>, harness <code>9f78479a&hellip;</code>, commits <code>164195</code> &middot; <a href="https://github.com/Anshul48/trace">source</a>
+  </footer>
 </body>
 </html>

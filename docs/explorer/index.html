@@ -4,7 +4,59 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TRACE Research Explorer — 10M Qualification & Self-Organizing DAG Engine</title>
+  <meta name="description" content="Interactive map of the TRACE 10M qualification graph (earlier October campaign: freeze 38c66bef, recall@10 0.73 all-sources / 0.4758 leave-source-out). Topic hubs, document bundles, passages, and query-routing replay.">
+  <link rel="canonical" href="https://anshul48.github.io/trace/explorer/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TRACE Research Explorer — 10M Qualification Graph">
+  <meta property="og:description" content="Clickable map of 3,711 topic hubs / 9,177 bundles / 63,441 passages. Recall@10 0.73 all-sources / 0.4758 leave-source-out (earlier October campaign, freeze 38c66bef).">
+  <meta property="og:url" content="https://anshul48.github.io/trace/explorer/">
+  <meta property="og:image" content="https://anshul48.github.io/trace/assets/trace-hero.svg">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="TRACE Research Explorer — 10M Qualification Graph">
+  <meta name="twitter:description" content="Clickable map of the 10M qualification graph + query-routing replay. Recall@10 0.73 / 0.4758. Receipt-backed; no broad benchmark claims.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="stylesheet" href="style.css">
+  <style>
+    .id-banner {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-left: 3px solid #0284c7;
+      border-radius: 0 8px 8px 0;
+      padding: 0.8rem 1.1rem;
+      margin: 1rem auto;
+      max-width: 1200px;
+      font-size: 0.9rem;
+      color: #cbd5e1;
+    }
+    .id-banner strong { color: #f1f5f9; }
+    .id-banner a { color: #7dd3fc; }
+    .id-banner code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.85em;
+      background: #0f172a;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      color: #e2e8f0;
+    }
+    .size-warning { margin: 0.6rem 0 0; }
+    .what-looking { font-size: 1rem; color: #e2e8f0; }
+    .rule-line, .measured-line {
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 0.6rem 0.9rem;
+      margin: 0.75rem 0;
+    }
+    .rule-line strong, .measured-line strong { color: #f1f5f9; }
+    .hero-actions a.btn { display: inline-block; text-decoration: none; }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
+  <noscript><style>.tab-panel { display: block !important; }</style></noscript>
 </head>
 <body>
   <header class="app-header">
@@ -21,21 +73,27 @@
     </div>
   </header>
 
+  <div class="id-banner" role="note">
+    <strong>Which run is this graph?</strong> This explorer shows the <em>earlier</em> October qualification campaign &mdash; source freeze <code>38c66bef</code> (207 files), store head <code>e8334c07&hellip;:0:166457</code>, recall@10 0.73 all-sources / 0.4758 leave-source-out, wall 12,973 s. It is <em>not</em> the latest <code>seam12a</code> freeze (run <code>o94-scale10m</code>: 0.7367 / 0.4883, wall 9,494.9 s) &mdash; see the <a href="../">landing page</a> for the latest numbers. Corpus scale is identical (10,003,381 tokens / 13,081 docs / 63,441 atoms).
+    <p class="size-warning"><strong>Download size:</strong> opening this page loads a ~7.2&nbsp;MB dataset (<code>graph_10m.json.gz</code>, 7,254,185 bytes). Avoid it on a metered connection.</p>
+  </div>
+
   <main class="main-container">
     <!-- Hero: Purpose & 3-Step Visitor Story -->
     <section class="hero-section" aria-label="Overview & Architecture">
       <div class="hero-intro">
         <h2>Self-Organizing Continuous Memory & Retrieval</h2>
+        <p class="what-looking"><strong>What am I looking at?</strong> A clickable map of 3,711 topic groups holding 9,177 document bundles (63,441 text passages), plus a step-by-step replay of how a question travels down the graph. Dots are groups, not distances: positions show hierarchy layout, not meaning.</p>
         <p class="hero-desc">
           TRACE is an experimental research retrieval architecture that organizes continuous document streams into an overlapping multi-tier directed acyclic graph (DAG) — without global clustering recomputation. It enables guided branch-descent retrieval that concentrates scoring compute on high-affinity clusters, achieving <strong>0.73 recall@10</strong> under a prototype evaluation protocol (all-sources mode; <a href="#eval-modes-table" class="hero-inline-link">compare both measured modes</a>, including 0.4758 in leave-source-out mode), without broad semantic IR benchmark claims.
         </p>
       </div>
 
-      <!-- Primary Action CTAs -->
+      <!-- Primary Action Links (real anchors: deep-linkable, no-JS usable) -->
       <div class="hero-actions">
-        <button class="btn btn-primary cta-btn" id="cta-explore-10m">Explore Qualified 10M DAG Hierarchy &rarr;</button>
-        <button class="btn btn-secondary cta-btn" id="cta-explore-20k">Inspect Local 20k Verification</button>
-        <button class="btn btn-secondary cta-btn" id="cta-query-replay">Step Through Query Routing Replay</button>
+        <a class="btn btn-primary cta-btn" id="cta-explore-10m" href="#tab-topology">Explore Qualified 10M DAG Hierarchy &rarr;</a>
+        <a class="btn btn-secondary cta-btn" id="cta-explore-20k" href="#tab-topology">Inspect Local 20k Verification</a>
+        <a class="btn btn-secondary cta-btn" id="cta-query-replay" href="#tab-queries">Step Through Query Routing Replay</a>
       </div>
 
       <!-- 3-Step Visitor Story Cards -->
@@ -256,6 +314,8 @@
         </div>
       </div>
 
+      <p class="rule-line"><strong>What the overview draws (exact viewer rule):</strong> the ring shows the <em>first 64 parents in dataset order</em> &mdash; not the 64 largest. The focus list offers the <em>top 40 parents by atom count</em>. Inside a focused group the canvas draws the <em>first 12 atoms of each leaf</em>; complete membership lists are in the inspector links below.</p>
+
       <!-- Live Loading / Error Notification -->
       <div id="topology-status-banner" class="topology-status-banner" style="display: none;"></div>
 
@@ -273,11 +333,11 @@
       </div>
 
       <div class="topology-legend" style="margin-top: 1rem;">
-        <div class="legend-item"><span class="legend-dot" style="background: #38bdf8;"></span><span>Virtual UI Entry Point</span></div>
-        <div class="legend-item"><span class="legend-dot" style="background: #818cf8;"></span><span>Parent Cluster Centroid</span></div>
-        <div class="legend-item"><span class="legend-dot" style="background: #34d399;"></span><span>Leaf Partition (Postings)</span></div>
-        <div class="legend-item"><span class="legend-dot" style="background: #fbbf24;"></span><span>Document Atom (Token Chunk)</span></div>
-        <div class="legend-item"><span class="legend-dot" style="background: #ec4899;"></span><span>Multi-Parent Overlapping Edge</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background: #38bdf8;"></span><span>Start point (virtual UI entry point)</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background: #818cf8;"></span><span>Topic group hub (parent cluster centroid)</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background: #34d399;"></span><span>Document bundle (leaf partition / postings)</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background: #fbbf24;"></span><span>Text passage (document atom / token chunk)</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background: #ec4899;"></span><span>Shared-member link (multi-parent overlapping edge)</span></div>
       </div>
     </section>
 
@@ -314,6 +374,8 @@
           </select>
         </div>
       </div>
+
+      <p class="measured-line"><strong>Measured:</strong> the per-stage row counts and recall numbers below. <strong>Illustrative:</strong> the animated node walk itself &mdash; per-query node IDs were never recorded, so the path is staged, not played back.</p>
 
       <!-- Dissecting 18/145 Callout -->
       <div class="dissect-notice">
@@ -499,5 +561,19 @@
   </footer>
 
   <script src="app.js"></script>
+  <script>
+    // Hash routing: open the tab matching #tab-overview/#tab-topology/#tab-queries/#tab-lifecycle/#tab-audit/#tab-local.
+    (function () {
+      var PANELS = ['tab-overview', 'tab-topology', 'tab-queries', 'tab-lifecycle', 'tab-audit', 'tab-local'];
+      function openHash() {
+        var id = (location.hash || '').slice(1);
+        if (PANELS.indexOf(id) === -1) return;
+        var btn = document.querySelector('.tab-btn[data-tab="' + id + '"]');
+        if (btn) btn.click();
+      }
+      document.addEventListener('DOMContentLoaded', openHash);
+      window.addEventListener('hashchange', openHash);
+    })();
+  </script>
 </body>
 </html>
