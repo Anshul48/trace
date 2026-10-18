@@ -1,5 +1,7 @@
 // TRACE 20k Local Run Terminal Player
-// Strictly offline, vanilla JS, textContent only (no HTML injection, deterministic ANSI escape stripping)
+// Strictly offline, vanilla JS, textContent only (no HTML injection,
+// deterministic ANSI escape stripping). No autoplay: playback starts
+// only on an explicit Play press, and first paint is t=0 (empty terminal).
 (function () {
   'use strict';
 
@@ -8,6 +10,20 @@
   function stripAnsi(str) {
     return str.replace(ansiRegex, '');
   }
+
+  // Chapters derived strictly from real run20k.cast event times/content.
+  var chapters = [
+    { t: 0, title: 'Setup: Python check, isolated environment',
+      caption: 't=0.0s: [1/7] Python 3.12.3 found, uv located; [2/7] isolated venv created at .trace-demo-env.' },
+    { t: 0.129, title: 'Dependencies and freeze check',
+      caption: 't=0.1s: [3/7] numpy + blake3 installed; [4/7] freeze check entries=207 ok=207 missing=0 mismatch=0.' },
+    { t: 0.485, title: 'Prefix data verification: 8 gates PASS',
+      caption: 't=0.5s: [5/7] 20,030 tokens, 88 documents, 144 atoms; all 8 prefix gates PASS; VERIFY PASS.' },
+    { t: 1.094, title: 'Pilot run: drain, faults, recovery, PASS',
+      caption: 't=1.1s: [6/7] drain cycles to 0 remaining, append ACK 0.022s, SIGKILL/restart clean, status PASS (25.9s wall).' },
+    { t: 27.56, title: 'Export viewer data, finish',
+      caption: 't=27.6s: local_20k_data.json exported (262,412 bytes, 240 queries); [7/7] server skipped (--no-server).' }
+  ];
 
   var events = [];
   var totalDuration = 0;
@@ -25,12 +41,58 @@
   var progressEl = document.getElementById('progress-slider');
   var timeEl = document.getElementById('time-display');
   var speedSelect = document.getElementById('speed-select');
+  var stepEl = document.getElementById('step-counter');
+  var captionEl = document.getElementById('chapter-caption');
+  var chapterListEl = document.getElementById('chapter-list');
+
+  var reduceMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function formatTime(s) {
     var mins = Math.floor(s / 60);
     var secs = Math.floor(s % 60);
     var ms = Math.floor((s % 1) * 10);
     return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs + '.' + ms;
+  }
+
+  function chapterIndexAt(t) {
+    var idx = 0;
+    for (var i = 0; i < chapters.length; i++) {
+      if (t >= chapters[i].t) idx = i;
+    }
+    return idx;
+  }
+
+  function buildChapterList() {
+    if (!chapterListEl) return;
+    chapterListEl.textContent = '';
+    for (var i = 0; i < chapters.length; i++) {
+      (function (i) {
+        var li = document.createElement('li');
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'chapter-btn';
+        btn.setAttribute('data-chapter', String(i + 1));
+        btn.textContent = chapters[i].title + ' (' + formatTime(chapters[i].t) + ')';
+        btn.setAttribute('aria-label', 'Jump replay to chapter ' + (i + 1) + ' of ' +
+          chapters.length + ': ' + chapters[i].title);
+        btn.addEventListener('click', function () {
+          pause();
+          renderUpToTime(chapters[i].t);
+        });
+        li.appendChild(btn);
+        chapterListEl.appendChild(li);
+      })(i);
+    }
+  }
+
+  function markActiveChapter(idx) {
+    if (!chapterListEl) return;
+    var btns = chapterListEl.querySelectorAll('.chapter-btn');
+    for (var i = 0; i < btns.length; i++) {
+      if (i === idx) btns[i].setAttribute('aria-current', 'true');
+      else btns[i].removeAttribute('aria-current');
+    }
   }
 
   function renderUpToTime(targetTime) {
@@ -51,6 +113,11 @@
 
     progressEl.value = totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0;
     timeEl.textContent = formatTime(currentTime) + ' / ' + formatTime(totalDuration);
+
+    var ci = chapterIndexAt(currentTime);
+    if (stepEl) stepEl.textContent = 'Chapter ' + (ci + 1) + ' of ' + chapters.length;
+    if (captionEl) captionEl.textContent = chapters[ci].caption;
+    markActiveChapter(ci);
   }
 
   function tick() {
@@ -78,7 +145,12 @@
     isPlaying = true;
     lastWallTime = performance.now();
     playBtn.textContent = 'Pause';
-    playBtn.setAttribute('aria-label', 'Pause playback');
+    playBtn.setAttribute('aria-label', 'Pause the recorded 20K run replay');
+    if (reduceMotion) {
+      // Reduced motion: advance in coarser steps to limit visual churn.
+      playbackSpeed = 1.0;
+      if (speedSelect) speedSelect.value = '1.0';
+    }
     timerId = requestAnimationFrame(tick);
   }
 
@@ -89,7 +161,7 @@
       timerId = null;
     }
     playBtn.textContent = 'Play';
-    playBtn.setAttribute('aria-label', 'Start playback');
+    playBtn.setAttribute('aria-label', 'Play replay of the recorded real 20K run (27.8 seconds)');
   }
 
   function togglePlay() {
@@ -121,10 +193,12 @@
     playbackSpeed = parseFloat(e.target.value);
   });
 
-  // Load asciicast v2 file
-  var castFile = 'run20k.cast';
-  fetch(castFile)
-    .catch(function () { return fetch('run3_final_fresh20k.cast'); })
+  buildChapterList();
+  // First paint before the capture loads: t=0 state with chapter 1 shown.
+  renderUpToTime(0);
+
+  // Load asciicast v2 file (single canonical capture).
+  fetch('run20k.cast')
     .then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.text();
@@ -144,10 +218,11 @@
       if (events.length > 0) {
         totalDuration = events[events.length - 1][0];
       }
-      renderUpToTime(totalDuration); // Show completed terminal by default
+      renderUpToTime(0); // First paint at t=0: empty terminal, Chapter 1 of 5
       pause();
     })
     .catch(function (err) {
-      outputEl.textContent = 'Failed to load recording: ' + err.message;
+      outputEl.textContent = 'Failed to load recording: ' + err.message +
+        '. You can still download the raw capture (run20k.cast link above).';
     });
 })();
