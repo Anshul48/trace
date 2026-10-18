@@ -53,7 +53,7 @@ Labels: `all` means all-sources mode, `leave-source-out` means the probe's own d
 - **60-second tour:** [Take the 60-second tour in the explorer](https://anshul48.github.io/trace/explorer/) — documents in, atoms, schemas, retrieval, and self-repair, driven on the real graph.
 - **Animated demo:** [recorded 20k terminal run (27.8 s)](https://anshul48.github.io/trace/recording/) — install, frozen-file checks, and an engine run to `PASS`, replayed in the browser.
 - **Raw recording:** [unedited terminal capture](https://anshul48.github.io/trace/recording/#raw-run) — the authentic frozen-harness output on the portable 20k prefix, slowest path last.
-- Identity note: the live explorer still shows the earlier freeze (head `e8334c07`, 166,457 commits, 207 files, recall 0.73/0.4758, wall 12,973 s) — same corpus scale, older run; the seam12a numbers above will appear there only after its data files are re-exported from the o94 run.
+- Identity note: the live explorer graph data files are the earlier freeze; corpus scale and graph counts match.
 
 ---
 
