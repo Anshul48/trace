@@ -50,12 +50,12 @@ work is the opt-in suffix-verify fork — deliberately not stacked.
   pending_topk 2/2, broader 150/150 at build time).
 - `run_all.sh` — local synthetic/unit runner (`stack|fix1|existing|all`).
 
-## Known shape limits (measured, not fixed here)
+## Known shape limits (measured in seam12a run `o94-scale10m`, not fixed here)
 
-- Per-doc drain cost grows ~N^1.5 with hierarchy size (remaining phase
-  1.49 s/doc at 10M vs 0.18 at 1M); the second level is a flat parent scan
-  (3,711 parents scored per guided query at 10M). Drain is ~85%+ of wall:
-  the 100M blocker is drain throughput, not publication.
-- `repair_to_zero` cost 2,234 s (17% of wall) with repair OFF in the default
-  path; reader threads halve the drain rate in reader phases.
+- Drain dominates the wall: initial drain (999.4 s) plus remaining drain
+  under readers (4,654.4 s, ~0.36 s/doc at 10M) together take ~60% of the
+  9,494.9 s wall. The second level is a flat parent scan per guided query.
+  Drain throughput — not publication — is the scaling risk toward 100M.
+- `repair_to_zero` cost 1,162.1 s (12% of wall) across 6 bounded iterations
+  (debt 5,847 → 0); reader phases carry contention overhead on drain.
 - Constant-factor fixes do not bend the curve (cosine cache: no gain).

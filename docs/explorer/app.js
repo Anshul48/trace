@@ -3,7 +3,9 @@
 (function() {
   'use strict';
 
-  // Verified Constants
+  // Shipped-file descriptors (earlier-freeze bytes still staged under docs/explorer/;
+  // required fail-closed so the canvas keeps rendering. Displayed statistics site-wide
+  // are the latest measured run seam12a (o94-scale10m) — see SEAM12A_* below.
   const VERIFIED_SOURCEFREEZE = '38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54';
   const VERIFIED_10M_PIN = 'e8334c07-731d-4ff9-a292-8329b89c41b9:0:166457';
   const EXPECTED_10M_GZIP_BYTES = 7254185;
@@ -17,7 +19,7 @@
   let graph10mData = null;
   let qualificationData = null;
   let probeList = [];
-  let currentDataset = '10m'; // '10m' or '20k'
+  let currentDataset = '20k'; // '10m' or '20k' — tour defaults to the small graph
   let currentClusterFocus = 'overview';
   let currentProbeIndex = 0;
   let currentStep = 1;
@@ -71,32 +73,46 @@
   const speedSelect = document.getElementById('replay-speed');
 
   // Hero CTA Buttons
+  const ctaTourStart = document.getElementById('cta-tour-start');
   const ctaExplore10m = document.getElementById('cta-explore-10m');
   const ctaExplore20k = document.getElementById('cta-explore-20k');
   const ctaQueryReplay = document.getElementById('cta-query-replay');
 
+  // Latest measured run seam12a (o94-scale10m): observed phase walls (s).
+  // The staged qualification_10m.json still carries the earlier freeze, so the
+  // timeline renders these measured constants and says so in the caption.
+  const SEAM12A_WALLS_S = {
+    ingest_visible_prepare: 586.9,
+    initial_drain_prepare: 999.4,
+    append_ingest_readers: 1163.2,
+    source_capacity_rejection: 1.83,
+    prepare_rejection_fresh: 170.3,
+    writer_kill_restart: 516.5,
+    remaining_drain_readers: 4654.4,
+    repair_to_zero: 1162.1
+  };
+  const SEAM12A_TOTAL_WALL_S = 9494.9;
+
   const phaseColors = {
-    initial_ingest_visible_and_prepare: '#38bdf8',
-    initial_drain_and_prepare: '#818cf8',
-    append_ingest_visible_with_readers: '#34d399',
+    ingest_visible_prepare: '#38bdf8',
+    initial_drain_prepare: '#22d3ee',
+    append_ingest_readers: '#34d399',
     source_capacity_rejection: '#f43f5e',
-    prepare_rejection_fresh_frontier: '#fbbf24',
-    writer_kill_and_restart: '#f97316',
-    remaining_drain_and_prepare_with_readers: '#a855f7',
-    repair_to_zero: '#ec4899',
-    final: '#64748b'
+    prepare_rejection_fresh: '#fbbf24',
+    writer_kill_restart: '#f97316',
+    remaining_drain_readers: '#2dd4bf',
+    repair_to_zero: '#ec4899'
   };
 
   const phaseNames = {
-    initial_ingest_visible_and_prepare: 'Ingest (Visible + Prepare)',
-    initial_drain_and_prepare: 'Initial Drain (3 cycles)',
-    append_ingest_visible_with_readers: 'Append Ingest + Readers',
-    source_capacity_rejection: 'Source Rejection',
-    prepare_rejection_fresh_frontier: 'Prepare Rejection',
-    writer_kill_and_restart: 'Writer Kill & Restart (exit -9)',
-    remaining_drain_and_prepare_with_readers: 'Remaining Drain + Readers',
-    repair_to_zero: 'Repair to Zero (5 iters)',
-    final: 'Final Qualification Gate'
+    ingest_visible_prepare: 'Ingest (visible + prepare)',
+    initial_drain_prepare: 'Initial drain + prepare',
+    append_ingest_readers: 'Append ingest + readers',
+    source_capacity_rejection: 'Source-capacity rejection',
+    prepare_rejection_fresh: 'Prepare rejection (fresh frontier)',
+    writer_kill_restart: 'Writer kill + restart',
+    remaining_drain_readers: 'Remaining drain + readers',
+    repair_to_zero: 'Repair to zero (6 iters, 5,847 to 0)'
   };
 
   // Init Tabs & Hero CTAs
@@ -150,6 +166,12 @@
       ctaQueryReplay.addEventListener('click', () => {
         const queryTab = document.getElementById('tab-btn-queries');
         if (queryTab) switchTab(queryTab);
+      });
+    }
+
+    if (ctaTourStart) {
+      ctaTourStart.addEventListener('click', () => {
+        startTour(1);
       });
     }
   }
@@ -690,22 +712,15 @@
     populateClusterSelector();
     layoutAndDrawTopology();
     renderStepDetail();
+    // Re-run the default tour step now that datasets are validated and drawable.
+    if (typeof applyTourStep === 'function' && tourMode && tourStep === 1) applyTourStep(1);
   }
 
-  // Render Phase Timeline Bar
+  // Render Phase Timeline Bar (latest measured run seam12a — see SEAM12A_WALLS_S)
   function renderPhaseTimeline() {
     if (!phaseBar) return;
-    const walls = (qualificationData && qualificationData.walls_s) ? qualificationData.walls_s : {
-      initial_ingest_visible_and_prepare: 917.4,
-      initial_drain_and_prepare: 1780.5,
-      append_ingest_visible_with_readers: 1885.0,
-      source_capacity_rejection: 1.2,
-      prepare_rejection_fresh_frontier: 496.6,
-      writer_kill_and_restart: 710.1,
-      remaining_drain_and_prepare_with_readers: 4865.6,
-      repair_to_zero: 2234.4
-    };
-    const totalWall = 12973.17;
+    const walls = SEAM12A_WALLS_S;
+    const totalWall = SEAM12A_TOTAL_WALL_S;
 
     phaseBar.innerHTML = '';
     if (phaseLegend) phaseLegend.innerHTML = '';
@@ -736,13 +751,13 @@
     if (!clusterSelect) return;
     const activeData = (currentDataset === '10m') ? graph10mData : local20kData;
     if (!activeData || !activeData.parents) {
-      clusterSelect.innerHTML = '<option value="overview">Overview: 64 of 3,711 Real Parents (Structural Preview)</option>';
+      clusterSelect.innerHTML = '<option value="overview">Overview of all real groups (structural preview)</option>';
       return;
     }
 
     const totalCount = activeData.parents.length.toLocaleString();
     const renderedCount = (currentDataset === '10m') ? Math.min(activeData.parents.length, 64) : activeData.parents.length;
-    clusterSelect.innerHTML = `<option value="overview">Overview: ${renderedCount} of ${totalCount} Real Parents (Structural Preview)</option>`;
+    clusterSelect.innerHTML = `<option value="overview">Overview: ${renderedCount} of ${totalCount} real groups (structural preview)</option>`;
 
     // List top 40 parents by atom count or order
     const sortedParents = [...activeData.parents].sort((a, b) => (b.atom_count || 0) - (a.atom_count || 0));
@@ -1024,9 +1039,9 @@
               <div class="stat-sub">top_children parameter limit</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">240-Query Benchmark Context</div>
+              <div class="stat-label">Recorded Range Context</div>
               <div class="stat-value" style="font-size: 1.1rem; color: #f8fafc;">6 &ndash; 54 (mean 25.5)</div>
-              <div class="stat-sub">Aggregate range across all 240 queries</div>
+              <div class="stat-sub">Recorded range across staged 240 rows</div>
             </div>
           </div>
           <p class="footnote">Overlapping DAG traversal: 4,370 multi-parent leaves ensure multi-faceted document clusters are reachable via alternate descent paths. Candidate leaves are dynamically deduplicated.</p>
@@ -1060,6 +1075,8 @@
         const recallAdvantage = (queryRow.flat_recall10 > 0)
           ? `${(queryRow.guided_recall10 / queryRow.flat_recall10).toFixed(1)}&times;`
           : (queryRow.guided_recall10 > 0 ? '&gt; Flat (Flat=0%)' : 'N/A');
+        // Recorded means of the staged 240 rows (earlier freeze). Latest measured
+        // aggregates (seam12a): 73.7% / 48.8% guided, shown on the overview tab.
         const aggMeanGuided = selectedLso ? '47.6%' : '73.0%';
         const aggMeanFlat = selectedLso ? '4.8%' : '5.6%';
 
@@ -1083,9 +1100,9 @@
               <div class="stat-sub">Wall: ${wallMs} ms &bull; Matched: ${queryRow.matched_work ? 'Yes' : 'No'}</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Aggregate 240-Query Context</div>
+              <div class="stat-label">Recorded 240-Row Mean</div>
               <div class="stat-value" style="font-size: 1.1rem; color: #f8fafc;">${aggMeanGuided} vs ${aggMeanFlat}</div>
-              <div class="stat-sub">Benchmark mean (${modeLabel})</div>
+              <div class="stat-sub">Earlier-freeze recording (${modeLabel}); latest: 73.7% / 48.8%</div>
             </div>
           </div>
           <p class="footnote">Benchmark Note: Evaluated against brute-force oracle over ${eligibleAtoms.toLocaleString()} atoms under matched row compute budget (${guidedRows.toLocaleString()} rows). Probe #${probeId} [${family}] (${modeLabel}) recorded ${(queryRow.guided_wall_s).toFixed(4)}s wall time.</p>
@@ -1201,14 +1218,14 @@
     ctx.restore();
 
     // Canvas Status Caption
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = '12px ' + getComputedStyle(document.body).fontFamily;
     ctx.textAlign = 'center';
     const statusText = (currentDataset === '20k')
-      ? `Local 20k Verified Reproduction: ${parents.length} Parents, ${leaves.length} Leaves, ${atoms.length} Atoms — Click any node to inspect`
+      ? `Small graph: ${parents.length} groups, ${leaves.length} bundles, ${atoms.length} passages — click any dot to inspect`
       : (currentClusterFocus === 'overview')
-        ? '10M Verified DAG: 3,711 Parents, 9,177 Leaves (4,370 multi-parent), 63,441 Atoms — Select cluster or click node'
-        : `10M Focus Cluster: ${currentClusterFocus} — Showing authentic child leaves and member atoms`;
+        ? '10M graph (earlier freeze, counts match): 3,711 groups, 9,177 bundles, 63,441 atoms — click any dot'
+        : `10M focus group: ${currentClusterFocus} — child bundles and member passages`;
     ctx.fillText(statusText, w / 2, h - 14);
   }
 
@@ -1468,17 +1485,17 @@
     if (!nodeInspectorContent) return;
 
     if (!node) {
-      nodeInspectorContent.innerHTML = '<p class="text-muted">Select any parent cluster, leaf partition, or atom node on the canvas to inspect its authentic ID, parent linkages, overlapping memberships, member count, and document metadata.</p>';
+      nodeInspectorContent.innerHTML = '<p class="text-muted">Click a topic group, document bundle, or passage on the canvas. You will get a plain-language explanation plus its counts, children, and sample text when the data has it.</p>';
       return;
     }
 
     let html = '';
     if (node.type === 'root') {
       html = `
-        <div class="inspector-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-weight: 700;">VIRTUAL UI ENTRY POINT</div>
-        <p><strong>Corpus Scale:</strong> ${currentDataset === '20k' ? '20,030 TOK_V1 tokens (88 complete documents)' : '10,003,381 TOK_V1 tokens (13,081 complete documents)'}</p>
-        <p><strong>Storage Topology:</strong> ${currentDataset === '20k' ? `${(local20kData && local20kData.parents ? local20kData.parents.length : 'N/A')} seg_parents, ${(local20kData && local20kData.leaves ? local20kData.leaves.length : 'N/A')} seg_leaves, ${(local20kData && local20kData.atoms ? local20kData.atoms.length : 'N/A')} atoms` : '3,711 seg_parents, 9,177 seg_leaves, 63,441 atoms'}</p>
-        <p><strong>DAG Connectivity:</strong> Overlapping directed acyclic graph. Query router scores all <code>seg_parents</code> centroids without global clustering recomputation.</p>
+        <div class="inspector-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-weight: 700;">MAP ENTRY POINT</div>
+        <p class="what-is"><strong>What this is:</strong> the entry point of the map — every topic group hangs below it.</p>
+        <p><strong>Corpus size:</strong> ${currentDataset === '20k' ? '20,030 tokens (88 complete documents)' : '10,003,381 tokens (13,081 complete documents)'}</p>
+        <p><strong>Graph contents:</strong> ${currentDataset === '20k' ? `${(local20kData && local20kData.parents ? local20kData.parents.length : 'N/A')} groups, ${(local20kData && local20kData.leaves ? local20kData.leaves.length : 'N/A')} bundles, ${(local20kData && local20kData.atoms ? local20kData.atoms.length : 'N/A')} passages` : '3,711 groups, 9,177 bundles, 63,441 passages'}</p>
       `;
     } else if (node.type === 'parent') {
       const p = node.raw || {};
@@ -1486,13 +1503,14 @@
       const childrenLinks = children.slice(0, 10).map(cid => `<button class="node-link" data-id="${cid}" data-type="leaf">${cid}</button>`).join(', ');
 
       html = `
-        <div class="inspector-badge" style="background: rgba(129, 140, 248, 0.15); color: #818cf8; font-weight: 700;">PARENT CLUSTER CENTROID</div>
-        <p><strong>Authentic Identifier:</strong> <code>${node.id}</code></p>
-        <p><strong>Child Leaves Count:</strong> ${children.length}</p>
-        <p><strong>Total Member Atoms:</strong> ${p.atom_count || 'N/A'}</p>
-        <p><strong>Child Leaves (Sample):</strong> ${childrenLinks || 'None'}${children.length > 10 ? ` ... (+${children.length - 10} more)` : ''}</p>
+        <div class="inspector-badge" style="background: rgba(45, 212, 191, 0.15); color: #2dd4bf; font-weight: 700;">TOPIC GROUP</div>
+        <p class="what-is"><strong>What this is:</strong> a topic group — documents with similar content gathered under one centroid.</p>
+        <p><strong>ID:</strong> <code>${node.id}</code></p>
+        <p><strong>Child bundles:</strong> ${children.length}</p>
+        <p><strong>Total member passages:</strong> ${p.atom_count || 'N/A'}</p>
+        <p><strong>Child bundles (sample):</strong> ${childrenLinks || 'None'}${children.length > 10 ? ` ... (+${children.length - 10} more)` : ''}</p>
         <div style="margin-top: 0.5rem;">
-          <button class="btn btn-secondary btn-sm" id="btn-focus-this-parent" data-id="${node.id}">Focus &amp; Expand This Cluster</button>
+          <button class="btn btn-secondary btn-sm" id="btn-focus-this-parent" data-id="${node.id}">Focus &amp; Expand This Group</button>
         </div>
       `;
     } else if (node.type === 'leaf') {
@@ -1503,13 +1521,14 @@
       const atomLinks = atomIds.slice(0, 8).map(aid => `<button class="node-link" data-id="${aid}" data-type="atom">${aid.slice(0, 16)}...</button>`).join(', ');
 
       html = `
-        <div class="inspector-badge" style="background: rgba(52, 211, 153, 0.15); color: #34d399; font-weight: 700;">LEAF PARTITION (POSTINGS)</div>
-        <p><strong>Authentic Identifier:</strong> <code>${node.id}</code></p>
-        ${pids.length > 1 ? `<div class="overlap-badge">Overlapping Membership: Connected to ${pids.length} Parent Clusters</div>` : ''}
-        <p><strong>Parent Holons:</strong> ${parentLinks || 'None'}</p>
-        <p><strong>Member Atoms Count:</strong> ${atomIds.length}</p>
-        <p><strong>Associated Document IDs:</strong> ${(l.doc_ids || []).slice(0, 6).join(', ') || 'N/A'}</p>
-        <p><strong>Member Atoms (Sample):</strong> ${atomLinks || 'None'}${atomIds.length > 8 ? ` ... (+${atomIds.length - 8} more)` : ''}</p>
+        <div class="inspector-badge" style="background: rgba(52, 211, 153, 0.15); color: #34d399; font-weight: 700;">DOCUMENT BUNDLE</div>
+        <p class="what-is"><strong>What this is:</strong> a document bundle — the posting list where passages live.</p>
+        <p><strong>ID:</strong> <code>${node.id}</code></p>
+        ${pids.length > 1 ? `<div class="overlap-badge">Shared member: belongs to ${pids.length} topic groups</div>` : ''}
+        <p><strong>Topic groups:</strong> ${parentLinks || 'None'}</p>
+        <p><strong>Member passages:</strong> ${atomIds.length}</p>
+        <p><strong>Document IDs:</strong> ${(l.doc_ids || []).slice(0, 6).join(', ') || 'N/A'}</p>
+        <p><strong>Member passages (sample):</strong> ${atomLinks || 'None'}${atomIds.length > 8 ? ` ... (+${atomIds.length - 8} more)` : ''}</p>
       `;
     } else if (node.type === 'atom') {
       const a = node.raw || {};
@@ -1517,15 +1536,16 @@
       const leafLinks = lids.map(lid => `<button class="node-link" data-id="${lid}" data-type="leaf">${lid}</button>`).join(', ');
 
       html = `
-        <div class="inspector-badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; font-weight: 700;">DOCUMENT ATOM (CHUNK)</div>
-        <p><strong>Authentic Atom ID:</strong> <code>${node.id}</code></p>
-        ${lids.length > 1 ? `<div class="overlap-badge">Overlapping Membership: Member of ${lids.length} Leaf Partitions</div>` : ''}
-        <p><strong>Parent Leaves:</strong> ${leafLinks || 'None'}</p>
-        <p><strong>Source Document ID:</strong> <code>${a.doc_id || 'N/A'}</code></p>
-        ${a.chunk_ix !== undefined ? `<p><strong>Chunk Index:</strong> ${a.chunk_ix}</p>` : ''}
-        ${a.span ? `<p><strong>Token Span:</strong> [${a.span[0]}, ${a.span[1]}]</p>` : ''}
-        ${a.title ? `<p><strong>Document Title:</strong> ${a.title}</p>` : ''}
-        ${a.snippet ? `<blockquote style="background: rgba(255,255,255,0.05); padding: 0.5rem; border-left: 3px solid #fbbf24; margin-top: 0.5rem; font-size: 0.85rem; color: #f8fafc;">${a.snippet}</blockquote>` : ''}
+        <div class="inspector-badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; font-weight: 700;">TEXT PASSAGE</div>
+        <p class="what-is"><strong>What this is:</strong> a text passage (atom) — a chunk cut from a real document.</p>
+        <p><strong>Atom ID:</strong> <code>${node.id}</code></p>
+        ${lids.length > 1 ? `<div class="overlap-badge">Shared member of ${lids.length} bundles</div>` : ''}
+        <p><strong>Bundles:</strong> ${leafLinks || 'None'}</p>
+        <p><strong>Source document:</strong> <code>${a.doc_id || 'N/A'}</code></p>
+        ${a.chunk_ix !== undefined ? `<p><strong>Chunk index:</strong> ${a.chunk_ix}</p>` : ''}
+        ${a.span ? `<p><strong>Token span:</strong> [${a.span[0]}, ${a.span[1]}]</p>` : ''}
+        ${a.title ? `<p><strong>Document title:</strong> ${a.title}</p>` : ''}
+        ${a.snippet ? `<blockquote style="background: rgba(255,255,255,0.05); padding: 0.5rem; border-left: 3px solid #fbbf24; margin-top: 0.5rem; font-size: 0.9rem; color: #f8fafc;">${a.snippet}</blockquote>` : ''}
       `;
     }
 
@@ -1708,12 +1728,187 @@
     });
   }
 
+  // Guided tour (default): 5-step story driving the canvas via existing engine
+  // hooks only (switchTab, dataset/cluster/tier controls, findAndInspectById,
+  // inspectNode, resetView, goToStep). Programmatic zoom is closure-private, so
+  // zoom beats are overlay annotations, not renderer changes.
+  const TOUR_TOTAL = 5;
+  let tourMode = true;
+  let tourStep = 1;
+
+  const TOUR_COPY = {
+    1: {
+      title: 'Step 1 of 5: Feed documents in',
+      body: 'TRACE starts with ordinary documents streaming into the engine. You are on the small graph: 88 complete abstracts, 20,030 tokens. Every dot on the canvas comes from those arrivals.',
+      annotation: 'Small graph: 88 documents in, 144 passages out.'
+    },
+    2: {
+      title: 'Step 2 of 5: Broken into atoms',
+      body: 'Each document is cut into content-addressed passages called atoms — the unit everything else points at. One real passage is open in the inspector, with its title and text.',
+      annotation: 'Annotated zoom: the passage open in the inspector is one real atom.'
+    },
+    3: {
+      title: 'Step 3 of 5: Self-organizes into schemas',
+      body: 'Atoms attach to document bundles, bundles gather under topic groups — with no global rebuild. Pink links are shared members: 8 bundles here belong to more than one group (4,370 shared leaves in the 10M graph file).',
+      annotation: 'Pink links = shared members. No rebuild: groups form as arrivals land.'
+    },
+    4: {
+      title: 'Step 4 of 5: Ask a question',
+      body: 'A question scores all 3,711 group centroids, keeps the top branches, and descends — scoring thousands of rows instead of everything. Measured: guided recall@10 0.7367 all-sources / 0.4883 leave-source-out. The replay below is the recorded mechanism.',
+      annotation: 'Retrieval: score groups, keep top branches, descend, rank.'
+    },
+    5: {
+      title: 'Step 5 of 5: Repairs itself',
+      body: 'Background repair rebalances the graph until residual debt hits exactly zero: 6 iterations, 5,847 to 0, inside a 9,494.9 s run peaking at about 8.5 GB. Full measured card below — or jump to the 10M scale.',
+      annotation: 'Repair converges: 6 iterations, debt 5,847 to exactly 0.'
+    }
+  };
+
+  function setDatasetAndRedraw(v) {
+    if (datasetSelect) datasetSelect.value = v;
+    currentDataset = v;
+    resetView();
+    populateClusterSelector();
+    updateStatusBanner();
+    layoutAndDrawTopology();
+  }
+
+  function focusTourAtom() {
+    setDatasetAndRedraw('20k');
+    if (!local20kData || !local20kData.parents || !local20kData.parents.length) return;
+    const sorted = [...local20kData.parents].sort((a, b) => (b.atom_count || 0) - (a.atom_count || 0));
+    const p = sorted[0];
+    if (!p) return;
+    currentClusterFocus = p.id;
+    if (clusterSelect) clusterSelect.value = p.id;
+    const atom = (local20kData.atoms || []).find(a => a.snippet) || local20kData.atoms[0];
+    if (atom) findAndInspectById(atom.id);
+    else inspectNode({ type: 'parent', id: p.id, raw: p });
+    layoutAndDrawTopology();
+  }
+
+  function renderTourAnnotation(text) {
+    const panelNote = document.getElementById('tour-annotation');
+    if (panelNote) panelNote.textContent = tourMode ? (text || '') : '';
+    let note = document.getElementById('tour-canvas-note');
+    if (!note) {
+      const wrap = document.querySelector('.canvas-wrapper');
+      if (wrap) {
+        note = document.createElement('div');
+        note.id = 'tour-canvas-note';
+        note.className = 'tour-canvas-note';
+        wrap.appendChild(note);
+      }
+    }
+    if (note) {
+      const topoActive = document.getElementById('tab-topology') &&
+        document.getElementById('tab-topology').classList.contains('active');
+      if (tourMode && topoActive && text) {
+        note.textContent = text;
+        note.hidden = false;
+      } else {
+        note.hidden = true;
+      }
+    }
+  }
+
+  function paintTourChrome() {
+    const titleEl = document.getElementById('tour-title');
+    const bodyEl = document.getElementById('tour-body');
+    const cardEl = document.getElementById('tour-measured-card');
+    const prevEl = document.getElementById('tour-prev');
+    const nextEl = document.getElementById('tour-next');
+    const toggleEl = document.getElementById('tour-toggle');
+    const sectionEl = document.getElementById('guided-tour');
+    const copy = TOUR_COPY[tourStep] || TOUR_COPY[1];
+    if (titleEl) titleEl.textContent = tourMode ? copy.title : 'Guided tour (off — free explore mode)';
+    if (bodyEl) bodyEl.textContent = tourMode ? copy.body : 'Tour hidden. The full graph, search, filters, and inspector are yours — one click restarts the 60-second story.';
+    document.querySelectorAll('.tour-dot').forEach(d => {
+      const s = parseInt(d.getAttribute('data-tour-step'), 10);
+      const on = tourMode && s === tourStep;
+      d.classList.toggle('active', on);
+      if (on) d.setAttribute('aria-current', 'step');
+      else d.removeAttribute('aria-current');
+    });
+    if (cardEl) cardEl.hidden = !(tourMode && tourStep === 5);
+    if (prevEl) prevEl.disabled = !tourMode || tourStep === 1;
+    if (nextEl) nextEl.disabled = !tourMode || tourStep === TOUR_TOTAL;
+    if (toggleEl) {
+      toggleEl.textContent = tourMode ? 'Exit tour · free explore' : 'Restart the 60-second tour';
+      toggleEl.setAttribute('aria-pressed', tourMode ? 'true' : 'false');
+    }
+    if (sectionEl) sectionEl.classList.toggle('tour-off', !tourMode);
+  }
+
+  function applyTourStep(n) {
+    if (!tourMode) { paintTourChrome(); renderTourAnnotation(''); return; }
+    tourStep = Math.min(TOUR_TOTAL, Math.max(1, n));
+    const copy = TOUR_COPY[tourStep];
+    const topBtn = document.getElementById('tab-btn-topology');
+    const queryBtn = document.getElementById('tab-btn-queries');
+    if (tourStep === 4) {
+      if (queryBtn) switchTab(queryBtn);
+      goToStep(1);
+    } else {
+      if (topBtn) switchTab(topBtn);
+      if (tourStep === 2) focusTourAtom();
+      else setDatasetAndRedraw('20k');
+    }
+    paintTourChrome();
+    renderTourAnnotation(copy.annotation);
+  }
+
+  function startTour(n) {
+    tourMode = true;
+    applyTourStep(n || 1);
+  }
+
+  function exitTour() {
+    tourMode = false;
+    resetView();
+    layoutAndDrawTopology();
+    paintTourChrome();
+    renderTourAnnotation('');
+  }
+
+  function initTour() {
+    const prevEl = document.getElementById('tour-prev');
+    const nextEl = document.getElementById('tour-next');
+    const scaleEl = document.getElementById('tour-scale');
+    const toggleEl = document.getElementById('tour-toggle');
+    if (prevEl) prevEl.addEventListener('click', () => applyTourStep(tourStep - 1));
+    if (nextEl) nextEl.addEventListener('click', () => applyTourStep(tourStep + 1));
+    if (scaleEl) scaleEl.addEventListener('click', () => {
+      const topBtn = document.getElementById('tab-btn-topology');
+      if (topBtn) switchTab(topBtn);
+      setDatasetAndRedraw('10m');
+      renderTourAnnotation('10M scale: 3,711 groups, 9,177 bundles, 63,441 passages (earlier freeze, counts match).');
+    });
+    if (toggleEl) toggleEl.addEventListener('click', () => {
+      if (tourMode) exitTour();
+      else startTour(tourStep);
+    });
+    document.querySelectorAll('.tour-dot').forEach(d => {
+      d.addEventListener('click', () => {
+        tourMode = true;
+        applyTourStep(parseInt(d.getAttribute('data-tour-step'), 10));
+      });
+    });
+    // Keep the canvas overlay annotation truthful when the user switches tabs manually.
+    tabButtons.forEach(b => b.addEventListener('click', () => {
+      if (tourMode) renderTourAnnotation((TOUR_COPY[tourStep] || {}).annotation);
+    }));
+    paintTourChrome();
+  }
+
   // Lifecycle Init
   document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initStepper();
     initCanvasInteractions();
+    initTour();
     loadData();
+    applyTourStep(1);
   });
 
   // Read-only QA Test & Pure Validation API (pure functions / getters, non-mutating)
@@ -1734,7 +1929,15 @@
       EXPECTED_10M_GZIP_SHA256,
       EXPECTED_10M_PLAIN_BYTES,
       EXPECTED_10M_PLAIN_SHA256,
-      MAX_PAYLOAD_BYTES
+      MAX_PAYLOAD_BYTES,
+      SEAM12A_WALLS_S,
+      SEAM12A_TOTAL_WALL_S
+    });
+    window.TRACE_TOUR = Object.freeze({
+      go: applyTourStep,
+      start: startTour,
+      exit: exitTour,
+      state: () => ({ tourMode, tourStep, total: TOUR_TOTAL })
     });
   }
 

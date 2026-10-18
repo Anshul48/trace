@@ -56,14 +56,19 @@ tree is present, the full set runs unchanged:
 
 ## What the 10M run needs (not runnable from this repo)
 
-- Corpus: staged `docs-100m.jsonl` cache + prefix/meta/index/vector pins in
-  `receipts/input.json` (VM-side `beam/pkg/data/`, not shipped).
-- Hardware: 16 vCPU / ~125 GiB GCP VM, solo CPUs 0–2, ~3.6 h wall, ~2.9 GB
-  retained store. Do NOT relaunch a 10M run casually: it is a billed,
-  multi-hour experiment, not a test.
-- Command (record, from the audit plan): `taskset -c 0-2 nice -n 19
-  product_pilot.py --tokens 10000000 --profile vm --drain-instrument
-  --drain-budget-s 5438` with derived caps 669,436 / 1,000,000.
+- Corpus: staged `docs-100m.jsonl` (VM-side data dir, not shipped);
+  10,003,381 actual tokens / 13,081 docs. Vectors are FP32 cached,
+  generated/cached at run time.
+- Hardware: shared VM, solo CPUs 0–1, ~2.6 h wall (9,494.9 s), 2.85 GiB
+  retained store, ~8.5 GB parent RSS peak. Do NOT relaunch a 10M run
+  casually: it is a billed, multi-hour experiment, not a test.
+- Command (record, seam12a run `o94-scale10m`): `taskset -c 0,1 nice -n 19
+  runtime.sh tools/product_pilot.py --tokens 10000000 --profile vm
+  --drain-attribution --drain-census --holon-descriptor-columnar
+  --overrides-columnar --descriptor-matrix-all --per-view-sharing
+  --cold-scan-chunk 4096 --repair-columnar --candidate-source hnsw
+  --drain-bounded-k 32 --candidate-shadow-audit 8` with
+  `SUP_REUSE_VIEW_POOL=1` and derived cap `max_delta_entries` 669,436.
 
 ## Receipts
 
@@ -72,8 +77,8 @@ tree is present, the full set runs unchanged:
 `phase-telemetry.json`, `manifest-before/after.json`, `memory.json`,
 `probes.json`, `kill-marker.stages.json`, plus audit `AUDIT-RESULT.json`,
 `AUDIT-STATUS.json`, `VM-10M-ACCEPTANCE.json`, `MANIFEST.json`, `PLAN.json`,
-`LAUNCH.json`. The 3.4 GB `runs/pilot-10M/store/` is excluded (size);
-its sha (`52e88439…`, 229,927 files) is asserted in the acceptance record.
+`LAUNCH.json`. These stage the earlier-freeze run bytes (see the identity
+note in BENCHMARKS.md); the large retained store is excluded (size).
 
 ## Small-scale portable reproduction (20k)
 

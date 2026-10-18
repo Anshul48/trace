@@ -78,7 +78,7 @@
       padding: 0.7rem 0.85rem;
     }
     .stat .v { font-size: 1.25rem; font-weight: 700; color: #ffffff; }
-    .stat .l { font-size: 0.78rem; color: #94a3b8; }
+    .stat .l { font-size: 0.85rem; color: #cbd5e1; }
     .paths { display: grid; gap: 0.75rem; margin: 1rem 0; }
     @media (min-width: 640px) { .paths { grid-template-columns: 1fr 1fr 1fr; } }
     .path {
@@ -91,7 +91,7 @@
     }
     .path:hover { border-color: #0284c7; }
     .path .t { font-weight: 700; color: #ffffff; font-size: 1rem; }
-    .path .d { font-size: 0.85rem; color: #94a3b8; margin-top: 0.3rem; }
+    .path .d { font-size: 0.9rem; color: #cbd5e1; margin-top: 0.3rem; }
     .btn-row { margin-top: 0.6rem; }
     .btn {
       display: inline-block;
@@ -160,9 +160,9 @@
     <section aria-label="Three ways in">
       <h2>Three ways in</h2>
       <div class="paths">
-        <a class="path" href="explorer/">
-          <div class="t">Explore the graph</div>
-          <div class="d">Clickable map of the qualified 10M document graph: topic hubs, bundles, passages, and a step-by-step replay of how a question is routed.</div>
+        <a class="path" href="explorer/#tab-topology">
+          <div class="t">Take the 60-second tour</div>
+          <div class="d">The guided default: feed in, break into atoms, self-organize, ask, repair — on the real graph. Starts on the small graph; 10M one click away.</div>
         </a>
         <a class="path" href="recording/">
           <div class="t">Watch the guided demo</div>
@@ -173,7 +173,8 @@
           <div class="d">Verified quickstart in the README: fresh tarball extract, in-tree venv, smoke checks, and a real 10K-token pilot to PASS.</div>
         </a>
       </div>
-      <div class="note"><strong>Heads-up on the explorer:</strong> the live graph still shows the <em>earlier</em> freeze (head <code>e8334c07</code>, 166,457 commits, 207 files, recall 0.73 / 0.4758, wall 12,973 s) &mdash; same corpus scale, older run. The <code>seam12a</code> numbers above are the latest.</div>
+      <div class="btn-row"><a class="btn" href="explorer/#tab-topology">Take the 60-second tour</a></div>
+      <div class="note"><strong>Heads-up on the explorer:</strong> the live graph data files are the <em>earlier</em> freeze, counts match (3,711 parents / 9,177 leaves / 63,441 atoms). The <code>seam12a</code> numbers above are the latest measured run.</div>
     </section>
 
     <section aria-label="Deep dive">
