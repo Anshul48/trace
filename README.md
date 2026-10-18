@@ -1,16 +1,25 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-# TRACE — Self-Organizing Retrieval Engine (10M scale, seam12a freeze)
+# TRACE — a self-organizing memory database (research preview)
 
+[![Status: research preview](https://img.shields.io/badge/Status-research_preview-blue.svg)](#status-and-roadmap)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Source Freeze Manifest](https://img.shields.io/badge/Freeze_Manifest-8d3bbb6b_(253_files)-blue.svg)](freeze-src/cand/SOURCEFREEZE.json)
 [![Qualification Receipt](https://img.shields.io/badge/Receipt-10M_PASS_(9494.9s)-brightgreen.svg)](docs/BENCHMARKS.md)
 [![Recorded 20k Run](https://img.shields.io/badge/Recording-20k_Run_(27.8s)-blue.svg)](https://anshul48.github.io/trace/recording/)
 
-TRACE organizes a continuous stream of documents into an overlapping multi-tier graph, so newly ingested items become searchable immediately without rebuilding the whole index. In one measured 10-million-token run, about thirteen thousand documents were organized into 3,711 parent groups and 9,177 leaf partitions, every leftover repair item was drained to zero, and guided routing put the right answer in the top 10 for roughly three out of four test queries.
+**TRACE is a self-organizing memory database: a 10-million-token persistent memory for LLMs and agents, filing every arrival into schemas and deltas without rebuilding the index.** In one frozen, receipt-backed run, 10,003,381 tokens across 13,081 documents settled into an overlapping graph of 3,711 parent groups and 9,177 leaf partitions, guided routing put the right answer in the top 10 for roughly three out of four test queries, and a bounded repair pass drained every leftover item to zero.
 
-## Measured 10M stat strip (freeze seam12a, run o94-scale10m)
+## What it does for you
 
-Every number below is measured and receipt-backed. Sources: the frozen `result.json` (claim = `measured`), `rss-hwm.txt`, and `rss-series.tsv` from run `o94-scale10m`.
+**Researchers** — use it to explore long-horizon agent memory on a frozen run you can cite: retrieval-at-scale experiments with guided-versus-flat routing under matched work budgets, crash-recovery gates, fresh-item visibility probes, and cross-domain schema linking through the overlapping parent/leaf graph.
+
+**Developers** — use it to explore persistent memory beyond the context window: ingest once with the Python package and the `product_pilot` CLI, run local-first in an isolated venv with no services or containers, and build on content-addressed storage where every artifact hashes back to the frozen manifest.
+
+Short on time? Read the proof strip, pick one path under See it, and come back for the 5-minute run.
+
+## Proof strip (freeze seam12a, run o94-scale10m)
+
+Every number below is measured and receipt-backed: the frozen `result.json` (claim = `measured`), `rss-hwm.txt`, and `rss-series.tsv` from run `o94-scale10m`.
 
 | What | Measured value |
 |---|---|
@@ -18,15 +27,22 @@ Every number below is measured and receipt-backed. Sources: the frozen `result.j
 | Commits | 5,353 source commits → 164,195 final commits |
 | Frozen source | 253 files, `frozen_ok=true` |
 | Wall | 9,494.9 s (~2.6 h) |
-| Guided recall@10 | 0.7367 (all) / 0.4883 (LSO) — 120 probes per mode across chunk, noisy, and cross families |
-| Matched flat recall@10 | 0.055 / 0.0017 |
-| Repair | 6 iterations, debt 5,847 → 0; 0 pending documents |
+| Guided recall@10 | 0.7367 (all) / 0.4883 (leave-source-out) — 120 probes per mode across chunk, noisy, and cross families |
+| Self-repair | 6 iterations, debt 5,847 → 0; 0 pending documents |
 | Fresh-item visibility | 33/33 queries complete within 5 s (p50 96.8 ms, p95 115.5 ms); append ACK-to-query 0.114 s |
 | Reader load | 2 threads, 27,796 requests, p50 74.7 ms |
-| Memory peaks | tree 9,700.9 MiB (@t=3,097 s) / parent 8,489.1 / child 7,169.2 MiB |
+| Peak RAM | ~8.5 GB (parent-process peak 8,489.1 MiB; child 7,169.2 MiB) |
 | Retained store | 2.85 GiB |
 
-Labels used above are the receipt labels: `all` means all-sources mode, `LSO` means leave-source-out (probe source excluded from the index). The flat arm scored the same mean row budget per query as the guided arm. "Recall@10" here is protocol recall — agreement with an exact oracle top-10 on the staged corpus — not a semantic relevance claim (see Limitations).
+Labels: `all` means all-sources mode, `leave-source-out` means the probe's own document was hidden from the index. "Recall@10" here is protocol recall — agreement with an exact oracle top-10 on the staged corpus — not a semantic relevance claim.
+
+---
+
+## See it
+
+- **Animated demo:** [recorded 20k terminal run (27.8 s)](https://anshul48.github.io/trace/recording/) — install, frozen-file checks, and an engine run to `PASS`, replayed in the browser.
+- **Explorer:** [interactive 10M graph](https://anshul48.github.io/trace/explorer/) — structural DAG view, node inspector, and query-routing replay.
+- Identity note: the live explorer still shows the earlier freeze (head `e8334c07`, 166,457 commits, 207 files, recall 0.73/0.4758, wall 12,973 s) — same corpus scale, older run; the seam12a numbers above will appear there only after its data files are re-exported from the o94 run.
 
 ---
 
@@ -125,7 +141,27 @@ Real output of step 5 (from `out-pilot/result.json`): `claim=measured, status=PA
 
 ---
 
-## Run the full 10M
+## Why it matters
+
+A language model cannot fit thirteen thousand documents into its prompt, so any agent working over a growing corpus needs retrieval: pick the right handful of passages first, then read only those. TRACE is built for that picking step — arrivals become searchable the moment they land, and each question descends only the most promising branches instead of scoring everything. The 10M run measured how often the pick contains the answer under a fixed work budget. That is the whole bet: bounded, repairable memory that grows with the agent instead of a context window that does not.
+
+---
+
+## Deep dive
+
+How it works lives behind these links:
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — storage ledger, fix stack, reader isolation.
+- [docs/CODE-TOUR.md](docs/CODE-TOUR.md) — file-by-file walkthrough of the frozen tree.
+- [docs/BENCHMARKS.md](docs/BENCHMARKS.md) — unabridged benchmark records and derivations.
+- [docs/REPRO.md](docs/REPRO.md) — reproduction commands, environment, pin hashes.
+- [Release seam12a-10m-freeze](https://github.com/Anshul48/trace/releases/tag/seam12a-10m-freeze) — frozen source tarball, measurements, and study record.
+- [repro-20k/README.md](repro-20k/README.md) — portable 20k-token reproduction (88 documents, precomputed vector cache).
+- [tools/verify_freeze.py](tools/verify_freeze.py) / [tools/check_receipts.py](tools/check_receipts.py) / [tools/check_links.py](tools/check_links.py) — freeze, receipt, and link checks run in CI.
+
+---
+
+## Reproduce the 10M benchmark
 
 ### The exact o94 command
 
@@ -143,7 +179,7 @@ SUP_REUSE_VIEW_POOL=1 taskset -c 0,1 bash runtime.sh tools/product_pilot.py \
   --candidate-shadow-audit 8
 ```
 
-Receipt-recorded requirements: wall 9,494.9 s (~2.6 h); about 10 GB or more of RAM (peaks in the stat strip); 2.85 GiB of retained disk; interpreter from the run receipts with numpy 2.5.3, single-threaded BLAS (`OMP/OPENBLAS/MKL_NUM_THREADS=1`), `nice 19`.
+Receipt-recorded requirements: wall 9,494.9 s (~2.6 h); peak RAM ~8.5 GB (parent-process peak 8,489.1 MiB); 2.85 GiB of retained disk; interpreter from the run receipts with numpy 2.5.3, single-threaded BLAS (`OMP/OPENBLAS/MKL_NUM_THREADS=1`), `nice 19`.
 
 ### Corpus format
 
@@ -156,39 +192,7 @@ There is no one-click 10M reproduction today. A full run is blocked by both of t
 1. The 10M corpus (`docs-100m.jsonl` plus `emb_cache/`) is external and not shipped — the release tarball is source-only (1.2 MB).
 2. `--profile vm` is hostname-gated to `trace-build500` (`tools/product_pilot.py:871-872` exits with "VM profile requires existing trace-build500; local runs capped at 1M TOK"). On your own machine the maximum is 1M tokens via `--profile local`.
 
-Labeling rule: running the command above on your own corpus is a **your-corpus 10M-scale run**. **Reproducing the measured o94 numbers** (the stat strip: 0.7367/0.4883, 9,494.9 s, and the rest) additionally requires the o94 corpus and the build VM, and is not possible today.
-
----
-
-## See it first
-
-- Interactive explorer: [https://anshul48.github.io/trace/explorer/](https://anshul48.github.io/trace/explorer/) (source: [docs/explorer/index.html](docs/explorer/index.html)) — structural DAG view, node inspector, and query-routing replay.
-- Guided demo recording: [https://anshul48.github.io/trace/recording/](https://anshul48.github.io/trace/recording/) (source: [docs/recording/index.html](docs/recording/index.html)) — authentic terminal capture of a local 20k run (27.8 s), separate from the 10M qualification.
-
-Identity notice, please read before comparing numbers: the live explorer currently shows the **earlier** freeze, not seam12a/o94 — head `e8334c07` with 166,457 commits, 207 frozen files (manifest `38c66bef`), harness `9f516288`, guided recall 0.73 / 0.4758, wall 12,973 s. It is the same corpus scale (tokens, docs, atoms, leaves, and parents match), but a different, earlier run. The o94/seam12a numbers in this README must not be pasted onto those pages until the explorer data files are re-exported from the o94 run.
-
----
-
-## What the 10M result means in real-world terms
-
-Think of thirteen thousand documents arriving as a stream — support tickets, research notes, a growing team wiki. TRACE files each one into parent groups (broad topics) and leaf partitions (tight clusters), letting an item belong to more than one group where it genuinely fits, instead of recomputing the whole filing system on every arrival.
-
-Self-repair going from 5,847 to 0 means this: after the stream finished, about six thousand items were sitting in slightly-off groups, and a bounded cleanup pass moved every one of them home, leaving zero stragglers and zero documents still waiting to be filed.
-
-Recall@10 is a simple scorecard. For each test question, look at the ten answers the system returns and ask: is the right answer among them? Guided routing — score the parent groups first, then search only the most promising branches — found it about 74% of the time in all-sources mode (about 49% when the question's own document was hidden from the index). Scanning the same number of rows without guidance found it about 6% of the time. Same budget, different strategy.
-
-Why this attacks context-window limits: a language model cannot fit thirteen thousand documents into its prompt. The practical alternative is retrieval — pick the right handful of documents first, then read only those. Bounded branch descent is exactly that picking step, and the 10M run measured how often the pick contains the answer under a fixed work budget.
-
----
-
-## How it works
-
-1. **Intake.** Text is tokenized (TOK_V1) into word chunks called atoms and appended to a journaled intake backlog.
-2. **Placement.** During batched drains, atoms attach to leaf clusters (`decide_leaf`) and leaves attach to parent clusters (`decide_parent`), updating centroids incrementally. Membership is many-to-many: leaves may belong to several parents and atoms to several leaves.
-3. **Repair.** A bounded local repair pass enforces cohesion floors, and an explicit final `repair_to_zero` phase drains residual debt to 0 without global recomputation.
-4. **Guided routing.** A query is scored against all parent centroids, the top parents are selected, child edges are descended, and member atoms are ranked to produce the top 10.
-
-Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/CODE-TOUR.md](docs/CODE-TOUR.md), [docs/BENCHMARKS.md](docs/BENCHMARKS.md), [docs/REPRO.md](docs/REPRO.md).
+Labeling rule: running the command above on your own corpus is a **your-corpus 10M-scale run**. **Reproducing the measured o94 numbers** (the proof strip: 0.7367/0.4883, 9,494.9 s, and the rest) additionally requires the o94 corpus and the build VM, and is not possible today.
 
 ---
 
@@ -203,7 +207,7 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/CODE-TOUR.md](docs/
 | Fresh visibility | 33/33 within 5 s; p50 96.8 ms, p95 115.5 ms | `result.json` F1 block, n=33 |
 | Append latency | ACK-to-query 0.114 s | `result.json` |
 | Reader load | 2 threads, 27,796 requests, p50 74.7 ms | `result.json` |
-| Memory | tree 9,700.9 MiB @t=3,097 s; parent 8,489.1; child 7,169.2 MiB | `rss-hwm.txt` + `rss-series.tsv` (1,899 rows) + `result.json` |
+| Memory | parent-process peak 8,489.1 MiB (~8.5 GB); child 7,169.2 MiB | `rss-hwm.txt` + `rss-series.tsv` (1,899 rows) + `result.json` |
 | Store | 2.85 GiB retained (3,058,624,883 B) | `result.json` / study record (VM-side) |
 | Repair | 6 iterations, 5,847 → 0 | `result.json` |
 | Derived caps | `max_delta_entries` 669,436 (37,117 commits / 7,035 atoms measured, margin 2.0); kill wait 316 s; drain k=32, cold-scan chunk 4,096 | `result.json` |
@@ -211,23 +215,22 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/CODE-TOUR.md](docs/
 
 ---
 
-## Limitations
+## Status and roadmap
+
+**Status: research preview.** TRACE is an experimental research prototype, proudly so: one measured 10M run on one VM, receipt-backed and honestly labeled — not a product, and no state-of-the-art claims are made.
 
 - Single-run provenance: the numbers come from one run (`o94-scale10m`) on one VM (`trace-build500`); no independent reproduction of the 10M figures exists yet.
-- The 10M corpus and embedding cache are not redistributed; the tarball is source-only.
+- The 10M corpus and embedding cache are not redistributed; the tarball is source-only (1.2 MB).
 - No Python version string appears in the run receipts (the 5-minute path above was verified on Python 3.12.3 with numpy 2.5.4 against receipts recording numpy 2.5.3).
 - Retained-disk (2.85 GiB) and corpus-path figures are VM-side and cannot be verified from another host.
 - Recall figures measure protocol agreement with an exact oracle on the staged corpus — not semantic relevance, ranking quality in general, or latency guarantees on other hardware.
 - TRACE is single-writer append-only with crash recovery to a consistent ledger boundary; it does not implement distributed transactions.
-- 100M tokens and beyond are not qualified; the drain phase is the known scaling bottleneck (see Roadmap). No state-of-the-art claims are made.
 
----
+Roadmap:
 
-## Roadmap
-
-- Re-export the explorer data files from the o94 run so the live pages show seam12a numbers (until then, the identity notice above stands).
+- Re-export the explorer data files from the o94 run so the live pages show seam12a numbers (until then, the identity note above stands).
 - Publish a corpus fetch or prep script so a public 10M reproduction is possible end to end.
-- Qualify larger scales (100M–500M+ tokens); this is roadmap, not a claim.
+- Qualify larger scales (100M–500M+ tokens); this is future work, not a claim.
 - Keep the 20k portable path working as the one-command local proof.
 
 ---
@@ -237,21 +240,6 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/CODE-TOUR.md](docs/
 - Freeze: **seam12a**, tarball sha256 `8d3bbb6bf53e1731811065a9de156a9997be740d598cd1dfa0a3d946928dbf64` (verified `sha256sum -c`: OK; manifest: 253 entries, 0 diffs).
 - Run: **o94-scale10m**. Pins: probes `b332d62d…`, harness `9f78479a…`, final commits **164195**.
 - Manifest: [freeze-src/cand/SOURCEFREEZE.json](freeze-src/cand/SOURCEFREEZE.json). Freeze check: `python3 tools/verify_freeze.py`.
-
----
-
-## Repo map
-
-- [docs/explorer/index.html](docs/explorer/index.html) — interactive 10M DAG explorer (static viewer, no backend).
-- [docs/recording/index.html](docs/recording/index.html) — terminal-cast player for the recorded 20k run.
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — storage ledger, fix stack, reader isolation.
-- [docs/CODE-TOUR.md](docs/CODE-TOUR.md) — file-by-file walkthrough of the frozen tree.
-- [docs/BENCHMARKS.md](docs/BENCHMARKS.md) — unabridged benchmark records and derivations.
-- [docs/REPRO.md](docs/REPRO.md) — reproduction commands, environment, pin hashes.
-- [repro-20k/README.md](repro-20k/README.md) — portable 20k-token reproduction (88 documents, precomputed vector cache).
-- [repro-20k/LICENSES-DATA-MODEL.md](repro-20k/LICENSES-DATA-MODEL.md) — upstream data and model attribution.
-- [demo-app/](demo-app/README.md) — in-memory 120-probe viewer demonstrating the frozen guided/flat scoring in isolation (educational, separate from the storage harness).
-- [tools/verify_freeze.py](tools/verify_freeze.py) / [tools/check_receipts.py](tools/check_receipts.py) / [tools/check_links.py](tools/check_links.py) — freeze, receipt, and link checks run in CI.
 
 ---
 
