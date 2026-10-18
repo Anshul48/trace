@@ -71,8 +71,8 @@
           <tbody>
             <tr><th scope="row">Corpus</th><td>10,003,381 tokens / 13,081 docs / 63,441 atoms</td></tr>
             <tr><th scope="row">Guided recall@10 (all)</th><td>0.7367</td></tr>
-            <tr><th scope="row">Guided recall@10 (leave-schema-out)</th><td>0.4883</td></tr>
-            <tr><th scope="row">Flat recall@10, matched-work control</th><td>0.055 (all) / 0.0017 (leave-schema-out)</td></tr>
+            <tr><th scope="row">Guided recall@10 (leave-source-out)</th><td>0.4883</td></tr>
+            <tr><th scope="row">Flat recall@10, matched-work control</th><td>0.055 (all) / 0.0017 (leave-source-out)</td></tr>
             <tr><th scope="row">Self-repair</th><td>5,847 &rarr; 0 in 6 iterations</td></tr>
             <tr><th scope="row">Peak RAM</th><td>~8.5 GB (parent-process peak 8,489.1 MB)</td></tr>
             <tr><th scope="row">Wall time</th><td>9,494.9 s (~2.6 h)</td></tr>
@@ -80,10 +80,10 @@
         </table>
         <nav class="deep-dives" aria-label="Deep dive">
           <span>Deep dive:</span>
-          <a href="../BENCHMARKS.html">Benchmarks</a>
-          <a href="../ARCHITECTURE.html">Architecture</a>
+          <a href="https://github.com/Anshul48/trace/blob/main/docs/BENCHMARKS.md">Benchmarks</a>
+          <a href="https://github.com/Anshul48/trace/blob/main/docs/ARCHITECTURE.md">Architecture</a>
           <a href="../explorer/">Interactive explorer</a>
-          <a href="../REPRO.html">Reproduction guide</a>
+          <a href="https://github.com/Anshul48/trace/blob/main/docs/REPRO.md">Reproduction guide</a>
         </nav>
       </section>
 
@@ -104,7 +104,7 @@
   --drain-attribution --drain-census --holon-descriptor-columnar --overrides-columnar \
   --descriptor-matrix-all --per-view-sharing --cold-scan-chunk 4096 --repair-columnar \
   --candidate-source hnsw --drain-bounded-k 32 --candidate-shadow-audit 8</code></pre>
-        <p>See the <a href="../REPRO.html">reproduction guide</a> for data formats and the exact recipe.</p>
+        <p>See the <a href="https://github.com/Anshul48/trace/blob/main/docs/REPRO.md">reproduction guide</a> for data formats and the exact recipe.</p>
       </section>
 
       <section class="raw-run" id="raw-run" aria-labelledby="raw-heading">

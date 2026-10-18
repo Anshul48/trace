@@ -240,7 +240,7 @@
       ctx.fillRect(bx, by, bw, bh);
       ctx.strokeStyle = C.amber;
       ctx.strokeRect(bx, by, bw, bh);
-      var msg = 'recall@10  0.7367 (all)  ·  0.4883 (leave-schema-out)';
+      var msg = 'recall@10  0.7367 (all)  ·  0.4883 (leave-source-out)';
       drawText(msg, bx + 10, by + 19, { font: 'bold 12px monospace, monospace', color: C.amber });
     }
   }
@@ -283,7 +283,7 @@
     'Scene 1 — Feed it documents: 88 complete documents (20,030 tokens in the recorded 20K run) fly into the store.',
     'Scene 2 — It breaks them into atoms: 144 content-addressed atoms, each tagged by its content hash.',
     'Scene 3 — It self-organizes into schemas: atoms cluster into labeled groups the engine can reason over.',
-    'Scene 4 — Ask a question: retrieval paths light up and answers come back ranked — guided recall@10 0.7367 (all) / 0.4883 (leave-schema-out).',
+    'Scene 4 — Ask a question: retrieval paths light up and answers come back ranked — guided recall@10 0.7367 (all) / 0.4883 (leave-source-out).',
     'Scene 5 — It repairs itself: 5,847 open issues drain to 0 over 6 iterations — measured at 10M tokens: 10,003,381 tok / 63,441 atoms / ~8.5 GB RAM / 0.7367 recall@10.'
   ];
   var DUR = [4.2, 4.2, 4.6, 5.0, 6.0]; // seconds per scene
