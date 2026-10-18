@@ -124,11 +124,15 @@
     table.facts th { background: #1e293b; color: #e2e8f0; }
     table.facts td { color: #cbd5e1; }
     footer { max-width: 880px; margin: 2.5rem auto 0; font-size: 0.8rem; color: #64748b; border-top: 1px solid #334155; padding-top: 1rem; }
+    .hero-art { margin: 1.25rem 0 0; border: 1px solid #334155; border-radius: 12px; overflow: hidden; background: #0b1220; }
+    .hero-art canvas { display: block; width: 100%; height: auto; aspect-ratio: 880 / 360; }
+    .hero-art figcaption { font-size: 0.8rem; color: #94a3b8; padding: 0.5rem 0.9rem 0.7rem; }
+    .hero-fallback { display: block; width: 100%; height: auto; }
     @media (prefers-reduced-motion: reduce) {
       * { transition: none !important; animation: none !important; }
     }
   </style>
-  <noscript><style>.path:hover { border-color: #334155; }</style></noscript>
+  <noscript><style>.path:hover { border-color: #334155; } #hero-canvas { display: none; }</style></noscript>
 </head>
 <body>
   <header class="top">
@@ -138,6 +142,12 @@
   </header>
 
   <main>
+    <figure class="hero-art" aria-label="Memory self-organizing: abstract animation">
+      <canvas id="hero-canvas" width="880" height="360" role="img" aria-label="Abstract animation: amber particles drift and gather into teal schema constellations">Memory self-organizing: amber particles gather into teal schema constellations.</canvas>
+      <noscript><img class="hero-fallback" src="assets/constellation-hero.svg" alt="Abstract illustration: amber particles gathered into teal schema constellations" width="880" height="360"></noscript>
+      <figcaption>Memory self-organizing &mdash; abstract illustration. Every number on this page is HTML text, measured and receipt-backed.</figcaption>
+    </figure>
+
     <section aria-label="What it does for you">
       <h2>What it does for you</h2>
       <p><strong>Researchers:</strong> long-horizon agent memory you can cite, retrieval-at-scale experiments under matched work budgets, and cross-domain schema linking through an overlapping graph.</p>
@@ -147,12 +157,12 @@
     <section aria-label="Frozen numbers">
       <h2>Proof &mdash; freeze <code>seam12a</code>, run <code>o94-scale10m</code></h2>
       <div class="strip">
-        <div class="stat"><div class="v">10,003,381</div><div class="l">tokens / 13,081 docs / 63,441 atoms</div></div>
-        <div class="stat"><div class="v">0.7367 / 0.4883</div><div class="l">guided recall@10: all-sources / leave-source-out (120 probes)</div></div>
-        <div class="stat"><div class="v">9,494.9 s</div><div class="l">wall (~2.6 h); repair 6 iters, debt 5,847 &rarr; 0</div></div>
-        <div class="stat"><div class="v">~8.5 GB</div><div class="l">peak RAM (parent-process peak 8,489.1 MiB)</div></div>
-        <div class="stat"><div class="v">96.8 / 115.5 ms</div><div class="l">fresh-item query p50 / p95 (n=33, all within 5 s)</div></div>
-        <div class="stat"><div class="v">253 files</div><div class="l">frozen sources, verified 0-diff; 164,195 final commits</div></div>
+        <div class="stat"><div class="v"><span data-countup="10003381" data-decimals="0">10,003,381</span></div><div class="l">tokens / 13,081 docs / <span data-countup="63441" data-decimals="0">63,441</span> atoms</div></div>
+        <div class="stat"><div class="v"><span data-countup="0.7367" data-decimals="4">0.7367</span> / <span data-countup="0.4883" data-decimals="4">0.4883</span></div><div class="l">guided recall@10: all-sources / leave-source-out (120 probes)</div></div>
+        <div class="stat"><div class="v"><span data-countup="9494.9" data-decimals="1">9,494.9</span> s</div><div class="l">wall (~2.6 h); repair 6 iters, debt 5,847 &rarr; 0</div></div>
+        <div class="stat"><div class="v"><span data-countup="8.5" data-decimals="1" data-prefix="~" data-suffix=" GB">~8.5 GB</span></div><div class="l">peak RAM (parent-process peak 8,489.1 MiB)</div></div>
+        <div class="stat"><div class="v"><span data-countup="96.8" data-decimals="1">96.8</span> / <span data-countup="115.5" data-decimals="1">115.5</span> ms</div><div class="l">fresh-item query p50 / p95 (n=33, all within 5 s)</div></div>
+        <div class="stat"><div class="v"><span data-countup="253" data-decimals="0">253</span> files</div><div class="l">frozen sources, verified 0-diff; 164,195 final commits</div></div>
       </div>
       <p>Every number is measured and receipt-backed. Identity pins: tarball sha256 <code>8d3bbb6bf53e1731811065a9de156a9997be740d598cd1dfa0a3d946928dbf64</code> &middot; probes <code>b332d62d&hellip;</code> &middot; harness <code>9f78479a&hellip;</code> &middot; 9,177 leaves / 3,711 parents.</p>
     </section>
@@ -186,5 +196,6 @@
   <footer>
     TRACE research preview &middot; Apache-2.0 &middot; freeze <code>seam12a</code> (<code>8d3bbb6b&hellip;928dbf64</code>) &middot; run <code>o94-scale10m</code> &middot; pins probes <code>b332d62d&hellip;</code>, harness <code>9f78479a&hellip;</code>, commits <code>164195</code> &middot; <a href="https://github.com/Anshul48/trace">source</a>
   </footer>
+  <script src="hero.js" defer></script>
 </body>
 </html>

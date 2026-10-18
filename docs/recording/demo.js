@@ -48,6 +48,14 @@
   window.addEventListener('resize', resize);
 
   function ease(t) { return t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t); }
+  // Gentle spring settle for clustering: identical endpoints (0 -> 0, 1 -> 1),
+  // slight overshoot mid-flight only. Position use only; counts unaffected.
+  function easeSettle(t) {
+    if (t <= 0) return 0;
+    if (t >= 1) return 1;
+    var c = 1.2, u = t - 1;
+    return 1 + (c + 1) * u * u * u + c * u * u;
+  }
   function clamp01(t) { return t < 0 ? 0 : t > 1 ? 1 : t; }
   function lerp(a, b, t) { return a + (b - a) * t; }
 
@@ -184,9 +192,10 @@
       var a = ATOMS[i];
       var fromX = a.sx * (W - 32) + 16, fromY = 70 + a.sy * (H - 110);
       var to = atomPos(a, a.cluster, W, H, atomRands[i]);
+      var se = easeSettle(e);
       ctx.fillStyle = CLUSTER_COLORS[a.cluster];
       ctx.beginPath();
-      ctx.arc(lerp(fromX, to.x, e), lerp(fromY, to.y, e), a.r, 0, Math.PI * 2);
+      ctx.arc(lerp(fromX, to.x, se), lerp(fromY, to.y, se), a.r, 0, Math.PI * 2);
       ctx.fill();
     }
     var counts = [0, 0, 0, 0];

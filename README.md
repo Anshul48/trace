@@ -1,13 +1,13 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 # TRACE — a self-organizing memory database (research preview)
 
-[![Status: research preview](https://img.shields.io/badge/Status-research_preview-blue.svg)](#status-and-roadmap)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Source Freeze Manifest](https://img.shields.io/badge/Freeze_Manifest-8d3bbb6b_(253_files)-blue.svg)](freeze-src/cand/SOURCEFREEZE.json)
-[![Qualification Receipt](https://img.shields.io/badge/Receipt-10M_PASS_(9494.9s)-brightgreen.svg)](docs/BENCHMARKS.md)
-[![Recorded 20k Run](https://img.shields.io/badge/Recording-20k_Run_(27.8s)-blue.svg)](https://anshul48.github.io/trace/recording/)
+[![CI](https://github.com/Anshul48/trace/actions/workflows/ci.yml/badge.svg)](https://github.com/Anshul48/trace/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/Anshul48/trace/blob/main/LICENSE)
+[![Release: seam12a-10m-freeze](https://img.shields.io/badge/Release-seam12a_10m_freeze-brightgreen.svg)](https://github.com/Anshul48/trace/releases/tag/seam12a-10m-freeze)
 
-**TRACE is a self-organizing memory database: a 10-million-token persistent memory for LLMs and agents, filing every arrival into schemas and deltas without rebuilding the index.** In one frozen, receipt-backed run, 10,003,381 tokens across 13,081 documents settled into an overlapping graph of 3,711 parent groups and 9,177 leaf partitions, guided routing put the right answer in the top 10 for roughly three out of four test queries, and a bounded repair pass drained every leftover item to zero.
+[![TRACE constellation — amber particles gather into teal schema groups; open the live animated landing](docs/assets/constellation-hero.svg)](https://anshul48.github.io/trace/)
+
+**TRACE is a self-organizing memory database: a 10-million-token persistent memory for LLMs and agents, filed into schemas and deltas without rebuilding the index.** Every number below is from one frozen, receipt-backed 10M run.
 
 **New here? [Take the 60-second tour](https://anshul48.github.io/trace/explorer/)** — feed documents in, watch them break into atoms, self-organize into schemas, answer a question, and repair itself, on the real graph.
 
@@ -46,6 +46,8 @@ Every number below is measured and receipt-backed: the frozen `result.json` (cla
 
 Labels: `all` means all-sources mode, `leave-source-out` means the probe's own document was hidden from the index. "Recall@10" here is protocol recall — agreement with an exact oracle top-10 on the staged corpus — not a semantic relevance claim.
 
+Scope: one measured run (`o94-scale10m`, wall 9,494.9 s ≈ 2.6 h, parent-process peak 8,489.1 MiB ≈ 8.5 GB) on one VM through the frozen `product_pilot` harness — pins: probes `b332d62d…`, harness `9f78479a…`, final commits 164,195. Both recall modes above ran 120 probes each under matched work budgets.
+
 ---
 
 ## See it
@@ -59,7 +61,7 @@ Labels: `all` means all-sources mode, `leave-source-out` means the probe's own d
 
 ## Run it in 5 minutes
 
-This is the exact path that was executed and verified on a clean host (WSL2 Ubuntu, Python 3.12.3), re-verified from a fresh tarball extract with the environment created inside the extracted tree. Every command below ran successfully; expected outputs are quoted from those runs.
+This is the exact path that was executed and verified on a clean host (WSL2 Ubuntu, Python 3.12.3), re-verified from a fresh tarball extract with the environment created inside the extracted tree. Every command below ran successfully; expected outputs are quoted from those runs. At the end of about five minutes you will have run the freeze check, the package suite, and a real 10K-token pilot to `claim=measured, status=PASS` — the outputs to expect are quoted at each step.
 
 ```bash
 # 1. Get the frozen source and verify it (1.2 MB source-only tarball).
@@ -237,6 +239,46 @@ Labeling rule: running the command above on your own corpus is a **your-corpus 1
 
 ---
 
+## Questions researchers & devs ask
+
+<details>
+<summary>Is this a vector database?</summary>
+
+No. TRACE is a self-organizing memory database and retrieval overlay: arrivals are filed into schemas and deltas in content-addressed storage without rebuilding the index, and each question descends only the most promising branches instead of scoring everything. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the storage ledger and reader isolation.
+</details>
+
+<details>
+<summary>Why not just use a bigger context window?</summary>
+
+A language model cannot fit thirteen thousand documents into its prompt, so any agent working over a growing corpus needs retrieval: pick the right handful of passages first, then read only those. TRACE is built for that picking step — arrivals become searchable the moment they land.
+</details>
+
+<details>
+<summary>What hardware do I need?</summary>
+
+The measured 10M run took 9,494.9 s (~2.6 h) with a parent-process peak of 8,489.1 MiB (~8.5 GB) and 2.85 GiB of retained store. The 5-minute path above is far smaller: about 90 MiB peak RSS, an ~8 MB output directory, and under a minute of wall time on 2 cores. The [portable 20k reproduction](repro-20k/README.md) (88 documents) is the one-command local proof.
+</details>
+
+<details>
+<summary>Can I reproduce the 10M numbers exactly?</summary>
+
+Not today, honestly. A full run is blocked by two things: the 10M corpus is external and not shipped (the release tarball is source-only, 1.2 MB), and `--profile vm` exits unless the hostname is `trace-build500` — on your own machine `--profile local` caps at 1M tokens. Running the command on your own corpus is a your-corpus run, not a reproduction of the measured figures. Details in [docs/REPRO.md](docs/REPRO.md).
+</details>
+
+<details>
+<summary>Is it production-ready?</summary>
+
+No — it is a research preview, proudly so: one measured 10M run on one VM, receipt-backed and honestly labeled, with no state-of-the-art claims. TRACE is single-writer append-only with crash recovery to a consistent ledger boundary; it does not implement distributed transactions.
+</details>
+
+<details>
+<summary>How does TRACE relate to ANIMA?</summary>
+
+[ANIMA](https://github.com/Anshul48/anima) owns agent orchestration; TRACE owns the retrieval overlay. The two are separate systems with no shared runtime.
+</details>
+
+---
+
 ## Status and roadmap
 
 **Status: research preview.** TRACE is an experimental research prototype, proudly so: one measured 10M run on one VM, receipt-backed and honestly labeled — not a product, and no state-of-the-art claims are made.
@@ -265,9 +307,13 @@ Roadmap:
 
 ---
 
+## Contributing
+
+TRACE is a research preview: bug reports and reproduction attempts with receipts are the most useful contributions. Please open an issue at [Anshul48/trace issues](https://github.com/Anshul48/trace/issues) with the exact command, the freeze check output, and the run receipts. Claims about the 10M figures need the o94 corpus and build VM (see scope note above); anything else is a your-corpus run — label it that way.
+
 ## License
 
-Apache-2.0 ([LICENSE](LICENSE)). Corpus text excerpts and vector models keep their upstream licenses; see [repro-20k/LICENSES-DATA-MODEL.md](repro-20k/LICENSES-DATA-MODEL.md).
+Apache-2.0 ([LICENSE](https://github.com/Anshul48/trace/blob/main/LICENSE)). Corpus text excerpts and vector models keep their upstream licenses; see [repro-20k/LICENSES-DATA-MODEL.md](repro-20k/LICENSES-DATA-MODEL.md).
 
 ## Related: ANIMA
 
