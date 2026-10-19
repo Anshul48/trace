@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TRACE — 10M-token retrieval freeze seam12a</title>
-  <meta name="description" content="TRACE is a self-organizing memory database (research preview): 10,003,381 tokens / 13,081 docs of persistent memory for LLMs and agents. Guided recall@10 0.7367 all-sources / 0.4883 leave-source-out, peak RAM about 8.5 GB. Receipt-backed, no benchmark claims beyond the stated protocol.">
+  <meta name="description" content="TRACE is a self-organizing memory database (research preview): 10,003,381 tokens / 13,081 docs of persistent memory for LLMs and agents. Guided recall@10 0.7367 all-sources / 0.4883 leave-source-out, peak RAM 8,489 MiB (8.3 GiB). Receipt-backed, no benchmark claims beyond the stated protocol.">
   <link rel="canonical" href="https://anshul48.github.io/trace/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="TRACE — 10M-token retrieval freeze seam12a">
@@ -94,6 +94,10 @@
       background: var(--panel);
     }
     .hero-art canvas { display: block; width: 100%; height: auto; aspect-ratio: 880 / 360; cursor: crosshair; }
+    .hero-stack { position: relative; }
+    .hero-stack .hero-static { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .hero-stack canvas { position: relative; }
+    .hero-cta { margin: 1rem 0 0; padding: 0; list-style: none; }
     .hero-art figcaption, .atom-panel { font-size: 0.85rem; color: var(--muted); padding: 0.5rem 0.9rem 0.7rem; }
     .atom-panel { border-top: 1px dashed var(--line); }
     .atom-panel .t { font-weight: 700; color: var(--ink); }
@@ -141,8 +145,9 @@
   <header class="top gutters">
     <span class="kicker">RESEARCH PREVIEW &middot; FROZEN RUN</span>
     <h1>TRACE: self-organizing memory for LLMs and agents</h1>
-    <p class="lede" id="hook">Self-organizing memory for AI: 10M tokens filed live, recalled at 0.7367, repaired to zero.</p>
+    <p class="lede" id="hook">Self-organizing memory for AI: 10M tokens filed live, recalled at 0.7367, leftover work drained 5,847 to 0.</p>
     <p class="muted">Researchers get long-horizon agent memory they can cite. Developers get memory beyond the context window, local-first and content-addressed.</p>
+    <p class="hero-cta"><a class="btn" href="explorer/#tab-topology">Open the explorer tour</a></p>
   </header>
 
   <main class="gutters layout-grid">
@@ -151,26 +156,24 @@
       <ul class="proof4">
         <li class="card"><div class="v"><span data-countup="10003381" data-decimals="0">10,003,381</span></div><div class="l">tokens / 13,081 docs / <span data-countup="63441" data-decimals="0">63,441</span> atoms</div></li>
         <li class="card"><div class="v"><span data-countup="0.7367" data-decimals="4">0.7367</span> / <span data-countup="0.4883" data-decimals="4">0.4883</span></div><div class="l">guided recall@10: all-sources / leave-source-out (120 probes each)</div></li>
-        <li class="card"><div class="v"><span data-countdown="5847">5,847</span></div><div class="l">open debt remaining &mdash; drained from 5,847 to 0 over 6 iterations; wall <span data-countup="9494.9" data-decimals="1">9,494.9</span> s (~2.6 h)</div></li>
-        <li class="card"><div class="v"><span data-countup="253" data-decimals="0">253</span> files</div><div class="l">frozen sources, 0 diffs; 164,195 final commits; peak RAM ~8.5 GB</div></li>
+        <li class="card"><div class="v"><span data-countdown="5847">5,847</span></div><div class="l">leftover items &mdash; drained from 5,847 to 0 over 6 iterations; wall <span data-countup="9494.9" data-decimals="1">9,494.9</span> s (~2.6 h)</div></li>
+        <li class="card"><div class="v"><span data-countup="253" data-decimals="0">253</span> files</div><div class="l">frozen sources, 0 diffs; 164,195 final commits; peak RAM 8,489 MiB (8.3 GiB)</div></li>
       </ul>
-      <p class="muted">Identity pins: tarball sha256 <code>8d3bbb6bf53e1731811065a9de156a9997be740d598cd1dfa0a3d946928dbf64</code> &middot; probes <code>b332d62d&hellip;</code> &middot; harness <code>9f78479a&hellip;</code> &middot; 9,177 leaves / 3,711 parents.</p>
+      <p class="muted">Recall@10 over 120 probes per mode (all-sources / leave-source-out): guided searches the organized store; flat is the no-organization control at the same scoring budget (matched work).</p>
     </section>
 
     <figure class="hero-art reveal" aria-label="Memory self-organizing: real atom-to-schema membership">
-      <canvas id="hero-canvas" width="880" height="360" role="img" aria-label="Real membership animation: 144 atoms gather into their real schema anchors; layout illustrative. Activate an atom to read its real title."></canvas>
-      <noscript><img src="assets/constellation-hero.svg" alt="Illustrated fallback: particles gathered into schema constellations" width="880" height="360"></noscript>
-      <figcaption>Real structure: 51 schemas / 81 leaves / 144 atoms from the recorded 20K run &mdash; layout illustrative, membership real. <span class="honesty-chip">Honesty: layout illustrative, membership real</span> <span class="honesty-chip">Numbers: HTML text, receipt-backed</span></figcaption>
+      <div class="hero-stack">
+        <img class="hero-static" src="assets/hero-static.svg" alt="Static snapshot of the recorded 20K run: 144 atoms gathered into their 51 real schema anchors" width="880" height="360">
+        <canvas id="hero-canvas" width="880" height="360" role="img" aria-label="Real membership animation: 144 atoms gather into their real schema anchors; layout illustrative. Activate an atom to read its real title."></canvas>
+      </div>
+      <noscript><img src="assets/hero-static.svg" alt="Static snapshot of the recorded 20K run: 144 atoms gathered into their 51 real schema anchors" width="880" height="360"></noscript>
+      <figcaption>Snapshot of the recorded 20K run: 144 atoms in their 51 real schema groups (81 leaves). <span class="honesty-chip">Layout illustrative, membership real</span> <span class="honesty-chip">HTML text, receipt-backed</span></figcaption>
       <div class="atom-panel" id="atom-panel" aria-live="polite">Tip: select any dot to read that atom&rsquo;s real title, snippet, and parent schema.</div>
     </figure>
 
     <section aria-label="Try it" class="reveal">
       <h2>Try it</h2>
-      <ul class="cta-row">
-        <li><a class="btn" href="explorer/#tab-topology">Take the 60-second tour</a></li>
-        <li><a class="btn secondary" href="recording/">Watch the guided demo</a></li>
-        <li><a class="btn secondary" href="https://github.com/Anshul48/trace">Run it in 5 minutes</a></li>
-      </ul>
       <div class="try3">
         <div class="step">
           <h3>1. Take the 60-second tour</h3>
@@ -280,7 +283,7 @@ SUP_PYTHON=$CAND/.venv/bin/python bash runtime.sh tools/product_pilot.py --token
 
     <section aria-label="Recall race" class="reveal">
       <h2>Recall race: guided vs flat, matched work</h2>
-      <p class="muted">Both modes ran 120 probes each under matched work budgets. Flat recall is the control; it appears in the benchmarks table only. <span class="honesty-chip">Honesty: protocol agreement, not a SOTA claim</span></p>
+      <p class="muted">Both modes ran 120 probes each under matched work budgets. Flat is the weak-baseline control, shown here as bars; the benchmarks table carries the full rows. <span class="honesty-chip">Protocol agreement, not a SOTA claim</span></p>
       <div class="race" id="race-all" role="img" aria-label="All-sources recall at 10: guided 0.7367 versus flat 0.055">
         <div class="row guided"><span>guided (all)</span><span class="track"><span class="bar-fill" data-w="100"></span></span><span>0.7367</span></div>
         <div class="row flat"><span>flat (all)</span><span class="track"><span class="bar-fill" data-w="7.5"></span></span><span>0.055</span></div>
@@ -292,11 +295,11 @@ SUP_PYTHON=$CAND/.venv/bin/python bash runtime.sh tools/product_pilot.py --token
     </section>
 
     <section aria-label="Memory gauge" class="reveal">
-      <h2>Memory: ~8.5 GB peak on one VM</h2>
-      <div class="gauge" role="img" aria-label="Parent-process peak 8,489.1 MiB of a 16 GiB scale; child peak 7,169.2 MiB">
-        <p class="muted">Parent-process peak 8,489.1 MiB; child 7,169.2 MiB (rss receipts, 1,899 rows).</p>
-        <div class="track"><span class="bar-fill" id="rss-bar" data-w="51.8"></span></div>
-        <p class="muted">Bar: parent peak against a 16 GiB scale (53%). <span class="honesty-chip">Honesty: one measured run, one VM</span></p>
+      <h2>Memory: 8,489 MiB (8.3 GiB) peak on one VM</h2>
+      <div class="gauge" role="img" aria-label="Parent-process peak 8,489 MiB of a 16 GiB scale (52%); child peak 7,169.2 MiB">
+        <p class="muted">Parent-process peak 8,489 MiB (8.3 GiB); child 7,169.2 MiB (rss receipts, 1,899 rows).</p>
+        <div class="track"><span class="bar-fill" id="rss-bar" data-w="52"></span></div>
+        <p class="muted">Bar: parent peak against a 16 GiB scale (52%). <span class="honesty-chip">One measured run, one VM</span></p>
       </div>
     </section>
 
@@ -333,7 +336,7 @@ SUP_PYTHON=$CAND/.venv/bin/python bash runtime.sh tools/product_pilot.py --token
   </main>
 
   <footer class="site gutters">
-    TRACE research preview &middot; Apache-2.0 &middot; freeze <code>seam12a</code> (<code>8d3bbb6b&hellip;928dbf64</code>) &middot; run <code>o94-scale10m</code> &middot; pins probes <code>b332d62d&hellip;</code>, harness <code>9f78479a&hellip;</code>, commits <code>164195</code> &middot; <a href="https://github.com/Anshul48/trace">source</a> &middot; numbers: <a href="assets/data.json">data.json</a>
+    TRACE research preview &middot; Apache-2.0 &middot; freeze <code>seam12a</code> &middot; run <code>o94-scale10m</code> &middot; tarball sha256 <code>8d3bbb6bf53e1731811065a9de156a9997be740d598cd1dfa0a3d946928dbf64</code> &middot; pins probes <code>b332d62d&hellip;</code>, harness <code>9f78479a&hellip;</code>, commits <code>164195</code> &middot; 9,177 leaves / 3,711 parents &middot; <a href="https://github.com/Anshul48/trace">source</a> &middot; numbers: <a href="assets/data.json">data.json</a>
   </footer>
   <script src="assets/motion.js" defer></script>
   <script src="hero.js" defer></script>
