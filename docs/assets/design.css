@@ -1,0 +1,98 @@
+/* Shared design tokens — identical in trace and anima (docs/assets/design.css).
+   Light default; dark via prefers-color-scheme. Type: system stack, 1.25 ratio.
+   Motion durations: 150/250/400/600ms. */
+:root {
+  --paper: #f4f6f8;
+  --panel: #ffffff;
+  --ink: #17212b;
+  --muted: #3d4c5c;
+  --line: #c3ced8;
+  --accent: #0b5cad;
+  --accent2: #0a6e4e;
+  --warn-ink: #7a4a00;
+  --warn-bg: #fdf3e3;
+  --focus: #b35c00;
+  --maxw: 70rem;
+  --radius-s: 6px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+  --radius-pill: 999px;
+  --dur-1: 150ms;
+  --dur-2: 250ms;
+  --dur-3: 400ms;
+  --dur-4: 600ms;
+  --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0e1116;
+    --panel: #161b22;
+    --ink: #e6edf3;
+    --muted: #8b949e;
+    --line: #30363d;
+    --accent: #4493f8;
+    --accent2: #3fb950;
+    --warn-ink: #f0c674;
+    --warn-bg: #2a2118;
+    --focus: #f0c674;
+    --err: #f85149;
+  }
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-stack);
+  line-height: 1.5;
+}
+
+body {
+  margin: 0 auto;
+  max-width: var(--maxw);
+  padding: 1.25rem;
+  font-size: 1rem;
+}
+
+h1 { font-size: calc(1rem * 1.25 * 1.25 * 1.25); }
+h2 { font-size: calc(1rem * 1.25 * 1.25); }
+h3 { font-size: calc(1rem * 1.25); }
+
+a { color: var(--accent); }
+a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-s);
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+}
+
+.card { border-radius: var(--radius-l); }
+.pill { border-radius: var(--radius-pill); }
+
+.warn {
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+}
+
+.muted { color: var(--muted); }
+
+/* Motion: transitions only; disabled under reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  a, .panel, .card { transition: opacity var(--dur-1) ease; }
+  .fade-slow { transition: opacity var(--dur-3) ease; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}

@@ -19,6 +19,20 @@
 | Developers | [Run it in 5 minutes](#run-it-in-5-minutes) · [Portable 20k reproduction](repro-20k/README.md) · [Code tour](docs/CODE-TOUR.md) |
 | Judges | [60-second tour](https://anshul48.github.io/trace/explorer/) · [Animated demo](https://anshul48.github.io/trace/recording/) · [Raw recorded run](https://anshul48.github.io/trace/recording/#raw-run) |
 
+## In 30 seconds
+
+TRACE files 10,003,381 tokens (13,081 docs) into 63,441 atoms across
+3,711 parents and 9,177 leaves, closing 164,195 ledger commits from
+253 frozen files (freeze seam12a). Guided recall@10 is 0.7367 all /
+0.4883 leave-source-out against flat 0.055 / 0.0017 (120 probes each,
+matched work); self-repair clears debt 5,847 to 0 in 6 iterations.
+One measured run: wall 9,494.9 s (~2.6 h), peak RAM ~8.5 GB
+(parent 8,489.1 MiB). Pins: probes `b332d62d…`, harness `9f78479a…`.
+Portable proof: 20,030 tokens / 88 docs / 144 atoms (81 leaves,
+51 parents), verdict PASS in 27.8 s (cast sha `7ef2cca3…`).
+Start at [Run it in 5 minutes](#run-it-in-5-minutes) or the
+[60-second tour](https://anshul48.github.io/trace/explorer/).
+
 ## What it does for you
 
 **Researchers** — use it to explore long-horizon agent memory on a frozen run you can cite: retrieval-at-scale experiments with guided-versus-flat routing under matched work budgets, crash-recovery gates, fresh-item visibility probes, and cross-domain schema linking through the overlapping parent/leaf graph.
@@ -314,6 +328,19 @@ TRACE is a research preview: bug reports and reproduction attempts with receipts
 ## License
 
 Apache-2.0 ([LICENSE](https://github.com/Anshul48/trace/blob/main/LICENSE)). Corpus text excerpts and vector models keep their upstream licenses; see [repro-20k/LICENSES-DATA-MODEL.md](repro-20k/LICENSES-DATA-MODEL.md).
+
+## Go deeper
+
+> External readings below are inspiration, not endorsement. Inclusion does not
+> imply affiliation, approval, or that our systems implement these methods.
+
+- Dense Passage Retrieval for Open-Domain Question Answering — Karpukhin et al. https://arxiv.org/abs/2004.04906
+- Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks — Lewis et al. https://arxiv.org/abs/2005.11401
+- REALM: Retrieval-Augmented Language Model Pre-Training — Guu et al. https://arxiv.org/abs/2002.08909
+- MemGPT: Towards LLMs as Operating Systems — Packer et al. https://arxiv.org/abs/2310.08560
+
+Shared tokens: [docs/assets/design.css](docs/assets/design.css),
+[docs/assets/motion.js](docs/assets/motion.js).
 
 ## Related: ANIMA
 
