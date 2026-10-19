@@ -38,12 +38,16 @@
   var viewportEl = document.getElementById('terminal-viewport');
   var playBtn = document.getElementById('btn-play');
   var restartBtn = document.getElementById('btn-restart');
+  var resetBtn = document.getElementById('btn-reset');
+  var stepBackBtn = document.getElementById('btn-step-back');
+  var stepFwdBtn = document.getElementById('btn-step-fwd');
   var progressEl = document.getElementById('progress-slider');
   var timeEl = document.getElementById('time-display');
   var speedSelect = document.getElementById('speed-select');
   var stepEl = document.getElementById('step-counter');
   var captionEl = document.getElementById('chapter-caption');
   var chapterListEl = document.getElementById('chapter-list');
+  var ticksEl = document.getElementById('chapter-ticks');
 
   var reduceMotion = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -177,11 +181,62 @@
     renderUpToTime(target);
   }
 
+  function stepChapter(dir) {
+    var ci = chapterIndexAt(currentTime);
+    var next = ci + dir;
+    if (next < 0) next = 0;
+    if (next >= chapters.length) next = chapters.length - 1;
+    pause();
+    renderUpToTime(chapters[next].t);
+  }
+
+  function renderTicks() {
+    if (!ticksEl || !(totalDuration > 0)) return;
+    ticksEl.textContent = '';
+    for (var i = 1; i < chapters.length; i++) {
+      var pct = (chapters[i].t / totalDuration) * 100;
+      if (pct < 0) pct = 0;
+      if (pct > 100) pct = 100;
+      var tick = document.createElement('span');
+      tick.className = 'chapter-tick';
+      tick.style.left = pct.toFixed(2) + '%';
+      ticksEl.appendChild(tick);
+    }
+  }
+
   playBtn.addEventListener('click', togglePlay);
   restartBtn.addEventListener('click', function () {
     pause();
     renderUpToTime(0);
     play();
+  });
+  if (resetBtn) resetBtn.addEventListener('click', function () {
+    pause();
+    renderUpToTime(0);
+  });
+  if (stepBackBtn) stepBackBtn.addEventListener('click', function () {
+    stepChapter(-1);
+  });
+  if (stepFwdBtn) stepFwdBtn.addEventListener('click', function () {
+    stepChapter(1);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!outputEl) return;
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+    if (e.key === ' ') {
+      e.preventDefault();
+      togglePlay();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      stepChapter(1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      stepChapter(-1);
+    } else if (e.key === 'r' || e.key === 'R') {
+      pause();
+      renderUpToTime(0);
+    }
   });
 
   progressEl.addEventListener('input', function (e) {
@@ -218,6 +273,7 @@
       if (events.length > 0) {
         totalDuration = events[events.length - 1][0];
       }
+      renderTicks();
       renderUpToTime(0); // First paint at t=0: empty terminal, Chapter 1 of 5
       pause();
     })

@@ -16,6 +16,7 @@
   <meta name="twitter:description" content="Feed in, break into atoms, self-organize, ask, repair. Measured at 10M: 0.7367 / 0.4883, 9,494.9 s, about 8.5 GB.">
   <meta name="theme-color" content="#0f172a">
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="stylesheet" href="../assets/design.css">
   <link rel="stylesheet" href="style.css">
   <style>
     .identity-note {
@@ -168,6 +169,7 @@
       <div id="topology-status-banner" class="topology-status-banner" style="display: none;"></div>
 
       <div class="canvas-wrapper" style="position: relative;">
+        <span class="honesty-chip">Honesty: positions schematic, membership real</span>
         <canvas id="topology-canvas" width="1000" height="520" aria-label="Memory graph canvas" tabindex="0"></canvas>
         <div id="canvas-tooltip" class="canvas-tooltip" aria-hidden="true"></div>
       </div>
@@ -464,6 +466,7 @@
     </div>
   </footer>
 
+  <script src="../assets/motion.js" defer></script>
   <script src="app.js"></script>
   <script>
     // Hash routing: open the tab matching #tab-overview/#tab-topology/#tab-queries/#tab-lifecycle/#tab-audit/#tab-local.

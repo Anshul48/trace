@@ -14,188 +14,328 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="TRACE — 10M-token retrieval freeze seam12a">
   <meta name="twitter:description" content="Guided recall@10 0.7367 all-sources / 0.4883 leave-source-out over 10,003,381 tokens. Receipt-backed; no broad benchmark claims.">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#f4f6f8">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="assets/design.css">
   <style>
-    :root { color-scheme: dark; }
-    * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f172a;
-      color: #f8fafc;
+      background: var(--paper);
+      color: var(--ink);
       margin: 0;
       padding: 0 1rem 3rem;
       line-height: 1.55;
     }
-    main { max-width: 880px; margin: 0 auto; }
-    header.top { max-width: 880px; margin: 0 auto; padding: 1.5rem 0 0; }
+    main, header.top, footer.site {
+      max-width: var(--maxw);
+      margin: 0 auto;
+    }
+    header.top { padding: 1.5rem 0 0; }
     .kicker {
       display: inline-block;
       font-size: 0.75rem;
       letter-spacing: 0.08em;
       font-weight: 700;
-      color: #7dd3fc;
-      border: 1px solid #155e75;
-      border-radius: 999px;
+      color: var(--accent);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-pill);
       padding: 0.2rem 0.7rem;
       margin-bottom: 0.75rem;
+      background: var(--panel);
     }
-    h1 { font-size: 2rem; margin: 0 0 0.5rem; line-height: 1.2; }
-    h2 { font-size: 1.25rem; margin: 2rem 0 0.5rem; color: #e2e8f0; }
-    h3 { font-size: 1rem; margin: 1.25rem 0 0.4rem; color: #e2e8f0; }
-    p { margin: 0.5rem 0; color: #cbd5e1; }
-    .lede { font-size: 1.1rem; color: #f1f5f9; }
-    a { color: #7dd3fc; }
+    h1 { margin: 0 0 0.5rem; }
+    h2 { margin: 2rem 0 0.5rem; }
+    p { margin: 0.5rem 0; color: var(--ink); }
+    .lede { font-size: 1.1rem; }
+    .muted { color: var(--muted); }
+    a { color: var(--accent); }
     code {
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 0.85em;
-      background: #1e293b;
+      background: var(--warn-bg);
       padding: 0.1rem 0.35rem;
       border-radius: 4px;
-      color: #e2e8f0;
+    }
+    @media (prefers-color-scheme: dark) {
+      code { background: #21262d; }
     }
     pre {
-      background: #020617;
-      border: 1px solid #334155;
-      border-radius: 8px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-m);
       padding: 1rem;
       overflow-x: auto;
       font-size: 0.82rem;
       line-height: 1.5;
-      color: #e2e8f0;
     }
     pre code { background: none; padding: 0; }
-    .strip {
+    .proof4 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 0.6rem;
+      gap: 1rem;
+      grid-template-columns: 1fr;
       margin: 1.25rem 0;
+      padding: 0;
+      list-style: none;
     }
-    .stat {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 0.7rem 0.85rem;
+    @media (min-width: 640px) { .proof4 { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1000px) { .proof4 { grid-template-columns: 1fr 1fr 1fr 1fr; } }
+    .proof4 .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-m);
+      padding: 0.8rem 0.95rem;
     }
-    .stat .v { font-size: 1.25rem; font-weight: 700; color: #ffffff; }
-    .stat .l { font-size: 0.85rem; color: #cbd5e1; }
-    .paths { display: grid; gap: 0.75rem; margin: 1rem 0; }
-    @media (min-width: 640px) { .paths { grid-template-columns: 1fr 1fr 1fr; } }
-    .path {
-      display: block;
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 1rem;
-      text-decoration: none;
+    .proof4 .v { font-size: 1.25rem; font-weight: 700; }
+    .proof4 .l { font-size: 0.85rem; color: var(--muted); }
+    .hero-art {
+      margin: 1.25rem 0 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-l);
+      overflow: hidden;
+      background: var(--panel);
     }
-    .path:hover { border-color: #0284c7; }
-    .path .t { font-weight: 700; color: #ffffff; font-size: 1rem; }
-    .path .d { font-size: 0.9rem; color: #cbd5e1; margin-top: 0.3rem; }
-    .btn-row { margin-top: 0.6rem; }
+    .hero-art canvas { display: block; width: 100%; height: auto; aspect-ratio: 880 / 360; cursor: crosshair; }
+    .hero-art figcaption, .atom-panel { font-size: 0.85rem; color: var(--muted); padding: 0.5rem 0.9rem 0.7rem; }
+    .atom-panel { border-top: 1px dashed var(--line); }
+    .atom-panel .t { font-weight: 700; color: var(--ink); }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1rem 0; padding: 0; list-style: none; }
     .btn {
       display: inline-block;
       padding: 0.55rem 1.1rem;
-      background: #0284c7;
-      color: #ffffff;
-      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: var(--radius-s);
       font-weight: 600;
       text-decoration: none;
       font-size: 0.9rem;
+      border: 1px solid transparent;
     }
-    .note {
-      background: #1e293b;
-      border-left: 3px solid #0284c7;
-      border-radius: 0 8px 8px 0;
-      padding: 0.7rem 1rem;
-      margin: 1rem 0;
-      font-size: 0.9rem;
+    .btn.secondary { background: var(--panel); color: var(--accent); border-color: var(--accent); }
+    .try3 { display: grid; gap: 1rem; grid-template-columns: 1fr; margin: 1rem 0; }
+    @media (min-width: 900px) { .try3 { grid-template-columns: 1fr 1fr 1fr; } }
+    .try3 .step { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); padding: 1rem; }
+    .try3 .step h3 { margin-top: 0; }
+    .race { margin: 0.75rem 0; }
+    .race .row { display: grid; grid-template-columns: 7rem 1fr 4.5rem; gap: 0.5rem; align-items: center; margin: 0.35rem 0; font-size: 0.85rem; }
+    .race .track { background: var(--line); border-radius: var(--radius-s); height: 0.9rem; }
+    .race .bar-fill { display: block; height: 100%; border-radius: var(--radius-s); background: var(--accent2); width: 0; }
+    .race .flat .bar-fill { background: var(--muted); }
+    .gauge { margin: 0.75rem 0; }
+    .gauge .track { position: relative; background: var(--line); border-radius: var(--radius-s); height: 1rem; }
+    .gauge .bar-fill { display: block; height: 100%; border-radius: var(--radius-s); background: var(--accent); width: 0; }
+    .ladder { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 0.75rem 0; }
+    .ladder th, .ladder td { border: 1px solid var(--line); padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
+    .ladder th { background: var(--panel); }
+    .limits { background: var(--warn-bg); border: 1px solid var(--line); border-left: 4px solid var(--warn-ink); border-radius: 0 var(--radius-m) var(--radius-m) 0; padding: 0.8rem 1rem; margin: 1rem 0; color: var(--ink); }
+    @media (prefers-color-scheme: dark) {
+      .limits { background: var(--panel); border-left-color: var(--focus); }
     }
-    .warn {
-      background: #1e293b;
-      border-left: 3px solid #f59e0b;
-      border-radius: 0 8px 8px 0;
-      padding: 0.7rem 1rem;
-      margin: 1rem 0;
-      font-size: 0.9rem;
-    }
-    table.facts { border-collapse: collapse; width: 100%; font-size: 0.86rem; margin: 0.75rem 0; }
-    table.facts th, table.facts td { border: 1px solid #334155; padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
-    table.facts th { background: #1e293b; color: #e2e8f0; }
-    table.facts td { color: #cbd5e1; }
-    footer { max-width: 880px; margin: 2.5rem auto 0; font-size: 0.8rem; color: #64748b; border-top: 1px solid #334155; padding-top: 1rem; }
-    .hero-art { margin: 1.25rem 0 0; border: 1px solid #334155; border-radius: 12px; overflow: hidden; background: #0b1220; }
-    .hero-art canvas { display: block; width: 100%; height: auto; aspect-ratio: 880 / 360; }
-    .hero-art figcaption { font-size: 0.8rem; color: #94a3b8; padding: 0.5rem 0.9rem 0.7rem; }
-    .hero-fallback { display: block; width: 100%; height: auto; }
-    @media (prefers-reduced-motion: reduce) {
-      * { transition: none !important; animation: none !important; }
-    }
+    .limits h2 { margin-top: 0; }
+    .limits li { margin: 0.3rem 0; }
+    footer.site { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 1rem; margin-top: 2.5rem; }
+    .gutters { padding-left: 16px; padding-right: 16px; }
   </style>
-  <noscript><style>.path:hover { border-color: #334155; } #hero-canvas { display: none; }</style></noscript>
+  <noscript><style>.reveal { opacity: 1; transform: none; } #hero-canvas { cursor: default; }</style></noscript>
 </head>
 <body>
-  <header class="top">
+  <header class="top gutters">
     <span class="kicker">RESEARCH PREVIEW &middot; FROZEN RUN</span>
     <h1>TRACE: self-organizing memory for LLMs and agents</h1>
-    <p class="lede">TRACE is a self-organizing memory database: a 10-million-token persistent memory for LLMs and agents, filing every arrival into schemas and deltas without rebuilding the index. New documents become searchable the moment they land; each question descends only the most promising branches.</p>
+    <p class="lede" id="hook">Self-organizing memory for AI: 10M tokens filed live, recalled at 0.7367, repaired to zero.</p>
+    <p class="muted">Researchers get long-horizon agent memory they can cite. Developers get memory beyond the context window, local-first and content-addressed.</p>
   </header>
 
-  <main>
-    <figure class="hero-art" aria-label="Memory self-organizing: real atom-to-schema membership">
-      <canvas id="hero-canvas" width="880" height="360" role="img" aria-label="Real membership animation: 144 atoms gather into their real schema anchors; layout illustrative">Memory self-organizing: 144 atoms gather into their real schema anchors.</canvas>
-      <noscript><img class="hero-fallback" src="assets/constellation-hero.svg" alt="Illustrated fallback: amber particles gathered into teal schema constellations" width="880" height="360"></noscript>
-      <figcaption>Real structure: 51 schemas / 81 leaves / 144 atoms from the recorded 20K run - layout illustrative, membership real. Every number on this page is HTML text, measured and receipt-backed.</figcaption>
+  <main class="gutters layout-grid">
+    <section aria-label="Measured proof" class="reveal">
+      <h2>Proof &mdash; freeze <code>seam12a</code>, run <code>o94-scale10m</code></h2>
+      <ul class="proof4">
+        <li class="card"><div class="v"><span data-countup="10003381" data-decimals="0">10,003,381</span></div><div class="l">tokens / 13,081 docs / <span data-countup="63441" data-decimals="0">63,441</span> atoms</div></li>
+        <li class="card"><div class="v"><span data-countup="0.7367" data-decimals="4">0.7367</span> / <span data-countup="0.4883" data-decimals="4">0.4883</span></div><div class="l">guided recall@10: all-sources / leave-source-out (120 probes each)</div></li>
+        <li class="card"><div class="v"><span data-countdown="5847">5,847</span></div><div class="l">open debt remaining &mdash; drained from 5,847 to 0 over 6 iterations; wall <span data-countup="9494.9" data-decimals="1">9,494.9</span> s (~2.6 h)</div></li>
+        <li class="card"><div class="v"><span data-countup="253" data-decimals="0">253</span> files</div><div class="l">frozen sources, 0 diffs; 164,195 final commits; peak RAM ~8.5 GB</div></li>
+      </ul>
+      <p class="muted">Identity pins: tarball sha256 <code>8d3bbb6bf53e1731811065a9de156a9997be740d598cd1dfa0a3d946928dbf64</code> &middot; probes <code>b332d62d&hellip;</code> &middot; harness <code>9f78479a&hellip;</code> &middot; 9,177 leaves / 3,711 parents.</p>
+    </section>
+
+    <figure class="hero-art reveal" aria-label="Memory self-organizing: real atom-to-schema membership">
+      <canvas id="hero-canvas" width="880" height="360" role="img" aria-label="Real membership animation: 144 atoms gather into their real schema anchors; layout illustrative. Activate an atom to read its real title."></canvas>
+      <noscript><img src="assets/constellation-hero.svg" alt="Illustrated fallback: particles gathered into schema constellations" width="880" height="360"></noscript>
+      <figcaption>Real structure: 51 schemas / 81 leaves / 144 atoms from the recorded 20K run &mdash; layout illustrative, membership real. <span class="honesty-chip">Honesty: layout illustrative, membership real</span> <span class="honesty-chip">Numbers: HTML text, receipt-backed</span></figcaption>
+      <div class="atom-panel" id="atom-panel" aria-live="polite">Tip: select any dot to read that atom&rsquo;s real title, snippet, and parent schema.</div>
     </figure>
 
-    <section aria-label="What it does for you">
-      <h2>What it does for you</h2>
-      <p><strong>Researchers:</strong> long-horizon agent memory you can cite, retrieval-at-scale experiments under matched work budgets, and cross-domain schema linking through an overlapping graph.</p>
-      <p><strong>Developers:</strong> persistent memory beyond the context window, local-first and content-addressed &mdash; the Python package and the <code>product_pilot</code> CLI run the real engine in an isolated venv.</p>
-    </section>
-
-    <section aria-label="Frozen numbers">
-      <h2>Proof &mdash; freeze <code>seam12a</code>, run <code>o94-scale10m</code></h2>
-      <div class="strip">
-        <div class="stat"><div class="v"><span data-countup="10003381" data-decimals="0">10,003,381</span></div><div class="l">tokens / 13,081 docs / <span data-countup="63441" data-decimals="0">63,441</span> atoms</div></div>
-        <div class="stat"><div class="v"><span data-countup="0.7367" data-decimals="4">0.7367</span> / <span data-countup="0.4883" data-decimals="4">0.4883</span></div><div class="l">guided recall@10: all-sources / leave-source-out (120 probes)</div></div>
-        <div class="stat"><div class="v"><span data-countup="9494.9" data-decimals="1">9,494.9</span> s</div><div class="l">wall (~2.6 h); repair 6 iters, debt 5,847 &rarr; 0</div></div>
-        <div class="stat"><div class="v"><span data-countup="8.5" data-decimals="1" data-prefix="~" data-suffix=" GB">~8.5 GB</span></div><div class="l">peak RAM (parent-process peak 8,489.1 MiB)</div></div>
-        <div class="stat"><div class="v"><span data-countup="96.8" data-decimals="1">96.8</span> / <span data-countup="115.5" data-decimals="1">115.5</span> ms</div><div class="l">fresh-item query p50 / p95 (n=33, all within 5 s)</div></div>
-        <div class="stat"><div class="v"><span data-countup="253" data-decimals="0">253</span> files</div><div class="l">frozen sources, verified 0-diff; 164,195 final commits</div></div>
+    <section aria-label="Try it" class="reveal">
+      <h2>Try it</h2>
+      <ul class="cta-row">
+        <li><a class="btn" href="explorer/#tab-topology">Take the 60-second tour</a></li>
+        <li><a class="btn secondary" href="recording/">Watch the guided demo</a></li>
+        <li><a class="btn secondary" href="https://github.com/Anshul48/trace">Run it in 5 minutes</a></li>
+      </ul>
+      <div class="try3">
+        <div class="step">
+          <h3>1. Take the 60-second tour</h3>
+          <p>The guided default: feed in, break into atoms, self-organize, ask, repair &mdash; on the real graph. Starts on the small graph; 10M one click away.</p>
+          <p><a href="explorer/#tab-topology">Open the explorer tour</a></p>
+        </div>
+        <div class="step">
+          <h3>2. Watch the guided demo</h3>
+          <p>Terminal recording of the authentic local verification run &mdash; install, frozen-file checks, engine run to PASS (27.8 s, cast SHA <code>7ef2cca3&hellip;</code>).</p>
+          <p><a href="recording/">Open the recording</a></p>
+        </div>
+        <div class="step">
+          <h3>3. Run it in 5 minutes</h3>
+          <p>Verified quickstart from the README: fresh tarball extract, in-tree venv, smoke checks, and a real 10K-token pilot to PASS.</p>
+          <p><a href="https://github.com/Anshul48/trace#run-it-in-5-minutes">README quickstart</a></p>
+        </div>
       </div>
-      <p>Every number is measured and receipt-backed. Identity pins: tarball sha256 <code>8d3bbb6bf53e1731811065a9de156a9997be740d598cd1dfa0a3d946928dbf64</code> &middot; probes <code>b332d62d&hellip;</code> &middot; harness <code>9f78479a&hellip;</code> &middot; 9,177 leaves / 3,711 parents.</p>
+      <details>
+        <summary>Full quickstart block (byte-identical to the README section above)</summary>
+        <pre id="quickstart-block"><code># 1. Get the frozen source and verify it (1.2 MB source-only tarball).
+sha256sum -c seam12a-fork.tar.gz.sha256
+# expect: seam12a-fork.tar.gz: OK
+# Extract it; the runnable tree is fix7/cand/ (set CAND to that path).
+tar xzf seam12a-fork.tar.gz
+CAND=$PWD/fix7/cand
+cd "$CAND"
+
+# 2. Environment, created INSIDE the extracted tree (needs uv;
+#    without uv: python3 -m venv .venv). The tarball ships no README,
+#    setup.py, pyproject.toml, or requirements file, so there is nothing
+#    to pip-install from the package itself: create a venv and add the two
+#    runtime dependencies (blake3 is hard-required by tlsys/identity.py;
+#    verified with numpy 2.5.4; o94 run receipts record numpy 2.5.3).
+uv venv .venv --python /usr/bin/python3
+uv pip install --python .venv/bin/python "numpy==2.5.4" "blake3==1.0.11"
+
+# 3. Smoke checks (all paths relative to $CAND).
+SUP_PYTHON=$CAND/.venv/bin/python bash runtime.sh tools/product_pilot.py --help
+# expect: exit 0, full usage printed (all o94 flags present).
+PYTHONPATH=$CAND/fork/tl-sys $CAND/.venv/bin/python -B fork/tl-sys/tests/test_o93_repair_columnar.py
+# expect: o93 repair-columnar: all groups PASS (221 checks).
+# The package integration suite also passes unmodified:
+$CAND/.venv/bin/python -B -m unittest tests.test_integration
+# expect: Ran 6 tests ... OK (about 3 s).
+
+# 4. Build the synthetic 10K corpus (layout tl-gpu-embcache-v1; corpus
+#    synthetic, pipeline 100% genuine). No corpus generator ships in the
+#    tarball, so this inline step builds synth-data/ from the shipped
+#    chunker (same seeded content as the reference run: 48 docs).
+$CAND/.venv/bin/python - &lt;&lt;'EOF'
+import hashlib, json, sys
+from pathlib import Path
+import numpy as np
+sys.path.insert(0, 'fork/tl-sys')
+from tlsys.ingest import chunk_text
+OUT = Path('synth-data'); CACHE = OUT / 'emb_cache'
+RPS, NDOCS = 256, 48
+TOPICS = [
+    ('sport', ['match', 'team', 'score', 'player', 'coach', 'season', 'league', 'goal', 'field', 'training', 'victory', 'rival', 'trophy']),
+    ('harbor', ['tide', 'dock', 'vessel', 'cargo', 'anchor', 'harbor', 'sailor', 'lighthouse', 'storm', 'channel', 'ferry', 'net', 'catch']),
+    ('orchard', ['apple', 'harvest', 'soil', 'rain', 'branch', 'blossom', 'farmer', 'basket', 'cider', 'frost', 'seed', 'grove']),
+    ('circuit', ['voltage', 'resistor', 'signal', 'wire', 'current', 'board', 'sensor', 'diode', 'ground', 'meter', 'switch', 'relay']),
+]
+rng = np.random.default_rng(0)
+OUT.mkdir(parents=True, exist_ok=True); CACHE.mkdir(parents=True, exist_ok=True)
+docs = []
+for i in range(NDOCS):
+    topic, words = TOPICS[i % len(TOPICS)]
+    sents = []
+    for s in range(14):
+        w = rng.choice(words, size=14, replace=True)
+        sents.append('Document %d sentence %d about %s: %s.' % (i, s, topic, ' '.join(w)))
+    docs.append({'doc_id': 'synth-doc-%03d' % i, 'text': ' '.join(sents)})
+with open(OUT / 'docs-100m.jsonl', 'wb') as f:
+    for d in docs:
+        f.write((json.dumps(d) + '\n').encode())
+config = json.dumps({'normalize_embeddings': False}, separators=(',', ':'))
+meta = {'format': 'tl-gpu-embcache-v1', 'dim': 384, 'dtype': 'float32-le',
+        'key_config_json': config,
+        'config_id': hashlib.sha256(config.encode()).hexdigest()[:16],
+        'rows_per_shard': RPS}
+(CACHE / 'meta.json').write_text(json.dumps(meta))
+prefix = b'tl-gpu-embcache-v1\0' + config.encode() + b'\0'
+rows = []
+for d in docs:
+    chunks = chunk_text(d['text']) or [(0, 0, '', 0, 0)]
+    for ch in chunks:
+        body = ch[2].encode('utf-8')
+        key = hashlib.sha256(prefix + body).hexdigest()
+        rows.append((key, hashlib.sha256(body).hexdigest(), len(body)))
+vecs = rng.standard_normal((len(rows), 384)).astype(np.float32)
+with open(CACHE / 'index.jsonl', 'w') as f:
+    for g, (key, csha, blen) in enumerate(rows):
+        f.write(json.dumps({'key': key, 'chunk_sha256': csha, 'byte_len': blen,
+                            'dim': 384, 'shard': g // RPS, 'row': g}) + '\n')
+for sh in range((len(rows) + RPS - 1) // RPS):
+    vecs[sh * RPS:(sh + 1) * RPS].astype('&lt;f4').tofile(CACHE / ('shard_%06d.f32' % sh))
+print(json.dumps({'docs': len(docs), 'chunks': len(rows), 'shards': (len(rows) + RPS - 1) // RPS}))
+EOF
+# expect: {"docs": 48, "chunks": 96, "shards": 1}
+
+# 5. A real 10K-token pilot through the genuine entry point.
+SUP_PYTHON=$CAND/.venv/bin/python bash runtime.sh tools/product_pilot.py --tokens 10000 --profile local --source-root $CAND --data-dir $CAND/synth-data --out $CAND/out-pilot --drain-attribution --drain-census --holon-descriptor-columnar --overrides-columnar --descriptor-matrix-all --per-view-sharing --cold-scan-chunk 4096 --repair-columnar --candidate-source hnsw --drain-bounded-k 32 --candidate-shadow-audit 8
+</code></pre>
+      </details>
     </section>
 
-    <section aria-label="Three ways in">
-      <h2>Three ways in</h2>
-      <div class="paths">
-        <a class="path" href="explorer/#tab-topology">
-          <div class="t">Take the 60-second tour</div>
-          <div class="d">The guided default: feed in, break into atoms, self-organize, ask, repair — on the real graph. Starts on the small graph; 10M one click away.</div>
-        </a>
-        <a class="path" href="recording/">
-          <div class="t">Watch the guided demo</div>
-          <div class="d">Terminal recording of the authentic local verification run &mdash; install, frozen-file checks, engine run to PASS.</div>
-        </a>
-        <a class="path" href="https://github.com/Anshul48/trace">
-          <div class="t">Run it in 5 minutes</div>
-          <div class="d">Verified quickstart in the README: fresh tarball extract, in-tree venv, smoke checks, and a real 10K-token pilot to PASS.</div>
-        </a>
+    <section aria-label="Recall race" class="reveal">
+      <h2>Recall race: guided vs flat, matched work</h2>
+      <p class="muted">Both modes ran 120 probes each under matched work budgets. Flat recall is the control; it appears in the benchmarks table only. <span class="honesty-chip">Honesty: protocol agreement, not a SOTA claim</span></p>
+      <div class="race" id="race-all" role="img" aria-label="All-sources recall at 10: guided 0.7367 versus flat 0.055">
+        <div class="row guided"><span>guided (all)</span><span class="track"><span class="bar-fill" data-w="100"></span></span><span>0.7367</span></div>
+        <div class="row flat"><span>flat (all)</span><span class="track"><span class="bar-fill" data-w="7.5"></span></span><span>0.055</span></div>
       </div>
-      <div class="btn-row"><a class="btn" href="explorer/#tab-topology">Take the 60-second tour</a></div>
-      <div class="note"><strong>Heads-up on the explorer:</strong> the live graph data files are the <em>earlier</em> freeze, counts match (3,711 parents / 9,177 leaves / 63,441 atoms). The <code>seam12a</code> numbers above are the latest measured run.</div>
+      <div class="race" id="race-lso" role="img" aria-label="Leave-source-out recall at 10: guided 0.4883 versus flat 0.0017">
+        <div class="row guided"><span>guided (lso)</span><span class="track"><span class="bar-fill" data-w="100"></span></span><span>0.4883</span></div>
+        <div class="row flat"><span>flat (lso)</span><span class="track"><span class="bar-fill" data-w="0.4"></span></span><span>0.0017</span></div>
+      </div>
     </section>
 
-    <section aria-label="Deep dive">
-      <h2>Deep dive</h2>
-      <p>How it works, full benchmarks, and the honest 10M reproduction path (external corpus, VM guard, 1M local cap) live in the repo: <a href="https://github.com/Anshul48/trace">README</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/ARCHITECTURE.md">architecture</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/BENCHMARKS.md">benchmarks</a> &middot; <a href="https://github.com/Anshul48/trace/releases/tag/seam12a-10m-freeze">release <code>seam12a-10m-freeze</code></a>. Research preview: one measured run on one VM, no SOTA claims; 100M&ndash;500M+ is roadmap, not measured.</p>
+    <section aria-label="Memory gauge" class="reveal">
+      <h2>Memory: ~8.5 GB peak on one VM</h2>
+      <div class="gauge" role="img" aria-label="Parent-process peak 8,489.1 MiB of a 16 GiB scale; child peak 7,169.2 MiB">
+        <p class="muted">Parent-process peak 8,489.1 MiB; child 7,169.2 MiB (rss receipts, 1,899 rows).</p>
+        <div class="track"><span class="bar-fill" id="rss-bar" data-w="51.8"></span></div>
+        <p class="muted">Bar: parent peak against a 16 GiB scale (53%). <span class="honesty-chip">Honesty: one measured run, one VM</span></p>
+      </div>
+    </section>
+
+    <section aria-label="Scale ladder" class="reveal">
+      <h2>Scale ladder: measured vs blocked</h2>
+      <table class="ladder">
+        <thead><tr><th scope="col">Rung</th><th scope="col">Status</th><th scope="col">Receipt</th></tr></thead>
+        <tbody>
+          <tr><td>20K portable (20,030 tok / 88 docs / 144 atoms)</td><td>measured, PASS in 27.8 s</td><td>run20k.cast <code>7ef2cca3&hellip;</code></td></tr>
+          <tr><td>10K pilot (10,080 tok / 36 docs / 72 atoms)</td><td>measured, PASS in ~26 s</td><td>out-pilot/result.json</td></tr>
+          <tr><td>10M freeze (10,003,381 tok / 13,081 docs)</td><td>measured, one run on one VM</td><td>result.json, 1,899-row RSS series</td></tr>
+          <tr><td>10M reproduction</td><td>blocked: external corpus, VM guard, 1M local cap</td><td>REPRO guide; small path runs anywhere</td></tr>
+          <tr><td>100M+ roadmap</td><td>unmeasured</td><td>roadmap, not a claim</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="limits reveal" aria-label="Limits">
+      <h2>Limits (single block)</h2>
+      <ul>
+        <li>One measured run on one VM through the frozen <code>product_pilot</code> harness.</li>
+        <li>Explorer graph files are the earlier freeze; counts match (3,711 parents / 9,177 leaves / 63,441 atoms).</li>
+        <li>Recall numbers are protocol agreement under matched work, not SOTA claims.</li>
+        <li>10M reproduction is blocked (external corpus, VM guard, 1M local cap); the small path runs anywhere.</li>
+        <li>100M+ is unmeasured roadmap.</li>
+      </ul>
+    </section>
+
+    <section id="go-deeper" aria-label="Go deeper" class="reveal">
+      <h2>Go deeper</h2>
+      <p><a href="https://github.com/Anshul48/trace">README</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/ARCHITECTURE.md">architecture</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/BENCHMARKS.md">benchmarks</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/REPRO.md">reproduction guide</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/CODE-TOUR.md">code tour</a> &middot; <a href="explorer/">explorer</a> &middot; <a href="recording/">recording</a> &middot; <a href="https://github.com/Anshul48/trace/releases/tag/seam12a-10m-freeze">release <code>seam12a-10m-freeze</code></a></p>
+      <!-- ws6-externals: assembly slot for verified external readings (label + list). Input: /tmp/r2/ws6-links.md. Not embedded yet. -->
     </section>
   </main>
 
-  <footer>
-    TRACE research preview &middot; Apache-2.0 &middot; freeze <code>seam12a</code> (<code>8d3bbb6b&hellip;928dbf64</code>) &middot; run <code>o94-scale10m</code> &middot; pins probes <code>b332d62d&hellip;</code>, harness <code>9f78479a&hellip;</code>, commits <code>164195</code> &middot; <a href="https://github.com/Anshul48/trace">source</a>
+  <footer class="site gutters">
+    TRACE research preview &middot; Apache-2.0 &middot; freeze <code>seam12a</code> (<code>8d3bbb6b&hellip;928dbf64</code>) &middot; run <code>o94-scale10m</code> &middot; pins probes <code>b332d62d&hellip;</code>, harness <code>9f78479a&hellip;</code>, commits <code>164195</code> &middot; <a href="https://github.com/Anshul48/trace">source</a> &middot; numbers: <a href="assets/data.json">data.json</a>
   </footer>
+  <script src="assets/motion.js" defer></script>
   <script src="hero.js" defer></script>
+  <script src="landing.js" defer></script>
 </body>
 </html>

@@ -374,3 +374,26 @@ a {
     white-space: normal;
   }
 }
+
+/* WS1 demo transport additions: real-lines, scrub, speed, key hints. */
+.demo-real {
+  font-size: 0.85rem;
+  color: var(--text-muted, #8b949e);
+  border-left: 3px solid var(--accent, #0b5cad);
+  padding-left: 0.6rem;
+  margin: 0.4rem 0;
+}
+
+.demo-scrub,
+.demo-speed {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  margin: 0.4rem 0;
+}
+
+.demo-scrub input[type="range"] {
+  flex: 1;
+  max-width: 100%;
+}

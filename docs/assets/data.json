@@ -1,0 +1,53 @@
+{
+  "_comment": "TRACE WS1 single numbers source. Every value below is copied from the live README proof strip on CURRENT main (verified 2026-10-19) or its named receipt. No other audit is input. JS reads this file; DOM text stays authoritative for no-JS readers.",
+  "seam12a": {
+    "_source": "README.md proof strip + benchmarks table (run o94-scale10m); leaf/parent counts docs/explorer/result.json",
+    "tokens": 10003381,
+    "tokens_display": "10,003,381",
+    "docs": 13081,
+    "docs_display": "13,081",
+    "atoms": 63441,
+    "atoms_display": "63,441",
+    "parents": 3711,
+    "parents_display": "3,711",
+    "leaves": 9177,
+    "leaves_display": "9,177",
+    "final_commits": 164195,
+    "final_commits_display": "164,195",
+    "recall_guided_all": 0.7367,
+    "recall_guided_lso": 0.4883,
+    "recall_flat_all": 0.055,
+    "recall_flat_lso": 0.0017,
+    "_flat_note": "flat recall is the matched-work control; shown in the benchmarks table only",
+    "repair_from": 5847,
+    "repair_to": 0,
+    "repair_iters": 6,
+    "wall_s": 9494.9,
+    "wall_display": "9,494.9 s (~2.6 h)",
+    "ram_parent_mib": 8489.1,
+    "ram_display": "~8.5 GB (parent peak 8,489.1 MiB)",
+    "freeze": "seam12a",
+    "freeze_sha256": "8d3bbb6bf53e1731811065a9de156a9997be740d598cd1dfa0a3d946928dbf64",
+    "freeze_files": 253,
+    "pin_probes": "b332d62d",
+    "pin_harness": "9f78479a"
+  },
+  "run20k": {
+    "_source": "docs/recording/run20k.cast (sha256 7ef2cca3...) + repro-20k portable prefix",
+    "tokens": 20030,
+    "tokens_display": "20,030",
+    "docs": 88,
+    "atoms": 144,
+    "leaves": 81,
+    "parents": 51,
+    "wall_s": 27.8,
+    "wall_display": "27.8 s",
+    "cast_sha256": "7ef2cca320a25690756528524095d9f350bb0187a16a3060d5ec58b1eb5b3d58",
+    "cast_sha_short": "7ef2cca3"
+  },
+  "fresh_item_latency": {
+    "_source": "README proof strip (n=33, all within 5 s)",
+    "p50_ms": 96.8,
+    "p95_ms": 115.5
+  }
+}

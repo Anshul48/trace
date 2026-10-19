@@ -6,12 +6,17 @@
 
   var canvas = document.getElementById('demo-canvas');
   var captionEl = document.getElementById('demo-caption');
+  var realEl = document.getElementById('demo-real');
   var countEl = document.getElementById('demo-count');
   var dotsEl = document.getElementById('demo-dots');
   var barFill = document.getElementById('demo-bar-fill');
   var prevBtn = document.getElementById('demo-prev');
   var nextBtn = document.getElementById('demo-next');
   var playBtn = document.getElementById('demo-play');
+  var resetBtn = document.getElementById('demo-reset');
+  var scrubEl = document.getElementById('demo-scrub');
+  var speedEl = document.getElementById('demo-speed');
+  var speedMult = 1.0;
   if (!canvas || !canvas.getContext) return;
 
   var ctx = canvas.getContext('2d');
@@ -313,7 +318,15 @@
     'Scene 2 — It breaks them into atoms: 144 content-addressed atoms, each tagged by its content hash.',
     'Scene 3 — It self-organizes into schemas: top 4 of 51 real schemas by primary membership hold 30 / 7 / 6 / 6 atoms (gray dots: 95 atoms in the other 47 schemas). Group sizes and labels real, from the recorded 20K run; dot positions schematic.',
     'Scene 4 — Ask a question: retrieval paths light up and answers come back ranked (query and rank bars illustrative) — guided recall@10 0.7367 (all) / 0.4883 (leave-source-out) measured.',
-    'Scene 5 — It repairs itself: 5,847 open issues drain to 0 over 6 iterations — measured at 10M tokens: 10,003,381 tok / 63,441 atoms / ~8.5 GB RAM / 0.7367 recall@10.'
+    'Scene 5 — It repairs itself, per-run split: [10M] 5,847 open issues drain to 0 over 6 iterations; [10M] scale card 10,003,381 tok / 63,441 atoms / ~8.5 GB RAM / 0.7367 recall@10; [20K] walkthrough cast: 88 docs / 144 atoms in 27.8 s.'
+  ];
+  // "What's real here" per scene: measured vs illustrative, stated plainly.
+  var REALS = [
+    "What's real here: 88 documents / 20,030 tokens from the recorded 20K run; flight paths illustrative.",
+    "What's real here: 144 content-addressed atoms (chunk hashes real); break-apart motion illustrative.",
+    "What's real here: top-4 schema sizes 30 / 7 / 6 / 6 and labels from the recorded 20K run; dot positions schematic.",
+    "What's real here: recall@10 0.7367 / 0.4883 measured; query text and rank bars illustrative.",
+    "What's real here [10M]: repair 5,847 → 0 in 6 iters, 10,003,381 tok, ~8.5 GB. [20K]: 88 docs / 144 atoms / 27.8 s cast."
   ];
   var DUR = [4.2, 4.2, 4.6, 5.0, 6.0]; // seconds per scene
 
@@ -328,11 +341,30 @@
     return clamp01(sceneElapsed / DUR[s]);
   }
 
+  function totalDur() {
+    var sum = 0, i;
+    for (i = 0; i < DUR.length; i++) sum += DUR[i];
+    return sum;
+  }
+
+  function scrubTo(percent) {
+    var target = (percent / 100) * totalDur();
+    var acc = 0, s = 0;
+    for (s = 0; s < DUR.length; s++) {
+      if (target < acc + DUR[s] || s === DUR.length - 1) break;
+      acc += DUR[s];
+    }
+    currentScene = s;
+    sceneElapsed = target - acc;
+    render(currentScene, sceneT(currentScene));
+  }
+
   function render(s, t) {
     ctx.fillStyle = C.bg;
     ctx.fillRect(0, 0, W, H);
     PAINTERS[s](t);
     captionEl.textContent = CAPTIONS[s];
+    if (realEl) realEl.textContent = REALS[s];
     canvas.setAttribute('aria-label', 'Scene ' + (s + 1) + ' of 5: ' + CAPTIONS[s]);
     countEl.textContent = 'Scene ' + (s + 1) + ' of 5';
     var dots = dotsEl.children;
@@ -341,6 +373,9 @@
     }
     var overall = (s + t) / PAINTERS.length;
     barFill.style.width = (overall * 100).toFixed(1) + '%';
+    if (scrubEl && document.activeElement !== scrubEl) {
+      scrubEl.value = String((overall * 100).toFixed(1));
+    }
   }
 
   function goTo(s) {
@@ -354,7 +389,7 @@
     var dt = (now - lastTick) / 1000;
     lastTick = now;
     if (dt > 0.25) dt = 0.25;
-    sceneElapsed += dt;
+    sceneElapsed += dt * speedMult;
     var t = sceneElapsed / DUR[currentScene];
     if (t >= 1) {
       if (currentScene === PAINTERS.length - 1) {
@@ -423,6 +458,37 @@
     playBtn.textContent = 'Next scene';
     playBtn.setAttribute('aria-label', 'Advance to next scene (animation disabled)');
   }
+  if (resetBtn) resetBtn.addEventListener('click', function () {
+    setPlaying(false);
+    goTo(0);
+  });
+  if (scrubEl) scrubEl.addEventListener('input', function (e) {
+    setPlaying(false);
+    scrubTo(parseFloat(e.target.value));
+  });
+  if (speedEl) speedEl.addEventListener('change', function (e) {
+    speedMult = parseFloat(e.target.value) || 1.0;
+  });
+  document.addEventListener('keydown', function (e) {
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+    if (e.key === ' ') {
+      e.preventDefault();
+      playBtn.click();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setPlaying(false);
+      goTo(currentScene + 1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setPlaying(false);
+      goTo(currentScene - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setPlaying(false);
+      goTo(0);
+    }
+  });
   document.addEventListener('visibilitychange', function () {
     if (document.hidden && playing) setPlaying(false);
   });

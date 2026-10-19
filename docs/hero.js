@@ -218,12 +218,16 @@
     loadPayload().then(function (data) {
       var sim = data ? buildRealSim(data) : null;
       if (!sim) sim = buildFallbackSim();
+      canvas._traceAtoms = (data && data.atoms && data.atoms.length === 144) ?
+        data.atoms : null;
       run(sim);
     });
 
     function run(sim) {
       var anchors = sim.anchors;
       var parts = sim.parts;
+      // Live positions for the zoom-to-atom provenance reader below.
+      canvas._traceLive = { parts: parts, anchors: anchors };
 
       function resize() {
         var dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -368,4 +372,114 @@
 
   initCounters();
   initHero();
+
+  // ---------- Zoom-to-atom provenance ----------
+  // Click/keyboard: nearest live particle -> real title/snippet/parent
+  // from hero20k.json (prefix match) + explorer/local_20k_data.json.
+  // Text-only panel update; never draws text on canvas.
+  function initProvenance() {
+    var canvas = document.getElementById('hero-canvas');
+    var panel = document.getElementById('atom-panel');
+    if (!canvas || !panel) return;
+    var cache20k = null;
+
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function load20k() {
+      if (cache20k) return Promise.resolve(cache20k);
+      if (!window.fetch) return Promise.resolve(null);
+      var urls = ['explorer/local_20k_data.json', '../explorer/local_20k_data.json'];
+      function attempt(i) {
+        if (i >= urls.length) return Promise.resolve(null);
+        return window.fetch(urls[i]).then(function (res) {
+          if (!res || !res.ok) return attempt(i + 1);
+          return res.json().then(function (data) {
+            cache20k = data;
+            return data;
+          }, function () { return attempt(i + 1); });
+        }, function () { return attempt(i + 1); });
+      }
+      return attempt(0);
+    }
+
+    function pick(clientX, clientY) {
+      var live = canvas._traceLive;
+      var atoms = canvas._traceAtoms;
+      if (!live || !atoms) return -1;
+      var rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return -1;
+      var ix = (clientX - rect.left) / rect.width * 880;
+      var iy = (clientY - rect.top) / rect.height * 360;
+      var best = -1, bestD = 28 * 28; // 28 internal px radius
+      for (var i = 0; i < live.parts.length; i++) {
+        var dx = live.parts[i].x - ix, dy = live.parts[i].y - iy;
+        var d = dx * dx + dy * dy;
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      return best;
+    }
+
+    function show(idx) {
+      if (idx < 0) {
+        panel.textContent = 'No atom near that point — try another dot.';
+        return;
+      }
+      var entry = String(canvas._traceAtoms[idx]).split(':');
+      var prefix = entry[0];
+      load20k().then(function (data) {
+        if (!data || !data.atoms) {
+          panel.textContent = 'Atom ' + prefix + '… (viewer data unreachable).';
+          return;
+        }
+        var hit = null;
+        for (var i = 0; i < data.atoms.length; i++) {
+          if (String(data.atoms[i].id).slice(0, 8) === prefix) {
+            hit = data.atoms[i];
+            break;
+          }
+        }
+        if (!hit) {
+          panel.textContent = 'Atom ' + prefix + '… (no viewer record).';
+          return;
+        }
+        var leaf = (hit.leaf_ids || [])[0] || '?';
+        var parent = '?';
+        if (data.leaves) {
+          for (var j = 0; j < data.leaves.length; j++) {
+            if (data.leaves[j].id === leaf) {
+              parent = ((data.leaves[j].parent_ids || [])[0]) || '?';
+              break;
+            }
+          }
+        }
+        panel.innerHTML = '<span class="t">' + esc(hit.title || '(untitled)') +
+          '</span><br>“' + esc((hit.snippet || '').slice(0, 220)) +
+          '…”<br><span>atom ' + esc(String(hit.id).slice(0, 12)) +
+          '… · leaf ' + esc(leaf) + ' · parent schema ' + esc(parent) +
+          ' · doc ' + esc(hit.doc_id || '?') + '</span>';
+      });
+    }
+
+    canvas.setAttribute('tabindex', '0');
+    canvas.setAttribute('role', 'button');
+    canvas.addEventListener('click', function (ev) {
+      show(pick(ev.clientX, ev.clientY));
+    });
+    canvas.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        var rect = canvas.getBoundingClientRect();
+        show(pick(rect.left + rect.width / 2, rect.top + rect.height / 2));
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProvenance);
+  } else {
+    initProvenance();
+  }
 })();

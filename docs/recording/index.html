@@ -13,6 +13,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="TRACE — Using TRACE: an illustrated walkthrough">
   <meta name="twitter:description" content="Illustrated walkthrough of TRACE. Measured at 10M tokens: 10,003,381 tok, 63,441 atoms, recall@10 0.7367. Research preview.">
+  <link rel="stylesheet" href="../assets/design.css">
   <link rel="stylesheet" href="player.css">
   <link rel="stylesheet" href="demo.css">
 </head>
@@ -43,13 +44,27 @@
           <canvas id="demo-canvas" role="img" aria-label="Scene 1 of 5: feeding documents into TRACE"></canvas>
         </div>
         <p class="sim-label">Illustrated simulation &mdash; visuals simplified; all numbers measured
-          (20K run + seam12a 10M freeze).</p>
+          (20K run + seam12a 10M freeze). <span class="honesty-chip">Honesty: dots schematic, counts measured</span></p>
         <p class="demo-caption" id="demo-caption" aria-live="polite"></p>
+        <p class="demo-real" id="demo-real" aria-live="polite"></p>
         <div class="demo-controls">
           <div class="demo-buttons">
             <button type="button" class="btn" id="demo-prev" aria-label="Previous scene">&#9664; Prev</button>
             <button type="button" class="btn btn-primary" id="demo-play" aria-label="Play walkthrough">Play</button>
             <button type="button" class="btn" id="demo-next" aria-label="Next scene">Next &#9654;</button>
+            <button type="button" class="btn" id="demo-reset" aria-label="Reset walkthrough to scene 1">Reset</button>
+          </div>
+          <div class="demo-scrub">
+            <label for="demo-scrub">Scrub:</label>
+            <input type="range" id="demo-scrub" min="0" max="100" value="0" step="0.1" aria-label="Walkthrough progress scrub">
+          </div>
+          <div class="demo-speed">
+            <label for="demo-speed">Speed:</label>
+            <select id="demo-speed" aria-label="Walkthrough speed selector">
+              <option value="0.5">0.5x</option>
+              <option value="1.0" selected>1.0x</option>
+              <option value="2.0">2.0x</option>
+            </select>
           </div>
           <div class="demo-progress">
             <span class="demo-count" id="demo-count">Scene 1 of 5</span>
@@ -57,6 +72,7 @@
           </div>
           <div class="demo-bar" aria-hidden="true"><span id="demo-bar-fill"></span></div>
         </div>
+        <p class="muted keys-hint">Keys: space play/pause &middot; arrows step scenes &middot; Home reset.</p>
         <noscript><p class="noscript-note">This walkthrough needs JavaScript. The five scenes:
           (1) 88 documents fly in; (2) they break into 144 content-addressed atoms;
           (3) atoms self-organize into labeled schemas; (4) a question lights up retrieval
@@ -112,19 +128,25 @@
         <p class="raw-note">The authentic captured output of the frozen harness on the portable 20k prefix:
           20,030 tokens / 88 documents / 144 atoms, verdict PASS in 27.8&nbsp;s. Separate from the
           10M benchmarks above.</p>
+        <p class="raw-honesty"><span class="honesty-chip">Honesty: authentic capture, replayed verbatim</span> <span class="honesty-chip">20K run, not 10M</span></p>
         <main class="player-container">
           <div class="terminal-viewport" id="terminal-viewport" aria-label="Terminal output display">
             <pre class="terminal-output" id="terminal-output" tabindex="0">Loading recording...</pre>
           </div>
+          <p class="chapter-caption" id="chapter-caption" aria-live="polite"></p>
           <footer class="controls-panel">
             <div class="scrubber-row">
               <input type="range" class="progress-slider" id="progress-slider" min="0" max="100" value="0" step="0.1" aria-label="Recording progress scrub">
               <span class="time-display" id="time-display" aria-live="off">00:00.0 / 00:00.0</span>
             </div>
+            <div class="chapter-ticks" id="chapter-ticks" aria-hidden="true"></div>
             <div class="buttons-row">
               <div class="btn-group">
+                <button type="button" class="btn" id="btn-step-back" aria-label="Step back one chapter">&#9664; Chapter</button>
                 <button type="button" class="btn btn-primary" id="btn-play" aria-label="Play recording">Play</button>
+                <button type="button" class="btn" id="btn-step-fwd" aria-label="Step forward one chapter">Chapter &#9654;</button>
                 <button type="button" class="btn" id="btn-restart" aria-label="Restart recording from beginning">Restart</button>
+                <button type="button" class="btn" id="btn-reset" aria-label="Reset replay to start, paused">Reset</button>
               </div>
               <div class="btn-group">
                 <label for="speed-select" style="font-size: 0.85rem; color: var(--text-muted);">Speed:</label>
@@ -137,11 +159,22 @@
                 </select>
               </div>
             </div>
+            <p class="step-counter" id="step-counter" aria-live="polite">Chapter 1 of 5</p>
+            <ol class="chapter-list" id="chapter-list" aria-label="Replay chapters"></ol>
+            <p class="keys-hint">Keys: space play/pause &middot; &larr;/&rarr; step chapters &middot; R reset.</p>
             <div class="hash-row">
-              <span>Asciicast SHA-256: <code>7ef2cca320a25690756528524095d9f350bb0187a16a3060d5ec58b1eb5b3d58</code></span>
+              <span>Asciicast SHA-256: <code>7ef2cca320a25690756528524095d9f350bb0187a16a3060d5ec58b1eb5b3d58</code> &middot; <a href="run20k.cast" download>download run20k.cast</a></span>
             </div>
           </footer>
         </main>
+      <section class="directed-cut" id="directed-cut" aria-labelledby="directed-heading">
+        <h2 id="directed-heading">Directed cut (video slot)</h2>
+        <p>No narrated video is embedded yet. The raw evidence above is the canonical record:
+          <a href="run20k.cast" download>run20k.cast</a>, SHA-256
+          <code>7ef2cca320a25690756528524095d9f350bb0187a16a3060d5ec58b1eb5b3d58</code>
+          (27.8 s, verdict PASS).</p>
+      </section>
+
         <details class="transcript">
           <summary>Transcript (27.8 s capture, 7 stages)</summary>
           <ol>
@@ -164,6 +197,7 @@
         <a href="https://github.com/Anshul48/trace">source</a></p>
     </footer>
   </div>
+  <script src="../assets/motion.js" defer></script>
   <script src="player.js"></script>
   <script src="demo.js"></script>
   <script src="../hero.js" defer></script>
