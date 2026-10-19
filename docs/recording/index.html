@@ -13,6 +13,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="TRACE — Using TRACE: an illustrated walkthrough">
   <meta name="twitter:description" content="Illustrated walkthrough of TRACE. Measured at 10M tokens: 10,003,381 tok, 63,441 atoms, recall@10 0.7367. Research preview.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="stylesheet" href="../assets/design.css">
   <link rel="stylesheet" href="player.css">
   <link rel="stylesheet" href="demo.css">
@@ -168,11 +169,19 @@
           </footer>
         </main>
       <section class="directed-cut" id="directed-cut" aria-labelledby="directed-heading">
-        <h2 id="directed-heading">Directed cut (video slot)</h2>
-        <p>No narrated video is embedded yet. The raw evidence above is the canonical record:
-          <a href="run20k.cast" download>run20k.cast</a>, SHA-256
-          <code>7ef2cca320a25690756528524095d9f350bb0187a16a3060d5ec58b1eb5b3d58</code>
-          (27.8 s, verdict PASS).</p>
+        <h2 id="directed-heading">Directed cut (65 s, 7 chapters)</h2>
+        <!-- Voice: synthetic (Kokoro TTS, voice af_heart). No autoplay. -->
+        <video controls preload="metadata" poster="trace-directed-poster.png" width="1280">
+          <source src="trace-directed.mp4" type="video/mp4" />
+          <source src="trace-directed.webm" type="video/webm" />
+          <track kind="captions" srclang="en" label="English" src="trace-directed.en.vtt" default />
+          Sorry, your browser does not support embedded video.
+        </video>
+        <p>Terminal footage: the recorded 20k run
+          (<a href="run20k.cast" download>run20k.cast</a>, SHA-256
+          <code>7ef2cca320a25690756528524095d9f350bb0187a16a3060d5ec58b1eb5b3d58</code>,
+          27.8 s, retimed). Narration is synthetic; transcript in the VTT captions above.
+          Raw evidence remains canonical.</p>
       </section>
 
         <details class="transcript">

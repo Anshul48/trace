@@ -110,6 +110,7 @@
       border: 1px solid transparent;
     }
     .btn.secondary { background: var(--panel); color: var(--accent); border-color: var(--accent); }
+    .pin { white-space: nowrap; }
     .try3 { display: grid; gap: 1rem; grid-template-columns: 1fr; margin: 1rem 0; }
     @media (min-width: 900px) { .try3 { grid-template-columns: 1fr 1fr 1fr; } }
     .try3 .step { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); padding: 1rem; }
@@ -146,7 +147,7 @@
 
   <main class="gutters layout-grid">
     <section aria-label="Measured proof" class="reveal">
-      <h2>Proof &mdash; freeze <code>seam12a</code>, run <code>o94-scale10m</code></h2>
+      <h2>Proof &mdash; <span class="pin">freeze <code>seam12a</code></span>, <span class="pin">run <code>o94-scale10m</code></span></h2>
       <ul class="proof4">
         <li class="card"><div class="v"><span data-countup="10003381" data-decimals="0">10,003,381</span></div><div class="l">tokens / 13,081 docs / <span data-countup="63441" data-decimals="0">63,441</span> atoms</div></li>
         <li class="card"><div class="v"><span data-countup="0.7367" data-decimals="4">0.7367</span> / <span data-countup="0.4883" data-decimals="4">0.4883</span></div><div class="l">guided recall@10: all-sources / leave-source-out (120 probes each)</div></li>
