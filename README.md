@@ -52,8 +52,9 @@ Scope: one measured run (`o94-scale10m`, wall 9,494.9 s ≈ 2.6 h, parent-proces
 
 ## See it
 
-- **60-second tour:** [Take the 60-second tour in the explorer](https://anshul48.github.io/trace/explorer/) — documents in, atoms, schemas, retrieval, and self-repair, driven on the real graph.
-- **Animated demo:** [recorded 20k terminal run (27.8 s)](https://anshul48.github.io/trace/recording/) — install, frozen-file checks, and an engine run to `PASS`, replayed in the browser.
+- **Site:** [live landing page](https://anshul48.github.io/trace/) — hook, proof strip, and the membership hero canvas.
+- **Demo:** [60-second tour in the explorer](https://anshul48.github.io/trace/explorer/) — documents in, atoms, schemas, retrieval, and self-repair, driven on the real graph.
+- **Video (placeholder):** no recorded walkthrough exists yet — the [recorded 20k terminal run (27.8 s)](https://anshul48.github.io/trace/recording/) (install, frozen-file checks, and an engine run to `PASS`, replayed in the browser) is the moving picture for now.
 - **Raw recording:** [unedited terminal capture](https://anshul48.github.io/trace/recording/#raw-run) — the authentic frozen-harness output on the portable 20k prefix, slowest path last.
 - Identity note: the live explorer graph data files are the earlier freeze; corpus scale and graph counts match.
 
@@ -154,6 +155,16 @@ Real output of step 5 (from `out-pilot/result.json`): `claim=measured, status=PA
 
 ---
 
+## Limits & honesty
+
+- One measured run on one VM: `o94-scale10m` on `trace-build500` (solo CPUs 0–1, `nice 19`), wall 9,494.9 s (~2.6 h), parent-process peak 8,489.1 MiB (~8.5 GB).
+- Explorer and replay pages show the earlier freeze; corpus scale and graph counts match (3,711 / 9,177 / 63,441).
+- Recall is protocol agreement with an exact oracle top-10 on the staged corpus (120 probes per mode, matched work budgets) — not a state-of-the-art or semantic-relevance claim.
+- The full 10M reproduction is blocked (external corpus, vm-guard hostname, 1M local cap); the 5-minute path above and the [portable 20k reproduction](repro-20k/README.md) run anywhere.
+- 100M+ scales are roadmap, unmeasured.
+
+---
+
 ## Why it matters
 
 A language model cannot fit thirteen thousand documents into its prompt, so any agent working over a growing corpus needs retrieval: pick the right handful of passages first, then read only those. TRACE is built for that picking step — arrivals become searchable the moment they land, and each question descends only the most promising branches instead of scoring everything. The 10M run measured how often the pick contains the answer under a fixed work budget. That is the whole bet: bounded, repairable memory that grows with the agent instead of a context window that does not.
@@ -176,28 +187,7 @@ How it works lives behind these links:
 
 ## Reproduce the 10M benchmark
 
-### The exact o94 command
-
-```bash
-SUP_REUSE_VIEW_POOL=1 taskset -c 0,1 bash runtime.sh tools/product_pilot.py \
-  --tokens 10000000 --profile vm \
-  --source-root <path-to>/fix7/cand \
-  --data-dir /home/anshul/beam/pkg/data \
-  --out <path-to>/runs/SCALE10M \
-  --drain-attribution --drain-census \
-  --holon-descriptor-columnar --overrides-columnar \
-  --descriptor-matrix-all --per-view-sharing \
-  --cold-scan-chunk 4096 --repair-columnar \
-  --candidate-source hnsw --drain-bounded-k 32 \
-  --candidate-shadow-audit 8
-```
-
-Receipt-recorded requirements: wall 9,494.9 s (~2.6 h); peak RAM ~8.5 GB (parent-process peak 8,489.1 MiB); 2.85 GiB of retained disk; interpreter from the run receipts with numpy 2.5.3, single-threaded BLAS (`OMP/OPENBLAS/MKL_NUM_THREADS=1`), `nice 19`.
-
-### Corpus format
-
-`--data-dir` must contain `docs-100m.jsonl` (one JSON object per line, fields `doc_id` plus `text`) and an `emb_cache/` directory holding `meta.json` (format `tl-gpu-embcache-v1`, dim 384, float32 little-endian), `index.jsonl` rows (`key`, `chunk_sha256`, `byte_len`, dim 384, `shard`, `row`), and `shard_NNNNNN.f32` FP32 little-endian 384-dim memmaps. Tokenizer is TOK_V1; only complete documents count; cache misses are fatal. No corpus generator ships in the package — the only in-repo reference for the layout is the `cache_fixture` in `tests/test_prefix_shards.py`.
-
+The exact `o94-scale10m` command, receipt-recorded requirements, corpus format, and receipts inventory live in [docs/REPRO.md](docs/REPRO.md). The [portable 20k reproduction](repro-20k/README.md) (88 documents, precomputed vector cache) is the one-command local proof.
 
 <details>
 <summary>Why a full 10M reproduction is blocked (2 blockers, stated honestly)</summary>
@@ -217,25 +207,7 @@ Labeling rule: running the command above on your own corpus is a **your-corpus 1
 
 ## Benchmarks (measured, receipt-backed)
 
-<details>
-<summary>Full benchmark table (measured, receipt-backed — click to expand)</summary>
-
-| Area | Measured result | Receipt / condition |
-|---|---|---|
-| Corpus | 10,003,381 tokens, 13,081 docs, 63,441 atoms, 0 cache misses | `result.json` input block |
-| Wall | 9,494.9 s total: ingest 586.9 / drain 999.4 / append 1,163.2 / rejection 1.83 / prepare-rejection 170.3 / kill-restart 516.5 / remaining drain 4,654.4 / repair 1,162.1 s | `result.json` phase walls |
-| Recall, all-sources | guided 0.7367 vs flat 0.055 | `result.json` evaluation summary, 120 probes |
-| Recall, LSO | guided 0.4883 vs flat 0.0017 | `result.json` evaluation summary, 120 probes |
-| Fresh visibility | 33/33 within 5 s; p50 96.8 ms, p95 115.5 ms | `result.json` F1 block, n=33 |
-| Append latency | ACK-to-query 0.114 s | `result.json` |
-| Reader load | 2 threads, 27,796 requests, p50 74.7 ms | `result.json` |
-| Memory | parent-process peak 8,489.1 MiB (~8.5 GB); child 7,169.2 MiB | `rss-hwm.txt` + `rss-series.tsv` (1,899 rows) + `result.json` |
-| Store | 2.85 GiB retained (3,058,624,883 B) | `result.json` / study record (VM-side) |
-| Repair | 6 iterations, 5,847 → 0 | `result.json` |
-| Derived caps | `max_delta_entries` 669,436 (37,117 commits / 7,035 atoms measured, margin 2.0); kill wait 316 s; drain k=32, cold-scan chunk 4,096 | `result.json` |
-| Pins | probes `b332d62d…`, harness `9f78479a…` (= freeze entry for `tools/product_pilot.py`), final commits 164,195 | `result.json` source pins |
-
-</details>
+Headlines are in the [proof strip](#proof-strip-freeze-seam12a-run-o94-scale10m) above. The full measured table — phase walls, both recall modes, fresh visibility, reader load, memory, store, repair, derived caps, and pins — lives in [docs/BENCHMARKS.md](docs/BENCHMARKS.md), receipt-backed per row.
 
 ---
 
