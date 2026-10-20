@@ -7,9 +7,9 @@
 
 [![TRACE constellation — amber particles gather into teal schema groups; open the live animated landing](docs/assets/constellation-hero.svg)](https://anshul48.github.io/trace/)
 
-**Your agent forgets everything outside its context window. TRACE remembers — a persistent memory that files 10 million tokens into schemas and deltas the moment they land, with no reindex and no rebuild.**
+**Your agent forgets everything outside its context window. TRACE remembers — 10 million tokens filed into one map you can open in your browser. No reindex, no rebuild. [Replay a probe.](https://anshul48.github.io/trace/play/#p=7&m=10m&v=race&lso=0&t=7)**
 
-**New here? [Watch the minute-long demo](https://anshul48.github.io/trace/recording/)** — install, live run, self-repair — then ask the real graph a question yourself.
+**New here? [Watch the map, two ways](https://anshul48.github.io/trace/recording/)** — 80 seconds of mechanism, 56 seconds of real replay — then replay a probe yourself.
 
 [Watch it](#watch-it) · [Try it](#try-it-in-5-minutes) · [Proof](#proof-one-line) · [Deep dive](#go-deeper)
 
@@ -21,7 +21,7 @@
 
 ## What you can do with it today
 
-- **Query a real 10M-token memory in your browser** — [the live explorer](https://anshul48.github.io/trace/explorer/) serves the recorded graph: arrivals becoming atoms, atoms organizing into schemas, questions descending only the most promising branches. No install.
+- **Replay a real 10M-token memory in your browser** — [the replay theater](https://anshul48.github.io/trace/play/#p=7&m=10m&v=race&lso=0&t=7) lights recorded probe paths on the real graph: arrivals becoming atoms, atoms organizing into schemas, guided-vs-flat races. No install. (Replay, not Q&A: the staged export carries topology + rows, not text.)
 - **Replay a real run to PASS** — [the recording hub](https://anshul48.github.io/trace/recording/) walks install, frozen-file checks, and an engine run on the portable 20k prefix, with the unedited terminal capture kept as evidence.
 - **Run your own pilot in 5 minutes** — freeze check, package suite, and a genuine 10K-token pilot to `claim=measured, status=PASS` on your machine. [Jump in](#try-it-in-5-minutes).
 - **Build on content-addressed storage** — ingest once with the Python package and the `product_pilot` CLI, local-first in an isolated venv. No services, no containers.

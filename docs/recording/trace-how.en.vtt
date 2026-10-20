@@ -1,0 +1,37 @@
+WEBVTT
+
+00:00:00.400 --> 00:00:04.925
+Trace is a memory that files ten million tokens into its own map.
+
+00:00:06.125 --> 00:00:10.400
+Documents stream in, and break into sixty-three thousand atoms.
+
+00:00:11.600 --> 00:00:14.425
+Atoms gather into nine thousand leaves.
+
+00:00:15.625 --> 00:00:23.800
+Leaves merge into three thousand seven hundred parents.  No global recompute. The map grows as the stream flows.
+
+00:00:25.000 --> 00:00:27.050
+Then a probe vector arrives.
+
+00:00:28.250 --> 00:00:32.425
+Guided search walks the map. Parents, then leaves, then atoms.
+
+00:00:33.625 --> 00:00:37.000
+Flat search scans everything, with no map at all.
+
+00:00:38.200 --> 00:00:42.975
+Guided: point seven three.  Flat: point zero six.
+
+00:00:44.775 --> 00:00:49.125
+Hide the probe's own document, and guided still scores point four eight.
+
+00:00:50.925 --> 00:00:57.875
+The census finds five thousand three hundred fourteen leftover items. Self-repair drains them to zero.
+
+00:00:59.675 --> 00:01:09.700
+Where it loses: fresh stores trail, the pony lane runs low for every arm, cold attach takes two minutes, and one hundred million tokens stay unclaimed.
+
+00:01:11.500 --> 00:01:16.975
+Every number you saw was measured.  This map is real. Open it.
