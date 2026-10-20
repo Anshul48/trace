@@ -1,0 +1,10 @@
+WEBVTT - TRACE overview video captions (voice: synthetic Kokoro TTS, af_heart)
+
+00:00.400 --> 00:18.600
+Trace turns a pile of documents into answers you can audit. It breaks text into small pieces called atoms, organizes them into labeled schemas, and shows its work for every answer. Measured on ten million tokens: thirteen thousand documents, sixty-three thousand atoms.
+
+00:19.400 --> 00:40.850
+Here is how it works. Documents stream in. Atoms form and link up. Schemas emerge, with names you can read. A question lights up retrieval paths and ranked answers, with guided recall near point seven four. When the census finds debt, self-repair drains it: from five thousand eight hundred forty-seven open items, down to zero.
+
+00:41.667 --> 01:01.217
+Trying it takes three lines. Clone the repo. Run run-trace. Your browser opens the interactive explorer on the recorded twenty thousand token run. Everything runs locally with Python only. No services, no containers. Trace is a research preview, and every number in this video was measured.

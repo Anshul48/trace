@@ -306,16 +306,23 @@ a {
   margin: 0.5rem 0 0.75rem;
 }
 
-/* Raw run: reuse player.css classes, constrain to page flow. */
+/* Trailer video: responsive, never autoplays (no autoplay attribute). */
+.trailer video {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #000;
+}
+
+/* Raw run: evidence block styles (the asciicast player was removed in R4;
+   run20k.cast stays as a download link). */
 .raw-note {
   font-size: 0.9rem;
   color: var(--text-muted);
   margin: 0 0 0.75rem;
   max-width: 70ch;
-}
-
-.raw-run .player-container {
-  max-width: none;
 }
 
 .transcript {

@@ -67,8 +67,14 @@ Scope: one measured run (`o94-scale10m`, wall 9,494.9 s ≈ 2.6 h, parent-proces
 ## See it
 
 - **60-second tour:** [Take the 60-second tour in the explorer](https://anshul48.github.io/trace/explorer/) — documents in, atoms, schemas, retrieval, and self-repair, driven on the real graph.
-- **Animated demo:** [recorded 20k terminal run (27.8 s)](https://anshul48.github.io/trace/recording/) — install, frozen-file checks, and an engine run to `PASS`, replayed in the browser.
-- **Raw recording:** [unedited terminal capture](https://anshul48.github.io/trace/recording/#raw-run) — the authentic frozen-harness output on the portable 20k prefix, slowest path last.
+- **Overview video + demo hub:** [TRACE in about a minute](https://anshul48.github.io/trace/recording/) — narrated walkthrough (what / how / local run) plus the interactive five-scene demo, captions included.
+- **Clone-and-run (3 lines, Python 3 only):** serves `docs/` locally and opens the explorer — no services, no containers (Windows: `tools\run-trace.bat`).
+  ```bash
+  git clone https://github.com/Anshul48/trace.git
+  cd trace
+  ./tools/run-trace.sh   # serves docs/, opens the explorer
+  ```
+- **Raw recording:** [evidence cast file](https://anshul48.github.io/trace/recording/#raw-run) — the authentic frozen-harness output on the portable 20k prefix (`run20k.cast`, replay with `asciinema play`), slowest path last.
 - Identity note: the live explorer graph data files are the earlier freeze; corpus scale and graph counts match.
 
 ---
