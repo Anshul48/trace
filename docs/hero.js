@@ -6,7 +6,7 @@
 // schema anchors (51 parents). Atoms in one of the 8 multi-parent leaves
 // draw a second dashed pink edge to their other parent, mirroring the
 // explorer's layout20kFull pattern. Layout is illustrative (deterministic
-// ellipse + id-hash jitter); membership is real. No data, numbers, or text
+// circle + id-hash jitter); membership is real. No data, numbers, or text
 // are ever drawn on the canvas.
 // If the sidecar payload cannot be fetched (e.g. file:// preview), the hero
 // falls back to abstract art so the page never breaks.
@@ -110,7 +110,7 @@
     return h >>> 0;
   }
 
-  // Real-membership sim: 51 parent anchors on a deterministic ellipse
+  // Real-membership sim: 51 parent anchors on a deterministic circle
   // (explorer layout20kFull pattern), 144 atoms bound to their real parent
   // anchor(s). part.a = primary anchor idx, part.b = secondary or -1.
   function buildRealSim(payload) {
@@ -120,8 +120,8 @@
     for (i = 0; i < parents.length; i++) {
       var angle = (i / parents.length) * Math.PI * 2;
       anchors.push({
-        x: IW / 2 + Math.cos(angle) * 372,
-        y: IH / 2 + Math.sin(angle) * 126
+        x: IW / 2 + Math.cos(angle) * 125,
+        y: IH / 2 + Math.sin(angle) * 125
       });
     }
     var parts = [];

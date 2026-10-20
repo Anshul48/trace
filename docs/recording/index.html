@@ -15,7 +15,6 @@
   <meta name="twitter:description" content="Illustrated walkthrough of TRACE. Measured at 10M tokens: 10,003,381 tok, 63,441 atoms, recall@10 0.7367. Research preview.">
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="stylesheet" href="../assets/design.css">
-  <link rel="stylesheet" href="player.css">
   <link rel="stylesheet" href="demo.css">
 </head>
 <body>
@@ -26,9 +25,9 @@
       <p class="lede">Built for researchers, developers, and hackathon judges: use it to explore
         how retrieval behaves at scale &mdash; what gets stored, what gets asked, and what gets fixed.</p>
       <ul class="proof-strip" aria-label="Measured proof">
-        <li><strong><span data-countup="10003381" data-decimals="0">10,003,381</span></strong><span>tokens measured</span></li>
+        <li><strong>10M</strong><span>tokens measured</span></li>
         <li><strong><span data-countup="13081" data-decimals="0">13,081</span></strong><span>documents</span></li>
-        <li><strong><span data-countup="0.7367" data-decimals="4">0.7367</span></strong><span>recall@10 (all)</span></li>
+        <li><strong>~<span data-countup="0.74" data-decimals="2">0.74</span></strong><span>recall@10 (all)</span></li>
         <li><strong>5,847 &rarr; 0</strong><span>self-repair debt</span></li>
       </ul>
       <p class="status-note">Experimental status, stated plainly: TRACE is a
@@ -39,6 +38,20 @@
     </header>
 
     <main>
+      <section class="trailer" aria-labelledby="trailer-heading">
+        <h2 id="trailer-heading">Watch: TRACE in about a minute</h2>
+        <video controls preload="none" poster="trace-poster.jpg" width="1280" height="720">
+          <source src="trace.mp4" type="video/mp4">
+          <track kind="captions" srclang="en" label="English" src="trace.en.vtt" default>
+          Sorry, your browser cannot play this video.
+          <a href="trace.mp4">Download trace.mp4</a> (1.5&nbsp;MB).
+        </video>
+        <p class="sim-label">What it does, how it works, and the three-line local run &mdash;
+          on real measured counts.
+          <span class="honesty-chip">Illustrated simulation &middot; counts measured</span></p>
+        <p class="muted">Voice: synthetic (Kokoro TTS).</p>
+      </section>
+
       <section class="hero-demo" aria-labelledby="demo-heading">
         <h2 id="demo-heading">Using TRACE</h2>
         <div class="demo-stage">
@@ -129,49 +142,12 @@
         <p class="raw-note">The authentic captured output of the frozen harness on the portable 20k prefix:
           20,030 tokens / 88 documents / 144 atoms, verdict PASS in 27.8&nbsp;s. Separate from the
           10M benchmarks above.</p>
-        <p class="raw-honesty"><span class="honesty-chip">Authentic capture, replayed verbatim</span> <span class="honesty-chip">20K run, not 10M</span></p>
-        <main class="player-container">
-          <div class="terminal-viewport" id="terminal-viewport" aria-label="Terminal output display">
-            <pre class="terminal-output" id="terminal-output" tabindex="0">Loading recording...</pre>
-          </div>
-          <p class="chapter-caption" id="chapter-caption" aria-live="polite"></p>
-          <footer class="controls-panel">
-            <div class="scrubber-row">
-              <input type="range" class="progress-slider" id="progress-slider" min="0" max="100" value="0" step="0.1" aria-label="Recording progress scrub">
-              <span class="time-display" id="time-display" aria-live="off">00:00.0 / 00:00.0</span>
-            </div>
-            <div class="chapter-ticks" id="chapter-ticks" aria-hidden="true"></div>
-            <div class="buttons-row">
-              <div class="btn-group">
-                <button type="button" class="btn" id="btn-step-back" aria-label="Step back one chapter">&#9664; Chapter</button>
-                <button type="button" class="btn btn-primary" id="btn-play" aria-label="Play recording">Play</button>
-                <button type="button" class="btn" id="btn-step-fwd" aria-label="Step forward one chapter">Chapter &#9654;</button>
-                <button type="button" class="btn" id="btn-restart" aria-label="Restart recording from beginning">Restart</button>
-                <button type="button" class="btn" id="btn-reset" aria-label="Reset replay to start, paused">Reset</button>
-              </div>
-              <div class="btn-group">
-                <label for="speed-select" style="font-size: 0.85rem; color: var(--text-muted);">Speed:</label>
-                <select id="speed-select" class="speed-select" aria-label="Playback speed selector">
-                  <option value="0.5">0.5x</option>
-                  <option value="1.0" selected>1.0x</option>
-                  <option value="1.5">1.5x</option>
-                  <option value="2.0">2.0x</option>
-                  <option value="4.0">4.0x</option>
-                </select>
-              </div>
-            </div>
-            <p class="step-counter" id="step-counter" aria-live="polite">Chapter 1 of 5</p>
-            <ol class="chapter-list" id="chapter-list" aria-label="Replay chapters"></ol>
-            <p class="keys-hint">Keys: space play/pause &middot; &larr;/&rarr; step chapters &middot; R reset.</p>
-            <div class="hash-row">
-              <span>Asciicast SHA-256: <code>7ef2cca320a25690756528524095d9f350bb0187a16a3060d5ec58b1eb5b3d58</code> &middot; <a href="run20k.cast" download>download run20k.cast</a></span>
-            </div>
-          </footer>
-        </main>
+        <p class="raw-honesty"><span class="honesty-chip">Authentic capture</span> <span class="honesty-chip">20K run, not 10M</span></p>
         <p class="raw-evidence-link">Evidence file: <a href="run20k.cast" download>run20k.cast</a>
           (SHA-256 <code>7ef2cca320a25690756528524095d9f350bb0187a16a3060d5ec58b1eb5b3d58</code>,
-          7.8&nbsp;KB). The directed video cut was removed; the interactive replay above and this
-          cast file are the canonical artifacts. <span class="honesty-chip">Recorded 20K run, not 10M</span></p>
+          7.8&nbsp;KB). Replay it locally with
+          <code>asciinema play run20k.cast</code>; the benchmarks table above
+          carries the measured values. <span class="honesty-chip">Recorded 20K run, not 10M</span></p>
 
         <details class="transcript">
           <summary>Transcript (27.8 s capture, 7 stages)</summary>
@@ -196,7 +172,6 @@
     </footer>
   </div>
   <script src="../assets/motion.js" defer></script>
-  <script src="player.js"></script>
   <script src="demo.js"></script>
   <script src="../hero.js" defer></script>
 </body>

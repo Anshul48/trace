@@ -121,7 +121,8 @@
     .pin { white-space: nowrap; }
     .try3 { display: grid; gap: 1rem; grid-template-columns: 1fr; margin: 1rem 0; }
     @media (min-width: 900px) { .try3 { grid-template-columns: 1fr 1fr 1fr; } }
-    .try3 .step { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); padding: 1rem; }
+    .try3 .step { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); padding: 1rem; min-width: 0; }
+    @media (min-width: 900px) { .watchrun .try3 { grid-template-columns: 1.15fr 1fr; } }
     .try3 .step h3 { margin-top: 0; }
     .race { margin: 0.75rem 0; }
     .race .row { display: grid; grid-template-columns: 7rem 1fr 4.5rem; gap: 0.5rem; align-items: center; margin: 0.35rem 0; font-size: 0.85rem; }
@@ -149,7 +150,7 @@
   <header class="top gutters">
     <span class="kicker">RESEARCH PREVIEW &middot; FROZEN RUN</span>
     <h1>TRACE: self-organizing memory for LLMs and agents</h1>
-    <p class="lede" id="hook">Self-organizing memory for AI: 10M tokens filed live, recalled at 0.7367, leftover work drained 5,847 to 0.</p>
+    <p class="lede" id="hook">Self-organizing memory for AI: 10M tokens filed live, recalled near 0.74, leftover work drained to zero.</p>
     <p class="muted">Researchers get long-horizon agent memory they can cite. Developers get memory beyond the context window, local-first and content-addressed.</p>
     <p class="hero-cta"><a class="btn" href="explorer/#tab-topology">Open the explorer tour</a></p>
   </header>
@@ -158,10 +159,10 @@
     <section aria-label="Measured proof" class="reveal">
       <h2>Proof &mdash; <span class="pin">freeze <code>seam12a</code></span>, <span class="pin">run <code>o94-scale10m</code></span></h2>
       <ul class="proof4">
-        <li class="card"><div class="v"><span data-countup="10003381" data-decimals="0">10,003,381</span></div><div class="l">tokens / 13,081 docs / <span data-countup="63441" data-decimals="0">63,441</span> atoms</div></li>
-        <li class="card"><div class="v"><span data-countup="0.7367" data-decimals="4">0.7367</span> / <span data-countup="0.4883" data-decimals="4">0.4883</span></div><div class="l">guided recall@10: all-sources / leave-source-out (120 probes each)</div></li>
+        <li class="card"><div class="v">10M</div><div class="l">tokens / 13,081 docs / <span data-countup="63441" data-decimals="0">63,441</span> atoms</div></li>
+        <li class="card"><div class="v">~<span data-countup="0.74" data-decimals="2">0.74</span> / ~<span data-countup="0.49" data-decimals="2">0.49</span></div><div class="l">guided recall@10: all-sources / leave-source-out (120 probes each)</div></li>
         <li class="card"><div class="v"><span data-countdown="5847">5,847</span></div><div class="l">leftover items &mdash; drained from 5,847 to 0 over 6 iterations; wall <span data-countup="9494.9" data-decimals="1">9,494.9</span> s (~2.6 h)</div></li>
-        <li class="card"><div class="v"><span data-countup="253" data-decimals="0">253</span> files</div><div class="l">frozen sources, 0 diffs; 164,195 final commits; peak RAM 8,489 MiB (8.3 GiB)</div></li>
+        <li class="card"><div class="v"><span data-countup="253" data-decimals="0">253</span> files</div><div class="l">frozen sources, 0 diffs; 164,195 final commits; peak RAM ~8.5 GB</div></li>
       </ul>
       <p class="muted">Recall@10 over 120 probes per mode (all-sources / leave-source-out): guided searches the organized store; flat is the no-organization control at the same scoring budget (matched work).</p>
     </section>
@@ -176,6 +177,24 @@
       <div class="atom-panel" id="atom-panel" aria-live="polite">Tip: select any dot to read that atom&rsquo;s real title, snippet, and parent schema.</div>
     </figure>
 
+    <section aria-label="Overview video and local run" class="reveal watchrun">
+      <h2>Watch it, then run it</h2>
+      <div class="try3">
+        <div class="step">
+          <h3>Watch &mdash; TRACE in about a minute</h3>
+          <p><a href="recording/"><img src="recording/trace-poster.jpg" alt="TRACE overview video poster: atom dots organizing into schemas" width="640" height="360" loading="lazy" style="width:100%;height:auto;border-radius:8px;border:1px solid var(--line)"></a></p>
+          <p class="muted">What it does, how it works, and the local run &mdash; captions included. <span class="honesty-chip">Illustrated simulation &middot; counts measured</span> <span class="honesty-chip">Voice: synthetic</span></p>
+        </div>
+        <div class="step">
+          <h3>Run &mdash; your own explorer in 3 lines</h3>
+          <pre style="max-width:100%;overflow-x:auto"><code>git clone https://github.com/Anshul48/trace.git
+cd trace
+./tools/run-trace.sh   # serves docs/, opens the explorer</code></pre>
+          <p class="muted">Python 3 only &mdash; no services, no containers. Windows: <code>tools\run-trace.bat</code>.</p>
+        </div>
+      </div>
+    </section>
+
     <section aria-label="Three doors" class="reveal">
       <h2>Three doors: tour, use, play</h2>
       <p class="muted">Researchers start with proof above; developers pick a door. How-it-works detail lives behind the tour door, not on this page. <span class="honesty-chip">Recorded data unless labeled live</span></p>
@@ -183,7 +202,7 @@
         <div class="step">
           <h3>Tour &mdash; how it works</h3>
           <p>Five scenes on the real graph: feed in, break into atoms, self-organize, ask, repair &mdash; then the raw recorded run. Starts on the small graph; 10M one click away.</p>
-          <p><a href="explorer/#tab-topology">Open the explorer tour</a> &middot; <a href="recording/">guided demo + recording</a></p>
+          <p><a href="explorer/#tab-topology">Open the explorer tour</a> &middot; <a href="recording/">overview video + interactive demo</a></p>
         </div>
         <div class="step">
           <h3>Use &mdash; run it in 5 minutes</h3>
@@ -289,18 +308,18 @@ SUP_PYTHON=$CAND/.venv/bin/python bash runtime.sh tools/product_pilot.py --token
     <section aria-label="Recall race" class="reveal">
       <h2>Recall race: guided vs flat, matched work</h2>
       <p class="muted">Both modes ran 120 probes each under matched work budgets. Flat is the weak-baseline control, shown here as bars; the benchmarks table carries the full rows. <span class="honesty-chip">Protocol agreement, not a SOTA claim</span></p>
-      <div class="race" id="race-all" role="img" aria-label="All-sources recall at 10: guided 0.7367 versus flat 0.055">
-        <div class="row guided"><span>guided (all)</span><span class="track"><span class="bar-fill" data-w="100"></span></span><span>0.7367</span></div>
-        <div class="row flat"><span>flat (all)</span><span class="track"><span class="bar-fill" data-w="7.5"></span></span><span>0.055</span></div>
+      <div class="race" id="race-all" role="img" aria-label="All-sources recall at 10: guided about 0.74 versus flat about 0.06">
+        <div class="row guided"><span>guided (all)</span><span class="track"><span class="bar-fill" data-w="100"></span></span><span>~0.74</span></div>
+        <div class="row flat"><span>flat (all)</span><span class="track"><span class="bar-fill" data-w="7.5"></span></span><span>~0.06</span></div>
       </div>
-      <div class="race" id="race-lso" role="img" aria-label="Leave-source-out recall at 10: guided 0.4883 versus flat 0.0017">
-        <div class="row guided"><span>guided (lso)</span><span class="track"><span class="bar-fill" data-w="100"></span></span><span>0.4883</span></div>
-        <div class="row flat"><span>flat (lso)</span><span class="track"><span class="bar-fill" data-w="0.4"></span></span><span>0.0017</span></div>
+      <div class="race" id="race-lso" role="img" aria-label="Leave-source-out recall at 10: guided about 0.49 versus flat under 0.01">
+        <div class="row guided"><span>guided (lso)</span><span class="track"><span class="bar-fill" data-w="100"></span></span><span>~0.49</span></div>
+        <div class="row flat"><span>flat (lso)</span><span class="track"><span class="bar-fill" data-w="0.4"></span></span><span>&lt;0.01</span></div>
       </div>
     </section>
 
     <section aria-label="Memory gauge" class="reveal">
-      <h2>Memory: 8,489 MiB (8.3 GiB) peak on one VM</h2>
+      <h2>Memory: ~8.5 GB peak on one VM</h2>
       <div class="gauge" role="img" aria-label="Parent-process peak 8,489 MiB of a 16 GiB scale (52%); child peak 7,169.2 MiB">
         <p class="muted">Parent-process peak 8,489 MiB (8.3 GiB); child 7,169.2 MiB (rss receipts, 1,899 rows).</p>
         <div class="track"><span class="bar-fill" id="rss-bar" data-w="52"></span></div>
