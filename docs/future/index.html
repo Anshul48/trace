@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRACE /future — measured, on-disk, vision</title>
+  <meta name="description" content="TRACE beyond 10M: what is measured (staged 10M run), what exists on disk but is not mapped (596 int8 shards), and what is vision, not built (100M/500M/1B sharding, sleep dreaming, contradiction engine).">
+  <link rel="canonical" href="https://anshul48.github.io/trace/future/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TRACE /future — measured, on-disk, vision">
+  <meta property="og:description" content="10M measured · 596 shards on disk, not mapped · 100M+ vision, not built. Every tier labeled.">
+  <meta property="og:url" content="https://anshul48.github.io/trace/future/">
+  <meta name="theme-color" content="#f4f6f8">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="stylesheet" href="../assets/design.css">
+  <link rel="stylesheet" href="../assets/tier.css">
+  <style>
+    main, header.top, footer.site { max-width: var(--maxw); margin: 0 auto; }
+    header.top { padding: 1.5rem 0 0; }
+    .kicker {
+      display: inline-block; font-size: 0.75rem; letter-spacing: 0.08em;
+      font-weight: 700; color: var(--accent); border: 1px solid var(--line);
+      border-radius: var(--radius-pill); padding: 0.2rem 0.7rem;
+      margin-bottom: 0.75rem; background: var(--panel);
+    }
+    h1 { margin: 0 0 0.5rem; }
+    h2 { margin: 2rem 0 0.5rem; }
+    p { margin: 0.5rem 0; }
+    .lede { font-size: 1.1rem; }
+    .muted { color: var(--muted); }
+    .gutters { padding-left: 16px; padding-right: 16px; }
+    footer.site { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 1rem; margin-top: 2.5rem; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1rem 0; padding: 0; list-style: none; }
+    .btn {
+      display: inline-block; padding: 0.55rem 1.1rem; background: var(--accent);
+      color: #fff; border-radius: var(--radius-s); font-weight: 600;
+      text-decoration: none; font-size: 0.9rem; border: 1px solid transparent;
+    }
+    .btn.secondary { background: var(--panel); color: var(--accent); border-color: var(--accent); }
+    code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85em; background: var(--warn-bg); padding: 0.1rem 0.35rem; border-radius: 4px; }
+    @media (prefers-color-scheme: dark) { code { background: #21262d; } }
+  </style>
+  <noscript><style>.stepseq .tstep { opacity: 1; }</style></noscript>
+</head>
+<body>
+  <header class="top gutters">
+    <span class="kicker">TRACE &middot; /FUTURE &middot; THREE TIERS, ALL LABELED</span>
+    <h1>Measured. On disk. Vision.</h1>
+    <p class="lede">Three tiers, three looks — solid, hollow, dashed. Numbers live only where they were measured. Everything past 10M is drawn, not built.</p>
+    <ul class="cta-row">
+      <li><a class="btn" href="../play/#p=7&amp;m=10m&amp;v=race&amp;lso=0&amp;t=7">Replay the measured map</a></li>
+      <li><a class="btn secondary" href="../">Back to TRACE home</a></li>
+    </ul>
+  </header>
+
+  <main class="gutters layout-grid">
+    <section aria-label="The grammar">
+      <h2>The grammar</h2>
+      <div class="tier-grid cols3">
+        <div class="tier tier-proof">
+          <span class="tchip tchip-proof">PROOF &middot; staged 10M</span>
+          <h3>Measured</h3>
+          <p>Solid, blue. Every number resolves to staged bytes. Replay it in <a href="../play/">the theater</a>.</p>
+        </div>
+        <div class="tier tier-exists">
+          <span class="tchip tchip-exists">EXISTS &middot; not mapped</span>
+          <h3>On disk</h3>
+          <p>Hollow, amber. Real bytes, pinned by sha — but not joined to the 10M map. Scope counts only; no recall numbers here.</p>
+        </div>
+        <div class="tier tier-vision">
+          <span class="tchip tchip-vision">VISION &middot; not built</span>
+          <h3>Vision</h3>
+          <p>Dashed wireframe, silent. Targets and question marks only. Sourced from project docs, never implied shipped.</p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Measured: the 10M tile">
+      <h2>Measured: the 10M tile <span class="tchip tchip-proof">PROOF &middot; staged 10M</span></h2>
+      <div class="tier tier-proof">
+        <ul>
+          <li>10,003,381 tokens &middot; TOK_V1 staged prefix (13,081 docs; both runs)</li>
+          <li>63,441 atoms &middot; 9,177 leaves &middot; 3,711 parents</li>
+          <li>probe-vector guided recall@10 0.73 (120 probes; staged explorer run, harness 9f516288)</li>
+          <li>leave-source-out 0.4758 (120 probes; staged explorer run)</li>
+          <li>flat baseline 0.0558 all / 0.0483 LSO (120 probes; staged explorer run, matched work)</li>
+          <li>leftover work 5,314 &rarr; 0 over 5 iterations (staged explorer run)</li>
+        </ul>
+        <p class="muted">Pins: probes <code>b332d62d&hellip;</code> &middot; harness <code>9f516288&hellip;</code> &middot; <a href="../play/provenance.json">provenance.json</a> &middot; <code>python3 docs/play/probe-row.py 7</code> reproduces probe 7.</p>
+      </div>
+    </section>
+
+    <section aria-label="On disk: the int8 store">
+      <h2>On disk: the int8 store <span class="tchip tchip-exists">EXISTS &middot; not mapped</span></h2>
+      <div class="tier tier-exists">
+        <ul>
+          <li>596 sha-pinned shards &middot; 38.8M rows &middot; 8.86B embedded tokens <em>(scope: embedded count incl. 32-token chunk overlap; stage-selected &asymp;6.09B unique TOK-v1)</em></li>
+          <li>MiniLM-L6-v2 <code>1110a24</code> &middot; dim 384 &middot; int8 symmetric per-row (cos drift &le;0.0002)</li>
+          <li>Text NOT co-located: rows key on <code>(doc, source, byte_offset)</code>; text re-derivable from pinned upstream + local 35GB archive</li>
+          <li class="blocker">Blocker: the doc-numbering map is missing — emb <code>doc</code> &rarr; native doc id has no stage ledger on record, so the exact 10M slice cannot be extracted yet</li>
+        </ul>
+        <p class="muted">Scope counts only — no recall or latency numbers exist for this store. Owner ask: approve the slice-export job + point at (or bless reconstruction of) the stage ledger.</p>
+      </div>
+    </section>
+
+    <section aria-label="Vision: sharding sequence">
+      <h2>Vision: one tile becomes many <span class="tchip tchip-vision">VISION &middot; not built</span></h2>
+      <p class="muted">10M is one tile. Each step carries its blocker as a label. Counters are targets and question marks — never extrapolations.</p>
+      <div class="stepseq" data-stepseq>
+        <div class="tstep solid on" data-step>
+          <div class="tnum">10M</div>
+          <div><span class="tchip tchip-proof">PROOF &middot; staged 10M</span></div>
+          <div class="tct">one tile &middot; guided 0.73 (staged)</div>
+        </div>
+        <div class="tstep wire" data-step>
+          <div class="tnum">100M</div>
+          <div><span class="tchip tchip-vision">VISION &middot; not built</span></div>
+          <div class="tct">target: 10 tiles + new root &middot; recall: ?</div>
+          <div class="tbl">blocker: attach 103&ndash;122 s</div>
+        </div>
+        <div class="tstep wire" data-step>
+          <div class="tnum">500M</div>
+          <div><span class="tchip tchip-vision">VISION &middot; not built</span></div>
+          <div class="tct">target: 50 tiles &middot; recall: ?</div>
+          <div class="tbl">blocker: R9 OOM fail replays at scale</div>
+        </div>
+        <div class="tstep wire" data-step>
+          <div class="tnum">1B</div>
+          <div><span class="tchip tchip-vision">VISION &middot; not built</span></div>
+          <div class="tct">target: 100 tiles &middot; recall: ?</div>
+          <div class="tbl">blocker: 100M not claimed</div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Vision: mined ambitions">
+      <h2>Vision: mined ambitions <span class="tchip tchip-vision">VISION &middot; not built</span></h2>
+      <div class="tier-grid">
+        <div class="tier tier-vision">
+          <span class="tchip tchip-vision">VISION &middot; not built</span>
+          <h3>Sleep-phase dreaming engine</h3>
+          <p>&ldquo;Asynchronous background &lsquo;sleep-phase&rsquo; dreaming engine operating over bounded changed neighborhoods&rdquo; — <code>trace/PROJECT.md:6</code>. Target: overnight consolidation; schedule: ?</p>
+        </div>
+        <div class="tier tier-vision">
+          <span class="tchip tchip-vision">VISION &middot; not built</span>
+          <h3>Contradiction engine</h3>
+          <p>&ldquo;Detects logical, temporal (Allen interval algebra), and factual contradictions&rdquo; — <code>trace/PROJECT.md:6</code>. Today: contradiction handling is record-only. Target: consolidation with adopted induction; schedule: ?</p>
+        </div>
+        <div class="tier tier-vision">
+          <span class="tchip tchip-vision">VISION &middot; not built</span>
+          <h3>Learned schemas (A&rarr;C&rarr;B&rarr;D)</h3>
+          <p>Useful knowledge &rarr; learned schemas &rarr; cumulative discovery &rarr; HW/SW co-design — <code>ANIMA/context/IDEA-MAP.md:46</code>. Staged priority map; &ldquo;B nears RSI&rdquo; caution on record. Target: ?</p>
+        </div>
+        <div class="tier tier-vision">
+          <span class="tchip tchip-vision">VISION &middot; not built</span>
+          <h3>Sub-50ms hot path</h3>
+          <p>&ldquo;Tier 1&ndash;3 Interactive Hot Path: Sub-50ms P95 latency&rdquo; — <code>trace/PROJECT.md:10</code>. Measured reality: resident query 0.78&ndash;1.41 s, cold attach 103&ndash;122 s. No sub-50ms story at 10M. Target: ?</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="next-strip" aria-label="What is next">
+      <h2>Next</h2>
+      <ol>
+        <li class="n-proof"><span class="tchip tchip-proof">PROOF &middot; staged 10M</span> Replay any of 120 probes on the real map — <a href="../play/#p=7&amp;m=10m&amp;v=race&amp;lso=0&amp;t=7">open the theater</a>.</li>
+        <li class="n-exists"><span class="tchip tchip-exists">EXISTS &middot; not mapped</span> 596 int8 shards wait on the stage ledger — owner ask above.</li>
+        <li class="n-vision"><span class="tchip tchip-vision">VISION &middot; not built</span> 100M tile + sleep dreaming — you are looking at the roadmap.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="site gutters">
+    TRACE research preview &middot; <a href="../">home</a> &middot; <a href="../play/">play (10M scope lock)</a> &middot; <a href="../recording/">films</a> &middot; future surface: speculation labeled, never shipped.
+  </footer>
+  <script src="../assets/motion.js" defer></script>
+  <script src="../assets/always.js" defer></script>
+</body>
+</html>
