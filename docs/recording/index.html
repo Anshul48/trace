@@ -15,6 +15,7 @@
   <meta name="twitter:description" content="Illustrated walkthrough of TRACE. Measured at 10M tokens: 10,003,381 tok, 63,441 atoms, recall@10 0.7367. Research preview.">
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="stylesheet" href="../assets/design.css">
+  <link rel="stylesheet" href="../assets/tier.css">
   <link rel="stylesheet" href="demo.css">
 </head>
 <body>
@@ -40,22 +41,22 @@
     <main>
       <section class="trailer" aria-labelledby="pilots-heading">
         <h2 id="pilots-heading">The map, two ways (staged explorer run)</h2>
-        <h3 id="trace-how">How: the map is real (80 s)</h3>
+        <h3 id="trace-how">How: the map is real (57 s)</h3>
         <video controls preload="none" poster="trace-how-poster.jpg" width="1280" height="720">
           <source src="trace-how.mp4" type="video/mp4">
           <track kind="captions" srclang="en" label="English" src="trace-how.en.vtt" default>
           Sorry, your browser cannot play this video.
-          <a href="trace-how.mp4">Download trace-how.mp4</a> (2.9&nbsp;MB).
+          <a href="trace-how.mp4">Download trace-how.mp4</a> (7.7&nbsp;MB).
         </video>
-        <p class="sim-label">Ten million tokens file into a map; a probe vector walks it; guided 0.73 vs flat ~0.06 — then where it loses.
-          <span class="honesty-chip">PROOF · staged 10M run</span> <span class="honesty-chip">Layout illustrative · counts measured</span></p>
-        <p class="muted">Voice: synthetic (Kokoro TTS). Captions included.</p>
-        <h3 id="trace-do">Do: replay a probe (56 s)</h3>
+        <p class="sim-label">120 comets over the real galaxy: ingest time-lapse from measured phase walls, probe 7's story, the 120 payoff with misses held red, flat at its recorded budget — then 10M as one tile of a drawn future.
+          <span class="honesty-chip">PROOF · staged 10M run</span> <span class="honesty-chip">Real counts + real paths · projection illustrative</span></p>
+        <p class="muted">Voice: synthetic (Kokoro TTS). Sound: synth bed + scoring ticks; flat plays silent. Captions included.</p>
+        <h3 id="trace-do">Do: replay a probe (45 s)</h3>
         <video controls preload="none" poster="trace-do-poster.jpg" width="1280" height="720">
           <source src="trace-do.mp4" type="video/mp4">
           <track kind="captions" srclang="en" label="English" src="trace-do.en.vtt" default>
           Sorry, your browser cannot play this video.
-          <a href="trace-do.mp4">Download trace-do.mp4</a> (1.6&nbsp;MB).
+          <a href="trace-do.mp4">Download trace-do.mp4</a> (2.0&nbsp;MB).
         </video>
         <p class="sim-label">Probe 7's real guided path lights up; flat wins probe 83 and we show it; airplane mode still replays; one command re-checks all 120 probes.
           <span class="honesty-chip">PROOF · staged 10M run</span> <span class="honesty-chip">Replay, not Q&amp;A</span></p>
@@ -186,12 +187,22 @@
           </ol>
         </details>
       </section>
+
+      <section class="next-strip" aria-label="What is next">
+        <h2>Next</h2>
+        <ol>
+          <li class="n-proof"><span class="tchip tchip-proof">PROOF &middot; staged 10M</span> Replay any of 120 probes on the real map — <a href="../play/#p=7&amp;m=10m&amp;v=race&amp;lso=0&amp;t=7">open the theater</a>.</li>
+          <li class="n-exists"><span class="tchip tchip-exists">EXISTS &middot; not mapped</span> 596 int8 shards on disk, blocked on the stage ledger — <a href="../future/">read the audit</a>.</li>
+          <li class="n-vision"><span class="tchip tchip-vision">VISION &middot; not built</span> 100M tile + sleep dreaming, drawn not built — <a href="../future/">see /future</a>.</li>
+        </ol>
+      </section>
     </main>
 
     <footer class="site-footer">
       <p>TRACE research preview &middot; freeze seam12a
         <code>8d3bbb6bf53e1731811065a9de156a9997be740d598cd1dfa0a3d946928dbf64</code>
         &middot; run o94-scale10m &middot;
+        <a href="../future/">future (vision, labeled)</a> &middot;
         <a href="https://github.com/Anshul48/trace">source</a></p>
     </footer>
   </div>

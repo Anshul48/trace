@@ -1,0 +1,192 @@
+/* R3 tier grammar + always-on visuals. Identical file in trace + anima
+   (docs/assets/tier.css). Tokens ONLY from design.css. No purple/indigo.
+   Tiers differ by FORM + label, never color alone:
+   MEASURED = solid accent border · ON-DISK = hollow amber outline ·
+   VISION = dashed wireframe + flat blueprint wash, static (silent). */
+.tchip {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  background: var(--panel);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.tchip-proof { color: var(--accent2); border: 2px solid var(--accent2); }
+.tchip-exists { color: var(--warn-ink); border: 2px solid var(--warn-ink); background: transparent; }
+.tchip-vision {
+  color: var(--warn-ink);
+  border: 2px dashed var(--warn-ink);
+  background: var(--warn-bg);
+}
+
+.tier-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; margin: 1rem 0; }
+@media (min-width: 900px) { .tier-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; } }
+.tier {
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+  background: var(--panel);
+  min-width: 0;
+}
+.tier-proof { border: 2px solid var(--accent); border-left-width: 8px; }
+.tier-exists { border: 2px solid var(--warn-ink); background: transparent; }
+.tier-vision {
+  border: 2px dashed var(--muted);
+  background-color: var(--warn-bg);
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 23px, var(--line) 23px 24px),
+    repeating-linear-gradient(90deg, transparent 0 23px, var(--line) 23px 24px);
+}
+.tier h3 { margin: 0.4rem 0 0.3rem; }
+.tier p, .tier li { font-size: 0.92rem; }
+.tier ul { margin: 0.4rem 0; padding-left: 1.2rem; }
+.tier .blocker { color: var(--warn-ink); font-weight: 600; }
+
+/* Sharding sequence stepper. */
+.stepseq { display: grid; gap: 0.7rem; grid-template-columns: 1fr; margin: 1rem 0; }
+@media (min-width: 900px) { .stepseq { grid-template-columns: repeat(4, 1fr); } }
+.stepseq .tstep {
+  border-radius: 8px;
+  padding: 0.8rem 0.9rem;
+  background: var(--panel);
+  opacity: 0.55;
+}
+.stepseq .tstep.on { opacity: 1; }
+.stepseq .tstep.solid { border: 2px solid var(--accent); }
+.stepseq .tstep.wire { border: 2px dashed var(--muted); background: var(--warn-bg); }
+.stepseq .tnum { font-size: 1.4rem; font-weight: 800; }
+.stepseq .tbl { font-size: 0.82rem; color: var(--warn-ink); font-weight: 600; }
+.stepseq .tct { font-size: 0.85rem; color: var(--muted); }
+
+/* Next strip (every major page). */
+.next-strip {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  margin: 2rem 0 0;
+  background: var(--panel);
+}
+.next-strip h2 { margin: 0 0 0.5rem; font-size: 1.1rem; }
+.next-strip ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.6rem; }
+.next-strip li { font-size: 0.92rem; border-left: 5px solid var(--line); padding-left: 0.7rem; }
+.next-strip li.n-proof { border-left-color: var(--accent); }
+.next-strip li.n-exists { border-left-color: var(--warn-ink); }
+.next-strip li.n-vision { border-left-color: var(--muted); border-left-style: dashed; }
+
+/* Receipt-hash ticker (one line, CSS marquee; static under RM). */
+.ticker {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 0.4rem 0;
+  margin: 1rem 0;
+}
+.ticker-track {
+  display: inline-block;
+  white-space: nowrap;
+  padding-left: 1rem;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ticker-track.live { animation: tickSlide 40s linear infinite; }
+}
+@keyframes tickSlide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* Scroll-typed terminal. Full text is in the DOM first (no-JS/RM safe);
+   JS retypes it on scroll into view. */
+.typed {
+  background: #0d1117;
+  color: #e6edf3;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.typed .caret { display: inline-block; width: 8px; height: 15px; background: #e6edf3; vertical-align: -2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .typed .caret { animation: caretBlink 1s steps(1) infinite; }
+}
+@keyframes caretBlink { 50% { opacity: 0; } }
+
+/* Constellation (anima home): brightness = TRUE status. */
+.constel { width: 100%; height: auto; display: block; }
+.constel .edge { stroke: var(--line); stroke-width: 2; }
+.constel .node { cursor: pointer; }
+.constel .disc { stroke-width: 2.5; }
+.constel .n-lit .disc { fill: var(--accent2); stroke: var(--accent2); }
+.constel .n-half .disc { fill: var(--panel); stroke: var(--accent); }
+.constel .n-seed .disc { fill: transparent; stroke: var(--warn-ink); stroke-dasharray: 5 4; }
+.constel .n-map .disc { fill: var(--accent); stroke: var(--accent); }
+.constel text { fill: var(--ink); font-size: 13px; font-weight: 700; text-anchor: middle; }
+.constel .sub { fill: var(--muted); font-size: 11px; font-weight: 400; }
+.constel-detail {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+  background: var(--panel);
+  min-height: 3.2em;
+}
+
+/* 6s SVG mechanism loops (capability pages). Self-animating, RM-frozen. */
+.mech { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+@media (prefers-reduced-motion: no-preference) {
+  .mech .m-dash { animation: dashMarch 6s linear infinite; }
+  .mech .m-pulse { animation: mechPulse 6s ease-in-out infinite; }
+  .mech .m-move { animation: mechMove 6s linear infinite; }
+  .mech .m-blink { animation: mechBlink 6s steps(1) infinite; }
+}
+@keyframes dashMarch { to { stroke-dashoffset: -48; } }
+@keyframes mechPulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+@keyframes mechMove { 0% { offset-distance: 0%; } 100% { offset-distance: 100%; } }
+@keyframes mechBlink { 0%, 69% { opacity: 1; } 70%, 100% { opacity: 0.15; } }
+
+/* Parallax galaxy backdrop (subtle, RM-off). */
+.parallax-wrap { position: relative; overflow: hidden; }
+.parallax-bg {
+  position: absolute;
+  inset: -30px 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: radial-gradient(var(--accent) 1px, transparent 1.6px);
+  background-size: 26px 26px;
+}
+@media (prefers-reduced-motion: reduce) { .parallax-bg { display: none; } }
+
+/* Live replay figure (trace). */
+.replay-fig { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); margin: 1.25rem 0 0; }
+.replay-fig canvas { display: block; width: 100%; height: auto; }
+.replay-fig figcaption { font-size: 0.85rem; color: var(--muted); padding: 0.5rem 0.9rem 0.7rem; }
+
+/* sha-verify moment. */
+.verify-row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin: 0.6rem 0; }
+.verify-row button {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: var(--panel);
+  color: var(--accent);
+  cursor: pointer;
+}
+.verify-out { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.82rem; color: var(--muted); }
+.verify-out.ok { color: var(--accent2); font-weight: 700; }
+.verify-out.bad { color: #b3261e; font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track.live, .mech .m-dash, .mech .m-pulse, .mech .m-move, .mech .m-blink { animation: none !important; }
+}

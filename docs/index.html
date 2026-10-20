@@ -10,13 +10,14 @@
   <meta property="og:title" content="TRACE — 10M-token retrieval freeze seam12a">
   <meta property="og:description" content="10,003,381 tokens / 13,081 docs. Guided recall@10 0.7367 all-sources / 0.4883 leave-source-out (run o94-scale10m). Receipt-backed research prototype.">
   <meta property="og:url" content="https://anshul48.github.io/trace/">
-  <meta property="og:image" content="https://anshul48.github.io/trace/assets/trace-hero.svg">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://anshul48.github.io/trace/assets/trace-v2-og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="TRACE — 10M-token retrieval freeze seam12a">
   <meta name="twitter:description" content="Guided recall@10 0.7367 all-sources / 0.4883 leave-source-out over 10,003,381 tokens. Receipt-backed; no broad benchmark claims.">
   <meta name="theme-color" content="#f4f6f8">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="assets/design.css">
+  <link rel="stylesheet" href="assets/tier.css">
   <style>
     body {
       background: var(--paper);
@@ -153,7 +154,7 @@
     <p class="lede" id="hook">TRACE files ten million tokens into a map it builds itself — then replays how any probe found its answer. No backend, no signup: the map opens in your browser.</p>
     <ul class="cta-row">
       <li><a class="btn" href="play/#p=7&amp;m=10m&amp;v=race&amp;lso=0&amp;t=7">Replay a probe</a></li>
-      <li><a class="btn secondary" href="recording/#trace-how">Watch the map (80 s)</a></li>
+      <li><a class="btn secondary" href="recording/#trace-how">Watch the map (57 s)</a></li>
       <li><a class="btn secondary" href="explorer/#tab-topology">Explorer tour</a></li>
     </ul>
   </header>
@@ -180,13 +181,18 @@
       <div class="atom-panel" id="atom-panel" aria-live="polite">Tip: select any dot to read that atom&rsquo;s real title, snippet, and parent schema.</div>
     </figure>
 
+    <figure class="replay-fig reveal" aria-label="Live probe replay: real paths, auto-looped">
+      <canvas data-replay="#replay-cap" data-src="play/dag-skeleton.json" width="880" height="360" role="img" aria-label="Auto-looping replay of real probe paths 7, 83, and 78 on the staged 10M skeleton."></canvas>
+      <figcaption><span id="replay-cap">probe 7 (chunk, all-sources): guided 0.4 / flat 0.0 &middot; 3,809 rows each &middot; staged explorer run</span> <span class="honesty-chip">Real paths &middot; autoplay in view only</span> <a href="play/#p=7&amp;m=10m&amp;v=race&amp;lso=0&amp;t=7">open this replay</a></figcaption>
+    </figure>
+
     <section aria-label="Overview video and local run" class="reveal watchrun">
       <h2>Watch it, then run it</h2>
       <div class="try3">
         <div class="step">
           <h3>Watch &mdash; the map, two ways</h3>
           <p><a href="recording/#trace-how"><img src="recording/trace-how-poster.jpg" alt="TRACE-How film poster: guided path lighting the DAG" width="640" height="360" loading="lazy" style="width:100%;height:auto;border-radius:8px;border:1px solid var(--line)"></a></p>
-          <p class="muted"><a href="recording/#trace-how">How: the map is real</a> (80 s) &middot; <a href="recording/#trace-do">Do: replay a probe</a> (56 s) &middot; captions included. <span class="honesty-chip">PROOF &middot; staged 10M run</span> <span class="honesty-chip">Voice: synthetic</span></p>
+          <p class="muted"><a href="recording/#trace-how">How: the map is real</a> (57 s) &middot; <a href="recording/#trace-do">Do: replay a probe</a> (45 s) &middot; captions included. <span class="honesty-chip">PROOF &middot; staged 10M run</span> <span class="honesty-chip">Voice: synthetic</span></p>
           <p class="muted"><a href="recording/">Earlier overview cut</a> + interactive demo.</p>
         </div>
         <div class="step">
@@ -349,6 +355,11 @@ SUP_PYTHON=$CAND/.venv/bin/python bash runtime.sh tools/product_pilot.py --token
           </tbody>
         </table>
         <p class="muted">Same corpus (10,003,381 TOK-v1 tokens, 13,081 docs, 63,441 atoms) and same 120 probes — different harness runs, different measurements. Never mixed without labels.</p>
+        <div class="ticker" aria-label="Receipt pins"><span class="ticker-track" data-ticker>harness 9f516288 &middot; probes b332d62d &middot; graph_10m 4dfc96ed &middot; seam12a 8d3bbb6b &middot; o94 9f78479a &middot; repair 5314&rarr;0/5 &middot;&nbsp;</span></div>
+        <div class="verify-row">
+          <button type="button" data-verify="#verify-out" data-manifest="play/provenance.json" data-key="explorer/probes_summary.json" data-file="explorer/probes_summary.json">Verify a staged file</button>
+          <span class="verify-out" id="verify-out">hashes explorer/probes_summary.json (14 KB) against provenance.json</span>
+        </div>
         <pre><code>python3 docs/play/probe-row.py 7            # probe 7 row + 120-probe means
 python3 docs/play/probe-row.py 83 --lso 1   # a probe flat wins</code></pre>
         <p class="muted">Separate BEIR rung (never beside probe-vector numbers): TL ndcg10 0.6311, 809 scifact queries, frozen Narrow <code>4c8c9673</code>.</p>
@@ -389,9 +400,18 @@ python3 docs/play/probe-row.py 83 --lso 1   # a probe flat wins</code></pre>
       </ul>
     </section>
 
+    <section class="next-strip reveal" aria-label="What is next">
+      <h2>Next</h2>
+      <ol>
+        <li class="n-proof"><span class="tchip tchip-proof">PROOF &middot; staged 10M</span> Replay any of 120 probes on the real map — <a href="play/#p=7&amp;m=10m&amp;v=race&amp;lso=0&amp;t=7">open the theater</a>.</li>
+        <li class="n-exists"><span class="tchip tchip-exists">EXISTS &middot; not mapped</span> 596 int8 shards on disk, blocked on the stage ledger — <a href="future/">read the audit</a>.</li>
+        <li class="n-vision"><span class="tchip tchip-vision">VISION &middot; not built</span> 100M tile + sleep dreaming, drawn not built — <a href="future/">see /future</a>.</li>
+      </ol>
+    </section>
+
     <section id="go-deeper" aria-label="Go deeper" class="reveal">
       <h2>Go deeper</h2>
-      <p><a href="https://github.com/Anshul48/trace">README</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/ARCHITECTURE.md">architecture</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/BENCHMARKS.md">benchmarks</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/REPRO.md">reproduction guide</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/CODE-TOUR.md">code tour</a> &middot; <a href="explorer/">explorer</a> &middot; <a href="recording/">recording</a> &middot; <a href="https://github.com/Anshul48/trace/releases/tag/seam12a-10m-freeze">release <code>seam12a-10m-freeze</code></a></p>
+      <p><a href="https://github.com/Anshul48/trace">README</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/ARCHITECTURE.md">architecture</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/BENCHMARKS.md">benchmarks</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/REPRO.md">reproduction guide</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/CODE-TOUR.md">code tour</a> &middot; <a href="explorer/">explorer</a> &middot; <a href="recording/">recording</a> &middot; <a href="future/">future (vision, labeled)</a> &middot; <a href="https://github.com/Anshul48/trace/releases/tag/seam12a-10m-freeze">release <code>seam12a-10m-freeze</code></a></p>
       <!-- ws6-externals: assembly slot for verified external readings (label + list). Input: /tmp/r2/ws6-links.md. Not embedded yet. -->
     </section>
   </main>
@@ -402,5 +422,7 @@ python3 docs/play/probe-row.py 83 --lso 1   # a probe flat wins</code></pre>
   <script src="assets/motion.js" defer></script>
   <script src="hero.js" defer></script>
   <script src="landing.js" defer></script>
+  <script src="assets/always.js" defer></script>
+  <script src="assets/replay.js" defer></script>
 </body>
 </html>

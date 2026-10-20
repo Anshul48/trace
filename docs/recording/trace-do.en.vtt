@@ -1,25 +1,25 @@
 WEBVTT
 
-00:00:00.400 --> 00:00:04.125
-Replay a probe. This is the real map, not a chat box.
+00:00:00.400 --> 00:00:03.500
+Trace in your browser: replay probe seven.
 
-00:00:05.325 --> 00:00:08.150
-Pick probe seven, from the chunk family.
+00:00:04.700 --> 00:00:10.275
+Open the replay theater. No backend, no signup: the map loads from static files.
 
-00:00:09.350 --> 00:00:17.150
-Watch its guided path light up. Three thousand seven hundred eleven parents scored, twenty-nine children, sixty-nine atoms.
+00:00:11.475 --> 00:00:15.250
+Guided: four of ten. Flat spends its budget and blanks.
 
-00:00:18.350 --> 00:00:23.525
-Guided scores point four. Flat scores zero. Recorded rows, matched work.
+00:00:16.450 --> 00:00:21.775
+Sixteen below half. Probe eighty-three: flat wins. Misses stay on screen.
 
-00:00:25.325 --> 00:00:32.025
-And when flat wins, we show that too. Probe eighty-three, leave-source-out: guided zero, flat point two.
+00:00:23.575 --> 00:00:27.250
+Every frame is a link. Copy the hash, send the replay.
 
-00:00:33.825 --> 00:00:39.025
-Every state is a link. Copy it, share it, anyone sees this exact replay.
+00:00:28.450 --> 00:00:31.350
+Kill the network. The replay still runs.
 
-00:00:40.225 --> 00:00:46.800
-Airplane mode on.  It still replays. Everything runs from the recorded files.
+00:00:32.550 --> 00:00:36.700
+Reproduce it locally: one command prints probe seven's row.
 
-00:00:48.000 --> 00:00:52.675
-One command re-checks all one hundred twenty probes from the staged files.
+00:00:37.900 --> 00:00:41.875
+Touch the real map.  Then verify it.

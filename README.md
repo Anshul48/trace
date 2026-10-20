@@ -9,7 +9,7 @@
 
 **Your agent forgets everything outside its context window. TRACE remembers — 10 million tokens filed into one map you can open in your browser. No reindex, no rebuild. [Replay a probe.](https://anshul48.github.io/trace/play/#p=7&m=10m&v=race&lso=0&t=7)**
 
-**New here? [Watch the map, two ways](https://anshul48.github.io/trace/recording/)** — 80 seconds of mechanism, 56 seconds of real replay — then replay a probe yourself.
+**New here? [Watch the map, two ways](https://anshul48.github.io/trace/recording/)** — 57 seconds of mechanism, 45 seconds of real replay — then replay a probe yourself. [Beyond 10M?](https://anshul48.github.io/trace/future/) Measured, on-disk, and vision — all labeled.
 
 [Watch it](#watch-it) · [Try it](#try-it-in-5-minutes) · [Proof](#proof-one-line) · [Deep dive](#go-deeper)
 
