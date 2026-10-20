@@ -99,6 +99,10 @@
     .hero-stack canvas { position: relative; }
     .hero-cta { margin: 1rem 0 0; padding: 0; list-style: none; }
     .hero-art figcaption, .atom-panel { font-size: 0.85rem; color: var(--muted); padding: 0.5rem 0.9rem 0.7rem; }
+    @media (prefers-color-scheme: dark) {
+      /* TASTE-R3 Fix2: proof captions + figure notes one step brighter, 13px floor (dark only; placed after base rules). */
+      .proof4 .l, .hero-art figcaption, .atom-panel { color: #a9b2bd; font-size: max(0.85rem, 13px); }
+    }
     .atom-panel { border-top: 1px dashed var(--line); }
     .atom-panel .t { font-weight: 700; color: var(--ink); }
     .cta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1rem 0; padding: 0; list-style: none; }

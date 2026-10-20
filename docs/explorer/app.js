@@ -174,6 +174,25 @@
         startTour(1);
       });
     }
+
+    // TASTE-R3 Fix3: default active tab fully visible on load (narrow viewports).
+    var initialActive = document.querySelector('.tab-btn.active');
+    if (initialActive) revealActiveTab(initialActive);
+  }
+
+  // TASTE-R3 Fix3: keep the active tab fully visible in the scrollable
+  // tab row on narrow viewports. Row-only scrollLeft math: no page scroll,
+  // no-op on desktop (no overflow -> assignments clamp to 0).
+  function revealActiveTab(btn) {
+    if (!btn || !btn.parentElement) return;
+    var row = btn.parentElement;
+    if (!row.classList || !row.classList.contains('nav-tabs')) return;
+    if (row.scrollWidth <= row.clientWidth) return;
+    var left = btn.offsetLeft, w = btn.offsetWidth;
+    if (left < row.scrollLeft) row.scrollLeft = left;
+    else if (left + w > row.scrollLeft + row.clientWidth) {
+      row.scrollLeft = left + w - row.clientWidth;
+    }
   }
 
   function switchTab(btn) {
@@ -185,6 +204,7 @@
 
     btn.classList.add('active');
     btn.setAttribute('aria-selected', 'true');
+    revealActiveTab(btn);
     const target = document.getElementById(btn.getAttribute('data-tab'));
     if (target) {
       target.classList.add('active');
