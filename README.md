@@ -28,7 +28,7 @@
 
 ## Watch it
 
-- 🎬 **[Demo suite](https://anshul48.github.io/trace/recording/)** — what TRACE is, how it works, and how to use it, in about a minute. Video file `docs/assets/trace.mp4` (720p H.264, captions + transcript on the page; voice is synthetic).
+- 🎬 **[Demo suite](https://anshul48.github.io/trace/recording/)** — what TRACE is, how it works, and how to use it, in about a minute. Video file `docs/recording/trace.mp4` (720p H.264, captions + transcript on the page; voice is synthetic).
 - 🖱️ **[Live interactive twin](https://anshul48.github.io/trace/explorer/)** — the same story you can click: documents in, atoms, schemas, retrieval, self-repair, driven on the real graph.
 - 📊 **[Play with real data](https://anshul48.github.io/trace/play/)** — client-side querying of the recorded 10M exports, honestly labeled recorded vs live.
 
