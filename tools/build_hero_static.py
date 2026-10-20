@@ -6,7 +6,7 @@ from docs/assets/hero20k.json (built by tools/build_hero20k.py from the recorded
 20K run: 51 parents, 144 atoms, 14 atoms in 8 multi-parent leaves).
 
 Layout is illustrative and matches the canvas hero (docs/hero.js) exactly:
-51 anchors on a deterministic ellipse, per-atom id-hash jitter (FNV-1a), then the
+51 anchors on a deterministic circle, per-atom id-hash jitter (FNV-1a), then the
 same settle loop the canvas runs for prefers-reduced-motion (1500 steps at full
 pull). Colors: amber atoms warming toward teal, teal spokes/anchors, pink dashed
 second edges -- same palette as the live canvas.
@@ -46,8 +46,8 @@ def main():
     anchors = []
     for i in range(len(parents)):
         angle = (i / len(parents)) * math.pi * 2
-        anchors.append((IW / 2 + math.cos(angle) * 372,
-                        IH / 2 + math.sin(angle) * 126))
+        anchors.append((IW / 2 + math.cos(angle) * 125,
+                        IH / 2 + math.sin(angle) * 125))
 
     parts = []
     for row in atom_rows:
@@ -101,7 +101,7 @@ def main():
     A('<svg xmlns="http://www.w3.org/2000/svg" width="880" height="360" viewBox="0 0 880 360" role="img">')
     A('<title>Static snapshot of the recorded 20K run: 144 atoms gathered into their 51 real schema anchors</title>')
     A('<desc>Deterministic fallback for the canvas hero. Membership real (docs/assets/hero20k.json); layout illustrative '
-      '(deterministic ellipse + id-hash jitter). Amber atoms, teal schema anchors, pink dashed second edges for multi-parent atoms.</desc>')
+      '(deterministic circle + id-hash jitter). Amber atoms, teal schema anchors, pink dashed second edges for multi-parent atoms.</desc>')
     A('<rect width="880" height="360" fill="#0b1220"/>')
     # Solid teal spokes: every atom to its REAL primary parent anchor.
     A('<g stroke="rgba(45,212,191,0.25)" stroke-width="1">')
