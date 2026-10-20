@@ -1,0 +1,44 @@
+{
+ "_source": "built by r5/tools/build-play-assets.py (G3)",
+ "run": "staged explorer run (harness 9f516288; NOT o94-scale10m)",
+ "files": {
+  "explorer/graph_10m.json": {
+   "bytes": 21695279,
+   "sha256": "4dfc96ed7276eb5cbe42f4bed40808adb00811c7d55a8b7a1b6711b9a76a96b0"
+  },
+  "explorer/graph_10m.json.gz": {
+   "bytes": 7254185,
+   "sha256": "15d2b2ebde19b5f183a3a40da7f1057601d2503ba15259627d7296de57344089"
+  },
+  "explorer/probes.json": {
+   "bytes": 1021874,
+   "sha256": "b332d62dffb3d64e3ef92cde86578aeae03a07226caca9668676f025cafeace8"
+  },
+  "explorer/probes_summary.json": {
+   "bytes": 14552,
+   "sha256": "f64a6ab3baf1e5d10994bb17cec08c5e2058e0e68d93b3c98bc6f122153c9543"
+  },
+  "explorer/qualification_10m.json": {
+   "bytes": 135699,
+   "sha256": "f3fd2ee397bf41aaea3be2071217e66f97fd4d4d7cf4cdbf80f93ecfca3872ee"
+  },
+  "explorer/local_20k_data.json": {
+   "bytes": 262550,
+   "sha256": "fa010d1cf8ca54b1a0bbe7bb8c40def5d8fefaeac8abe78c5a643c4c47f57c34"
+  },
+  "explorer/result.json": {
+   "bytes": 155231,
+   "sha256": "2e0be11cbd100e98de15805572b5cbb5224368fb9375da6a213105b963c0b9d9"
+  },
+  "play/dag-skeleton.json": {
+   "bytes": 281660,
+   "sha256": "78186384ecc15d8acd4972d4c12784c791b4222cc8a8dbde2ee90389918b5e08"
+  }
+ },
+ "labels": {
+  "guided": "probe-vector guided recall@10 0.73 (120 probes; staged explorer run, harness 9f516288)",
+  "lso": "leave-source-out 0.4758 (120 probes; staged explorer run)",
+  "rerun": "re-aggregates 120 staged probe rows in your browser \u00b7 verifies against manifest \u2014 not a rescore (atom vectors unexported)"
+ },
+ "queries": 240
+}

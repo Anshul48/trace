@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRACE — Play with real data (recorded freeze)</title>
-  <meta name="description" content="Query recorded TRACE exports in your browser: free-text over the 20K slice, per-probe recorded recall, opt-in 10M graph. Recorded freeze, not live.">
+  <title>TRACE — Replay a probe (real 10M map)</title>
+  <meta name="description" content="Replay any of 120 recorded probes on the real TRACE 10M topology: guided path, guided-vs-flat race, misses, ingest scrub. No backend; numbers carry staged-run provenance.">
   <link rel="canonical" href="https://anshul48.github.io/trace/play/">
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="stylesheet" href="../assets/design.css">
@@ -13,64 +13,130 @@
     main, header.top, footer.site { max-width: var(--maxw); margin: 0 auto; }
     header.top { padding: 1.5rem 0 0; }
     .kicker { display: inline-block; font-size: 0.75rem; letter-spacing: 0.08em; font-weight: 700; color: var(--accent); border: 1px solid var(--line); border-radius: var(--radius-pill); padding: 0.2rem 0.7rem; margin-bottom: 0.75rem; background: var(--panel); }
-    .honesty-chip { display: inline-block; font-size: 0.75rem; border: 1px solid var(--line); border-radius: var(--radius-pill); padding: 0.1rem 0.55rem; color: var(--muted); background: var(--panel); }
     .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); padding: 1rem; margin: 1rem 0; }
-    #q { width: 100%; max-width: 32rem; padding: 0.55rem 0.7rem; font-size: 1rem; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--paper); color: var(--ink); }
+    .grid2 { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+    @media (min-width: 900px) { .grid2 { grid-template-columns: 1.4fr 1fr; } }
+    #dag { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-s); }
+    .controls { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin: 0.75rem 0; }
+    .controls label { font-size: 0.85rem; color: var(--muted); }
+    select, input[type="search"], input[type="range"] { font-size: 0.9rem; padding: 0.4rem 0.55rem; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--paper); color: var(--ink); max-width: 100%; }
+    .btn { display: inline-block; padding: 0.55rem 1.1rem; background: var(--accent); color: #fff; border-radius: var(--radius-s); font-weight: 600; font-size: 0.9rem; border: 1px solid transparent; cursor: pointer; }
+    .btn.secondary { background: var(--panel); color: var(--accent); border-color: var(--accent); }
+    .btn:disabled { opacity: 0.55; cursor: default; }
+    table.data { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 0.75rem 0; }
+    table.data th, table.data td { border: 1px solid var(--line); padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
+    table.data th { background: var(--panel); }
+    .bar-row { display: grid; grid-template-columns: 7rem 1fr 4.5rem; gap: 0.5rem; align-items: center; margin: 0.35rem 0; font-size: 0.86rem; }
+    .track { background: var(--line); border-radius: var(--radius-s); height: 0.9rem; }
+    .bar-fill { display: block; height: 100%; border-radius: var(--radius-s); background: var(--accent); width: 0; }
+    .bar-fill.flat { background: var(--muted); }
+    .bar-fill.lso { background: var(--accent2); }
     #hits { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 0.75rem; }
     #hits li { border: 1px solid var(--line); border-radius: var(--radius-s); padding: 0.6rem 0.8rem; background: var(--paper); }
     #hits .t { font-weight: 700; }
     #hits .s { font-size: 0.86rem; color: var(--muted); }
-    table.data { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 0.75rem 0; }
-    table.data th, table.data td { border: 1px solid var(--line); padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
-    table.data th { background: var(--panel); }
-    .btn { display: inline-block; padding: 0.55rem 1.1rem; background: var(--accent); color: #fff; border-radius: var(--radius-s); font-weight: 600; font-size: 0.9rem; border: 1px solid transparent; cursor: pointer; }
-    .btn.secondary { background: var(--panel); color: var(--accent); border-color: var(--accent); }
-    .btn:disabled { opacity: 0.55; cursor: default; }
-    progress { width: 100%; max-width: 32rem; }
     footer.site { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 1rem; margin-top: 2.5rem; }
     .gutters { padding-left: 16px; padding-right: 16px; }
+    .src { font-size: 0.75rem; color: var(--muted); }
+    #hashnote { font-size: 0.82rem; color: var(--warn-ink); }
+    progress { width: 100%; max-width: 32rem; }
   </style>
 </head>
 <body>
   <header class="top gutters">
-    <span class="kicker">RECORDED FREEZE &middot; NOT LIVE</span>
-    <h1>Play with real data</h1>
-    <p class="lede">Query the recorded exports in your browser — no backend, no signup, nothing leaves your machine.</p>
-    <p><span class="honesty-chip">RECORDED: frozen run o94-scale10m + 20K prefix slice</span> <span class="honesty-chip">LIVE-ONLY-YOURS: run the quickstart for your own data</span></p>
+    <span class="kicker">REAL MAP · RECORDED ROWS · NO BACKEND</span>
+    <h1>Replay a probe</h1>
+    <p class="lede">Pick any of 120 recorded probe vectors and watch its guided path light up on the real 10M topology — then race it against the flat baseline.</p>
+    <p><span class="mrig-chip mrig-proof">PROOF · staged 10M run</span> <span class="mrig-chip mrig-proof">PROOF · replay, not Q&amp;A</span></p>
   </header>
 
   <main class="gutters">
-    <section class="card" aria-label="Search the 20K slice">
-      <h2>1. Search the recorded 20K slice</h2>
-      <p class="muted">Substring match over 144 real atoms (title + snippet) from <code>local_20k_data.json</code> (262&nbsp;KB, loaded eagerly). This is the recorded slice — not the 10M index.</p>
-      <label for="q">Search atoms:</label><br>
-      <input id="q" type="search" placeholder="e.g. cotton, voltage, harbor" autocomplete="off">
+    <section class="card" aria-label="Probe replay theater">
+      <h2>1. Guided path replay</h2>
+      <div class="grid2">
+        <div>
+          <canvas id="dag" width="880" height="495" role="img" aria-label="DAG replay canvas: parent field with the probe neighborhood lit"></canvas>
+          <p class="src" id="dag-note">Neighborhood: representative real subgraph (root = parents[probe mod 3711]). Counts + rows recorded; per-probe node lists unexported — selection labeled, never hidden.</p>
+        </div>
+        <div>
+          <div class="controls">
+            <label for="probe">Probe</label>
+            <select id="probe"></select>
+            <button type="button" class="btn secondary" id="prev">←</button>
+            <button type="button" class="btn secondary" id="next">→</button>
+          </div>
+          <div class="controls" role="group" aria-label="View controls">
+            <label for="corpus">Corpus</label>
+            <select id="corpus"><option value="10m">10M structure</option><option value="20k">20K readable</option></select>
+            <label for="view">Race</label>
+            <select id="view"><option value="race">guided vs flat</option><option value="guided">guided only</option><option value="flat">flat only</option></select>
+            <label for="lso">Mode</label>
+            <select id="lso"><option value="0">all-sources</option><option value="1">leave-source-out</option></select>
+          </div>
+          <div id="race" aria-live="polite"></div>
+          <p class="src" id="workline">loading recorded rows…</p>
+          <p><button type="button" class="btn secondary" id="copylink">Copy link to this replay</button> <span id="hashnote" aria-live="polite"></span></p>
+        </div>
+      </div>
+      <noscript><p>Without JavaScript: probe 7 (chunk, all-sources) scored guided 0.4 vs flat 0.0 over 3,711 parents / 29 children / 69 atoms. Full rows: <a href="../explorer/qualification_10m.json">qualification_10m.json</a>.</p></noscript>
+    </section>
+
+    <section class="card" aria-label="Re-run probe recall">
+      <h2>2. Re-run probe recall <span class="src">(in your browser)</span></h2>
+      <p class="muted">Re-aggregates the 120 staged probe rows in your browser and verifies the aggregates against the manifest — not a rescore (atom vectors unexported).</p>
+      <p><button type="button" class="btn" id="rerun">Re-run probe recall</button></p>
+      <div id="rerun-out" aria-live="polite"><p class="muted">Not run yet.</p></div>
+    </section>
+
+    <section class="card" aria-label="Misses">
+      <h2>3. Misses <span class="src">(low guided recall + leave-source-out view)</span></h2>
+      <div class="controls">
+        <label for="misscorpus">Corpus</label>
+        <select id="misscorpus"><option value="10m">10M</option><option value="20k">20K</option></select>
+        <label for="misslso">Mode</label>
+        <select id="misslso"><option value="0">all-sources</option><option value="1">leave-source-out</option></select>
+      </div>
+      <div style="overflow-x:auto"><table class="data" id="misses"><thead><tr><th scope="col">Probe</th><th scope="col">Family</th><th scope="col">Guided@10</th><th scope="col">Flat@10</th><th scope="col">Replay</th></tr></thead><tbody><tr><td colspan="5">loading…</td></tr></tbody></table></div>
+    </section>
+
+    <section class="card" aria-label="Scrub ingest">
+      <h2>4. Scrub ingest 0 → 10M <span class="src">(phase walls measured; density interpolated)</span></h2>
+      <p><label for="scrub">Phase</label> <input type="range" id="scrub" min="0" max="7" step="1" value="7" style="width:min(32rem,90%)"></p>
+      <div style="overflow-x:auto"><table class="data" id="phases"><thead><tr><th scope="col">Phase</th><th scope="col">Wall (s)</th><th scope="col">Cumulative</th></tr></thead><tbody><tr><td colspan="3">loading…</td></tr></tbody></table></div>
+    </section>
+
+    <section class="card" aria-label="20K text mode">
+      <h2>5. 20K text mode <span class="src">(readable slice beside 10M structure)</span></h2>
+      <p class="muted">This is what the mechanism returns (20K, readable titles + snippets) vs the scale it runs at (10M, structure-only). Scope chips always visible.</p>
+      <p><span class="mrig-chip mrig-proof">PROOF · 20k readable slice</span> <span class="mrig-chip mrig-proof">PROOF · 10M structure-only</span></p>
+      <label for="q">Search 144 recorded atoms:</label><br>
+      <input id="q" type="search" placeholder="e.g. cells, tumor, cotton" autocomplete="off" style="width:min(32rem,100%)">
       <p class="muted" id="q-status" aria-live="polite">Loading recorded slice…</p>
       <ul id="hits"></ul>
-      <noscript><p>Search needs JavaScript. Without it: the slice holds 144 atoms in 51 schema groups (81 leaves); open the <a href="../explorer/">explorer tour</a> data files directly, or read <a href="../explorer/local_20k_data.json">local_20k_data.json</a>.</p></noscript>
+      <noscript><p>Search needs JavaScript. The slice holds 144 atoms in 51 schema groups (81 leaves): <a href="../explorer/local_20k_data.json">local_20k_data.json</a>.</p></noscript>
     </section>
 
-    <section class="card" aria-label="Recorded probe outcomes">
-      <h2>2. Recorded probe outcomes (120 probes)</h2>
-      <p class="muted">Each probe ran twice under matched work: guided (organized store) vs flat (no-organization control). All-sources recall@10 <strong>0.7367</strong>; leave-source-out <strong>0.4883</strong>. Per-probe rows load from the recorded slice.</p>
-      <p class="muted" id="probe-status" aria-live="polite">Loading probe rows…</p>
-      <div style="overflow-x:auto"><table class="data" id="probes"><thead><tr><th scope="col">Probe</th><th scope="col">Family</th><th scope="col">Guided@10 (all / lso)</th><th scope="col">Flat@10 (all / lso)</th></tr></thead><tbody></tbody></table></div>
-      <noscript><p>Aggregate only without JavaScript: guided 0.7367 all-sources / 0.4883 leave-source-out over 120 probes each; flat control 0.055 / 0.0017. Full rows: <a href="../explorer/probes_summary.json">probes_summary.json</a>.</p></noscript>
-    </section>
-
-    <section class="card" aria-label="10M graph opt-in">
-      <h2>3. The 10M graph — explicit opt-in</h2>
-      <p class="muted"><code>graph_10m.json.gz</code>: 7.25&nbsp;MB download, 21.7&nbsp;MB raw (3,711 parents / 9,177 leaves / 63,441 atoms). Fetched only when you ask, with progress and cancel. Parsing happens locally.</p>
-      <p><button type="button" class="btn" id="load10m">Load the 10M graph (7.25&nbsp;MB)</button>
+    <section class="card" aria-label="Deep topology verify">
+      <h2>6. Deep topology verify <span class="src">(opt-in 10M graph)</span></h2>
+      <p class="muted"><code>graph_10m.json.gz</code>: 7.25&nbsp;MB download, 21.7&nbsp;MB raw (3,711 parents / 9,177 leaves / 63,441 atoms). First paint never waits for it — the replay above runs on the small files. Opt in to verify the skeleton against the full export.</p>
+      <p><button type="button" class="btn" id="load10m">Verify against the 10M graph (7.25&nbsp;MB)</button>
       <button type="button" class="btn secondary" id="cancel10m" disabled>Cancel</button></p>
       <p><progress id="dl10m" max="100" value="0" hidden></progress></p>
       <p class="muted" id="m10m-status" aria-live="polite">Not loaded.</p>
     </section>
 
+    <section class="card" aria-label="Receipts">
+      <h2>Receipts</h2>
+      <div style="overflow-x:auto"><table class="data" id="manifest"><thead><tr><th scope="col">File</th><th scope="col">Bytes</th><th scope="col">sha256</th><th scope="col">Status</th></tr></thead><tbody><tr><td colspan="4">verifying…</td></tr></tbody></table></div>
+      <p class="muted">Reproduce any probe row offline:</p>
+      <pre><code>python3 docs/play/probe-row.py 7</code></pre>
+      <p class="muted">What this demo can't do yet: free-text Q&amp;A over 10M (atom text unexported), true in-browser rescoring (atom vectors unexported), live embedding. Those need the owner-approved v2 export job.</p>
+    </section>
+
     <section class="card" aria-label="Dataset links">
-      <h2>4. Dataset links (10M / 100M / 500M / 1B)</h2>
-      <p><span class="honesty-chip">External links — not owned or hosted by the author</span></p>
-      <p class="muted">Tiers mirror the pinned upstream resolver selections (tiers 10M / 100M / 500M / 1B; read-only reference, not vendored here). Every link below opens the upstream dataset card; licenses and terms are the upstream owners'.</p>
+      <h2>Dataset links (10M / 100M / 500M / 1B)</h2>
+      <p><span class="mrig-chip mrig-proof">PROOF · external links — not owned or hosted by the author</span></p>
+      <p class="muted">Tiers mirror the pinned upstream resolver selections (read-only reference, not vendored here). Every link opens the upstream dataset card; licenses and terms are the upstream owners'.</p>
       <div style="overflow-x:auto"><table class="data">
         <thead><tr><th scope="col">Tier</th><th scope="col">Target</th><th scope="col">Upstream sources</th><th scope="col">Status</th></tr></thead>
         <tbody>
@@ -83,11 +149,11 @@
     </section>
 
     <section class="card" aria-label="Populate your own">
-      <h2>5. Populate your own (Colab path)</h2>
+      <h2>Populate your own (Colab path)</h2>
       <ol>
         <li>Open the <a href="https://github.com/Anshul48/trace/blob/main/docs/REPRO.md">reproduction guide</a> — data formats and the exact recipe.</li>
         <li>Fetch tiers yourself from the upstream cards above (respect each license: CC-BY-4.0, CC-BY-NC-4.0, CC-BY-SA-4.0, ODC-By-1.0).</li>
-        <li>Run the <a href="https://github.com/Anshul48/trace#run-it-in-5-minutes">README quickstart</a> pilot (10K tokens, ~26&nbsp;s) — your machine, your data, <span class="honesty-chip">Live — only yours</span>.</li>
+        <li>Run the <a href="https://github.com/Anshul48/trace#run-it-in-5-minutes">README quickstart</a> pilot (10K tokens, ~26&nbsp;s) — your machine, your data.</li>
         <li>Full 10M reproduction has three blockers (external corpus, VM guard, 1M local cap) — listed honestly in <a href="../recording/">repro section</a>.</li>
       </ol>
     </section>
@@ -96,8 +162,9 @@
   </main>
 
   <footer class="site gutters">
-    TRACE research preview &middot; freeze <code>seam12a</code> &middot; run <code>o94-scale10m</code> &middot; numbers from receipts only &middot; <a href="https://github.com/Anshul48/trace">source</a>
+    TRACE research preview &middot; replay data: staged explorer run (harness <code>9f516288</code>, generation <code>d21a3aef</code>) — not o94-scale10m &middot; publication numbers: <a href="../">TRACE home</a> &middot; <a href="https://github.com/Anshul48/trace">source</a>
   </footer>
+  <script src="../assets/motion.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

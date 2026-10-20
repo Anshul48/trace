@@ -149,10 +149,13 @@
 <body>
   <header class="top gutters">
     <span class="kicker">RESEARCH PREVIEW &middot; FROZEN RUN</span>
-    <h1>TRACE: self-organizing memory for LLMs and agents</h1>
-    <p class="lede" id="hook">Self-organizing memory for AI: 10M tokens filed live, recalled near 0.74, leftover work drained to zero.</p>
-    <p class="muted">Researchers get long-horizon agent memory they can cite. Developers get memory beyond the context window, local-first and content-addressed.</p>
-    <p class="hero-cta"><a class="btn" href="explorer/#tab-topology">Open the explorer tour</a></p>
+    <h1>10,003,381 tokens. One map. Open it.</h1>
+    <p class="lede" id="hook">TRACE files ten million tokens into a map it builds itself — then replays how any probe found its answer. No backend, no signup: the map opens in your browser.</p>
+    <ul class="cta-row">
+      <li><a class="btn" href="play/#p=7&amp;m=10m&amp;v=race&amp;lso=0&amp;t=7">Replay a probe</a></li>
+      <li><a class="btn secondary" href="recording/#trace-how">Watch the map (80 s)</a></li>
+      <li><a class="btn secondary" href="explorer/#tab-topology">Explorer tour</a></li>
+    </ul>
   </header>
 
   <main class="gutters layout-grid">
@@ -181,9 +184,10 @@
       <h2>Watch it, then run it</h2>
       <div class="try3">
         <div class="step">
-          <h3>Watch &mdash; TRACE in about a minute</h3>
-          <p><a href="recording/"><img src="recording/trace-poster.jpg" alt="TRACE overview video poster: atom dots organizing into schemas" width="640" height="360" loading="lazy" style="width:100%;height:auto;border-radius:8px;border:1px solid var(--line)"></a></p>
-          <p class="muted">What it does, how it works, and the local run &mdash; captions included. <span class="honesty-chip">Illustrated simulation &middot; counts measured</span> <span class="honesty-chip">Voice: synthetic</span></p>
+          <h3>Watch &mdash; the map, two ways</h3>
+          <p><a href="recording/#trace-how"><img src="recording/trace-how-poster.jpg" alt="TRACE-How film poster: guided path lighting the DAG" width="640" height="360" loading="lazy" style="width:100%;height:auto;border-radius:8px;border:1px solid var(--line)"></a></p>
+          <p class="muted"><a href="recording/#trace-how">How: the map is real</a> (80 s) &middot; <a href="recording/#trace-do">Do: replay a probe</a> (56 s) &middot; captions included. <span class="honesty-chip">PROOF &middot; staged 10M run</span> <span class="honesty-chip">Voice: synthetic</span></p>
+          <p class="muted"><a href="recording/">Earlier overview cut</a> + interactive demo.</p>
         </div>
         <div class="step">
           <h3>Run &mdash; your own explorer in 3 lines</h3>
@@ -307,7 +311,7 @@ SUP_PYTHON=$CAND/.venv/bin/python bash runtime.sh tools/product_pilot.py --token
 
     <section aria-label="Recall race" class="reveal">
       <h2>Recall race: guided vs flat, matched work</h2>
-      <p class="muted">Both modes ran 120 probes each under matched work budgets. Flat is the weak-baseline control, shown here as bars; the benchmarks table carries the full rows. <span class="honesty-chip">Protocol agreement, not a SOTA claim</span></p>
+      <p class="muted">Frozen <code>seam12a</code>, run <code>o94-scale10m</code>: both modes ran 120 probes each under matched work budgets. Flat is the weak-baseline control, shown here as bars; the benchmarks table carries the full rows. <span class="honesty-chip">Protocol agreement, not a SOTA claim</span> <span class="honesty-chip">Replay the staged run instead: <a href="play/#p=7&amp;m=10m&amp;v=race&amp;lso=0&amp;t=7">probe 7 race</a></span></p>
       <div class="race" id="race-all" role="img" aria-label="All-sources recall at 10: guided about 0.74 versus flat about 0.06">
         <div class="row guided"><span>guided (all)</span><span class="track"><span class="bar-fill" data-w="100"></span></span><span>~0.74</span></div>
         <div class="row flat"><span>flat (all)</span><span class="track"><span class="bar-fill" data-w="7.5"></span></span><span>~0.06</span></div>
@@ -318,8 +322,41 @@ SUP_PYTHON=$CAND/.venv/bin/python bash runtime.sh tools/product_pilot.py --token
       </div>
     </section>
 
+    <section aria-label="Where TRACE loses" class="reveal">
+      <h2>Where TRACE loses</h2>
+      <p class="muted">Published misses first — every row measured, receipt-linked. <span class="honesty-chip">Limits are the feature</span></p>
+      <table class="ladder">
+        <thead><tr><th scope="col">Loss</th><th scope="col">Measured</th><th scope="col">Receipt</th></tr></thead>
+        <tbody>
+          <tr><td>Fresh Narrow stores trail references</td><td>Shipped stack trails bm25/dense on four lanes (1061 queries × arms, 0 failures); leads only BRIGHT-pony</td><td>C2-10M-PUBLICATION Claim 3</td></tr>
+          <tr><td>Pony lane: every arm scores low</td><td>nDCG@10: bm25 0.055 / dense 0.033 / shipped 0.064 (112 queries) — "all arms score low there"</td><td>C2-10M-PUBLICATION lane table</td></tr>
+          <tr><td>Attach wall</td><td>Cold attach 103–122 s per request; resident query 0.78–1.41 s. No sub-50 ms story at 10M.</td><td>C2-10M-PUBLICATION Claim 5</td></tr>
+          <tr><td>Flat beats guided sometimes</td><td>Staged run: flat wins 4 of 120 leave-source-out probes (all cross family); probe 78 scores guided 0.0</td><td><a href="play/#p=83&amp;m=10m&amp;v=race&amp;lso=1&amp;t=7">replay probe 83</a></td></tr>
+          <tr><td>100M unclaimed, R9 OOM</td><td>"100M retrieval is NOT evidenced and NOT claimed"; R9 10M RelIndex verification FAILED (OOM)</td><td>C2-10M-PUBLICATION scope notes</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section aria-label="Receipts drawer" class="reveal">
+      <h2>Receipts</h2>
+      <details>
+        <summary>Two runs, both pinned — staged replay run + frozen publication run</summary>
+        <table class="ladder">
+          <thead><tr><th scope="col">Run</th><th scope="col">Use it for</th><th scope="col">Pins</th></tr></thead>
+          <tbody>
+            <tr><td>Staged explorer run (guided 0.73 / LSO 0.4758)</td><td>replays, films, /play/ — every row clickable</td><td>harness <code>9f516288</code> · generation <code>d21a3aef</code> · <a href="play/provenance.json">provenance.json</a></td></tr>
+            <tr><td>Frozen <code>seam12a</code>, run <code>o94-scale10m</code> (guided 0.7367 / LSO 0.4883)</td><td>publication numbers on this page</td><td>tarball <code>8d3bbb6b…</code> · harness <code>9f78479a</code> · probes <code>b332d62d</code></td></tr>
+          </tbody>
+        </table>
+        <p class="muted">Same corpus (10,003,381 TOK-v1 tokens, 13,081 docs, 63,441 atoms) and same 120 probes — different harness runs, different measurements. Never mixed without labels.</p>
+        <pre><code>python3 docs/play/probe-row.py 7            # probe 7 row + 120-probe means
+python3 docs/play/probe-row.py 83 --lso 1   # a probe flat wins</code></pre>
+        <p class="muted">Separate BEIR rung (never beside probe-vector numbers): TL ndcg10 0.6311, 809 scifact queries, frozen Narrow <code>4c8c9673</code>.</p>
+      </details>
+    </section>
+
     <section aria-label="Memory gauge" class="reveal">
-      <h2>Memory: ~8.5 GB peak on one VM</h2>
+      <h2>Memory: ~8.5 GB peak on one VM (seam12a o94)</h2>
       <div class="gauge" role="img" aria-label="Parent-process peak 8,489 MiB of a 16 GiB scale (52%); child peak 7,169.2 MiB">
         <p class="muted">Parent-process peak 8,489 MiB (8.3 GiB); child 7,169.2 MiB (rss receipts, 1,899 rows).</p>
         <div class="track"><span class="bar-fill" id="rss-bar" data-w="52"></span></div>

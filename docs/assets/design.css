@@ -21,6 +21,11 @@
   --dur-2: 250ms;
   --dur-3: 400ms;
   --dur-4: 600ms;
+  /* R5 motion rig v2 (spec §2): single curve family, mirrored in motion.js. */
+  --ease-enter: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --ease-move: cubic-bezier(0.2, 0, 0, 1);
+  --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
   --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, system-ui, sans-serif;
 }
@@ -125,4 +130,35 @@ pre {
 
 code {
   overflow-wrap: anywhere;
+}
+
+/* R5 motion rig v2: honesty chips + kinetic caption key terms (spec §§3/5). */
+.mrig-chip {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 0.1rem 0.55rem;
+  background: var(--panel);
+  color: var(--muted);
+  max-width: 100%;
+}
+.mrig-chip.mrig-proof { color: var(--accent2); border-color: var(--accent2); }
+.mrig-chip.mrig-vision {
+  color: var(--warn-ink);
+  border-color: var(--warn-ink);
+  border-style: dashed;
+  background: var(--warn-bg);
+}
+.mrig-cap .key {
+  color: var(--accent);
+  font-weight: 700;
+  display: inline-block;
+  transform: scale(1);
+}
+.mrig-cap .key.on {
+  transform: scale(1.04);
+  transition: transform var(--dur-2) var(--ease-enter);
 }
