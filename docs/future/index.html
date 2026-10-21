@@ -14,6 +14,7 @@
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="stylesheet" href="../assets/design.css">
   <link rel="stylesheet" href="../assets/tier.css">
+  <link rel="stylesheet" href="../assets/nav.css">
   <style>
     main, header.top, footer.site { max-width: var(--maxw); margin: 0 auto; }
     header.top { padding: 1.5rem 0 0; }
@@ -43,12 +44,21 @@
   <noscript><style>.stepseq .tstep { opacity: 1; }</style></noscript>
 </head>
 <body>
+  <nav class="topnav" aria-label="Site"><div class="wrap">
+    <a class="brand" href="../">TRACE</a>
+    <a class="nav" href="../">Home</a>
+    <a class="nav" href="../recording/">Watch</a>
+    <a class="nav" href="../explorer/">Explore</a>
+    <a class="nav" href="./" aria-current="page">Future</a>
+    <a class="nav" href="../#go-deeper">Deep dive</a>
+    <a class="cta" href="../play/">Replay a probe</a>
+  </div></nav>
   <header class="top gutters">
     <span class="kicker">TRACE &middot; /FUTURE &middot; THREE TIERS, ALL LABELED</span>
     <h1>Measured. On disk. Vision.</h1>
     <p class="lede">Three tiers, three looks — solid, hollow, dashed. Numbers live only where they were measured. Everything past 10M is drawn, not built.</p>
     <ul class="cta-row">
-      <li><a class="btn" href="../play/#p=7&amp;m=10m&amp;v=race&amp;lso=0&amp;t=7">Replay the measured map</a></li>
+      <li><a class="btn" href="../play/">Replay the measured map</a></li>
       <li><a class="btn secondary" href="../">Back to TRACE home</a></li>
     </ul>
   </header>
@@ -60,7 +70,7 @@
         <div class="tier tier-proof">
           <span class="tchip tchip-proof">PROOF &middot; staged 10M</span>
           <h3>Measured</h3>
-          <p>Solid, blue. Every number resolves to staged bytes. Replay it in <a href="../play/">the theater</a>.</p>
+          <p>Solid, blue. Every number resolves to staged bytes. Replay it in <a href="../play/">the comets</a>.</p>
         </div>
         <div class="tier tier-exists">
           <span class="tchip tchip-exists">EXISTS &middot; not mapped</span>
@@ -162,7 +172,7 @@
     <section class="next-strip" aria-label="What is next">
       <h2>Next</h2>
       <ol>
-        <li class="n-proof"><span class="tchip tchip-proof">PROOF &middot; staged 10M</span> Replay any of 120 probes on the real map — <a href="../play/#p=7&amp;m=10m&amp;v=race&amp;lso=0&amp;t=7">open the theater</a>.</li>
+        <li class="n-proof"><span class="tchip tchip-proof">PROOF &middot; staged 10M</span> Replay any of 120 probes on the real map — <a href="../play/">open the theater</a>.</li>
         <li class="n-exists"><span class="tchip tchip-exists">EXISTS &middot; not mapped</span> 596 int8 shards wait on the stage ledger — owner ask above.</li>
         <li class="n-vision"><span class="tchip tchip-vision">VISION &middot; not built</span> 100M tile + sleep dreaming — you are looking at the roadmap.</li>
       </ol>
