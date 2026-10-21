@@ -3,211 +3,128 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRACE — Using TRACE: an illustrated walkthrough (research preview)</title>
-  <meta name="description" content="TRACE is a research-preview engine that turns documents into queryable atoms and schemas. Measured at 10M tokens: 10,003,381 tokens, 13,081 docs, recall@10 0.7367. Python package + product_pilot CLI.">
+  <title>TRACE — Watch: the map, two ways</title>
+  <meta name="description" content="Two films on the staged 10M run: How (57 s, 120 comets over the real galaxy) and Do (45 s, replay a probe). Measured benchmarks below. Research preview.">
   <link rel="canonical" href="https://anshul48.github.io/trace/recording/">
-  <meta property="og:title" content="TRACE — Using TRACE: an illustrated walkthrough">
-  <meta property="og:description" content="Watch TRACE ingest documents, build atoms, organize schemas, answer questions, and repair itself. Measured: 10,003,381 tokens, recall@10 0.7367 (research preview).">
+  <meta property="og:title" content="TRACE — Watch: the map, two ways">
+  <meta property="og:description" content="How (57 s): 120 comets over the real galaxy. Do (45 s): replay a probe. Measured: 10,003,381 tokens.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://anshul48.github.io/trace/recording/">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="TRACE — Using TRACE: an illustrated walkthrough">
-  <meta name="twitter:description" content="Illustrated walkthrough of TRACE. Measured at 10M tokens: 10,003,381 tok, 63,441 atoms, recall@10 0.7367. Research preview.">
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="stylesheet" href="../assets/design.css">
   <link rel="stylesheet" href="../assets/tier.css">
-  <link rel="stylesheet" href="demo.css">
+  <link rel="stylesheet" href="../assets/nav.css">
+  <style>
+    body { background: var(--paper); color: var(--ink); margin: 0; padding: 0 0 3rem; line-height: 1.55; }
+    main, header.top, footer.site { max-width: var(--maxw); margin: 0 auto; }
+    header.top { padding: 2rem 0 0; }
+    .gutters { padding-left: 16px; padding-right: 16px; }
+    .kicker {
+      display: inline-block; font-size: 0.75rem; letter-spacing: 0.08em; font-weight: 700;
+      color: var(--accent); border: 1px solid var(--line); border-radius: var(--radius-pill);
+      padding: 0.2rem 0.7rem; margin-bottom: 0.75rem; background: var(--panel);
+    }
+    h1 { margin: 0 0 0.5rem; font-size: clamp(1.6rem, 3.6vw, 2.3rem); line-height: 1.15; }
+    h2 { margin: 2rem 0 0.5rem; }
+    h3 { margin: 1.5rem 0 0.4rem; }
+    p { margin: 0.5rem 0; }
+    .lede { font-size: 1.1rem; max-width: 44rem; }
+    .muted { color: var(--muted); }
+    a { color: var(--accent); }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.85em; background: var(--warn-bg); padding: 0.1rem 0.35rem; border-radius: 4px;
+    }
+    @media (prefers-color-scheme: dark) { code { background: #21262d; } }
+    video { width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: var(--radius-m); border: 1px solid var(--line); background: #000; }
+    .bench-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 0.75rem 0; }
+    .bench-table th, .bench-table td { border: 1px solid var(--line); padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
+    .bench-table th { background: var(--panel); width: 16rem; }
+    .bench-table caption { text-align: left; padding: 0.4rem 0; color: var(--muted); font-size: 0.85rem; }
+    footer.site { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 1rem; margin-top: 2.5rem; }
+  </style>
+  <noscript><style>.reveal { opacity: 1; transform: none; }</style></noscript>
 </head>
 <body>
-  <div class="page">
-    <header class="site-header">
-      <p class="eyebrow">TRACE &middot; research preview</p>
-      <h1>TRACE turns a pile of documents into answers you can audit.</h1>
-      <p class="lede">Built for researchers, developers, and hackathon judges: use it to explore
-        how retrieval behaves at scale &mdash; what gets stored, what gets asked, and what gets fixed.</p>
-      <ul class="proof-strip" aria-label="Measured proof">
-        <li><strong>10M</strong><span>tokens measured</span></li>
-        <li><strong><span data-countup="13081" data-decimals="0">13,081</span></strong><span>documents</span></li>
-        <li><strong>~<span data-countup="0.74" data-decimals="2">0.74</span></strong><span>recall@10 (all)</span></li>
-        <li><strong>5,847 &rarr; 0</strong><span>self-repair debt</span></li>
-      </ul>
-      <p class="status-note">Experimental status, stated plainly: TRACE is a
-        <strong>research preview</strong>. Every number on this page was measured &mdash; nothing is
-        projected. Scope and limits are listed in the benchmarks table below.</p>
-      <p class="interface-note">Available as a Python package plus the
-        <code>product_pilot</code> command-line harness.</p>
-    </header>
+  <nav class="topnav" aria-label="Site"><div class="wrap">
+    <a class="brand" href="../">TRACE</a>
+    <a class="nav" href="../">Home</a>
+    <a class="nav" href="./" aria-current="page">Watch</a>
+    <a class="nav" href="../explorer/">Explore</a>
+    <a class="nav" href="../future/">Future</a>
+    <a class="nav" href="../#go-deeper">Deep dive</a>
+    <a class="cta" href="../play/">Replay a probe</a>
+  </div></nav>
 
-    <main>
-      <section class="trailer" aria-labelledby="pilots-heading">
-        <h2 id="pilots-heading">The map, two ways (staged explorer run)</h2>
-        <h3 id="trace-how">How: the map is real (57 s)</h3>
-        <video controls preload="none" poster="trace-how-poster.jpg" width="1280" height="720">
-          <source src="trace-how.mp4" type="video/mp4">
-          <track kind="captions" srclang="en" label="English" src="trace-how.en.vtt" default>
-          Sorry, your browser cannot play this video.
-          <a href="trace-how.mp4">Download trace-how.mp4</a> (7.7&nbsp;MB).
-        </video>
-        <p class="sim-label">120 comets over the real galaxy: ingest time-lapse from measured phase walls, probe 7's story, the 120 payoff with misses held red, flat at its recorded budget — then 10M as one tile of a drawn future.
-          <span class="honesty-chip">PROOF · staged 10M run</span> <span class="honesty-chip">Real counts + real paths · projection illustrative</span></p>
-        <p class="muted">Voice: synthetic (Kokoro TTS). Sound: synth bed + scoring ticks; flat plays silent. Captions included.</p>
-        <h3 id="trace-do">Do: replay a probe (45 s)</h3>
-        <video controls preload="none" poster="trace-do-poster.jpg" width="1280" height="720">
-          <source src="trace-do.mp4" type="video/mp4">
-          <track kind="captions" srclang="en" label="English" src="trace-do.en.vtt" default>
-          Sorry, your browser cannot play this video.
-          <a href="trace-do.mp4">Download trace-do.mp4</a> (2.0&nbsp;MB).
-        </video>
-        <p class="sim-label">Probe 7's real guided path lights up; flat wins probe 83 and we show it; airplane mode still replays; one command re-checks all 120 probes.
-          <span class="honesty-chip">PROOF · staged 10M run</span> <span class="honesty-chip">Replay, not Q&amp;A</span></p>
-        <p class="muted">Voice: synthetic (Kokoro TTS). Captions included.</p>
-      </section>
+  <div class="gutters">
+  <header class="top">
+    <span class="kicker">TRACE &middot; TWO FILMS &middot; STAGED 10M RUN</span>
+    <h1>The map, two ways.</h1>
+    <p class="lede">How it works (57 s), then a real replay (45 s). Every frame below is labeled: what's measured, what's illustrated, what's synthetic voice.</p>
+  </header>
 
-      <section class="trailer" aria-labelledby="trailer-heading">
-        <h2 id="trailer-heading">Watch: TRACE in about a minute (earlier cut)</h2>
-        <video controls preload="none" poster="trace-poster.jpg" width="1280" height="720">
-          <source src="trace.mp4" type="video/mp4">
-          <track kind="captions" srclang="en" label="English" src="trace.en.vtt" default>
-          Sorry, your browser cannot play this video.
-          <a href="trace.mp4">Download trace.mp4</a> (1.5&nbsp;MB).
-        </video>
-        <p class="sim-label">What it does, how it works, and the three-line local run &mdash;
-          on real measured counts.
-          <span class="honesty-chip">Illustrated simulation &middot; counts measured</span></p>
-        <p class="muted">Voice: synthetic (Kokoro TTS).</p>
-      </section>
+  <main>
+    <section aria-labelledby="trace-how" class="reveal">
+      <h2 id="trace-how">How: the map is real (57 s)</h2>
+      <video controls preload="none" poster="trace-how-poster.jpg">
+        <source src="trace-how.mp4" type="video/mp4">
+        <track kind="captions" srclang="en" label="English" src="trace-how.en.vtt" default>
+        Sorry, your browser cannot play this video. <a href="trace-how.mp4">Download trace-how.mp4</a>.
+      </video>
+      <p class="muted">120 comets over the real galaxy: ingest time-lapse from measured phase walls, probe 7's story, the 120 payoff with misses held red, flat at its recorded budget. <span class="honesty-chip">PROOF &middot; staged 10M run</span> <span class="honesty-chip">Real counts + real paths &middot; projection illustrative</span> <span class="honesty-chip">Voice: synthetic</span></p>
+    </section>
 
-      <section class="hero-demo" aria-labelledby="demo-heading">
-        <h2 id="demo-heading">Using TRACE</h2>
-        <div class="demo-stage">
-          <canvas id="demo-canvas" role="img" aria-label="Scene 1 of 5: feeding documents into TRACE"></canvas>
-        </div>
-        <p class="sim-label">Illustrated simulation &mdash; visuals simplified; all numbers measured
-          (20K run + seam12a 10M freeze). <span class="honesty-chip">Dots schematic, counts measured</span></p>
-        <p class="demo-caption" id="demo-caption" aria-live="polite"></p>
-        <p class="demo-real" id="demo-real" aria-live="polite"></p>
-        <div class="demo-controls">
-          <div class="demo-buttons">
-            <button type="button" class="btn" id="demo-prev" aria-label="Previous scene">&#9664; Prev</button>
-            <button type="button" class="btn btn-primary" id="demo-play" aria-label="Play walkthrough">Play</button>
-            <button type="button" class="btn" id="demo-next" aria-label="Next scene">Next &#9654;</button>
-            <button type="button" class="btn" id="demo-reset" aria-label="Reset walkthrough to scene 1">Reset</button>
-          </div>
-          <div class="demo-scrub">
-            <label for="demo-scrub">Scrub:</label>
-            <input type="range" id="demo-scrub" min="0" max="100" value="0" step="0.1" aria-label="Walkthrough progress scrub">
-          </div>
-          <div class="demo-speed">
-            <label for="demo-speed">Speed:</label>
-            <select id="demo-speed" aria-label="Walkthrough speed selector">
-              <option value="0.5">0.5x</option>
-              <option value="1.0" selected>1.0x</option>
-              <option value="2.0">2.0x</option>
-            </select>
-          </div>
-          <div class="demo-progress">
-            <span class="demo-count" id="demo-count">Scene 1 of 5</span>
-            <div class="demo-dots" id="demo-dots" role="group" aria-label="Jump to scene"></div>
-          </div>
-          <div class="demo-bar" aria-hidden="true"><span id="demo-bar-fill"></span></div>
-        </div>
-        <p class="muted keys-hint">Keys: space play/pause &middot; arrows step scenes &middot; Home reset.</p>
-        <noscript><p class="noscript-note">This walkthrough needs JavaScript. The five scenes:
-          (1) 88 documents fly in; (2) they break into 144 content-addressed atoms;
-          (3) atoms self-organize into labeled schemas; (4) a question lights up retrieval
-          paths and ranked answers (recall@10 0.7367); (5) self-repair counts 5,847 down to 0,
-          then shows the 10M scale card.</p></noscript>
-      </section>
+    <section aria-labelledby="trace-do" class="reveal">
+      <h2 id="trace-do">Do: replay a probe (45 s)</h2>
+      <video controls preload="none" poster="trace-do-poster.jpg">
+        <source src="trace-do.mp4" type="video/mp4">
+        <track kind="captions" srclang="en" label="English" src="trace-do.en.vtt" default>
+        Sorry, your browser cannot play this video. <a href="trace-do.mp4">Download trace-do.mp4</a>.
+      </video>
+      <p class="muted">Probe 7's real guided path lights up; flat wins probe 83 and we show it; airplane mode still replays; one command re-checks all 120 probes. <span class="honesty-chip">PROOF &middot; staged 10M run</span> <span class="honesty-chip">Replay, not Q&amp;A</span> <span class="honesty-chip">Voice: synthetic</span></p>
+    </section>
 
-      <section class="benchmarks" aria-labelledby="bench-heading">
-        <h2 id="bench-heading">Benchmarks, measured (seam12a freeze <code>8d3bbb6b&hellip;928dbf64</code>)</h2>
-        <table class="bench-table">
-          <caption>All values measured in run o94-scale10m; wall 9,494.9&nbsp;s (~2.6&nbsp;h).</caption>
-          <tbody>
-            <tr><th scope="row">Corpus</th><td>10,003,381 tokens / 13,081 docs / 63,441 atoms</td></tr>
-            <tr><th scope="row">Guided recall@10 (all)</th><td>0.7367</td></tr>
-            <tr><th scope="row">Guided recall@10 (leave-source-out)</th><td>0.4883</td></tr>
-            <tr><th scope="row">Flat recall@10, matched-work control</th><td>0.055 (all) / 0.0017 (leave-source-out)</td></tr>
-            <tr><th scope="row">Self-repair</th><td>5,847 &rarr; 0 in 6 iterations</td></tr>
-            <tr><th scope="row">Peak RAM</th><td>~8.5 GB (parent-process peak 8,489.1 MB)</td></tr>
-            <tr><th scope="row">Wall time</th><td>9,494.9 s (~2.6 h)</td></tr>
-          </tbody>
-        </table>
-        <nav class="deep-dives" aria-label="Deep dive">
-          <span>Deep dive:</span>
-          <a href="https://github.com/Anshul48/trace/blob/main/docs/BENCHMARKS.md">Benchmarks</a>
-          <a href="https://github.com/Anshul48/trace/blob/main/docs/ARCHITECTURE.md">Architecture</a>
-          <a href="../explorer/">Interactive explorer</a>
-          <a href="https://github.com/Anshul48/trace/blob/main/docs/REPRO.md">Reproduction guide</a>
-        </nav>
-      </section>
+    <section aria-labelledby="bench-heading" class="reveal">
+      <h2 id="bench-heading">Benchmarks, measured (seam12a freeze <code>8d3bbb6b&hellip;928dbf64</code>)</h2>
+      <table class="bench-table">
+        <caption>All values measured in run o94-scale10m; wall 9,494.9&nbsp;s (~2.6&nbsp;h). The replay surfaces (films, /play/) use the staged explorer run instead (guided 0.73 / LSO 0.4758) — same corpus, same probes, different harness run.</caption>
+        <tbody>
+          <tr><th scope="row">Corpus</th><td>10,003,381 tokens / 13,081 docs / 63,441 atoms</td></tr>
+          <tr><th scope="row">Guided recall@10 (all)</th><td>0.7367</td></tr>
+          <tr><th scope="row">Guided recall@10 (leave-source-out)</th><td>0.4883</td></tr>
+          <tr><th scope="row">Flat recall@10, matched-work control</th><td>0.055 (all) / 0.0017 (leave-source-out)</td></tr>
+          <tr><th scope="row">Self-repair</th><td>5,847 &rarr; 0 in 6 iterations</td></tr>
+          <tr><th scope="row">Peak RAM</th><td>~8.5 GB (parent-process peak 8,489.1 MB)</td></tr>
+          <tr><th scope="row">Wall time</th><td>9,494.9 s (~2.6 h)</td></tr>
+        </tbody>
+      </table>
+    </section>
 
-      <section class="repro" aria-labelledby="repro-heading">
-        <h2 id="repro-heading">Reproduce the benchmark</h2>
-        <p>A full 10M-token reproduction has three blockers:</p>
-        <ol>
-          <li><strong>External corpus.</strong> The 10M dataset (<code>docs-100m.jsonl</code> plus
-            embedding cache) does not ship with the source; only the 1.2&nbsp;MB source tarball is published.</li>
-          <li><strong>VM guard.</strong> <code>--profile vm</code> exits unless the hostname is
-            <code>trace-build500</code>.</li>
-          <li><strong>1M local cap.</strong> On your own machine, <code>--profile local</code> runs at most
-            1M tokens.</li>
-        </ol>
-        <p>What you <em>can</em> run anywhere is the small local path, e.g.:</p>
-        <pre class="code-block"><code>bash runtime.sh tools/product_pilot.py --tokens 10000 --profile local \
-  --source-root &lt;extracted-seam12a-dir&gt; --data-dir &lt;your-data-dir&gt; --out &lt;out-dir&gt; \
-  --drain-attribution --drain-census --holon-descriptor-columnar --overrides-columnar \
-  --descriptor-matrix-all --per-view-sharing --cold-scan-chunk 4096 --repair-columnar \
-  --candidate-source hnsw --drain-bounded-k 32 --candidate-shadow-audit 8</code></pre>
-        <p>See the <a href="https://github.com/Anshul48/trace/blob/main/docs/REPRO.md">reproduction guide</a> for data formats and the exact recipe.</p>
-      </section>
+    <section aria-labelledby="repro-heading" class="reveal">
+      <h2 id="repro-heading">Reproduce it</h2>
+      <p>A full 10M reproduction has three blockers: external corpus (data doesn't ship), VM guard (<code>--profile vm</code> needs hostname <code>trace-build500</code>), and a 1M local cap. The small path runs anywhere — see the <a href="https://github.com/Anshul48/trace/blob/main/docs/REPRO.md">reproduction guide</a>. Raw evidence: <a href="run20k.cast" download>run20k.cast</a> (20K PASS in 27.8 s, sha <code>7ef2cca3&hellip;</code>) replays with <code>asciinema play</code>.</p>
+    </section>
 
-      <section class="raw-run" id="raw-run" aria-labelledby="raw-heading">
-        <h2 id="raw-heading">The raw recorded run</h2>
-        <p class="raw-note">The authentic captured output of the frozen harness on the portable 20k prefix:
-          20,030 tokens / 88 documents / 144 atoms, verdict PASS in 27.8&nbsp;s. Separate from the
-          10M benchmarks above.</p>
-        <p class="raw-honesty"><span class="honesty-chip">Authentic capture</span> <span class="honesty-chip">20K run, not 10M</span></p>
-        <p class="raw-evidence-link">Evidence file: <a href="run20k.cast" download>run20k.cast</a>
-          (SHA-256 <code>7ef2cca320a25690756528524095d9f350bb0187a16a3060d5ec58b1eb5b3d58</code>,
-          7.8&nbsp;KB). Replay it locally with
-          <code>asciinema play run20k.cast</code>; the benchmarks table above
-          carries the measured values. <span class="honesty-chip">Recorded 20K run, not 10M</span></p>
+    <section class="next-strip reveal" aria-label="What is next">
+      <h2>Next</h2>
+      <ol>
+        <li class="n-proof"><span class="tchip tchip-proof">PROOF &middot; staged 10M</span> Replay any of 120 probes on the real map — <a href="../play/">open the comets</a>.</li>
+        <li class="n-exists"><span class="tchip tchip-exists">EXISTS &middot; not mapped</span> 596 int8 shards on disk, blocked on the stage ledger — <a href="../future/">read the audit</a>.</li>
+        <li class="n-vision"><span class="tchip tchip-vision">VISION &middot; not built</span> 100M tile + sleep dreaming, drawn not built — <a href="../future/">see /future</a>.</li>
+      </ol>
+    </section>
 
-        <details class="transcript">
-          <summary>Transcript (27.8 s capture, 7 stages)</summary>
-          <ol>
-            <li><span class="t">[0.0 s]</span> Installer banner; Python 3.12 runtime check passes.</li>
-            <li><span class="t">[0.1 s]</span> Isolated venv created; <span class="t">numpy</span> + <span class="t">blake3</span> installed.</li>
-            <li><span class="t">[0.4 s]</span> 207 immutable source files verified against SOURCEFREEZE (0 mismatches).</li>
-            <li><span class="t">[0.5 s]</span> 20k prefix data verified: 20,030 tokens, 88 complete documents, 144 atoms, 0 cache misses &mdash; VERIFY PASS.</li>
-            <li><span class="t">[1.1 s]</span> Pilot run resolves into a fresh unique run directory.</li>
-            <li><span class="t">[11&ndash;22 s]</span> Drain, append (ACK&rarr;searchable 0.022 s), capacity rejection, prepare fault, SIGKILL/restart with no duplicate commits.</li>
-            <li><span class="t">[26&ndash;28 s]</span> Final verdict <strong>PASS</strong>; viewer data exported; run complete.</li>
-          </ol>
-        </details>
-      </section>
+    <section id="go-deeper" aria-label="Go deeper" class="reveal">
+      <h2>Go deeper</h2>
+      <p><a href="https://github.com/Anshul48/trace/blob/main/docs/BENCHMARKS.md">Benchmarks</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/ARCHITECTURE.md">architecture</a> &middot; <a href="../explorer/">interactive explorer</a> &middot; <a href="https://github.com/Anshul48/trace/blob/main/docs/REPRO.md">reproduction guide</a></p>
+    </section>
+  </main>
 
-      <section class="next-strip" aria-label="What is next">
-        <h2>Next</h2>
-        <ol>
-          <li class="n-proof"><span class="tchip tchip-proof">PROOF &middot; staged 10M</span> Replay any of 120 probes on the real map — <a href="../play/#p=7&amp;m=10m&amp;v=race&amp;lso=0&amp;t=7">open the theater</a>.</li>
-          <li class="n-exists"><span class="tchip tchip-exists">EXISTS &middot; not mapped</span> 596 int8 shards on disk, blocked on the stage ledger — <a href="../future/">read the audit</a>.</li>
-          <li class="n-vision"><span class="tchip tchip-vision">VISION &middot; not built</span> 100M tile + sleep dreaming, drawn not built — <a href="../future/">see /future</a>.</li>
-        </ol>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <p>TRACE research preview &middot; freeze seam12a
-        <code>8d3bbb6bf53e1731811065a9de156a9997be740d598cd1dfa0a3d946928dbf64</code>
-        &middot; run o94-scale10m &middot;
-        <a href="../future/">future (vision, labeled)</a> &middot;
-        <a href="https://github.com/Anshul48/trace">source</a></p>
-    </footer>
+  <footer class="site">
+    TRACE research preview &middot; freeze seam12a &middot; run o94-scale10m &middot; <a href="../future/">future (vision, labeled)</a> &middot; <a href="https://github.com/Anshul48/trace">source</a>
+  </footer>
   </div>
   <script src="../assets/motion.js" defer></script>
-  <script src="demo.js"></script>
-  <script src="../hero.js" defer></script>
 </body>
 </html>

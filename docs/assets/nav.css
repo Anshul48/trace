@@ -1,0 +1,61 @@
+/* R4 shared sticky nav (trace + anima, identical labels).
+   One row, <=5 plain items + one primary CTA. Sticky, wraps clean on 375px,
+   active item via aria-current="page". No JS. REUSE: copy this file + the
+   <nav class="topnav"> block; set aria-current per page; adjust ../ depth. */
+.topnav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--panel);
+  border-bottom: 2px solid var(--accent);
+}
+.topnav .wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.9rem;
+  align-items: center;
+  padding: 0.55rem 16px;
+}
+.topnav .brand {
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  text-decoration: none;
+  margin-right: auto;
+  font-size: 0.95rem;
+}
+.topnav a.nav {
+  color: var(--ink);
+  text-decoration: none;
+  padding: 0.25rem 0.55rem;
+  border-radius: var(--radius-s, 6px);
+  font-size: 0.92rem;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.topnav a.nav:hover { text-decoration: underline; }
+.topnav a.nav[aria-current="page"] {
+  background: var(--paper);
+  border-color: var(--line);
+  font-weight: 700;
+}
+.topnav a.cta {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-s, 6px);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.topnav a.cta:hover { text-decoration: underline; }
+@media (max-width: 560px) {
+  .topnav .wrap { gap: 0.25rem 0.6rem; }
+  .topnav .brand { flex-basis: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .topnav a { transition: none !important; }
+}
