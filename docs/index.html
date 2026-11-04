@@ -34,6 +34,7 @@
         <a href="demos/">Demos</a>
         <a href="verify/">Verify</a>
         <a href="about/">About</a>
+        <a class="gh" href="https://github.com/Anshul48/anima-substrate" title="ANIMA, our companion project">ANIMA</a>
         <a class="gh" href="https://github.com/Anshul48/trace">GitHub</a>
         <button class="theme-btn" type="button" data-theme-toggle>Theme: auto</button>
     </nav>
@@ -47,9 +48,12 @@
       <div class="pill-row"><span class="pill">Research prototype</span><span class="pill">Open source, Apache-2.0</span></div>
       <h1>A memory that organizes itself.</h1>
       <p class="lede"><b>Self-organizing memory prototype.</b> Demonstrated result: routed vector retrieval kept <b>0.9985</b> of exact top-ten results while scoring <b>0.79%</b> of passages (50 test searches, one of four equal library parts). Every answer comes with a record you can check.</p>
+      <p class="plain"><b>In plain words:</b> imagine a library where nobody files the books. TRACE puts the shelves in order by itself, so passages that mean alike end up together. Ask a question and it walks to a few shelves instead of reading every book, then shows the page each answer came from, with a code you can check.</p>
+      <p class="plain"><b>Why this matters now:</b> if you use an AI agent every day, you know it forgets. TRACE is an early form of the memory such an agent needs: one it can search and check instead of starting over. What works today is the recorded replay one click below.</p>
       <div class="btn-row">
-        <a class="btn btn-primary" href="#judges">Try it in 2 minutes</a>
+        <a class="btn btn-primary" href="explorer/">Open the explorer: nothing to install</a>
         <a class="btn btn-quiet" href="#film">Watch the 3-minute film</a>
+        <a class="btn btn-quiet" href="#judges">Judges: try it in 2 minutes</a>
       </div>
 
       <div class="pile" data-pile>
@@ -77,7 +81,7 @@
 
 <section class="section-tight" id="film">
   <div class="wrap">
-    <p class="statusline" aria-label="What you can try today"><span class="sl-item"><b>Recorded replay</b> <span class="badge badge-built" data-status-id="explorer-replay">Working today</span></span> <span class="sl-item"><b>Browser mode</b> <span class="badge badge-proto" data-status-id="browser-mode">Prototype</span></span> <span class="sl-item"><b>Public backend</b> <span class="badge badge-next" data-status-id="public-service">Off</span></span> <span class="sl-item"><b>Run-it-yourself kit</b> <span class="badge badge-next" data-status-id="local-kit">Not built yet</span></span></p>
+    <p class="statusline" aria-label="What you can try today"><span class="sl-item"><b>Recorded replay</b> <span class="badge badge-built" data-status-id="explorer-replay">Working today</span></span> <span class="sl-item"><b>Browser mode</b> <span class="badge badge-proto" data-status-id="browser-mode">Prototype</span></span> <span class="sl-item"><b>Public backend</b> <span class="badge badge-next" data-status-id="public-service">Off</span></span> <span class="sl-item"><b>Local kit</b> <span class="badge badge-next" data-status-id="local-kit">Not built yet</span></span></p>
     <div class="grid-2" style="align-items: stretch">
       <div data-films="main">
         <article class="card film-card" style="grid-template-columns: 1fr">
@@ -91,7 +95,7 @@
           <li><div><b>Watch the film</b> <span class="time">3 min, or skip to step 2</span></div></li>
           <li><div><b>Open a real recorded search.</b> <a href="explorer/#q=how-do-vaccines-train-the-immune-system">How do vaccines train the immune system?</a> <span class="time">30 s</span></div></li>
           <li><div><b>Open the first result's record</b> and press &ldquo;Check the fingerprint in my browser&rdquo;. It should say it matches. <a href="explorer/#q=how-do-vaccines-train-the-immune-system&amp;open=1">Open it already expanded.</a> <span class="time">20 s</span></div></li>
-          <li><div><b>Read what we did not show.</b> <a href="#limits">Five limits, in plain words.</a> <span class="time">1 min</span></div></li>
+          <li><div><b>Read what we did not show.</b> <a href="#limits">Six questions a skeptic asks, answered plainly.</a> <span class="time">1 min</span></div></li>
         </ol>
         <p class="note">Technical? Three commands on <a href="verify/">Verify</a> re-check that the published code is the code we tested (207 of 207 files). Nothing to install for the rest: your browser is enough.</p>
       </aside>
@@ -99,11 +103,36 @@
   </div>
 </section>
 
-<section class="section" id="ladder">
+<section class="section" id="beats">
+  <div class="wrap">
+    <span class="eyebrow">The idea in three beats</span>
+    <h2>Nobody files the books. A question walks to a few shelves. Every answer shows its page.</h2>
+    <div class="grid-3" style="margin-top: var(--space-5)">
+      <article class="card">
+        <div class="card-head"><h3>1. It sorts itself</h3><span class="badge badge-built" data-status-id="groups-hold-matches">Measured by us</span></div>
+        <p>Passages that mean alike end up on the same shelf, and no one adds labels. The order comes from the passages.</p>
+        <div class="stat"><span class="num">about 7</span><span class="what">shelves hold a search's ten best matches</span><span class="scope">At most 10 are possible; groups made at random would give 10. 50 test searches, our library and method. We measured how ordered the finished groups are, not how they formed.</span></div>
+      </article>
+      <article class="card">
+        <div class="card-head"><h3>2. A question wakes a part</h3><span class="badge badge-built" data-status-id="sparse-search">Measured by us</span></div>
+        <p>A question is compared with the shelves first, and only the shelves most likely to hold the answer are searched.</p>
+        <div class="stat"><span class="num">0.79%</span><span class="what">of one of four equal parts is scored per search</span><span class="scope">About 127 times less passage-scoring work (choosing the shelves and building them are separate costs), and 0.9985 of exact search's top ten kept. 50 test searches, our library and method.</span></div>
+      </article>
+      <article class="card">
+        <div class="card-head"><h3>3. Every answer has a record</h3><span class="badge badge-built" data-status-id="record-check">Working today</span></div>
+        <p>Each result shows which article it came from, where in it, and a fingerprint your browser re-computes.</p>
+        <div class="stat"><span class="num">144</span><span class="what">real recorded searches you can open</span><span class="scope">Our own re-run matched on all claims. No outside party has checked it. <a href="explorer/">Open the explorer.</a></span></div>
+      </article>
+    </div>
+    <p class="note" style="margin-top: var(--space-4)">The pictures and the plain-words walkthrough are on <a href="how-it-works/">How it works</a>. Words like &ldquo;inspired by the brain&rdquo; are explained there, one by one.</p>
+  </div>
+</section>
+
+<section class="section band" id="ladder">
   <div class="wrap">
     <span class="eyebrow">Scale</span>
     <h2>How far it has been tested</h2>
-    <p class="lede" style="max-width: 62ch">The measured result is on one sealed library of 99.9 million tokens. Larger builds were earlier tests of ours: they are shown separately below it, each with its own records and caveats.</p>
+    <p class="lede" style="max-width: 62ch">Every number on this page comes from one sealed library of 99.9 million tokens. A token is a word-sized piece of text.</p>
     <div class="tier tier-main" aria-labelledby="tier-main-h">
   <p class="tier-label" id="tier-main-h">Measured result: the sealed library</p>
   <article class="rung rung-main">
@@ -119,124 +148,23 @@
   </article>
 </div>
 
-<div class="tier tier-earlier" aria-labelledby="tier-earlier-h">
-  <p class="tier-label" id="tier-earlier-h">Earlier tests, by us: separate from the result above</p>
-  <p class="tier-note">These are earlier runs with their own records. They were not the sealed library, their numbers are never to be read together with the result above, and the machine they ran on was shut down.</p>
-  <ol class="ladder" id="ladder-list" aria-label="Earlier tests, three steps">
-    <li class="rung">
-      <span class="badge badge-proto" data-status-id="build-310m">Earlier test</span>
-      <span class="size">310.5M<small>tokens, built in 8 pieces</small></span>
-      <p class="did">Exact search matched the ground truth. With one piece switched off it still found 0.87 of the exact results, with no wrong passages.</p>
-      <p class="caveat">Our own records, not outside-verified. The cloud machine was shut down, so it cannot be re-run. A search took p50 4.18 s, pieces searched one at a time.</p>
-      <p class="links"><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-300M.txt">Raw record</a> &middot; <a href="evidence/#earlier">Details</a></p>
-    </li>
-    <li class="rung">
-      <span class="badge badge-proto" data-status-id="build-504m">Earlier test</span>
-      <span class="size">504.5M<small>tokens, sealed in 13 pieces (7.65 GB stored size on disk; memory use was not compared)</small></span>
-      <p class="did">Exact search matched the ground truth. With one piece switched off it still found 0.885 of the exact results, with no wrong passages.</p>
-      <p class="caveat">Our own records, not outside-verified, cannot be re-run, not served at that size. The compressed-search figure (0.994 to 0.998) was measured only on the five newest pieces. A 13-piece search took p50 6.86 s, which is slow.</p>
-      <p class="links"><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-500M.txt">Raw record</a> &middot; <a href="evidence/#earlier">Details</a></p>
-    </li>
-    <li class="rung">
-      <span class="badge badge-proto" data-status-id="routing-1b">Separate test</span>
-      <span class="size">1.53B<small>tokens encoded into 7.13M vectors, in 109 pieces</small></span>
-      <p class="did">A separate October test of group-picking only: opening 6.6% of the vectors kept 0.9947 of the exact top ten.</p>
-      <p class="caveat">A different, larger collection. Not served through TRACE. No merged index, no checkable records at that size, no billion-vector run. We have not run a billion tokens through TRACE.</p>
-      <p class="links"><a href="evidence/#separate">What was and was not done</a></p>
-    </li>
-  </ol>
-</div>
-
-
-    <p class="note">Plain words: a token is a word-sized piece of text. A &ldquo;piece&rdquo; is one sealed part of a library. Earlier tests are our own records and no outside party has verified them.</p>
-  </div>
-</section>
-
-<section class="section band" id="beats">
-  <div class="wrap">
-    <span class="eyebrow">The idea in three beats</span>
-    <h2>Order, then a small wake-up, then proof.</h2>
-    <div class="grid-3" style="margin-top: var(--space-5)">
-      <article class="card">
-        <div class="card-head"><h3>1. It sorts itself</h3><span class="badge badge-built" data-status-id="groups-hold-matches">Measured by us</span></div>
-        <p>Passages that mean alike end up together, and no one adds labels. The order comes from the passages.</p>
-        <div class="stat"><span class="num">about 7</span><span class="what">groups hold a search's ten best matches</span><span class="scope">At most 10 are possible; groups made at random would give 10. 50 test searches, our library and method. We measured how ordered the finished groups are, not how they formed.</span></div>
-      </article>
-      <article class="card">
-        <div class="card-head"><h3>2. A question wakes a part</h3><span class="badge badge-built" data-status-id="sparse-search">Measured by us</span></div>
-        <p>A question is compared with the groups first, and only the groups most likely to hold the answer are searched.</p>
-        <div class="stat"><span class="num">0.79%</span><span class="what">of one of four equal parts is scored per search</span><span class="scope">About 127 times less passage-scoring work (routing and building the groups are separate costs), and 0.9985 of exact search's top ten kept. 50 test searches, our library and method, not reproduced on public data.</span></div>
-      </article>
-      <article class="card">
-        <div class="card-head"><h3>3. Every answer has a record</h3><span class="badge badge-built" data-status-id="record-check">Working today</span></div>
-        <p>Each result shows which article it came from, where in it, and a fingerprint your browser re-computes.</p>
-        <div class="stat"><span class="num">144</span><span class="what">real recorded searches you can open</span><span class="scope">Our own re-run matched on all claims. No outside party has checked it. <a href="explorer/">Open the explorer.</a></span></div>
-      </article>
-    </div>
-    <div class="grid-2" style="margin-top: var(--space-6)">
-      <figure style="margin: 0">
-        <img src="img/explorer.png" width="1280" height="900" loading="lazy" alt="The TRACE explorer: pick a question, read the ranked passages, and open a checkable record for each result." style="border-radius: var(--radius); border: 1px solid var(--line)">
-        <figcaption class="note">The explorer: pick a real recorded question and read the ten passages TRACE returned.</figcaption>
-      </figure>
-      <figure style="margin: 0">
-        <img src="img/explorer-record.png" width="1280" height="900" loading="lazy" alt="A checkable record opened in the explorer, with the fingerprint check showing a match." style="border-radius: var(--radius); border: 1px solid var(--line)">
-        <figcaption class="note">A checkable record: your browser recomputes the fingerprint and it matches.</figcaption>
-      </figure>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="scorecard">
-  <div class="wrap">
-    <span class="eyebrow">Where each thing stands</span>
-    <h2>What we set out to show</h2>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th scope="col">We set out to show</th><th scope="col">Where it stands today</th><th scope="col">Status</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">A memory that organizes itself as it grows</th><td>It is how TRACE's own store is built, and the repository holds the records of an earlier qualification run. On the 99.9M-token library the groups come from one ordinary sorting run, so we measured how ordered the finished result is, not how it formed over time. There is no growth curve yet.</td><td><span class="badge badge-proto" data-status-id="self-organizing-store">Prototype</span><br><br><span class="badge badge-next" data-status-id="growth-curve">Not built yet</span></td></tr>
-          <tr><th scope="row">A question wakes only a small part</th><td>0.79% of one of four equal parts scored, 0.9985 of exact search's top ten kept. 50 test searches; our library and method.</td><td><span class="badge badge-built" data-status-id="sparse-search">Measured by us</span></td></tr>
-          <tr><th scope="row">A checkable record on every answer</th><td>144 real recorded searches; the fingerprint check runs in your browser. Our own re-run matched on all claims.</td><td><span class="badge badge-built" data-status-id="record-check">Working today</span></td></tr>
-          <tr><th scope="row">A cost we can state</th><td>At this size a plain scan answers sooner and our stored size on disk is bigger. Sorting the library into groups takes real time up front. We make no claim that the cost is acceptable at larger sizes.</td><td><span class="badge badge-limit">Limit</span></td></tr>
-          <tr><th scope="row">Anyone can query it, or run it themselves</th><td>The public service is switched off. A download for your own computer is planned.</td><td><span class="badge badge-next" data-status-id="public-service">Off</span><br><br><span class="badge badge-next" data-status-id="local-kit">Not built yet</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<section class="section band" id="skeptic">
-  <div class="wrap-narrow prose">
-        <span class="eyebrow">What a skeptic asks</span>
-    <h2>The hard questions, answered plainly</h2>
-    <h3>Does it find the right source?</h3>
-    <p>Not as often as keyword search. On our 50 test searches, ordinary keyword search put the right source in its top ten for 82% of them; TRACE and exact search by meaning each reached 52%. Our 0.9985 measures how much of <em>exact vector search's</em> answer TRACE kept, not answer quality.</p>
-    <h3>Does a matching fingerprint prove nothing relevant was skipped?</h3>
-    <p>No. A matching fingerprint proves the passage you were shown is the one that was stored, with its article and position. Whether the shortcut skipped something relevant is a different question, and the comparison with exact search measures it: 0.9985 of exact search's top ten kept.</p>
-    <h3>Is 0.79% the whole cost?</h3>
-    <p>No. It counts passage-scoring work only. Choosing the groups, building them and the end-to-end time are separate costs: a TRACE search took 1.2 s against 88 ms for an exact scan, and keyword search took 6 ms.</p>
-    <h3>Is the saving from self-organization, or from ordinary grouping?</h3>
-    <p>We have not separated the two inside TRACE's own engine. The groups come from an ordinary sorting step, and we measured how ordered they are, not how they formed. In a simple stand-in (not TRACE) at the same 0.8% of passages, our groups found nearly all of the true best matches, arrival order alone found 92% and random groups about a third. The order we measured shows up at every size we tested (10,000 to 200,000 passages, a flat band with no trend), and we do not claim it improves with scale.</p>
-    <h3>Does it work on public data?</h3>
-    <p>TRACE has not been run there. A stand-in of ours gave dataset-specific results: FiQA about 95% at 7% scored, SciFact about 95% at 24%, NFCorpus 90% at 28% and 97% at 55%.</p>
-    <h3>Has anyone outside your team checked it?</h3>
-    <p>No. Outside verification is pending. What you can check yourself is on <a href="verify/">Verify</a>.</p>
-
+    <p class="note">We also ran larger builds earlier, on a machine since shut down. They are separate tests with their own caveats and are never read together with the result above: <a href="evidence/#appendix">earlier tests</a>.</p>
   </div>
 </section>
 
 <section class="section" id="limits">
   <div class="wrap">
     <span class="eyebrow">Honest limits</span>
-    <h2>What we did not show</h2>
+    <h2>What a skeptic asks</h2>
     <ol class="limits-list">
-      <li><div><b class="lead">Keyword search finds the source more often.</b><p>On our 50 test searches, ordinary keyword search put the right source passage in its top ten for 82% of them. TRACE did for 52%, and exact search by meaning also got 52%, so the gap is meaning versus keywords, not our shortcut.</p></div></li>
-      <li><div><b class="lead">A plain scan takes less time per search, and our stored size on disk is bigger.</b><p>Per search: keyword 6 ms, exact scan 88 ms, TRACE 1.2 s. Stored size on disk: 2.28 GB for TRACE, 1.25 GB for plain vectors, 0.51 GB for the keyword index. Stored size on disk; memory use was not compared. TRACE's saving is passage-scoring work, not time or space.</p></div></li>
-      <li><div><b class="lead">The headline result is for our own library and method.</b><p>TRACE itself has not been run on public data. A simple stand-in of ours (not TRACE) on three small public sets gave dataset-specific results: FiQA kept about 95% of exact search's top ten at 7% of passages scored, SciFact about 95% at 24%, and NFCorpus 90% at 28% and 97% at 55%. Scoring under 1% (FiQA, one group) kept only 52%.</p></div></li>
-      <li><div><b class="lead">Scale: not as far as it may sound.</b><p>We missed our 100M target by 0.11%. We have not run a billion tokens. The 1.53 billion item is a separate group-picking test. The 504.5M and 310.5M builds are earlier tests by us, on a machine since shut down, shown separately above.</p></div></li>
-      <li><div><b class="lead">The groups come from an ordinary sorting step.</b><p>On our library it ran once. We measured how ordered the finished groups are (a search's best matches share about 7 groups, and arrival order alone gives about 8), not how they formed. The order did not clearly grow with size in our small checks, and we make no claim at millions or billions.</p></div></li>
+      <li><div><b class="lead">Does it find the right source?</b><p>Not as often as ordinary keyword search: on our 50 test searches the right source was in its top ten for 82% of them, against 52% for TRACE (exact search by meaning also got 52%). The 0.9985 measures how much of exact search's answer was kept, not answer quality.</p></div></li>
+      <li><div><b class="lead">Is it faster or smaller?</b><p>No. A TRACE search took 1.2 s, a plain scan 88 ms, keyword search 6 ms. Stored size on disk: 2.28 GB for TRACE, 1.25 GB for plain vectors; memory use was not compared. The saving is passage-scoring work only.</p></div></li>
+      <li><div><b class="lead">Does a matching fingerprint prove nothing relevant was skipped?</b><p>No. It proves the passage shown is the one that was stored. Whether the shortcut skipped something relevant is measured by the comparison with exact search (0.9985 kept).</p></div></li>
+      <li><div><b class="lead">Is it the self-organizing, or just ordinary grouping?</b><p>We have not separated the two inside TRACE's own engine. In a simplified control, random groups of the same sizes found 28.5% of the true matches where ours found 98.1% (0.5% of passages scored), and arrival order alone found 87.3%. <a href="evidence/#control">The control and its caveats.</a></p></div></li>
+      <li><div><b class="lead">Does it work on public data?</b><p>TRACE has not been run there. A stand-in of ours (not TRACE) gave dataset-specific results: FiQA about 95% of exact search's top ten at 7% of passages scored, SciFact about 95% at 24%, NFCorpus 90% at 28% and 97% at 55%.</p></div></li>
+      <li><div><b class="lead">Has anyone outside your team checked it?</b><p>No. Outside verification is pending. There is no live public service and no download of the whole library yet; the explorer is a replay of real recorded searches.</p></div></li>
     </ol>
-    <div class="btn-row"><a class="btn btn-primary" href="evidence/">Every limit, with numbers</a><a class="btn btn-quiet" href="verify/">Check it yourself</a></div>
+    <div class="btn-row"><a class="btn btn-primary" href="evidence/#limits">Every limit, with numbers</a><a class="btn btn-quiet" href="verify/">Check it yourself</a></div>
   </div>
 </section>
 
@@ -247,7 +175,7 @@
     <div class="grid-2">
       <article class="card">
         <div class="card-head"><h3>ANIMA</h3><span class="badge badge-proto" data-status-id="anima-link">Prototype</span></div>
-        <p>A harness that sits around AI coding agents: a hidden checker no agent can see, a ladder of helpers, and a recorded chain of decisions. TRACE is its shared memory, as a prototype link. Validated for one kind of job so far (fixing a bug against hidden tests).</p>
+        <p>A harness that sits around AI coding agents: a hidden checker no agent can see, a ladder of helpers, and a recorded chain of decisions. TRACE is meant to be its shared memory; that link is a prototype. Validated for one kind of job so far (fixing a bug against hidden tests).</p>
         <p><a class="btn btn-quiet" href="https://github.com/Anshul48/anima-substrate">ANIMA on GitHub</a></p>
       </article>
       <article class="card">
@@ -277,6 +205,7 @@
           <li><a href="demos/">Demos</a></li>
           <li><a href="verify/">Verify</a></li>
           <li><a href="about/">About</a> and <a href="built/">how this was built</a></li>
+          <li><a href="vision/">Where this could go</a> (not built, not measured)</li>
         </ul>
       </div>
       <div>

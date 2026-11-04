@@ -1,0 +1,36 @@
+/* SPDX-License-Identifier: Apache-2.0
+ * Styles for the "Where this could go" page only. Uses the shared tokens. */
+.vision-stage { padding: var(--space-8) var(--space-7) var(--space-7); }
+.vision-stage h1 { font-size: var(--step-4); line-height: var(--lh-tight); margin: var(--space-3) 0 var(--space-4); letter-spacing: -0.02em; }
+.vlabel { display: inline-block; font-size: var(--step--1); font-weight: 700; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: #cfc8ff; border: 1px dashed #8e83e6; border-radius: var(--radius-pill); padding: var(--space-1) var(--space-4); }
+@media (max-width: 720px) { .vision-stage { padding: var(--space-7) var(--space-4) var(--space-6); } }
+
+.whatif .prose > p:not(.note) { max-width: 62ch; }
+.whatif h2 { font-size: var(--step-3); line-height: var(--lh-tight); letter-spacing: -0.015em; margin-top: var(--space-2); }
+.whatif .big { font-size: var(--step-1); line-height: 1.55; color: var(--ink); max-width: 56ch; margin-block: var(--space-4); padding-left: var(--space-4); border-left: 3px solid var(--accent); }
+.needs { list-style: none; padding: 0; display: grid; gap: var(--space-3); }
+.needs li { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--st-next); border-radius: var(--radius-s); padding: var(--space-3) var(--space-4); }
+.whatif.band .needs li { background: var(--surface); }
+
+/* two-lane picture */
+.lanes { margin: var(--space-6) 0; display: grid; gap: 0; }
+.lane { border-radius: var(--radius); padding: var(--space-4) var(--space-5); }
+.lane-fast { background: var(--surface); border: 2px solid var(--accent); }
+.lane-slow { background: transparent; border: 2px dashed var(--st-next); }
+.lane-name { margin: 0 0 var(--space-3); font-weight: 700; font-size: var(--step--1); }
+.lane-fast .lane-name { color: var(--accent); }
+.lane-slow .lane-name { color: var(--st-next); }
+.flow { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); counter-reset: f; }
+.flow li { position: relative; background: var(--surface-2); border-radius: var(--radius-s); padding: var(--space-3) var(--space-4); font-size: var(--step--1); line-height: 1.4; }
+.flow li + li::before { content: "\2192"; position: absolute; left: calc(-1 * var(--space-4) + 1px); top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--muted); width: var(--space-4); text-align: center; }
+.lane-link { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-2) var(--space-5); font-size: var(--step--1); color: var(--muted); }
+.lane-link .down::before { content: "\2193  "; }
+.lane-link .up::before { content: "\2191  "; color: var(--st-next); }
+.lane-link .up { color: var(--st-next); font-weight: 600; animation: breathe 3.2s var(--ease) infinite; }
+@keyframes breathe { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .lane-link .up { animation: none; } }
+@media (max-width: 720px) {
+  .flow { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+  .flow li + li::before { content: "\2193"; left: 50%; top: calc(-1 * var(--space-3)); transform: translateX(-50%); width: auto; height: var(--space-3); line-height: var(--space-3); }
+  .lane-link { flex-direction: column; gap: var(--space-1); padding: var(--space-2) var(--space-3); }
+}

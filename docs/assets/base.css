@@ -133,6 +133,8 @@ small, .note { font-size: var(--step--1); color: var(--muted); }
 .stage .note, .stage small { color: var(--stage-muted); }
 .stage .eyebrow { color: var(--stage-accent); }
 .stage .lede { color: var(--stage-muted); }
+.stage .plain { max-width: 60ch; color: var(--stage-ink); font-size: var(--step-0); line-height: 1.65; border-left: 3px solid var(--stage-accent); padding-left: var(--space-4); margin: var(--space-4) 0 var(--space-5); }
+.stage .plain b { color: var(--stage-accent); }
 .hero { padding-block: var(--space-6) var(--space-7); }
 .hero .stage { padding: var(--space-8) var(--space-7) var(--space-6); }
 @media (max-width: 720px) { .hero .stage { padding: var(--space-7) var(--space-4) var(--space-5); border-radius: var(--radius); } }

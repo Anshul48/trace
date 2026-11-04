@@ -2,9 +2,9 @@
 <!-- GENERATED from docs-src/README.src.md by tools/build_site.py. Edit the source, then run: python3 tools/build_site.py -->
 # TRACE: a memory that organizes itself
 
-**Self-organizing memory prototype; demonstrated result: routed vector retrieval kept 0.9985 of exact top-ten results while scoring 0.79% of passages (50 test searches, one of four equal library parts).** TRACE sorts a growing library into groups from the passages themselves, so a question wakes only a small part of it, and every answer carries a record you can check. It is for people who need answers they can verify, and for AI agents that need a memory they can audit. Open source, Apache-2.0.
+**Self-organizing memory prototype; demonstrated result: routed vector retrieval kept 0.9985 of exact top-ten results while scoring 0.79% of passages (50 test searches, one of four equal library parts).** TRACE sorts a growing library into groups from the passages themselves, so a question wakes only a small part of it, and every answer carries a record you can check. If you use an AI agent every day, you know it forgets. TRACE is an early answer: a memory an agent can search and check. Today it is a prototype you can try as a recorded replay, in your browser. Open source, Apache-2.0.
 
-**Recorded replay:** working today. **Browser mode:** prototype. **Public backend:** off. **Run-it-yourself kit:** not built yet.
+**Recorded replay:** working today. **Browser mode:** prototype. **Public backend:** off. **Local kit:** not built yet.
 
 | In 60 seconds | |
 |---|---|

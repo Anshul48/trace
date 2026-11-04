@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en" data-project="trace">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where this could go | TRACE</title>
+<meta name="description" content="Vision and hypotheses: not built, not measured. Four what-ifs for a memory that organizes itself, kept apart from everything TRACE has actually shown.">
+<link rel="canonical" href="https://anshul48.github.io/trace/vision/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Where this could go | TRACE">
+<meta property="og:description" content="Vision and hypotheses: not built, not measured. Four what-ifs for a memory that organizes itself, kept apart from everything TRACE has actually shown.">
+<meta property="og:url" content="https://anshul48.github.io/trace/vision/">
+<meta property="og:image" content="https://anshul48.github.io/trace/img/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a1124">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<script>(function(){try{var t=localStorage.getItem("trace-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")})();</script>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/base.css">
+<link rel="stylesheet" href="../assets/vision.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="../" aria-label="TRACE, home">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#0a1124"/><g fill="#7fa6e8"><circle cx="16" cy="7" r="1.7"/><circle cx="24.3" cy="13" r="1.7"/><circle cx="21.1" cy="22.8" r="1.7"/><circle cx="10.9" cy="22.8" r="1.7"/><circle cx="7.7" cy="13" r="1.7"/></g><circle cx="16" cy="15.5" r="3.4" fill="#2fd6c2"/><g fill="#3a4a78"><circle cx="27" cy="5" r="1"/><circle cx="4.5" cy="26.5" r="1"/><circle cx="27.5" cy="27" r="1"/></g></svg>
+      <span>TRACE</span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+        <a href="../try/">Try it</a>
+        <a href="../how-it-works/">How it works</a>
+        <a href="../evidence/">Evidence &amp; limits</a>
+        <a href="../demos/">Demos</a>
+        <a href="../verify/">Verify</a>
+        <a href="../about/">About</a>
+        <a class="gh" href="https://github.com/Anshul48/anima-substrate" title="ANIMA, our companion project">ANIMA</a>
+        <a class="gh" href="https://github.com/Anshul48/trace">GitHub</a>
+        <button class="theme-btn" type="button" data-theme-toggle>Theme: auto</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero">
+  <div class="wrap">
+    <div class="stage vision-stage">
+      <span class="vlabel">Vision and hypotheses: not built, not measured</span>
+      <h1>Where this could go.</h1>
+      <p class="lede">Four what-ifs for a memory that keeps its own order. They are ideas, written down so that someone can test them or throw them away.</p>
+      <p class="plain"><b>How to read this page:</b> none of it exists yet, and none of it has been measured. No sentence here is evidence for a claim on any other page. What TRACE has really shown, with its limits, is on <a href="../evidence/">Evidence and limits</a>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="wrap-narrow prose">
+    <div class="callout callout-limit">
+      <p class="callout-title"><strong class="callout-title">Before you read on</strong></p>
+      <p>TRACE is a research prototype. This page makes no claim about medical, legal or safety-critical use, and TRACE is not fit for any of them. Each what-if ends with what would have to be true first.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section whatif" id="context">
+  <div class="wrap-narrow prose">
+    <span class="eyebrow">What if 1</span>
+    <h2>The right context arrived at the right moment</h2>
+    <p class="big">An assistant forgets everything that is not in front of it. A good memory would not hand it everything. It would put the few right pieces on the desk just as the work needs them.</p>
+    <p>That is the direction TRACE&rsquo;s way of searching points in: a memory that sorts itself as it grows, so that for any moment it only has to look at a small part of itself.</p>
+    <h3>What would have to be true first</h3>
+    <ul class="needs">
+      <li><b>The order must hold as the memory grows.</b> We checked collections of 10,000 to 233,000 passages and found the order at every size, with no trend either way. We have not checked millions.</li>
+      <li><b>The right pieces must come quickly.</b> Today a TRACE search takes 1.2 seconds on our library, against 88 milliseconds for a plain scan.</li>
+      <li><b>&ldquo;Right&rdquo; must mean useful.</b> On our 50 test searches, ordinary keyword search found the right source more often than TRACE (82% against 52%).</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section band whatif" id="documents">
+  <div class="wrap-narrow prose">
+    <span class="eyebrow">What if 2</span>
+    <h2>The messy documents in your life arranged themselves</h2>
+    <p class="big">Notes, saved web pages, long email threads, PDFs. Nobody files them, and folders never survive real life. What if you gave a memory the documents you choose, and it laid them out with neat connections, by itself, at a size no person could tidy by hand?</p>
+    <p>You would stop looking for a file name. You would ask, and each answer would point back to the page it came from.</p>
+    <h3>What would have to be true first</h3>
+    <ul class="needs">
+      <li><b>It must cope with messy text.</b> Our library is English Wikipedia, which is tidy. TRACE has not been run on public benchmarks, and a simple stand-in of ours did very differently on different public sets.</li>
+      <li><b>New material must join without starting over.</b> That is the design aim. We have no measured curve of a library growing.</li>
+      <li><b>Private stays private.</b> No service exists for this today. Our public backend is switched off, and nothing here is a promise about handling anyone&rsquo;s documents.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section whatif" id="cases">
+  <div class="wrap-narrow prose">
+    <span class="eyebrow">What if 3</span>
+    <h2>A researcher compared one new case with every earlier case</h2>
+    <p class="big">A researcher meets something new: an odd experiment result, a puzzling failure in a machine, a bug nobody has seen. The question is always the same. What have we seen before that looks like this?</p>
+    <p>The memory would bring back the nearest earlier cases, and every one would carry a record of where it came from: which document, where in it, and a fingerprint that shows the text has not changed since it was stored.</p>
+    <h3>What would have to be true first</h3>
+    <ul class="needs">
+      <li><b>&ldquo;Nearest&rdquo; must mean &ldquo;comparable&rdquo;.</b> We only measured that TRACE keeps what exact search by meaning finds. We did not measure whether what it finds is the right comparison.</li>
+      <li><b>A record is not a verdict.</b> A matching fingerprint shows the text is the stored one. It does not show the earlier case is relevant, or that its conclusion was right.</li>
+      <li><b>A person stays responsible.</b> The memory would offer comparisons. The judgement would remain with the researcher.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section band whatif" id="two-speeds">
+  <div class="wrap-narrow prose">
+    <span class="eyebrow">What if 4: for readers who want depth</span>
+    <h2>Fast retrieval, slow deliberation, and knowledge that moves between them</h2>
+    <p>This section uses technical language. It states two hypotheses and how each could fail. The terms &ldquo;system 1&rdquo; and &ldquo;system 2&rdquo; come from psychology, where they name fast, automatic judgement and slow, deliberate reasoning. We use them as a design analogy only, and make no claim about how brains work.</p>
+
+    <figure class="lanes" role="group" aria-labelledby="lanes-cap">
+      <div class="lane lane-fast">
+        <p class="lane-name">Fast (system 1): what TRACE&rsquo;s sparse search does today, in replay</p>
+        <ol class="flow">
+          <li>A question</li>
+          <li>Wakes a small part of the memory</li>
+          <li>Candidate passages, each with its record</li>
+        </ol>
+      </div>
+      <div class="lane-link" aria-hidden="true">
+        <span class="down">candidates go down</span>
+        <span class="up">conclusions written back go up (H2)</span>
+      </div>
+      <div class="lane lane-slow">
+        <p class="lane-name">Slow (system 2): hypothesis, not built</p>
+        <ol class="flow">
+          <li>Reads the candidates and their records</li>
+          <li>Reasons, checks, asks for more</li>
+          <li>A conclusion, with its sources</li>
+        </ol>
+      </div>
+      <figcaption id="lanes-cap" class="note">The solid lane exists as a replay. The dashed lane and the arrow from it back into the memory do not exist.</figcaption>
+    </figure>
+
+    <h3>H1: two speeds beat one</h3>
+    <p>A fast stage that returns candidates by waking a small part of an index, followed by a slow stage that reads the candidates and their records and reasons over them, may answer correctly more often than the fast stage alone, at a cost we can measure.</p>
+    <ul>
+      <li><b>How to test:</b> the same 50 test searches, plus a larger written set, with and without the slow stage. Score whether the source is in the top ten and whether the final answer is correct by a fixed rubric. Report the extra time and cost per question.</li>
+      <li><b>It fails if</b> the gain over the fast stage alone is within noise, or if ordinary keyword search plus the same slow stage does as well, which would make the self-organizing part unnecessary.</li>
+    </ul>
+
+    <h3>H2: knowledge moves from the slow mode to the fast one</h3>
+    <p>When the slow stage keeps reaching the same conclusion from the same sources, writing that conclusion back into the memory as a new entry, with the records of its sources, lets the fast stage find it next time. The slow stage would then be called less often for questions we have already worked out. This is inspired by how a practised skill becomes habit, and is nothing more than that: an analogy.</p>
+    <ul>
+      <li><b>How to test:</b> replay a stream of repeated and related questions. Count slow-stage calls per question as written-back entries pile up, and check that correctness holds.</li>
+      <li><b>It fails if</b> the calls do not fall, or if errors rise because a wrong conclusion, once written back, returns later looking like a confident answer. Every written-back entry would need to carry its source records and be removable.</li>
+    </ul>
+    <p class="note"><b>Status: not built.</b> No slow stage, no write-back and no test of either exists in this repository.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap-narrow prose">
+    <h2>Back to what is real</h2>
+    <p>If any of this interests you, start with what we have measured, and with what we got wrong. If you can show one of these ideas is mistaken, that is a useful result and we would like to hear it.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="../evidence/">Evidence and limits</a>
+      <a class="btn btn-quiet" href="../try/">Try the explorer</a>
+      <a class="btn btn-quiet" href="https://github.com/Anshul48/trace/issues/new/choose">Challenge a claim</a>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h2>TRACE</h2>
+        <p>A memory that organizes itself. Research prototype, open source (Apache-2.0).</p>
+        <p>No trackers, no outside fonts or scripts. Status data last updated 2026-11-04.</p>
+      </div>
+      <div>
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="../try/">Try it</a></li>
+          <li><a href="../how-it-works/">How it works</a></li>
+          <li><a href="../evidence/">Evidence &amp; limits</a></li>
+          <li><a href="../demos/">Demos</a></li>
+          <li><a href="../verify/">Verify</a></li>
+          <li><a href="../about/">About</a> and <a href="../built/">how this was built</a></li>
+          <li><a href="../vision/">Where this could go</a> (not built, not measured)</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Also by this team</h2>
+        <ul>
+          <li><a href="https://github.com/Anshul48/anima-substrate">ANIMA</a>, a harness for coding agents (prototype)</li>
+          <li><a href="../demos/#reflex">Reflex</a>, a short film</li>
+          <li><a href="https://github.com/Anshul48/trace">TRACE on GitHub</a> and <a href="https://github.com/Anshul48/trace/issues">issues</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">Tested so far: a 99.9M-token library (measured, short of our 100M target by 0.11%). Earlier tests, by us and separate from it, with our own records: 310.5M and 504.5M-token builds, and a 1.53 billion-token group-picking test. Nobody outside our team has verified any of this. <a href="../evidence/#appendix">Details and caveats</a>.</p>
+  </div>
+</footer>
+
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

@@ -61,7 +61,7 @@ def badge_html(status, cap_id):
 
 
 STATUSLINE = [("explorer-replay", "Recorded replay"), ("browser-mode", "Browser mode"),
-              ("public-service", "Public backend"), ("local-kit", "Run-it-yourself kit")]
+              ("public-service", "Public backend"), ("local-kit", "Local kit")]
 
 
 def statusline_html(status):
