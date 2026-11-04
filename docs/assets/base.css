@@ -71,6 +71,7 @@ small, .note { font-size: var(--step--1); color: var(--muted); }
 .theme-btn, .menu-btn { font: inherit; font-size: var(--step--1); color: var(--ink); background: transparent; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); min-height: var(--tap); min-width: var(--tap); padding: 0 var(--space-3); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); }
 .theme-btn:hover, .menu-btn:hover { background: var(--surface-2); }
 .menu-btn { display: none; margin-left: auto; }
+.bar > .theme-btn { margin-left: var(--space-2); flex: none; }
 @media (max-width: 960px) {
   .site-header .bar { flex-wrap: wrap; padding-block: var(--space-2); }
   .menu-btn { display: inline-flex; }
