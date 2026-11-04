@@ -1,0 +1,6 @@
+part 0: tightness (mean cosine to own group centre)  real groups 0.7750 (median 0.7803) | k-means log last pass 0.7744 | input-order blocks 0.7093 (median 0.7409) | shuffled labels 0.3767 0.3767 0.3768
+part 1: tightness (mean cosine to own group centre)  real groups 0.7825 (median 0.7866) | k-means log last pass 0.7820 | input-order blocks 0.7305 (median 0.7514) | shuffled labels 0.3858 0.3857 0.3857
+part 2: tightness (mean cosine to own group centre)  real groups 0.7834 (median 0.7872) | k-means log last pass 0.7829 | input-order blocks 0.7301 (median 0.7506) | shuffled labels 0.3818 0.3818 0.3817
+part 3: tightness (mean cosine to own group centre)  real groups 0.7817 (median 0.7858) | k-means log last pass 0.7813 | input-order blocks 0.7248 (median 0.7454) | shuffled labels 0.3874 0.3876 0.3878
+part 0 k-means log, per pass: pass 1: mean_cos 0.6572, passages that changed group 100.00%, pass 2: mean_cos 0.7620, passages that changed group 11.87%, pass 3: mean_cos 0.7702, passages that changed group 3.99%, pass 4: mean_cos 0.7731, passages that changed group 1.84%, pass 5: mean_cos 0.7744, passages that changed group 0.95%
+DONE

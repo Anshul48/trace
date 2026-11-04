@@ -1,0 +1,214 @@
+WEBVTT
+
+1
+00:00:00.500 --> 00:00:02.207
+AI coding agents say done.
+
+2
+00:00:02.207 --> 00:00:03.913
+ANIMA makes them prove it.
+
+3
+00:00:04.163 --> 00:00:06.365
+This is how this week's work moved.
+
+4
+00:00:06.365 --> 00:00:08.441
+Many agents, working in parallel.
+
+5
+00:00:08.441 --> 00:00:11.523
+Some results came back rejected, and were redone.
+
+6
+00:00:13.273 --> 00:00:14.336
+Now picture this.
+
+7
+00:00:14.336 --> 00:00:16.274
+You bring your own coding tool.
+
+8
+00:00:16.274 --> 00:00:18.649
+Claude Code, Codex, whichever you use.
+
+9
+00:00:18.849 --> 00:00:21.517
+You plug it into ANIMA, with a single line.
+
+10
+00:00:21.517 --> 00:00:23.193
+That part is not built yet.
+
+11
+00:00:23.543 --> 00:00:25.802
+What ANIMA adds is a hidden checker,
+
+12
+00:00:25.802 --> 00:00:27.622
+a ladder of stronger helpers,
+
+13
+00:00:27.622 --> 00:00:30.383
+a record where any edit shows, and a memory.
+
+14
+00:00:33.633 --> 00:00:36.214
+Here is the checker, running for real,
+
+15
+00:00:36.214 --> 00:00:37.572
+on a small demo job.
+
+16
+00:00:37.572 --> 00:00:39.202
+The stand-in agent says:
+
+17
+00:00:39.202 --> 00:00:39.541
+done.
+
+18
+00:00:40.441 --> 00:00:41.602
+The checker says:
+
+19
+00:00:41.602 --> 00:00:41.943
+fail.
+
+20
+00:00:43.143 --> 00:00:45.823
+The agent even tries to edit the tests.
+
+21
+00:00:45.823 --> 00:00:46.442
+Rejected.
+
+22
+00:00:47.442 --> 00:00:49.111
+So the job climbs a rung.
+
+23
+00:00:49.111 --> 00:00:52.583
+A small local model, then Claude Sonnet, then Codex.
+
+24
+00:00:53.083 --> 00:00:53.951
+This time:
+
+25
+00:00:53.951 --> 00:00:54.385
+pass.
+
+26
+00:00:57.335 --> 00:00:59.731
+Then we ran nine real bug-fix jobs,
+
+27
+00:00:59.731 --> 00:01:01.579
+from open-source libraries.
+
+28
+00:01:01.979 --> 00:01:03.778
+Seven were right the first time.
+
+29
+00:01:04.678 --> 00:01:06.278
+Two said done, and were wrong.
+
+30
+00:01:06.278 --> 00:01:09.158
+The checker caught both, and Claude Sonnet fixed them.
+
+31
+00:01:12.308 --> 00:01:14.434
+Every decision goes into a record.
+
+32
+00:01:14.434 --> 00:01:16.559
+Each line seals the one before it.
+
+33
+00:01:16.559 --> 00:01:19.498
+Change a single character, and the break shows.
+
+34
+00:01:22.148 --> 00:01:24.283
+Next, SST, a state space tree.
+
+35
+00:01:24.283 --> 00:01:27.558
+A single screen for what every agent is doing,
+
+36
+00:01:27.558 --> 00:01:28.484
+and changing.
+
+37
+00:01:28.984 --> 00:01:31.940
+With voice control, and loadable in Telegram.
+
+38
+00:01:31.940 --> 00:01:34.567
+All of it is design only, not built yet.
+
+39
+00:01:36.817 --> 00:01:38.396
+And TRACE is the memory.
+
+40
+00:01:38.396 --> 00:01:40.172
+Search that shows its work.
+
+41
+00:01:40.172 --> 00:01:42.803
+A prototype link, and a small test only.
+
+42
+00:01:45.353 --> 00:01:46.689
+Here is where it stands.
+
+43
+00:01:46.989 --> 00:01:47.877
+Working today:
+
+44
+00:01:47.877 --> 00:01:50.350
+the checker, the ladder and the record,
+
+45
+00:01:50.350 --> 00:01:51.935
+for a single kind of job.
+
+46
+00:01:51.935 --> 00:01:54.091
+Fixing a bug against hidden tests.
+
+47
+00:01:54.691 --> 00:01:55.408
+Prototype:
+
+48
+00:01:55.408 --> 00:01:56.556
+the memory link.
+
+49
+00:01:57.056 --> 00:01:57.375
+Next:
+
+50
+00:01:57.375 --> 00:02:00.701
+a single-line install, plug in your own tool, voice,
+
+51
+00:02:00.701 --> 00:02:01.532
+and Telegram.
+
+52
+00:02:02.132 --> 00:02:04.282
+To try it, the address is on screen.
+
+53
+00:02:04.282 --> 00:02:05.716
+You need Python and git.
+

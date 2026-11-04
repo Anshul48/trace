@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en" data-project="trace">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evidence and limits | TRACE</title>
+<meta name="description" content="Every TRACE number with its scope, the harder comparisons we ran, what we did not show, the earlier larger tests with their caveats, and the corrections we made along the way.">
+<link rel="canonical" href="https://anshul48.github.io/trace/evidence/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Evidence and limits | TRACE">
+<meta property="og:description" content="Every TRACE number with its scope, the harder comparisons we ran, what we did not show, the earlier larger tests with their caveats, and the corrections we made along the way.">
+<meta property="og:url" content="https://anshul48.github.io/trace/evidence/">
+<meta property="og:image" content="https://anshul48.github.io/trace/img/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a1124">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<script>(function(){try{var t=localStorage.getItem("trace-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")})();</script>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="../" aria-label="TRACE, home">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#0a1124"/><g fill="#7fa6e8"><circle cx="16" cy="7" r="1.7"/><circle cx="24.3" cy="13" r="1.7"/><circle cx="21.1" cy="22.8" r="1.7"/><circle cx="10.9" cy="22.8" r="1.7"/><circle cx="7.7" cy="13" r="1.7"/></g><circle cx="16" cy="15.5" r="3.4" fill="#2fd6c2"/><g fill="#3a4a78"><circle cx="27" cy="5" r="1"/><circle cx="4.5" cy="26.5" r="1"/><circle cx="27.5" cy="27" r="1"/></g></svg>
+      <span>TRACE</span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+        <a href="../try/">Try it</a>
+        <a href="../how-it-works/">How it works</a>
+        <a href="../evidence/" aria-current="page">Evidence &amp; limits</a>
+        <a href="../demos/">Demos</a>
+        <a href="../verify/">Verify</a>
+        <a href="../about/">About</a>
+        <a class="gh" href="https://github.com/Anshul48/trace">GitHub</a>
+        <button class="theme-btn" type="button" data-theme-toggle>Theme: auto</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<section class="section-tight">
+  <div class="wrap-narrow">
+    <span class="eyebrow">Evidence and limits</span>
+    <h1>What we measured, and what we did not.</h1>
+    <p class="lede">Every number on this site is here with its scope. The limits come first-class, with the same weight as the results. If a number is missing, we did not measure it.</p>
+    <nav aria-label="On this page" class="note">
+      <a href="#ladder">Scale</a> &middot; <a href="#measured">The measured result</a> &middot; <a href="#order">Is the library in order?</a> &middot; <a href="#limits">Limits</a> &middot; <a href="#earlier">Earlier larger tests</a> &middot; <a href="#separate">The separate 1.53 billion test</a> &middot; <a href="#cost">Cost to build</a> &middot; <a href="#corrections">Corrections</a> &middot; <a href="#status">Status of everything</a>
+    </nav>
+  </div>
+</section>
+
+<section class="section" id="ladder">
+  <div class="wrap">
+    <h2>Scale: how far it has been tested</h2>
+    <ol class="ladder" id="ladder-list" aria-label="How far TRACE has been tested, four steps">
+  <li class="rung">
+    <span class="badge badge-built" data-status-id="library-100m">Working today, our server</span>
+    <span class="size">99.9M<small>tokens in the sealed library: 812,545 passages</small></span>
+    <p class="did">The full measured pipeline: sorted into groups, searched, every answer with a checkable record, re-run on our own server.</p>
+    <p class="caveat">Short of our 100M target by 0.11% (108,154 tokens). Our own library and method; not reproduced on public data; no outside party has checked it.</p>
+    <p class="links"><a href="../evidence/#measured">The measurement</a> &middot; <a href="../explorer/">Explorer</a></p>
+  </li>
+  <li class="rung">
+    <span class="badge badge-proto" data-status-id="build-310m">Earlier test</span>
+    <span class="size">310.5M<small>tokens, built in 8 pieces</small></span>
+    <p class="did">Exact search matched the ground truth. With one piece switched off it still found 87% of the exact results, with no wrong passages.</p>
+    <p class="caveat">Earlier test, by us. Our own records, not outside-verified. The cloud machine was shut down, so it cannot be re-run. A search took p50 4.18 s, pieces searched one at a time.</p>
+    <p class="links"><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-300M.txt">Raw receipt</a></p>
+  </li>
+  <li class="rung">
+    <span class="badge badge-proto" data-status-id="build-504m">Earlier test</span>
+    <span class="size">504.5M<small>tokens, sealed in 13 pieces (7.65 GB stored)</small></span>
+    <p class="did">Exact search matched the ground truth. With one piece switched off it still found 88.5% of the exact results, with no wrong passages.</p>
+    <p class="caveat">Earlier test, by us. Our own records, not outside-verified. The machine was shut down, so it cannot be re-run. Not served at that size. The compressed-search figure (0.994 to 0.998) was measured only on the five newest pieces. A 13-piece search took p50 6.86 s, not fast.</p>
+    <p class="links"><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-500M.txt">Raw receipt</a></p>
+  </li>
+  <li class="rung">
+    <span class="badge badge-proto" data-status-id="routing-1b">Separate test</span>
+    <span class="size">1.53B<small>tokens encoded into 7.13M vectors, in 109 pieces</small></span>
+    <p class="did">A separate October test of group-picking only: opening 6.6% of the vectors kept 0.9947 of the exact top ten.</p>
+    <p class="caveat">A different, larger collection. Not served through TRACE. No merged index, no checkable records at that size, no billion-vector run. We have not run a billion tokens through TRACE.</p>
+    <p class="links"><a href="../evidence/#separate">What was and was not done</a></p>
+  </li>
+</ol>
+
+    <p class="note">A token is a word-sized piece of text. A &ldquo;piece&rdquo; is one sealed part of a library. The top step is the one with the full measurement; the others are earlier tests of ours and each carries its own caveats below.</p>
+  </div>
+</section>
+
+<section class="section band" id="measured">
+  <div class="wrap-narrow">
+    <span class="eyebrow">The measured result</span>
+    <h2>A question wakes 0.79% of one of four equal parts</h2>
+    <p>The library holds 812,545 passages (99,891,846 tokens), sealed in four equal parts of about 203,000 passages. We ran 50 test searches (40 written questions and 10 taken from the openings of passages) against it and compared TRACE with exact search by meaning, which compares the question with every passage.</p>
+    <div class="grid-3" style="margin: var(--space-5) 0">
+      <div class="card"><div class="stat"><span class="num">0.79%</span><span class="what">of rows scored</span><span class="scope">on one of four equal parts</span></div></div>
+      <div class="card"><div class="stat"><span class="num">~127&times;</span><span class="what">less scoring work</span><span class="scope">than scoring every row</span></div></div>
+      <div class="card"><div class="stat"><span class="num">0.9985</span><span class="what">of exact search's top ten kept</span><span class="scope">1 would mean identical</span></div></div>
+    </div>
+    <p>The library is short of our 100M-token target by 0.11% (108,154 tokens). We waived that gate and say so. On the live copy of the library on our server, the checkable records matched on all the claims we re-ran. No outside party has checked any of this.</p>
+    <p class="note">The measured TRACE search is vector search only, with no keyword part. An older engine in the repository does combine the two, but we have no result for it on this library.</p>
+  </div>
+</section>
+
+<section class="section" id="order">
+  <div class="wrap-narrow prose">
+    <span class="eyebrow">Is the library in order?</span>
+    <h2>The groups hold best matches together, modestly</h2>
+    <p>We asked a plain question: when a search's ten true best matches are found by exact search, how many different groups do they sit in? If the sorting were useless, they would sit in 10 different groups. The library has about 22,995 groups per quarter, around 9 passages each.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">How the passages were put into groups</th><th scope="col">Groups holding a search's ten best matches (of at most 10)</th><th scope="col">Closeness of two passages in the same group (0 to 1)</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Random groups of the same sizes</th><td>10.0</td><td>0.045 (what two random passages score)</td></tr>
+          <tr><th scope="row">Order of arrival (blocks of consecutive passages)</th><td>7.8</td><td>0.450</td></tr>
+          <tr><th scope="row">TRACE's groups</th><td><b>6.5</b></td><td><b>0.547</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">First quarter of the library (the one the 0.79% and 0.9985 were measured on), 50 test searches; the other three quarters gave 7.1, 6.8 and 7.1, and 6.9 across all four. The edges are soft: a passage is about as close (0.47) to a member of the next-nearest group as to its own group-mates (0.55).</p>
+    <p>Plainly: the best matches are held together far more than chance, and somewhat more than the order in which passages happened to arrive. They are not held in one or two groups. TRACE has to look inside many groups to keep 0.9985, and the 0.79% already counts that.</p>
+    <div class="callout callout-limit">
+      <p class="callout-title"><strong class="callout-title">What this does not show</strong></p>
+      <ul>
+        <li>Nothing here shows the memory organising itself as a process. The groups come from one ordinary sorting run (a standard method, k-means, five passes, once per quarter). We measured how ordered the finished result is, not how it formed.</li>
+        <li>We have no before-and-after curve as the library grows. Six separately sorted sets of 203,000 to 233,000 passages showed the same amount of order, but they differ by only 15% in size, so that says nothing about growth. The largest sorted set we can still open has about 285,000 passages. We make no claim about order at millions or billions of passages.</li>
+        <li>We did not show that the order is why sparse search works inside TRACE's own engine. A simplified stand-in (not TRACE) was consistent with it: looking at the same 0.8% of passages, our groups found nearly all the true best matches, arrival order alone found 92%, and random groups found a third. Those numbers are not comparable to the 0.9985 above.</li>
+        <li>The 50 test searches were chosen earlier for other tests. They are not a random sample of possible searches, and the library is ours.</li>
+      </ul>
+    </div>
+    <p class="note">Raw outputs and scripts: <a href="https://github.com/Anshul48/trace/tree/main/receipts/order-measure">receipts/order-measure</a> in the repository.</p>
+  </div>
+</section>
+
+<section class="section band" id="limits">
+  <div class="wrap">
+    <span class="eyebrow">Honest limits</span>
+    <h2>What we did not show</h2>
+    <ol class="limits-list">
+      <li><div><b class="lead">Ordinary keyword search finds the source more often.</b><p>On our 50 test searches, ordinary keyword search put the right source passage in its top ten for 82% of them. TRACE did for 52%, and exact search by meaning also got 52%, so the gap is meaning versus keywords, not our shortcut. On a stricter score that also rewards putting the source first, keyword search got 0.74 and TRACE 0.42. TRACE is for search by meaning that you can check, not a replacement for keyword search.</p></div></li>
+      <li><div><b class="lead">A plain scan takes less time per search, and our stored size on disk is bigger.</b><p>Per search: keyword 6 ms, exact scan 88 ms, TRACE 1.2 s. Stored size on disk: 2.28 GB for TRACE, 1.25 GB for plain vectors, 0.51 GB for the keyword index. TRACE's saving is scoring work. We make no claim about speed or space.</p></div></li>
+      <li><div><b class="lead">We have no like-for-like measure of memory in use.</b><p>The one memory figure we measured is the live service's peak, 1.03 GiB, while answering the 50 real test questions. We did not measure the other methods the same way, so we compare nothing.</p></div></li>
+      <li><div><b class="lead">The headline result is for our own library and method.</b><p>TRACE itself has not been run on public benchmarks. A simple stand-in of ours (not TRACE) that groups passages with ordinary k-means, run on three small public sets of 3,600 to 57,600 passages, needed 7% to 28% of passages scored to keep about 95% of exact search's top ten. Scoring under 1% kept only 52% on the largest. So 0.79% at 0.9985 is not reproduced on public data.</p></div></li>
+      <li><div><b class="lead">Scale: not as far as it may sound.</b><p>We missed our 100M target by 0.11%. The 504.5M and 310.5M builds are earlier tests by us, on a cloud machine since shut down, so nobody can re-run them. The 1.53 billion item is a separate group-picking test. We have not run a billion tokens through TRACE.</p></div></li>
+      <li><div><b class="lead">The groups come from an ordinary sorting step.</b><p>One run per quarter. We measured how ordered the finished groups are (above), not how they formed, and we have no growth curve. The sorting takes real time up front.</p></div></li>
+      <li><div><b class="lead">Nobody outside our team has checked these results.</b><p>The numbers come from our own runs. The checkable records and the code check let you verify the parts that can be verified, and the rest is our word until someone re-runs it.</p></div></li>
+      <li><div><b class="lead">There is no live public service, and no download of the whole library yet.</b><p>A public backend was switched off after it failed its first test with many users. The explorer replays 144 real recorded searches. A download for your own computer is planned, not built.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section" id="charts">
+  <div class="wrap">
+    <span class="eyebrow">The same limits, as bars</span>
+    <h2>Every bar starts at zero</h2>
+    <div class="grid-3">
+      <div class="chart">
+        <h3>Source passage in the top ten</h3>
+        <p class="sub">Share of the 50 test searches. Higher is better.</p>
+        <div class="bars">
+          <div class="bar-row"><span class="lab">Keyword</span><div class="bar-track"><div class="bar-fill fill-keyword" style="width:82%"></div><span class="bar-val">82%</span></div></div>
+          <div class="bar-row"><span class="lab">Exact search</span><div class="bar-track"><div class="bar-fill fill-exact" style="width:52%"></div><span class="bar-val">52%</span></div></div>
+          <div class="bar-row"><span class="lab">TRACE</span><div class="bar-track"><div class="bar-fill fill-trace" style="width:52%"></div><span class="bar-val">52%</span></div></div>
+        </div>
+      </div>
+      <div class="chart">
+        <h3>Time per search</h3>
+        <p class="sub">Typical search, same library. Lower is better.</p>
+        <div class="bars">
+          <div class="bar-row"><span class="lab">Keyword</span><div class="bar-track"><div class="bar-fill fill-keyword low" style="width:0.5%; --w:0.5%"></div><span class="bar-val">6 ms</span></div></div>
+          <div class="bar-row"><span class="lab">Exact search</span><div class="bar-track"><div class="bar-fill fill-exact low" style="width:7.3%; --w:7.3%"></div><span class="bar-val">88 ms</span></div></div>
+          <div class="bar-row"><span class="lab">TRACE</span><div class="bar-track"><div class="bar-fill fill-trace" style="width:100%"></div><span class="bar-val">1.2 s</span></div></div>
+        </div>
+      </div>
+      <div class="chart">
+        <h3>Stored size on disk</h3>
+        <p class="sub">Not memory in use. Lower is smaller.</p>
+        <div class="bars">
+          <div class="bar-row"><span class="lab">Keyword</span><div class="bar-track"><div class="bar-fill fill-keyword" style="width:22.4%"></div><span class="bar-val">0.51 GB</span></div></div>
+          <div class="bar-row"><span class="lab">Exact search</span><div class="bar-track"><div class="bar-fill fill-exact" style="width:54.8%"></div><span class="bar-val">1.25 GB</span></div></div>
+          <div class="bar-row"><span class="lab">TRACE</span><div class="bar-track"><div class="bar-fill fill-trace" style="width:100%"></div><span class="bar-val">2.28 GB</span></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">What TRACE buys is less scoring work, 0.79% of rows. These three bars are what it costs at this size.</p>
+  </div>
+</section>
+
+<section class="section band" id="earlier">
+  <div class="wrap-narrow prose">
+    <span class="eyebrow">Earlier larger tests</span>
+    <h2>The 504.5M and 310.5M builds, with every caveat</h2>
+    <div class="callout callout-earlier">
+      <p class="callout-title"><strong class="callout-title">Read this first</strong></p>
+      <p>These are earlier tests by us, from late October 2026, on a cloud machine that has since been shut down. They cannot be re-run. The records are ours, are not verified by anyone outside, and the underlying machine files are gone. They are not the sealed library, and none of their numbers belongs next to the 0.79% and 0.9985 above.</p>
+    </div>
+    <h3>504,480,146 tokens, sealed in 13 pieces (7.65 GB)</h3>
+    <ul>
+      <li>Exact search matched the ground truth: 1.0, no errors.</li>
+      <li>With one piece switched off, it still found 0.885 of the exact results, with no wrong passages returned. The missing share is the part that lived on the switched-off piece.</li>
+      <li>The compressed-search figure (0.994 to 0.998 of the exact top ten) was measured only on the five newest pieces, never on all 13.</li>
+      <li>A search across 13 pieces took a typical 6.86 s, with pieces searched one at a time. That is slow, and it is not served at that size.</li>
+      <li>Record: <a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-500M.txt">RECEIPT-RUNG-500M.txt</a>. It was written by one of our automated workers, not by a person, and the underlying machine files are gone.</li>
+    </ul>
+    <h3>310,532,353 tokens, built in 8 pieces</h3>
+    <ul>
+      <li>Exact search matched the ground truth. With one piece switched off it found 0.87 of the exact results, with no wrong passages, and a deliberately planted fault was detected, as it had to be.</li>
+      <li>The compressed-search figure was 0.995 to 0.998 on all 8 pieces.</li>
+      <li>A search took a typical 4.18 s, pieces searched one at a time.</li>
+      <li>Record: <a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-300M.txt">RECEIPT-RUNG-300M.txt</a>.</li>
+    </ul>
+    <p class="note">&ldquo;Found 0.885 (or 0.87) of the exact results&rdquo; means: of the true top ten that exact search returns, that share came back, with the missing ones simply absent. It is not a measure of answer quality.</p>
+  </div>
+</section>
+
+<section class="section" id="separate">
+  <div class="wrap-narrow prose">
+    <span class="eyebrow">A separate test</span>
+    <h2>1.53 billion tokens: group-picking only</h2>
+    <p>On 16 October 2026, on rented cloud graphics cards, we encoded 1,531,809,092 tokens of a different, larger collection into 7,134,906 searchable vectors, in 109 pieces. A routed search over those vectors, looking only at the most likely groups, kept 0.9947 of the exact top ten while looking at 6.6% of the vectors (1,024 groups, 64 looked at, 5,000 held-out test queries).</p>
+    <div class="callout callout-limit">
+      <p class="callout-title"><strong class="callout-title">What was not done</strong></p>
+      <ul>
+        <li>The vectors were not merged into one index and were not served through TRACE.</li>
+        <li>There were no checkable records at that size.</li>
+        <li>There was no run with a billion vectors, and we have not run a billion tokens through TRACE.</li>
+        <li>Its numbers must never be read together with the sealed library's: it is a different collection with groups hundreds of times larger.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section band" id="cost">
+  <div class="wrap-narrow prose">
+    <span class="eyebrow">Cost to build</span>
+    <h2>What building cost, at a small size</h2>
+    <p>This is the one build-cost comparison we have, and it is small: a test of 10,003,381 tokens on the same machine and the same collection. One run peaked at 22.0 GiB of memory and took 12,973 s. A later run peaked at 8.3 GiB (about 62% lower) and took 9,495 s.</p>
+    <div class="callout callout-limit">
+      <p class="callout-title"><strong class="callout-title">Read before using</strong></p>
+      <ul>
+        <li>One run each. The later run was not like-for-like: it picked candidates with an approximate method and stored data in columns. Its find rate was 0.7367 against 0.7300, and it used about 6% more disk.</li>
+        <li>This is building the memory, not serving searches. The first run's record is in the repository (<code>receipts/result.json</code>); the second run's record is not published yet.</li>
+        <li>It was measured at 10 million tokens. We did not measure it at the sizes above.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="corrections">
+  <div class="wrap-narrow prose">
+    <span class="eyebrow">Corrections</span>
+    <h2>Numbers we corrected before publishing</h2>
+    <ul>
+      <li><b>Stored size, not memory.</b> An earlier draft called 2.28 GB, 1.25 GB and 0.51 GB &ldquo;serving memory&rdquo;. They are stored size on disk, and this site says so. The only memory figure we measured is the live service's 1.03 GiB peak.</li>
+      <li><b>82% and 52% are shares of searches.</b> An earlier draft presented them as a rank-aware score. They are the share of the 50 test searches that put the source in the top ten, and the stricter score is in the first limit above.</li>
+      <li><b>Public benchmarks.</b> TRACE has not been run on them. The small stand-in run is reported above, including that it did not reach our headline.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section band" id="status">
+  <div class="wrap">
+    <span class="eyebrow">Status of everything</span>
+    <h2>Working today, prototype, or not built yet</h2>
+    <p class="lede" style="max-width: 62ch">This table is generated from <a href="https://github.com/Anshul48/trace/blob/main/docs/status.json"><code>docs/status.json</code></a>, the single file that also decides every badge on this site and in the README. A capability can be marked working today only if its evidence file exists in the repository.</p>
+    <div class="table-wrap"><table>
+<thead><tr><th scope="col">Capability</th><th scope="col">Status</th><th scope="col">Where to look</th></tr></thead>
+<tbody>
+<tr><td>Explorer: replay of 144 real recorded searches, each result with a checkable record</td><td><span class="badge badge-built" data-status-id="explorer-replay">Working today</span></td><td><a href="https://github.com/Anshul48/trace/blob/main/docs/explorer/index.html"><code>docs/explorer/index.html</code></a></td></tr>
+<tr><td>Check a record in your own browser (the fingerprint is recomputed there)</td><td><span class="badge badge-built" data-status-id="record-check">Working today</span></td><td><a href="https://github.com/Anshul48/trace/blob/main/docs/explorer/app.js"><code>docs/explorer/app.js</code></a></td></tr>
+<tr><td>Run the explorer on your own computer with Python 3 (tools/run-trace.sh)</td><td><span class="badge badge-built" data-status-id="explorer-local">Working today</span></td><td><a href="https://github.com/Anshul48/trace/blob/main/tools/run-trace.sh"><code>tools/run-trace.sh</code></a></td></tr>
+<tr><td>A 100M-class sealed library (812,545 passages, 99,891,846 tokens), sorted into groups and searched on our own server</td><td><span class="badge badge-built" data-status-id="library-100m">Working today, our server</span></td><td>The recorded searches are in the explorer. The raw measurement files stay on our build machine, not in this repository. <a href="https://github.com/Anshul48/trace/blob/main/docs/explorer/data/replay.js"><code>docs/explorer/data/replay.js</code></a></td></tr>
+<tr><td>A question scores 0.79% of one of four equal parts and keeps 0.9985 of exact search&#x27;s top ten (50 test searches, our library and method)</td><td><span class="badge badge-built" data-status-id="sparse-search">Measured by us</span></td><td>Our own measurement; not reproduced on public data; no outside party has checked it. <a href="https://github.com/Anshul48/trace/blob/main/docs/explorer/data/replay.js"><code>docs/explorer/data/replay.js</code></a></td></tr>
+<tr><td>The finished groups hold a search&#x27;s best matches together: about 7 groups out of at most 10, against 10 for random groups</td><td><span class="badge badge-built" data-status-id="groups-hold-matches">Measured by us</span></td><td>Measures how ordered the finished groups are. Not a measurement of the library ordering itself over time. <a href="https://github.com/Anshul48/trace/blob/main/receipts/order-measure/out-1-test-searches-pairs-balance.txt"><code>receipts/order-measure/out-1-test-searches-pairs-balance.txt</code></a></td></tr>
+<tr><td>A small reproduction (20,000 tokens) that runs on your own computer</td><td><span class="badge badge-built" data-status-id="small-repro">Working today</span></td><td><a href="https://github.com/Anshul48/trace/blob/main/repro-20k/README.md"><code>repro-20k/README.md</code></a></td></tr>
+<tr><td>Check that the published code is byte-for-byte what was tested (207 files)</td><td><span class="badge badge-built" data-status-id="freeze-verify">Working today</span></td><td><a href="https://github.com/Anshul48/trace/blob/main/tools/verify_freeze.py"><code>tools/verify_freeze.py</code></a></td></tr>
+<tr><td>TRACE&#x27;s own filing-and-repair store, with the records of an earlier qualification run (receipts/)</td><td><span class="badge badge-proto" data-status-id="self-organizing-store">Prototype</span></td><td><a href="https://github.com/Anshul48/trace/blob/main/receipts/result.json"><code>receipts/result.json</code></a></td></tr>
+<tr><td>Earlier build: 310,532,353 tokens in 8 pieces (our records, machine shut down)</td><td><span class="badge badge-proto" data-status-id="build-310m">Earlier test</span></td><td><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-300M.txt"><code>receipts/earlier-runs/RECEIPT-RUNG-300M.txt</code></a></td></tr>
+<tr><td>Earlier build: 504,480,146 tokens in 13 pieces (our records, machine shut down)</td><td><span class="badge badge-proto" data-status-id="build-504m">Earlier test</span></td><td><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-500M.txt"><code>receipts/earlier-runs/RECEIPT-RUNG-500M.txt</code></a></td></tr>
+<tr><td>Separate October test: 1,531,809,092 tokens encoded into 7,134,906 vectors, group-picking only</td><td><span class="badge badge-proto" data-status-id="routing-1b">Separate test</span></td><td></td></tr>
+<tr><td>TRACE as the shared memory for ANIMA coding agents</td><td><span class="badge badge-proto" data-status-id="anima-link">Prototype</span></td><td>A prototype link to the separate ANIMA project; small test only.</td></tr>
+<tr><td>Reflex: a separate prototype that lets an assistant use a real web page</td><td><span class="badge badge-proto" data-status-id="reflex">Prototype</span></td><td>A separate project with its own short film.</td></tr>
+<tr><td>A before-and-after measurement of the library&#x27;s order as it grows</td><td><span class="badge badge-next" data-status-id="growth-curve">Not built yet</span></td><td></td></tr>
+<tr><td>A public live service anyone can query</td><td><span class="badge badge-next" data-status-id="public-service">Not built yet</span></td><td>Switched off. It failed a first test with many people at once; a later fix passed a local retest; the public service is still off.</td></tr>
+<tr><td>A download you run on your own computer for the whole library</td><td><span class="badge badge-next" data-status-id="local-kit">Not built yet</span></td><td>Planned. No download, size or hardware list exists yet.</td></tr>
+<tr><td>TRACE itself run on public benchmarks (BEIR)</td><td><span class="badge badge-next" data-status-id="public-benchmarks">Not built yet</span></td><td></td></tr>
+<tr><td>Results checked by an outside party</td><td><span class="badge badge-next" data-status-id="outside-check">Not built yet</span></td><td></td></tr>
+<tr><td>A billion tokens through TRACE, searchable, with checkable records</td><td><span class="badge badge-next" data-status-id="billion-run">Not built yet</span></td><td></td></tr>
+<tr><td>The 3-minute film on YouTube</td><td><span class="badge badge-next" data-status-id="film-youtube">Not built yet</span></td><td>Set the id in docs/demos/films.json when the video is public.</td></tr>
+</tbody></table></div>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h2>TRACE</h2>
+        <p>A memory that organizes itself. Research prototype, open source (Apache-2.0).</p>
+        <p>No trackers, no outside fonts or scripts. Status data last updated 2026-11-04.</p>
+      </div>
+      <div>
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="../try/">Try it</a></li>
+          <li><a href="../how-it-works/">How it works</a></li>
+          <li><a href="../evidence/">Evidence &amp; limits</a></li>
+          <li><a href="../demos/">Demos</a></li>
+          <li><a href="../verify/">Verify</a></li>
+          <li><a href="../about/">About</a> and <a href="../built/">how this was built</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Also by this team</h2>
+        <ul>
+          <li><a href="https://github.com/Anshul48/anima-substrate">ANIMA</a>, a harness for coding agents (prototype)</li>
+          <li><a href="../demos/#reflex">Reflex</a>, a short film</li>
+          <li><a href="https://github.com/Anshul48/trace">TRACE on GitHub</a> and <a href="https://github.com/Anshul48/trace/issues">issues</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">Tested so far: a 99.9M-token library (measured, short of our 100M target by 0.11%), 310M and 504.5M-token builds (earlier tests, by us, our own records), and a separate 1.53 billion-token group-picking test (not served). <a href="../evidence/#ladder">The ladder, with every caveat</a>.</p>
+  </div>
+</footer>
+
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

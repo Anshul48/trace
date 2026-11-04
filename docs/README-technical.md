@@ -9,7 +9,7 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/Anshul48/trace/blob/main/LICENSE)
 [![Release: seam12a-10m-freeze](https://img.shields.io/badge/Release-seam12a_10m_freeze-brightgreen.svg)](https://github.com/Anshul48/trace/releases/tag/seam12a-10m-freeze)
 
-[![TRACE constellation — amber particles gather into teal schema groups; open the live animated landing](assets/constellation-hero.svg)](https://anshul48.github.io/trace/)
+*(The animated landing image that stood here was removed in the November 2026 site redesign; it is in the git history.)*
 
 **Your agent forgets everything outside its context window. TRACE remembers — 10 million tokens filed into one map you can open in your browser. No reindex, no rebuild. [Replay a probe.](https://anshul48.github.io/trace/play/#p=7&m=10m&v=race&lso=0&t=7)**
 
@@ -185,8 +185,8 @@ Apache-2.0 ([LICENSE](https://github.com/Anshul48/trace/blob/main/LICENSE)). Cor
 - REALM: Retrieval-Augmented Language Model Pre-Training — Guu et al. https://arxiv.org/abs/2002.08909
 - MemGPT: Towards LLMs as Operating Systems — Packer et al. https://arxiv.org/abs/2310.08560
 
-Shared tokens: [docs/assets/design.css](assets/design.css),
-[docs/assets/motion.js](assets/motion.js).
+Shared tokens: [docs/assets/tokens.css](assets/tokens.css),
+[docs/assets/base.css](assets/base.css).
 
 ## Related: ANIMA
 

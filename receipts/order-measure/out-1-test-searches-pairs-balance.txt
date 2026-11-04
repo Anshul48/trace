@@ -1,0 +1,141 @@
+== INPUTS ==
+queries: 50 Counter({'authored': 40, 's8-probe': 10})
+rows per part: [203137, 203136, 203136, 203136]  total 812545
+groups per part (distinct ids): [22995, 22995, 22995, 22995]
+gt_ids == flat_ids (exact engine) on 200 of 200 part-queries
+
+== (a) exact top-10 neighbours across groups, per part ==
+N = distinct groups holding the ten neighbours (max possible 10); H = Shannon entropy in bits of the
+ten neighbours' spread over groups (max log2(10)=3.3219 bits at 10 groups, 0 bits if all in one group);
+MAX = neighbours in the single most-populated group.
+
+-- part 0 (50 test searches) --
+OBSERVED  N groups : mean 6.540  sd 2.296  min 1.000  median 7.000  max 10.000  (n=50)
+OBSERVED  H bits   : mean 2.415  sd 0.756  min -0.000  median 2.646  max 3.322  (n=50)
+OBSERVED  MAX in one group: mean 3.440  sd 1.897  min 1.000  median 3.000  max 10.000  (n=50)
+INPUT-ORDER BLOCKS N: mean 7.820  sd 1.734  min 3.000  median 8.000  max 10.000  (n=50)
+INPUT-ORDER BLOCKS H: mean 2.808  sd 0.466  min 1.361  median 2.922  max 3.322  (n=50)
+INPUT-ORDER BLOCKS MAX: mean 2.520  sd 1.129  min 1.000  median 2.000  max 6.000  (n=50)
+SHUFFLED LABELS (1000 shuffles, same group sizes), mean over the 50 searches per shuffle:
+   N: mean-of-means 9.9964  2.5%..97.5% of shuffle means 9.9800..10.0000   avg per-search sd 0.024
+   H: mean-of-means 3.3212  2.5%..97.5% 3.3179..3.3219
+   MAX: mean-of-means 1.0036  2.5%..97.5% 1.0000..1.0200
+   shuffles with mean N <= observed mean N: 0 of 1000
+
+-- part 1 (50 test searches) --
+OBSERVED  N groups : mean 7.120  sd 1.945  min 2.000  median 8.000  max 10.000  (n=50)
+OBSERVED  H bits   : mean 2.614  sd 0.611  min 0.469  median 2.846  max 3.322  (n=50)
+OBSERVED  MAX in one group: mean 2.980  sd 1.584  min 1.000  median 2.500  max 9.000  (n=50)
+INPUT-ORDER BLOCKS N: mean 8.520  sd 1.568  min 4.000  median 9.000  max 10.000  (n=50)
+INPUT-ORDER BLOCKS H: mean 2.981  sd 0.405  min 1.571  median 3.122  max 3.322  (n=50)
+INPUT-ORDER BLOCKS MAX: mean 2.060  sd 1.132  min 1.000  median 2.000  max 6.000  (n=50)
+SHUFFLED LABELS (1000 shuffles, same group sizes), mean over the 50 searches per shuffle:
+   N: mean-of-means 9.9973  2.5%..97.5% of shuffle means 9.9800..10.0000   avg per-search sd 0.018
+   H: mean-of-means 3.3214  2.5%..97.5% 3.3179..3.3219
+   MAX: mean-of-means 1.0027  2.5%..97.5% 1.0000..1.0200
+   shuffles with mean N <= observed mean N: 0 of 1000
+
+-- part 2 (50 test searches) --
+OBSERVED  N groups : mean 6.840  sd 2.307  min 1.000  median 7.000  max 10.000  (n=50)
+OBSERVED  H bits   : mean 2.505  sd 0.755  min -0.000  median 2.646  max 3.322  (n=50)
+OBSERVED  MAX in one group: mean 3.180  sd 2.057  min 1.000  median 3.000  max 10.000  (n=50)
+INPUT-ORDER BLOCKS N: mean 8.220  sd 1.682  min 3.000  median 9.000  max 10.000  (n=50)
+INPUT-ORDER BLOCKS H: mean 2.924  sd 0.417  min 1.361  median 3.122  max 3.322  (n=50)
+INPUT-ORDER BLOCKS MAX: mean 2.140  sd 0.990  min 1.000  median 2.000  max 5.000  (n=50)
+SHUFFLED LABELS (1000 shuffles, same group sizes), mean over the 50 searches per shuffle:
+   N: mean-of-means 9.9969  2.5%..97.5% of shuffle means 9.9800..10.0000   avg per-search sd 0.020
+   H: mean-of-means 3.3213  2.5%..97.5% 3.3179..3.3219
+   MAX: mean-of-means 1.0031  2.5%..97.5% 1.0000..1.0200
+   shuffles with mean N <= observed mean N: 0 of 1000
+
+-- part 3 (50 test searches) --
+OBSERVED  N groups : mean 7.120  sd 2.096  min 1.000  median 7.000  max 10.000  (n=50)
+OBSERVED  H bits   : mean 2.607  sd 0.642  min -0.000  median 2.684  max 3.322  (n=50)
+OBSERVED  MAX in one group: mean 3.000  sd 1.641  min 1.000  median 3.000  max 10.000  (n=50)
+INPUT-ORDER BLOCKS N: mean 8.260  sd 1.536  min 4.000  median 9.000  max 10.000  (n=50)
+INPUT-ORDER BLOCKS H: mean 2.933  sd 0.375  min 1.846  median 3.122  max 3.322  (n=50)
+INPUT-ORDER BLOCKS MAX: mean 2.160  sd 0.912  min 1.000  median 2.000  max 5.000  (n=50)
+SHUFFLED LABELS (1000 shuffles, same group sizes), mean over the 50 searches per shuffle:
+   N: mean-of-means 9.9970  2.5%..97.5% of shuffle means 9.9800..10.0000   avg per-search sd 0.020
+   H: mean-of-means 3.3213  2.5%..97.5% 3.3179..3.3219
+   MAX: mean-of-means 1.0030  2.5%..97.5% 1.0000..1.0200
+   shuffles with mean N <= observed mean N: 0 of 1000
+
+-- POOLED over 4 parts (200 part-queries) --
+OBSERVED  N groups : mean 6.905  sd 2.163  min 1.000  median 7.000  max 10.000  (n=200)
+OBSERVED  H bits   : mean 2.535  sd 0.694  min -0.000  median 2.646  max 3.322  (n=200)
+OBSERVED  MAX in one group: mean 3.150  sd 1.801  min 1.000  median 3.000  max 10.000  (n=200)
+SHUFFLED  N: mean-of-means 9.9969  2.5%..97.5% 9.9850..10.0000
+SHUFFLED  H: mean-of-means 3.3213  2.5%..97.5% 3.3189..3.3219
+SHUFFLED  MAX: mean-of-means 1.0031  2.5%..97.5% 1.0000..1.0150
+INPUT-ORDER BLOCKS N: mean 8.205  sd 1.639  min 3.000  median 9.000  max 10.000  (n=200)
+INPUT-ORDER BLOCKS H: mean 2.912  sd 0.419  min 1.361  median 3.122  max 3.322  (n=200)
+INPUT-ORDER BLOCKS MAX: mean 2.220  sd 1.052  min 1.000  median 2.000  max 6.000  (n=200)
+
+-- part 0 split by search type --
+authored (n=40): observed N mean 6.775  H mean 2.476  MAX mean 3.350 | input-order blocks N mean 7.950
+s8-probe (n=10): observed N mean 5.600  H mean 2.169  MAX mean 3.800 | input-order blocks N mean 7.300
+
+-- part 0 histogram of N (observed) --
+N=1:1 N=2:1 N=3:6 N=4:3 N=5:4 N=6:5 N=7:9 N=8:10 N=9:9 N=10:2
+-- pooled histogram of N (observed) --
+N=1:3 N=2:3 N=3:11 N=4:12 N=5:27 N=6:18 N=7:32 N=8:37 N=9:42 N=10:15
+
+== (b) within-group vs between-group cosine of stored passage vectors ==
+5000 pairs per kind per part, seed 20261104; cosine computed on explicitly re-normalised vectors.
+
+-- part 0 (groups with >=2 members: 21182 of 22995) --
+same group (k-means)              n=5000: mean 0.5466 (se 0.0020)  sd 0.1422  median 0.5450
+different groups, random pair     n=5000: mean 0.0450 (se 0.0013)  sd 0.0917  median 0.0347
+different groups, NEAREST rival   n=5000: mean 0.4663 (se 0.0020)  sd 0.1429  median 0.4611
+control: same input-order block   n=5000: mean 0.4496 (se 0.0031)  sd 0.2185  median 0.4853
+ratio of means: same-group / random-different = 12.16 ; same-group / nearest-rival = 1.17 ; same-group / input-order-block = 1.22
+
+-- part 1 (groups with >=2 members: 21154 of 22995) --
+same group (k-means)              n=5000: mean 0.5634 (se 0.0020)  sd 0.1381  median 0.5607
+different groups, random pair     n=5000: mean 0.0503 (se 0.0014)  sd 0.0960  median 0.0387
+different groups, NEAREST rival   n=5000: mean 0.4883 (se 0.0020)  sd 0.1394  median 0.4838
+control: same input-order block   n=5000: mean 0.4816 (se 0.0027)  sd 0.1911  median 0.5013
+ratio of means: same-group / random-different = 11.21 ; same-group / nearest-rival = 1.15 ; same-group / input-order-block = 1.17
+
+-- part 2 (groups with >=2 members: 21170 of 22995) --
+same group (k-means)              n=5000: mean 0.5647 (se 0.0020)  sd 0.1382  median 0.5627
+different groups, random pair     n=5000: mean 0.0482 (se 0.0013)  sd 0.0938  median 0.0373
+different groups, NEAREST rival   n=5000: mean 0.4867 (se 0.0020)  sd 0.1403  median 0.4831
+control: same input-order block   n=5000: mean 0.4792 (se 0.0028)  sd 0.1960  median 0.4987
+ratio of means: same-group / random-different = 11.72 ; same-group / nearest-rival = 1.16 ; same-group / input-order-block = 1.18
+
+-- part 3 (groups with >=2 members: 21113 of 22995) --
+same group (k-means)              n=5000: mean 0.5595 (se 0.0020)  sd 0.1421  median 0.5574
+different groups, random pair     n=5000: mean 0.0547 (se 0.0014)  sd 0.0976  median 0.0443
+different groups, NEAREST rival   n=5000: mean 0.4866 (se 0.0020)  sd 0.1444  median 0.4769
+control: same input-order block   n=5000: mean 0.4710 (se 0.0028)  sd 0.1951  median 0.4887
+ratio of means: same-group / random-different = 10.22 ; same-group / nearest-rival = 1.15 ; same-group / input-order-block = 1.19
+
+== (c) balance of group sizes ==
+
+part 0: 203137 rows, 22995 groups (0 empty)
+  size: min 1  p1 1  median 7  mean 8.834  p99 31  max 759
+  share of the part's rows in the largest 10 groups: 0.6395%  largest 1% of groups (229): 4.525%  largest 10% of groups: 26.988%
+  Shannon entropy of rows over groups: 14.0960 bits (maximum if all groups equal: log2(22995) = 14.4890 bits; ratio 0.9729)
+  groups holding 1 row: 1813 (7.88%)
+
+part 1: 203136 rows, 22995 groups (0 empty)
+  size: min 1  p1 1  median 7  mean 8.834  p99 31  max 68
+  share of the part's rows in the largest 10 groups: 0.2781%  largest 1% of groups (229): 4.187%  largest 10% of groups: 26.943%
+  Shannon entropy of rows over groups: 14.1022 bits (maximum if all groups equal: log2(22995) = 14.4890 bits; ratio 0.9733)
+  groups holding 1 row: 1841 (8.01%)
+
+part 2: 203136 rows, 22995 groups (0 empty)
+  size: min 1  p1 1  median 7  mean 8.834  p99 32  max 58
+  share of the part's rows in the largest 10 groups: 0.2550%  largest 1% of groups (229): 4.186%  largest 10% of groups: 26.797%
+  Shannon entropy of rows over groups: 14.1068 bits (maximum if all groups equal: log2(22995) = 14.4890 bits; ratio 0.9736)
+  groups holding 1 row: 1825 (7.94%)
+
+part 3: 203136 rows, 22995 groups (0 empty)
+  size: min 1  p1 1  median 7  mean 8.834  p99 31  max 70
+  share of the part's rows in the largest 10 groups: 0.2762%  largest 1% of groups (229): 4.155%  largest 10% of groups: 26.682%
+  Shannon entropy of rows over groups: 14.1045 bits (maximum if all groups equal: log2(22995) = 14.4890 bits; ratio 0.9735)
+  groups holding 1 row: 1882 (8.18%)
+
+DONE

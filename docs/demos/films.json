@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "note": "The single swap list. To replace a film: copy the new mp4 (720p), poster (jpg) and captions (vtt) into docs/demos/, change the file names below, and push. To publish the 3-minute film: set youtube to the video id (the part after v=). Nothing else needs editing.",
+  "films": [
+    {
+      "id": "film-main",
+      "role": "main",
+      "project": "trace",
+      "title": "The 3-minute film",
+      "length": "3:00",
+      "blurb": "TRACE first: a library that sorts itself, a question that wakes a small part, a real recorded search, the honest limits. Then the two companion projects.",
+      "file": null,
+      "poster": null,
+      "captions": null,
+      "youtube": null,
+      "source": "YouTube, set by the owner",
+      "size": "",
+      "where": "Home page, Demos"
+    },
+    {
+      "id": "trace-v6",
+      "role": "working-version",
+      "project": "trace",
+      "title": "TRACE, scale-led cut",
+      "length": "2:20",
+      "blurb": "The scale ladder (504.5 million tokens, earlier test), the sealed library sorting itself into groups, a real recorded search, the numbers, and where TRACE does worse than plain search.",
+      "file": "trace-v6-720p.mp4",
+      "poster": "trace-v6.jpg",
+      "captions": "trace-v6.vtt",
+      "youtube": null,
+      "source": "READY/video-trace-v5/v6-720p.mp4",
+      "size": "8.5 MB",
+      "where": "Demos"
+    },
+    {
+      "id": "anima",
+      "role": "companion",
+      "project": "anima",
+      "title": "ANIMA, working version",
+      "length": "2:09",
+      "blurb": "ANIMA is a separate project: a harness that sits around coding agents. A prototype, validated for one kind of job (fixing a bug against hidden tests). TRACE is its memory in a prototype link.",
+      "file": "anima-v5-v1-720p.mp4",
+      "poster": "anima-v5-v1.jpg",
+      "captions": "anima-v5-v1.vtt",
+      "youtube": null,
+      "source": "READY/video-anima-v5/v1-720p.mp4",
+      "size": "5.0 MB",
+      "where": "Demos"
+    },
+    {
+      "id": "reflex",
+      "role": "companion",
+      "project": "reflex",
+      "title": "Reflex",
+      "length": "2:06",
+      "blurb": "Reflex is a separate prototype that lets an assistant use a real web page by reading the page's structure first. The owner-approved v3 cut.",
+      "file": "reflex-v3-720p.mp4",
+      "poster": "reflex-v3.jpg",
+      "captions": null,
+      "youtube": null,
+      "source": "READY/reflex/reflex-v3-720p.mp4",
+      "size": "2.5 MB",
+      "where": "Demos"
+    }
+  ]
+}

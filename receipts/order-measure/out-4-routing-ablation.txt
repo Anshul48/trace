@@ -1,0 +1,22 @@
+part 0: 201137 library rows (the 2000 query passages removed), 22995 groups, 2000 held-out passage-queries
+rows budget -> mean rows actually collected | mean share of the exact top-10 collected
+
+real k-means groups (centres recomputed from these labels)
+  budget  1600 rows (0.80% of the part) -> collected 1608 rows on average | 0.9878 of the exact top-10 (sd 0.043)
+  budget  4000 rows (1.99% of the part) -> collected 4007 rows on average | 0.9963 of the exact top-10 (sd 0.022)
+  budget 10000 rows (4.97% of the part) -> collected 10007 rows on average | 0.9989 of the exact top-10 (sd 0.013)
+  budget 20000 rows (9.94% of the part) -> collected 20008 rows on average | 0.9996 of the exact top-10 (sd 0.006)
+
+input-order blocks (centres recomputed from these labels)
+  budget  1600 rows (0.80% of the part) -> collected 1604 rows on average | 0.9245 of the exact top-10 (sd 0.135)
+  budget  4000 rows (1.99% of the part) -> collected 4004 rows on average | 0.9551 of the exact top-10 (sd 0.100)
+  budget 10000 rows (4.97% of the part) -> collected 10004 rows on average | 0.9788 of the exact top-10 (sd 0.058)
+  budget 20000 rows (9.94% of the part) -> collected 20004 rows on average | 0.9891 of the exact top-10 (sd 0.039)
+
+shuffled labels (centres recomputed from these labels)
+  budget  1600 rows (0.80% of the part) -> collected 1611 rows on average | 0.3327 of the exact top-10 (sd 0.182)
+  budget  4000 rows (1.99% of the part) -> collected 4013 rows on average | 0.4569 of the exact top-10 (sd 0.196)
+  budget 10000 rows (4.97% of the part) -> collected 10014 rows on average | 0.6111 of the exact top-10 (sd 0.190)
+  budget 20000 rows (9.94% of the part) -> collected 20013 rows on average | 0.7445 of the exact top-10 (sd 0.170)
+
+DONE

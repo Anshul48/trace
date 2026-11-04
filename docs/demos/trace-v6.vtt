@@ -1,0 +1,142 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:05.963
+An earlier test: 504.5 million word-sized pieces of text,
+
+2
+00:00:05.963 --> 00:00:08.469
+sealed into separate parts.
+
+3
+00:00:10.139 --> 00:00:11.561
+It ran on a cloud machine
+
+4
+00:00:11.561 --> 00:00:13.268
+that has since been shut down.
+
+5
+00:00:13.268 --> 00:00:14.997
+These are our own records.
+
+6
+00:00:16.987 --> 00:00:18.301
+A full exact search over
+
+7
+00:00:18.301 --> 00:00:20.522
+it matched the known-correct answer.
+
+8
+00:00:22.667 --> 00:00:24.524
+Then we switched one part off.
+
+9
+00:00:24.524 --> 00:00:27.990
+It still answered most searches, with no wrong passages.
+
+10
+00:00:27.990 --> 00:00:29.230
+It was not fast.
+
+11
+00:00:33.380 --> 00:00:35.905
+Building an index on the same machine:
+
+12
+00:00:35.905 --> 00:00:38.429
+the memory used while building dropped
+
+13
+00:00:38.429 --> 00:00:40.606
+by 62 percent in a later run.
+
+14
+00:00:41.956 --> 00:00:44.329
+One run each, with different settings,
+
+15
+00:00:44.329 --> 00:00:46.827
+so it is not a like-for-like comparison.
+
+16
+00:00:46.827 --> 00:00:49.326
+This is about building, not serving.
+
+17
+00:00:52.976 --> 00:00:55.742
+Now the sealed library we search through TRACE.
+
+18
+00:00:55.992 --> 00:00:59.720
+Searching a huge library normally means reading all of it.
+
+19
+00:01:02.370 --> 00:01:04.908
+The library sorts itself into groups.
+
+20
+00:01:07.570 --> 00:01:10.380
+A question opens only the likely ones.
+
+21
+00:01:10.630 --> 00:01:12.928
+The rest is not scored for this search.
+
+22
+00:01:17.678 --> 00:01:19.291
+A real recorded search:
+
+23
+00:01:19.291 --> 00:01:22.066
+the same top results as a full scan.
+
+24
+00:01:23.978 --> 00:01:26.276
+Each comes with a record you can check.
+
+25
+00:01:31.578 --> 00:01:35.280
+On our test searches, on one of four equal parts:
+
+26
+00:01:35.280 --> 00:01:37.849
+about 127 times less scoring work,
+
+27
+00:01:37.849 --> 00:01:41.122
+and nearly all of the exact answer kept.
+
+28
+00:01:46.972 --> 00:01:47.990
+The honest part:
+
+29
+00:01:47.990 --> 00:01:51.364
+at this size a plain scan takes less time per search,
+
+30
+00:01:51.364 --> 00:01:53.147
+our index is bigger on disk,
+
+31
+00:01:53.147 --> 00:01:56.389
+and keyword search found the source more often.
+
+32
+00:02:01.339 --> 00:02:04.282
+We have not built TRACE past that earlier test.
+
+33
+00:02:04.282 --> 00:02:05.972
+Our saving is scoring work;
+
+34
+00:02:05.972 --> 00:02:08.414
+where it pays off is not shown yet.
+
+35
+00:02:13.364 --> 00:02:16.430
+Try the explorer. Running it yourself is planned.
+

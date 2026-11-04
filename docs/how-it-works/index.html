@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en" data-project="trace">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How it works | TRACE</title>
+<meta name="description" content="TRACE in plain words: a pile of passages sorts itself into groups, a question wakes only a small part, and every answer carries a record you can check. Brain-inspired words, each explained.">
+<link rel="canonical" href="https://anshul48.github.io/trace/how-it-works/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="How it works | TRACE">
+<meta property="og:description" content="TRACE in plain words: a pile of passages sorts itself into groups, a question wakes only a small part, and every answer carries a record you can check. Brain-inspired words, each explained.">
+<meta property="og:url" content="https://anshul48.github.io/trace/how-it-works/">
+<meta property="og:image" content="https://anshul48.github.io/trace/img/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a1124">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<script>(function(){try{var t=localStorage.getItem("trace-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")})();</script>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="../" aria-label="TRACE, home">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#0a1124"/><g fill="#7fa6e8"><circle cx="16" cy="7" r="1.7"/><circle cx="24.3" cy="13" r="1.7"/><circle cx="21.1" cy="22.8" r="1.7"/><circle cx="10.9" cy="22.8" r="1.7"/><circle cx="7.7" cy="13" r="1.7"/></g><circle cx="16" cy="15.5" r="3.4" fill="#2fd6c2"/><g fill="#3a4a78"><circle cx="27" cy="5" r="1"/><circle cx="4.5" cy="26.5" r="1"/><circle cx="27.5" cy="27" r="1"/></g></svg>
+      <span>TRACE</span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+        <a href="../try/">Try it</a>
+        <a href="../how-it-works/" aria-current="page">How it works</a>
+        <a href="../evidence/">Evidence &amp; limits</a>
+        <a href="../demos/">Demos</a>
+        <a href="../verify/">Verify</a>
+        <a href="../about/">About</a>
+        <a class="gh" href="https://github.com/Anshul48/trace">GitHub</a>
+        <button class="theme-btn" type="button" data-theme-toggle>Theme: auto</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero">
+  <div class="wrap">
+    <div class="stage">
+      <span class="eyebrow">How it works, in plain words</span>
+      <h1 style="font-size: var(--step-3)">A pile becomes groups. A question wakes a few.</h1>
+      <p class="lede">Press the three steps below. Everything on this page is the same idea seen three ways: order, a small wake-up, proof.</p>
+      <div class="pile" data-pile>
+        <div class="pile-canvas-wrap">
+          <img class="static-pile" src="../img/organizing-pile.png" width="1280" height="560" alt="Illustration: 20,000 dots in four equal parts, sorted into groups. In the first part a question has lit 40 dots, with ten ringed as the best matches. All other dots are dim.">
+          <canvas width="1280" height="560" role="img" aria-label="Illustration of 20,000 dots that sort themselves into groups, then a question that lights a small part."></canvas>
+          <div class="pile-hud" aria-hidden="true">
+            <span class="chip" data-hud="count">Passages so far: 0</span>
+            <span class="chip" data-hud="note">20,000 dots stand in for 812,545 passages</span>
+          </div>
+        </div>
+        <div class="pile-tabs" role="group" aria-label="Show a stage of the picture">
+          <button type="button" data-stage="1" aria-pressed="true">1 A pile</button>
+          <button type="button" data-stage="2" aria-pressed="false">2 It sorts itself</button>
+          <button type="button" data-stage="3" aria-pressed="false">3 A question wakes a part</button>
+          <span class="spacer"></span>
+          <button type="button" data-play aria-pressed="true">Pause</button>
+        </div>
+        <p class="pile-caption" aria-live="polite"><b>A library grows.</b> New passages just arrive, in no order. Nobody files them.</p>
+        <p class="pile-fine">An illustration, not data. 20,000 dots stand in for 812,545 passages. Where each dot sits and how many groups there are is drawn; the proportions are real (four equal parts; 0.79% of one part woken, drawn as 40 of 5,000 dots).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="wrap">
+    <span class="eyebrow">Where it has been tested</span>
+    <h2>Four steps of scale</h2>
+    <ol class="ladder" id="ladder-list" aria-label="How far TRACE has been tested, four steps">
+  <li class="rung">
+    <span class="badge badge-built" data-status-id="library-100m">Working today, our server</span>
+    <span class="size">99.9M<small>tokens in the sealed library: 812,545 passages</small></span>
+    <p class="did">The full measured pipeline: sorted into groups, searched, every answer with a checkable record, re-run on our own server.</p>
+    <p class="caveat">Short of our 100M target by 0.11% (108,154 tokens). Our own library and method; not reproduced on public data; no outside party has checked it.</p>
+    <p class="links"><a href="../evidence/#measured">The measurement</a> &middot; <a href="../explorer/">Explorer</a></p>
+  </li>
+  <li class="rung">
+    <span class="badge badge-proto" data-status-id="build-310m">Earlier test</span>
+    <span class="size">310.5M<small>tokens, built in 8 pieces</small></span>
+    <p class="did">Exact search matched the ground truth. With one piece switched off it still found 87% of the exact results, with no wrong passages.</p>
+    <p class="caveat">Earlier test, by us. Our own records, not outside-verified. The cloud machine was shut down, so it cannot be re-run. A search took p50 4.18 s, pieces searched one at a time.</p>
+    <p class="links"><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-300M.txt">Raw receipt</a></p>
+  </li>
+  <li class="rung">
+    <span class="badge badge-proto" data-status-id="build-504m">Earlier test</span>
+    <span class="size">504.5M<small>tokens, sealed in 13 pieces (7.65 GB stored)</small></span>
+    <p class="did">Exact search matched the ground truth. With one piece switched off it still found 88.5% of the exact results, with no wrong passages.</p>
+    <p class="caveat">Earlier test, by us. Our own records, not outside-verified. The machine was shut down, so it cannot be re-run. Not served at that size. The compressed-search figure (0.994 to 0.998) was measured only on the five newest pieces. A 13-piece search took p50 6.86 s, not fast.</p>
+    <p class="links"><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-500M.txt">Raw receipt</a></p>
+  </li>
+  <li class="rung">
+    <span class="badge badge-proto" data-status-id="routing-1b">Separate test</span>
+    <span class="size">1.53B<small>tokens encoded into 7.13M vectors, in 109 pieces</small></span>
+    <p class="did">A separate October test of group-picking only: opening 6.6% of the vectors kept 0.9947 of the exact top ten.</p>
+    <p class="caveat">A different, larger collection. Not served through TRACE. No merged index, no checkable records at that size, no billion-vector run. We have not run a billion tokens through TRACE.</p>
+    <p class="links"><a href="../evidence/#separate">What was and was not done</a></p>
+  </li>
+</ol>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap-narrow prose">
+
+    <h2 id="sorts">1. A pile becomes groups</h2>
+    <p>Imagine a library with no shelves. Every new passage is dropped on the pile. TRACE files each passage with others that mean alike, so passages about vaccines end up near passages about the immune system.</p>
+    <p>No one writes labels or topic lists. Each passage is turned into a list of numbers that captures what it says, and passages with similar numbers are put in the same group. That is what we mean by &ldquo;organizes itself&rdquo;: the order comes from the passages, not from labels people add.</p>
+    <div class="callout callout-note">
+      <p class="callout-title"><strong class="callout-title">What we measured</strong></p>
+      <ul>
+        <li><b>Best matches stay together.</b> In our tests a search's ten true best matches fall into about 7 groups on average, out of at most 10. If the same passages had been put into groups at random, it would be 10. (50 test searches, our library; the first quarter, where the other numbers on this site were measured, gave 6.5.)</li>
+        <li><b>A harder comparison.</b> If you simply keep passages in the order they arrived, the ten best matches share about 8 groups. So the sorting step improves on arrival order, from about 8 to about 7, which is real but modest.</li>
+        <li><b>Same group, more alike.</b> Passages in the same group are much closer to each other (0.55 on a 0 to 1 closeness score) than two random passages (0.045). The edges are soft, though: a passage is almost as close to a member of the next-nearest group (0.47) as to its own group-mates.</li>
+      </ul>
+    </div>
+    <div class="callout callout-limit" style="margin-top: var(--space-4)">
+      <p class="callout-title"><strong class="callout-title">What we did not measure</strong></p>
+      <p>On our 99.9M-token library the groups come from one ordinary sorting run (a standard method, k-means, five passes, once per quarter of the library). We measured how ordered the finished result is, not how it formed over time, and we have no curve of the order growing as the library grows. TRACE's own store, which is built to file passages as they arrive and repair itself, has the records of an earlier qualification run in the repository; that is the evidence for the process, and it is smaller than the main library.</p>
+    </div>
+    <p>One more honest limit: each of the four quarters of our library, sorted on its own, showed about the same amount of order. But the largest sorted set we can still open has about 285,000 passages, so we make no claim about how the order holds at millions or billions.</p>
+    <p class="note">Details and caveats: <a href="../evidence/#order">Evidence and limits</a>. The raw output files are in <a href="https://github.com/Anshul48/trace/tree/main/receipts/order-measure">receipts/order-measure</a>.</p>
+
+    <h2 id="wakes">2. A question wakes only a small part</h2>
+    <p>Searching by meaning normally means comparing your question with every passage. TRACE first picks the groups most likely to hold the answer, then compares your question only with the passages inside them. The rest of the library is never scored for that question.</p>
+    <div class="chart" style="margin-bottom: var(--space-4)">
+      <h3>Passages compared per search, in one of four equal parts</h3>
+      <p class="sub">Bars start at zero. 50 test searches, top ten, our library and method.</p>
+      <div class="bars">
+        <div class="bar-row"><span class="lab">Exact search</span><div class="bar-track"><div class="bar-fill fill-exact" style="width:100%"></div><span class="bar-val">100%</span></div></div>
+        <div class="bar-row"><span class="lab">TRACE</span><div class="bar-track"><div class="bar-fill fill-trace low" style="width:0.79%; --w:0.79%"></div><span class="bar-val">0.79%</span></div></div>
+      </div>
+      <p class="note">About 127 times less scoring work, and TRACE kept 0.9985 of exact search's top ten (1 would mean identical).</p>
+    </div>
+    <p>This is what we call <b>sparse activation</b>: only a small share of the memory is woken per question. What it does not mean: faster. At this size a plain scan answers sooner (see the limits), because TRACE also has to pick the groups, and our measured TRACE search is vector search only, with no keyword part. What it buys is less scoring work, which should matter once a library is too big to scan in the time or memory you have. We have not measured where that crossover is.</p>
+    <p class="note">The 0.79% was measured on one of the library's four equal parts, each about 203,000 passages. The same 50 test searches were not run as a random sample of all possible searches.</p>
+
+    <h2 id="record">3. Every answer carries a record you can check</h2>
+    <p>Each result comes with a checkable record: the article it came from, where in the article (the character span), the licence, and a fingerprint. The fingerprint (SHA-256) is a short code worked out from the exact text, and your browser can recompute it. If one letter changed, the code would not match.</p>
+    <p><b>What a match proves:</b> the text on the page is the text that was sealed in the library. <b>What it does not prove:</b> that the search found the best passage, or that Wikipedia says the same today. The point is that you can check where an answer came from instead of taking it on trust.</p>
+    <p class="btn-row"><a class="btn btn-primary" href="../explorer/#q=how-do-vaccines-train-the-immune-system&amp;open=1">Try the check yourself</a></p>
+
+    <h2 id="words">Words we use, in plain words</h2>
+    <p>Some of our words are borrowed from how brains are thought to work. We say &ldquo;inspired by&rdquo; because that is all we claim: we are not saying TRACE works like a brain.</p>
+    <dl>
+      <dt><b>Self-organization</b> <span class="badge badge-proto" data-status-id="self-organizing-store">Prototype</span></dt>
+      <dd><p>Inspired by how order can arise without a conductor. In TRACE: the groups come from the passages themselves, not from labels people add. Measured: how ordered the finished groups are. Not measured: the order forming over time, or how it changes as the library grows.</p></dd>
+      <dt><b>Sparse activation</b> <span class="badge badge-built" data-status-id="sparse-search">Measured by us</span></dt>
+      <dd><p>Inspired by the idea that only a small part of a memory fires for a given cue. In TRACE: a question scores 0.79% of one of four equal parts. Measured on 50 test searches, on our library and method.</p></dd>
+      <dt><b>Recall</b></dt>
+      <dd><p>In plain words: bringing a stored passage back. We never use it as the name of a score.</p></dd>
+      <dt><b>A word we leave out</b></dt>
+      <dd><p>&ldquo;Consolidation&rdquo;, the settling of memories over time. We have no measured step that it would describe, so we do not use it.</p></dd>
+    </dl>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h2>TRACE</h2>
+        <p>A memory that organizes itself. Research prototype, open source (Apache-2.0).</p>
+        <p>No trackers, no outside fonts or scripts. Status data last updated 2026-11-04.</p>
+      </div>
+      <div>
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="../try/">Try it</a></li>
+          <li><a href="../how-it-works/">How it works</a></li>
+          <li><a href="../evidence/">Evidence &amp; limits</a></li>
+          <li><a href="../demos/">Demos</a></li>
+          <li><a href="../verify/">Verify</a></li>
+          <li><a href="../about/">About</a> and <a href="../built/">how this was built</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Also by this team</h2>
+        <ul>
+          <li><a href="https://github.com/Anshul48/anima-substrate">ANIMA</a>, a harness for coding agents (prototype)</li>
+          <li><a href="../demos/#reflex">Reflex</a>, a short film</li>
+          <li><a href="https://github.com/Anshul48/trace">TRACE on GitHub</a> and <a href="https://github.com/Anshul48/trace/issues">issues</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">Tested so far: a 99.9M-token library (measured, short of our 100M target by 0.11%), 310M and 504.5M-token builds (earlier tests, by us, our own records), and a separate 1.53 billion-token group-picking test (not served). <a href="../evidence/#ladder">The ladder, with every caveat</a>.</p>
+  </div>
+</footer>
+
+<script src="../assets/site.js" defer></script>
+<script src="../assets/organize.js" defer></script>
+</body>
+</html>

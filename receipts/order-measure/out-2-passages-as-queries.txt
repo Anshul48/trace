@@ -1,0 +1,20 @@
+Mem:           32086        2306        2485           4       27760       29779
+== part 0: 2000 random passages used as queries (exact top-10 among the other 203136 rows, float32) ==
+OBSERVED   N groups: mean 5.080  sd 2.183  min 1.000  median 5.000  max 10.000
+OBSERVED   H bits  : mean 1.938  sd 0.792  min -0.000  median 2.046  max 3.322
+OBSERVED   MAX in one group: mean 4.636  sd 2.152  min 1.000  median 4.000  max 10.000
+OBSERVED   share of the ten in the passage's own group: mean 0.386
+INPUT-ORDER BLOCKS N: mean 6.685  H: mean 2.515  MAX: mean 3.080  own-group share: mean 0.207
+SHUFFLED LABELS (200 shuffles; mean over the 2000 queries per shuffle): N 9.9965 (9.9935..9.9990)  H 3.3212 (3.3206..3.3217)  MAX 1.0035  own-group share 0.00008
+observed N histogram: N=1:58 N=2:181 N=3:295 N=4:333 N=5:313 N=6:297 N=7:217 N=8:145 N=9:114 N=10:47
+
+== part 2: 2000 random passages used as queries (exact top-10 among the other 203135 rows, float32) ==
+OBSERVED   N groups: mean 4.850  sd 2.082  min 1.000  median 5.000  max 10.000
+OBSERVED   H bits  : mean 1.863  sd 0.774  min -0.000  median 1.961  max 3.322
+OBSERVED   MAX in one group: mean 4.815  sd 2.145  min 1.000  median 4.000  max 10.000
+OBSERVED   share of the ten in the passage's own group: mean 0.393
+INPUT-ORDER BLOCKS N: mean 6.617  H: mean 2.508  MAX: mean 3.055  own-group share: mean 0.197
+SHUFFLED LABELS (200 shuffles; mean over the 2000 queries per shuffle): N 9.9972 (9.9945..9.9990)  H 3.3214 (3.3208..3.3217)  MAX 1.0028  own-group share 0.00006
+observed N histogram: N=1:58 N=2:186 N=3:350 N=4:352 N=5:352 N=6:251 N=7:203 N=8:142 N=9:71 N=10:35
+
+DONE

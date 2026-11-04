@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en" data-project="trace">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Try it | TRACE</title>
+<meta name="description" content="Five ways to get hands on TRACE, from nothing to install to a short Python run. The explorer replays real recorded searches in your browser.">
+<link rel="canonical" href="https://anshul48.github.io/trace/try/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Try it | TRACE">
+<meta property="og:description" content="Five ways to get hands on TRACE, from nothing to install to a short Python run. The explorer replays real recorded searches in your browser.">
+<meta property="og:url" content="https://anshul48.github.io/trace/try/">
+<meta property="og:image" content="https://anshul48.github.io/trace/img/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a1124">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<script>(function(){try{var t=localStorage.getItem("trace-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")})();</script>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="../" aria-label="TRACE, home">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#0a1124"/><g fill="#7fa6e8"><circle cx="16" cy="7" r="1.7"/><circle cx="24.3" cy="13" r="1.7"/><circle cx="21.1" cy="22.8" r="1.7"/><circle cx="10.9" cy="22.8" r="1.7"/><circle cx="7.7" cy="13" r="1.7"/></g><circle cx="16" cy="15.5" r="3.4" fill="#2fd6c2"/><g fill="#3a4a78"><circle cx="27" cy="5" r="1"/><circle cx="4.5" cy="26.5" r="1"/><circle cx="27.5" cy="27" r="1"/></g></svg>
+      <span>TRACE</span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+        <a href="../try/" aria-current="page">Try it</a>
+        <a href="../how-it-works/">How it works</a>
+        <a href="../evidence/">Evidence &amp; limits</a>
+        <a href="../demos/">Demos</a>
+        <a href="../verify/">Verify</a>
+        <a href="../about/">About</a>
+        <a class="gh" href="https://github.com/Anshul48/trace">GitHub</a>
+        <button class="theme-btn" type="button" data-theme-toggle>Theme: auto</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<section class="section-tight">
+  <div class="wrap-narrow">
+    <span class="eyebrow">Try it</span>
+    <h1 style="font-size: var(--step-3)">Start with your browser. Nothing to install.</h1>
+    <p class="lede" style="max-width: 52ch">Five ways in, ordered by effort. The first two take under a minute. The last one is the one you cannot do yet, and we say so.</p>
+    <p class="note">Tested so far: a 99.9M-token library (measured), 310M and 504.5M-token builds (earlier tests, by us), a 1.53B-token routing test (separate). <a href="../evidence/#ladder">The ladder, with every caveat.</a></p>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="wrap-narrow" style="display: grid; gap: var(--space-5)">
+
+    <article class="card" id="explorer">
+      <div class="card-head"><h2 style="font-size: var(--step-1); margin: 0">1. Open the explorer</h2><span class="badge badge-built" data-status-id="explorer-replay">Working today</span></div>
+      <p><b>30 seconds. Nothing to install. A web browser is enough.</b></p>
+      <p>The explorer replays 144 real searches that TRACE answered on our own server. Pick a question, read the ten passages it returned, and see how they compare with a full exact search.</p>
+      <ol>
+        <li>Open the explorer and pick a question, or type your own. There is no live search, so your words are matched to the closest recorded question, and the page tells you which one it used.</li>
+        <li>Read the ranked passages. Each card says which article it came from.</li>
+        <li>Look at the panel &ldquo;Same answer as exact search?&rdquo;.</li>
+      </ol>
+      <p class="btn-row"><a class="btn btn-primary" href="../explorer/#q=how-do-vaccines-train-the-immune-system">Open the explorer</a></p>
+      <p class="note">This is a replay of recorded searches over a 99.9M-token library, not a live service.</p>
+    </article>
+
+    <article class="card" id="record">
+      <div class="card-head"><h2 style="font-size: var(--step-1); margin: 0">2. Check a record yourself</h2><span class="badge badge-built" data-status-id="record-check">Working today</span></div>
+      <p><b>20 seconds. In the explorer.</b></p>
+      <p>Every result carries a checkable record: the article it came from, where in the article, the licence, and a fingerprint (a short code worked out from the exact text; change one letter and it changes completely). Your browser recomputes the fingerprint from the text on the page.</p>
+      <ol>
+        <li>Open the explorer and open the record of any result (&ldquo;See its checkable record&rdquo;).</li>
+        <li>Press <b>Check the fingerprint in my browser</b>.</li>
+        <li>It should say it matches.</li>
+      </ol>
+      <p class="btn-row"><a class="btn btn-primary" href="../explorer/#q=how-do-vaccines-train-the-immune-system&amp;open=1">Open a record already expanded</a></p>
+      <div class="callout callout-note"><p><b>What a match shows:</b> the text you see is unchanged since the library was sealed. <b>What it does not show:</b> that the search was right, or that Wikipedia says the same today.</p></div>
+    </article>
+
+    <article class="card" id="local">
+      <div class="card-head"><h2 style="font-size: var(--step-1); margin: 0">3. Run the explorer on your own computer</h2><span class="badge badge-built" data-status-id="explorer-local">Working today</span></div>
+      <p><b>2 minutes. Needs Python 3 and git.</b></p>
+<pre><code>git clone https://github.com/Anshul48/trace.git
+cd trace
+./tools/run-trace.sh        # Windows: tools\run-trace.bat</code></pre>
+      <p>It serves this site on your computer (no outside requests) and opens the explorer. It is the same replay as step 1, running locally.</p>
+    </article>
+
+    <article class="card" id="reproduce">
+      <div class="card-head"><h2 style="font-size: var(--step-1); margin: 0">4. Re-check the code and run the small reproduction</h2><span><span class="badge badge-built" data-status-id="freeze-verify">Working today</span> <span class="badge badge-built" data-status-id="small-repro">Working today</span></span></div>
+      <p><b>2 to 10 minutes. Needs Python 3, git, and two small Python packages.</b></p>
+      <p>This confirms that the published code is byte for byte the code we tested (207 files), and runs the small reproduction at 20,000 tokens on your machine. It reproduces the method on a small slice. It does not reproduce the 99.9M-token result: that needs our corpus and billed cloud hardware.</p>
+      <p class="btn-row"><a class="btn btn-primary" href="../verify/">The exact commands, and what you should see</a></p>
+    </article>
+
+    <article class="card" id="whole">
+      <div class="card-head"><h2 style="font-size: var(--step-1); margin: 0">5. Search the whole library yourself</h2><span><span class="badge badge-next" data-status-id="public-service">Not built yet</span> <span class="badge badge-next" data-status-id="local-kit">Not built yet</span></span></div>
+      <p><b>Not possible yet.</b></p>
+      <ul>
+        <li><b>A public live service</b> is switched off. It failed a first test with many people using it at once. A later fix passed a local retest, but we are keeping the public service off.</li>
+        <li><b>A download you run on your own computer</b> is planned. It does not exist yet, so there is no size or hardware list to give.</li>
+      </ul>
+      <p>What exists instead is the explorer replay (step 1) and our own server, which you cannot query.</p>
+    </article>
+
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h2>TRACE</h2>
+        <p>A memory that organizes itself. Research prototype, open source (Apache-2.0).</p>
+        <p>No trackers, no outside fonts or scripts. Status data last updated 2026-11-04.</p>
+      </div>
+      <div>
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="../try/">Try it</a></li>
+          <li><a href="../how-it-works/">How it works</a></li>
+          <li><a href="../evidence/">Evidence &amp; limits</a></li>
+          <li><a href="../demos/">Demos</a></li>
+          <li><a href="../verify/">Verify</a></li>
+          <li><a href="../about/">About</a> and <a href="../built/">how this was built</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Also by this team</h2>
+        <ul>
+          <li><a href="https://github.com/Anshul48/anima-substrate">ANIMA</a>, a harness for coding agents (prototype)</li>
+          <li><a href="../demos/#reflex">Reflex</a>, a short film</li>
+          <li><a href="https://github.com/Anshul48/trace">TRACE on GitHub</a> and <a href="https://github.com/Anshul48/trace/issues">issues</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">Tested so far: a 99.9M-token library (measured, short of our 100M target by 0.11%), 310M and 504.5M-token builds (earlier tests, by us, our own records), and a separate 1.53 billion-token group-picking test (not served). <a href="../evidence/#ladder">The ladder, with every caveat</a>.</p>
+  </div>
+</footer>
+
+<script src="../assets/site.js" defer></script>
+</body>
+</html>
