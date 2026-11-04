@@ -1,0 +1,47 @@
+<!--page {"title": "How this was built", "desc": "A plain account of how TRACE was made: a human direction, an AI architect, and a crew of automated workers, with the counts and what we do not claim.", "nav": "about"} -->
+<section class="section-tight">
+  <div class="wrap-narrow">
+    <span class="eyebrow">How this was built</span>
+    <h1>One owner, one architect, many workers.</h1>
+    <p class="lede">TRACE was made by a small team that works with AI tools, and we say plainly how. This page gives the counts. It does not claim who wrote what share of the code.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap-narrow prose">
+    <h2>Three layers</h2>
+    <ol>
+      <li><b>The owner</b> set the direction, decided what to claim, and approved or rejected results.</li>
+      <li><b>The architect</b> is Claude, from Anthropic. It planned the work, wrote briefs, checked results and kept the records straight.</li>
+      <li><b>The workers</b> are automated agents that took a written brief and produced a result file. Most worker jobs ran on Meta's Muse Code tool.</li>
+    </ol>
+
+    <h2 id="muse">Muse Code as our main worker tool</h2>
+    <p>Muse Code (version 1.4.14) was our main automated worker tool. From 1 to 4 November 2026 we recorded <b>670 worker jobs on two machines</b> (a laptop and a cloud machine): 619 finished, 22 failed and 21 were cancelled, and 8 were still running when we counted. The summed time of all attempts is about 170 hours; jobs ran in parallel, so that is not elapsed time.</p>
+    <p>All but two of the job records name the model <code>muse-spark-1.3</code>, at maximum reasoning effort; two used <code>muse-wonder-1.0</code>. About nine in ten worker attempts ran on Muse subscription accounts, and about one in ten on a Meta API key.</p>
+    <p>The jobs covered TRACE, ANIMA and Reflex work, film production, documentation, tests and infrastructure. One example with a written record: a worker job encoded the 812,545-passage library on a laptop graphics card in 1,002.6 seconds. The build report for the frozen engine fork in this repository (<code>freeze-src/BUILD-REPORT.md</code>) names Muse as its builder. None of the repository's commit messages mention Muse, so the git history alone does not show it.</p>
+
+    <h2 id="how">How a worker job went</h2>
+    <ol class="steps" style="margin-bottom: var(--space-5)">
+      <li><div><b>A written brief</b> with the goal, the files it may touch and what it must not do.</div></li>
+      <li><div><b>A worker runs it</b> on its own, without a person watching.</div></li>
+      <li><div><b>A result file</b> comes back with what it did and what is unverified.</div></li>
+      <li><div><b>The architect and the owner review it</b> before anything is claimed. Several of our public numbers were corrected at this step (see <a href="../evidence/#corrections">Corrections</a>).</div></li>
+    </ol>
+
+    <h2 id="meta">Meta products: what was used, what was not</h2>
+    <ul>
+      <li>TRACE's search itself uses <b>no Meta model</b>. Its text encoder is all-MiniLM-L6-v2, which is not from Meta. PyTorch, an open-source library created at Meta, ran the encoding of the library.</li>
+      <li>We also called SAM 3.1, Muse Spark vision, Muse voice and Muse Image in small, recorded, exploratory experiments on synthetic screenshots, for the Reflex project.</li>
+      <li>We found no Llama or other Meta open-weights model in our code, and we do not say what family the Muse models belong to.</li>
+    </ul>
+    <p><a class="btn btn-primary" href="https://github.com/Anshul48/trace/blob/main/docs/META-USE.md">The full table: used, not used, unconfirmed</a></p>
+
+    <h2 id="not">What we do not claim</h2>
+    <ul>
+      <li>That Muse wrote TRACE, or any share of it.</li>
+      <li>That any tool is cheaper, faster or better than another: we ran no like-for-like comparison.</li>
+      <li>That TRACE is powered by a Meta model. It is not.</li>
+    </ul>
+  </div>
+</section>

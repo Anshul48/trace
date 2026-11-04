@@ -1,14 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="TRACE favicon">
-<rect width="64" height="64" rx="12" fill="#0f172a"/>
-<g stroke="#38bdf8" stroke-width="3" fill="none" stroke-linecap="round">
-<path d="M32 10 v12"/>
-<circle cx="32" cy="30" r="4" fill="#38bdf8" stroke="none"/>
-<path d="M32 34 v6"/>
-<path d="M32 40 L18 50"/>
-<path d="M32 40 L32 52"/>
-<path d="M32 40 L46 50"/>
-</g>
-<circle cx="18" cy="52" r="3.5" fill="#34d399"/>
-<circle cx="32" cy="54" r="3.5" fill="#fbbf24"/>
-<circle cx="46" cy="52" r="3.5" fill="#ec4899"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><title>TRACE</title><rect width="32" height="32" rx="8" fill="#0a1124"/><g fill="#7fa6e8"><circle cx="16" cy="7" r="1.7"/><circle cx="24.3" cy="13" r="1.7"/><circle cx="21.1" cy="22.8" r="1.7"/><circle cx="10.9" cy="22.8" r="1.7"/><circle cx="7.7" cy="13" r="1.7"/></g><circle cx="16" cy="15.5" r="3.4" fill="#2fd6c2"/><g fill="#3a4a78"><circle cx="27" cy="5" r="1"/><circle cx="4.5" cy="26.5" r="1"/><circle cx="27.5" cy="27" r="1"/></g></svg>

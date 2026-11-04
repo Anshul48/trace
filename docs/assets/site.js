@@ -96,7 +96,8 @@
     var copy = f.captions && !compact ? '<details class="copy" data-vtt="' + esc(root + "demos/" + f.captions) + '"><summary>Read the words of the film</summary><p class="note">Loading the written copy.</p></details>' : "";
     var action = "";
     if (!f.file && !f.youtube) action = '<p><a class="btn btn-primary" href="' + root + 'demos/">Watch the working versions</a></p>';
-    return '<article class="card film-card" id="' + esc(f.id) + '">' + frame(f) + '<div><h3>' + esc(f.title) + '</h3><div class="film-meta">' + meta + '</div><p>' + esc(f.blurb || "") + "</p>" + yt + action + copy + "</div></article>";
+    var h = compact ? "h2" : "h3";
+    return '<article class="card film-card" id="' + esc(f.id) + '">' + frame(f) + '<div><' + h + '>' + esc(f.title) + '</' + h + '><div class="film-meta">' + meta + '</div><p>' + esc(f.blurb || "") + "</p>" + yt + action + copy + "</div></article>";
   }
   var slots = $$("[data-films]");
   if (slots.length && window.fetch) {

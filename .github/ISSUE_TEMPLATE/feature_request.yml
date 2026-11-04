@@ -1,0 +1,19 @@
+name: Idea or request
+description: Suggest something. Please say what problem it would solve.
+title: "[idea] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+  - type: markdown
+    attributes:
+      value: |
+        Note: a run-it-yourself download of the whole library and a public live service are planned and not built yet. See the status table in the README.

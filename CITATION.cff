@@ -1,15 +1,26 @@
 cff-version: 1.2.0
-title: TRACE stack-fork 10M candidate
-version: 0.1.0
-date-released: 2026-10-14
+message: "If you use TRACE, please cite it as below. TRACE is a research prototype; none of its results have been checked by an outside party."
+title: "TRACE: a memory that organizes itself (research prototype)"
+type: software
+version: 0.2.0
+date-released: 2026-11-04
 license: Apache-2.0
-repository-code: https://github.com/Anshul48/trace
-abstract: Frozen stack-fork candidate (SOURCEFREEZE 38c66bef, 207 files) with
-  the first receipt-backed 10M self-organization qualification and staged VM
-  receipts.
+repository-code: "https://github.com/Anshul48/trace"
+url: "https://anshul48.github.io/trace/"
+authors:
+  - name: "The TRACE team (GitHub: Anshul48)"
+abstract: >-
+  TRACE sorts a growing library into groups from the passages themselves, so a
+  question wakes only a small part of it, and every answer carries a record
+  that can be checked. On a sealed library of 812,545 passages (99.9 million
+  tokens, short of the 100M target by 0.11%), a question scored 0.79% of the
+  rows on one of four equal parts and kept 0.9985 of exact search's top ten,
+  over 50 test searches, with the team's own library and method. The tested
+  engine is frozen (207 files, verifiable with tools/verify_freeze.py).
 keywords:
-  - trace
-  - self-organization
-  - hierarchical-index
-  - similarity-search
-  - benchmarking
+  - memory for AI systems
+  - semantic search
+  - sparse activation
+  - provenance
+  - reproducibility
+  - research prototype

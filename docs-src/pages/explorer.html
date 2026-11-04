@@ -1,0 +1,100 @@
+<!--page {"title": "Explorer", "desc": "Ask a question, see ranked passages, open each result's checkable record, and compare TRACE with exact search. A replay of real queries recorded on a sealed library of 812,545 Wikipedia passages. No live backend.", "nav": "try", "css": ["style.css"], "scripts": ["data/replay.js", "app.js"]} -->
+<div class="xp">
+<section class="xhero wrap">
+  <h1>The explorer: real searches, each with a checkable record</h1>
+  <p class="lede">A question wakes only a small part of the library: TRACE found nearly the same passages as exact, meaning-based search while scoring 0.79% of the rows on one of four equal parts. Every result comes with a <strong>checkable record</strong> of where it came from.</p>
+  <p class="replay-banner" role="note"><strong>This page is a replay.</strong> Every question below was really asked on a sealed library of 812,545 passages on our server, and the answers were recorded. No search is running live behind this page.</p>
+  <ol class="xsteps" aria-label="What to do">
+    <li><b>1</b> Pick or type a question</li>
+    <li><b>2</b> Read the ranked passages</li>
+    <li><b>3</b> Open a checkable record</li>
+    <li><b>4</b> Compare with exact search</li>
+  </ol>
+</section>
+
+<section id="ask" class="wrap panel">
+  <h2><span class="n">1</span> Pick or type a question</h2>
+  <form id="askform" autocomplete="off" role="search">
+    <label for="q" class="sr">Your question</label>
+    <input id="q" name="q" type="search" placeholder="Try: Why is the sky blue?" enterkeyhint="search" spellcheck="false">
+    <button type="submit" class="primary">Show the answer</button>
+  </form>
+  <p class="hint">There is no live search, so your words are matched to the closest question we recorded. The page always says which one it used.</p>
+  <div id="matchnote" class="matchnote" role="status" aria-live="polite" hidden></div>
+
+  <div class="tabs" role="group" aria-label="Question topics" id="cattabs"></div>
+  <ul class="chips" id="chips" aria-label="Recorded questions"></ul>
+</section>
+
+<section id="results" class="wrap" aria-live="polite">
+  <div class="resultshead">
+    <h2><span class="n">2</span> Ranked passages for <span id="qtitle" class="qtitle"></span></h2>
+    <p class="sub">Best match first. These ten passages were returned by TRACE on the sealed library. Open any result to see its checkable record.</p>
+    <p id="weaknote" class="matchnote" hidden></p>
+    <p class="jump"><a href="#compare" id="jumpcmp">Jump to step 4: same answer as exact search?</a></p>
+  </div>
+  <div class="grid">
+    <ol id="list" class="cards"></ol>
+    <aside id="compare" class="compare" aria-label="Same answer as exact search?"></aside>
+  </div>
+</section>
+
+<section id="limits" class="wrap panel">
+  <h2>What this shows, and what it does not</h2>
+  <div class="two">
+    <div class="box good">
+      <h3>What this shows</h3>
+      <ul>
+        <li><span class="lead">Real searches, recorded.</span> Each question was asked on a sealed library of <b>812,545 passages</b> of English Wikipedia, and the answers are shown as they came back.</li>
+        <li><span class="lead">A checkable record for every result.</span> Which article it came from, where in the article, and a fingerprint your browser can re-check.</li>
+        <li><span class="lead">A second opinion.</span> The same question asked with exact search, so you can see how close the two lists are.</li>
+        <li><span class="lead">A measured result.</span> On our 50 test searches, TRACE kept <b>0.9985</b> of exact search&rsquo;s results while scoring <b>0.79%</b> of the rows (about <b>127 times</b> less scoring work). The checkable records matched on all claims we re-ran on the live service. No outside party has verified this yet.
+          <details class="more"><summary>How the 50 test searches were made</summary><p>40 written questions plus 10 taken from passage openings. The 0.79% counts rows scored per search, measured on one of the library&rsquo;s four equal parts, for the top 10 results.</p></details></li>
+      </ul>
+    </div>
+    <div class="box warn">
+      <h3>What it does not show</h3>
+      <ul>
+        <li><span class="lead">It is not live.</span> This is a replay of real queries recorded on the sealed corpus. The public live service is switched off.
+          <details class="more"><summary>Why it is off</summary><p>It failed a first test with many people at once. A later fix passed a local retest, but we are still keeping the public service off.</p></details></li>
+        <li><span class="lead">Keyword search did better on this test.</span> On the 50 test searches, ordinary keyword search put the right source passage in its top ten for <b>82%</b> of them. TRACE did for <b>52%</b>. TRACE is for meaning-based search you can verify, not a replacement for keyword search.
+          <details class="more"><summary>More detail</summary><p>Exact meaning-based search also got 52%, so the gap is meaning-based search versus keywords, not TRACE&rsquo;s shortcut. On a stricter score that also rewards putting the right passage higher up, keyword search got 0.74 and TRACE 0.42. Keyword search also answered faster: 6 milliseconds, against 1.2 seconds for TRACE (88 milliseconds for exact meaning-based search).</p></details></li>
+        <li><span class="lead">No speed or memory claim.</span> Stored size on disk: 2.28 GB for TRACE, against 1.25 GB for a plain vector copy and 0.51 GB for the keyword index. While answering questions, the live service peaked near 1 GB of memory (1.03 GiB).</li>
+        <li><span class="lead">Not a random sample.</span> We wrote 144 everyday questions before asking, and kept every answer. The tab <b>Weaker matches</b> holds the 29 where the top results read less well.</li>
+        <li><span class="lead">TRACE was not run on public benchmarks.</span> We did not test TRACE on the public search benchmarks researchers use (called BEIR), so this page says nothing about how it compares there.</li>
+        <li><span class="lead">The library is slightly short of its goal.</span> It holds about 99.9 million tokens (99,891,846; a token is roughly a word piece). The planned 100-million-token gate was waived: it falls short by 108,154 tokens, which is short of the 100M target by 0.11%.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="status-h">What works today</h3>
+  <table class="status">
+    <thead><tr><th scope="col">Part</th><th scope="col">Status</th></tr></thead>
+    <tbody>
+      <tr><td>This replay explorer, with real recorded questions</td><td>{{badge:explorer-replay}}</td></tr>
+      <tr><td>The 99.9M-token library, sorted into groups and searched, with checkable records, on our own server</td><td>{{badge:library-100m}}</td></tr>
+      <tr><td>A public live search anyone can query</td><td>{{badge:public-service}}</td></tr>
+      <tr><td>A download of about 2.3 GB to run the whole library on your own computer</td><td>{{badge:local-kit}}</td></tr>
+      <tr><td>Checking by an outside party</td><td>{{badge:outside-check}}</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="library" class="wrap panel">
+  <h2>About the library and this replay</h2>
+  <div class="two">
+    <div>
+      <h3>The library</h3>
+      <p>812,545 passages of English Wikipedia text, cut from articles into pieces of a few sentences. It holds about 99.9 million tokens. The planned 100-million-token gate was waived: it falls short by 108,154 tokens (0.11%).</p>
+      <p>The library is split into four equal parts, and inside each part similar passages are grouped together. To answer a question, TRACE picks the groups most likely to hold the answer and scores only the passages inside them. Exact search scores every passage.</p>
+    </div>
+    <div>
+      <h3>The recordings</h3>
+      <p id="recmeta">Loading the recording details.</p>
+      <p>The server returns the ranked passages, their closeness scores and the first part of each passage&rsquo;s text. For the record view we read the full passage and its record fields (article ID, character span, licence, fingerprint) straight from the sealed library&rsquo;s own files, read-only. Article titles come from the first line of each article in the library. The only thing we change is a tidy-up of wiki markup in the text on cards; the record view can show each passage exactly as stored.</p>
+      <p>Passages are excerpts of Wikipedia, licensed CC BY-SA 4.0. The code is Apache-2.0: <a href="https://github.com/Anshul48/trace">github.com/Anshul48/trace</a>.</p>
+    </div>
+  </div>
+</section>
+</div>
+<noscript><p class="wrap">This page needs JavaScript to show the recorded questions.</p></noscript>

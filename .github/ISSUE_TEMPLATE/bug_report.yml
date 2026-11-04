@@ -1,0 +1,28 @@
+name: Bug report
+description: Something is broken in the explorer, the website, a tool or the documents. (freeze-src/ is frozen; fixes land outside it.)
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: input
+    id: path
+    attributes:
+      label: Affected page or file
+      description: The page address or the path. Note that bytes under freeze-src/ are frozen.
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce it
+      description: Steps or a command with its output. Please do not run a large build to reproduce a bug.
+  - type: input
+    id: env
+    attributes:
+      label: Browser or environment
+      description: For example "Firefox 130 on Windows 11", or "Python 3.12 on Ubuntu 24.04".

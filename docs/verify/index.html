@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en" data-project="trace">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify it yourself | TRACE</title>
+<meta name="description" content="Four ways to check TRACE, from a browser click to a re-run on your own computer, and what each check does and does not prove.">
+<link rel="canonical" href="https://anshul48.github.io/trace/verify/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Verify it yourself | TRACE">
+<meta property="og:description" content="Four ways to check TRACE, from a browser click to a re-run on your own computer, and what each check does and does not prove.">
+<meta property="og:url" content="https://anshul48.github.io/trace/verify/">
+<meta property="og:image" content="https://anshul48.github.io/trace/img/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a1124">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<script>(function(){try{var t=localStorage.getItem("trace-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")})();</script>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="../" aria-label="TRACE, home">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#0a1124"/><g fill="#7fa6e8"><circle cx="16" cy="7" r="1.7"/><circle cx="24.3" cy="13" r="1.7"/><circle cx="21.1" cy="22.8" r="1.7"/><circle cx="10.9" cy="22.8" r="1.7"/><circle cx="7.7" cy="13" r="1.7"/></g><circle cx="16" cy="15.5" r="3.4" fill="#2fd6c2"/><g fill="#3a4a78"><circle cx="27" cy="5" r="1"/><circle cx="4.5" cy="26.5" r="1"/><circle cx="27.5" cy="27" r="1"/></g></svg>
+      <span>TRACE</span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+        <a href="../try/">Try it</a>
+        <a href="../how-it-works/">How it works</a>
+        <a href="../evidence/">Evidence &amp; limits</a>
+        <a href="../demos/">Demos</a>
+        <a href="../verify/" aria-current="page">Verify</a>
+        <a href="../about/">About</a>
+        <a class="gh" href="https://github.com/Anshul48/trace">GitHub</a>
+        <button class="theme-btn" type="button" data-theme-toggle>Theme: auto</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<section class="section-tight">
+  <div class="wrap-narrow">
+    <span class="eyebrow">Verify</span>
+    <h1>Check it yourself, from easy to thorough.</h1>
+    <p class="lede">Each check below says what it proves and what it does not. The first needs only a browser. The last ones need Python 3 on your own computer.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap-narrow prose">
+
+    <h2 id="record">1. Check a record in your browser <span class="badge badge-built" data-status-id="record-check">Working today</span></h2>
+    <p class="note">Needs: a browser. About 20 seconds.</p>
+    <ol>
+      <li>Open <a href="../explorer/#q=how-do-vaccines-train-the-immune-system&amp;open=1">a recorded search with the first record already open</a>.</li>
+      <li>Press &ldquo;Check the fingerprint in my browser&rdquo;.</li>
+      <li>It should say the fingerprint matches.</li>
+    </ol>
+    <p><b>What it proves:</b> the text shown is exactly the text that was sealed in the library for that record. Your browser recomputes a SHA-256 fingerprint of the text; change one letter and it would not match.</p>
+    <p><b>What it does not prove:</b> that the search found the best passage, or that the source article still says the same today.</p>
+
+    <h2 id="code">2. Check that the published code is the code we tested <span class="badge badge-built" data-status-id="freeze-verify">Working today</span></h2>
+    <p class="note">Needs: Python 3 and a copy of the repository (<code>git clone https://github.com/Anshul48/trace</code>). A few seconds.</p>
+<pre><code>python3 tools/verify_freeze.py
+python3 tools/check_receipts.py</code></pre>
+    <p>The first re-computes the hash of each of the 207 files of the tested engine and compares it with the list we published. The expected end of the output is:</p>
+<pre><code>entries=207 ok=207 missing=0 mismatch=0</code></pre>
+    <p>The second reads the records of the qualification run (gates passed, both probe modes, the digest of the frozen code) and checks they are consistent. Expected: <code>receipts ok: gates, both probe modes, matched work, caps, freeze digest</code>.</p>
+    <p><b>What it proves:</b> the 207 engine files in the repository are byte-for-byte what our records say we tested. <b>What it does not prove:</b> that the tested engine is good, or anything about the larger library, which ran on our server.</p>
+
+    <h2 id="small">3. Run the small reproduction <span class="badge badge-built" data-status-id="small-repro">Working today</span></h2>
+    <p class="note">Needs: Python 3.12 with <code>numpy</code> and <code>blake3</code>. About a minute for the check, longer for the full small run.</p>
+<pre><code>pip install numpy blake3
+cd repro-20k
+python3 prep_small_prefix.py verify-freeze --cand ../freeze-src/cand
+python3 prep_small_prefix.py unpack --tar small-prefix-20k.tar.gz --data-dir data-20k
+python3 prep_small_prefix.py verify --tokens 20000 --cand ../freeze-src/cand --data-dir data-20k</code></pre>
+    <p>Expected: <code>VERIFY PASS</code>, with 88 documents, 144 passages and 0 cache misses. The folder's own <a href="https://github.com/Anshul48/trace/blob/main/repro-20k/README.md">README</a> has the fourth step, which runs the tested engine's own protocol on those 20,000 tokens.</p>
+    <p><b>What it proves:</b> the tested engine runs from a clean copy on real data, end to end, at 20,000 tokens. <b>What it does not prove:</b> any number from the big library. The small run's numbers are not the large run's, and it uses the earlier engine of the repository.</p>
+
+    <h2 id="local">4. Run the explorer on your own computer <span class="badge badge-built" data-status-id="explorer-local">Working today</span></h2>
+    <p class="note">Needs: Python 3 only. Downloads nothing.</p>
+<pre><code>./tools/run-trace.sh        # macOS or Linux
+tools\run-trace.bat         # Windows</code></pre>
+    <p>It serves the same pages you are reading from a local port and opens the explorer in your browser, with the recorded searches working offline.</p>
+
+    <h2 id="cannot">What you cannot re-run yet</h2>
+    <div class="callout callout-limit">
+      <ul>
+        <li><b>The measurement on the 99.9M-token library.</b> The library and its search ran on our own server. The recorded searches are in the explorer, and the raw measurement files are on our build machine, not in this repository. A download for your own computer is planned, not built yet.</li>
+        <li><b>The 504.5M and 310.5M builds.</b> Earlier tests of ours on a machine that has been shut down. Only their records exist: <a href="https://github.com/Anshul48/trace/tree/main/receipts/earlier-runs">receipts/earlier-runs</a>.</li>
+        <li><b>The 1.53 billion item.</b> A separate October test; the files are not in this repository.</li>
+        <li><b>An outside check.</b> <span class="badge badge-next" data-status-id="outside-check">Not built yet</span> Nobody outside our team has re-run any of this. If you do, we would like to hear (see <a href="../about/#contact">About</a>).</li>
+      </ul>
+    </div>
+
+    <h2 id="what-ci-runs">What runs automatically on every change</h2>
+    <p>Every push runs the tests in <code>.github/workflows/ci.yml</code>: the 207-file check, the record check, the backend tests, the small reproduction's check, the link and picture check, and a scan for file names that look like secrets. They show the repository is consistent. They are not a measurement of search quality.</p>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h2>TRACE</h2>
+        <p>A memory that organizes itself. Research prototype, open source (Apache-2.0).</p>
+        <p>No trackers, no outside fonts or scripts. Status data last updated 2026-11-04.</p>
+      </div>
+      <div>
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="../try/">Try it</a></li>
+          <li><a href="../how-it-works/">How it works</a></li>
+          <li><a href="../evidence/">Evidence &amp; limits</a></li>
+          <li><a href="../demos/">Demos</a></li>
+          <li><a href="../verify/">Verify</a></li>
+          <li><a href="../about/">About</a> and <a href="../built/">how this was built</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Also by this team</h2>
+        <ul>
+          <li><a href="https://github.com/Anshul48/anima-substrate">ANIMA</a>, a harness for coding agents (prototype)</li>
+          <li><a href="../demos/#reflex">Reflex</a>, a short film</li>
+          <li><a href="https://github.com/Anshul48/trace">TRACE on GitHub</a> and <a href="https://github.com/Anshul48/trace/issues">issues</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">Tested so far: a 99.9M-token library (measured, short of our 100M target by 0.11%), 310M and 504.5M-token builds (earlier tests, by us, our own records), and a separate 1.53 billion-token group-picking test (not served). <a href="../evidence/#ladder">The ladder, with every caveat</a>.</p>
+  </div>
+</footer>
+
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Try the explorer or read the limits first
+    url: https://anshul48.github.io/trace/
+    about: The website explains what TRACE is, what was measured, and what was not.
+  - name: Report a security problem privately
+    url: https://github.com/Anshul48/trace/security/advisories/new
+    about: Please do not open a public issue for a vulnerability. See SECURITY.md.

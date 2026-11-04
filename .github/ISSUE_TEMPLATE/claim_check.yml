@@ -1,0 +1,34 @@
+name: A claim or number looks wrong
+description: Something on the website or in the README does not hold, or you re-ran something and got a different result.
+title: "[claim] "
+labels: ["claim-check"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the most useful kind of report. Thank you. Please be specific, and say if you re-ran something yourself.
+  - type: input
+    id: where
+    attributes:
+      label: Where is it?
+      description: A page address, or a file and line.
+    validations:
+      required: true
+  - type: textarea
+    id: claim
+    attributes:
+      label: What does it say?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why does it not hold?
+      description: What you measured or read, with the command and its output if you re-ran something.
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Your setup, if you re-ran something
+      description: Operating system, Python version, numpy and blake3 versions.

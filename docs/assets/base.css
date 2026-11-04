@@ -68,7 +68,7 @@ small, .note { font-size: var(--step--1); color: var(--muted); }
 .nav a:hover { background: var(--surface-2); color: var(--ink); }
 .nav a[aria-current="page"] { background: var(--accent-soft); color: var(--ink); font-weight: 650; }
 .nav .gh { border: 1px solid var(--line-strong); }
-.theme-btn, .menu-btn { font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); min-height: var(--tap); min-width: var(--tap); padding: 0 var(--space-3); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); }
+.theme-btn, .menu-btn { font: inherit; font-size: var(--step--1); color: var(--ink); background: transparent; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); min-height: var(--tap); min-width: var(--tap); padding: 0 var(--space-3); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); }
 .theme-btn:hover, .menu-btn:hover { background: var(--surface-2); }
 .menu-btn { display: none; margin-left: auto; }
 @media (max-width: 960px) {
@@ -104,6 +104,7 @@ small, .note { font-size: var(--step--1); color: var(--muted); }
 
 /* ---------- cards, stats, callouts ---------- */
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space-5); box-shadow: var(--shadow); }
+.card { min-width: 0; }
 .card > :last-child { margin-bottom: 0; }
 .card h3 { margin-bottom: var(--space-2); }
 .card .badge { margin-bottom: var(--space-3); }
@@ -172,6 +173,7 @@ small, .note { font-size: var(--step--1); color: var(--muted); }
 .rung .did { font-weight: 650; margin: 0; }
 .rung .caveat { font-size: var(--step--1); color: var(--muted); margin: 0; }
 .rung .links { margin-top: auto; font-size: var(--step--1); }
+.rung .links a { display: inline-block; padding: 0.35rem 0; }
 .rung .badge { align-self: flex-start; }
 @media (max-width: 1000px) { .ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; } .rung, .rung:nth-child(n) { min-height: 0; } }
 @media (max-width: 600px) { .ladder { grid-template-columns: 1fr; } }
@@ -184,7 +186,7 @@ small, .note { font-size: var(--step--1); color: var(--muted); }
 .film-frame .placeholder { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: var(--space-5); background: var(--stage-glow); color: var(--stage-ink); gap: var(--space-2); }
 .film-frame .placeholder strong { font-size: var(--step-1); }
 .film-frame .placeholder span { color: var(--stage-muted); font-size: var(--step--1); max-width: 34ch; margin-inline: auto; }
-.film-card h3 { margin-bottom: var(--space-2); }
+.film-card h2, .film-card h3 { font-size: var(--step-1); margin-bottom: var(--space-2); }
 .film-meta { display: flex; gap: var(--space-3); flex-wrap: wrap; color: var(--muted); font-size: var(--step--1); margin-bottom: var(--space-3); }
 
 /* ---------- numbered steps ---------- */
@@ -215,12 +217,12 @@ tr:last-child td { border-bottom: 0; }
 .bar-row .lab { font-weight: 650; }
 .bar-track { position: relative; height: 1.7rem; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
 .bar-fill { position: absolute; inset: 0 auto 0 0; border-radius: 6px; min-width: 3px; }
-.bar-val { position: absolute; left: 0.6rem; top: 50%; transform: translateY(-50%); font-weight: 750; font-variant-numeric: tabular-nums; color: var(--ink); text-shadow: 0 0 6px var(--surface-2), 0 0 2px var(--surface-2); }
+.bar-val { position: absolute; left: 0.6rem; top: 50%; transform: translateY(-50%); font-weight: 750; font-variant-numeric: tabular-nums; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 0 0.45rem; line-height: 1.35; white-space: nowrap; }
 .fill-keyword { background: var(--c-keyword); }
 .fill-exact { background: var(--c-exact); }
 .fill-trace { background: var(--c-trace); }
 .fill-first { background: var(--c-trace-2); }
-.bar-fill.low ~ .bar-val { left: calc(var(--w, 0%) + 0.6rem); text-shadow: none; }
+.bar-fill.low ~ .bar-val { left: calc(var(--w, 0%) + 0.6rem); }
 
 /* ---------- footer ---------- */
 .site-footer { border-top: 1px solid var(--line); background: var(--bg-2); padding-block: var(--space-7) var(--space-6); margin-top: var(--space-8); font-size: var(--step--1); color: var(--muted); }

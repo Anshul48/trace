@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en" data-project="trace">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About | TRACE</title>
+<meta name="description" content="What TRACE is, who made it, how it is licensed, where everything is in the repository, how to get in touch, and the two companion projects.">
+<link rel="canonical" href="https://anshul48.github.io/trace/about/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="About | TRACE">
+<meta property="og:description" content="What TRACE is, who made it, how it is licensed, where everything is in the repository, how to get in touch, and the two companion projects.">
+<meta property="og:url" content="https://anshul48.github.io/trace/about/">
+<meta property="og:image" content="https://anshul48.github.io/trace/img/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a1124">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<script>(function(){try{var t=localStorage.getItem("trace-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")})();</script>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="../" aria-label="TRACE, home">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#0a1124"/><g fill="#7fa6e8"><circle cx="16" cy="7" r="1.7"/><circle cx="24.3" cy="13" r="1.7"/><circle cx="21.1" cy="22.8" r="1.7"/><circle cx="10.9" cy="22.8" r="1.7"/><circle cx="7.7" cy="13" r="1.7"/></g><circle cx="16" cy="15.5" r="3.4" fill="#2fd6c2"/><g fill="#3a4a78"><circle cx="27" cy="5" r="1"/><circle cx="4.5" cy="26.5" r="1"/><circle cx="27.5" cy="27" r="1"/></g></svg>
+      <span>TRACE</span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+        <a href="../try/">Try it</a>
+        <a href="../how-it-works/">How it works</a>
+        <a href="../evidence/">Evidence &amp; limits</a>
+        <a href="../demos/">Demos</a>
+        <a href="../verify/">Verify</a>
+        <a href="../about/" aria-current="page">About</a>
+        <a class="gh" href="https://github.com/Anshul48/trace">GitHub</a>
+        <button class="theme-btn" type="button" data-theme-toggle>Theme: auto</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<section class="section-tight">
+  <div class="wrap-narrow">
+    <span class="eyebrow">About</span>
+    <h1>An open research prototype.</h1>
+    <p class="lede">TRACE is a memory that sorts itself into groups as it grows, so a question has to wake only a small part of it, and every answer carries a record you can check. It is a research prototype by one small team, open source under Apache-2.0.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap-narrow prose">
+    <h2 id="what">What it is, and is not</h2>
+    <ul>
+      <li><b>Is:</b> an experiment in memory for AI systems that keeps its own order, searches only a small part per question, and shows where each answer came from.</li>
+      <li><b>Is not:</b> a product, a keyword-search replacement, a service you can call today, or something checked by anyone outside our team. See <a href="../evidence/#limits">the limits</a>.</li>
+    </ul>
+
+    <h2 id="licence">Licence and data</h2>
+    <p>The code is Apache-2.0 (<a href="https://github.com/Anshul48/trace/blob/main/LICENSE">LICENSE</a>). The library's passages are English Wikipedia text, under CC BY-SA 4.0: each record names its article, so you can credit it. The text encoder is all-MiniLM-L6-v2 (sentence-transformers). Data and model licences are listed in <a href="https://github.com/Anshul48/trace/blob/main/repro-20k/LICENSES-DATA-MODEL.md">repro-20k/LICENSES-DATA-MODEL.md</a>.</p>
+
+    <h2 id="map">Where things are in the repository</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">Folder or file</th><th scope="col">What is in it</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><code>docs/</code></th><td>This website (served by GitHub Pages), including the explorer, the films and <code>status.json</code>. Written from <code>docs-src/</code> by <code>tools/build_site.py</code>.</td></tr>
+          <tr><th scope="row"><code>docs/explorer/</code></th><td>The explorer: 144 recorded searches and the in-browser record check.</td></tr>
+          <tr><th scope="row"><code>freeze-src/</code></th><td>The tested engine, 207 files, never edited after testing. <code>tools/verify_freeze.py</code> checks it.</td></tr>
+          <tr><th scope="row"><code>receipts/</code></th><td>The records of our runs: the qualification run, the earlier larger builds, the order measurement.</td></tr>
+          <tr><th scope="row"><code>repro-20k/</code></th><td>A small reproduction you can run on your own computer.</td></tr>
+          <tr><th scope="row"><code>demo-app/</code>, <code>demo/</code></th><td>The demo backend and a synthetic demo, with tests.</td></tr>
+          <tr><th scope="row"><code>tools/</code></th><td>Checks (<code>verify_freeze.py</code>, <code>check_receipts.py</code>, <code>check_links.py</code>), the site generator and the local launcher.</td></tr>
+          <tr><th scope="row"><code>archive/</code></th><td>Earlier pages and notes, kept for the record and not linked from the site.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/Anshul48/trace/blob/main/docs/README.md"><code>docs/README.md</code></a></th><td>The index of the technical documents (architecture, scale and memory, benchmarks, code tour).</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="contact">Get in touch</h2>
+    <p>Found a mistake, or re-ran something? Open an issue on <a href="https://github.com/Anshul48/trace/issues">GitHub</a>; a report that a number does not hold is the most useful kind. For a security problem, see <a href="https://github.com/Anshul48/trace/blob/main/SECURITY.md">SECURITY.md</a>. To cite TRACE, use <a href="https://github.com/Anshul48/trace/blob/main/CITATION.cff">CITATION.cff</a> (GitHub shows a &ldquo;Cite this repository&rdquo; button).</p>
+
+    <h2 id="built">How this was built</h2>
+    <p>Short version: a human direction, an AI architect (Claude), and a large crew of automated workers, with Meta's Muse Code doing most of the worker jobs. <a href="../built/">The full account, with counts.</a> Which Meta products we used and did not use is on <a href="https://github.com/Anshul48/trace/blob/main/docs/META-USE.md">one page for judges</a>.</p>
+
+    <h2 id="also">Also by this team</h2>
+    <div class="grid-2" style="margin-top: var(--space-4)">
+      <article class="card">
+        <div class="card-head"><h3>ANIMA</h3><span class="badge badge-proto" data-status-id="anima-link">Prototype</span></div>
+        <p>A harness around AI coding agents: a hidden checker no agent can see or edit, a ladder of helpers, and a recorded chain of decisions. TRACE is its shared memory, through a prototype link. Validated for one kind of job so far.</p>
+        <p><a class="btn btn-quiet" href="https://github.com/Anshul48/anima-substrate">ANIMA on GitHub</a></p>
+      </article>
+      <article class="card">
+        <div class="card-head"><h3>Reflex</h3><span class="badge badge-proto" data-status-id="reflex">Prototype</span></div>
+        <p>A separate prototype that lets an assistant use a real web page by reading the page's structure first.</p>
+        <p><a class="btn btn-quiet" href="../demos/#reflex">Watch the Reflex film</a></p>
+      </article>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h2>TRACE</h2>
+        <p>A memory that organizes itself. Research prototype, open source (Apache-2.0).</p>
+        <p>No trackers, no outside fonts or scripts. Status data last updated 2026-11-04.</p>
+      </div>
+      <div>
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="../try/">Try it</a></li>
+          <li><a href="../how-it-works/">How it works</a></li>
+          <li><a href="../evidence/">Evidence &amp; limits</a></li>
+          <li><a href="../demos/">Demos</a></li>
+          <li><a href="../verify/">Verify</a></li>
+          <li><a href="../about/">About</a> and <a href="../built/">how this was built</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Also by this team</h2>
+        <ul>
+          <li><a href="https://github.com/Anshul48/anima-substrate">ANIMA</a>, a harness for coding agents (prototype)</li>
+          <li><a href="../demos/#reflex">Reflex</a>, a short film</li>
+          <li><a href="https://github.com/Anshul48/trace">TRACE on GitHub</a> and <a href="https://github.com/Anshul48/trace/issues">issues</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">Tested so far: a 99.9M-token library (measured, short of our 100M target by 0.11%), 310M and 504.5M-token builds (earlier tests, by us, our own records), and a separate 1.53 billion-token group-picking test (not served). <a href="../evidence/#ladder">The ladder, with every caveat</a>.</p>
+  </div>
+</footer>
+
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

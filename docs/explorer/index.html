@@ -1,39 +1,53 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-project="trace">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TRACE Explorer: search that shows its work</title>
-<meta name="description" content="Ask a question, see ranked passages, open each result's checkable record, and compare TRACE with exact search. A replay of real queries recorded on a sealed library of 812,545 Wikipedia passages. No live backend.">
+<title>Explorer | TRACE</title>
+<meta name="description" content="Ask a question, see ranked passages, open each result&#x27;s checkable record, and compare TRACE with exact search. A replay of real queries recorded on a sealed library of 812,545 Wikipedia passages. No live backend.">
 <link rel="canonical" href="https://anshul48.github.io/trace/explorer/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="TRACE Explorer: search that shows its work">
-<meta property="og:description" content="Real recorded searches over 812,545 passages, each result with a checkable record of where it came from.">
+<meta property="og:title" content="Explorer | TRACE">
+<meta property="og:description" content="Ask a question, see ranked passages, open each result&#x27;s checkable record, and compare TRACE with exact search. A replay of real queries recorded on a sealed library of 812,545 Wikipedia passages. No live backend.">
 <meta property="og:url" content="https://anshul48.github.io/trace/explorer/">
-<meta name="theme-color" content="#0f5c63">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f5c63'/%3E%3Cpath d='M14 22h36M14 32h26M14 42h16' stroke='%23fff' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+<meta property="og:image" content="https://anshul48.github.io/trace/img/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a1124">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<script>(function(){try{var t=localStorage.getItem("trace-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")})();</script>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/base.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<a class="skip" href="#ask">Skip to the question box</a>
-
-<header class="site">
+<a class="skip" href="#main">Skip to the content</a>
+<header class="site-header">
   <div class="wrap bar">
-    <span class="brand"><span class="logo" aria-hidden="true"></span>TRACE Explorer</span>
-    <nav aria-label="Page sections">
-      <a href="#ask">Ask</a>
-      <a href="#limits">What this shows</a>
-      <a href="#library">The library</a>
+    <a class="brand" href="../" aria-label="TRACE, home">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#0a1124"/><g fill="#7fa6e8"><circle cx="16" cy="7" r="1.7"/><circle cx="24.3" cy="13" r="1.7"/><circle cx="21.1" cy="22.8" r="1.7"/><circle cx="10.9" cy="22.8" r="1.7"/><circle cx="7.7" cy="13" r="1.7"/></g><circle cx="16" cy="15.5" r="3.4" fill="#2fd6c2"/><g fill="#3a4a78"><circle cx="27" cy="5" r="1"/><circle cx="4.5" cy="26.5" r="1"/><circle cx="27.5" cy="27" r="1"/></g></svg>
+      <span>TRACE</span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+        <a href="../try/" aria-current="page">Try it</a>
+        <a href="../how-it-works/">How it works</a>
+        <a href="../evidence/">Evidence &amp; limits</a>
+        <a href="../demos/">Demos</a>
+        <a href="../verify/">Verify</a>
+        <a href="../about/">About</a>
+        <a class="gh" href="https://github.com/Anshul48/trace">GitHub</a>
+        <button class="theme-btn" type="button" data-theme-toggle>Theme: auto</button>
     </nav>
   </div>
 </header>
 
-<main>
-<section class="hero wrap">
-  <h1>Search that shows its work</h1>
-  <p class="lede">TRACE finds nearly the same passages as exact, meaning-based search while looking at under 1% of the library. Every result comes with a <strong>checkable record</strong> of where it came from.</p>
+<main id="main">
+<div class="xp">
+<section class="xhero wrap">
+  <h1>The explorer: real searches, each with a checkable record</h1>
+  <p class="lede">A question wakes only a small part of the library: TRACE found nearly the same passages as exact, meaning-based search while scoring 0.79% of the rows on one of four equal parts. Every result comes with a <strong>checkable record</strong> of where it came from.</p>
   <p class="replay-banner" role="note"><strong>This page is a replay.</strong> Every question below was really asked on a sealed library of 812,545 passages on our server, and the answers were recorded. No search is running live behind this page.</p>
-  <ol class="steps" aria-label="What to do">
+  <ol class="xsteps" aria-label="What to do">
     <li><b>1</b> Pick or type a question</li>
     <li><b>2</b> Read the ranked passages</li>
     <li><b>3</b> Open a checkable record</li>
@@ -78,7 +92,7 @@
         <li><span class="lead">A checkable record for every result.</span> Which article it came from, where in the article, and a fingerprint your browser can re-check.</li>
         <li><span class="lead">A second opinion.</span> The same question asked with exact search, so you can see how close the two lists are.</li>
         <li><span class="lead">A measured result.</span> On our 50 test searches, TRACE kept <b>0.9985</b> of exact search&rsquo;s results while scoring <b>0.79%</b> of the rows (about <b>127 times</b> less scoring work). The checkable records matched on all claims we re-ran on the live service. No outside party has verified this yet.
-          <details class="more"><summary>How the 50 test searches were made</summary><p>40 written questions plus 10 taken from passage openings. The 0.79% counts rows scored per search, measured on one of the library&rsquo;s four sections, for the top 10 results.</p></details></li>
+          <details class="more"><summary>How the 50 test searches were made</summary><p>40 written questions plus 10 taken from passage openings. The 0.79% counts rows scored per search, measured on one of the library&rsquo;s four equal parts, for the top 10 results.</p></details></li>
       </ul>
     </div>
     <div class="box warn">
@@ -90,7 +104,7 @@
           <details class="more"><summary>More detail</summary><p>Exact meaning-based search also got 52%, so the gap is meaning-based search versus keywords, not TRACE&rsquo;s shortcut. On a stricter score that also rewards putting the right passage higher up, keyword search got 0.74 and TRACE 0.42. Keyword search also answered faster: 6 milliseconds, against 1.2 seconds for TRACE (88 milliseconds for exact meaning-based search).</p></details></li>
         <li><span class="lead">No speed or memory claim.</span> Stored size on disk: 2.28 GB for TRACE, against 1.25 GB for a plain vector copy and 0.51 GB for the keyword index. While answering questions, the live service peaked near 1 GB of memory (1.03 GiB).</li>
         <li><span class="lead">Not a random sample.</span> We wrote 144 everyday questions before asking, and kept every answer. The tab <b>Weaker matches</b> holds the 29 where the top results read less well.</li>
-        <li><span class="lead">Public benchmarks were not run.</span> We did not test TRACE on the public search benchmarks researchers use (called BEIR), so this page says nothing about how it compares there.</li>
+        <li><span class="lead">TRACE was not run on public benchmarks.</span> We did not test TRACE on the public search benchmarks researchers use (called BEIR), so this page says nothing about how it compares there.</li>
         <li><span class="lead">The library is slightly short of its goal.</span> It holds about 99.9 million tokens (99,891,846; a token is roughly a word piece). The planned 100-million-token gate was waived: it falls short by 108,154 tokens, which is short of the 100M target by 0.11%.</li>
       </ul>
     </div>
@@ -100,11 +114,11 @@
   <table class="status">
     <thead><tr><th scope="col">Part</th><th scope="col">Status</th></tr></thead>
     <tbody>
-      <tr><td>This replay explorer, with real recorded questions</td><td><span class="tag ok">Working today</span></td></tr>
-      <tr><td>Search with checkable records, on our own server</td><td><span class="tag proto">Prototype</span></td></tr>
-      <tr><td>A public live search anyone can query</td><td><span class="tag no">Not built yet</span></td></tr>
-      <tr><td>A download of about 2.3 GB to run it on your own machine</td><td><span class="tag no">Not built yet (planned)</span></td></tr>
-      <tr><td>Checking by an outside party</td><td><span class="tag no">Not done yet</span></td></tr>
+      <tr><td>This replay explorer, with real recorded questions</td><td><span class="badge badge-built" data-status-id="explorer-replay">Working today</span></td></tr>
+      <tr><td>The 99.9M-token library, sorted into groups and searched, with checkable records, on our own server</td><td><span class="badge badge-built" data-status-id="library-100m">Working today, our server</span></td></tr>
+      <tr><td>A public live search anyone can query</td><td><span class="badge badge-next" data-status-id="public-service">Not built yet</span></td></tr>
+      <tr><td>A download of about 2.3 GB to run the whole library on your own computer</td><td><span class="badge badge-next" data-status-id="local-kit">Not built yet</span></td></tr>
+      <tr><td>Checking by an outside party</td><td><span class="badge badge-next" data-status-id="outside-check">Not built yet</span></td></tr>
     </tbody>
   </table>
 </section>
@@ -115,7 +129,7 @@
     <div>
       <h3>The library</h3>
       <p>812,545 passages of English Wikipedia text, cut from articles into pieces of a few sentences. It holds about 99.9 million tokens. The planned 100-million-token gate was waived: it falls short by 108,154 tokens (0.11%).</p>
-      <p>The library is split into 4 sections, and inside each section similar passages are grouped together. To answer a question, TRACE picks the groups most likely to hold the answer and scores only the passages inside them. Exact search scores every passage.</p>
+      <p>The library is split into four equal parts, and inside each part similar passages are grouped together. To answer a question, TRACE picks the groups most likely to hold the answer and scores only the passages inside them. Exact search scores every passage.</p>
     </div>
     <div>
       <h3>The recordings</h3>
@@ -125,16 +139,44 @@
     </div>
   </div>
 </section>
-</main>
+</div>
+<noscript><p class="wrap">This page needs JavaScript to show the recorded questions.</p></noscript>
 
-<footer class="site">
+</main>
+<footer class="site-footer">
   <div class="wrap">
-    <p>TRACE Explorer is a static page: plain HTML, CSS and JavaScript, with no build step and no server behind it. Recorded on the sealed library on an Azure VM in India Central.</p>
+    <div class="cols">
+      <div>
+        <h2>TRACE</h2>
+        <p>A memory that organizes itself. Research prototype, open source (Apache-2.0).</p>
+        <p>No trackers, no outside fonts or scripts. Status data last updated 2026-11-04.</p>
+      </div>
+      <div>
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="../try/">Try it</a></li>
+          <li><a href="../how-it-works/">How it works</a></li>
+          <li><a href="../evidence/">Evidence &amp; limits</a></li>
+          <li><a href="../demos/">Demos</a></li>
+          <li><a href="../verify/">Verify</a></li>
+          <li><a href="../about/">About</a> and <a href="../built/">how this was built</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Also by this team</h2>
+        <ul>
+          <li><a href="https://github.com/Anshul48/anima-substrate">ANIMA</a>, a harness for coding agents (prototype)</li>
+          <li><a href="../demos/#reflex">Reflex</a>, a short film</li>
+          <li><a href="https://github.com/Anshul48/trace">TRACE on GitHub</a> and <a href="https://github.com/Anshul48/trace/issues">issues</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">Tested so far: a 99.9M-token library (measured, short of our 100M target by 0.11%), 310M and 504.5M-token builds (earlier tests, by us, our own records), and a separate 1.53 billion-token group-picking test (not served). <a href="../evidence/#ladder">The ladder, with every caveat</a>.</p>
   </div>
 </footer>
 
-<noscript><p class="wrap">This page needs JavaScript to show the recorded questions.</p></noscript>
-<script src="data/replay.js"></script>
-<script src="app.js"></script>
+<script src="../assets/site.js" defer></script>
+<script src="data/replay.js" defer></script>
+<script src="app.js" defer></script>
 </body>
 </html>

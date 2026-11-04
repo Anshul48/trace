@@ -1,286 +1,124 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-project="trace">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TRACE demo films</title>
-<meta name="description" content="Short demo films of TRACE and the ANIMA harness, played on this page with captions and a written copy of the words. Research prototypes.">
+<title>Demos and films | TRACE</title>
+<meta name="description" content="The explorer and the films: the 3-minute film, TRACE, ANIMA and Reflex. Captions on every film that has them.">
 <link rel="canonical" href="https://anshul48.github.io/trace/demos/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="TRACE demo films">
-<meta property="og:description" content="Short films of TRACE and the ANIMA harness, with captions and a written copy of the words.">
+<meta property="og:title" content="Demos and films | TRACE">
+<meta property="og:description" content="The explorer and the films: the 3-minute film, TRACE, ANIMA and Reflex. Captions on every film that has them.">
 <meta property="og:url" content="https://anshul48.github.io/trace/demos/">
-<meta property="og:image" content="https://anshul48.github.io/trace/demos/trace-poster.png">
-<meta name="theme-color" content="#f6f4ee">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f5c63'/%3E%3Crect x='7' y='10' width='18' height='3.5' rx='1.75' fill='%23fff'/%3E%3Crect x='7' y='18' width='11' height='3.5' rx='1.75' fill='%23fff'/%3E%3C/svg%3E">
-<style>
-:root{
-  --bg:#f6f4ee; --surface:#ffffff; --surface2:#efece3; --ink:#18232d; --muted:#556270;
-  --line:#d9d4c7; --brand:#0f5c63; --brand-ink:#ffffff; --brand-soft:#dcefef;
-  --good:#1d7447; --good-soft:#dff1e6; --warn:#9a5b06; --warn-soft:#fbeed2;
-  --focus:#1a56db; --shadow:0 1px 2px rgba(24,35,45,.06),0 6px 18px rgba(24,35,45,.06);
-  --radius:14px;
-}
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:#10171d; --surface:#18222b; --surface2:#1f2b36; --ink:#e8eef2; --muted:#9db0bd;
-    --line:#2d3b47; --brand:#4fb3b8; --brand-ink:#08262a; --brand-soft:#17363a;
-    --good:#58c58b; --good-soft:#163526; --warn:#e5a94d; --warn-soft:#3a2b10;
-    --focus:#7fb0ff; --shadow:none;
-  }
-}
-*{box-sizing:border-box}
-[hidden]{display:none !important}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
-a{color:var(--brand)}
-a:hover{text-decoration-thickness:2px}
-:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
-.skip{position:absolute;left:-999px;top:8px;background:var(--surface);padding:8px 12px;z-index:10;border-radius:8px}
-.skip:focus{left:8px}
-
-header.site{background:var(--surface);border-bottom:1px solid var(--line)}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;flex-wrap:wrap}
-.brand{font-weight:700;font-size:1.05rem;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
-.logo{width:26px;height:26px;border-radius:7px;background:var(--brand);display:inline-block;position:relative}
-.logo::before,.logo::after{content:"";position:absolute;left:6px;height:3px;border-radius:2px;background:var(--brand-ink)}
-.logo::before{top:8px;width:14px}.logo::after{top:15px;width:9px}
-header.site nav{display:flex;gap:18px;font-size:.95rem}
-header.site nav a{text-decoration:none;color:var(--muted)}
-header.site nav a:hover{color:var(--ink)}
-header.site nav a[aria-current="page"]{color:var(--ink);font-weight:700}
-
-h1{font-size:clamp(2rem,5.5vw,3rem);line-height:1.15;margin:.2em 0 .3em;letter-spacing:-.01em}
-h2{font-size:clamp(1.4rem,3.2vw,1.8rem);line-height:1.25;margin:0 0 .4em}
-p{margin:.5em 0 .9em}
-.hero{padding-top:34px;padding-bottom:4px}
-.lede{font-size:clamp(1.15rem,2.4vw,1.4rem);max-width:46em}
-.small{color:var(--muted);font-size:1rem;max-width:46em}
-
-.demo{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px 22px 22px;margin:26px 0 0}
-.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--muted);font-size:.95rem;margin-bottom:6px}
-.chip{display:inline-block;font-size:.78rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:var(--brand-soft);color:var(--brand)}
-.chip.good{background:var(--good-soft);color:var(--good)}
-.video{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;background:#0b1118;border-radius:12px;margin:12px 0 4px}
-.words-note{color:var(--muted);font-size:.9rem;margin:2px 0 14px}
-.blurb{font-size:1.08rem;max-width:46em}
-.limit{background:var(--warn-soft);border:1px solid var(--warn);border-left-width:6px;border-radius:10px;padding:12px 16px;margin:14px 0 10px;font-size:1rem;line-height:1.5;max-width:50em}
-.limit p{margin:.2em 0}
-.limit .scope{color:var(--muted);font-size:.9rem;margin-top:.5em}
-.actions{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 6px}
-.btn{display:inline-flex;align-items:center;min-height:48px;padding:10px 20px;border-radius:12px;font-weight:700;font-size:1.02rem;text-decoration:none;border:2px solid var(--brand);background:var(--brand);color:var(--brand-ink)}
-.btn:hover{filter:brightness(1.08)}
-.btn.alt{background:transparent;color:var(--brand)}
-.btn.alt:hover{background:var(--brand-soft);filter:none}
-details.words{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
-details.words summary{cursor:pointer;font-weight:700;font-size:1.05rem;min-height:44px;display:flex;align-items:center}
-details.words .t{max-width:46em;color:var(--ink);font-size:1.02rem;line-height:1.6}
-details.words .t p{margin:.2em 0 .8em}
-footer{margin-top:44px;border-top:1px solid var(--line);padding:22px 0 40px;color:var(--muted);font-size:.95rem}
-footer p{margin:.3em 0}
-@media (max-width:640px){
-  .demo{padding:18px 14px 16px}
-  .btn{width:100%;justify-content:center}
-  .video{border-radius:8px}
-}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-</style>
+<meta property="og:image" content="https://anshul48.github.io/trace/img/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a1124">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<script>(function(){try{var t=localStorage.getItem("trace-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")})();</script>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
-<a class="skip" href="#main">Skip to the demo films</a>
-<header class="site">
+<a class="skip" href="#main">Skip to the content</a>
+<header class="site-header">
   <div class="wrap bar">
-    <a class="brand" href="../"><span class="logo" aria-hidden="true"></span>TRACE</a>
-    <nav aria-label="Main">
-      <a href="../">Home</a>
-      <a href="../explorer/">Explorer</a>
-      <a href="./" aria-current="page">Demos</a>
-      <a href="https://github.com/Anshul48/trace">Code</a>
+    <a class="brand" href="../" aria-label="TRACE, home">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#0a1124"/><g fill="#7fa6e8"><circle cx="16" cy="7" r="1.7"/><circle cx="24.3" cy="13" r="1.7"/><circle cx="21.1" cy="22.8" r="1.7"/><circle cx="10.9" cy="22.8" r="1.7"/><circle cx="7.7" cy="13" r="1.7"/></g><circle cx="16" cy="15.5" r="3.4" fill="#2fd6c2"/><g fill="#3a4a78"><circle cx="27" cy="5" r="1"/><circle cx="4.5" cy="26.5" r="1"/><circle cx="27.5" cy="27" r="1"/></g></svg>
+      <span>TRACE</span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+        <a href="../try/">Try it</a>
+        <a href="../how-it-works/">How it works</a>
+        <a href="../evidence/">Evidence &amp; limits</a>
+        <a href="../demos/" aria-current="page">Demos</a>
+        <a href="../verify/">Verify</a>
+        <a href="../about/">About</a>
+        <a class="gh" href="https://github.com/Anshul48/trace">GitHub</a>
+        <button class="theme-btn" type="button" data-theme-toggle>Theme: auto</button>
     </nav>
   </div>
 </header>
 
 <main id="main">
-  <div class="wrap hero">
-    <h1>Demo films</h1>
-    <p class="lede">Short films of each project working. They play on this page, so you can watch them again without YouTube.</p>
-    <p class="small">Captions are built into each film. The same words are also written out under &ldquo;Read the words&rdquo;. Under every film you will find what it shows and what it does not.</p>
-  </div>
-
+<section class="section-tight">
   <div class="wrap">
-
-    <article class="demo" id="trace" aria-labelledby="trace-h">
-      <div class="meta"><span class="chip">Prototype</span><span>TRACE &middot; 2:34 &middot; 720p video, 4.6 MB</span></div>
-      <h2 id="trace-h">TRACE: search that shows its work</h2>
-      <video class="video" controls playsinline preload="metadata" poster="trace-poster.png" width="1280" height="720" aria-describedby="trace-blurb">
-        <source src="trace-v4-720p.mp4" type="video/mp4">
-        <track kind="captions" src="trace-v4.vtt" srclang="en" label="English">
-        Your browser cannot play this video. <a href="trace-v4-720p.mp4">Download the film (MP4)</a>.
-      </video>
-      <p class="blurb" id="trace-blurb">TRACE is search that shows its work. In the film we pick a question in the real explorer, open a result&rsquo;s checkable record, and press check: the browser works out the fingerprint of the exact text again, and it matches. Then we compare TRACE&rsquo;s ten passages with those from exact search, which checks every passage: on our 50 test searches, TRACE looked at under 1% of the library and kept 99.85% of the exact top-ten results.</p>
-      <div class="limit">
-        <p><strong>Honest limits.</strong> Ordinary keyword search did better on our test and answers faster, and exact meaning-based search did no better than TRACE. The public live server is off, so the explorer replays real recorded questions. No outside group has verified it, and the kit to run it on your own computer is planned, not built.</p>
-        <p class="scope">Scope of the under-1% figure: rows scored per search, counted in one of the library&rsquo;s four sections, for the top ten results.</p>
-      </div>
-      <div class="actions">
-        <a class="btn" href="../explorer/">Open the explorer</a>
-        <a class="btn alt" href="trace-v4-720p.mp4" download>Download the film (MP4, 4.6 MB)</a>
-        <a class="btn alt" href="trace-v4.vtt">Captions file (.vtt)</a>
-      </div>
-      <details class="words">
-        <summary>Read the words</summary>
-        <div class="t">
-        <p>TRACE is search that shows its work. You ask in plain words. It finds the passages that match your meaning, and gives you a record you can check.</p>
-        <p>Ask an AI to search a huge pile of text, and you get an answer. But where did it come from? What did it miss? You can't tell.</p>
-        <p>So here is the real thing, running in a browser. The library behind it holds about 800 thousand passages.</p>
-        <p>Pick a question.</p>
-        <p>Results come up: passages that match what the question means, not just its words.</p>
-        <p>Click one.</p>
-        <p>Here is its checkable record: the article it came from, where in the article, and a fingerprint of the exact text.</p>
-        <p>Press check, and your own browser works out the fingerprint again. It matches.</p>
-        <p>Now the key question. Is this the same answer as the exact method, which checks every passage?</p>
-        <p>Here, the ten passages are the same, in the same order.</p>
-        <p>On our test searches, TRACE looked at under 1 percent of the library, and still found 99.85 percent of the exact answer.</p>
-        <p>Far less scoring work, and every result shows where it came from.</p>
-        <p>Try another question. Same idea: ranked passages, a record, and a side-by-side check.</p>
-        <p>An answer you can check, not just trust.</p>
-        <p>To use it, open the page in your web browser. There is nothing to install, and nothing to sign up for. It is a small page, and any computer with a web browser will do. A kit to run it on your own computer is planned, but not built yet.</p>
-        <p>Now, the honest limits. Ordinary keyword search did better on our test, and it answers faster. Exact meaning-based search, with no shortcut, did no better than TRACE. TRACE is for search by meaning that you can verify. The public live server is off, so this explorer replays real recorded questions. It has not been run on public benchmark tests yet, and no outside group has verified it.</p>
-        <p>Try it: open the explorer, link on screen. Next up: a kit to run it on your own computer.</p>
-        </div>
-      </details>
-    </article>
-
-    <article class="demo" id="anima" aria-labelledby="anima-h">
-      <div class="meta"><span class="chip good">Working for one job type</span><span>ANIMA Harness (a separate project) &middot; 2:50 &middot; 720p video, 3.2 MB</span></div>
-      <h2 id="anima-h">ANIMA: an AI agent says &ldquo;done&rdquo;. Was it right?</h2>
-      <video class="video" controls playsinline preload="metadata" poster="anima-poster.png" width="1280" height="720" aria-describedby="anima-blurb">
-        <source src="anima-v4-720p.mp4" type="video/mp4">
-        <track kind="captions" src="anima-v4.vtt" srclang="en" label="English">
-        Your browser cannot play this video. <a href="anima-v4-720p.mp4">Download the film (MP4)</a>.
-      </video>
-      <p class="blurb" id="anima-blurb">ANIMA is a harness that lets an AI agent attempt a real bug fix, then checks the result with tests the agent did not see and cannot edit. In the film a stand-in agent says &ldquo;done&rdquo; and is wrong, the checker catches it, and the next helper up (a small local model, then Claude, then Codex) tries again. On nine real bug-fix jobs, seven were right the first time, and the checker caught the two wrong &ldquo;done&rdquo; answers, which the next helper then fixed.</p>
-      <div class="limit">
-        <p><strong>Honest limits.</strong> It is tested for one kind of job only: fixing a bug against hidden tests. It is not a general job scheduler. The record check in the film confirms the links in the log; it does not re-run the nine jobs. The other parts (SST, STC and a shared memory with TRACE) are prototypes and are not shown.</p>
-      </div>
-      <div class="actions">
-        <a class="btn" href="https://github.com/Anshul48/anima-substrate">ANIMA on GitHub</a>
-        <a class="btn alt" href="anima-v4-720p.mp4" download>Download the film (MP4, 3.2 MB)</a>
-        <a class="btn alt" href="anima-v4.vtt">Captions file (.vtt)</a>
-      </div>
-      <details class="words">
-        <summary>Read the words</summary>
-        <div class="t">
-        <p>ANIMA is a harness that lets an AI agent attempt a real bug fix, and then checks whether the fix was right. Agents say, done. But were they right? Somebody still has to check, by hand. Here is a small demo bug report. The function says Sunday is not part of the weekend. A stand-in agent changes the code, and says: done. Now the real checker runs. It holds tests that the agent did not see, and cannot edit. Result: fail. The change counted Friday as weekend. The agent said done, and it was wrong.</p>
-        <p>The agent can also try to edit the tests, to make itself pass. The checker spots that, and rejects it.</p>
-        <p>So the next rung tries again. A rung is just the next agent up: a small local model, then Claude, then Codex. This time, the checker says: pass.</p>
-        <p>We ran this on nine real bug-fix jobs. Seven were right the first time. Two said done, and were wrong. The checker caught both, and the next rung fixed them. Here is one of those two, from the recorded log. The first agent said done. The checker disagreed. The next rung passed.</p>
-        <p>To check the record yourself, you need Python and git. No account, and no keys. First, copy the repository.</p>
-        <p>Then run the check. Each record in the log points back to the one before it, and here every link matches. Now change a single character in a copy. The break shows. This checks the record. It does not re-run the nine jobs.</p>
-        <p>On our laptop, a self-test must fail when we plant a fault. Publishing it is the next step.</p>
-        <p>What works today is the harness and its checker, tested for a single kind of job: fixing a bug against hidden tests. It is not a general job scheduler. Other parts are prototypes. SST tries many candidate fixes. STC turns a written spec into code. And a shared memory with TRACE, linked by a small test. We do not show them here.</p>
-        <p>To try it, start at the ANIMA repository on GitHub. The address is on screen. A checker the agent cannot see or edit decides. And if the agent was wrong, the next rung tries again.</p>
-        </div>
-      </details>
-    </article>
-
-    <!-- Reflex card: stays hidden unless reflex-v3.mp4 exists next to this page (checked by the script below).
-         To publish it, add reflex-v3.mp4 to docs/demos/. Optional: reflex-v3.vtt (captions + written words) and reflex-v3.png (poster). -->
-    <article class="demo" id="reflex" aria-labelledby="reflex-h" hidden>
-      <div class="meta"><span class="chip">Prototype</span><span>Reflex<span id="reflex-size"></span></span></div>
-      <h2 id="reflex-h">Reflex: an assistant that uses a web page</h2>
-      <div id="reflex-video-slot"></div>
-      <p class="blurb">Reflex lets an assistant use a real web page. It reads the page&rsquo;s structure first, and calls a vision model only when the structure runs out. The film shows it working on a real todo-list page.</p>
-      <div class="limit">
-        <p><strong>Honest limit.</strong> This is a prototype, shown on one real todo-list page.</p>
-      </div>
-      <div class="actions">
-        <a class="btn alt" id="reflex-dl" download>Download the film (MP4)</a>
-      </div>
-      <details class="words" id="reflex-words" hidden>
-        <summary>Read the words</summary>
-        <div class="t" id="reflex-words-text"></div>
-      </details>
-    </article>
-
+    <span class="eyebrow">Demos</span>
+    <h1>Watch it work.</h1>
+    <p class="lede" style="max-width: 62ch">The explorer is the real thing you can use. The films tell the same story in a few minutes. The films shown here are working versions until the 3-minute film is on YouTube.</p>
   </div>
+</section>
+
+<section class="section-tight">
+  <div class="wrap">
+    <article class="card" style="display:flex; gap: var(--space-5); flex-wrap: wrap; align-items:center; justify-content: space-between">
+      <div style="flex: 1 1 24rem">
+        <div class="card-head"><h2 style="font-size: var(--step-1)">The explorer</h2><span class="badge badge-built" data-status-id="explorer-replay">Working today</span></div>
+        <p>Pick one of 144 real recorded searches, read the ten passages TRACE returned, and open a checkable record for each. Nothing to install, and the fingerprint check runs in your browser.</p>
+      </div>
+      <p class="btn-row"><a class="btn btn-primary" href="../explorer/">Open the explorer</a><a class="btn btn-quiet" href="../try/">All the ways to try it</a></p>
+    </article>
+  </div>
+</section>
+
+<section class="section" id="films">
+  <div class="wrap">
+    <h2>Films</h2>
+    <div class="grid-2" data-films="all" style="align-items: start">
+      <p class="note">The films need JavaScript to be listed here. The files are in <a href="https://github.com/Anshul48/trace/tree/main/docs/demos"><code>docs/demos/</code></a>.</p>
+    </div>
+    <p class="note">Captions are included in the player. &ldquo;Read the words of the film&rdquo; shows the same words as text. YouTube links open in a new tab; we do not embed YouTube players, so this site loads nothing from outside.</p>
+  </div>
+</section>
+
+<section class="section band" id="swap">
+  <div class="wrap-narrow prose">
+    <span class="eyebrow">For the maintainer</span>
+    <h2>Swap list: replacing a film</h2>
+    <p>Every film on the site, including the one on the home page, comes from one file: <a href="https://github.com/Anshul48/trace/blob/main/docs/demos/films.json"><code>docs/demos/films.json</code></a>. To replace a film, copy the new 720p mp4, poster (jpg) and captions (vtt) into <code>docs/demos/</code>, change the names in that file, and push. To publish the 3-minute film, set <code>youtube</code> to the video id (the part after <code>v=</code>) in the entry whose <code>role</code> is <code>main</code>. Nothing else needs editing, and no page needs rebuilding.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">File</th><th scope="col">Film</th><th scope="col">Source</th><th scope="col">Size</th><th scope="col">Shown on</th></tr></thead>
+        <tbody data-films-table><tr><td colspan="5">Loading the list.</td></tr></tbody>
+      </table>
+    </div>
+    <p class="note">The films here are working versions. When the final cuts are approved they replace these files with the same names or new names in the list.</p>
+  </div>
+</section>
+
 </main>
-
-<footer>
+<footer class="site-footer">
   <div class="wrap">
-    <p><a href="../">Back to the TRACE home page</a> &middot; <a href="https://github.com/Anshul48/trace">TRACE code on GitHub</a> (Apache-2.0)</p>
-    <p>This is a static page: plain HTML, CSS and a few lines of JavaScript, no analytics, no outside fonts or scripts.</p>
+    <div class="cols">
+      <div>
+        <h2>TRACE</h2>
+        <p>A memory that organizes itself. Research prototype, open source (Apache-2.0).</p>
+        <p>No trackers, no outside fonts or scripts. Status data last updated 2026-11-04.</p>
+      </div>
+      <div>
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="../try/">Try it</a></li>
+          <li><a href="../how-it-works/">How it works</a></li>
+          <li><a href="../evidence/">Evidence &amp; limits</a></li>
+          <li><a href="../demos/">Demos</a></li>
+          <li><a href="../verify/">Verify</a></li>
+          <li><a href="../about/">About</a> and <a href="../built/">how this was built</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Also by this team</h2>
+        <ul>
+          <li><a href="https://github.com/Anshul48/anima-substrate">ANIMA</a>, a harness for coding agents (prototype)</li>
+          <li><a href="../demos/#reflex">Reflex</a>, a short film</li>
+          <li><a href="https://github.com/Anshul48/trace">TRACE on GitHub</a> and <a href="https://github.com/Anshul48/trace/issues">issues</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">Tested so far: a 99.9M-token library (measured, short of our 100M target by 0.11%), 310M and 504.5M-token builds (earlier tests, by us, our own records), and a separate 1.53 billion-token group-picking test (not served). <a href="../evidence/#ladder">The ladder, with every caveat</a>.</p>
   </div>
 </footer>
 
-<script>
-/* Show the Reflex card only if reflex-v3.mp4 has been added next to this page. */
-(function () {
-  var card = document.getElementById("reflex");
-  if (!card || !window.fetch) return;
-
-  function exists(url) {
-    return fetch(url, { method: "HEAD", cache: "no-store" }).then(function (r) {
-      var type = r.headers.get("content-type") || "";
-      return r.ok && !/text\/html/i.test(type) ? r : null;
-    }).catch(function () { return null; });
-  }
-
-  function vttToParagraphs(text) {
-    function secs(s) { var p = s.split(":"); return (+p[0]) * 3600 + (+p[1]) * 60 + parseFloat(p[2]); }
-    var paras = [], cur = [], prevEnd = null;
-    text.replace(/\r\n/g, "\n").split("\n\n").forEach(function (block) {
-      var lines = block.trim().split("\n"), i, m;
-      for (i = 0; i < lines.length; i++) {
-        m = lines[i].match(/(\d+:\d\d:\d\d\.\d+) --> (\d+:\d\d:\d\d\.\d+)/);
-        if (m) {
-          var start = secs(m[1]), end = secs(m[2]), t = lines.slice(i + 1).join(" ").trim();
-          if (prevEnd !== null && start - prevEnd >= 0.7 && cur.length) { paras.push(cur.join(" ")); cur = []; }
-          if (t) cur.push(t);
-          prevEnd = end;
-          break;
-        }
-      }
-    });
-    if (cur.length) paras.push(cur.join(" "));
-    return paras;
-  }
-
-  exists("reflex-v3.mp4").then(function (res) {
-    if (!res) return;
-    var len = parseInt(res.headers.get("content-length") || "0", 10);
-    if (len > 0) document.getElementById("reflex-size").textContent = " \u00b7 video, " + (len / 1000000).toFixed(1) + " MB";
-
-    var v = document.createElement("video");
-    v.className = "video";
-    v.controls = true;
-    v.setAttribute("playsinline", "");
-    v.preload = "metadata";
-    v.width = 1280; v.height = 720;
-    var src = document.createElement("source");
-    src.src = "reflex-v3.mp4"; src.type = "video/mp4";
-    v.appendChild(src);
-    document.getElementById("reflex-video-slot").appendChild(v);
-    document.getElementById("reflex-dl").setAttribute("href", "reflex-v3.mp4");
-    card.hidden = false;
-
-    exists("reflex-v3.png").then(function (p) { if (p) v.poster = "reflex-v3.png"; });
-    exists("reflex-v3.vtt").then(function (r) {
-      if (!r) return;
-      var tr = document.createElement("track");
-      tr.kind = "captions"; tr.src = "reflex-v3.vtt"; tr.srclang = "en"; tr.label = "English";
-      v.appendChild(tr);
-      return fetch("reflex-v3.vtt").then(function (x) { return x.text(); }).then(function (t) {
-        var box = document.getElementById("reflex-words-text");
-        vttToParagraphs(t).forEach(function (s) {
-          var p = document.createElement("p"); p.textContent = s; box.appendChild(p);
-        });
-        document.getElementById("reflex-words").hidden = false;
-      });
-    });
-  });
-})();
-</script>
+<script src="../assets/site.js" defer></script>
 </body>
 </html>

@@ -80,7 +80,7 @@
   --muted:     #46547a;      /* 7.0:1 on --bg */
   --line:      #d3d9e8;
   --line-strong: #aeb8d2;
-  --accent:    #0a7c74;      /* teal; 5.1:1 on --surface */
+  --accent:    #07706a;      /* teal; 5.9:1 on --surface, 5.0:1 on the tinted bands */
   --accent-ink: #ffffff;
   --accent-soft: #d8f1ee;
   --link:      #0a6a8e;

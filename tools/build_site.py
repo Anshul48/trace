@@ -177,6 +177,37 @@ def badges_svg(status):
     return out
 
 
+def badge_md(status, cap_id):
+    cap = next((c for c in status["capabilities"] if c["id"] == cap_id), None)
+    if cap is None:
+        raise SystemExit("unknown badge id: " + cap_id)
+    text = cap.get("badge_text") or status["labels"][cap["status"]]
+    return "![%s](docs/badges/%s.svg)" % (text, cap_id)
+
+
+def film_md():
+    path = os.path.join(OUT, "demos", "films.json")
+    with open(path, encoding="utf-8") as fh:
+        films = json.load(fh)["films"]
+    main = next((f for f in films if f.get("role") == "main"), None)
+    if main and main.get("youtube"):
+        return "**[Watch the 3-minute film on YouTube](https://www.youtube.com/watch?v=%s)**: TRACE first, then the two companion projects." % main["youtube"]
+    return ("Being published on YouTube; the link will be added here. Until then: [working versions of the films](https://anshul48.github.io/trace/demos/).")
+
+
+def render_md(text, status):
+    text = re.sub(r"\{\{badge:([a-z0-9-]+)\}\}", lambda m: badge_md(status, m.group(1)), text)
+    text = text.replace("{{film}}", film_md())
+    text = text.replace("{{updated}}", status["updated"])
+    if "{{statusmd}}" in text:
+        order = {"built": 0, "prototype": 1, "next": 2}
+        rows = ["| Capability | Status |", "|---|---|"]
+        for cap in sorted(status["capabilities"], key=lambda c: order[c["status"]]):
+            rows.append("| %s | %s |" % (cap["title"], badge_md(status, cap["id"])))
+        text = text.replace("{{statusmd}}", "\n".join(rows))
+    return text
+
+
 def desired_files():
     status = load_status()
     files = {}
@@ -188,6 +219,8 @@ def desired_files():
                 routes.append(rel.replace(os.sep, "/"))
     for route in sorted(routes):
         files[route_out(route)] = build_page(route, status)
+    with open(os.path.join(SRC, "README.src.md"), encoding="utf-8") as fh:
+        files[os.path.join(ROOT, "README.md")] = render_md(fh.read(), status)
     for cid, svg in badges_svg(status).items():
         files[os.path.join(OUT, "badges", cid + ".svg")] = svg
     return files

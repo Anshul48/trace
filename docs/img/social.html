@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>TRACE social preview (source for social-preview.png)</title>
+<meta name="robots" content="noindex">
+<style>
+  html, body { margin: 0; }
+  body { width: 1280px; height: 640px; overflow: hidden; background: #0a1124; color: #eef3ff; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; position: relative; }
+  .glow { position: absolute; inset: 0; background: radial-gradient(70% 60% at 50% 100%, rgba(47,214,194,0.16), rgba(10,17,36,0) 70%); }
+  img.pile { position: absolute; left: 0; bottom: 0; width: 1280px; height: 330px; object-fit: cover; object-position: 50% 42%; opacity: 0.95; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 40%); mask-image: linear-gradient(to bottom, transparent 0, #000 40%); }
+  .copy { position: absolute; left: 72px; top: 52px; right: 72px; }
+  .brand { display: flex; align-items: center; gap: 14px; font-weight: 800; letter-spacing: 0.12em; font-size: 26px; color: #7fa6e8; }
+  .brand i { width: 32px; height: 32px; border-radius: 9px; background: #111b36; border: 2px solid #3a4a78; display: inline-block; position: relative; }
+  .brand i::after { content: ""; position: absolute; left: 10px; top: 10px; width: 12px; height: 12px; border-radius: 50%; background: #2fd6c2; }
+  .tag { margin-left: auto; font-size: 22px; font-weight: 600; letter-spacing: 0.02em; color: #a9b6d8; }
+  h1 { font-size: 64px; line-height: 1.05; letter-spacing: -0.03em; margin: 28px 0 18px; white-space: nowrap; }
+  p { font-size: 29px; line-height: 1.35; margin: 0; color: #c8d3ef; max-width: 1000px; }
+  p b { color: #2fd6c2; }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<img class="pile" src="organizing-pile.png" alt="">
+<div class="copy">
+  <div class="brand"><i></i>TRACE<span class="tag">Research prototype &middot; open source (Apache-2.0)</span></div>
+  <h1>A memory that organizes itself.</h1>
+  <p>A question wakes <b>0.79%</b> of one of four equal parts. Every answer carries a record you can check.</p>
+</div>
+</body>
+</html>
