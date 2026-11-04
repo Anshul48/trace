@@ -4,6 +4,10 @@
 
 **Self-organizing memory prototype; demonstrated result: routed vector retrieval kept 0.9985 of exact top-ten results while scoring 0.79% of passages (50 test searches, one of four equal library parts).** TRACE sorts a growing library into groups from the passages themselves, so a question wakes only a small part of it, and every answer carries a record you can check. If you use an AI agent every day, you know it forgets. TRACE is an early answer: a memory an agent can search and check. Today it is a prototype you can try as a recorded replay, in your browser. Open source, Apache-2.0.
 
+**Try it now: [open the explorer](https://anshul48.github.io/trace/explorer/) — a replay of 144 real recorded searches. Nothing to install.**
+
+**Why it matters.** AI agents forget. The documents pile up and nobody files them. TRACE is the memory that sorts itself: the right passage at the right time, each with a record you can check.
+
 ## The library
 
 **812,545 passages. 99,891,846 tokens (about 99.9 million).** The library is fixed: every number here comes from the same frozen library, and every result carries a fingerprint your browser can re-check. Frozen engine: 207 files verified (`python3 tools/verify_freeze.py`). Measured on 50 test searches, one of four equal parts. Short of our 100M target by 0.11% (108,154 tokens).
@@ -79,6 +83,12 @@ Larger builds were earlier tests, shown separately under [Appendix: earlier test
 - **Does it work on public data?** TRACE has not been run there. A stand-in of ours (not TRACE) gave dataset-specific results: FiQA about 95% of exact search's top ten at 7% of passages scored, SciFact about 95% at 24%, NFCorpus 90% at 28% and 97% at 55%.
 - **Has anyone outside your team checked it?** No. Outside verification is pending. What you can check yourself is under [Try it, and check it](#try-it-and-check-it).
 
+## Questions judges ask
+
+- **What does 0.79% mean?** For one question, TRACE read closely and ranked only 0.79% of the passages on one quarter of the library — about 127 times less passage-scoring work than scoring everything — and kept 0.9985 of exact search's top ten. It counts scoring work only, not the whole search.
+- **Is this a live service?** No. The explorer replays 144 searches recorded on our server. The public backend is off, and a download you run yourself is planned.
+- **How do I open the explorer?** [Click here](https://anshul48.github.io/trace/explorer/) — nothing to install. Or run it on your own computer: `git clone https://github.com/Anshul48/trace.git`, then `cd trace`, then `./tools/run-trace.sh` (Windows: `tools\run-trace.bat`).
+
 ## Try it, and check it
 
 - **No install:** the [explorer](https://anshul48.github.io/trace/explorer/) in your browser. ![Working today](docs/badges/explorer-replay.svg) ![Working today](docs/badges/record-check.svg)
@@ -89,13 +99,12 @@ Larger builds were earlier tests, shown separately under [Appendix: earlier test
 
 ## Honest limits
 
-1. **Ordinary keyword search finds the source more often.** On our 50 test searches (40 written questions and 10 taken from passage openings) it put the right source passage in its top ten for 82% of them. TRACE did for 52%, and exact search by meaning also got 52%, so the gap is meaning versus keywords, not our shortcut. TRACE is for search by meaning that you can check, not a replacement for keyword search.
-2. **A plain scan takes less time, and our stored size on disk is bigger.** Per search: keyword 6 ms, exact scan 88 ms, TRACE 1.2 s. Stored size on disk: 2.28 GB for TRACE, 1.25 GB for plain vectors, 0.51 GB for the keyword index. Stored size on disk; memory use was not compared. The one memory figure we measured is the live service's peak, 1.03 GiB, while answering the 50 test questions. We claim no speed or space advantage.
-3. **The headline result is for our own library and method.** TRACE itself has not been run on public benchmarks. A simple stand-in of ours (not TRACE) on three small public sets gave dataset-specific results: FiQA about 95% of exact search's top ten at 7% of passages scored, SciFact about 95% at 24%, NFCorpus 90% at 28% and 97% at 55%. So 0.79% at 0.9985 is not reproduced on public data.
-4. **The groups come from an ordinary sorting step**, one run per quarter of the library. We measured how ordered the finished groups are (about 7 of at most 10 for a search's best matches, and 7.8 if passages are simply kept in arrival order), not how they formed. The order was present at every size we sorted (10,000 to 233,000 passages) and did not clearly improve with size; we make no claim about millions or billions of passages, and none that it improves as the library grows.
-5. **Scale is not as far as it may sound.** We missed our 100M target by 0.11%. The 310.5M and 504.5M builds are earlier tests by us on a machine since shut down, and the 1.53 billion item is a separate group-picking test: see the appendix below.
-6. **Nobody outside our team has checked these results.**
-7. **No live public service, and no download yet.** The explorer is a replay of real recorded searches. A public backend was switched off after it failed its first test with many users.
+1. **Keyword search finds the source more often, and a plain scan answers sooner.** On our 50 test searches the right source was in keyword search's top ten for 82% of them, against 52% for TRACE. Per search: 6 ms keyword, 88 ms exact scan, 1.2 s TRACE. TRACE is meaning-based search you can check, not a keyword replacement.
+2. **Our library, our method.** 0.79% at 0.9985 is not reproduced on public data, and no outside party has checked our results.
+3. **Ordinary grouping under the hood.** One sorting run per quarter of the library. The order was present at every size we checked (10,000 to 200,000 passages in a controlled check; the largest set we sorted holds 233,000 passages), with no claim it improves as the library grows.
+4. **A replay, not a live service.** The explorer replays recorded searches. The public backend is off and the download is planned.
+
+*Each limit above is expanded with numbers on the [evidence page](https://anshul48.github.io/trace/evidence/). The earlier larger builds are in the [appendix](#appendix-earlier-tests-by-us).*
 
 ## Where each thing stands
 
