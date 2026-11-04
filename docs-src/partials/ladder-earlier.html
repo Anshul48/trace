@@ -1,0 +1,27 @@
+<div class="tier tier-earlier" aria-labelledby="tier-earlier-h">
+  <p class="tier-label" id="tier-earlier-h">Earlier tests, by us: separate from the result above</p>
+  <p class="tier-note">These are earlier runs with their own records. They were not the sealed library, their numbers are never to be read together with the result above, and the machine they ran on was shut down.</p>
+  <ol class="ladder" id="ladder-list" aria-label="Earlier tests, three steps">
+    <li class="rung">
+      {{badge:build-310m}}
+      <span class="size">310.5M<small>tokens, built in 8 pieces</small></span>
+      <p class="did">Exact search matched the ground truth. With one piece switched off it still found 0.87 of the exact results, with no wrong passages.</p>
+      <p class="caveat">Our own records, not outside-verified. The cloud machine was shut down, so it cannot be re-run. A search took p50 4.18 s, pieces searched one at a time.</p>
+      <p class="links"><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-300M.txt">Raw record</a> &middot; <a href="{{root}}evidence/#earlier">Details</a></p>
+    </li>
+    <li class="rung">
+      {{badge:build-504m}}
+      <span class="size">504.5M<small>tokens, sealed in 13 pieces (7.65 GB stored size on disk; memory use was not compared)</small></span>
+      <p class="did">Exact search matched the ground truth. With one piece switched off it still found 0.885 of the exact results, with no wrong passages.</p>
+      <p class="caveat">Our own records, not outside-verified, cannot be re-run, not served at that size. The compressed-search figure (0.994 to 0.998) was measured only on the five newest pieces. A 13-piece search took p50 6.86 s, which is slow.</p>
+      <p class="links"><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-500M.txt">Raw record</a> &middot; <a href="{{root}}evidence/#earlier">Details</a></p>
+    </li>
+    <li class="rung">
+      {{badge:routing-1b}}
+      <span class="size">1.53B<small>tokens encoded into 7.13M vectors, in 109 pieces</small></span>
+      <p class="did">A separate October test of group-picking only: opening 6.6% of the vectors kept 0.9947 of the exact top ten.</p>
+      <p class="caveat">A different, larger collection. Not served through TRACE. No merged index, no checkable records at that size, no billion-vector run. We have not run a billion tokens through TRACE.</p>
+      <p class="links"><a href="{{root}}evidence/#separate">What was and was not done</a></p>
+    </li>
+  </ol>
+</div>

@@ -27,7 +27,7 @@ These documents were written for an earlier, smaller experiment (a 10-million-to
 
 | Document | What it is |
 |---|---|
-| [README-technical.md](README-technical.md) | The earlier full README, including how to reproduce a small run on your own computer. |
+| [README-technical.md](README-technical.md) | The earlier full README, including how to reproduce a small run on your own computer. Its links to the retired play, recording and future pages no longer work. |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | The design, in technical terms. |
 | [BENCHMARKS.md](BENCHMARKS.md) | The measurement records of the earlier build. |
 | [REPRO.md](REPRO.md) | Reproduction commands and environment pins. |

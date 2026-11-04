@@ -60,6 +60,23 @@ def badge_html(status, cap_id):
     return '<span class="badge %s" data-status-id="%s">%s</span>' % (cls, cap_id, html.escape(text))
 
 
+STATUSLINE = [("explorer-replay", "Recorded replay"), ("browser-mode", "Browser mode"),
+              ("public-service", "Public backend"), ("local-kit", "Run-it-yourself kit")]
+
+
+def statusline_html(status):
+    parts = ['<span class="sl-item"><b>%s</b> %s</span>' % (name, badge_html(status, cid)) for cid, name in STATUSLINE]
+    return '<p class="statusline" aria-label="What you can try today">%s</p>' % " ".join(parts)
+
+
+def statusline_md(status):
+    out = []
+    for cid, name in STATUSLINE:
+        cap = next(c for c in status["capabilities"] if c["id"] == cid)
+        out.append("**%s:** %s" % (name, (cap.get("badge_text") or status["labels"][cap["status"]]).lower()))
+    return ". ".join(out) + "."
+
+
 def status_table(status, root):
     rows = []
     order = {"built": 0, "prototype": 1, "next": 2}
@@ -94,6 +111,7 @@ def render(text, route, status, meta, depth=0):
     text = re.sub(r"\{\{label:([a-z0-9-]+)\}\}", lambda m: status["labels"][
         next(c for c in status["capabilities"] if c["id"] == m.group(1))["status"]], text)
     text = text.replace("{{statustable}}", status_table(status, root)) if "{{statustable}}" in text else text
+    text = text.replace("{{statusline}}", statusline_html(status))
     text = text.replace("{{root}}", root)
     text = text.replace("{{updated}}", status["updated"])
     if "{{nav}}" in text:
@@ -198,6 +216,7 @@ def film_md():
 def render_md(text, status):
     text = re.sub(r"\{\{badge:([a-z0-9-]+)\}\}", lambda m: badge_md(status, m.group(1)), text)
     text = text.replace("{{film}}", film_md())
+    text = text.replace("{{statusline}}", statusline_md(status))
     text = text.replace("{{updated}}", status["updated"])
     if "{{statusmd}}" in text:
         order = {"built": 0, "prototype": 1, "next": 2}

@@ -1,0 +1,14 @@
+    <span class="eyebrow">What a skeptic asks</span>
+    <h2>The hard questions, answered plainly</h2>
+    <h3>Does it find the right source?</h3>
+    <p>Not as often as keyword search. On our 50 test searches, ordinary keyword search put the right source in its top ten for 82% of them; TRACE and exact search by meaning each reached 52%. Our 0.9985 measures how much of <em>exact vector search's</em> answer TRACE kept, not answer quality.</p>
+    <h3>Does a matching fingerprint prove nothing relevant was skipped?</h3>
+    <p>No. A matching fingerprint proves the passage you were shown is the one that was stored, with its article and position. Whether the shortcut skipped something relevant is a different question, and the comparison with exact search measures it: 0.9985 of exact search's top ten kept.</p>
+    <h3>Is 0.79% the whole cost?</h3>
+    <p>No. It counts passage-scoring work only. Choosing the groups, building them and the end-to-end time are separate costs: a TRACE search took 1.2 s against 88 ms for an exact scan, and keyword search took 6 ms.</p>
+    <h3>Is the saving from self-organization, or from ordinary grouping?</h3>
+    <p>We have not separated the two inside TRACE's own engine. The groups come from an ordinary sorting step, and we measured how ordered they are, not how they formed. In a simple stand-in (not TRACE) at the same 0.8% of passages, our groups found nearly all of the true best matches, arrival order alone found 92% and random groups about a third. The order we measured shows up at every size we tested (10,000 to 200,000 passages, a flat band with no trend), and we do not claim it improves with scale.</p>
+    <h3>Does it work on public data?</h3>
+    <p>TRACE has not been run there. A stand-in of ours gave dataset-specific results: FiQA about 95% at 7% scored, SciFact about 95% at 24%, NFCorpus 90% at 28% and 97% at 55%.</p>
+    <h3>Has anyone outside your team checked it?</h3>
+    <p>No. Outside verification is pending. What you can check yourself is on <a href="{{root}}verify/">Verify</a>.</p>

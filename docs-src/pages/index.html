@@ -1,10 +1,10 @@
-<!--page {"title": "TRACE: a memory that organizes itself", "desc": "TRACE sorts a growing library into groups from the passages themselves. A question then wakes only a small part of it, and every answer comes with a record you can check. Research prototype, open source.", "nav": "home"} -->
+<!--page {"title": "TRACE: a memory that organizes itself", "desc": "Self-organizing memory prototype. Demonstrated result: routed vector retrieval kept 0.9985 of exact top-ten results while scoring 0.79% of passages (50 test searches, one of four equal library parts). Every answer comes with a record you can check.", "nav": "home"} -->
 <section class="hero">
   <div class="wrap">
     <div class="stage">
       <div class="pill-row"><span class="pill">Research prototype</span><span class="pill">Open source, Apache-2.0</span></div>
       <h1>A memory that organizes itself.</h1>
-      <p class="lede">TRACE sorts a growing library into groups from the passages themselves. A question then wakes only a small part of it, and every answer comes with a record you can check.</p>
+      <p class="lede"><b>Self-organizing memory prototype.</b> Demonstrated result: routed vector retrieval kept <b>0.9985</b> of exact top-ten results while scoring <b>0.79%</b> of passages (50 test searches, one of four equal library parts). Every answer comes with a record you can check.</p>
       <div class="btn-row">
         <a class="btn btn-primary" href="#judges">Try it in 2 minutes</a>
         <a class="btn btn-quiet" href="#film">Watch the 3-minute film</a>
@@ -35,6 +35,7 @@
 
 <section class="section-tight" id="film">
   <div class="wrap">
+    {{statusline}}
     <div class="grid-2" style="align-items: stretch">
       <div data-films="main">
         <article class="card film-card" style="grid-template-columns: 1fr">
@@ -60,9 +61,9 @@
   <div class="wrap">
     <span class="eyebrow">Scale</span>
     <h2>How far it has been tested</h2>
-    <p class="lede" style="max-width: 62ch">The measured result is on a sealed library of 99.9 million tokens. The larger builds are earlier tests of ours, with their own records and their own caveats, shown on each step.</p>
+    <p class="lede" style="max-width: 62ch">The measured result is on one sealed library of 99.9 million tokens. Larger builds were earlier tests of ours: they are shown separately below it, each with its own records and caveats.</p>
     {{include:ladder}}
-    <p class="note">Plain words: a token is a word-sized piece of text. A &ldquo;piece&rdquo; is one sealed part of the library. Earlier tests are our own records and no outside party has verified them.</p>
+    <p class="note">Plain words: a token is a word-sized piece of text. A &ldquo;piece&rdquo; is one sealed part of a library. Earlier tests are our own records and no outside party has verified them.</p>
   </div>
 </section>
 
@@ -79,7 +80,7 @@
       <article class="card">
         <div class="card-head"><h3>2. A question wakes a part</h3>{{badge:sparse-search}}</div>
         <p>A question is compared with the groups first, and only the groups most likely to hold the answer are searched.</p>
-        <div class="stat"><span class="num">0.79%</span><span class="what">of one of four equal parts is scored per search</span><span class="scope">About 127 times less scoring work, and 0.9985 of exact search's top ten kept. 50 test searches, our library and method, not reproduced on public data.</span></div>
+        <div class="stat"><span class="num">0.79%</span><span class="what">of one of four equal parts is scored per search</span><span class="scope">About 127 times less passage-scoring work (routing and building the groups are separate costs), and 0.9985 of exact search's top ten kept. 50 test searches, our library and method, not reproduced on public data.</span></div>
       </article>
       <article class="card">
         <div class="card-head"><h3>3. Every answer has a record</h3>{{badge:record-check}}</div>
@@ -119,22 +120,28 @@
   </div>
 </section>
 
-<section class="section band" id="limits">
+<section class="section band" id="skeptic">
+  <div class="wrap-narrow prose">
+    {{include:skeptic}}
+  </div>
+</section>
+
+<section class="section" id="limits">
   <div class="wrap">
     <span class="eyebrow">Honest limits</span>
     <h2>What we did not show</h2>
     <ol class="limits-list">
       <li><div><b class="lead">Keyword search finds the source more often.</b><p>On our 50 test searches, ordinary keyword search put the right source passage in its top ten for 82% of them. TRACE did for 52%, and exact search by meaning also got 52%, so the gap is meaning versus keywords, not our shortcut.</p></div></li>
-      <li><div><b class="lead">A plain scan takes less time per search, and our stored size on disk is bigger.</b><p>Per search: keyword 6 ms, exact scan 88 ms, TRACE 1.2 s. Stored size on disk: 2.28 GB for TRACE, 1.25 GB for plain vectors, 0.51 GB for the keyword index. TRACE's saving is scoring work, not time or space.</p></div></li>
-      <li><div><b class="lead">The headline result is for our own library and method.</b><p>It has not been reproduced on public data. A simple stand-in of ours (not TRACE itself) on three small public sets needed 7% to 28% of passages scored to keep about 95%, and under 1% kept only 52% on the largest.</p></div></li>
-      <li><div><b class="lead">Scale: not as far as it may sound.</b><p>We missed our 100M target by 0.11%. We have not run a billion tokens. The 1.53 billion item is a separate group-picking test. The 504.5M build is an earlier test by us, on a machine since shut down.</p></div></li>
-      <li><div><b class="lead">The groups come from an ordinary sorting step.</b><p>On our library it ran once. We measured how ordered the finished groups are (a search's best matches share about 7 groups, and arrival order alone gives about 8), not how they formed.</p></div></li>
+      <li><div><b class="lead">A plain scan takes less time per search, and our stored size on disk is bigger.</b><p>Per search: keyword 6 ms, exact scan 88 ms, TRACE 1.2 s. Stored size on disk: 2.28 GB for TRACE, 1.25 GB for plain vectors, 0.51 GB for the keyword index. Stored size on disk; memory use was not compared. TRACE's saving is passage-scoring work, not time or space.</p></div></li>
+      <li><div><b class="lead">The headline result is for our own library and method.</b><p>TRACE itself has not been run on public data. A simple stand-in of ours (not TRACE) on three small public sets gave dataset-specific results: FiQA kept about 95% of exact search's top ten at 7% of passages scored, SciFact about 95% at 24%, and NFCorpus 90% at 28% and 97% at 55%. Scoring under 1% (FiQA, one group) kept only 52%.</p></div></li>
+      <li><div><b class="lead">Scale: not as far as it may sound.</b><p>We missed our 100M target by 0.11%. We have not run a billion tokens. The 1.53 billion item is a separate group-picking test. The 504.5M and 310.5M builds are earlier tests by us, on a machine since shut down, shown separately above.</p></div></li>
+      <li><div><b class="lead">The groups come from an ordinary sorting step.</b><p>On our library it ran once. We measured how ordered the finished groups are (a search's best matches share about 7 groups, and arrival order alone gives about 8), not how they formed. The order did not clearly grow with size in our small checks, and we make no claim at millions or billions.</p></div></li>
     </ol>
     <div class="btn-row"><a class="btn btn-primary" href="evidence/">Every limit, with numbers</a><a class="btn btn-quiet" href="verify/">Check it yourself</a></div>
   </div>
 </section>
 
-<section class="section" id="also">
+<section class="section band" id="also">
   <div class="wrap">
     <span class="eyebrow">Also by this team</span>
     <h2>Two companion projects</h2>

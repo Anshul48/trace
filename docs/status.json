@@ -31,6 +31,13 @@
       "checked": "2026-11-04"
     },
     {
+      "id": "browser-mode",
+      "title": "Explorer browser mode: typed words are matched to the closest recorded question, and the record check, all inside your own browser",
+      "status": "prototype",
+      "evidence_note": "What runs in your browser today: matching your words to a recorded question and recomputing the fingerprint. There is no search of the whole library in the browser.",
+      "checked": "2026-11-04"
+    },
+    {
       "id": "library-100m",
       "title": "A 100M-class sealed library (812,545 passages, 99,891,846 tokens), sorted into groups and searched on our own server",
       "status": "built",
@@ -110,7 +117,8 @@
       "id": "public-service",
       "title": "A public live service anyone can query",
       "status": "next",
-      "evidence_note": "Switched off. It failed a first test with many people at once; a later fix passed a local retest; the public service is still off."
+      "evidence_note": "The public backend is switched off: it failed a first test with many users at once. A later fix passed a local retest, but it stays off.",
+      "badge_text": "Off"
     },
     {
       "id": "local-kit",

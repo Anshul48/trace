@@ -160,23 +160,31 @@ small, .note { font-size: var(--step--1); color: var(--muted); }
 .pile-hud .chip { background: rgba(7, 13, 30, 0.82); border: 1px solid var(--stage-line); color: var(--stage-ink); border-radius: var(--radius-pill); padding: 0.35em 0.9em; font-size: 0.9rem; }
 .pile-hud .chip b { color: var(--stage-accent); }
 
-/* ---------- scale ladder ---------- */
-.ladder { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); align-items: end; }
-.rung { display: flex; flex-direction: column; gap: var(--space-2); background: var(--surface); border: 1px solid var(--line); border-top: 5px solid var(--accent); border-radius: var(--radius); padding: var(--space-5) var(--space-4) var(--space-4); margin: 0; box-shadow: var(--shadow); }
-.rung:nth-child(1) { min-height: 22rem; }
-.rung:nth-child(2) { min-height: 24rem; }
-.rung:nth-child(3) { min-height: 26rem; }
-.rung:nth-child(4) { min-height: 28rem; border-top-color: var(--st-next); }
-.rung:nth-child(2), .rung:nth-child(3) { border-top-color: var(--st-proto); }
+/* ---------- scale ladder: one measured result, then earlier tests kept apart ---------- */
+.tier { margin: 0 0 var(--space-5); }
+.tier-label { font-size: var(--step--1); font-weight: 750; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 var(--space-2); }
+.tier-note { max-width: 70ch; color: var(--muted); font-size: var(--step--1); margin: 0 0 var(--space-4); }
+.tier-earlier { border: 2px dashed var(--st-proto); border-radius: var(--radius); padding: var(--space-4); background: var(--st-proto-bg); }
+.ladder { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); align-items: stretch; }
+.rung { display: flex; flex-direction: column; gap: var(--space-2); background: var(--surface); border: 1px solid var(--line); border-top: 5px solid var(--accent); border-radius: var(--radius); padding: var(--space-5) var(--space-4) var(--space-4); margin: 0; min-width: 0; }
+.rung-main { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr); gap: var(--space-5); align-items: start; padding: var(--space-5); }
+.rung-main .size { font-size: var(--step-4); }
+.tier-earlier .rung { border-top-color: var(--st-proto); }
+.tier-earlier .rung:nth-child(3) { border-top-color: var(--st-next); }
 .rung .size { font-size: var(--step-3); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
 .rung .size small { display: block; font-size: var(--step--1); letter-spacing: 0; font-weight: 600; color: var(--muted); margin-top: var(--space-1); }
 .rung .did { font-weight: 650; margin: 0; }
 .rung .caveat { font-size: var(--step--1); color: var(--muted); margin: 0; }
 .rung .links { margin-top: auto; font-size: var(--step--1); }
 .rung .links a { display: inline-block; padding: 0.35rem 0; }
-.rung .badge { align-self: flex-start; }
-@media (max-width: 1000px) { .ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; } .rung, .rung:nth-child(n) { min-height: 0; } }
+.rung .badge { align-self: flex-start; margin-bottom: var(--space-3); }
+@media (max-width: 1000px) { .ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 720px) { .rung-main { grid-template-columns: 1fr; gap: var(--space-3); } }
 @media (max-width: 600px) { .ladder { grid-template-columns: 1fr; } }
+
+.statusline { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); align-items: center; margin: var(--space-4) 0; padding: var(--space-3) var(--space-4); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); font-size: var(--step--1); }
+.statusline .sl-item { display: inline-flex; gap: var(--space-2); align-items: center; }
+.statusline .badge { margin: 0; }
 
 /* ---------- film card ---------- */
 .film-card { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-5); align-items: center; }

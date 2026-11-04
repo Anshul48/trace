@@ -73,37 +73,50 @@
 <section class="section-tight">
   <div class="wrap">
     <span class="eyebrow">Where it has been tested</span>
-    <h2>Four steps of scale</h2>
-    <ol class="ladder" id="ladder-list" aria-label="How far TRACE has been tested, four steps">
-  <li class="rung">
-    <span class="badge badge-built" data-status-id="library-100m">Working today, our server</span>
-    <span class="size">99.9M<small>tokens in the sealed library: 812,545 passages</small></span>
-    <p class="did">The full measured pipeline: sorted into groups, searched, every answer with a checkable record, re-run on our own server.</p>
-    <p class="caveat">Short of our 100M target by 0.11% (108,154 tokens). Our own library and method; not reproduced on public data; no outside party has checked it.</p>
-    <p class="links"><a href="../evidence/#measured">The measurement</a> &middot; <a href="../explorer/">Explorer</a></p>
-  </li>
-  <li class="rung">
-    <span class="badge badge-proto" data-status-id="build-310m">Earlier test</span>
-    <span class="size">310.5M<small>tokens, built in 8 pieces</small></span>
-    <p class="did">Exact search matched the ground truth. With one piece switched off it still found 87% of the exact results, with no wrong passages.</p>
-    <p class="caveat">Earlier test, by us. Our own records, not outside-verified. The cloud machine was shut down, so it cannot be re-run. A search took p50 4.18 s, pieces searched one at a time.</p>
-    <p class="links"><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-300M.txt">Raw receipt</a></p>
-  </li>
-  <li class="rung">
-    <span class="badge badge-proto" data-status-id="build-504m">Earlier test</span>
-    <span class="size">504.5M<small>tokens, sealed in 13 pieces (7.65 GB stored)</small></span>
-    <p class="did">Exact search matched the ground truth. With one piece switched off it still found 88.5% of the exact results, with no wrong passages.</p>
-    <p class="caveat">Earlier test, by us. Our own records, not outside-verified. The machine was shut down, so it cannot be re-run. Not served at that size. The compressed-search figure (0.994 to 0.998) was measured only on the five newest pieces. A 13-piece search took p50 6.86 s, not fast.</p>
-    <p class="links"><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-500M.txt">Raw receipt</a></p>
-  </li>
-  <li class="rung">
-    <span class="badge badge-proto" data-status-id="routing-1b">Separate test</span>
-    <span class="size">1.53B<small>tokens encoded into 7.13M vectors, in 109 pieces</small></span>
-    <p class="did">A separate October test of group-picking only: opening 6.6% of the vectors kept 0.9947 of the exact top ten.</p>
-    <p class="caveat">A different, larger collection. Not served through TRACE. No merged index, no checkable records at that size, no billion-vector run. We have not run a billion tokens through TRACE.</p>
-    <p class="links"><a href="../evidence/#separate">What was and was not done</a></p>
-  </li>
-</ol>
+    <h2>One measured library, and earlier tests kept apart</h2>
+    <div class="tier tier-main" aria-labelledby="tier-main-h">
+  <p class="tier-label" id="tier-main-h">Measured result: the sealed library</p>
+  <article class="rung rung-main">
+    <div>
+      <span class="badge badge-built" data-status-id="library-100m">Working today, our server</span>
+      <span class="size">99.9M<small>tokens in the sealed library: 812,545 passages</small></span>
+    </div>
+    <div>
+      <p class="did">The full measured pipeline: sorted into groups, searched, every answer with a checkable record, re-run on our own server. This is the library behind every number on this site that is not marked as an earlier test.</p>
+      <p class="caveat">Short of our 100M target by 0.11% (108,154 tokens). Our own library and method; not reproduced on public data; no outside party has checked it.</p>
+      <p class="links"><a href="../evidence/#measured">The measurement</a> &middot; <a href="../explorer/">Explorer</a></p>
+    </div>
+  </article>
+</div>
+
+<div class="tier tier-earlier" aria-labelledby="tier-earlier-h">
+  <p class="tier-label" id="tier-earlier-h">Earlier tests, by us: separate from the result above</p>
+  <p class="tier-note">These are earlier runs with their own records. They were not the sealed library, their numbers are never to be read together with the result above, and the machine they ran on was shut down.</p>
+  <ol class="ladder" id="ladder-list" aria-label="Earlier tests, three steps">
+    <li class="rung">
+      <span class="badge badge-proto" data-status-id="build-310m">Earlier test</span>
+      <span class="size">310.5M<small>tokens, built in 8 pieces</small></span>
+      <p class="did">Exact search matched the ground truth. With one piece switched off it still found 0.87 of the exact results, with no wrong passages.</p>
+      <p class="caveat">Our own records, not outside-verified. The cloud machine was shut down, so it cannot be re-run. A search took p50 4.18 s, pieces searched one at a time.</p>
+      <p class="links"><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-300M.txt">Raw record</a> &middot; <a href="../evidence/#earlier">Details</a></p>
+    </li>
+    <li class="rung">
+      <span class="badge badge-proto" data-status-id="build-504m">Earlier test</span>
+      <span class="size">504.5M<small>tokens, sealed in 13 pieces (7.65 GB stored size on disk; memory use was not compared)</small></span>
+      <p class="did">Exact search matched the ground truth. With one piece switched off it still found 0.885 of the exact results, with no wrong passages.</p>
+      <p class="caveat">Our own records, not outside-verified, cannot be re-run, not served at that size. The compressed-search figure (0.994 to 0.998) was measured only on the five newest pieces. A 13-piece search took p50 6.86 s, which is slow.</p>
+      <p class="links"><a href="https://github.com/Anshul48/trace/blob/main/receipts/earlier-runs/RECEIPT-RUNG-500M.txt">Raw record</a> &middot; <a href="../evidence/#earlier">Details</a></p>
+    </li>
+    <li class="rung">
+      <span class="badge badge-proto" data-status-id="routing-1b">Separate test</span>
+      <span class="size">1.53B<small>tokens encoded into 7.13M vectors, in 109 pieces</small></span>
+      <p class="did">A separate October test of group-picking only: opening 6.6% of the vectors kept 0.9947 of the exact top ten.</p>
+      <p class="caveat">A different, larger collection. Not served through TRACE. No merged index, no checkable records at that size, no billion-vector run. We have not run a billion tokens through TRACE.</p>
+      <p class="links"><a href="../evidence/#separate">What was and was not done</a></p>
+    </li>
+  </ol>
+</div>
+
 
   </div>
 </section>
@@ -126,7 +139,7 @@
       <p class="callout-title"><strong class="callout-title">What we did not measure</strong></p>
       <p>On our 99.9M-token library the groups come from one ordinary sorting run (a standard method, k-means, five passes, once per quarter of the library). We measured how ordered the finished result is, not how it formed over time, and we have no curve of the order growing as the library grows. TRACE's own store, which is built to file passages as they arrive and repair itself, has the records of an earlier qualification run in the repository; that is the evidence for the process, and it is smaller than the main library.</p>
     </div>
-    <p>One more honest limit: each of the four quarters of our library, sorted on its own, showed about the same amount of order. But the largest sorted set we can still open has about 285,000 passages, so we make no claim about how the order holds at millions or billions.</p>
+    <p>One more honest limit: sorting the same collection at sizes from 10,000 to 200,000 passages showed order at every size, but it did not clearly grow with size. The largest set we sorted and measured holds 233,000 passages, so we make no claim about millions or billions, and we do not claim the order improves as the library grows.</p>
     <p class="note">Details and caveats: <a href="../evidence/#order">Evidence and limits</a>. The raw output files are in <a href="https://github.com/Anshul48/trace/tree/main/receipts/order-measure">receipts/order-measure</a>.</p>
 
     <h2 id="wakes">2. A question wakes only a small part</h2>
@@ -138,9 +151,9 @@
         <div class="bar-row"><span class="lab">Exact search</span><div class="bar-track"><div class="bar-fill fill-exact" style="width:100%"></div><span class="bar-val">100%</span></div></div>
         <div class="bar-row"><span class="lab">TRACE</span><div class="bar-track"><div class="bar-fill fill-trace low" style="width:0.79%; --w:0.79%"></div><span class="bar-val">0.79%</span></div></div>
       </div>
-      <p class="note">About 127 times less scoring work, and TRACE kept 0.9985 of exact search's top ten (1 would mean identical).</p>
+      <p class="note">About 127 times less passage-scoring work (routing and building the groups are separate costs), and TRACE kept 0.9985 of exact search's top ten (1 would mean identical).</p>
     </div>
-    <p>This is what we call <b>sparse activation</b>: only a small share of the memory is woken per question. What it does not mean: faster. At this size a plain scan answers sooner (see the limits), because TRACE also has to pick the groups, and our measured TRACE search is vector search only, with no keyword part. What it buys is less scoring work, which should matter once a library is too big to scan in the time or memory you have. We have not measured where that crossover is.</p>
+    <p>This is what we call <b>sparse activation</b>: only a small share of the memory is woken per question. What it does not mean: faster. At this size a plain scan answers sooner (see the limits), because TRACE also has to pick the groups, and our measured TRACE search is vector search only, with no keyword part. What it buys is less passage-scoring work, which should matter once a library is too big to scan in the time or memory you have. We have not measured where that crossover is.</p>
     <p class="note">The 0.79% was measured on one of the library's four equal parts, each about 203,000 passages. The same 50 test searches were not run as a random sample of all possible searches.</p>
 
     <h2 id="record">3. Every answer carries a record you can check</h2>
@@ -192,7 +205,7 @@
         </ul>
       </div>
     </div>
-    <p class="fine">Tested so far: a 99.9M-token library (measured, short of our 100M target by 0.11%), 310M and 504.5M-token builds (earlier tests, by us, our own records), and a separate 1.53 billion-token group-picking test (not served). <a href="../evidence/#ladder">The ladder, with every caveat</a>.</p>
+    <p class="fine">Tested so far: a 99.9M-token library (measured, short of our 100M target by 0.11%). Earlier tests, by us and separate from it, with our own records: 310.5M and 504.5M-token builds, and a 1.53 billion-token group-picking test. Nobody outside our team has verified any of this. <a href="../evidence/#appendix">Details and caveats</a>.</p>
   </div>
 </footer>
 

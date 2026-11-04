@@ -31,7 +31,7 @@
 <section class="section-tight">
   <div class="wrap">
     <span class="eyebrow">Where it has been tested</span>
-    <h2>Four steps of scale</h2>
+    <h2>One measured library, and earlier tests kept apart</h2>
     {{include:ladder}}
   </div>
 </section>
@@ -54,7 +54,7 @@
       <p class="callout-title"><strong class="callout-title">What we did not measure</strong></p>
       <p>On our 99.9M-token library the groups come from one ordinary sorting run (a standard method, k-means, five passes, once per quarter of the library). We measured how ordered the finished result is, not how it formed over time, and we have no curve of the order growing as the library grows. TRACE's own store, which is built to file passages as they arrive and repair itself, has the records of an earlier qualification run in the repository; that is the evidence for the process, and it is smaller than the main library.</p>
     </div>
-    <p>One more honest limit: each of the four quarters of our library, sorted on its own, showed about the same amount of order. But the largest sorted set we can still open has about 285,000 passages, so we make no claim about how the order holds at millions or billions.</p>
+    <p>One more honest limit: sorting the same collection at sizes from 10,000 to 200,000 passages showed order at every size, but it did not clearly grow with size. The largest set we sorted and measured holds 233,000 passages, so we make no claim about millions or billions, and we do not claim the order improves as the library grows.</p>
     <p class="note">Details and caveats: <a href="../evidence/#order">Evidence and limits</a>. The raw output files are in <a href="https://github.com/Anshul48/trace/tree/main/receipts/order-measure">receipts/order-measure</a>.</p>
 
     <h2 id="wakes">2. A question wakes only a small part</h2>
@@ -66,9 +66,9 @@
         <div class="bar-row"><span class="lab">Exact search</span><div class="bar-track"><div class="bar-fill fill-exact" style="width:100%"></div><span class="bar-val">100%</span></div></div>
         <div class="bar-row"><span class="lab">TRACE</span><div class="bar-track"><div class="bar-fill fill-trace low" style="width:0.79%; --w:0.79%"></div><span class="bar-val">0.79%</span></div></div>
       </div>
-      <p class="note">About 127 times less scoring work, and TRACE kept 0.9985 of exact search's top ten (1 would mean identical).</p>
+      <p class="note">About 127 times less passage-scoring work (routing and building the groups are separate costs), and TRACE kept 0.9985 of exact search's top ten (1 would mean identical).</p>
     </div>
-    <p>This is what we call <b>sparse activation</b>: only a small share of the memory is woken per question. What it does not mean: faster. At this size a plain scan answers sooner (see the limits), because TRACE also has to pick the groups, and our measured TRACE search is vector search only, with no keyword part. What it buys is less scoring work, which should matter once a library is too big to scan in the time or memory you have. We have not measured where that crossover is.</p>
+    <p>This is what we call <b>sparse activation</b>: only a small share of the memory is woken per question. What it does not mean: faster. At this size a plain scan answers sooner (see the limits), because TRACE also has to pick the groups, and our measured TRACE search is vector search only, with no keyword part. What it buys is less passage-scoring work, which should matter once a library is too big to scan in the time or memory you have. We have not measured where that crossover is.</p>
     <p class="note">The 0.79% was measured on one of the library's four equal parts, each about 203,000 passages. The same 50 test searches were not run as a random sample of all possible searches.</p>
 
     <h2 id="record">3. Every answer carries a record you can check</h2>
