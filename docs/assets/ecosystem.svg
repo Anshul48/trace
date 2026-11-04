@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400" role="img" aria-label="Diagram of one ecosystem: TRACE in front as the memory, ANIMA and Reflex behind it.">
+  <title>One ecosystem: TRACE in front, ANIMA and Reflex behind it</title>
+  <g font-family="system-ui, 'Segoe UI', Arial, sans-serif" text-anchor="middle">
+    <!-- behind: ANIMA (left) and Reflex (right) -->
+    <rect x="30" y="30" width="250" height="120" rx="12" fill="#eef1f7" stroke="#8a93ad" stroke-width="2"/>
+    <text x="155" y="80" font-size="26" font-weight="700" fill="#1a2333">ANIMA</text>
+    <text x="155" y="108" font-size="14" fill="#445066">coding agents</text>
+    <text x="155" y="128" font-size="14" fill="#445066">that remember</text>
+    <rect x="360" y="30" width="250" height="120" rx="12" fill="#eef1f7" stroke="#8a93ad" stroke-width="2"/>
+    <text x="485" y="80" font-size="26" font-weight="700" fill="#1a2333">Reflex</text>
+    <text x="485" y="108" font-size="14" fill="#445066">an AI that finds</text>
+    <text x="485" y="128" font-size="14" fill="#445066">the right button</text>
+    <!-- connecting lines, drawn before the front box so TRACE covers them -->
+    <line x1="155" y1="150" x2="260" y2="215" stroke="#8a93ad" stroke-width="2"/>
+    <line x1="485" y1="150" x2="380" y2="215" stroke="#8a93ad" stroke-width="2"/>
+    <!-- front: TRACE overlaps the lines -->
+    <rect x="155" y="210" width="330" height="140" rx="14" fill="#dce8ff" stroke="#1f3a8a" stroke-width="3"/>
+    <text x="320" y="262" font-size="34" font-weight="800" fill="#12245e">TRACE</text>
+    <text x="320" y="292" font-size="15" font-weight="600" fill="#1f3a8a">the memory, at the front</text>
+    <text x="320" y="316" font-size="13" fill="#445066">every answer carries a record you can check</text>
+  </g>
+</svg>

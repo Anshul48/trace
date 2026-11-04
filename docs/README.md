@@ -14,6 +14,17 @@ The website lives in this folder and is served by GitHub Pages at https://anshul
 | [Verify it yourself](https://anshul48.github.io/trace/verify/) | What each check proves, and what it does not. |
 | [META-USE.md](META-USE.md) | Which Meta products and models we used and did not use. |
 
+## The ecosystem
+
+One builder, three projects; TRACE is the memory at the front. The full picture is in [the README's ecosystem section](../README.md#the-ecosystem).
+
+| | |
+|---|---|
+| [ANIMA on GitHub](https://github.com/Anshul48/anima-substrate) | The companion project: coding agents that remember. |
+| [ANIMA demo](https://anshul48.github.io/anima-substrate/demo/) | Check ANIMA's record in your browser, a replay of a recorded nine-job run. |
+| [Reflex demo](https://anshul48.github.io/demo-trace-anima-reflex/) | The companion line of work: an AI that finds the right button. No login. |
+| [Reflex: early trial results](reflex.md) | What Reflex is, and the numbers from the early trial (SAM 3.1 with Muse Spark). |
+
 ## Machine-readable files the site is built from
 
 | File | What it decides |

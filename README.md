@@ -4,6 +4,32 @@
 
 **Self-organizing memory prototype; demonstrated result: routed vector retrieval kept 0.9985 of exact top-ten results while scoring 0.79% of passages (50 test searches, one of four equal library parts).** TRACE sorts a growing library into groups from the passages themselves, so a question wakes only a small part of it, and every answer carries a record you can check. If you use an AI agent every day, you know it forgets. TRACE is an early answer: a memory an agent can search and check. Today it is a prototype you can try as a recorded replay, in your browser. Open source, Apache-2.0.
 
+## The ecosystem
+
+One builder, three projects. TRACE is at the front: the memory the other two are built to use. ANIMA and Reflex stand behind it, each with its own demo. The owner's profile is calibrated as a map of these projects: [github.com/Anshul48](https://github.com/Anshul48).
+
+<p align="center">
+  <img src="docs/assets/ecosystem.svg" alt="Diagram: TRACE in front as the memory, ANIMA and Reflex behind it, with lines from each to TRACE." width="640">
+</p>
+
+### TRACE: the memory, at the front
+
+TRACE is a memory that sorts a huge pile of text into groups by itself, so a question opens only the few groups it needs, and every result comes with a record you can check. It is the vanguard of this ecosystem: the part the other two build on.
+
+**Watch the demo:** [open the TRACE explorer](https://anshul48.github.io/trace/explorer/), a replay of 144 real recorded searches. Nothing to install.
+
+### ANIMA: coding agents that remember
+
+ANIMA is a layer that sits on top of the coding agent you already use (Muse Code first, then Claude Code, Codex), giving it memory, a checker it cannot see, and a screen to watch it work. Its memory is TRACE, joined by a prototype link with one small recorded test so far.
+
+**Watch the demo:** [check ANIMA's record in your browser](https://anshul48.github.io/anima-substrate/demo/), a replay of a recorded nine-job run. [ANIMA on GitHub](https://github.com/Anshul48/anima-substrate).
+
+### Reflex: an AI that finds the right button
+
+Reflex is a line of work where an AI looks at a screen and finds the right button to press. The direction is SAM 3.1 with Muse Spark: in the early trial, SAM 3.1 cut made-up screens into pieces and Muse Spark read them and chose — an early trial, a direction, with small synthetic tests so far.
+
+**Watch the demo:** [open the replay demo](https://anshul48.github.io/demo-trace-anima-reflex/) (no login, pick the Reflex sample) or [watch the short film](https://anshul48.github.io/trace/demos/#reflex). [Early trial results](docs/reflex.md).
+
 **Recorded replay:** working today. **Browser mode:** prototype. **Public backend:** off. **Local kit:** not built yet.
 
 | In 60 seconds | |
