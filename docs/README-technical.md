@@ -11,7 +11,7 @@
 
 *(The animated landing image that stood here was removed in the November 2026 site redesign; it is in the git history.)*
 
-**Your agent forgets everything outside its context window. TRACE remembers — an earlier test collection filed into one map you can open in your browser. No reindex, no rebuild. [Replay a probe.](https://anshul48.github.io/trace/play/#p=7&m=10m&v=race&lso=0&t=7)**
+**Your agent forgets everything outside its context window. TRACE remembers — a 100M library sorted into groups you can explore in your browser. [Open the explorer.](https://anshul48.github.io/trace/explorer/)**
 
 **New here? [Watch the map, two ways](https://anshul48.github.io/trace/recording/)** — 57 seconds of mechanism, 45 seconds of real replay — then replay a probe yourself. [Beyond that size?](https://anshul48.github.io/trace/future/) Measured, on-disk, and vision — all labeled.
 
@@ -25,7 +25,6 @@
 
 ## What you can do with it today
 
-- **Replay a real recorded memory in your browser** — [the replay theater](https://anshul48.github.io/trace/play/#p=7&m=10m&v=race&lso=0&t=7) lights recorded probe paths on the real graph: arrivals becoming atoms, atoms organizing into schemas, guided-vs-flat races. No install. (Replay, not Q&A: the staged export carries topology + rows, not text.)
 - **Replay a real run to PASS** — [the recording hub](https://anshul48.github.io/trace/recording/) walks install, frozen-file checks, and an engine run on the portable 20k prefix, with the unedited terminal capture kept as evidence.
 - **Run your own pilot in 5 minutes** — freeze check, package suite, and a genuine 10K-token pilot to `claim=measured, status=PASS` on your machine. [Jump in](#try-it-in-5-minutes).
 - **Build on content-addressed storage** — ingest once with the Python package and the `product_pilot` CLI, local-first in an isolated venv. No services, no containers.
