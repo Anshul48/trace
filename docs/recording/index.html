@@ -45,8 +45,17 @@
     footer.site { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 1rem; margin-top: 2.5rem; }
   </style>
   <noscript><style>.reveal { opacity: 1; transform: none; }</style></noscript>
+  <style>
+    .snapshot-banner{background:var(--warn-bg,#fdf3e3);color:var(--warn-ink,#7a4a00);border-bottom:2px solid var(--warn-ink,#7a4a00);padding:12px 16px;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .snapshot-banner p{max-width:var(--maxw,70rem);margin:0 auto}
+    .snapshot-banner a{color:inherit;font-weight:700;text-decoration:underline}
+    .snapshot-banner a:focus-visible{outline:3px solid currentColor;outline-offset:2px}
+  </style>
 </head>
 <body>
+<div class="snapshot-banner" role="note">
+  <p><strong>Earlier snapshot, kept for the record.</strong> This page describes a smaller, earlier test (the "staged 10M" run). It does not describe the current TRACE results. For those, see the <a href="../">home page</a> and the <a href="../explorer/">explorer</a>.</p>
+</div>
   <nav class="topnav" aria-label="Site"><div class="wrap">
     <a class="brand" href="../">TRACE</a>
     <a class="nav" href="../">Home</a>
