@@ -1,10 +1,9 @@
-<!--page {"title": "Demos and films", "desc": "The explorer and the films: the 3-minute film, TRACE, ANIMA and Reflex. Captions on every film that has them.", "nav": "demos", "css": []} -->
+<!--page {"title": "Demos and films", "desc": "The explorer and the films: the 3-minute story, the explorer tour, the ANIMA state-tree replay, TRACE, ANIMA and Reflex. Captions on every film that has them.", "nav": "demos", "css": []} -->
 <section class="section-tight">
   <div class="wrap">
     <span class="eyebrow">Demos</span>
     <h1>Watch it work.</h1>
-    <p class="lede" style="max-width: 62ch">The explorer is the real thing you can use. The films tell the same story in a few minutes. The films shown here are working versions until the 3-minute film is on YouTube.</p>
-    <p class="note">The library is fixed: every number on this site comes from the same frozen 100M-token library (812,545 passages · 99.9 million tokens). Measured on 50 test searches, one of four equal parts.</p>
+    <p class="lede" style="max-width: 62ch">The explorer is the real thing you can use. The films tell the same story in a few minutes.</p>
   </div>
 </section>
 
@@ -20,9 +19,15 @@
   </div>
 </section>
 
+<!-- VIDEO_SLOT: Flagship film - Replace href when rendered -->
+<!-- VIDEO_SLOT: 60-second explorer tour - Replace href when rendered -->
+<!-- VIDEO_SLOT: ANIMA state-tree replay - Replace href when rendered -->
+<!-- VIDEO_SLOT: Module deep dives - Replace href when rendered -->
 <section class="section" id="films">
   <div class="wrap">
+    <span class="eyebrow">Media hub</span>
     <h2>Films</h2>
+    <p class="lede" style="max-width: 62ch">One hub for every film. Slots without a cut yet open the working demo instead.</p>
     <div class="grid-2" data-films="all" style="align-items: start">
       <p class="note">The films need JavaScript to be listed here. The files are in <a href="https://github.com/Anshul48/trace/tree/main/docs/demos"><code>docs/demos/</code></a>.</p>
     </div>
@@ -34,7 +39,7 @@
   <div class="wrap-narrow prose">
     <span class="eyebrow">For the maintainer</span>
     <h2>Swap list: replacing a film</h2>
-    <p>Every film on the site, including the one on the home page, comes from one file: <a href="https://github.com/Anshul48/trace/blob/main/docs/demos/films.json"><code>docs/demos/films.json</code></a>. To replace a film, copy the new 720p mp4, poster (jpg) and captions (vtt) into <code>docs/demos/</code>, change the names in that file, and push. To publish the 3-minute film, set <code>youtube</code> to the video id (the part after <code>v=</code>) in the entry whose <code>role</code> is <code>main</code>. Nothing else needs editing, and no page needs rebuilding.</p>
+    <p>Every film on the site, including the one on the home page, comes from one file: <a href="https://github.com/Anshul48/trace/blob/main/docs/demos/films.json"><code>docs/demos/films.json</code></a>. To replace a film, copy the new 720p mp4, poster (jpg) and captions (vtt) into <code>docs/demos/</code>, change the names in that file, and push. To publish the 3-minute film, set <code>youtube</code> to the video id (the part after <code>v=</code>) in the entry whose <code>role</code> is <code>main</code>. To fill a tour or replay slot, give its entry a <code>file</code> (or <code>youtube</code>) and remove its <code>fallback_href</code>. Nothing else needs editing, and no page needs rebuilding.</p>
     <div class="table-wrap">
       <table>
         <thead><tr><th scope="col">File</th><th scope="col">Film</th><th scope="col">Source</th><th scope="col">Size</th><th scope="col">Shown on</th></tr></thead>

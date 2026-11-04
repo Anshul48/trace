@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TRACE: a memory that organizes itself</title>
-<meta name="description" content="Self-organizing memory prototype. Demonstrated result: routed vector retrieval kept 0.9985 of exact top-ten results while scoring 0.79% of passages (50 test searches, one of four equal library parts). Every answer comes with a record you can check.">
+<meta name="description" content="TRACE organizes a 100M library by meaning, so developers and researchers can find the context their agents need. A question scored 0.79% of the library and kept 99.85% of exact search&#x27;s top ten.">
 <link rel="canonical" href="https://anshul48.github.io/trace/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="TRACE: a memory that organizes itself">
-<meta property="og:description" content="Self-organizing memory prototype. Demonstrated result: routed vector retrieval kept 0.9985 of exact top-ten results while scoring 0.79% of passages (50 test searches, one of four equal library parts). Every answer comes with a record you can check.">
+<meta property="og:description" content="TRACE organizes a 100M library by meaning, so developers and researchers can find the context their agents need. A question scored 0.79% of the library and kept 99.85% of exact search&#x27;s top ten.">
 <meta property="og:url" content="https://anshul48.github.io/trace/">
 <meta property="og:image" content="https://anshul48.github.io/trace/img/social-preview.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -47,13 +47,10 @@
     <div class="stage">
       <div class="pill-row"><span class="pill">Research prototype</span><span class="pill">Open source, Apache-2.0</span></div>
       <h1>A memory that organizes itself.</h1>
-      <p class="lede"><b>Self-organizing memory prototype.</b> Demonstrated result: routed vector retrieval kept <b>0.9985</b> of exact top-ten results while scoring <b>0.79%</b> of passages (50 test searches, one of four equal library parts). Every answer comes with a record you can check.</p>
-      <p class="plain"><b>In plain words:</b> imagine a library where nobody files the books. TRACE puts the shelves in order by itself, so passages that mean alike end up together. Ask a question and it walks to a few shelves instead of reading every book, then shows the page each answer came from, with a code you can check.</p>
-      <p class="plain"><b>Why this matters now:</b> if you use an AI agent every day, you know it forgets. TRACE is an early form of the memory such an agent needs: one it can search and check instead of starting over. What works today is the recorded replay one click below.</p>
+      <p class="lede">TRACE organizes a 100M library by meaning, so developers and researchers can find the context their agents need. Passages form their own groups, and a question opens only the groups most likely to hold an answer.</p>
       <div class="btn-row">
-        <a class="btn btn-primary" href="explorer/">Open the explorer: nothing to install</a>
-        <a class="btn btn-quiet" href="#film">Watch the 3-minute film</a>
-        <a class="btn btn-quiet" href="#judges">Judges: try it in 2 minutes</a>
+        <a class="btn btn-primary" href="explorer/">Open the explorer</a>
+        <a class="btn btn-quiet" href="demos/">Watch the 3-minute story</a>
       </div>
 
       <div class="pile" data-pile>
@@ -73,7 +70,7 @@
           <button type="button" data-play aria-pressed="true">Pause</button>
         </div>
         <p class="pile-caption" aria-live="polite"><b>A library grows.</b> New passages just arrive, in no order. Nobody files them.</p>
-        <p class="pile-fine">An illustration, not data. 20,000 dots stand in for the 812,545 passages of our sealed library (one dot is about 41 passages). Where each dot sits, and how many groups there are, is drawn. What is real is the proportion: four equal parts, and a question waking 0.79% of one of them (50 test searches, our library and method), drawn here as 40 of 5,000 dots.</p>
+        <p class="pile-fine">Illustration of the grouping and search, not data. 20,000 dots stand in for the 812,545 passages of our sealed library (one dot is about 41 passages). Where each dot sits, and how many groups there are, is drawn. What is real is the proportion: four equal parts, and a question waking 0.79% of one of them (50 test searches, our library and method), drawn here as 40 of 5,000 dots.</p>
       </div>
     </div>
   </div>
@@ -81,21 +78,15 @@
 
 <section class="section-tight" id="library">
   <div class="wrap">
-    <article class="card lib-panel" aria-labelledby="lib-h">
-      <div>
-        <span class="eyebrow">The library</span>
-        <h2 id="lib-h">One frozen library behind every number.</h2>
-        <div class="lib-nums">
-          <div class="stat"><span class="num">100M</span><span class="what">tokens in one frozen library</span></div>
-          <div class="stat"><span class="num">207</span><span class="what">engine files verified</span></div>
-        </div>
-        <p><b>The library is fixed: every number on this site comes from the same frozen library, and every result carries a fingerprint your browser can re-check.</b></p>
-        <p class="note">812,545 passages · 99.9 million tokens. Frozen engine: 207 files verified (<a href="verify/">check it yourself</a>). Measured on 50 test searches, one of four equal parts. Short of the 100M target by 0.11% (108,154 tokens).</p>
-      </div>
-      <figure class="lib-fig">
-        <img src="assets/library.svg" width="640" height="360" alt="A field of dots in four equal parts: a 100M-token library, frozen.">
-      </figure>
-    </article>
+    <span class="eyebrow">The proof</span>
+    <h2>A question scored under one percent of the library.</h2>
+    <div class="grid-4" style="margin-top: var(--space-5)">
+      <div class="stat"><span class="num">100M</span><span class="what">library, one frozen copy behind every number</span></div>
+      <div class="stat"><span class="num">0.79%</span><span class="what">of the library scored per question</span></div>
+      <div class="stat"><span class="num">99.85%</span><span class="what">of exact search's top ten kept</span></div>
+      <div class="stat"><span class="num">670</span><span class="what">recorded Muse Code worker jobs behind this site</span></div>
+    </div>
+    <p class="note">Scope: 50 test searches; one of four equal library parts; passage-scoring work only. Fine print: 812,545 passages · 99.9 million tokens — 0.11% short of the 100M target. <a href="evidence/">Every number, with its caveats.</a></p>
   </div>
 </section>
 
@@ -112,10 +103,9 @@
       <aside class="callout callout-note" id="judges" aria-labelledby="judges-h">
         <h2 id="judges-h" style="font-size: var(--step-1)">For judges: try it in 2 minutes</h2>
         <ol class="steps">
-          <li><div><b>Watch the film</b> <span class="time">3 min, or skip to step 2</span></div></li>
           <li><div><b>Open a real recorded search.</b> <a href="explorer/#q=how-do-vaccines-train-the-immune-system">How do vaccines train the immune system?</a> <span class="time">30 s</span></div></li>
           <li><div><b>Open the first result's record</b> and press &ldquo;Check the fingerprint in my browser&rdquo;. It should say it matches. <a href="explorer/#q=how-do-vaccines-train-the-immune-system&amp;open=1">Open it already expanded.</a> <span class="time">20 s</span></div></li>
-          <li><div><b>Read what we did not show.</b> <a href="#limits">Six questions a skeptic asks, answered plainly.</a> <span class="time">1 min</span></div></li>
+          <li><div><b>Read what we did not show.</b> <a href="evidence/#limits">Every limit, with numbers.</a> <span class="time">1 min</span></div></li>
         </ol>
         <p class="note">Technical? Three commands on <a href="verify/">Verify</a> re-check that the published code is the code we tested (207 of 207 files). Nothing to install for the rest: your browser is enough.</p>
       </aside>
@@ -131,12 +121,12 @@
       <article class="card">
         <div class="card-head"><h3>1. It sorts itself</h3><span class="badge badge-built" data-status-id="groups-hold-matches">Measured by us</span></div>
         <p>Passages that mean alike end up on the same shelf, and no one adds labels. The order comes from the passages.</p>
-        <div class="stat"><span class="num">about 7</span><span class="what">shelves hold a search's ten best matches</span><span class="scope">At most 10 are possible; groups made at random would give 10. 50 test searches, our library and method. We measured how ordered the finished groups are, not how they formed.</span></div>
+        <div class="stat"><span class="num">about 7</span><span class="what">shelves hold a search's ten best matches</span><span class="scope">At most 10 are possible; groups made at random would give 10. 50 test searches, our library and method.</span></div>
       </article>
       <article class="card">
         <div class="card-head"><h3>2. A question wakes a part</h3><span class="badge badge-built" data-status-id="sparse-search">Measured by us</span></div>
         <p>A question is compared with the shelves first, and only the shelves most likely to hold the answer are searched.</p>
-        <div class="stat"><span class="num">0.79%</span><span class="what">of one of four equal parts is scored per search</span><span class="scope">About 127 times less passage-scoring work (choosing the shelves and building them are separate costs), and 0.9985 of exact search's top ten kept. 50 test searches, our library and method.</span></div>
+        <div class="stat"><span class="num">0.79%</span><span class="what">of one of four equal parts is scored per search</span><span class="scope">Passage-scoring work only (choosing the shelves and building them are separate costs), and 99.85% of exact search's top ten kept. 50 test searches, our library and method.</span></div>
       </article>
       <article class="card">
         <div class="card-head"><h3>3. Every answer has a record</h3><span class="badge badge-built" data-status-id="record-check">Working today</span></div>
@@ -144,7 +134,59 @@
         <div class="stat"><span class="num">144</span><span class="what">real recorded searches you can open</span><span class="scope">Our own re-run matched on all claims. No outside party has checked it. <a href="explorer/">Open the explorer.</a></span></div>
       </article>
     </div>
-    <p class="note" style="margin-top: var(--space-4)">The pictures and the plain-words walkthrough are on <a href="how-it-works/">How it works</a>. Words like &ldquo;inspired by the brain&rdquo; are explained there, one by one.</p>
+    <p class="note" style="margin-top: var(--space-4)">The pictures and the plain-words walkthrough are on <a href="how-it-works/">How it works</a>.</p>
+  </div>
+</section>
+
+<section class="section band" id="walkthroughs">
+  <div class="wrap">
+    <span class="eyebrow">Walkthroughs &amp; Visual Proofs</span>
+    <h2>Watch each part work.</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">Track</th><th scope="col">Watch today</th></tr></thead>
+        <tbody>
+          <!-- VIDEO_SLOT: Flagship film - Replace href when rendered -->
+          <tr><td>Flagship film</td><td><a href="demos/">Watch the 3-minute story</a></td></tr>
+          <!-- VIDEO_SLOT: 60-second explorer tour - Replace href when rendered -->
+          <tr><td>60-second explorer tour</td><td><a href="explorer/">Open the explorer</a>, a replay of 144 recorded searches</td></tr>
+          <!-- VIDEO_SLOT: ANIMA state-tree replay - Replace href when rendered -->
+          <tr><td>ANIMA state-tree replay</td><td><a href="https://anshul48.github.io/anima-substrate/demo/">Recorded demo</a></td></tr>
+          <tr><td>Reflex clip</td><td><a href="demos/#reflex">Short film</a></td></tr>
+          <!-- VIDEO_SLOT: Module deep dives - Replace href when rendered -->
+          <tr><td>Module deep dives</td><td><a href="how-it-works/">How it works</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="also">
+  <div class="wrap">
+    <span class="eyebrow">One ecosystem</span>
+    <h2>TRACE at the front, ANIMA and Reflex behind it</h2>
+    <p class="lede" style="max-width: 62ch">One builder, three projects. Each has its own demo.</p>
+    <figure>
+      <img src="assets/ecosystem.svg" width="640" height="360" alt="Diagram: TRACE in front as the memory, ANIMA and Reflex behind it.">
+    </figure>
+    <div class="grid-3">
+      <article class="card">
+        <div class="card-head"><h3>TRACE: the memory</h3><span class="badge badge-built" data-status-id="explorer-replay">Working today</span></div>
+        <p>A memory that sorts a huge pile of text into groups by itself, so a question opens only the few groups it needs. This site is its home.</p>
+        <p><a class="btn btn-quiet" href="explorer/">Open the explorer</a></p>
+      </article>
+      <article class="card">
+        <div class="card-head"><h3>ANIMA</h3><span class="badge badge-proto" data-status-id="anima-link">Prototype</span></div>
+        <p>A layer on top of the coding agent you already use (Muse Code first, then Claude Code, Codex), giving it memory, a checker it cannot see, and a screen to watch it work. One-line install:</p>
+        <p><code>curl -fsSL https://raw.githubusercontent.com/Anshul48/anima-substrate/main/install.sh | sh</code></p>
+        <p class="btn-row"><a class="btn btn-quiet" href="https://anshul48.github.io/anima-substrate/demo/">Recorded demo</a> <a class="btn btn-quiet" href="https://github.com/Anshul48/anima-substrate">ANIMA on GitHub</a></p>
+      </article>
+      <article class="card">
+        <div class="card-head"><h3>Reflex</h3><span class="badge badge-proto" data-status-id="reflex">Prototype</span></div>
+        <p>A line of work where an AI looks at a screen and finds the right button to press (SAM 3.1 with Muse Spark). An early trial, a direction.</p>
+        <p class="btn-row"><a class="btn btn-quiet" href="https://anshul48.github.io/demo-trace-anima-reflex/">Replay</a> <a class="btn btn-quiet" href="demos/#reflex">Short film</a></p>
+      </article>
+    </div>
   </div>
 </section>
 
@@ -174,41 +216,24 @@
 
 <section class="section" id="limits">
   <div class="wrap">
-    <span class="eyebrow">Honest limits</span>
-    <h2>What a skeptic asks</h2>
-    <ol class="limits-list">
-      <li><div><b class="lead">Does it find the right source?</b><p>Not as often as ordinary keyword search: on our 50 test searches the right source was in its top ten for 82% of them, against 52% for TRACE (exact search by meaning also got 52%). The 0.9985 measures how much of exact search's answer was kept, not answer quality.</p></div></li>
-      <li><div><b class="lead">Is it faster or smaller?</b><p>No. A TRACE search took 1.2 s, a plain scan 88 ms, keyword search 6 ms. Stored size on disk: 2.28 GB for TRACE, 1.25 GB for plain vectors; memory use was not compared. The saving is passage-scoring work only.</p></div></li>
-      <li><div><b class="lead">Does a matching fingerprint prove nothing relevant was skipped?</b><p>No. It proves the passage shown is the one that was stored. Whether the shortcut skipped something relevant is measured by the comparison with exact search (0.9985 kept).</p></div></li>
-      <li><div><b class="lead">Is it the self-organizing, or just ordinary grouping?</b><p>We have not separated the two inside TRACE's own engine. In a simplified control, random groups of the same sizes found 28.5% of the true matches where ours found 98.1% (0.5% of passages scored), and arrival order alone found 87.3%. <a href="evidence/#control">The control and its caveats.</a></p></div></li>
-      <li><div><b class="lead">Does it work on public data?</b><p>TRACE has not been run there. A stand-in of ours (not TRACE) gave dataset-specific results: FiQA about 95% of exact search's top ten at 7% of passages scored, SciFact about 95% at 24%, NFCorpus 90% at 28% and 97% at 55%.</p></div></li>
-      <li><div><b class="lead">Has anyone outside your team checked it?</b><p>No. Outside verification is pending. There is no live public service and no download of the whole library yet; the explorer is a replay of real recorded searches.</p></div></li>
-    </ol>
+    <span class="eyebrow">Straight answers</span>
+    <h2>What TRACE is not.</h2>
+    <p class="lede" style="max-width: 62ch">Not a keyword-search replacement: ordinary keyword search found the right source more often than TRACE did. Not faster: a plain scan answers sooner. Not checked by anyone outside our team.</p>
     <div class="btn-row"><a class="btn btn-primary" href="evidence/#limits">Every limit, with numbers</a><a class="btn btn-quiet" href="verify/">Check it yourself</a></div>
   </div>
 </section>
 
-<section class="section band" id="also">
+<section class="section band" id="deep">
   <div class="wrap">
-    <span class="eyebrow">One ecosystem</span>
-    <h2>TRACE at the front, ANIMA and Reflex behind it</h2>
-    <p class="lede" style="max-width: 62ch">One builder, three projects. TRACE is the memory the other two are built to use. Each has its own demo.</p>
+    <span class="eyebrow">The deep end</span>
+    <h2>Go deeper.</h2>
     <div class="grid-3">
-      <article class="card">
-        <div class="card-head"><h3>TRACE: the memory</h3><span class="badge badge-built" data-status-id="explorer-replay">Working today</span></div>
-        <p>A memory that sorts a huge pile of text into groups by itself, so a question opens only the few groups it needs. This site is its home.</p>
-        <p><a class="btn btn-quiet" href="explorer/">Watch the demo</a></p>
-      </article>
-      <article class="card">
-        <div class="card-head"><h3>ANIMA</h3><span class="badge badge-proto" data-status-id="anima-link">Prototype</span></div>
-        <p>A layer on top of the coding agent you already use, giving it memory, a checker it cannot see, and a screen to watch it work. Its memory is TRACE.</p>
-        <p class="btn-row"><a class="btn btn-quiet" href="https://anshul48.github.io/anima-substrate/demo/">Watch the demo</a> <a class="btn btn-quiet" href="https://github.com/Anshul48/anima-substrate">ANIMA on GitHub</a></p>
-      </article>
-      <article class="card">
-        <div class="card-head"><h3>Reflex</h3><span class="badge badge-proto" data-status-id="reflex">Prototype</span></div>
-        <p>A line of work where an AI looks at a screen and finds the right button to press (SAM 3.1 with Muse Spark). An early trial, a direction.</p>
-        <p class="btn-row"><a class="btn btn-quiet" href="https://anshul48.github.io/demo-trace-anima-reflex/">Watch the demo</a> <a class="btn btn-quiet" href="demos/#reflex">Short film</a></p>
-      </article>
+      <article class="card"><h3><a href="evidence/">Receipts</a></h3><p>The records behind every number.</p></article>
+      <article class="card"><h3><a href="verify/">Reproduce</a></h3><p>Re-check the code and the records yourself.</p></article>
+      <article class="card"><h3><a href="https://github.com/Anshul48/trace/blob/main/docs/ARCHITECTURE.md">Architecture</a></h3><p>The design in technical terms.</p></article>
+      <article class="card"><h3><a href="https://github.com/Anshul48/trace/blob/main/docs/BENCHMARKS.md">Research notes</a></h3><p>Earlier builds and their measurement records.</p></article>
+      <article class="card"><h3><a href="built/">Status</a></h3><p>Every capability, Working today to Planned.</p></article>
+      <article class="card"><h3><a href="https://github.com/Anshul48/trace/blob/main/.github/CONTRIBUTING.md">Contribute</a></h3><p>The rules for changing this repository.</p></article>
     </div>
   </div>
 </section>

@@ -92,6 +92,9 @@
     if (f.youtube) {
       return '<div class="film-frame">' + (f.poster ? '<img src="' + esc(base + f.poster) + '" alt="">' : "") + '</div>';
     }
+    if (f.fallback_href) {
+      return '<div class="film-frame"><div class="placeholder"><strong>' + esc(f.title) + '</strong><span>' + esc(f.fallback_label || "Open the working demo") + '</span></div></div>';
+    }
     return '<div class="film-frame"><div class="placeholder"><strong>The 3-minute film is being published</strong><span>It will appear here as soon as it is on YouTube. Until then, watch the working versions of the films on the Demos page.</span></div></div>';
   }
   function card(f, compact) {
@@ -99,7 +102,14 @@
     var meta = fmtMeta(f).map(function (b) { return "<span>" + esc(b) + "</span>"; }).join("");
     var copy = f.captions && !compact ? '<details class="copy" data-vtt="' + esc(root + "demos/" + f.captions) + '"><summary>Read the words of the film</summary><p class="note">Loading the written copy.</p></details>' : "";
     var action = "";
-    if (!f.file && !f.youtube) action = '<p><a class="btn btn-primary" href="' + root + 'demos/">Watch the working versions</a></p>';
+    if (!f.file && !f.youtube) {
+      if (f.fallback_href) {
+        var href = /^https?:\/\//.test(f.fallback_href) ? f.fallback_href : root + f.fallback_href;
+        action = '<p><a class="btn btn-primary" href="' + esc(href) + '">' + esc(f.fallback_label || "Open the working demo") + '</a></p>';
+      } else {
+        action = '<p><a class="btn btn-primary" href="' + root + 'demos/">Watch the working versions</a></p>';
+      }
+    }
     var h = compact ? "h2" : "h3";
     return '<article class="card film-card" id="' + esc(f.id) + '">' + frame(f) + '<div><' + h + '>' + esc(f.title) + '</' + h + '><div class="film-meta">' + meta + '</div><p>' + esc(f.blurb || "") + "</p>" + yt + action + copy + "</div></article>";
   }
@@ -123,7 +133,7 @@
       });
       var tbl = $("[data-films-table]");
       if (tbl) tbl.innerHTML = films.map(function (f) {
-        return "<tr><td><code>" + esc(f.file || "(none yet: set youtube id)") + "</code></td><td>" + esc(f.title) + "</td><td>" + esc(f.source || "") + "</td><td>" + esc(f.size || "") + "</td><td>" + esc(f.where || "") + "</td></tr>";
+        return "<tr><td><code>" + esc(f.file || (f.fallback_href ? "(links to working demo)" : "(none yet: set youtube id)")) + "</code></td><td>" + esc(f.title) + "</td><td>" + esc(f.source || "") + "</td><td>" + esc(f.size || "") + "</td><td>" + esc(f.where || "") + "</td></tr>";
       }).join("");
     }).catch(function () {
       slots.forEach(function (s) { s.innerHTML = '<p class="note">The film list could not be loaded. The files are in <code>docs/demos/</code>.</p>'; });
