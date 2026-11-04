@@ -1,0 +1,211 @@
+# RECEIPT-RUNG-300M — 300M-tok_v1 rung: 8 sealed shards (R143)
+
+Authority: architect POST-693 / R143 (300M granted in tok_v1) via meta
+glass-pavo. Refs: `RECEIPT-RUNG-100M.md` (accepted as RUNG-77.7M-tok),
+`RECEIPT-RUNG-117M-tok` (checkpoint, filed mid-phase per R143 4(ii)),
+`PRE-RUNG-100M.md`, `RUNG300M-PROMPT.md`. Written 2026-10-28T00:58Z.
+Verdict: RUNG COMPLETE — no STOP-grade finding. No 500M work done.
+
+UNIT DISCIPLINE: the prior rung is named RUNG-77.7M-tok everywhere
+(466,000 units = 100.49M wp + 77.70M tok_v1), never "100M tokens". All
+scale statements carry wordpieces AND tok_v1.
+
+Fences kept: VM writes only in `/srv/tl/lane1-r119/` (new: `rung300m/`
+20.8 GB, nine `build/` tool files); rung inputs fwedu-254 read-only
+packs (NO re-embed; stock `e2bit_build.py` d699a44b… + `shard_kmeans.py`
+807d8c4e… byte-untouched, mtimes Oct 22, hashes re-verified); shards 0/1
+masters + metas NEVER written (mtimes Oct 27 17:39/17:50 intact); no
+BEIR/BRIGHT/MuSiQue bytes; licence ODC-By throughout; no Drive/ferry; no
+laptop store pulls; never touched ANIMA, secrets, transcripts, ECO
+outputs, `/tmp/m2-*`, R60, bridge; no git writes; every SSH leg under
+`timeout` via `gcloud compute ssh tl-m2-cpu --zone=us-central1-c
+--tunnel-through-iap`.
+
+## 1. WHAT WAS BUILT (observed)
+
+8 sealed shards, 254a file order, 233,000 units each: 1,864,000 units =
+401,527,510 wp + 310,532,353 tok_v1 MEASURED (401.5M wp / 310.5M tok;
+166.59 tok/unit; 395,447 docs). Sealed bytes 8 × 588,728,426 =
+4,709,827,408 B (4.71 GB; 2526 B/unit, deterministic size across all 8).
+Shards 0/1 from RUNG-77.7M-tok STAY (accepted, untouched); shards 2–7
+built this phase by the same sealed e2bit path (K = 26375, seeds
+158502–158507, 6 kmeans epochs every shard, gen 1, WAL 80 B).
+
+| shard | ordinals | wp | tok_v1 | ranges | e2bit digest | kmeans | wall |
+|---|---|---|---|---|---|---|---|
+| 0–1 | RUNG-77.7M-tok | 100,487,822 | 77,703,859 | 5/10 | 85ae3ba8/5fe649cc | 6 ep | prior |
+| 2 | [466000,699000) | 50,172,051 | 38,816,741 | 14 | 590b56c485cef86c | 6 ep | ~10.4 min (G2 dance) |
+| 3 | [699000,932000) | 50,072,529 | 38,758,044 | 19 | d898e70b72751455 | 6 ep | 7:46 |
+| 4 | [932000,1165000) | 50,170,509 | 38,809,380 | 24 | bd3e248084b0631e | 6 ep | 7:38 |
+| 5 | [1165000,1398000) | 50,108,645 | 38,743,520 | 28 | 7e1a03f7acd30e3d | 6 ep | 7:39 |
+| 6 | [1398000,1631000) | 50,213,904 | 38,881,694 | 33 | fea55c96b83aad1a | 6 ep | 7:39 |
+| 7 | [1631000,1864000) | 50,302,050 | 38,819,115 | 38 | f81e231c04f7cdf6 | 6 ep | 7:48 |
+
+All six new builds PASS all six e2bit gates first attempt (centroid
+audits 0.99999982, s200 agree 0.9965–0.9985, `verify-rows bad=0`).
+Ranges-touched grows with ordinal (5→38): dedup scatter — later units'
+hashes resolve in earlier ranges' keys; content-correct by hash.
+Metas: `rung300m/phaseb/shard{2..7}/store/meta.jsonl` (D100 key set,
+global doc-relative wp_off). Query pools: `qpool-117m` (checkpoint, 200q
+over s0–2) and `qpool-300m` (final, 200q/25-per-shard over s0–7), same
+method (text[:48], MiniLM-onnx live, rev 1110a24).
+
+## 2. ACCEPTANCE (staged harness + audited paired A3 — all 8 shards)
+
+Same staged v2 harness, attach-module method, `CAND_MMAP=1
+CAND_ROUTE=exact`, rc3 engines, 200 queries k=100, `--cpus 0,1`, working
+copies (masters untouched). s0/s1 results stand from RUNG-77.7M-tok.
+
+| sh | A0 | A1 | A2 | A3 flat (v2) | A3 paired (R13e bar) | A4 | A5 | A6 | A7 | A8 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 0–1 | PASS | PASS | PASS | FAIL ~+304 | PASS +0.03/+1.59 | PASS | PASS | PASS | PASS | PASS |
+| 2 | 5.3 | 239.5 | 97.9 | FAIL +334.4 | PASS −0.13 ≤ 10.49 | 14.3 | 13.6 | 45.8 | 32.4 | 46.0 |
+| 3 | 5.1 | 241.7 | 96.3 | FAIL +332.2 | PASS +0.26 ≤ 20.27 | 14.0 | 13.9 | 45.3 | 32.1 | 45.3 |
+| 4 | 5.1 | 234.7 | 93.6 | FAIL +309.9 | PASS +2.88 ≤ 5.65 | 13.6 | 13.4 | 42.9 | 30.7 | 43.6 |
+| 5 | 5.2 | 238.0 | 96.4 | FAIL +341.8 | PASS +1.74 ≤ 11.61 | 14.1 | 13.7 | 45.7 | 32.1 | 45.8 |
+| 6 | 5.3 | 240.9 | 99.6 | FAIL +323.6 | PASS +1.10 ≤ 30.72 | 14.5 | 13.5 | 45.7 | 31.4 | 44.9 |
+| 7 | 5.2 | 238.9 | 98.9 | FAIL +326.1 | PASS +0.09 ≤ 14.81 | 14.4 | 13.6 | 45.3 | 32.3 | 45.6 |
+
+Staged seconds shown; all non-flat-A3 legs PASS on all 8. Flat-A3 FAILs
+are the recorded standin-spawn signature on every rung-scale shard (9
+pairs × 12 queries paired rule is the bar; all six new shards PASS with
+margin). A3 absolutes FRONTIER (adapter warm p50 / direct p50 ms):
+s2 525.8/191.4, s3 524.7/192.5, s4 496.7/186.8, s5 532.5/190.7,
+s6 515.2/191.7, s7 519.4/193.3 (RUNG-77.7M-tok 478/174) — adapter ≈ 500–533 ms,
+engine ≈ 187–193 ms, stable across shards. Receipts:
+`rung300m/accept/ACCEPT-s{2..7}.json` + `PAIRED-A3-s{2..7}.json`.
+Verdict: ACCEPTANCE PASS under the audited bar on all 8 (one recorded
+superseded-leg deviation per new shard).
+
+## 3. LANE GATES (rung scale)
+
+G2 publish-point (R143 item 3 — PASS; full account in
+`RECEIPT-RUNG-117M-tok` §3, evidence in `rung300m/g2-*/`, `pubobs/`).
+Publish map observed: `compact` ≈ 3.8 s, tmp-build + atomic renames
+(gen-1, MANIFEST, WAL). (a) THREE SIGKILLs inside the seal/publish of
+233k-unit builds (W1 live shard-2 @1.8 s, W2 tmp-partial @3.5 s, W3
+post-flip/pre-truncate @3.5 s). (b) TWO second-generation kills with
+gen-1 present (early-pre @11 ms, mid-way tmp-pre). Every run: recovery
+(engine's own re-`compact`) to EXACTLY ONE valid generation (MANIFEST
+names one; no torn/partial/tmp remains), content equality (verify bad=0;
+digest 590b56c4 stable gen-0→1→2; served 200q ids+scores bit-identical
+pre/post; recovered seal 16/16 fields = clean stock rebuild), FOUR
+plants FAIL as required (+1 valid post-publish outcome). Rung scale
+throughout — no P4 fallback.
+
+G3 shard-down (8-way fanout, GT-union oracle, drop highest s7):
+
+| profile | full vs GT-union | s7 down (recall / span_bad) | plant (recall / span_bad) |
+|---|---|---|---|
+| exact | 1.0 (0 ties) | 0.87 / 0 | 0.785 / 25 → FAILS as required |
+| Q | 1.0 (0 ties) | 0.87 / 0 | 0.785 / 25 → FAILS as required |
+
+Disclosed degradation 1.0→0.87 (25/200 queries sourced s7), zero
+wrong-span, plant detected. G3 verdict: PASS. (Checkpoint 3-way also
+PASS: exact 1.0, Q 0.995 with 1 recorded near-miss, down 0.68/0.)
+
+G4 retrieval vs exact GT (all 8, `qpool-300m`, ~8.4 s/shard-profile):
+
+| shard | exact @10/@100 | Q @10 strict / aware | Q @100 strict / aware |
+|---|---|---|---|
+| 0–7 | 1.0 / 1.0 (all) | 0.9950–0.9980 / 0.9995–1.0 | 0.9838–0.9859 / 1.0 |
+
+Per-shard Q @10: s0 .9980, s1 .9960, s2 .9950, s3 .9955, s4 .9975,
+s5 .9960, s6 .9960, s7 .9955; @100: .9838/.9848/.9859/.9846/.9846/
+.9853/.9852/.9857. In-band with RUNG-77.7M-tok and the checkpoint pool.
+G4 verdict: PASS (non-inferior; frontier).
+
+G5 Pareto (C1 baseline extended to 8 shards). Per-shard k=100 serving:
+≈ 16.7k tok/search ÷ ~0.52 s ≈ 32k tok/s returned at ≈ 0.59 GB
+resident (0.19 handle + 0.40 engine; same stated definition as the prior
+34.9k — pool/shard variance). 8-way k=10 fanout: 13.3k tok/query ÷ 4.18
+s ≈ 3.2k tok/s at 1.77 GB (derived, definition stated). G5 verdict:
+RECORDED (frontier).
+
+## 4. R131 ITEMS + R143 EXTRAS
+
+(a) Harness lineage. Staged v2 files (hashes match PRE-RUNG P1) as the
+attach module (P2 method, `--cpus 0,1`, `--work` in-lane) on all six new
+shards + audited v4 paired-A3 (R13e; parameterized `paired_a3_300m.py`,
+same 9×12 launch-baseline rule). s0/s1 acceptance reused from
+RUNG-77.7M-tok (stores untouched, recorded). P2 selftest: unchanged
+reference. Builder: stock scripts byte-identical (hashes re-verified);
+`--tree` = rc3 engines (four hashes = P1-FINAL frozen). G3:
+`build/g3_300m.py` (streaming GT-union, low-ordinal tie-break, misroute
+span check; one own-script verdict-rule error found at checkpoint and
+fixed per P1 precedent — Q full reported, not gated). No store code
+touched, ever.
+
+(b) MEASURED tok_v1: 310,532,353 over 1,864,000 units = 166.59
+tok/unit; wordpieces 401,527,510 = 215.46 wp/unit (offsets convention
+incl 2 specials; s0+s1 = 100.49M wp reproduces the R143 planning unit).
+Per-shard tok: 38.91/38.80/38.82/38.76/38.81/38.74/38.88/38.82M (max
+spread 0.3%). Provenance: same as RUNG-77.7M-tok (packs text+`c_span`,
+manifest hashes, range-tar wp offsets; doc offsets global from 0).
+
+(c) Observed walls: meta (6 shards + full census) 310.7 s; qpool embeds
+1.5–1.9 s; per-shard seal 7:38–7:48 stock (s2 ~10.4 min with G2 dance);
+total seal time s2–s7 ≈ 49 min; staged acceptance ≈ 13 min + paired-A3
+≈ 5 min per shard; lane batch exact ≈ 60 s / Q ≈ 39 s per shard
+(200q k=100); exact GT ≈ 8.4 s/shard-profile, union GT ≈ 59–75 s
+(8 shards). 500M re-fit (recorded only, no 500M work): at 166.6
+tok/unit, 500M tok_v1 ≈ 3.0M units ≈ 13 × 233k shards ≈ 100 min seal +
+≈ 4 h acceptance on this host.
+
+(d) Cumulative USD: lane start 2026-10-27T13:55Z at ≈ $0.67/h; receipt
+time 00:58Z → 11.05 h → ≈ $7.40 cumulative (rate × hours, no meter
+read). $25 STOP line (≈ 37.3 h) never near.
+
+(e) Design-change failure: NONE. Zero shard failures (6/6 first-attempt
+PASS — retry logic never fired); zero gate failures; no second path;
+bridge untouched.
+
+(f) Build peak RAM (was UNOBSERVED — now measured): 4.71–4.72 GB every
+build (member VmHWM; 2 s tree-RSS samples 4.62–4.66 GB; recover-only
+stage 1.18 GB). Source: materialize hash-join index (all 46 range keys
+parsed). Method: `build_peakmon.py` tree poller + `/usr/bin/time -v`
+parent maxrss (identical numbers). 7.6% of the 62 GB host — no pressure.
+
+(g) Attach time (was UNOBSERVED — now measured): fresh-process open per
+shard 4.48–5.62 s (s0 7.35 s coldest-first; rest 4.5–5.6 s) +
+first k=10 search ≈ 0.5 s. Full 8-shard attach in one process: 45.6 s
+total (opens + 1 search each). Maps: 8 × 537 MB read-only (4.3 GB
+address, demand-paged).
+
+(h) 8-way fanout latency + resident RSS: online (persistent handles,
+sequential, k=10): open-all 39.4 s; 200 queries 840.6 s; per-query p50
+4.18 s / p95 4.33 s / max 5.37 s (≈ 8 × 0.52 s/shard + merge).
+Batch-analytical ≈ 2.4 s/query + merge. Resident RSS: 8-handle parent
+1.37 GB (1.35 GB anon = standin per-handle meta oracle + perm maps;
+18 MB file touched — parents never touch `_maps`) + transient engine
+child 0.40 GB (0.35 GB file + 0.05 GB anon, measured) = 1.77 GB
+composed serving footprint (sequential fanout; components measured,
+composition labeled).
+
+## 5. HONEST UNOBSERVED LIST
+
+- Meter-read USD (rate × hours throughout); meter-read power.
+- Cold-cache attach (page cache warm from builds; no root drop_caches).
+- Parallel-fanout latency (sequential measured; no parallel fanout impl).
+- 8-way with a shard down at >1 shard (single-shard-down measured 3- and
+  8-way; multi-down not run).
+- Per-hit tok_v1 readout for the 8-way Pareto (derived from means, stated).
+- `D100-compute-recall.py` exact formula (same mirror).
+- Per-unit `continued`/truncation flags (same uniform treatment).
+- faiss/GPU GT path (numpy f64: 8 s/shard, sufficient).
+- `minilm-r2p-254` role (not a rung input).
+- 500M/1B behavior beyond the recorded re-fit (forbidden this phase).
+
+## 6. CLOSE
+
+Rung: 1,864,000 units / 401.5M wp / 310.5M tok_v1 sealed in 8 shards
+(4.71 GB), acceptance ALL PASS under the audited bar on all 8 (one
+recorded superseded-leg deviation per new shard), G2 publish-point PASS
+(5 rung-scale kills, 4 failing plants), G3/G4 PASS at 8-shard scale, G5
+frontier recorded, peak RAM + attach + fanout/RSS measured (nothing left
+from the R143 instrument list). No 500M work performed. Evidence lives
+under `/srv/tl/lane1-r119/rung300m/` (shard builds, phaseb, accept,
+gates117, gates300, g2-*, pubobs) and `lane1-r119/p2/` (P2 reference);
+prior-rung evidence untouched in `rung100m/`; laptop record is this file
++ `RECEIPT-RUNG-117M-tok`.
+VMLANE-RUNG300M-DONE 8/8 G2-PUBLISH-PASS checkpoint-filed-y 1881-words

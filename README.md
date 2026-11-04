@@ -78,6 +78,7 @@ The technical record is still here. Some of it was written for an earlier, small
 - [docs/BENCHMARKS.md](docs/BENCHMARKS.md): the measurement records
 - [docs/REPRO.md](docs/REPRO.md): reproduction commands and environment
 - [docs/CODE-TOUR.md](docs/CODE-TOUR.md): a walk through the code
+- [docs/SCALE-AND-MEMORY.md](docs/SCALE-AND-MEMORY.md): earlier scale and build-memory runs, with their raw receipts
 - [repro-20k/README.md](repro-20k/README.md): a small reproduction you can run yourself
 
 ---
