@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Build the static site in docs/ from the page sources in docs-src/.
+"""Build the static site in docs/ from the page sources in docs/source/.
 
 Why a build step at all: every page shares one header, footer and scale ladder,
 and every status badge must say exactly what docs/status.json says. Writing
@@ -12,8 +12,8 @@ read it.
   python3 tools/build_site.py --check   exit 1 if docs/ differs from what the sources produce
 
 Standard library only. Sources:
-  docs-src/pages/<route>.html     first line: <!--page {"title": "...", "desc": "...", "nav": "try"} -->
-  docs-src/partials/<name>.html   included with {{include:name}}
+  docs/source/pages/<route>.html     first line: <!--page {"title": "...", "desc": "...", "nav": "try"} -->
+  docs/source/partials/<name>.html   included with {{include:name}}
   docs/status.json                badges: {{badge:id}} and {{label:id}}
 """
 import html
@@ -23,7 +23,7 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, "docs-src")
+SRC = os.path.join(ROOT, "docs/source")
 OUT = os.path.join(ROOT, "docs")
 SITE = "https://anshul48.github.io/trace/"
 
@@ -266,7 +266,7 @@ def main():
             for b in bad:
                 print(" -", b)
             return 1
-        print("site ok: %d generated files match docs-src and docs/status.json" % len(files))
+        print("site ok: %d generated files match docs/source and docs/status.json" % len(files))
         return 0
     print("wrote %d file(s); %d unchanged" % (len(bad), len(files) - len(bad)))
     return 0

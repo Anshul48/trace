@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 # Documentation index
 
-The website lives in this folder and is served by GitHub Pages at https://anshul48.github.io/trace/. Its pages are generated from [`../docs-src/`](../docs-src/) by `python3 tools/build_site.py`; do not edit the generated `index.html` files by hand.
+The website lives in this folder and is served by GitHub Pages at https://anshul48.github.io/trace/. Its pages are generated from [`source/`](source/) by `python3 tools/build_site.py`; do not edit the generated `index.html` files by hand.
 
 ## Read first
 

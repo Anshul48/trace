@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-<!-- GENERATED from docs-src/README.src.md by tools/build_site.py. Edit the source, then run: python3 tools/build_site.py -->
+<!-- GENERATED from docs/source/README.src.md by tools/build_site.py. Edit the source, then run: python3 tools/build_site.py -->
 # TRACE: a memory that organizes itself
 
 **Self-organizing memory prototype; demonstrated result: routed vector retrieval kept 0.9985 of exact top-ten results while scoring 0.79% of passages (50 test searches, one of four equal library parts).** TRACE sorts a growing library into groups from the passages themselves, so a question wakes only a small part of it, and every answer carries a record you can check. If you use an AI agent every day, you know it forgets. TRACE is an early answer: a memory an agent can search and check. Today it is a prototype you can try as a recorded replay, in your browser. Open source, Apache-2.0.
@@ -134,7 +134,7 @@ A "piece" is one sealed part of a library. The cost to build on a smaller test c
 | | |
 |---|---|
 | [`docs/`](docs/README.md) | The website, served by GitHub Pages, and the technical documents (see [`docs/README.md`](docs/README.md) for the index). |
-| [`docs-src/`](docs-src/) | The sources the website is generated from (`python3 tools/build_site.py`). |
+| [`docs/source/`](docs/source/) | The sources the website is generated from (`python3 tools/build_site.py`). |
 | [`freeze-src/`](freeze-src/) | The tested engine, 207 files. |
 | [`receipts/`](receipts/) | The records of our runs (the folder is named *receipts*): the qualification run, the earlier larger builds, the order measurement. |
 | [`repro-20k/`](repro-20k/README.md) | A small reproduction for your own computer. |

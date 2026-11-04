@@ -5,11 +5,11 @@
 A new front door. No change to the tested engine: `freeze-src/` is untouched and
 `python3 tools/verify_freeze.py` still prints `entries=207 ok=207 missing=0 mismatch=0`.
 
-- New website in `docs/`, generated from `docs-src/` by `tools/build_site.py`
+- New website in `docs/`, generated from `docs/source/` by `tools/build_site.py`
   (stdlib only, `--check` mode, committed plain HTML): home, try it, how it works,
   evidence and limits, demos, verify, about, how this was built, and the explorer
   restyled with the shared design (light and dark, phone width, no outside requests).
-- New `README.md`, generated from `docs-src/README.src.md`.
+- New `README.md`, generated from `docs/source/README.src.md`.
 - `docs/status.json`: one file that decides every "Working today", "Prototype" and
   "Not built yet" badge on the site and in the README.
 - `docs/demos/films.json`: the single swap list for films; three 720p working
