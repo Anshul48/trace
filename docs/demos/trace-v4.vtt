@@ -1,0 +1,194 @@
+WEBVTT
+
+1
+00:00:00.600 --> 00:00:02.846
+TRACE is search that shows its work.
+
+2
+00:00:03.196 --> 00:00:04.617
+You ask in plain words.
+
+3
+00:00:04.617 --> 00:00:07.570
+It finds the passages that match your meaning,
+
+4
+00:00:07.570 --> 00:00:10.009
+and gives you a record you can check.
+
+5
+00:00:10.809 --> 00:00:13.645
+Ask an AI to search a huge pile of text,
+
+6
+00:00:13.645 --> 00:00:15.276
+and you get an answer.
+
+7
+00:00:15.626 --> 00:00:17.156
+But where did it come from?
+
+8
+00:00:17.156 --> 00:00:19.082
+What did it miss? You can't tell.
+
+9
+00:00:19.882 --> 00:00:23.466
+So here is the real thing, running in a browser.
+
+10
+00:00:23.466 --> 00:00:27.848
+The library behind it holds about 800 thousand passages.
+
+11
+00:00:28.898 --> 00:00:30.155
+Pick a question.
+
+12
+00:00:32.105 --> 00:00:36.192
+Results come up: passages that match what the question means,
+
+13
+00:00:36.192 --> 00:00:37.532
+not just its words.
+
+14
+00:00:38.782 --> 00:00:39.787
+Click one.
+
+15
+00:00:41.537 --> 00:00:43.327
+Here is its checkable record:
+
+16
+00:00:43.327 --> 00:00:46.340
+the article it came from, where in the article,
+
+17
+00:00:46.340 --> 00:00:48.713
+and a fingerprint of the exact text.
+
+18
+00:00:49.863 --> 00:00:52.213
+Press check, and your own browser works
+
+19
+00:00:52.213 --> 00:00:54.564
+out the fingerprint again. It matches.
+
+20
+00:00:58.114 --> 00:00:59.535
+Now the key question.
+
+21
+00:00:59.535 --> 00:01:02.635
+Is this the same answer as the exact method,
+
+22
+00:01:02.635 --> 00:01:04.607
+which checks every passage?
+
+23
+00:01:05.557 --> 00:01:09.171
+Here, the ten passages are the same, in the same order.
+
+24
+00:01:11.521 --> 00:01:13.138
+On our test searches,
+
+25
+00:01:13.138 --> 00:01:16.837
+TRACE looked at under 1 percent of the library,
+
+26
+00:01:16.837 --> 00:01:20.766
+and still found 99.85 percent of the exact answer.
+
+27
+00:01:21.716 --> 00:01:25.735
+Far less scoring work, and every result shows where it came from.
+
+28
+00:01:28.085 --> 00:01:30.506
+Try another question. Same idea:
+
+29
+00:01:30.506 --> 00:01:34.642
+ranked passages, a record, and a side-by-side check.
+
+30
+00:01:38.192 --> 00:01:40.824
+An answer you can check, not just trust.
+
+31
+00:01:41.624 --> 00:01:44.532
+To use it, open the page in your web browser.
+
+32
+00:01:44.532 --> 00:01:48.351
+There is nothing to install, and nothing to sign up for.
+
+33
+00:01:48.701 --> 00:01:49.913
+It is a small page,
+
+34
+00:01:49.913 --> 00:01:52.783
+and any computer with a web browser will do.
+
+35
+00:01:53.133 --> 00:01:56.119
+A kit to run it on your own computer is planned,
+
+36
+00:01:56.119 --> 00:01:57.302
+but not built yet.
+
+37
+00:01:58.102 --> 00:01:59.632
+Now, the honest limits.
+
+38
+00:01:59.632 --> 00:02:02.892
+Ordinary keyword search did better on our test,
+
+39
+00:02:02.892 --> 00:02:04.488
+and it answers faster.
+
+40
+00:02:04.838 --> 00:02:06.577
+Exact meaning-based search,
+
+41
+00:02:06.577 --> 00:02:09.412
+with no shortcut, did no better than TRACE.
+
+42
+00:02:09.762 --> 00:02:13.203
+TRACE is for search by meaning that you can verify.
+
+43
+00:02:13.553 --> 00:02:15.596
+The public live server is off,
+
+44
+00:02:15.596 --> 00:02:19.001
+so this explorer replays real recorded questions.
+
+45
+00:02:19.351 --> 00:02:22.785
+It has not been run on public benchmark tests yet,
+
+46
+00:02:22.785 --> 00:02:25.396
+and no outside group has verified it.
+
+47
+00:02:26.196 --> 00:02:29.285
+Try it: open the explorer, link on screen.
+
+48
+00:02:29.635 --> 00:02:32.863
+Next up: a kit to run it on your own computer.
+
