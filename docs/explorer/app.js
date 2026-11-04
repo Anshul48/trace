@@ -69,6 +69,42 @@
   function partOf(p) { return (p.u === null || p.u === undefined) ? "" : " &middot; part " + (p.u + 1) + " of the article"; }
   function ordinalSuffix(n) { var v = n % 100; if (v >= 11 && v <= 13) return n + "th"; return n + ({ 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th"); }
 
+  /* ---------- v5 guide: live caption + strip highlight. Every number comes from the replay data. ---------- */
+  var capTimer = 0, capSeq = 0;
+  var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function setCaption(t) { var c = $("captiontext"); if (c) c.textContent = t; }
+  function setStep(n) {
+    var items = document.querySelectorAll(".guide-steps li");
+    for (var i = 0; i < items.length; i++) items[i].classList.toggle("active", items[i].getAttribute("data-step") === String(n));
+  }
+  function groupStats(q) {
+    var gs = {}, ss = {};
+    q.g.forEach(function (hit) { var p = P[hit[0]]; gs[p.pa] = 1; ss[p.sh] = 1; });
+    return { g: Object.keys(gs).length, s: Object.keys(ss).length };
+  }
+  function sharedCount(q) {
+    var fi = q.f.map(function (x) { return x[0]; });
+    return q.g.map(function (x) { return x[0]; }).filter(function (o) { return fi.indexOf(o) >= 0; }).length;
+  }
+  function resultsCaption(q) {
+    var st = groupStats(q);
+    return "Only the groups that fit opened; the rest stayed closed. These 10 answers came from " + st.g + " groups across " + st.s + " of the 4 parts, and " + sharedCount(q) + " of 10 match exact search.";
+  }
+  function recordCaption(q, hit, rank) {
+    var o = hit[0], p = P[o];
+    return "Checking the record for result " + rank + ": the article \u201c" + (p.ti || p.d) + "\u201d, passage " + fmt(o) + " of " + fmt(TOTAL) + ". The fingerprint check runs in your own browser.";
+  }
+  /* Glossary tap-toggle (hover and keyboard focus are pure CSS). One delegated listener covers static and dynamic tips. */
+  document.addEventListener("click", function (ev) {
+    var g = ev.target && ev.target.closest ? ev.target.closest("dfn.g") : null;
+    var pins = document.querySelectorAll("dfn.g.pin");
+    for (var i = 0; i < pins.length; i++) if (pins[i] !== g) pins[i].classList.remove("pin");
+    if (g) { g.classList.toggle("pin"); ev.stopPropagation(); }
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") { var pins = document.querySelectorAll("dfn.g.pin"); for (var i = 0; i < pins.length; i++) pins[i].classList.remove("pin"); }
+  });
+
   /* ---------- question picker ---------- */
   function renderTabs() {
     var t = $("cattabs"); t.innerHTML = "";
@@ -152,7 +188,7 @@
     li.innerHTML =
       '<div class="chead"><div class="rank" aria-label="Rank ' + rank + '">' + rank + '</div><div>' +
       '<div class="ctitle">' + esc(p.ti || p.d) + '</div>' +
-      '<div class="csub">English Wikipedia' + partOf(p) + ' &middot; closeness ' + hit[1].toFixed(3) + '</div></div></div>' +
+      '<div class="csub">English Wikipedia' + partOf(p) + ' &middot; <dfn class="g" tabindex="0">closeness<span class="tip" role="tooltip">How close this passage is in meaning to the question. Higher is closer.</span></dfn> ' + hit[1].toFixed(3) + '</div></div></div>' +
       '<p class="snippet">' + esc(snippet(p.tx, 300)) + '</p>' +
       '<div class="tags">' + (flatRank
         ? '<span class="tag same">Exact search also found it (its rank ' + flatRank + ')</span>'
@@ -177,6 +213,9 @@
     box.hidden = !open; btn.setAttribute("aria-expanded", open ? "true" : "false");
     btn.textContent = open ? "Hide the checkable record" : "See its checkable record";
     li.classList.toggle("open", open);
+    capSeq++; clearTimeout(capTimer);
+    if (open) { setStep(4); setCaption(recordCaption(q, hit, rank)); }
+    else { setStep(3); setCaption(resultsCaption(q)); }
   }
 
   function buildRecord(box, q, hit, rank) {
@@ -193,14 +232,14 @@
       '<dt>Passage number</dt><dd><code>' + fmt(o) + '</code> of ' + fmt(TOTAL) + ' in the library</dd>' +
       '<dt>Position in the article</dt><dd>Characters ' + span + '; sentences ' + sent + '</dd>' +
       '<dt>Licence</dt><dd>' + esc(p.lic || "unknown") + ' (Wikipedia text: reuse needs credit and the same licence)</dd>' +
-      '<dt>Library section</dt><dd>Section ' + (p.sh + 1) + ' of 4, group ' + fmt(p.pa) + ' (TRACE scores only the passages inside the few best groups)</dd>' +
+      '<dt>Library part</dt><dd>Part ' + (p.sh + 1) + ' of 4, <dfn class="g" tabindex="0">group<span class="tip" role="tooltip">One pile of similar passages. The computer sorted them by itself.</span></dfn> ' + fmt(p.pa) + ' (TRACE scores only the passages inside the few best groups)</dd>' +
       '<dt>Closeness to the question</dt><dd>' + hit[1].toFixed(4) + ' (higher is closer in meaning)</dd>' +
       '<dt>Exact search also returned it</dt><dd>' + (flatRank ? 'Yes, at its rank ' + flatRank : 'No') + '</dd>' +
       '<dt>Fingerprint stored in the library</dt><dd><span class="hash mono">' + esc(p.h) + '</span><div class="fine">A fingerprint (SHA-256) is a short code worked out from the exact text. Change one letter and the code changes completely.</div></dd>' +
       '</dl>' +
       '<div class="actions"><button type="button" class="chk">Check the fingerprint in my browser</button>' +
       '<a href="' + esc(url) + '" target="_blank" rel="noopener">Open the Wikipedia article</a>' +
-      '<button type="button" class="dl">Download this record (JSON)</button></div>' +
+      '<button type="button" class="dl">Download this record</button></div>' +
       '<div class="verdict-slot" role="status" aria-live="polite"></div>' +
       '<p class="fine">A match shows the text on this page is unchanged since the library was sealed. It does not prove Wikipedia says the same today: pages change, so the link may show newer wording.</p>' +
       '<h4>The full passage</h4><div class="fulltext"></div>' +
@@ -223,11 +262,13 @@
   }
   function checkHash(p, slot) {
     slot.innerHTML = '<div class="verdict">Checking&hellip;</div>';
+    setCaption("Checking the fingerprint in your browser\u2026");
     sha256hex(p.tx).then(function (hex) {
-      if (hex === p.h) slot.innerHTML = '<div class="verdict pass">Match. Your browser worked out <span class="mono">' + hex.slice(0, 16) + '&hellip;</span> from the text on this page, and it equals the fingerprint the library stored.</div>';
-      else slot.innerHTML = '<div class="verdict fail">No match. The text here does not give the stored fingerprint.</div>';
+      if (hex === p.h) { slot.innerHTML = '<div class="verdict pass">Match. Your browser worked out <span class="mono">' + hex.slice(0, 16) + '&hellip;</span> from the text on this page, and it equals the fingerprint the library stored.</div>'; setCaption("Match: the text on this page gives the same fingerprint the library stored."); }
+      else { slot.innerHTML = '<div class="verdict fail">No match. The text here does not give the stored fingerprint.</div>'; setCaption("No match: the text here does not give the stored fingerprint."); }
     }, function () {
       slot.innerHTML = '<div class="verdict fail">This browser cannot work out fingerprints on this page (it needs https or localhost). The stored fingerprint is shown above.</div>';
+      setCaption("This browser cannot work out fingerprints here. The stored fingerprint is shown above.");
     });
   }
   function download(q, hit, rank) {
@@ -275,7 +316,7 @@
       '<div class="cols">' + col("TRACE", gi, fi) + col("Exact search", fi, gi) + '</div>' +
       '<p class="legend">Green edge: also in the other list. Amber edge: only in this list.</p>' +
       '<p class="fine">Time the server took when we recorded: TRACE ' + sec(q.tg) + ', the server&rsquo;s scan-everything mode ' + sec(q.tf) + '. We make no speed claim: what TRACE aims to save is scoring work, not time in this demo.</p>' +
-      '<div class="measured"><div class="bars" role="img" aria-label="Rows scored per search: exact search 100 percent, TRACE 0.79 percent"><div class="bar-row"><span>Exact search</span><i style="width:100%"></i><em>scores 100% of rows</em></div><div class="bar-row"><span>TRACE</span><i class="thin" style="width:max(0.79%,4px)"></i><em>scores 0.79% of rows</em></div></div><p><b>Our 50 test searches:</b> TRACE kept <b>0.9985</b> of exact search&rsquo;s results (1.0 would be identical) while scoring <b>0.79%</b> of the rows, about <b>127 times</b> less scoring work.</p>' +
+      '<div class="measured"><div class="bars" role="img" aria-label="Passages scored per search: exact search 100 percent, TRACE 0.79 percent"><div class="bar-row"><span>Exact search</span><i style="width:100%"></i><em>scores 100% of passages</em></div><div class="bar-row"><span>TRACE</span><i class="thin" style="width:max(0.79%,4px)"></i><em>scores 0.79% of passages</em></div></div><p><b>Our 50 test searches:</b> TRACE kept <b>0.9985</b> of exact search&rsquo;s results (1.0 would be identical) while scoring <b>0.79%</b> of the passages, about <b>127 times</b> less scoring work.</p>' +
       '<p class="fine">Across the ' + all.n + ' questions recorded on this page: ' + all.all + ' gave identical top-10 sets (' + all.ord + ' in exactly the same order), and on average ' + (all.sum / all.n).toFixed(2) + ' of 10 passages were shared. These are only the questions we chose to record, so treat this as an illustration. The 50-search test above is the measurement.</p></div>';
   }
 
@@ -303,6 +344,12 @@
     renderWeakNote(q);
     renderChips();
     try { history.replaceState(null, "", "#q=" + q.id); } catch (e) { /* file:// may refuse */ }
+    (function () {
+      var my = ++capSeq; clearTimeout(capTimer);
+      setStep(1); setCaption("You asked: \u201c" + q.q + "\u201d");
+      if (REDUCED) { setStep(3); setCaption(resultsCaption(q)); }
+      else capTimer = setTimeout(function () { if (my !== capSeq) return; setStep(3); setCaption(resultsCaption(q)); }, 1100);
+    })();
     if (opt.scroll) $("results").scrollIntoView({ behavior: "smooth", block: "start" });
     if (opt.open) {
       var idx = Math.max(1, Math.min(q.g.length, +opt.open || 1));
@@ -323,6 +370,10 @@
     curCat = q.cat || CATS[0];
     renderTabs();
     $("askform").addEventListener("submit", onSubmit);
+    $("jumpcmp").addEventListener("click", function () {
+      capSeq++; clearTimeout(capTimer);
+      setCaption(sharedCount(cur) + " of 10 passages are the same as exact search. Both lists are real recordings of this question.");
+    });
     show(q, { open: hp.open ? +hp.open : 0, focusOpen: !!hp.open });
     if (hp.view === "compare") setTimeout(function () { $("compare").scrollIntoView({ block: "start" }); }, 50);
     var n = Q.length, m = R.meta || {};

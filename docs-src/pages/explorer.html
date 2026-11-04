@@ -2,8 +2,30 @@
 <div class="xp">
 <section class="xhero wrap">
   <h1>The explorer: real searches, each with a checkable record</h1>
-  <p class="lede">A question wakes only a small part of the library: TRACE found nearly the same passages as exact, meaning-based search while scoring 0.79% of the passages on one of four equal parts. Every result comes with a <strong>checkable record</strong> of where it came from.</p>
-  <p class="replay-banner" role="note"><strong>This page is a replay.</strong> Every question below was really asked on a sealed library of 812,545 passages on our server, and the answers were recorded. No search is running live behind this page.</p>
+  <p class="lede">A question wakes only a small part of the library: TRACE found nearly the same <dfn class="g" tabindex="0">passages<span class="tip" role="tooltip">Short pieces of text, a few sentences each, cut from articles.</span></dfn> as <dfn class="g" tabindex="0">exact, meaning-based search<span class="tip" role="tooltip">A second method that checks every one of the 812,545 passages. It is shown so you can compare.</span></dfn> while scoring 0.79% of the passages on one of four equal parts. Every result comes with a <strong>checkable record</strong> of where it came from.</p>
+  <section class="guide" aria-label="What you are seeing">
+    <h2 class="guide-h">What you are seeing</h2>
+    <ol class="guide-steps">
+      <li data-step="1">
+        <svg class="gi" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M6 7h20v12H14l-5 4v-4H6z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><circle class="d1" cx="12" cy="13" r="1.8" fill="currentColor"/><circle class="d2" cx="16" cy="13" r="1.8" fill="currentColor"/><circle class="d3" cx="20" cy="13" r="1.8" fill="currentColor"/></svg>
+        <div><span class="gnum" aria-hidden="true">1</span><b>You ask a question.</b> <span>Pick one from the list below.</span></div>
+      </li>
+      <li data-step="2">
+        <svg class="gi" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line class="b1" x1="7" y1="9" x2="25" y2="9"/><line class="b2" x1="7" y1="16" x2="20" y2="16"/><line class="b3" x1="7" y1="23" x2="25" y2="23"/></g></svg>
+        <div><span class="gnum" aria-hidden="true">2</span><b>The library is already sorted into <dfn class="g" tabindex="0">groups<span class="tip" role="tooltip">Piles of similar passages. The computer sorted them by itself; no person labelled them.</span></dfn>.</b> <span>TRACE did this by itself, before any question arrived.</span></div>
+      </li>
+      <li data-step="3">
+        <svg class="gi" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M5 9h9l3 3h10v11H5z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path class="lid" d="M5 9h9l3 3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><line class="beam" x1="11" y1="17" x2="21" y2="17" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <div><span class="gnum" aria-hidden="true">3</span><b>Only the few groups that fit your question open; the rest stay closed.</b> <span>On our 50 test searches, TRACE <dfn class="g" tabindex="0">scored<span class="tip" role="tooltip">Read closely and ranked for this question.</span></dfn> 0.79% of the passages.</span></div>
+      </li>
+      <li data-step="4">
+        <svg class="gi" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M9 5h9l5 5v17H9z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path class="tick" d="M12.5 16.5l4 4 7-8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div><span class="gnum" aria-hidden="true">4</span><b>Ten passages come back, each with a record.</b> <span>You can check each record on your own computer.</span></div>
+      </li>
+    </ol>
+    <p class="guide-note">The 0.79% counts passages scored per search, measured on one of the library&rsquo;s four equal parts, for the top 10 results.</p>
+  </section>
+  <p class="replay-banner" role="note"><strong>This page is a replay.</strong> Every question below was really asked on a <dfn class="g" tabindex="0">sealed library<span class="tip" role="tooltip">A fixed copy of 812,545 passages that nobody can change, so every check can be repeated.</span></dfn> of 812,545 passages on our server, and the answers were recorded. No search is running live behind this page.</p>
   <ol class="xsteps" aria-label="What to do">
     <li><b>1</b> Pick or type a question</li>
     <li><b>2</b> Read the ranked passages</li>
@@ -20,6 +42,13 @@
     <button type="submit" class="primary">Show the answer</button>
   </form>
   <p class="hint">There is no live search, so your words are matched to the closest question we recorded. The page always says which one it used.</p>
+  <div class="here" aria-label="How to get here">
+    <h3>How to get here</h3>
+    <ul>
+      <li>This page lives at <a href="https://anshul48.github.io/trace/explorer/">https://anshul48.github.io/trace/explorer/</a> (this address works once GitHub Pages is switched on for the repo).</li>
+      <li>It is a recorded replay: pick a question from the list below. There is no live search to run.</li>
+    </ul>
+  </div>
   <div id="matchnote" class="matchnote" role="status" aria-live="polite" hidden></div>
 
   <div class="tabs" role="group" aria-label="Question topics" id="cattabs"></div>
@@ -29,12 +58,15 @@
 <section id="results" class="wrap" aria-live="polite">
   <div class="resultshead">
     <h2><span class="n">2</span> Ranked passages for <span id="qtitle" class="qtitle"></span></h2>
-    <p class="sub">Best match first. These ten passages were returned by TRACE on the sealed library. Open any result to see its checkable record.</p>
+    <p class="sub">Best match first. These ten <dfn class="g" tabindex="0">passages<span class="tip" role="tooltip">Short pieces of text, a few sentences each, cut from articles.</span></dfn> were returned by TRACE on the sealed library. Open any result to see its <dfn class="g" tabindex="0">checkable record<span class="tip" role="tooltip">Where a result came from: the article, its position, and a fingerprint your browser can re-check.</span></dfn>.</p>
     <p id="weaknote" class="matchnote" hidden></p>
     <p class="jump"><a href="#compare" id="jumpcmp">Jump to step 4: same answer as exact search?</a></p>
   </div>
   <div class="grid">
-    <ol id="list" class="cards"></ol>
+    <div class="leftcol">
+      <ol id="list" class="cards"></ol>
+      <p id="caption" class="caption" role="status" aria-live="polite"><span class="cdot" aria-hidden="true"></span><span id="captiontext">Loading the recording.</span></p>
+    </div>
     <aside id="compare" class="compare" aria-label="Same answer as exact search?"></aside>
   </div>
 </section>
@@ -46,7 +78,7 @@
       <h3>What this shows</h3>
       <ul>
         <li><span class="lead">Real searches, recorded.</span> Each question was asked on a sealed library of <b>812,545 passages</b> of English Wikipedia, and the answers are shown as they came back.</li>
-        <li><span class="lead">A checkable record for every result.</span> Which article it came from, where in the article, and a fingerprint your browser can re-check.</li>
+        <li><span class="lead">A checkable record for every result.</span> Which article it came from, where in the article, and a <dfn class="g" tabindex="0">fingerprint<span class="tip" role="tooltip">A short code worked out from the exact text. Change one letter and the code changes completely.</span></dfn> your browser can re-check.</li>
         <li><span class="lead">A second opinion.</span> The same question asked with exact search, so you can see how close the two lists are.</li>
         <li><span class="lead">A measured result.</span> On our 50 test searches, TRACE kept <b>0.9985</b> of exact search&rsquo;s results while scoring <b>0.79%</b> of the passages (about <b>127 times</b> less passage-scoring work; routing and building the groups are separate costs). The checkable records matched on all claims we re-ran on the live service. No outside party has verified this yet.
           <details class="more"><summary>How the 50 test searches were made</summary><p>40 written questions plus 10 taken from passage openings. The 0.79% counts passages scored per search, measured on one of the library&rsquo;s four equal parts, for the top 10 results.</p></details></li>
@@ -57,7 +89,7 @@
       <ul>
         <li><span class="lead">It is not live.</span> This is a replay of real queries recorded on the sealed corpus. The public live service is switched off.
           <details class="more"><summary>Why it is off</summary><p>It failed a first test with many people at once. A later fix passed a local retest, but we are still keeping the public service off.</p></details></li>
-        <li><span class="lead">Keyword search did better on this test.</span> On the 50 test searches, ordinary keyword search put the right source passage in its top ten for <b>82%</b> of them. TRACE did for <b>52%</b>. TRACE is for meaning-based search you can verify, not a replacement for keyword search.
+        <li><span class="lead">Keyword search did better on this test.</span> On the 50 test searches, ordinary <dfn class="g" tabindex="0">keyword search<span class="tip" role="tooltip">Search that matches the exact words you typed, instead of their meaning.</span></dfn> put the right source passage in its top ten for <b>82%</b> of them. TRACE did for <b>52%</b>. TRACE is for meaning-based search you can verify, not a replacement for keyword search.
           <details class="more"><summary>More detail</summary><p>Exact meaning-based search also got 52%, so the gap is meaning-based search versus keywords, not TRACE&rsquo;s shortcut. On a stricter score that also rewards putting the right passage higher up, keyword search got 0.74 and TRACE 0.42. Keyword search also answered faster: 6 milliseconds, against 1.2 seconds for TRACE (88 milliseconds for exact meaning-based search).</p></details></li>
         <li><span class="lead">No speed or memory claim.</span> Stored size on disk: 2.28 GB for TRACE, against 1.25 GB for a plain vector copy and 0.51 GB for the keyword index. Stored size on disk; memory use was not compared. While answering questions, the live service peaked near 1 GB of memory (1.03 GiB).</li>
         <li><span class="lead">Not a random sample.</span> We wrote 144 everyday questions before asking, and kept every answer. The tab <b>Weaker matches</b> holds the 29 where the top results read less well.</li>
@@ -91,8 +123,8 @@
     <div>
       <h3>The recordings</h3>
       <p id="recmeta">Loading the recording details.</p>
-      <p>The server returns the ranked passages, their closeness scores and the first part of each passage&rsquo;s text. For the record view we read the full passage and its record fields (article ID, character span, licence, fingerprint) straight from the sealed library&rsquo;s own files, read-only. Article titles come from the first line of each article in the library. The only thing we change is a tidy-up of wiki markup in the text on cards; the record view can show each passage exactly as stored.</p>
-      <p>Passages are excerpts of Wikipedia, licensed CC BY-SA 4.0. The code is Apache-2.0: <a href="https://github.com/Anshul48/trace">github.com/Anshul48/trace</a>.</p>
+      <p>The server returns the <dfn class="g" tabindex="0">ranked<span class="tip" role="tooltip">In order, best match first.</span></dfn> passages, their <dfn class="g" tabindex="0">closeness scores<span class="tip" role="tooltip">How close a passage is in meaning to the question. Higher is closer.</span></dfn> and the first part of each passage&rsquo;s text. For the record view we read the full passage and its record fields (article ID, <dfn class="g" tabindex="0">character span<span class="tip" role="tooltip">Which letters of the article this passage covers, counted from the start.</span></dfn>, licence, fingerprint) straight from the sealed library&rsquo;s own files, read-only. Article titles come from the first line of each article in the library. The only thing we change is a tidy-up of <dfn class="g" tabindex="0">wiki markup<span class="tip" role="tooltip">Editing codes inside Wikipedia text. They are tidied here for reading; the record view can show the text exactly as stored.</span></dfn> in the text on cards; the record view can show each passage exactly as stored.</p>
+      <p>Passages are excerpts of Wikipedia, licensed <dfn class="g" tabindex="0">CC BY-SA 4.0<span class="tip" role="tooltip">The licence for Wikipedia text: reuse needs credit and the same licence.</span></dfn>. The code is Apache-2.0: <a href="https://github.com/Anshul48/trace">github.com/Anshul48/trace</a>.</p>
     </div>
   </div>
 </section>

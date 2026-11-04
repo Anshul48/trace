@@ -147,3 +147,52 @@
 .xp table.status{table-layout:fixed}
 .xp table.status .badge{white-space:normal}
 .xp table.status td,.xp table.status th{overflow-wrap:anywhere}
+
+/* ---------- v5 guide: what-you-are-seeing strip ---------- */
+.xp .guide{margin:20px 0 4px}
+.xp .guide-h{font-size:1.05rem;margin:0 0 .5em;color:var(--ink)}
+.xp .guide-steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.xp .guide-steps li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 12px 12px 10px;display:flex;gap:10px;align-items:flex-start;font-size:.92rem;line-height:1.45;box-shadow:var(--shadow)}
+.xp .guide-steps li.active{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-soft),var(--shadow)}
+.xp .guide-steps .gnum{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--brand);color:var(--brand-ink);font-size:.8em;font-weight:700;margin-right:.4em}
+.xp .guide-steps .gi{flex:0 0 auto;width:30px;height:30px;color:var(--brand);margin-top:2px}
+.xp .guide-note{font-size:.85rem;color:var(--muted);margin:.5em 0 0;max-width:60em}
+/* small calm icon motion; frozen when the visitor prefers less motion */
+.xp .gi .d1{animation:xp-pulse 2.4s ease-in-out infinite}
+.xp .gi .d2{animation:xp-pulse 2.4s ease-in-out .4s infinite}
+.xp .gi .d3{animation:xp-pulse 2.4s ease-in-out .8s infinite}
+@keyframes xp-pulse{0%,100%{opacity:.25}50%{opacity:1}}
+.xp .gi .b2{animation:xp-drift 3.2s ease-in-out infinite alternate}
+@keyframes xp-drift{from{transform:translateX(0)}to{transform:translateX(5px)}}
+.xp .gi .beam{animation:xp-pulse 2.8s ease-in-out infinite}
+.xp .gi .tick{stroke-dasharray:16;stroke-dashoffset:16;animation:xp-draw 3.4s ease-in-out infinite}
+@keyframes xp-draw{0%{stroke-dashoffset:16}35%,70%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}
+@media (max-width:900px){.xp .guide-steps{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.xp .guide-steps{grid-template-columns:1fr}.xp .guide-steps li{font-size:.95rem}}
+@media (prefers-reduced-motion:reduce){
+  .xp .gi *{animation:none}
+  .xp .gi .tick{stroke-dashoffset:0}
+}
+
+/* ---------- v5 guide: how-to-get-here box ---------- */
+.xp .here{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:14px 0 4px}
+.xp .here h3{font-size:1.02rem;margin:0 0 .3em}
+.xp .here ul{margin:0;padding-left:1.1em}
+.xp .here li{margin-bottom:.3em;font-size:.98rem}
+.xp .here a{overflow-wrap:anywhere}
+
+/* ---------- v5 guide: live caption under the results ---------- */
+.xp .leftcol{min-width:0}
+.xp .caption{display:flex;gap:10px;align-items:flex-start;background:var(--brand-soft);border:1px solid var(--brand);border-radius:12px;padding:12px 14px;margin:14px 0 0;font-size:.98rem;color:var(--ink);min-height:3.2em}
+.xp .cdot{flex:0 0 auto;width:.7em;height:.7em;border-radius:50%;background:var(--brand);margin-top:.45em;animation:xp-pulse 2s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.xp .cdot{animation:none}}
+
+/* ---------- v5 guide: glossary tooltips (hover, focus, or tap) ---------- */
+.xp dfn.g{font-style:normal;text-decoration:underline dotted;text-underline-offset:3px;text-decoration-thickness:1.5px;cursor:help;position:relative;border-radius:4px}
+.xp dfn.g:hover{text-decoration-style:solid}
+.xp dfn.g:focus{outline:none}
+.xp dfn.g:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.xp dfn.g .tip{display:none;position:absolute;left:0;bottom:130%;z-index:20;width:max-content;max-width:min(270px,78vw);background:var(--surface);color:var(--ink);border:1px solid var(--brand);border-radius:10px;padding:8px 12px;font-size:.85rem;font-weight:400;line-height:1.45;box-shadow:var(--shadow);text-decoration:none;white-space:normal}
+.xp dfn.g:hover .tip,
+.xp dfn.g:focus .tip,
+.xp dfn.g.pin .tip{display:block}
