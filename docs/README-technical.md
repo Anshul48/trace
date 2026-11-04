@@ -1,4 +1,6 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
+> Archived earlier material, kept for the record. Its numbers and claims are superseded by the main README. Current, checked results: [README](../README.md).
+
 > **This is the earlier, full technical README, kept for researchers.** It was written for an earlier, smaller experiment, so its numbers can differ from the front page. The current plain-language overview is in the [main README](../README.md). Relative links below were adjusted for this folder; the text is otherwise unchanged.
 
 # TRACE — a self-organizing memory database (research preview)

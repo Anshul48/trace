@@ -1,4 +1,6 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
+> Archived earlier material, kept for the record. Its numbers and claims are superseded by the main README. Current, checked results: [README](../README.md).
+
 # Proposed GitHub About (for maintainer review; not yet applied)
 
 **Description:** Frozen 10M self-organizing retrieval stack with source-pinned qualification, benchmarks, architecture docs and a browser demo.

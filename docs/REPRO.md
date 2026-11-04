@@ -1,3 +1,5 @@
+> Archived earlier material, kept for the record. Its numbers and claims are superseded by the main README. Current, checked results: [README](../README.md).
+
 # Reproducibility (pins, hardware, re-verification)
 
 ## Source pins (frozen bytes)

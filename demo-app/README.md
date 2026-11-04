@@ -1,3 +1,5 @@
+> Archived earlier material, kept for the record. Its numbers and claims are superseded by the main README. Current, checked results: [README](../README.md).
+
 # TRACE freeze-38 browser demo
 
 A working localhost demo of the **actual frozen** STACK-FORK candidate

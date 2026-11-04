@@ -1,3 +1,5 @@
+> Archived earlier material, kept for the record. Its numbers and claims are superseded by the main README. Current, checked results: [README](../README.md).
+
 # 10M benchmarks (freeze `seam12a`, run `o94-scale10m`)
 
 All numbers below are from the seam12a freeze audit (tarball sha256

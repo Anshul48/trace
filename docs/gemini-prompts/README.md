@@ -1,3 +1,5 @@
+> Archived earlier material, kept for the record. Its numbers and claims are superseded by the main README. Current, checked results: [README](../../README.md).
+
 # Manual Gemini prompts for the actual `38c66bef` stack
 
 Integrated prompt set in `docs/gemini-prompts/`, superseding earlier drafts (preserved outside this repo,
