@@ -49,4 +49,4 @@ no model weights are redistributed here.
 `prep_small_prefix.py`, `README.md`, `PROTOCOL.md`, `MANIFEST.json`, the
 exporter's repacking (renumbered index rows), and the local pilot outputs
 are project-authored and follow the repository's Apache-2.0 terms.
-Receipts under `../receipts/` are project records quoted by hash in `MANIFEST.json`.
+Receipts under `../../../receipts/` are project records quoted by hash in `MANIFEST.json`.

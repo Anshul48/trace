@@ -103,7 +103,7 @@
       "id": "small-repro",
       "title": "A small reproduction (20,000 tokens) that runs on your own computer",
       "status": "built",
-      "evidence": "repro-20k/README.md",
+      "evidence": "docs/reproduction/repro-20k/README.md",
       "checked": "2026-11-04"
     },
     {

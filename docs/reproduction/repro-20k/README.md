@@ -25,14 +25,14 @@ the earlier record remains the receipts summarized in [PROTOCOL.md](PROTOCOL.md)
 
 ## Reproduce it yourself (clean checkout)
 
-Prerequisites: the frozen candidate tree (`../freeze-src/cand`,
+Prerequisites: the frozen candidate tree (`../../../freeze-src/cand`,
 SOURCEFREEZE `38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54`),
 Python 3.12 with `numpy` and `blake3`, and — only for re-export — existing
 `gcloud` SSH auth to `trace-build500` (read-only; no VM writes, no new runs).
 
 ```bash
 # 1. Verify the frozen source (207/207 + harness pin 9f516288…)
-python3 prep_small_prefix.py verify-freeze --cand ../freeze-src/cand
+python3 prep_small_prefix.py verify-freeze --cand ../../../freeze-src/cand
 
 # 2a. Use the committed export …
 python3 prep_small_prefix.py unpack --tar small-prefix-20k.tar.gz --data-dir data-20k
@@ -41,13 +41,13 @@ python3 prep_small_prefix.py export-vm --tokens 20000 --out small-prefix-20k.tar
 
 # 3. Verify: frozen RealPrefix over the portable dir must reproduce the
 #    exporter's full-cache receipt (prefix + used-vector hashes exact, 0 misses)
-python3 prep_small_prefix.py verify --tokens 20000 --cand ../freeze-src/cand --data-dir data-20k
+python3 prep_small_prefix.py verify --tokens 20000 --cand ../../../freeze-src/cand --data-dir data-20k
 
 # 4. Run the actual small-scale protocol with the frozen harness
 PYTHONDONTWRITEBYTECODE=1 \
-PYTHONPATH=../freeze-src/cand/fork/tl-sys:../freeze-src/cand/fork/tl-candidate-batch/candidate:../freeze-src/cand/tools \
-python -B ../freeze-src/cand/tools/product_pilot.py --tokens 20000 --profile local \
-    --out ./pilot-20k-out2 --source-root ../freeze-src/cand --data-dir ./data-20k
+PYTHONPATH=../../../freeze-src/cand/fork/tl-sys:../../../freeze-src/cand/fork/tl-candidate-batch/candidate:../../../freeze-src/cand/tools \
+python -B ../../../freeze-src/cand/tools/product_pilot.py --tokens 20000 --profile local \
+    --out ./pilot-20k-out2 --source-root ../../../freeze-src/cand --data-dir ./data-20k
 ```
 
 Expected step-3 result (observed 2026-10-14): `VERIFY PASS` — actual_tokens

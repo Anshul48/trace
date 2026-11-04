@@ -94,7 +94,7 @@ Larger builds were earlier tests, shown separately under [Appendix: earlier test
 - **No install:** the [explorer](https://anshul48.github.io/trace/explorer/) in your browser. ![Working today](docs/badges/explorer-replay.svg) ![Working today](docs/badges/record-check.svg)
 - **Run the explorer on your own computer** (Python 3, downloads nothing): `./tools/run-trace.sh` (Windows: `tools\run-trace.bat`). ![Working today](docs/badges/explorer-local.svg)
 - **Check that the published code is the code we tested** (207 files): `python3 tools/verify_freeze.py` should end with `entries=207 ok=207 missing=0 mismatch=0`. ![Working today](docs/badges/freeze-verify.svg)
-- **Run a small reproduction** (20,000 tokens, needs `numpy` and `blake3`): see [`repro-20k/README.md`](repro-20k/README.md). ![Working today](docs/badges/small-repro.svg)
+- **Run a small reproduction** (20,000 tokens, needs `numpy` and `blake3`): see [`repro-20k/README.md`](docs/reproduction/repro-20k/README.md). ![Working today](docs/badges/small-repro.svg)
 - **Planned:** query the whole library yourself, or download it. ![Off](docs/badges/public-service.svg) ![Planned](docs/badges/local-kit.svg) Nobody outside our team has re-run our results. ![Planned](docs/badges/outside-check.svg)
 
 ## Honest limits
@@ -160,7 +160,7 @@ A "piece" is one sealed part of a library. The cost to build on a smaller test c
 | [`docs/source/`](docs/source/) | The sources the website is generated from (`python3 tools/build_site.py`). |
 | [`freeze-src/`](freeze-src/) | The tested engine, 207 files. |
 | [`receipts/`](receipts/) | The records of our runs (the folder is named *receipts*): the qualification run, the earlier larger builds, the order measurement. |
-| [`repro-20k/`](repro-20k/README.md) | A small reproduction for your own computer. |
+| [`docs/reproduction/repro-20k/`](docs/reproduction/repro-20k/README.md) | A small reproduction for your own computer. |
 | [`tools/`](tools/) | The checks, the site generator and the local launcher. |
 
 ## Contributing, security, citation

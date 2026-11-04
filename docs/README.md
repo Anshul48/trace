@@ -50,4 +50,4 @@ These documents were written for an earlier, smaller experiment (an earlier smal
 
 - [`../receipts/`](../receipts/): the records of our runs (the folder is named *receipts*): `earlier-runs/` (the 504.5M and 310.5M builds and the build-memory runs), `order-measure/` (the measurement of how ordered the groups are).
 - [`../tools/`](../tools/): `verify_freeze.py`, `check_receipts.py`, `check_links.py`, `build_site.py`, `run-trace.sh`.
-- [`../repro-20k/`](../repro-20k/README.md): a small reproduction for your own computer.
+- [`reproduction/repro-20k/`](reproduction/repro-20k/README.md): a small reproduction for your own computer.

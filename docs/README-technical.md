@@ -20,7 +20,7 @@
 | Start here | Pick a path |
 |---|---|
 | Researchers | [Proof](#proof-one-line) · [Benchmarks](BENCHMARKS.md) · [Architecture](ARCHITECTURE.md) |
-| Developers | [Try it in 5 minutes](#try-it-in-5-minutes) · [Portable 20k reproduction](../repro-20k/README.md) · [Code tour](CODE-TOUR.md) |
+| Developers | [Try it in 5 minutes](#try-it-in-5-minutes) · [Portable 20k reproduction](reproduction/repro-20k/README.md) · [Code tour](CODE-TOUR.md) |
 | Judges | [60-second tour](https://anshul48.github.io/trace/explorer/) · [Animated demo](https://anshul48.github.io/trace/recording/) · [Raw recorded run](https://anshul48.github.io/trace/recording/#raw-run) |
 
 ## What you can do with it today
@@ -154,7 +154,7 @@ Real output of step 5 (from `out-pilot/result.json`): `claim=measured, status=PA
 - [docs/BENCHMARKS.md](BENCHMARKS.md) — unabridged benchmark records and derivations.
 - [docs/REPRO.md](REPRO.md) — reproduction commands, environment, pin hashes, and the two honest blockers on a full rerun.
 - [Release seam12a](https://github.com/Anshul48/trace/releases/tag/seam12a-10m-freeze) — frozen source tarball, measurements, and study record.
-- [repro-20k/README.md](../repro-20k/README.md) — portable 20k-token reproduction (88 documents, precomputed vector cache).
+- [docs/reproduction/repro-20k/README.md](reproduction/repro-20k/README.md) — portable 20k-token reproduction (88 documents, precomputed vector cache).
 - [tools/verify_freeze.py](../tools/verify_freeze.py) / [tools/check_receipts.py](../tools/check_receipts.py) / [tools/check_links.py](../tools/check_links.py) — freeze, receipt, and link checks run in CI.
 
 ---
@@ -173,7 +173,7 @@ TRACE is a research preview: bug reports and reproduction attempts with receipts
 
 ## License
 
-Apache-2.0 ([LICENSE](https://github.com/Anshul48/trace/blob/main/LICENSE)). Corpus text excerpts and vector models keep their upstream licenses; see [repro-20k/LICENSES-DATA-MODEL.md](../repro-20k/LICENSES-DATA-MODEL.md).
+Apache-2.0 ([LICENSE](https://github.com/Anshul48/trace/blob/main/LICENSE)). Corpus text excerpts and vector models keep their upstream licenses; see [docs/reproduction/repro-20k/LICENSES-DATA-MODEL.md](reproduction/repro-20k/LICENSES-DATA-MODEL.md).
 
 ## Further reading
 

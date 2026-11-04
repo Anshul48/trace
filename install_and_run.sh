@@ -138,18 +138,18 @@ echo "[4/7] Verifying 207 immutable source files against SOURCEFREEZE..."
 # 5. Small-Scale Real Prefix Verification
 echo ""
 echo "[5/7] Verifying 20k token prefix data..."
-DATA_DIR="${SCRIPT_DIR}/repro-20k/data-20k"
-TAR_FILE="${SCRIPT_DIR}/repro-20k/small-prefix-20k.tar.gz"
+DATA_DIR="${SCRIPT_DIR}/docs/reproduction/repro-20k/data-20k"
+TAR_FILE="${SCRIPT_DIR}/docs/reproduction/repro-20k/small-prefix-20k.tar.gz"
 
 if [ ! -d "${DATA_DIR}" ]; then
     if [ ! -f "${TAR_FILE}" ]; then
         echo "ERROR: Missing prefix data directory and archive at ${TAR_FILE}" >&2
         exit 1
     fi
-    echo "  Unpacking repro-20k/small-prefix-20k.tar.gz..."
-    "${PYTHON_BIN}" repro-20k/prep_small_prefix.py unpack --tar "${TAR_FILE}" --data-dir "${DATA_DIR}"
+    echo "  Unpacking docs/reproduction/repro-20k/small-prefix-20k.tar.gz..."
+    "${PYTHON_BIN}" docs/reproduction/repro-20k/prep_small_prefix.py unpack --tar "${TAR_FILE}" --data-dir "${DATA_DIR}"
 fi
-"${PYTHON_BIN}" repro-20k/prep_small_prefix.py verify --tokens 20000 --cand freeze-src/cand --data-dir "${DATA_DIR}"
+"${PYTHON_BIN}" docs/reproduction/repro-20k/prep_small_prefix.py verify --tokens 20000 --cand freeze-src/cand --data-dir "${DATA_DIR}"
 
 # 6. Execute Frozen Product Pilot on 20k Prefix (Preserve all runs, NO deletions)
 RUNS_DIR="${SCRIPT_DIR}/local-runs"

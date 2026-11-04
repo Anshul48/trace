@@ -46,12 +46,12 @@ def resolve_run_dir(given_path=None):
 
 
 def load_doc_texts(data_dir=None):
-    """Load licensed SciFact abstract texts from repro-20k prefix data."""
+    """Load licensed SciFact abstract texts from docs/reproduction/repro-20k prefix data."""
     docs = {}
     if data_dir:
         docs_file = Path(data_dir) / "docs-100m.jsonl"
     else:
-        docs_file = ROOT / "repro-20k" / "data-20k" / "docs-100m.jsonl"
+        docs_file = ROOT / "docs" / "reproduction" / "repro-20k" / "data-20k" / "docs-100m.jsonl"
     if docs_file.exists():
         with open(docs_file, "r", encoding="utf-8") as f:
             for line in f:

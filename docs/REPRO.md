@@ -84,7 +84,7 @@ note in BENCHMARKS.md); the large retained store is excluded (size).
 
 ## Small-scale portable reproduction (20k)
 
-[`repro-20k/`](../repro-20k/README.md) ships an exact 88-document /
+[`docs/reproduction/repro-20k/`](reproduction/repro-20k/README.md) ships an exact 88-document /
 20,030-token prefix (SciFact corpus abstracts, ODC-By 1.0 per the upstream
 allenai/scifact LICENSE record; claims annotations CC-BY-4.0 and SciFact
 code Apache-2.0 are not in this export) with derived FP32 vectors from
@@ -92,7 +92,7 @@ code Apache-2.0 are not in this export) with derived FP32 vectors from
 All 88 exported rows were inspected as numeric SciFact corpus ids. This
 runs the frozen harness locally to PASS and reproduces the *protocol* at
 small scale; it is not full-run reproduction. Full attribution:
-[`repro-20k/LICENSES-DATA-MODEL.md`](../repro-20k/LICENSES-DATA-MODEL.md).
+[`docs/reproduction/repro-20k/LICENSES-DATA-MODEL.md`](reproduction/repro-20k/LICENSES-DATA-MODEL.md).
 
 ## Data / third-party note
 

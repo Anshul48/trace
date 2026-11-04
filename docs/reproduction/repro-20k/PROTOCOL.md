@@ -1,4 +1,4 @@
-> Archived earlier material, kept for the record. Its numbers and claims are superseded by the main README. Current, checked results: [README](../README.md).
+> Archived earlier material, kept for the record. Its numbers and claims are superseded by the main README. Current, checked results: [README](../../../README.md).
 
 # Recorded earlier qualification protocol — stack-fork `38c66bef`
 

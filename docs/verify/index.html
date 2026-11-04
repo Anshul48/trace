@@ -75,11 +75,11 @@ python3 tools/check_receipts.py</code></pre>
     <h2 id="small">3. Run the small reproduction <span class="badge badge-built" data-status-id="small-repro">Working today</span></h2>
     <p class="note">Needs: Python 3.12 with <code>numpy</code> and <code>blake3</code>. About a minute for the check, longer for the full small run.</p>
 <pre><code>pip install numpy blake3
-cd repro-20k
-python3 prep_small_prefix.py verify-freeze --cand ../freeze-src/cand
+cd docs/reproduction/repro-20k
+python3 prep_small_prefix.py verify-freeze --cand ../../../freeze-src/cand
 python3 prep_small_prefix.py unpack --tar small-prefix-20k.tar.gz --data-dir data-20k
-python3 prep_small_prefix.py verify --tokens 20000 --cand ../freeze-src/cand --data-dir data-20k</code></pre>
-    <p>Expected: <code>VERIFY PASS</code>, with 88 documents, 144 passages and 0 cache misses. The folder's own <a href="https://github.com/Anshul48/trace/blob/main/repro-20k/README.md">README</a> has the fourth step, which runs the tested engine's own protocol on those 20,000 tokens.</p>
+python3 prep_small_prefix.py verify --tokens 20000 --cand ../../../freeze-src/cand --data-dir data-20k</code></pre>
+    <p>Expected: <code>VERIFY PASS</code>, with 88 documents, 144 passages and 0 cache misses. The folder's own <a href="https://github.com/Anshul48/trace/blob/main/docs/reproduction/repro-20k/README.md">README</a> has the fourth step, which runs the tested engine's own protocol on those 20,000 tokens.</p>
     <p><b>What it proves:</b> the tested engine runs from a clean copy on real data, end to end, at 20,000 tokens. <b>What it does not prove:</b> any number from the big library. The small run's numbers are not the large run's, and it uses the earlier engine of the repository.</p>
 
     <h2 id="local">4. Run the explorer on your own computer <span class="badge badge-built" data-status-id="explorer-local">Working today</span></h2>
