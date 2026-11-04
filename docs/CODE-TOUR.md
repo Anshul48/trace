@@ -4,7 +4,7 @@
 Every path below is inside the exact qualified snapshot. **Do not edit
 anything under `freeze-src/`**: `python3 tools/verify_freeze.py` must keep
 printing `entries=207 ok=207 missing=0 mismatch=0`. New code goes in
-wrappers outside the freeze (`tools/`, `demo/`, `demo-app/`).
+wrappers outside the freeze (`tools/`, `docs/examples/demo/`, `tools/demo-app/`).
 
 ## Entry points
 
@@ -67,5 +67,5 @@ the durability behaviour exercised by the pilot's kill/restart phase.
 | [tools/verify_freeze.py](../tools/verify_freeze.py) | Rehash all 207 frozen files against `SOURCEFREEZE.json`. |
 | [tools/check_receipts.py](../tools/check_receipts.py) | Validate staged receipt JSON shape and the recorded gate values quoted in the docs. |
 | [tools/check_links.py](../tools/check_links.py) | Check relative Markdown links in the maintained docs resolve. |
-| [demo/synthetic_recall.py](../demo/synthetic_recall.py) | Illustrative synthetic guided-vs-flat shape demo; not a benchmark. |
+| [docs/examples/demo/synthetic_recall.py](examples/demo/synthetic_recall.py) | Illustrative synthetic guided-vs-flat shape demo; not a benchmark. |
 | [receipts/](../receipts/result.json) | Staged VM records, verbatim; the only source for benchmark numbers. |

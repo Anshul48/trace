@@ -5,7 +5,7 @@ Builds a tiny two-level store with random FP32 vectors, runs one guided
 exact float64 oracle, and prints recall + work. This exercises the routing
 *shape* only — it is not the earlier qualification and claims nothing about it.
 
-Run:  python3 demo/synthetic_recall.py [--probes 20 --atoms 2000 --seed 7]
+Run:  python3 docs/examples/demo/synthetic_recall.py [--probes 20 --atoms 2000 --seed 7]
 """
 import argparse
 import numpy as np

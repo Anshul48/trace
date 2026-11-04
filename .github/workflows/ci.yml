@@ -29,9 +29,9 @@ jobs:
       - name: Documentation links and SVG well-formedness
         run: |
           python3 tools/check_links.py
-          python3 -c "import xml.etree.ElementTree as E, glob; [E.parse(f) for f in glob.glob('assets/*.svg')]; print('svg ok')"
+          python3 -c "import xml.etree.ElementTree as E, glob; [E.parse(f) for f in glob.glob('docs/media/legacy-assets/*.svg')]; print('svg ok')"
       - name: Synthetic demo
-        run: python3 demo/synthetic_recall.py --probes 20 --atoms 2000
+        run: python3 docs/examples/demo/synthetic_recall.py --probes 20 --atoms 2000
       - name: Stack unit tests (5/6; build-host-only path excluded)
         run: |
           CAND="$PWD/freeze-src/cand"

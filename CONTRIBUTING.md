@@ -4,7 +4,7 @@ Thank you for looking. TRACE is a research prototype, so the rules are stricter 
 
 ## The rules
 
-- **Never edit `freeze-src/`.** It is the tested engine, 207 files. Any edit breaks `python3 tools/verify_freeze.py`, which must keep ending with `entries=207 ok=207 missing=0 mismatch=0`. Put new code outside it (`tools/`, `demo/`, `demo-app/`).
+- **Never edit `freeze-src/`.** It is the tested engine, 207 files. Any edit breaks `python3 tools/verify_freeze.py`, which must keep ending with `entries=207 ok=207 missing=0 mismatch=0`. Put new code outside it (`tools/`, `docs/examples/demo/`, `tools/demo-app/`).
 - **No new numbers without a record.** Every number in the README and on the website must trace to a file in `receipts/` (or to a measurement file named in the evidence page). Do not run a large build "to check something": the larger builds are billed, multi-hour hardware.
 - **Say what was measured, and its scope.** Write "50 test searches", "our library and method", "stored size on disk", "one of four equal parts" next to 0.79%, and "short of the 100M target by 0.11%" next to 99.9M. Do not write "beats", "fastest", "faster", "low memory", "scales to a billion" or "works on public benchmarks".
 - **Explain our words.** Brain-inspired words are fine only when they are accurate, always as "inspired by", never "works like the brain", and each with a plain-words explanation. Avoid unexplained jargon (shard, recall@10, nDCG, BM25, lanes): write ordinary keyword search, checkable record, piece and group instead.
@@ -28,7 +28,7 @@ python3 tools/verify_freeze.py          # entries=207 ok=207 missing=0 mismatch=
 python3 tools/check_receipts.py         # receipts ok: ...
 python3 tools/check_links.py            # links ok, status.json evidence paths exist
 python3 tools/build_site.py --check     # site ok
-python3 demo/synthetic_recall.py
+python3 docs/examples/demo/synthetic_recall.py
 ```
 
 CI runs the same checks. The [pull request template](.github/pull_request_template.md) lists the rest.
