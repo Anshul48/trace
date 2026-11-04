@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="603" viewBox="0 0 1000 603" role="img" aria-labelledby="t d">
+<title id="t">Honest limits of TRACE</title>
+<desc id="d">Four limits. Ordinary keyword search did better on our test: it found the right passage more often and answered faster. TRACE needs more computer memory than exact or keyword search, and we make no speed claim. The testing is small: 50 test searches, and the public standard tests (BEIR) have not been run. The live service is switched off and the run-it-yourself kit is only planned. We claim only what we measured, and nothing more.</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#071A30"/><stop offset="1" stop-color="#0B3A4F"/></linearGradient>
+<style>text{font-family:'Segoe UI','Helvetica Neue',Helvetica,Arial,'DejaVu Sans',sans-serif}</style>
+</defs>
+<rect x="1" y="1" width="998" height="601" rx="24" fill="url(#bg)" stroke="#1F5673" stroke-width="2"/>
+<text x="46" y="72" font-size="36" font-weight="700" fill="#F2F8FC">Honest limits</text>
+<text x="46" y="104" font-size="20" fill="#9FB8CC">What TRACE does not do, said plainly.</text>
+<rect x="46" y="120" width="64" height="4" rx="2" fill="#2DD4BF"/>
+<circle cx="62" cy="160" r="9" fill="none" stroke="#E8B865" stroke-width="3"/>
+<circle cx="62" cy="160" r="3" fill="#E8B865"/>
+<text x="90" y="168" font-size="25" font-weight="700" fill="#F2F8FC">Ordinary keyword search did better here</text>
+<text x="90" y="198" font-size="19" fill="#B4C9DA">On our test it found the right passage more often, and faster.</text>
+<text x="90" y="223" font-size="19" fill="#B4C9DA">TRACE is for search by meaning that you can check. It is not a replacement.</text>
+<circle cx="62" cy="274" r="9" fill="none" stroke="#E8B865" stroke-width="3"/>
+<circle cx="62" cy="274" r="3" fill="#E8B865"/>
+<text x="90" y="282" font-size="25" font-weight="700" fill="#F2F8FC">It uses more memory</text>
+<text x="90" y="312" font-size="19" fill="#B4C9DA">It needs more computer memory than exact or keyword search. No speed claim.</text>
+<circle cx="62" cy="363" r="9" fill="none" stroke="#E8B865" stroke-width="3"/>
+<circle cx="62" cy="363" r="3" fill="#E8B865"/>
+<text x="90" y="371" font-size="25" font-weight="700" fill="#F2F8FC">The testing is small</text>
+<text x="90" y="401" font-size="19" fill="#B4C9DA">Only 50 test searches. The public standard tests (BEIR) have not been run.</text>
+<circle cx="62" cy="452" r="9" fill="none" stroke="#E8B865" stroke-width="3"/>
+<circle cx="62" cy="452" r="3" fill="#E8B865"/>
+<text x="90" y="460" font-size="25" font-weight="700" fill="#F2F8FC">Not public yet</text>
+<text x="90" y="490" font-size="19" fill="#B4C9DA">The live service is switched off. The run-it-yourself kit is only planned.</text>
+<line x1="46" y1="531" x2="954" y2="531" stroke="#2A6F8A" stroke-width="1.5"/>
+<text x="46" y="571" font-size="23" font-weight="700" fill="#5EEAD4">We claim only what we measured, and nothing more.</text>
+</svg>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="322" viewBox="0 0 1000 322" role="img" aria-labelledby="t d">
+<title id="t">How TRACE works in three steps</title>
+<desc id="d">Step 1: ask a question in plain words. Step 2: TRACE narrows down and looks at under 1% of the passages, not all of them. Step 3: you get an answer, and every result comes with a checkable record of where it came from.</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#071A30"/><stop offset="1" stop-color="#0B3A4F"/></linearGradient>
+<style>text{font-family:'Segoe UI','Helvetica Neue',Helvetica,Arial,'DejaVu Sans',sans-serif}</style>
+</defs>
+<rect x="1" y="1" width="998" height="320" rx="24" fill="url(#bg)" stroke="#1F5673" stroke-width="2"/>
+<rect x="34" y="30" width="288" height="262" rx="18" fill="#0E2C46" stroke="#2A6F8A" stroke-width="1.5"/>
+<circle cx="78" cy="80" r="24" fill="#14B8A6"/>
+<text x="78" y="89" font-size="26" font-weight="700" text-anchor="middle" fill="#04202B">1</text>
+<g transform="translate(242,54)"><circle cx="22" cy="22" r="15" fill="none" stroke="#5EEAD4" stroke-width="5"/><path d="M34 34 L50 50" stroke="#5EEAD4" stroke-width="6" stroke-linecap="round"/></g>
+<text x="58" y="154" font-size="27" font-weight="700" fill="#F2F8FC">Ask</text>
+<text x="58" y="190" font-size="20" fill="#B4C9DA">Type a question in</text>
+<text x="58" y="217" font-size="20" fill="#B4C9DA">plain words.</text>
+<rect x="356" y="30" width="288" height="262" rx="18" fill="#0E2C46" stroke="#2A6F8A" stroke-width="1.5"/>
+<circle cx="400" cy="80" r="24" fill="#14B8A6"/>
+<text x="400" y="89" font-size="26" font-weight="700" text-anchor="middle" fill="#04202B">2</text>
+<g transform="translate(564,54)"><circle cx="8" cy="10" r="3" fill="#6FA3C7" fill-opacity="0.55"/><circle cx="24" cy="6" r="4.6" fill="#2DD4BF" fill-opacity="1"/><circle cx="42" cy="12" r="4.6" fill="#2DD4BF" fill-opacity="1"/><circle cx="52" cy="26" r="3" fill="#6FA3C7" fill-opacity="0.55"/><circle cx="10" cy="30" r="3" fill="#6FA3C7" fill-opacity="0.55"/><circle cx="30" cy="24" r="4.6" fill="#2DD4BF" fill-opacity="1"/><circle cx="46" cy="44" r="3" fill="#6FA3C7" fill-opacity="0.55"/><circle cx="20" cy="46" r="3" fill="#6FA3C7" fill-opacity="0.55"/><circle cx="6" cy="50" r="3" fill="#6FA3C7" fill-opacity="0.55"/><circle cx="36" cy="54" r="3" fill="#6FA3C7" fill-opacity="0.55"/><circle cx="54" cy="8" r="3" fill="#6FA3C7" fill-opacity="0.55"/><circle cx="14" cy="20" r="3" fill="#6FA3C7" fill-opacity="0.55"/><circle cx="32" cy="14" r="20" fill="none" stroke="#2DD4BF" stroke-width="2" stroke-dasharray="4 4"/></g>
+<text x="380" y="154" font-size="27" font-weight="700" fill="#F2F8FC">Narrow down</text>
+<text x="380" y="190" font-size="20" fill="#B4C9DA">Look at under 1% of</text>
+<text x="380" y="217" font-size="20" fill="#B4C9DA">the passages, not all</text>
+<text x="380" y="244" font-size="20" fill="#B4C9DA">of them.</text>
+<rect x="678" y="30" width="288" height="262" rx="18" fill="#0E2C46" stroke="#2A6F8A" stroke-width="1.5"/>
+<circle cx="722" cy="80" r="24" fill="#14B8A6"/>
+<text x="722" y="89" font-size="26" font-weight="700" text-anchor="middle" fill="#04202B">3</text>
+<g transform="translate(886,54)"><rect x="2" y="2" width="52" height="56" rx="8" fill="#EAF4FA"/><circle cx="19" cy="20" r="9" fill="#14B8A6"/><path d="M14.5 20 l3.5 3.5 l7 -8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><rect x="33" y="14" width="14" height="5" rx="2.5" fill="#9DB4C6"/><rect x="33" y="23" width="9" height="5" rx="2.5" fill="#C3D3DF"/><rect x="10" y="38" width="36" height="5" rx="2.5" fill="#9DB4C6"/><rect x="10" y="47" width="24" height="5" rx="2.5" fill="#C3D3DF"/></g>
+<text x="702" y="154" font-size="27" font-weight="700" fill="#F2F8FC">Get an answer</text>
+<text x="702" y="190" font-size="20" fill="#B4C9DA">Every result comes</text>
+<text x="702" y="217" font-size="20" fill="#B4C9DA">with a checkable</text>
+<text x="702" y="244" font-size="20" fill="#B4C9DA">record of where</text>
+<text x="702" y="271" font-size="20" fill="#B4C9DA">it came from.</text>
+<path d="M332 149 L346 161 L332 173" fill="none" stroke="#5EEAD4" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M654 149 L668 161 L654 173" fill="none" stroke="#5EEAD4" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
