@@ -4,6 +4,14 @@
 
 **Self-organizing memory prototype; demonstrated result: routed vector retrieval kept 0.9985 of exact top-ten results while scoring 0.79% of passages (50 test searches, one of four equal library parts).** TRACE sorts a growing library into groups from the passages themselves, so a question wakes only a small part of it, and every answer carries a record you can check. If you use an AI agent every day, you know it forgets. TRACE is an early answer: a memory an agent can search and check. Today it is a prototype you can try as a recorded replay, in your browser. Open source, Apache-2.0.
 
+## The library
+
+**812,545 passages. 99,891,846 tokens (about 99.9 million).** The library is fixed: every number here comes from the same frozen library, and every result carries a fingerprint your browser can re-check. Frozen engine: 207 files verified (`python3 tools/verify_freeze.py`). Measured on 50 test searches, one of four equal parts. Short of our 100M target by 0.11% (108,154 tokens).
+
+<p align="center">
+  <img src="docs/assets/library.svg" alt="A field of dots in four equal parts: 812,545 passages, 99.9 million tokens, one frozen library." width="640">
+</p>
+
 ## The ecosystem
 
 One builder, three projects. TRACE is at the front: the memory the other two are built to use. ANIMA and Reflex stand behind it, each with its own demo. The owner's profile is calibrated as a map of these projects: [github.com/Anshul48](https://github.com/Anshul48).

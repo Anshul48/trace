@@ -244,5 +244,14 @@ tr:last-child td { border-bottom: 0; }
 .site-footer a { color: var(--ink-2); display: inline-block; padding-block: 0.35em; }
 .site-footer .fine { margin-top: var(--space-5); border-top: 1px solid var(--line); padding-top: var(--space-4); }
 
+/* ---------- the library panel ---------- */
+.lib-panel { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--space-6); align-items: center; }
+.lib-nums { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin: var(--space-4) 0; }
+.lib-nums .stat .num { font-size: var(--step-2); }
+.lib-fig { margin: 0; min-width: 0; }
+.lib-fig img { display: block; width: 100%; height: auto; border-radius: var(--radius-s); }
+@media (max-width: 860px) { .lib-panel { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .lib-nums { grid-template-columns: 1fr; } }
+
 /* ---------- print ---------- */
 @media print { .site-header, .pile-tabs, .btn-row, .theme-btn, .menu-btn { display: none !important; } body { background: #fff; color: #000; } }
