@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="603" viewBox="0 0 1000 603" role="img" aria-labelledby="t d">
 <title id="t">Honest limits of TRACE</title>
-<desc id="d">Four limits. Ordinary keyword search did better on our test: it found the right passage more often and answered faster. TRACE needs more computer memory than exact or keyword search, and we make no speed claim. The testing is small: 50 test searches, and the public standard tests (BEIR) have not been run. The live service is switched off and the run-it-yourself kit is only planned. We claim only what we measured, and nothing more.</desc>
+<desc id="d">Four limits. Ordinary keyword search did better on our test: it found the right passage more often and answered faster. TRACE takes more space on disk (2.28 GB, against 1.25 GB for a plain vector copy and 0.51 GB for the keyword index), and we make no speed claim. While answering questions, the live service peaked near 1 GB of memory. The testing is small: 50 test searches, and the public standard tests (BEIR) have not been run. The live service is switched off and the run-it-yourself kit is only planned. We claim only what we measured, and nothing more.</desc>
 <defs>
 <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#071A30"/><stop offset="1" stop-color="#0B3A4F"/></linearGradient>
 <style>text{font-family:'Segoe UI','Helvetica Neue',Helvetica,Arial,'DejaVu Sans',sans-serif}</style>
@@ -16,8 +16,9 @@
 <text x="90" y="223" font-size="19" fill="#B4C9DA">TRACE is for search by meaning that you can check. It is not a replacement.</text>
 <circle cx="62" cy="274" r="9" fill="none" stroke="#E8B865" stroke-width="3"/>
 <circle cx="62" cy="274" r="3" fill="#E8B865"/>
-<text x="90" y="282" font-size="25" font-weight="700" fill="#F2F8FC">It uses more memory</text>
-<text x="90" y="312" font-size="19" fill="#B4C9DA">It needs more computer memory than exact or keyword search. No speed claim.</text>
+<text x="90" y="282" font-size="25" font-weight="700" fill="#F2F8FC">It takes more space on disk</text>
+<text x="90" y="312" font-size="19" fill="#B4C9DA">Stored size: 2.28 GB, against 1.25 GB for a plain vector copy</text>
+<text x="90" y="337" font-size="19" fill="#B4C9DA">and 0.51 GB for the keyword index. No speed claim.</text>
 <circle cx="62" cy="363" r="9" fill="none" stroke="#E8B865" stroke-width="3"/>
 <circle cx="62" cy="363" r="3" fill="#E8B865"/>
 <text x="90" y="371" font-size="25" font-weight="700" fill="#F2F8FC">The testing is small</text>

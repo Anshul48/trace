@@ -54,13 +54,13 @@ These come from our test searches. The 0.79% was measured on one of the library'
 
 ## Honest limits
 
-<img src="docs/img/limits.svg" alt="Honest limits. Ordinary keyword search did better on our test. TRACE needs more computer memory. The testing is small. The live service is off and the run-it-yourself kit is only planned. We claim only what we measured." width="100%">
+<img src="docs/img/limits.svg" alt="Honest limits. Ordinary keyword search did better on our test. TRACE takes more space on disk: 2.28 GB, against 1.25 GB for a plain vector copy and 0.51 GB for the keyword index. The testing is small. The live service is off and the run-it-yourself kit is only planned. We claim only what we measured." width="100%">
 
 In plain words:
 
 - **Ordinary keyword search did better on this test.** Keyword search (the kind that matches the words you type) was tried on the same 50 test searches (40 written questions and 10 taken from passage openings). It put the right source passage in its top ten for 82% of them; TRACE did for 52%. A full, exact search by meaning also got 52%, so the gap is meaning-search versus keywords, not TRACE's shortcut.
 - **Keyword search was also faster, and TRACE is not a replacement for it.** It answered in 6 milliseconds against 1.2 seconds. TRACE is for search by meaning that you can verify.
-- **No claim of being better, faster or smaller.** TRACE needs more computer memory to serve searches than a full exact search or keyword search does.
+- **No claim of being better, faster or smaller.** Stored size on disk: 2.28 GB for TRACE, against 1.25 GB for a plain vector copy and 0.51 GB for the keyword index. While answering questions, the live service peaked near 1 GB of memory (1.03 GiB).
 - **The testing is small.** 50 test searches. We have not run TRACE on the public standard tests for this kind of search (called BEIR). A separate, earlier test (16 October 2026) used a different, larger collection and is not part of the numbers above: it turned 1.53 billion word-sized pieces of text into 7.13 million searchable entries on rented cloud computers, and a search that looks only at the most likely groups of entries kept 0.9947 of the exact results while looking at 6.6% of the entries. That collection was never served through TRACE with checkable records, so we do not count it as a result for this page.
 - **The checking is ours.** The records matched when we re-ran them. An outside party has not confirmed it.
 - **Not public yet.** The live service is off, and the run-it-yourself kit is only planned.
