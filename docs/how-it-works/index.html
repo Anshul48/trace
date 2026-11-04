@@ -138,7 +138,7 @@
     </div>
     <div class="callout callout-limit" style="margin-top: var(--space-4)">
       <p class="callout-title"><strong class="callout-title">What we did not measure</strong></p>
-      <p>On our 99.9M-token library the groups come from one ordinary sorting run (a standard method, k-means, five passes, once per quarter of the library). We measured how ordered the finished result is, not how it formed over time, and we have no curve of the order growing as the library grows. TRACE's own store, which is built to file passages as they arrive and repair itself, has the records of an earlier qualification run in the repository; that is the evidence for the process, and it is smaller than the main library.</p>
+      <p>On our 100M-token library the groups come from one ordinary sorting run (a standard method, k-means, five passes, once per quarter of the library). We measured how ordered the finished result is, not how it formed over time, and we have no curve of the order growing as the library grows. TRACE's own store, which is built to file passages as they arrive and repair itself, has the records of an earlier qualification run in the repository; that is the evidence for the process, and it is smaller than the main library.</p>
     </div>
     <p>One more honest limit: sorting the same collection at sizes from 10,000 to 200,000 passages showed order at every size, but it did not clearly grow with size. The largest set we sorted and measured holds 233,000 passages, so we make no claim about millions or billions, and we do not claim the order improves as the library grows.</p>
     <p class="note">Details and caveats: <a href="../evidence/#order">Evidence and limits</a>. The raw output files are in <a href="https://github.com/Anshul48/trace/tree/main/receipts/order-measure">receipts/order-measure</a>.</p>
@@ -207,7 +207,7 @@
         </ul>
       </div>
     </div>
-    <p class="fine">Tested so far: a 99.9M-token library (measured, short of our 100M target by 0.11%). Earlier tests, by us and separate from it, with our own records: 310.5M and 504.5M-token builds, and a 1.53 billion-token group-picking test. Nobody outside our team has verified any of this. <a href="../evidence/#appendix">Details and caveats</a>.</p>
+    <p class="fine">Tested so far: a 100M-token library (measured: 812,545 passages · 99.9 million tokens; short of the 100M target by 0.11%). Earlier tests, by us and separate from it, with our own records: 310.5M and 504.5M-token builds, and a 1.53 billion-token group-picking test. Nobody outside our team has verified any of this. <a href="../evidence/#appendix">Details and caveats</a>.</p>
   </div>
 </footer>
 

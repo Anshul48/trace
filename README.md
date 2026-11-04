@@ -10,10 +10,10 @@
 
 ## The library
 
-**812,545 passages. 99,891,846 tokens (about 99.9 million).** The library is fixed: every number here comes from the same frozen library, and every result carries a fingerprint your browser can re-check. Frozen engine: 207 files verified (`python3 tools/verify_freeze.py`). Measured on 50 test searches, one of four equal parts. Short of our 100M target by 0.11% (108,154 tokens).
+**A 100M-token library (812,545 passages · 99.9 million tokens).** The library is fixed: every number here comes from the same frozen library, and every result carries a fingerprint your browser can re-check. Frozen engine: 207 files verified (`python3 tools/verify_freeze.py`). Measured on 50 test searches, one of four equal parts. Short of our 100M target by 0.11% (108,154 tokens).
 
 <p align="center">
-  <img src="docs/assets/library.svg" alt="A field of dots in four equal parts: 812,545 passages, 99.9 million tokens, one frozen library." width="640">
+  <img src="docs/assets/library.svg" alt="A field of dots in four equal parts: a 100M-token library, frozen." width="640">
 </p>
 
 ## The ecosystem
@@ -70,7 +70,7 @@ Reflex is a line of work where an AI looks at a screen and finds the right butto
 
 | Size | Status | What was done | Caveats |
 |---|---|---|---|
-| **99.9M tokens** (812,545 passages) | ![Working today, our server](docs/badges/library-100m.svg) | The full measured pipeline: sorted into groups, searched, every answer with a checkable record, re-run on our own server. Every number above is from this library. | Short of our 100M target by 0.11% (108,154 tokens). Our own library and method, not reproduced on public data, no outside check. |
+| **100M-token library** (812,545 passages · 99.9M) | ![Working today, our server](docs/badges/library-100m.svg) | The full measured pipeline: sorted into groups, searched, every answer with a checkable record, re-run on our own server. Every number above is from this library. | Short of our 100M target by 0.11% (108,154 tokens). Our own library and method, not reproduced on public data, no outside check. |
 
 Larger builds were earlier tests, shown separately under [Appendix: earlier tests](#appendix-earlier-tests-by-us) and never to be read together with the result above. A token is a word-sized piece of text. The details are on the [evidence page](https://anshul48.github.io/trace/evidence/).
 

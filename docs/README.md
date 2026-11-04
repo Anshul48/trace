@@ -29,7 +29,7 @@ One builder, three projects; TRACE is the memory at the front. The full picture 
 
 | File | What it decides |
 |---|---|
-| [`status.json`](status.json) | Every "Working today", "Prototype" and "Not built yet" badge, on the site and in the README. A capability may be `built` only if its `evidence` file exists (`tools/check_links.py` checks). |
+| [`status.json`](status.json) | Every "Working today", "Prototype" and "Planned" badge, on the site and in the README. A capability may be `built` only if its `evidence` file exists (`tools/check_links.py` checks). |
 | [`demos/films.json`](demos/films.json) | Every film on the site: the swap list. Set `youtube` on the `main` entry to publish the 3-minute film. |
 
 ## Technical record
