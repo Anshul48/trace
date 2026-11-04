@@ -3,7 +3,7 @@
 Builds a tiny two-level store with random FP32 vectors, runs one guided
 (hierarchy-routed) and one flat (brute-force) top-10 query per probe with an
 exact float64 oracle, and prints recall + work. This exercises the routing
-*shape* only — it is not the 10M qualification and claims nothing about it.
+*shape* only — it is not the earlier qualification and claims nothing about it.
 
 Run:  python3 demo/synthetic_recall.py [--probes 20 --atoms 2000 --seed 7]
 """
@@ -54,7 +54,7 @@ def main():
     print(f"probes={args.probes} atoms={args.atoms} "
           f"guided_recall10={rec_sum / args.probes:.3f} "
           f"mean_parents_scored={args.parents} mean_atoms_rescored={work / args.probes:.0f}")
-    print(f"note: {P50_P95_NOTE}; see docs/BENCHMARKS.md for the measured 10M receipt")
+    print(f"note: {P50_P95_NOTE}; see docs/BENCHMARKS.md for the measured earlier receipt")
 
 
 if __name__ == "__main__":

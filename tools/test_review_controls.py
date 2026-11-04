@@ -3,7 +3,7 @@
 """Focused test helper and standalone verification suite for TRACE review controls.
 
 Verifies:
-1. Cluster selector subset labels (10M: 64 of 3,711 real parents; 20k: actual rendered count).
+1. Cluster selector subset labels (main: 64 of 3,711 real parents; 20k: actual rendered count).
 2. Canvas zoom/pan transform instrumentation (ctx.scale, ctx.translate, pixel change, reset baseline).
 3. Scrolled screenshots: node inspector and canvas scrolled into view before capture.
 4. Terminal recording player: 41-event cast loaded, controls effect, seek 100 PASS marker, and end screenshot.
@@ -63,15 +63,15 @@ def save_screenshot(page, name, full_page=False):
 
 
 def verify_subset_labels(page):
-    """Verifies cluster selector overview option labels for 10M and 20k datasets."""
+    """Verifies cluster selector overview option labels for main and 20k datasets."""
     dataset_select = page.locator("#topology-dataset-select")
 
-    # 1. Check 10M dataset
-    dataset_select.select_option("10m")
+    # 1. Check main dataset
+    dataset_select.select_option("main")
     time.sleep(0.3)
-    opt_10m = page.locator("#cluster-focus-select option[value='overview']").inner_text()
-    assert "Overview: 64 of 3,711 Real Parents (Structural Preview)" in opt_10m, (
-        f"Unexpected 10M label: {opt_10m}"
+    opt_main = page.locator("#cluster-focus-select option[value='overview']").inner_text()
+    assert "Overview: 64 of 3,711 Real Parents (Structural Preview)" in opt_main, (
+        f"Unexpected overview label: {opt_main}"
     )
 
     # 2. Check 20k dataset
@@ -87,13 +87,13 @@ def verify_subset_labels(page):
     inspector_text = page.locator("#node-inspector-content").inner_text()
     assert "xseg-102662-s0" in inspector_text, f"20k leaf not found: {inspector_text}"
 
-    # Switch back to 10M
-    dataset_select.select_option("10m")
+    # Switch back to main
+    dataset_select.select_option("main")
     time.sleep(0.3)
     search_input.fill("xpar-01f45e945309ff5cd92e-repair-parent-10428")
     time.sleep(0.2)
-    inspector_10m = page.locator("#node-inspector-content").inner_text()
-    assert "xpar-01f45e945309ff5cd92e-repair-parent-10428" in inspector_10m
+    inspector_main = page.locator("#node-inspector-content").inner_text()
+    assert "xpar-01f45e945309ff5cd92e-repair-parent-10428" in inspector_main
 
 
 def verify_canvas_zoom(page):
@@ -305,8 +305,8 @@ def run_focused_review_tests():
         browser = pw.chromium.launch()
         page = browser.new_page(viewport={"width": 1280, "height": 900})
 
-        # 1. Explorer: Subset labels verification (10M and 20k)
-        print("\n--- Test: Cluster Selector Subset Labels (10M / 20k) ---")
+        # 1. Explorer: Subset labels verification (main and 20k)
+        print("\n--- Test: Cluster Selector Subset Labels (main / 20k) ---")
         page.goto(explorer_url)
         page.wait_for_selector("#tab-btn-topology")
         page.locator("#tab-btn-topology").click()
@@ -314,7 +314,7 @@ def run_focused_review_tests():
         page.wait_for_selector("#topology-dataset-select")
         time.sleep(0.5)
         verify_subset_labels(page)
-        print("  PASS: Cluster selector subset labels verified (10M 64/3711 structural preview & 20k rendered count)")
+        print("  PASS: Cluster selector subset labels verified (main 64/3711 structural preview & 20k rendered count)")
         passed += 1
 
         # 2. Explorer: Canvas Zoom, Pan, Reset & Transform Assertions

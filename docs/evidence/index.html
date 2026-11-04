@@ -372,13 +372,13 @@
       </ul>
     </div>
     <h3 id="cost">Cost to build, at a small size</h3>
-    <p>This is the one build-cost comparison we have, and it is small: a test of 10,003,381 tokens on the same machine and the same collection. One run peaked at 22.0 GiB of memory and took 12,973 s. A later run peaked at 8.3 GiB and took 9,495 s.</p>
+    <p>This is the one build-cost comparison we have, and it is small: a test on a smaller collection, on the same machine. One run peaked at 22.0 GiB of memory and took 12,973 s. A later run peaked at 8.3 GiB and took 9,495 s.</p>
     <div class="callout callout-limit">
       <p class="callout-title"><strong class="callout-title">Read before using</strong></p>
       <ul>
         <li>One run each. The later run was not like-for-like: it picked candidates with an approximate method and stored data in columns. Its find rate was 0.7367 against 0.7300, and it used about 6% more disk.</li>
         <li>This is building the memory, not serving searches. The first run's record is in the repository (<code>receipts/result.json</code>); the second run's record is not published yet.</li>
-        <li>It was measured at 10 million tokens. We did not measure it at the sizes above.</li>
+        <li>It was a test on a smaller collection. We did not measure it at larger sizes.</li>
       </ul>
     </div>
   </div>

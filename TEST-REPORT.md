@@ -27,7 +27,7 @@ provisioning only, frozen bytes untouched).
 
 ## Not run (by design)
 
-- No 10M run (billed multi-hour VM hardware + VM-side corpus; forbidden by
+- No full-size run (billed multi-hour VM hardware + VM-side corpus; forbidden by
   task). No full-store download (3.4 GB excluded; sha asserted in acceptance).
 - Oracle replay not re-run locally (needs the store); the staged
   `AUDIT-RESULT.json` + fresh-verifier concurrence record stand as the

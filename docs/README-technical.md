@@ -11,9 +11,9 @@
 
 *(The animated landing image that stood here was removed in the November 2026 site redesign; it is in the git history.)*
 
-**Your agent forgets everything outside its context window. TRACE remembers — 10 million tokens filed into one map you can open in your browser. No reindex, no rebuild. [Replay a probe.](https://anshul48.github.io/trace/play/#p=7&m=10m&v=race&lso=0&t=7)**
+**Your agent forgets everything outside its context window. TRACE remembers — an earlier test collection filed into one map you can open in your browser. No reindex, no rebuild. [Replay a probe.](https://anshul48.github.io/trace/play/#p=7&m=10m&v=race&lso=0&t=7)**
 
-**New here? [Watch the map, two ways](https://anshul48.github.io/trace/recording/)** — 57 seconds of mechanism, 45 seconds of real replay — then replay a probe yourself. [Beyond 10M?](https://anshul48.github.io/trace/future/) Measured, on-disk, and vision — all labeled.
+**New here? [Watch the map, two ways](https://anshul48.github.io/trace/recording/)** — 57 seconds of mechanism, 45 seconds of real replay — then replay a probe yourself. [Beyond that size?](https://anshul48.github.io/trace/future/) Measured, on-disk, and vision — all labeled.
 
 [Watch it](#watch-it) · [Try it](#try-it-in-5-minutes) · [Proof](#proof-one-line) · [Deep dive](#go-deeper)
 
@@ -25,7 +25,7 @@
 
 ## What you can do with it today
 
-- **Replay a real 10M-token memory in your browser** — [the replay theater](https://anshul48.github.io/trace/play/#p=7&m=10m&v=race&lso=0&t=7) lights recorded probe paths on the real graph: arrivals becoming atoms, atoms organizing into schemas, guided-vs-flat races. No install. (Replay, not Q&A: the staged export carries topology + rows, not text.)
+- **Replay a real recorded memory in your browser** — [the replay theater](https://anshul48.github.io/trace/play/#p=7&m=10m&v=race&lso=0&t=7) lights recorded probe paths on the real graph: arrivals becoming atoms, atoms organizing into schemas, guided-vs-flat races. No install. (Replay, not Q&A: the staged export carries topology + rows, not text.)
 - **Replay a real run to PASS** — [the recording hub](https://anshul48.github.io/trace/recording/) walks install, frozen-file checks, and an engine run on the portable 20k prefix, with the unedited terminal capture kept as evidence.
 - **Run your own pilot in 5 minutes** — freeze check, package suite, and a genuine 10K-token pilot to `claim=measured, status=PASS` on your machine. [Jump in](#try-it-in-5-minutes).
 - **Build on content-addressed storage** — ingest once with the Python package and the `product_pilot` CLI, local-first in an isolated venv. No services, no containers.
@@ -34,11 +34,11 @@
 
 - 🎬 **[Demo suite](https://anshul48.github.io/trace/recording/)** — what TRACE is, how it works, and how to use it, in about a minute. Video file `docs/recording/trace.mp4` (720p H.264, captions + transcript on the page; voice is synthetic).
 - 🖱️ **[Live interactive twin](https://anshul48.github.io/trace/explorer/)** — the same story you can click: documents in, atoms, schemas, retrieval, self-repair, driven on the real graph.
-- 📊 **[Play with real data](https://anshul48.github.io/trace/play/)** — client-side querying of the recorded 10M exports, honestly labeled recorded vs live.
+- 📊 **[Play with real data](https://anshul48.github.io/trace/play/)** — client-side querying of the recorded exports, honestly labeled recorded vs live.
 
 ## Proof (one line)
 
-10M tokens, ~8.5 GB peak, self-repairing — every figure measured and receipt-backed. Full records: [docs/BENCHMARKS.md](BENCHMARKS.md).
+Smaller test collection, ~8.5 GB peak, self-repairing — every figure measured and receipt-backed. Full records: [docs/BENCHMARKS.md](BENCHMARKS.md).
 
 ## Try it in 5 minutes
 
@@ -143,7 +143,7 @@ Real output of step 5 (from `out-pilot/result.json`): `claim=measured, status=PA
 
 ## Vision (direction — not shipped)
 
-> Agents will need memories that grow with them instead of context windows that don't. TRACE bets on bounded, repairable memory: arrivals searchable the moment they land, questions descending only the most promising branches, ledgers that repair themselves. What exists today is one frozen, receipt-backed 10M run plus the portable 20k proof above — everything beyond that is roadmap, not a claim.
+> Agents will need memories that grow with them instead of context windows that don't. TRACE bets on bounded, repairable memory: arrivals searchable the moment they land, questions descending only the most promising branches, ledgers that repair themselves. What exists today is one frozen, receipt-backed earlier run plus the portable 20k proof above — everything beyond that is roadmap, not a claim.
 
 ---
 
@@ -152,8 +152,8 @@ Real output of step 5 (from `out-pilot/result.json`): `claim=measured, status=PA
 - [docs/ARCHITECTURE.md](ARCHITECTURE.md) — storage ledger, fix stack, reader isolation.
 - [docs/CODE-TOUR.md](CODE-TOUR.md) — file-by-file walkthrough of the frozen tree.
 - [docs/BENCHMARKS.md](BENCHMARKS.md) — unabridged benchmark records and derivations.
-- [docs/REPRO.md](REPRO.md) — reproduction commands, environment, pin hashes, and the two honest blockers on a full 10M rerun.
-- [Release seam12a-10m-freeze](https://github.com/Anshul48/trace/releases/tag/seam12a-10m-freeze) — frozen source tarball, measurements, and study record.
+- [docs/REPRO.md](REPRO.md) — reproduction commands, environment, pin hashes, and the two honest blockers on a full rerun.
+- [Release seam12a](https://github.com/Anshul48/trace/releases/tag/seam12a-10m-freeze) — frozen source tarball, measurements, and study record.
 - [repro-20k/README.md](../repro-20k/README.md) — portable 20k-token reproduction (88 documents, precomputed vector cache).
 - [tools/verify_freeze.py](../tools/verify_freeze.py) / [tools/check_receipts.py](../tools/check_receipts.py) / [tools/check_links.py](../tools/check_links.py) — freeze, receipt, and link checks run in CI.
 
@@ -161,7 +161,7 @@ Real output of step 5 (from `out-pilot/result.json`): `claim=measured, status=PA
 
 ## Status
 
-**Status: research preview.** TRACE is an experimental research prototype, proudly so: one measured 10M run on one VM, receipt-backed and honestly labeled — not a product, and no state-of-the-art claims are made.
+**Status: research preview.** TRACE is an experimental research prototype, proudly so: one measured earlier run on one VM, receipt-backed and honestly labeled — not a product, and no state-of-the-art claims are made.
 
 Freeze: **seam12a** — verify with `python3 tools/verify_freeze.py`; full identity, pins, and scope notes in [docs/REPRO.md](REPRO.md).
 

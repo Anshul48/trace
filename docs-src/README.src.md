@@ -105,7 +105,7 @@ Separate from the measured result above. These are earlier runs with their own r
 | **504.5M tokens**, 13 pieces (7.65 GB stored size on disk; memory use was not compared) | {{badge:build-504m}} | Exact search matched the ground truth. With one piece switched off it still found 0.885 of the exact results, with no wrong passages. | Our own records, not outside-verified, cannot be re-run, not served at that size. The compressed-search figure (0.994 to 0.998) was measured only on the five newest pieces. A 13-piece search took p50 6.86 s. [Raw record](receipts/earlier-runs/RECEIPT-RUNG-500M.txt). |
 | **1.53B tokens**, 7.13M vectors | {{badge:routing-1b}} | A separate October test of group-picking only: opening 6.6% of the vectors kept 0.9947 of the exact top ten. | A different, larger collection. Not served through TRACE, no checkable records at that size, no billion-vector run. We have not run a billion tokens through TRACE. |
 
-A "piece" is one sealed part of a library. The cost to build at 10 million tokens (one run each, not like-for-like) is on the [evidence page](https://anshul48.github.io/trace/evidence/#cost).
+A "piece" is one sealed part of a library. The cost to build on a smaller test collection (one run each, not like-for-like) is on the [evidence page](https://anshul48.github.io/trace/evidence/#cost).
 
 ## Also by this team
 
@@ -122,7 +122,6 @@ A "piece" is one sealed part of a library. The cost to build at 10 million token
 | [`receipts/`](receipts/) | The records of our runs (the folder is named *receipts*): the qualification run, the earlier larger builds, the order measurement. |
 | [`repro-20k/`](repro-20k/README.md) | A small reproduction for your own computer. |
 | [`tools/`](tools/) | The checks, the site generator and the local launcher. |
-| [`archive/`](archive/README.md) | Earlier pages and notes, kept for the record. |
 
 ## Contributing, security, citation
 

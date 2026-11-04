@@ -28,9 +28,9 @@ $("query-form").addEventListener("submit",async(e)=>{
     if(d.guided)html+=cards("Guided — hierarchy-routed (frozen)",d.guided.rows,d.oracle_top)+`<details><summary>Guided work report</summary><pre>${esc(JSON.stringify(d.guided.report.work,null,2))}</pre></details>`;
     if(d.flat)html+=cards("Flat control — same scoring budget (frozen)",d.flat.rows,d.oracle_top)+`<details><summary>Flat work report</summary><pre>${esc(JSON.stringify(d.flat.report.work,null,2))}</pre></details>`;
     $("results").innerHTML=html;
-    $("evidence").innerHTML=d.recorded_10m_row
-      ?`<p>Recorded full-10M row for this probe (receipt, not recomputed):</p><div class="metrics">${metric(d.recorded_10m_row.guided_recall10,"recorded guided recall@10")}${metric(d.recorded_10m_row.flat_recall10,"recorded flat recall@10")}${metric(Number(d.recorded_10m_row.guided_scoring_rows).toLocaleString(),"guided scoring rows")}${metric(Number(d.recorded_10m_row.eligible_atoms).toLocaleString(),"eligible atoms")}</div>`
-      :"<p>No recorded 10M row for this probe/mode.</p>";
+    $("evidence").innerHTML=d.recorded_row
+      ?`<p>Recorded row for this probe (receipt, not recomputed):</p><div class="metrics">${metric(d.recorded_row.guided_recall10,"recorded guided recall@10")}${metric(d.recorded_row.flat_recall10,"recorded flat recall@10")}${metric(Number(d.recorded_row.guided_scoring_rows).toLocaleString(),"guided scoring rows")}${metric(Number(d.recorded_row.eligible_atoms).toLocaleString(),"eligible atoms")}</div>`
+      :"<p>No recorded row for this probe/mode.</p>";
     $("status").textContent="Query complete.";
     document.getElementById("results-view").scrollIntoView({block:"start"});
   }catch(err){$("error").textContent="Error: "+err.message;$("status").textContent="";}

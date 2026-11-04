@@ -10,17 +10,17 @@
 <header class="topbar">
   <div class="brand"><span class="mark" aria-hidden="true">T</span>
     <div><h1>TRACE <span class="sub">frozen stack-fork demo</span></h1>
-    <p class="tagline">Run the actual frozen guided/flat query code on real receipt probe vectors, and inspect the recorded 10M evidence separately.</p></div>
+    <p class="tagline">Run the actual frozen guided/flat query code on real receipt probe vectors, and inspect the recorded evidence separately.</p></div>
   </div>
   <p class="freeze-chip">Freeze <code>38c66bef…a43a0d54</code> · verified at startup</p>
 </header>
 <nav class="tabs" aria-label="Demo views">
-  <a href="#query">Query</a><a href="#results-view">Results</a><a href="#evidence-view">10M evidence</a><a href="#about-view">How to read this</a>
+  <a href="#query">Query</a><a href="#results-view">Results</a><a href="#evidence-view">Recorded evidence</a><a href="#about-view">How to read this</a>
 </nav>
 <main>
   <section id="query" aria-labelledby="q-h" class="panel">
     <h2 id="q-h">Query the sample index</h2>
-    <p class="scope" role="note">Vector-probe mode on a 120-vector sample (the real cached encoder probe vectors). Sample recall is measured against an exact cosine oracle over those 120 vectors only — it is not the 10M result.</p>
+    <p class="scope" role="note">Vector-probe mode on a 120-vector sample (the real cached encoder probe vectors). Sample recall is measured against an exact cosine oracle over those 120 vectors only — it is not the earlier full-size result.</p>
     <form id="query-form">
       <div class="field grow"><label for="probe">Receipt probe (query vector)</label>
         <select id="probe" name="probe" required></select>
@@ -35,7 +35,7 @@
       <div class="field check"><input id="lso" name="lso" type="checkbox">
         <label for="lso">Leave source out</label><small>Exclude the probe's own source documents.</small></div>
       <div class="actions"><button type="submit" class="primary">Run frozen query</button>
-        <button type="button" id="evidence-btn">Load 10M evidence</button></div>
+        <button type="button" id="evidence-btn">Load recorded evidence</button></div>
     </form>
     <p id="status" role="status" aria-live="polite"></p>
     <p id="error" role="alert"></p>
@@ -48,8 +48,8 @@
   </section>
 
   <section id="evidence-view" aria-labelledby="e-h" class="panel">
-    <h2 id="e-h">Recorded 10M evidence <span class="badge alt">receipt, not recomputed</span></h2>
-    <div id="evidence"><p class="empty">Use “Load 10M evidence”, or run a query to see that probe's recorded 10M row.</p></div>
+    <h2 id="e-h">Recorded evidence <span class="badge alt">receipt, not recomputed</span></h2>
+    <div id="evidence"><p class="empty">Use “Load recorded evidence”, or run a query to see that probe's recorded row.</p></div>
   </section>
 
   <section id="about-view" aria-labelledby="a-h" class="panel">
@@ -57,7 +57,7 @@
     <ul class="plain">
       <li><strong>Guided</strong> walks the two-level hierarchy (parents → leaves → atoms); <strong>flat</strong> scans directly with the same scoring budget. Comparing them at equal work is the point of the demo.</li>
       <li><strong>Recall@K vs sample oracle</strong> asks how many of the exact top-K cosine matches (over the 120 sample vectors) each method found.</li>
-      <li>The <strong>10M evidence</strong> panel is the separate VM qualification record: harness recall and oracle agreement on the recorded probe protocol, not semantic search quality.</li>
+      <li>The <strong>recorded-evidence</strong> panel is the separate VM qualification record: harness recall and oracle agreement on the recorded probe protocol, not semantic search quality.</li>
     </ul>
     <details><summary>Implementation details</summary>
       <p>Frozen functions exercised: <code>fork/tl-sys/tlsys/query.py:1617</code> guided, <code>:1764</code> flat, <code>tools/product_pilot.py:449</code> tie_recall. SOURCEFREEZE sha256 <code>38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54</code> (207 files; a content digest, not a Git commit). Startup fails if the freeze identity differs.</p>

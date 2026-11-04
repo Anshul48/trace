@@ -28,7 +28,7 @@ python3 tools/verify_freeze.py   # rehashes all 207 files vs SOURCEFREEZE.json
 `entries=207 ok=207 missing=0 mismatch=0`. Frozen bytes are never edited;
 wrappers live outside `freeze-src/`.
 
-## Local tests (synthetic, no corpus, no 10M run)
+## Local tests (synthetic, no corpus, no full-size run)
 
 ```bash
 bash freeze-src/run_all.sh stack    # stack unit tests (needs a Python with numpy)
@@ -38,7 +38,7 @@ bash freeze-src/run_all.sh existing # shipped suites: pending_topk, publication,
 `run_all.sh` defaults to `/tmp/baseline-venv/bin/python` (falling back to
 `python3` on a clean host where that venv does not exist); override with
 `PY=python3`. These are the builder's synthetic suites — they do NOT
-reproduce the 10M run and claim nothing about it.
+reproduce the earlier run and claim nothing about it.
 
 Clean-host / CI exclusions (same in `stack`, `existing`, and the default
 `run_all.sh` / `all` mode): two checks compare against trees that only
@@ -56,15 +56,15 @@ tree is present, the full set runs unchanged:
   when the build host's upstream source tree is absent. Full 15 when
   it exists (or set `TRACE_BUILD_HOST_SOURCE`).
 
-## What the 10M run needs (not runnable from this repo)
+## What the earlier run needs (not runnable from this repo)
 
 - Corpus: staged `docs-100m.jsonl` (VM-side data dir, not shipped);
-  10,003,381 actual tokens / 13,081 docs. Vectors are FP32 cached,
+  a smaller test collection (counts in `receipts/result.json`). Vectors are FP32 cached,
   generated/cached at run time.
 - Hardware: shared VM, solo CPUs 0–1, ~2.6 h wall (9,494.9 s), 2.85 GiB
-  retained store, ~8.5 GB parent RSS peak. Do NOT relaunch a 10M run
+  retained store, ~8.5 GB parent RSS peak. Do NOT relaunch that run
   casually: it is a billed, multi-hour experiment, not a test.
-- Command (record, seam12a run `o94-scale10m`): `taskset -c 0,1 nice -n 19
+- Command (record, seam12a run): `taskset -c 0,1 nice -n 19
   runtime.sh tools/product_pilot.py --tokens 10000000 --profile vm
   --drain-attribution --drain-census --holon-descriptor-columnar
   --overrides-columnar --descriptor-matrix-all --per-view-sharing
@@ -78,7 +78,7 @@ tree is present, the full set runs unchanged:
 `source-pin.json`, `input.json`, `cap-derivation.json`,
 `phase-telemetry.json`, `manifest-before/after.json`, `memory.json`,
 `probes.json`, `kill-marker.stages.json`, plus audit `AUDIT-RESULT.json`,
-`AUDIT-STATUS.json`, `VM-10M-ACCEPTANCE.json`, `MANIFEST.json`, `PLAN.json`,
+`AUDIT-STATUS.json`, the VM acceptance record, `MANIFEST.json`, `PLAN.json`,
 `LAUNCH.json`. These stage the earlier-freeze run bytes (see the identity
 note in BENCHMARKS.md); the large retained store is excluded (size).
 
@@ -91,7 +91,7 @@ code Apache-2.0 are not in this export) with derived FP32 vectors from
 `all-MiniLM-L6-v2` (Apache-2.0 per its model card; no weights shipped).
 All 88 exported rows were inspected as numeric SciFact corpus ids. This
 runs the frozen harness locally to PASS and reproduces the *protocol* at
-small scale; it is not full-10M reproduction. Full attribution:
+small scale; it is not full-run reproduction. Full attribution:
 [`repro-20k/LICENSES-DATA-MODEL.md`](../repro-20k/LICENSES-DATA-MODEL.md).
 
 ## Data / third-party note

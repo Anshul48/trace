@@ -5,7 +5,7 @@
 Authoritative Integrated Verifications:
 1. Zero fictional IDs: Assert NO 'xpar-sample' anywhere in DOM or canvas.
 2. Visitor-first hero section: 3-step story cards and primary CTAs.
-3. 10M authentic DAG dataset: 3,711 parents, 9,177 leaves, 63,441 atoms, 4,370 multi-parent leaves.
+3. Main authentic DAG dataset: 3,711 parents, 9,177 leaves, 63,441 atoms, 4,370 multi-parent leaves.
 4. Real Node Inspector: Interactive search by authentic ID, multi-parent overlap badge, and link navigation.
 5. Canvas CSS intrinsic scaling hit-testing, zoom, pan, and transform state checks.
 6. Local 20k verification: Switch to 20k, inspect SciFact abstract snippets and authentic linkages.
@@ -125,13 +125,13 @@ def main():
         print(f"  PASS: {segs} phase duration segments rendered")
         passed += 1
 
-        save_screenshot(page, "desktop-10m-overview.png", full_page=True)
+        save_screenshot(page, "desktop-main-overview.png", full_page=True)
 
         # -------------------------------------------------------------
         # Test 2: Hero CTA Navigation to Topology
         # -------------------------------------------------------------
         print("\n--- Test 2: Primary CTA Navigation to Topology ---")
-        cta_btn = page.locator("#cta-explore-10m")
+        cta_btn = page.locator("#cta-explore-main")
         cta_btn.click()
         page.wait_for_selector("#tab-topology.active")
         assert page.locator("#tab-topology").is_visible()
@@ -139,19 +139,19 @@ def main():
         passed += 1
 
         # -------------------------------------------------------------
-        # Test 3: 10M DAG Canvas & Real Node Inspector
+        # Test 3: main DAG Canvas & Real Node Inspector
         # -------------------------------------------------------------
-        print("\n--- Test 3: 10M DAG Canvas & Real Node Inspector ---")
+        print("\n--- Test 3: main DAG Canvas & Real Node Inspector ---")
         page.wait_for_selector("#topology-canvas")
         time.sleep(1.0)  # Allow initial layout render
 
-        # Verify 10M cluster selector overview label shows structural preview of 64 of 3,711 parents
-        opt_10m = page.locator("#cluster-focus-select option[value='overview']").inner_text()
-        assert "Overview: 64 of 3,711 Real Parents (Structural Preview)" in opt_10m, f"Unexpected 10M label: {opt_10m}"
-        print("  PASS: 10M cluster selector overview label verified (64 of 3,711 Real Parents)")
+        # Verify main cluster selector overview label shows structural preview of 64 of 3,711 parents
+        opt_main = page.locator("#cluster-focus-select option[value='overview']").inner_text()
+        assert "Overview: 64 of 3,711 Real Parents (Structural Preview)" in opt_main, f"Unexpected overview label: {opt_main}"
+        print("  PASS: main cluster selector overview label verified (64 of 3,711 Real Parents)")
         passed += 1
 
-        # Search for authentic 10M parent cluster
+        # Search for authentic main parent cluster
         search_input = page.locator("#node-search-input")
         test_parent_id = "xpar-01f45e945309ff5cd92e-repair-parent-10428"
         search_input.fill(test_parent_id)
@@ -163,7 +163,7 @@ def main():
         print(f"  PASS: Searched and inspected authentic parent cluster: {test_parent_id}")
         passed += 1
 
-        # Search for authentic 10M multi-parent leaf
+        # Search for authentic main multi-parent leaf
         test_leaf_id = "xseg-10039688-s0"
         search_input.fill(test_leaf_id)
         time.sleep(0.3)
@@ -422,9 +422,9 @@ def main():
             assert scroll_width <= inner_width, f"Horizontal overflow on {width}px: scrollWidth {scroll_width} > innerWidth {inner_width}"
 
             # Verify Explore CTA is visible near top on mobile
-            cta_10m = mob.locator("#cta-explore-10m")
-            assert cta_10m.is_visible()
-            box = cta_10m.bounding_box()
+            cta_main = mob.locator("#cta-explore-main")
+            assert cta_main.is_visible()
+            box = cta_main.bounding_box()
             assert box is not None and box["y"] < height, f"CTA button offscreen at y={box['y']}"
 
             save_screenshot(mob, fname, full_page=True)

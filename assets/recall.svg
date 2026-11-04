@@ -12,7 +12,7 @@
 <g font-family="sans-serif" font-size="12" fill="#4a5a75">
 <text x="40" y="272">120 probes per mode · matched scoring rows (3,865.775 / 3,836.24) · oracle replay 240/240 exact · store before==after</text>
 <text x="40" y="294">F1 visibility this run: 33/33 queries within 5 s of ACK (p50 119 ms, p95 130 ms) · fixtures 121/121</text>
-<text x="40" y="330">Source: receipts/result.json evaluation + receipts/VM-10M-ACCEPTANCE.json.</text>
+<text x="40" y="330">Source: receipts/result.json evaluation + the VM acceptance record.</text>
 <text x="40" y="352">Harness recall / oracle agreement on a shared VM under experimental derived caps — not semantic IR quality or nDCG.</text>
 </g>
 </svg>

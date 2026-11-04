@@ -34,7 +34,7 @@ One builder, three projects; TRACE is the memory at the front. The full picture 
 
 ## Technical record
 
-These documents were written for an earlier, smaller experiment (a 10-million-token build and its qualification run). Their numbers can differ from the website's; where they differ, the website and the root README are current. They are kept because the records they cite are real.
+These documents were written for an earlier, smaller experiment (an earlier small build and its qualification run). Their numbers can differ from the website's; where they differ, the website and the root README are current. They are kept because the records they cite are real.
 
 | Document | What it is |
 |---|---|

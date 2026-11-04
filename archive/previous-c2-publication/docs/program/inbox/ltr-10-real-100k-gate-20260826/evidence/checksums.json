@@ -1,8 +1,0 @@
-{
-  "100k_scale_dossier.json": "e8d14d431f2b08c9741964241acbd460539ed886c77975aab79dc8c01bb215a6",
-  "telemetry_timeseries.json": "a94eb2e01c49ca165a1e1ccfc14f233789f2c866a672b64527ff9eb9fbbd23c0",
-  "runs/durability_audit_trace.json": "eac51c6e46f0571c0c7d1de65e2c847f153e0d48d3f2a0e9e41b266c461d270b",
-  "runs/graph_walk_telemetry.jsonl": "811cae64a8ad5191374bd4f5db3540281d0f44e32f1d15c5c38a4600f6ad94e4",
-  "runs/raw_query_evaluations.jsonl": "153ba66ce01108896f84ab4c1a32cc2e29645d91ca43fe73db63a91544ae6641",
-  "runs/replay_recovery_trace.json": "766c483506206fdf7b8fc78ee808465c72ba1431f16da044870ef2ecc11a9a1f"
-}

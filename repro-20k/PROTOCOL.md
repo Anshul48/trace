@@ -1,6 +1,6 @@
 > Archived earlier material, kept for the record. Its numbers and claims are superseded by the main README. Current, checked results: [README](../README.md).
 
-# Recorded 10M qualification protocol — stack-fork `38c66bef`
+# Recorded earlier qualification protocol — stack-fork `38c66bef`
 
 All values below are copied from the recovered receipts in
 `vm-recovery/receipts/` and `vm-recovery/audit/` (hashes in `MANIFEST.json`).
@@ -21,7 +21,7 @@ Recall values are **public-harness probe recall / oracle agreement** only.
 
 ## Input (receipt `input.json`, identical in `source-pin.json` / audit)
 
-- Target 10,000,000 → actual **10,003,381** TOK_V1 tokens
+- Target and actual token counts: see the frozen receipt (`receipts/result.json`), TOK_V1 tokens
   (tokenizer regex `[^\W_]+`), **13,081** complete documents,
   **63,441** atoms/distinct chunks, **0** cache misses.
 - Corpus: contiguous complete-document prefix of `~/beam/pkg/data/docs-100m.jsonl`
@@ -42,14 +42,14 @@ Recall values are **public-harness probe recall / oracle agreement** only.
 
 - Command profile: `--tokens 10000000 --profile vm --drain-instrument
   --drain-budget-s 5438`; CPUs 0-2, nice 19, single-thread BLAS env;
-  2026-10-13T01:48:12Z → 05:24:36Z, `t10M.rc = 0`, qualification wall
+  2026-10-13T01:48:12Z → 05:24:36Z, return code 0, qualification wall
   **12,973.17 s**. Store 2.87 GB; 166,457 commits (final pin
   `e8334c07-731d-4ff9-a292-8329b89c41b9:0:166457`).
 - `result.json` status **PASS**; lifecycle includes ingest → drain →
   bounded repair → publish faults + SIGKILL restart (`source_recommit_count 0`)
   → repair-to-zero → pinned guided eval (all-sources + leave-source-out).
-- `VM-10M-ACCEPTANCE.json`: **PASS**, hardened, `manifest_match true`,
-  fixtures 121/121. `AUDIT-RESULT.json`: **VERIFIED_VM_10M_RECEIPT**.
+- The VM acceptance record: **PASS**, hardened, `manifest_match true`,
+  fixtures 121/121. `AUDIT-RESULT.json`: **verified VM receipt** (exact status value in the frozen file).
   `ORACLE.json`: **VERIFIED_PASS_READONLY_ORACLE_REPLAY** — 240/240 queries
   exact vs an independent einsum/argpartition reference, counts match,
   store digest identical before/after (229,927 files). Oracle scope:
@@ -78,7 +78,7 @@ within 5 s (p50 119 ms, p95 130 ms, max 133 ms); append ack→query 0.12 s.
 ## Costs and negative findings (receipted, keep visible)
 
 - Drain dominates: ~85%+ of wall; per-doc drain cost grows ~N^1.5
-  (remaining-drain phase ≈ 1.49 s/doc at 10M scale).
+  (remaining-drain phase ≈ 1.49 s/doc at that scale).
 - Repair-to-zero: 2,234 s (~17% of qualification wall).
 - Concurrent readers impose ~2× drain penalty (reader-interference phases
   in `walls_s`: append-with-readers 1,885 s, remaining-drain-with-readers 4,866 s).
@@ -91,6 +91,6 @@ within 5 s (p50 119 ms, p95 130 ms, max 133 ms); append ack→query 0.12 s.
 `prep_small_prefix.py` + `small-prefix-20k.tar.gz` in this directory
 reproduce this protocol at 20k tokens from a clean checkout (same frozen
 harness, same cache bytes for that prefix; local run PASS, 41.9 s).
-To re-run at 10M you would need the VM data dir hashes above
+To re-run at that size you would need the VM data dir hashes above
 (`afaf20a8…` prefix over `docs-100m.jsonl`, cache `885d31c0…`) and
 `--profile vm`; no such run was performed for this staging.

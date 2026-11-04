@@ -17,7 +17,7 @@ A new front door. No change to the tested engine: `freeze-src/` is untouched and
 - `docs/META-USE.md`: which Meta products and models we used and did not use.
 - `receipts/order-measure/`: scripts and raw output for the measurement of how
   ordered the groups are.
-- The 10M-era pages (`/play/`, `/recording/`, `/future/`), the old hero images, the
+- The retired pages (`/play/`, `/recording/`, `/future/`), the old hero images, the
   large duplicate JSON files and the old videos were removed from `docs/`; all are
   in git history, and the records they duplicated are in `receipts/` and `freeze-src/`.
 - Stored sizes are labelled as stored size on disk everywhere.
@@ -28,14 +28,14 @@ A new front door. No change to the tested engine: `freeze-src/` is untouched and
 
 Successor publication on the existing public history: the previous
 publication is preserved byte-exact under `archive/previous-c2-publication/`
-(see its `INVENTORY.md`), and the primary tree is the stack-fork 10M candidate.
+(see its `INVENTORY.md`), and the primary tree is the stack-fork candidate.
 
 - Frozen candidate (`freeze-src/`, SOURCEFREEZE `38c66bef…`, 207 files,
   drift `[]`) + build report + run script, staged read-only from VM
   `trace-build500` `~/exec-claude-stack-20261013T0045Z/stack-fork/`.
 - Staged VM receipts verbatim (`receipts/16 JSONs`): pilot result,
   source-pin, input, cap derivation, phase telemetry, manifest before/after,
-  probes, acceptance PASS, `VERIFIED_VM_10M_RECEIPT`, fresh-verifier
+  probes, acceptance PASS, verified-VM-receipt verdict, fresh-verifier
   concurrence record.
 - README with measured benchmark tables, architecture tour, repro guide,
   hero/architecture/measured-chart SVGs; local synthetic demo; freeze

@@ -3,8 +3,8 @@
 Runs the ACTUAL frozen HierQuery.guided/flat (fork/tl-sys/tlsys/query.py:1617/1764)
 and product_pilot.tie_recall (tools/product_pilot.py:449) over a small sample
 corpus built from the ACTUAL receipt probe vectors (data/probes.json, 120 x 384-d
-cached encoder vectors from the 10M qualification). This is vector-probe mode:
-there is no text encoder and no fake QA. The full 10M qualification record is
+cached encoder vectors from the earlier qualification). This is vector-probe mode:
+there is no text encoder and no fake QA. The full earlier qualification record is
 served separately at /api/evidence and is never recomputed here.
 
 Freeze source: env TRACE_FREEZE_SRC, default ../freeze-src relative to this
@@ -160,12 +160,12 @@ def run_query(probe_id, top_k=10, mode="both", lso=False):
            "mode": mode, "top_k": top_k, "leave_source_out": bool(lso),
            "sample_atoms": len(aids),
            "oracle_top": oracle,
-           "scope": "sample corpus of 120 receipt probe vectors; not the 10M store",
+           "scope": "sample corpus of 120 receipt probe vectors; not the earlier full-size store",
            "frozen": {"source": str(SRC), "sourcefreeze_sha256": FREEZE_SHA,
                       "guided": "fork/tl-sys/tlsys/query.py:1617 HierQuery.guided",
                       "flat": "fork/tl-sys/tlsys/query.py:1764 HierQuery.flat",
                       "tie_recall": "tools/product_pilot.py:449 tie_recall"},
-           "recorded_10m_row": recorded_row(probe_id, bool(lso))}
+           "recorded_row": recorded_row(probe_id, bool(lso))}
     if mode in ("both", "guided"):
         rows, report = hq.guided(qvec, top_parents=4, top_children=8,
                                  top_atoms=top_k)
@@ -198,7 +198,7 @@ def evidence():
                         "complete_documents", "atoms", "cache_misses",
                         "normalization")},
             "summary": ev,
-            "scope": ("Separate full 10M qualification record (VM receipt). "
+            "scope": ("Separate full earlier qualification record (VM receipt). "
                       "Harness recall / oracle agreement, not semantic IR or nDCG. "
                       "The live demo above runs the same frozen query code on a "
                       "120-vector sample only.")}

@@ -1,6 +1,6 @@
 > Archived earlier material, kept for the record. Its numbers and claims are superseded by the main README. Current, checked results: [README](../README.md).
 
-# 10M benchmarks (freeze `seam12a`, run `o94-scale10m`)
+# Earlier benchmarks (freeze `seam12a`)
 
 All numbers below are from the seam12a freeze audit (tarball sha256
 `8d3bbb6bf53e1731811065a9de156a9997be740d598cd1dfa0a3d946928dbf64`,
@@ -13,7 +13,7 @@ those stay out of this repo.
 | Metric | Definition | Pass bar (this run) |
 |---|---|---|
 | `status` | pilot verdict in `result.json` | `PASS` |
-| `actual_tokens` / `complete_documents` / `atoms` | TOK_V1 counts over the staged corpus | 10,003,381 / 13,081 / 63,441 |
+| `actual_tokens` / `complete_documents` / `atoms` | TOK_V1 counts over the staged corpus | counts of the smaller test collection, in `receipts/result.json` |
 | `pending_documents`, `repair_to_zero.final_debt` | unconverged docs / residual debt after bounded repair | both `0` |
 | `commits` (closed ledger) | ledger commits vs derived cap | 164,195 < 669,436 (`max_delta_entries`) |
 | `guided_recall10` / `flat_recall10` | Two recorded modes, 120 probes each: `all_sources` and `leave_source_out`; guided and flat score identical mean rows per mode (matched work) | see both-modes table below |
@@ -25,9 +25,9 @@ those stay out of this repo.
 | probes pin | evaluation probe set sha | `b332d62d…` |
 | harness pin | `tools/product_pilot.py` freeze entry | `9f78479a…` |
 
-## The qualified run (the only 10M run in scope)
+## The qualified run (the only run in scope)
 
-Run `o94-scale10m`, CPUs 0–1, nice 19, numpy 2.5.3, BLAS threads = 1.
+Run on CPUs 0–1, nice 19, numpy 2.5.3, BLAS threads = 1.
 `taskset -c 0,1` + `SUP_REUSE_VIEW_POOL=1`, candidate source hnsw,
 drain bounded k32, cold-scan chunk 4096, repair columnar.
 Wall **9,494.9 s (~2.6 h)**. Verdict `PASS`.
@@ -60,7 +60,7 @@ append ack→query 0.114 s. Readers: 2 threads, 27,796 requests, p50 74.7 ms.
 
 | Field | Value |
 |---|---|
-| tokens / docs / atoms | 10,003,381 / 13,081 / 63,441 |
+| tokens / docs / atoms | smaller test collection; counts in `receipts/result.json` |
 | leaves / parents | 9,177 / 3,711 |
 | closed ledger commits | 164,195 (derived cap `max_delta_entries` 669,436, measured from 37,117 commits / 7,035 atoms, margin 2.0) |
 | peak RAM | parent 8,489.1 MiB (~8.5 GB) / child 7,169.2 MiB; transient tree 9,700.9 MiB at t≈3,097 s (restart window); mem floor 3 GB |
@@ -76,7 +76,7 @@ append ack→query 0.114 s. Readers: 2 threads, 27,796 requests, p50 74.7 ms.
 - Experimental derived cap (delta 669,436), not default product caps.
 - Shared-VM walls (solo CPUs 0–1, single-thread BLAS); timing is not a
   reference benchmark.
-- Corpus: VM-side staged cache (10M-token slice of `docs-100m.jsonl`);
+- Corpus: VM-side staged cache (a slice of `docs-100m.jsonl`);
   the corpus does NOT ship in this repo (see REPRO.md).
 - One measured run on one VM. Larger scales are roadmap, not measured.
 
@@ -85,7 +85,7 @@ append ack→query 0.114 s. Readers: 2 threads, 27,796 requests, p50 74.7 ms.
 `freeze-src/`, `receipts/`, and `docs/explorer/*.json` still stage
 earlier-freeze bytes (207-file candidate, its own pins and walls).
 Corpus scale and graph counts match the latest run
-(10,003,381 tokens / 13,081 docs; 3,711 parents / 9,177 leaves /
+(a smaller test collection; 3,711 parents / 9,177 leaves /
 63,441 atoms). The statistics above — not the staged bytes — are the
 latest measured run.
 

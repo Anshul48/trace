@@ -1,15 +1,15 @@
 # Small-scale reproduction — TRACE stack-fork `38c66bef` (20k exact prefix)
 
 This directory closes the clean-checkout reproduction gap for the frozen
-stack-fork candidate. The recorded 10M qualification ran on VM-only data
+stack-fork candidate. The recorded earlier qualification ran on VM-only data
 (`~/beam/pkg/data`); nothing here pretends those assets are in a checkout.
 Instead, a verified preparation script exports a **small exact prefix**
 (actual documents + actual cached FP32 vectors, read-only from the VM)
 that the **actual frozen harness** consumes locally, end to end.
 
 Scope honesty: the small run reproduces the *protocol* at 20k tokens with
-the frozen engine. Its numbers are **not** the 10M qualification numbers;
-the 10M record remains the receipts summarized in [PROTOCOL.md](PROTOCOL.md).
+the frozen engine. Its numbers are **not** the earlier qualification numbers;
+the earlier record remains the receipts summarized in [PROTOCOL.md](PROTOCOL.md).
 
 ## What is here
 
@@ -19,7 +19,7 @@ the 10M record remains the receipts summarized in [PROTOCOL.md](PROTOCOL.md).
 | `small-prefix-20k.tar.gz` | Exported portable data dir (270,494 B): exact 88-document prefix of `docs-100m.jsonl` (20,030 TOK_V1 tokens), verbatim `emb_cache/meta.json`, repacked subset `emb_cache` (144 vectors), `exporter-receipt.json`. |
 | `data-20k/` | The same tarball, unpacked and verified. |
 | `pilot-20k-out2/` | Local small-scale pilot JSON output (`result.json` status **PASS**, wall 41.9 s). First attempt failed closed on missing `blake3` (harness refuses silent hash swaps); installing `blake3` fixed it. |
-| `PROTOCOL.md` | The recorded 10M protocol, gates, both LSO modes, caps, hardware, negatives. |
+| `PROTOCOL.md` | The recorded earlier protocol, gates, both LSO modes, caps, hardware, negatives. |
 | `LICENSES-DATA-MODEL.md` | Data/model licences and attribution for everything redistributed here. |
 | `MANIFEST.json` | Hashes of script, export, receipts relied on, and verification results. |
 
@@ -65,7 +65,7 @@ recall values in that file describe this 88-document prefix only.
 
 ## What this does NOT do
 
-- No full 10M run, no multi-gigabyte corpus/cache copy (the export is 264 KiB).
+- No full-size run, no multi-gigabyte corpus/cache copy (the export is 264 KiB).
 - No VM writes: the exporter runs from stdin and emits a tar stream on
   stdout; VM data files are mode `r--r--r--` and were only read.
 - No synthetic substitute data or encoder: documents and vectors are the

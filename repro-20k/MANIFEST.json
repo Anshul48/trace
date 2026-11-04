@@ -41,9 +41,9 @@
   "status": "PASS",
   "wall_s": 41.912021860000095,
   "result_json_sha256": "014d03e993f3dbc49e246e533be9ee12d8486114371a104d38fd10162bc5dbe8",
-  "scope": "88-doc/20k-token prefix only; NOT the 10M qualification"
+  "scope": "88-doc/20k-token prefix only; NOT the earlier full-size qualification"
  },
- "script_sha256": "4689e9e3a390569a8755ea7c0e385dd100d0caf18068034713966bbeab250817",
+ "script_sha256": "3daba40a45145aa0382f4f7fe4b88a101eb75d107e40f523b06a22abe81be15d",
  "receipts_relied_on": {
   "vm-recovery/receipts/input.json": "ee2215a03fef42d5ee4858450899fd83abec89f57565356fdbf522719f9f0d87",
   "vm-recovery/receipts/result.json": "2e0be11cbd100e98de15805572b5cbb5224368fb9375da6a213105b963c0b9d9",
@@ -54,7 +54,7 @@
   "vm-recovery/audit/VM-10M-ACCEPTANCE.json": "2c174daa5a98e88c0007e8b2a94e4b53b34cbeadd8527e028134eca0c24e5c81"
  },
  "not_done": [
-  "no full 10M run",
+  "no full-size run",
   "no VM writes/starts/new runs/billing actions",
   "no multi-GB corpus or full emb_cache copy (export is 270,494 B)"
  ]

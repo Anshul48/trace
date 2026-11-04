@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Portable exact-prefix preparation for the TRACE stack-fork 38c66bef protocol.
 
-The 10M qualification consumed a VM-only data dir (`~/beam/pkg/data`:
+The earlier qualification consumed a VM-only data dir (`~/beam/pkg/data`:
 `docs-100m.jsonl` + `emb_cache/`, format `tl-gpu-embcache-v1`). This script
 closes clean-checkout reproduction at small scale WITHOUT copying that tree:
 
@@ -27,7 +27,7 @@ After `verify` passes, the small-scale protocol runs from a clean checkout:
       --out <outdir> --source-root <cand> --data-dir <this-data-dir>
 
 This reproduces the protocol at small scale with the actual frozen engine
-and actual cached vectors. It does NOT reproduce the 10M qualification
+and actual cached vectors. It does NOT reproduce the earlier qualification
 numbers; those remain the recorded VM receipts (see PROTOCOL.md).
 """
 import argparse

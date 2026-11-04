@@ -36,7 +36,7 @@
     "files": 229927,
     "sha256": "52e884393b2abd66b46ead13d1831238510dbf5f6738e5b398ea9334f0edca38"
   },
-  "scope": "closed optinprefetch/topk VM10M final-state only; independent einsum/argpartition tie reference, native guided replay; public harness probes, no new semantic relevance claim",
+  "scope": "closed optinprefetch/topk VM final-state only; independent einsum/argpartition tie reference, native guided replay; public harness probes, no new semantic relevance claim",
   "rows": [
     {
       "probe": 0,

@@ -21,7 +21,7 @@ jobs:
         run: |
           cd demo-app
           python3 -B -m unittest discover tests -v
-      - name: 20k repro prep verify (cheap; no full pilot or 10M run)
+      - name: 20k repro prep verify (cheap; no full pilot or full-size run)
         run: |
           cd repro-20k
           python3 prep_small_prefix.py verify-freeze --cand ../freeze-src/cand

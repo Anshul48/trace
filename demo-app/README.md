@@ -31,14 +31,14 @@ required because the frozen engine requires it; `run_demo.py` creates
   vectors from the qualification receipts (`data/probes.json`, copied verbatim).
 - **Sample corpus.** The live index is those same 120 vectors grouped into
   12 leaves / 4 parents. Live recall numbers are against an exact cosine
-  oracle *over the 120-vector sample only* — they are not the 10M numbers.
-- **Full 10M record is separate.** `/api/evidence` serves the recorded VM
-  receipt values (10,003,381 tokens, 13,081 docs, 63,441 atoms, guided
+  oracle *over the 120-vector sample only* — they are not the earlier full-size numbers.
+- **Full earlier record is separate.** `/api/evidence` serves the recorded VM
+  receipt values (smaller test collection, counts in `data/result.json`, guided
   recall@10 0.73 vs matched flat 0.056 all-sources; 0.476 vs 0.048
   leave-source-out; oracle `VERIFIED_PASS_READONLY_ORACLE_REPLAY`, 240 queries).
   These are harness recall / oracle agreement, not semantic IR quality or nDCG,
   and are never recomputed here. Each query also shows that probe's recorded
-  10M row from `result.json`.
+  recorded row from `result.json`.
 - Sample atom "text" is a labelled receipt-probe description; the original
   chunk text is not in the recovered receipts, so none is invented.
 
@@ -57,7 +57,7 @@ required because the frozen engine requires it; `run_demo.py` creates
   keyboard-operable form, `prefers-reduced-motion` support, responsive layout.
   Views: query form, guided/flat results with receipt paths, evidence/provenance.
 - `data/` — verbatim receipts: `probes.json`, `result.json`, `ORACLE.json`,
-  `VM-10M-ACCEPTANCE.json`, `SOURCEFREEZE.json`.
+  the VM acceptance record, `SOURCEFREEZE.json`.
 - API: `GET /api/health`, `GET /api/probes`, `GET /api/evidence`,
   `POST /api/query` `{probe_id, top_k, mode, leave_source_out}`; JSON errors
   (400 bad input, 404 unknown path, 500 engine error — never fake results).
