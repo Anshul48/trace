@@ -1,0 +1,188 @@
+/* SPDX-License-Identifier: Apache-2.0
+ *
+ * Shared design tokens for the TRACE and ANIMA sites ("calm night" identity).
+ * Source of truth: TRACE site-redesign team. The ANIMA site copies this file
+ * unchanged; a project only sets data-project="trace" or "anima" on <html>.
+ *
+ * Rules these tokens encode:
+ *   - No outside fonts, no CDNs: system fonts only.
+ *   - Light and dark are both first class. Default follows the visitor's system;
+ *     <html data-theme="light|dark"> forces one (the theme button sets it).
+ *   - Status colours always travel with a text label (never colour alone):
+ *     BUILT, PROTOTYPE, NEXT, LIMIT.
+ *   - The "stage" is a dark panel used for hero visuals and video frames in
+ *     BOTH themes, so the look matches the films (deep navy, teal, amber).
+ *   - Text contrast: ink on bg and ink on surface are at least 7:1 (AAA);
+ *     muted on bg and surface is at least 4.5:1 (AA); accent-ink on accent is
+ *     at least 4.5:1.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* ---------- type ---------- */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* fluid type scale: body is 17 to 19 px, hero is 40 to 76 px */
+  --step--1: clamp(0.875rem, 0.85rem + 0.1vw, 0.95rem);
+  --step-0:  clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  --step-1:  clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --step-2:  clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  --step-3:  clamp(2rem, 1.5rem + 2.4vw, 3.25rem);
+  --step-4:  clamp(2.5rem, 1.6rem + 4.2vw, 4.75rem);
+  --lh-body: 1.65;
+  --lh-tight: 1.12;
+  --tracking-caps: 0.12em;
+
+  /* ---------- space (4 px base) ---------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 7rem;
+  --gutter: clamp(1rem, 4vw, 2rem);
+
+  /* ---------- shape and layout ---------- */
+  --radius-s: 8px;
+  --radius: 14px;
+  --radius-l: 22px;
+  --radius-pill: 999px;
+  --wrap: 1120px;
+  --wrap-narrow: 760px;
+  --measure: 64ch;
+  --nav-h: 64px;
+  --tap: 44px;               /* minimum touch target */
+
+  /* ---------- motion ---------- */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 180ms;
+  --dur-slow: 600ms;
+
+  /* ---------- status vocabulary (same words on both sites) ---------- */
+  /* BUILT = working today; PROTOTYPE = runs, small test; NEXT = not built; LIMIT = a stated limit */
+  --st-built: #17713f;       --st-built-bg: #dff3e7;
+  --st-proto: #8a5a00;       --st-proto-bg: #fdf0cf;
+  --st-next:  #5546c9;       --st-next-bg:  #e9e6ff;
+  --st-limit: #a8283a;       --st-limit-bg: #fde4e7;
+
+  /* ---------- light theme (default) ---------- */
+  --bg:        #f4f6fb;
+  --bg-2:      #e9edf6;      /* alternate band */
+  --surface:   #ffffff;
+  --surface-2: #eef1f8;
+  --ink:       #0e1730;      /* 16.6:1 on --bg */
+  --ink-2:     #27345a;
+  --muted:     #46547a;      /* 7.0:1 on --bg */
+  --line:      #d3d9e8;
+  --line-strong: #aeb8d2;
+  --accent:    #0a7c74;      /* teal; 5.1:1 on --surface */
+  --accent-ink: #ffffff;
+  --accent-soft: #d8f1ee;
+  --link:      #0a6a8e;
+  --focus:     #1d4ed8;
+  --shadow:    0 1px 2px rgba(14, 23, 48, 0.06), 0 10px 30px rgba(14, 23, 48, 0.07);
+
+  /* chart series (the same three colours as the films) */
+  --c-keyword: #b87400;      /* amber */
+  --c-exact:   #3b6fe0;      /* blue */
+  --c-trace:   #0a8f84;      /* teal */
+  --c-trace-2: #7686c4;      /* lavender, "first run" bars */
+
+  /* ---------- the stage: always dark, in both themes ---------- */
+  --stage-bg:   #0a1124;
+  --stage-bg-2: #101b38;
+  --stage-ink:  #eef3ff;
+  --stage-muted:#a9b6d8;
+  --stage-line: #243255;
+  --stage-accent: #2fd6c2;   /* teal as in the films */
+  --stage-amber:  #f6b93b;
+  --stage-violet: #a597ff;
+  --stage-green:  #4be0a0;
+  --stage-rose:   #ff7f8d;
+  --stage-glow: radial-gradient(1200px 600px at 70% -10%, #17305e 0%, rgba(23, 48, 94, 0) 60%),
+                radial-gradient(900px 500px at 0% 110%, #0e2a4a 0%, rgba(14, 42, 74, 0) 55%),
+                linear-gradient(180deg, #0d1630 0%, #0a1124 100%);
+
+  /* canvas dots (read these from JS with getComputedStyle) */
+  --dot:       #5d78b8;      /* resting dot on the stage */
+  --dot-group: #7fa6e8;      /* dot after it has joined a group */
+  --dot-lit:   #2fd6c2;      /* dot woken by a question */
+  --dot-dim:   #26345c;      /* dot not scored for this question */
+}
+
+/* ---------- dark theme: system preference unless the visitor forced light ---------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --st-built: #5ee3a3;     --st-built-bg: #12301f;
+    --st-proto: #f6c25a;     --st-proto-bg: #382a0c;
+    --st-next:  #b6aaff;     --st-next-bg:  #271f55;
+    --st-limit: #ff9aa6;     --st-limit-bg: #3d1820;
+
+    --bg:        #0a1124;
+    --bg-2:      #0e1730;
+    --surface:   #111b36;
+    --surface-2: #17234a;
+    --ink:       #eef3ff;    /* 16:1 on --bg */
+    --ink-2:     #cfd9f5;
+    --muted:     #a9b6d8;    /* 8.7:1 on --bg */
+    --line:      #243255;
+    --line-strong: #3a4a78;
+    --accent:    #2fd6c2;
+    --accent-ink: #04201d;
+    --accent-soft: #0f3a3b;
+    --link:      #7fd4f2;
+    --focus:     #8db4ff;
+    --shadow:    none;
+
+    --c-keyword: #f6b93b;
+    --c-exact:   #6e9bff;
+    --c-trace:   #2fd6c2;
+    --c-trace-2: #8e9fd6;
+  }
+}
+
+/* ---------- dark theme: forced by the theme button ---------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --st-built: #5ee3a3;     --st-built-bg: #12301f;
+  --st-proto: #f6c25a;     --st-proto-bg: #382a0c;
+  --st-next:  #b6aaff;     --st-next-bg:  #271f55;
+  --st-limit: #ff9aa6;     --st-limit-bg: #3d1820;
+
+  --bg:        #0a1124;
+  --bg-2:      #0e1730;
+  --surface:   #111b36;
+  --surface-2: #17234a;
+  --ink:       #eef3ff;
+  --ink-2:     #cfd9f5;
+  --muted:     #a9b6d8;
+  --line:      #243255;
+  --line-strong: #3a4a78;
+  --accent:    #2fd6c2;
+  --accent-ink: #04201d;
+  --accent-soft: #0f3a3b;
+  --link:      #7fd4f2;
+  --focus:     #8db4ff;
+  --shadow:    none;
+
+  --c-keyword: #f6b93b;
+  --c-exact:   #6e9bff;
+  --c-trace:   #2fd6c2;
+  --c-trace-2: #8e9fd6;
+}
+:root[data-theme="light"] { color-scheme: light; }
+
+/* ---------- per-project hint (kept tiny on purpose: one shared identity) ---------- */
+/* TRACE and ANIMA share every token. The only per-project difference is the
+   wordmark text and this optional second accent for small decorative details. */
+:root[data-project="trace"] { --project-accent: var(--accent); }
+:root[data-project="anima"] { --project-accent: var(--st-next); }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur: 0ms; --dur-slow: 0ms; }
+}
