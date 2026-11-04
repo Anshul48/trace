@@ -24,8 +24,8 @@ SHOTS_DIR = Path(os.environ.get("TRACE_SHOTS_DIR", "/tmp/trace-presentation-agy2
 try:
     SHOTS_DIR.mkdir(parents=True, exist_ok=True)
 except Exception:
-    SHOTS_DIR = ROOT / "screenshots-final"
-FINAL_SHOTS_DIR = ROOT / "screenshots-final"
+    SHOTS_DIR = ROOT / "docs" / "media" / "screenshots-final"
+FINAL_SHOTS_DIR = ROOT / "docs" / "media" / "screenshots-final"
 FINAL_SHOTS_DIR.mkdir(parents=True, exist_ok=True)
 
 from playwright.sync_api import sync_playwright
