@@ -6,8 +6,8 @@
  *
  * Rules these tokens encode:
  *   - No outside fonts, no CDNs: system fonts only.
- *   - Light and dark are both first class. Default follows the visitor's system;
- *     <html data-theme="light|dark"> forces one (the theme button sets it).
+ *   - Light is the default for every visitor. Dark is a choice: the theme
+ *     button sets <html data-theme="dark"> and remembers it.
  *   - Status colours always travel with a text label (never colour alone):
  *     BUILT, PROTOTYPE, NEXT, LIMIT.
  *   - The "stage" is a dark panel used for hero visuals and video frames in
@@ -18,7 +18,7 @@
  */
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   /* ---------- type ---------- */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
@@ -115,38 +115,7 @@
   --dot-dim:   #26345c;      /* dot not scored for this question */
 }
 
-/* ---------- dark theme: system preference unless the visitor forced light ---------- */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --st-built: #5ee3a3;     --st-built-bg: #12301f;
-    --st-proto: #f6c25a;     --st-proto-bg: #382a0c;
-    --st-next:  #b6aaff;     --st-next-bg:  #271f55;
-    --st-limit: #ff9aa6;     --st-limit-bg: #3d1820;
-
-    --bg:        #0a1124;
-    --bg-2:      #0e1730;
-    --surface:   #111b36;
-    --surface-2: #17234a;
-    --ink:       #eef3ff;    /* 16:1 on --bg */
-    --ink-2:     #cfd9f5;
-    --muted:     #a9b6d8;    /* 8.7:1 on --bg */
-    --line:      #243255;
-    --line-strong: #3a4a78;
-    --accent:    #2fd6c2;
-    --accent-ink: #04201d;
-    --accent-soft: #0f3a3b;
-    --link:      #7fd4f2;
-    --focus:     #8db4ff;
-    --shadow:    none;
-
-    --c-keyword: #f6b93b;
-    --c-exact:   #6e9bff;
-    --c-trace:   #2fd6c2;
-    --c-trace-2: #8e9fd6;
-  }
-}
-
-/* ---------- dark theme: forced by the theme button ---------- */
+/* ---------- dark theme: chosen by the visitor with the theme button ---------- */
 :root[data-theme="dark"] {
   color-scheme: dark;
   --st-built: #5ee3a3;     --st-built-bg: #12301f;

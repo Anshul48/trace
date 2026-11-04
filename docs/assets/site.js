@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0
  * Small shared behaviour for the TRACE and ANIMA sites. No libraries, no tracking.
  *  - menu button (narrow screens)
- *  - theme button: auto -> light -> dark, remembered in localStorage (inside try/catch)
+ *  - theme button: Dark <-> Light, remembered in localStorage (inside try/catch)
  *  - status badges: elements with data-status-id take their word and colour from status.json
  *  - films: elements with data-films render cards from demos/films.json (the single swap list)
  */
@@ -27,18 +27,22 @@
     nav.addEventListener("click", function (e) { if (e.target.tagName === "A" && nav.classList.contains("open")) { nav.classList.remove("open"); menu.setAttribute("aria-expanded", "false"); menu.textContent = "Menu"; } });
   }
 
-  /* ---- theme ---- */
+  /* ---- theme: light is the default; the button flips Dark <-> Light ---- */
   var tbtn = $("[data-theme-toggle]");
-  function currentPref() { var t = store("trace-theme"); return t === "light" || t === "dark" ? t : "auto"; }
+  function currentPref() { return store("trace-theme") === "dark" ? "dark" : "light"; }
   function applyPref(p) {
-    if (p === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", p);
-    if (tbtn) { tbtn.textContent = "Theme: " + p; tbtn.setAttribute("aria-label", "Colour theme: " + p + ". Press to change."); }
+    document.documentElement.setAttribute("data-theme", p);
+    if (tbtn) {
+      var other = p === "dark" ? "Light" : "Dark";
+      tbtn.textContent = other;
+      tbtn.setAttribute("aria-label", "Switch to " + other + " mode. Current mode: " + p + ".");
+    }
   }
   if (tbtn) {
     applyPref(currentPref());
     tbtn.addEventListener("click", function () {
-      var order = ["auto", "light", "dark"], next = order[(order.indexOf(currentPref()) + 1) % 3];
-      store("trace-theme", next === "auto" ? null : next); applyPref(next);
+      var next = currentPref() === "dark" ? "light" : "dark";
+      store("trace-theme", next); applyPref(next);
     });
   }
 

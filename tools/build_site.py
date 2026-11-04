@@ -154,7 +154,7 @@ def build_page(route, status):
 <meta property="og:url" content="{url}">
 <meta property="og:image" content="{og_img}">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0a1124">
+<meta name="theme-color" content="#f4f6fb">
 <link rel="icon" type="image/svg+xml" href="{root}assets/favicon.svg">
 <script>(function(){{try{{var t=localStorage.getItem("trace-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}}catch(e){{}}document.documentElement.classList.add("js")}})();</script>
 <link rel="stylesheet" href="{root}assets/tokens.css">
