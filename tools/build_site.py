@@ -209,8 +209,8 @@ def film_md():
         films = json.load(fh)["films"]
     main = next((f for f in films if f.get("role") == "main"), None)
     if main and main.get("youtube"):
-        return "**[Watch the 3-minute film on YouTube](https://www.youtube.com/watch?v=%s)**: TRACE first, then the two companion projects." % main["youtube"]
-    return ("Being published on YouTube; the link will be added here. Until then: [working versions of the films](https://anshul48.github.io/trace/demos/).")
+        return "[Watch the 3-minute story](https://www.youtube.com/watch?v=%s)" % main["youtube"]
+    return "[Watch the 3-minute story](https://anshul48.github.io/trace/demos/)"
 
 
 def render_md(text, status):

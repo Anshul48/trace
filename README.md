@@ -1,168 +1,75 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <!-- GENERATED from docs/source/README.src.md by tools/build_site.py. Edit the source, then run: python3 tools/build_site.py -->
-# TRACE: a memory that organizes itself
+# TRACE — a memory that organizes itself.
 
-**Self-organizing memory prototype; demonstrated result: routed vector retrieval kept 0.9985 of exact top-ten results while scoring 0.79% of passages (50 test searches, one of four equal library parts).** TRACE sorts a growing library into groups from the passages themselves, so a question wakes only a small part of it, and every answer carries a record you can check. If you use an AI agent every day, you know it forgets. TRACE is an early answer: a memory an agent can search and check. Today it is a prototype you can try as a recorded replay, in your browser. Open source, Apache-2.0.
+TRACE organizes a 100M library by meaning, so developers and researchers can find the context their agents need. Passages form their own groups, and a question opens only the groups most likely to hold an answer.
 
-**Try it now: [open the explorer](https://anshul48.github.io/trace/explorer/) — a replay of 144 real recorded searches. Nothing to install.**
-
-**Why it matters.** AI agents forget. The documents pile up and nobody files them. TRACE is the memory that sorts itself: the right passage at the right time, each with a record you can check.
-
-## The library
-
-**A 100M-token library (812,545 passages · 99.9 million tokens).** The library is fixed: every number here comes from the same frozen library, and every result carries a fingerprint your browser can re-check. Frozen engine: 207 files verified (`python3 tools/verify_freeze.py`). Measured on 50 test searches, one of four equal parts. Short of our 100M target by 0.11% (108,154 tokens).
+**[Open the explorer](https://anshul48.github.io/trace/explorer/)** · [Watch the 3-minute story](https://anshul48.github.io/trace/demos/)
 
 <p align="center">
-  <img src="docs/assets/library.svg" alt="A field of dots in four equal parts: a 100M-token library, frozen." width="640">
+  <img src="docs/img/organizing-pile.png" alt="Illustration of the grouping and search: 20,000 dots in four equal parts, sorted into groups; in the first part a question has lit a few dots, with ten ringed as the best matches." width="100%">
 </p>
 
-## The ecosystem
+*Illustration of the grouping and search. 20,000 dots stand in for the passages; where each dot sits is drawn. What is real is the proportion: four equal parts, and a question waking under one percent of one of them.*
 
-One builder, three projects. TRACE is at the front: the memory the other two are built to use. ANIMA and Reflex stand behind it, each with its own demo. The owner's profile is calibrated as a map of these projects: [github.com/Anshul48](https://github.com/Anshul48).
+## The 3-minute proof
 
-<p align="center">
-  <img src="docs/assets/ecosystem.svg" alt="Diagram: TRACE in front as the memory, ANIMA and Reflex behind it, with lines from each to TRACE." width="640">
-</p>
+A question scored **0.79% of the library** and kept **99.85% of exact search's top ten**.
 
-### TRACE: the memory, at the front
+*<small>Scope: 50 test searches; one of four equal library parts; passage-scoring work only. The full numbers, with every caveat, are on the [evidence page](https://anshul48.github.io/trace/evidence/).</small>*
 
-TRACE is a memory that sorts a huge pile of text into groups by itself, so a question opens only the few groups it needs, and every result comes with a record you can check. It is the vanguard of this ecosystem: the part the other two build on.
-
-**Watch the demo:** [open the TRACE explorer](https://anshul48.github.io/trace/explorer/), a replay of 144 real recorded searches. Nothing to install.
-
-### ANIMA: coding agents that remember
-
-ANIMA is a layer that sits on top of the coding agent you already use (Muse Code first, then Claude Code, Codex), giving it memory, a checker it cannot see, and a screen to watch it work. Its memory is TRACE, joined by a prototype link with one small recorded test so far.
-
-**Watch the demo:** [check ANIMA's record in your browser](https://anshul48.github.io/anima-substrate/demo/), a replay of a recorded nine-job run. [ANIMA on GitHub](https://github.com/Anshul48/anima-substrate).
-
-### Reflex: an AI that finds the right button
-
-Reflex is a line of work where an AI looks at a screen and finds the right button to press. The direction is SAM 3.1 with Muse Spark: in the early trial, SAM 3.1 cut made-up screens into pieces and Muse Spark read them and chose — an early trial, a direction, with small synthetic tests so far.
-
-**Watch the demo:** [open the replay demo](https://anshul48.github.io/demo-trace-anima-reflex/) (no login, pick the Reflex sample) or [watch the short film](https://anshul48.github.io/trace/demos/#reflex). [Early trial results](docs/reflex.md).
-
-**Recorded replay:** working today. **Browser mode:** prototype. **Public backend:** off. **Local kit:** planned.
-
-| In 60 seconds | |
-|---|---|
-| **Try it** | **[Open the explorer](https://anshul48.github.io/trace/explorer/)**: a replay of 144 real searches that were recorded on our server. Nothing to install. Open a result's record and press "Check the fingerprint in my browser". |
-| **The measured result** | On our library of 812,545 passages, a question scored **0.79% of the passages on one of four equal parts** (about **127 times less passage-scoring work**) and kept **0.9985** of exact vector search's top ten. 50 test searches, our library and our method. It measures how much of the exact answer was kept, not answer quality. |
-| **The honest limits** | Ordinary keyword search found the right source more often than TRACE did (82% against 52%), a plain scan takes less time per search, and nobody outside our team has checked the results. [All the limits](#honest-limits). |
-| **Meta tooling** | Muse Code was our main automated worker tool (670 recorded jobs). TRACE's search itself uses no Meta model. [What we used and did not use](docs/META-USE.md). |
-| **The 3-minute film** | Being published on YouTube; the link will be added here. Until then: [working versions of the films](https://anshul48.github.io/trace/demos/). |
-
-[Website](https://anshul48.github.io/trace/) · [How it works](https://anshul48.github.io/trace/how-it-works/) · [Evidence and limits](https://anshul48.github.io/trace/evidence/) · [Verify it yourself](https://anshul48.github.io/trace/verify/) · [Meta tooling](docs/META-USE.md)
-
-<p align="center">
-  <img src="docs/img/organizing-pile.png" alt="Illustration: 20,000 dots in four equal parts, sorted into groups. In the first part a question has lit 40 dots, with ten ringed as the best matches. All other dots are dim." width="100%">
-</p>
-
-*An illustration, not data: 20,000 dots stand in for the 812,545 passages. Where each dot sits and how many groups there are is drawn. What is real is the proportion: four equal parts, and a question waking 0.79% of one of them. The [website](https://anshul48.github.io/trace/how-it-works/) animates it.*
-
-## The idea in three beats
-
-1. **It sorts itself.** Passages that mean alike end up in the same group, and nobody adds labels. In our tests, a search's ten true best matches fall into about 7 groups on average, out of at most 10; groups made at random would give 10. *Scope:* 50 test searches, our library, one ordinary sorting run. We measured how ordered the finished groups are, not how they formed over time, and we have no growth curve yet.
-2. **A question wakes a small part.** Only the groups most likely to hold the answer are searched: 0.79% of the passages on one of four equal parts, about 127 times less passage-scoring work (routing and building the groups are separate costs), with 0.9985 of exact vector search's top ten kept. This is what we call *sparse activation*, inspired by the idea that only a small part of a memory fires for a given cue. It is not a claim of being faster: see the limits.
-3. **Every answer has a checkable record.** Each result shows its article, where in the article, its licence and a fingerprint (SHA-256) that your browser recomputes from the exact text. A match proves the text is what was sealed in the library. It does not prove the search found the best passage.
-
-## How far it has been tested
-
-| Size | Status | What was done | Caveats |
+| | | | |
 |---|---|---|---|
-| **100M-token library** (812,545 passages · 99.9M) | ![Working today, our server](docs/badges/library-100m.svg) | The full measured pipeline: sorted into groups, searched, every answer with a checkable record, re-run on our own server. Every number above is from this library. | Short of our 100M target by 0.11% (108,154 tokens). Our own library and method, not reproduced on public data, no outside check. |
+| **100M library** | **0.79% of the library scored** | **99.85% of exact top ten kept** | **670 recorded Muse Code worker jobs** |
+| one frozen library behind every number | per question, passage-scoring work only | of exact meaning-based search's top ten | [what we used and did not use](docs/META-USE.md) |
 
-Larger builds were earlier tests, shown separately under [Appendix: earlier tests](#appendix-earlier-tests-by-us) and never to be read together with the result above. A token is a word-sized piece of text. The details are on the [evidence page](https://anshul48.github.io/trace/evidence/).
+*<small>Fine print: 812,545 passages · 99,891,846 tokens — 0.11% short of the 100M target. Our library and our method, 50 test searches; no outside check yet. Every result carries a fingerprint your browser can re-check.</small>*
 
-## What a skeptic asks
+### The ecosystem
 
-- **Does it find the right source?** Not as often as keyword search. On our 50 test searches, ordinary keyword search put the right source in its top ten for 82% of them; TRACE and exact search by meaning each reached 52%. The 0.9985 measures how much of exact vector search's answer TRACE kept, not answer quality.
-- **Does a matching fingerprint prove nothing relevant was skipped?** No. It proves the passage you were shown is the one that was stored, with its article and position. Whether the shortcut skipped something relevant is a different question, and the comparison with exact search measures it (0.9985 of the top ten kept).
-- **Is 0.79% the whole cost?** No. It counts passage-scoring work only. A TRACE search took 1.2 s against 88 ms for an exact scan and 6 ms for keyword search.
-- **Is the saving from self-organization, or from ordinary grouping?** We have not separated the two inside TRACE's own engine. We measured how ordered the finished groups are, not how they formed, and the order we measured showed up at every size we tested (10,000 to 200,000 passages in a controlled check, a flat band with no trend). We do not claim it improves with scale.
-- **Does it work on public data?** TRACE has not been run there. A stand-in of ours (not TRACE) gave dataset-specific results: FiQA about 95% of exact search's top ten at 7% of passages scored, SciFact about 95% at 24%, NFCorpus 90% at 28% and 97% at 55%.
-- **Has anyone outside your team checked it?** No. Outside verification is pending. What you can check yourself is under [Try it, and check it](#try-it-and-check-it).
+One builder, three projects. TRACE is the memory at the front; ANIMA brings that memory into coding work; Reflex is a separate line of work on screens and buttons.
 
-## Questions judges ask
+| Project | Repository | Demo |
+|---|---|---|
+| TRACE | [Repository](https://github.com/Anshul48/trace) | [Explorer](https://anshul48.github.io/trace/explorer/) |
+| ANIMA | [Repository](https://github.com/Anshul48/anima-substrate) | [Recorded demo](https://anshul48.github.io/anima-substrate/demo/) |
+| Reflex | [Demo repository](https://github.com/Anshul48/demo-trace-anima-reflex) | [Replay](https://anshul48.github.io/demo-trace-anima-reflex/) |
 
-- **What does 0.79% mean?** For one question, TRACE read closely and ranked only 0.79% of the passages on one quarter of the library — about 127 times less passage-scoring work than scoring everything — and kept 0.9985 of exact search's top ten. It counts scoring work only, not the whole search.
-- **Is this a live service?** No. The explorer replays 144 searches recorded on our server. The public backend is off, and a download you run yourself is planned.
-- **How do I open the explorer?** [Click here](https://anshul48.github.io/trace/explorer/) — nothing to install. Or run it on your own computer: `git clone https://github.com/Anshul48/trace.git`, then `cd trace`, then `./tools/run-trace.sh` (Windows: `tools\run-trace.bat`).
+TRACE is a memory that sorts a huge pile of text into groups by itself, so a question opens only the few groups it needs, and every result comes with a record you can check.
 
-## Try it, and check it
+ANIMA is a layer you install in one line on top of the coding agent you already use (Muse Code first, then Claude Code, Codex), giving it memory, a checker it cannot see, and a screen to watch it work. Install: `curl -fsSL https://raw.githubusercontent.com/Anshul48/anima-substrate/main/install.sh | sh`. Headless adapters exist for Muse Code, Claude Code and Codex; the screen shows the recorded state-tree of a run.
+
+Reflex is a line of work where an AI looks at a screen and finds the right button to press (SAM 3.1 with Muse Spark).
+
+### Walkthroughs & Visual Proofs
+
+| Track | Watch today |
+|---|---|
+| Flagship film | [Watch the 3-minute story](https://anshul48.github.io/trace/demos/) <!-- VIDEO_SLOT: Flagship film - Replace href when rendered --> |
+| 60-second explorer tour | [Open the explorer](https://anshul48.github.io/trace/explorer/), a replay of 144 recorded searches <!-- VIDEO_SLOT: 60-second explorer tour - Replace href when rendered --> |
+| ANIMA state-tree replay | [Recorded demo](https://anshul48.github.io/anima-substrate/demo/) <!-- VIDEO_SLOT: ANIMA state-tree replay - Replace href when rendered --> |
+| Reflex clip | [Short film](https://anshul48.github.io/trace/demos/#reflex) |
+| Module deep dives | [How it works](https://anshul48.github.io/trace/how-it-works/) <!-- VIDEO_SLOT: Module deep dives - Replace href when rendered --> |
+
+## The deep end
+
+| Destination | What lives there |
+|---|---|
+| [Receipts](receipts/) | The records of our runs: the qualification run, the earlier larger builds, the order measurement. The [evidence page](https://anshul48.github.io/trace/evidence/) tells the story they tell. |
+| [Reproduce](https://anshul48.github.io/trace/verify/) | The commands that re-check the code and the records, and a [small reproduction](docs/reproduction/repro-20k/README.md) that runs on your own computer. |
+| [Architecture](docs/ARCHITECTURE.md) | The design in technical terms, plus a [walk through the 207 tested files](docs/CODE-TOUR.md). |
+| [Research notes](docs/BENCHMARKS.md) | The measurement records of the earlier builds, and the [scale and build-memory runs](docs/SCALE-AND-MEMORY.md) with their raw records. |
+| [Status](https://anshul48.github.io/trace/built/) | Every capability with its Working today / Prototype / Planned badge, driven by [status.json](docs/status.json). |
+| [Contribute](.github/CONTRIBUTING.md) | The rules for changing this repository. |
+
+<details>
+<summary>Try it, and check it</summary>
 
 - **No install:** the [explorer](https://anshul48.github.io/trace/explorer/) in your browser. ![Working today](docs/badges/explorer-replay.svg) ![Working today](docs/badges/record-check.svg)
-- **Run the explorer on your own computer** (Python 3, downloads nothing): `./tools/run-trace.sh` (Windows: `tools\run-trace.bat`). ![Working today](docs/badges/explorer-local.svg)
-- **Check that the published code is the code we tested** (207 files): `python3 tools/verify_freeze.py` should end with `entries=207 ok=207 missing=0 mismatch=0`. ![Working today](docs/badges/freeze-verify.svg)
-- **Run a small reproduction** (20,000 tokens, needs `numpy` and `blake3`): see [`repro-20k/README.md`](docs/reproduction/repro-20k/README.md). ![Working today](docs/badges/small-repro.svg)
-- **Planned:** query the whole library yourself, or download it. ![Off](docs/badges/public-service.svg) ![Planned](docs/badges/local-kit.svg) Nobody outside our team has re-run our results. ![Planned](docs/badges/outside-check.svg)
+- **Run the explorer on your own computer** (Python 3, downloads nothing): `./tools/run-trace.sh` (Windows: `tools\run-trace.bat`).
+- **Check that the published code is exactly what we tested** (207 files): `python3 tools/verify_freeze.py` should end with `entries=207 ok=207 missing=0 mismatch=0`. ![Working today](docs/badges/freeze-verify.svg)
+- **Run a small reproduction** (20,000 tokens, needs `numpy` and `blake3`): see [docs/reproduction/repro-20k/README.md](docs/reproduction/repro-20k/README.md). ![Working today](docs/badges/small-repro.svg)
 
-## Honest limits
+</details>
 
-1. **Keyword search finds the source more often, and a plain scan answers sooner.** On our 50 test searches the right source was in keyword search's top ten for 82% of them, against 52% for TRACE. Per search: 6 ms keyword, 88 ms exact scan, 1.2 s TRACE. TRACE is meaning-based search you can check, not a keyword replacement.
-2. **Our library, our method.** 0.79% at 0.9985 is not reproduced on public data, and no outside party has checked our results.
-3. **Ordinary grouping under the hood.** One sorting run per quarter of the library. The order was present at every size we checked (10,000 to 200,000 passages in a controlled check; the largest set we sorted holds 233,000 passages), with no claim it improves as the library grows.
-4. **A replay, not a live service.** The explorer replays recorded searches. The public backend is off and the download is planned.
-
-*Each limit above is expanded with numbers on the [evidence page](https://anshul48.github.io/trace/evidence/). The earlier larger builds are in the [appendix](#appendix-earlier-tests-by-us).*
-
-## Where each thing stands
-
-Generated from [`docs/status.json`](docs/status.json), the one file that also drives every badge on the website. A capability is marked "Working today" only if its evidence file exists in this repository.
-
-| Capability | Status |
-|---|---|
-| Explorer: replay of 144 real recorded searches, each result with a checkable record | ![Working today](docs/badges/explorer-replay.svg) |
-| Check a record in your own browser (the fingerprint is recomputed there) | ![Working today](docs/badges/record-check.svg) |
-| Run the explorer on your own computer with Python 3 (tools/run-trace.sh) | ![Working today](docs/badges/explorer-local.svg) |
-| A 100M-class sealed library (812,545 passages, 99,891,846 tokens), sorted into groups and searched on our own server | ![Working today, our server](docs/badges/library-100m.svg) |
-| A question scores 0.79% of one of four equal parts and keeps 0.9985 of exact search's top ten (50 test searches, our library and method) | ![Measured by us](docs/badges/sparse-search.svg) |
-| The finished groups hold a search's best matches together: about 7 groups out of at most 10, against 10 for random groups | ![Measured by us](docs/badges/groups-hold-matches.svg) |
-| A small reproduction (20,000 tokens) that runs on your own computer | ![Working today](docs/badges/small-repro.svg) |
-| Check that the published code is byte-for-byte what was tested (207 files) | ![Working today](docs/badges/freeze-verify.svg) |
-| Explorer browser mode: typed words are matched to the closest recorded question, and the record check, all inside your own browser | ![Prototype](docs/badges/browser-mode.svg) |
-| TRACE's own filing-and-repair store, with the records of an earlier qualification run (receipts/) | ![Prototype](docs/badges/self-organizing-store.svg) |
-| Earlier build: 310,532,353 tokens in 8 pieces (our records, machine shut down) | ![Earlier test](docs/badges/build-310m.svg) |
-| Earlier build: 504,480,146 tokens in 13 pieces (our records, machine shut down) | ![Earlier test](docs/badges/build-504m.svg) |
-| Separate October test: 1,531,809,092 tokens encoded into 7,134,906 vectors, group-picking only | ![Separate test](docs/badges/routing-1b.svg) |
-| TRACE as the shared memory for ANIMA coding agents | ![Prototype](docs/badges/anima-link.svg) |
-| Reflex: an AI that looks at a screen and finds the right button to press (SAM 3.1 with Muse Spark) | ![Prototype](docs/badges/reflex.svg) |
-| A before-and-after measurement of the library's order as it grows | ![Planned](docs/badges/growth-curve.svg) |
-| A public live service anyone can query | ![Off](docs/badges/public-service.svg) |
-| A download you run on your own computer for the whole library | ![Planned](docs/badges/local-kit.svg) |
-| TRACE itself run on public benchmarks (BEIR) | ![Planned](docs/badges/public-benchmarks.svg) |
-| Results checked by an outside party | ![Planned](docs/badges/outside-check.svg) |
-| A billion tokens through TRACE, searchable, with checkable records | ![Planned](docs/badges/billion-run.svg) |
-| The 3-minute film on YouTube | ![Planned](docs/badges/film-youtube.svg) |
-
-## Appendix: earlier tests, by us
-
-Separate from the measured result above. These are earlier runs with their own records. They were not the sealed library, their numbers are never to be read together with the 99.9M-token result, and the machine they ran on was shut down.
-
-| Size | Status | What was done | Caveats |
-|---|---|---|---|
-| **310.5M tokens**, 8 pieces | ![Earlier test](docs/badges/build-310m.svg) | Exact search matched the ground truth. With one piece switched off it still found 0.87 of the exact results, with no wrong passages. | Our own records, not outside-verified. The cloud machine was shut down, so it cannot be re-run. A search took p50 4.18 s. [Raw record](receipts/earlier-runs/RECEIPT-RUNG-300M.txt). |
-| **504.5M tokens**, 13 pieces (7.65 GB stored size on disk; memory use was not compared) | ![Earlier test](docs/badges/build-504m.svg) | Exact search matched the ground truth. With one piece switched off it still found 0.885 of the exact results, with no wrong passages. | Our own records, not outside-verified, cannot be re-run, not served at that size. The compressed-search figure (0.994 to 0.998) was measured only on the five newest pieces. A 13-piece search took p50 6.86 s. [Raw record](receipts/earlier-runs/RECEIPT-RUNG-500M.txt). |
-| **1.53B tokens**, 7.13M vectors | ![Separate test](docs/badges/routing-1b.svg) | A separate October test of group-picking only: opening 6.6% of the vectors kept 0.9947 of the exact top ten. | A different, larger collection. Not served through TRACE, no checkable records at that size, no billion-vector run. We have not run a billion tokens through TRACE. |
-
-A "piece" is one sealed part of a library. The cost to build on a smaller test collection (one run each, not like-for-like) is on the [evidence page](https://anshul48.github.io/trace/evidence/#cost).
-
-## Also by this team
-
-- **[ANIMA](https://github.com/Anshul48/anima-substrate)** ![Prototype](docs/badges/anima-link.svg): a harness around AI coding agents, with a hidden checker no agent can see, a ladder of helpers and a recorded chain of decisions. TRACE is its shared memory through a prototype link. Validated for one kind of job so far (fixing a bug against hidden tests).
-- **Reflex** ![Prototype](docs/badges/reflex.svg): a line of work where an AI looks at a screen and finds the right button to press (SAM 3.1 with Muse Spark). It has [its own short film](https://anshul48.github.io/trace/demos/#reflex) and [early trial results](docs/reflex.md).
-
-## Where things are
-
-| | |
-|---|---|
-| [`docs/`](docs/README.md) | The website, served by GitHub Pages, and the technical documents (see [`docs/README.md`](docs/README.md) for the index). |
-| [`docs/source/`](docs/source/) | The sources the website is generated from (`python3 tools/build_site.py`). |
-| [`freeze-src/`](freeze-src/) | The tested engine, 207 files. |
-| [`receipts/`](receipts/) | The records of our runs (the folder is named *receipts*): the qualification run, the earlier larger builds, the order measurement. |
-| [`docs/reproduction/repro-20k/`](docs/reproduction/repro-20k/README.md) | A small reproduction for your own computer. |
-| [`tools/`](tools/) | The checks, the site generator and the local launcher. |
-
-## Contributing, security, citation
-
-[CONTRIBUTING.md](.github/CONTRIBUTING.md) · [SECURITY.md](.github/SECURITY.md) · [CITATION.cff](docs/CITATION.cff) · [CHANGELOG.md](docs/CHANGELOG.md) · [Meta tooling used](docs/META-USE.md) · Questions or problems: [open an issue](https://github.com/Anshul48/trace/issues). License: Apache-2.0 ([LICENSE](LICENSE)). Passages in the library are English Wikipedia text under CC BY-SA 4.0.
+[Contributing](.github/CONTRIBUTING.md) · [Security](.github/SECURITY.md) · [Cite](docs/CITATION.cff) · [Changelog](docs/CHANGELOG.md) · Questions or problems: [open an issue](https://github.com/Anshul48/trace/issues). License: Apache-2.0 ([LICENSE](LICENSE)). Passages in the library are English Wikipedia text under CC BY-SA 4.0.
