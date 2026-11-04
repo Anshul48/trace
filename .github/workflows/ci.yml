@@ -19,7 +19,7 @@ jobs:
         run: python3 tools/check_receipts.py
       - name: Demo backend tests (incl. 207-file freeze verification)
         run: |
-          cd demo-app
+          cd tools/demo-app
           python3 -B -m unittest discover tests -v
       - name: 20k repro prep verify (cheap; no full pilot or full-size run)
         run: |
@@ -56,5 +56,5 @@ jobs:
           python3 -c "import json; data = json.load(open('docs/explorer/local_20k_data.json')); assert data['manifest']['status'] == 'PASS'; assert data['manifest']['atoms_count'] == 144"
       - name: Secret scan (filenames)
         run: |
-          git ls-files -- . ':!archive' ':!freeze-src' ':!demo-app' ':!local-runs' | grep -Ei '(\.env$|\.pem$|\.key$|id_rsa|consented_trace)' \
+          git ls-files -- . ':!archive' ':!freeze-src' ':!tools/demo-app' ':!local-runs' | grep -Ei '(\.env$|\.pem$|\.key$|id_rsa|consented_trace)' \
             | grep -v '.env.example' && exit 1 || echo "filename scan clean"

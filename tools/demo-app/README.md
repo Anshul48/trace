@@ -9,7 +9,7 @@ A working localhost demo of the **actual frozen** STACK-FORK candidate
 ## Launch (one command)
 
 ```bash
-cd demo-app
+cd tools/demo-app
 python3 run_demo.py --port 8765   # clean checkout: auto-creates .venv with numpy only if needed
 # then open http://127.0.0.1:8765/ in a browser
 ```

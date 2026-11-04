@@ -2,7 +2,7 @@
 """Check relative Markdown links in the maintained docs resolve to files.
 
 Skips the frozen snapshot, the byte-exact archive (historical links are
-preserved as-is), and demo-app (integrated separately; links to its README
+preserved as-is), and tools/demo-app (integrated separately; links to its README
 are allowed to be pending — reported as warnings, not failures).
 
 It also checks docs/status.json (every capability marked "built" must name an

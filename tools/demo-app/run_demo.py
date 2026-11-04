@@ -31,7 +31,7 @@ def main():
     if venv_py.exists() and has_numpy(venv_py):
         py = venv_py
     elif not has_numpy(py):
-        print("numpy not found; creating demo-app/.venv and installing numpy only...", flush=True)
+        print("numpy not found; creating tools/demo-app/.venv and installing numpy only...", flush=True)
         if shutil.which("uv"):
             subprocess.check_call(["uv", "venv", str(HERE / ".venv")])
             subprocess.check_call(["uv", "pip", "install", "--python", str(venv_py), "--quiet", "numpy"])
@@ -40,7 +40,7 @@ def main():
                 subprocess.check_call([sys.executable, "-m", "venv", str(HERE / ".venv")])
                 subprocess.check_call([str(venv_py), "-m", "pip", "install", "--quiet", "numpy"])
             except subprocess.CalledProcessError:
-                raise SystemExit("Could not create demo-app/.venv (python3-venv/ensurepip missing?). Install uv or python3-venv, or run with an interpreter that already has numpy.")
+                raise SystemExit("Could not create tools/demo-app/.venv (python3-venv/ensurepip missing?). Install uv or python3-venv, or run with an interpreter that already has numpy.")
         py = venv_py
     print(f"TRACE demo: http://127.0.0.1:{port}/  (Ctrl-C to stop)", flush=True)
     raise SystemExit(subprocess.call([str(py), str(HERE / "backend.py"), port]))

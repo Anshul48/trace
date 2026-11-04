@@ -7,8 +7,8 @@ cached encoder vectors from the earlier qualification). This is vector-probe mod
 there is no text encoder and no fake QA. The full earlier qualification record is
 served separately at /api/evidence and is never recomputed here.
 
-Freeze source: env TRACE_FREEZE_SRC, default ../freeze-src relative to this
-folder (integrator: drop this folder in as demo-app/ beside freeze-src/).
+Freeze source: env TRACE_FREEZE_SRC, default the freeze-src/ beside the
+repository root (this folder lives at tools/demo-app/).
 Stdlib HTTP only; numpy is required because the frozen engine requires it.
 """
 import hashlib
@@ -29,6 +29,7 @@ def freeze_src():
     env = os.environ.get("TRACE_FREEZE_SRC")
     candidates = [Path(env)] if env else []
     candidates += [HERE.parent / "freeze-src" / "cand", HERE.parent / "freeze-src",
+                   HERE.parent.parent / "freeze-src" / "cand", HERE.parent.parent / "freeze-src",
                    HERE.parent / "vm-recovery" / "cand" / "stack-fork" / "cand"]
     for c in candidates:
         if (c / "tools" / "product_pilot.py").exists():

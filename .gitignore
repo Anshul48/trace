@@ -5,7 +5,7 @@ build/
 dist/
 *.egg-info/
 .venv/
-demo-app/.venv/
+tools/demo-app/.venv/
 .trace-demo-env/
 local-runs/
 local-run-20k/
