@@ -17,7 +17,7 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOCS = ["README.md", "CONTRIBUTING.md", "SECURITY.md", "CHANGELOG.md"]
+DOCS = ["README.md", ".github/CONTRIBUTING.md", ".github/SECURITY.md"]
 DOCS += [
     os.path.join("docs", f)
     for f in sorted(os.listdir(os.path.join(ROOT, "docs")))

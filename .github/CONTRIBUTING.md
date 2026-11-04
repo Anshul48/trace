@@ -15,8 +15,8 @@ Thank you for looking. TRACE is a research prototype, so the rules are stricter 
 The website in `docs/` and the root `README.md` are generated, so they cannot drift:
 
 1. Edit the sources: `docs/source/pages/*.html`, `docs/source/partials/*.html`, `docs/source/README.src.md`.
-2. If a capability changes (a "Working today", "Prototype" or "Not built yet" label), edit [`docs/status.json`](docs/status.json). A capability may be marked `built` only if its `evidence` path exists in the repository.
-3. To swap a film, edit [`docs/demos/films.json`](docs/demos/films.json) (see the Demos page for how).
+2. If a capability changes (a "Working today", "Prototype" or "Not built yet" label), edit [`docs/status.json`](../docs/status.json). A capability may be marked `built` only if its `evidence` path exists in the repository.
+3. To swap a film, edit [`docs/demos/films.json`](../docs/demos/films.json) (see the Demos page for how).
 4. Run `python3 tools/build_site.py`, then commit the generated files with your change.
 
 The generated files are checked: `python3 tools/build_site.py --check` fails if `docs/` or `README.md` differs from what the sources produce.
@@ -31,7 +31,7 @@ python3 tools/build_site.py --check     # site ok
 python3 docs/examples/demo/synthetic_recall.py
 ```
 
-CI runs the same checks. The [pull request template](.github/pull_request_template.md) lists the rest.
+CI runs the same checks. The [pull request template(pull_request_template.md) lists the rest.
 
 ## Reporting a wrong number
 

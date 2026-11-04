@@ -45,6 +45,9 @@ These documents were written for an earlier, smaller experiment (an earlier smal
 | [CODE-TOUR.md](CODE-TOUR.md) | A walk through the 207 tested files. |
 | [SCALE-AND-MEMORY.md](SCALE-AND-MEMORY.md) | The earlier scale and build-memory runs, with their raw records. |
 | [ABOUT.md](ABOUT.md) | The repository's description, topics and social preview, for the maintainer. |
+| [CHANGELOG.md](CHANGELOG.md) | What changed, newest first. |
+| [TEST-REPORT.md](TEST-REPORT.md) | The publication verification record. |
+| [Contributing](../.github/CONTRIBUTING.md) | The rules for changing this repository. |
 
 ## Records and tools
 

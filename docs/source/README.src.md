@@ -142,4 +142,4 @@ A "piece" is one sealed part of a library. The cost to build on a smaller test c
 
 ## Contributing, security, citation
 
-[CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CITATION.cff](CITATION.cff) · [CHANGELOG.md](CHANGELOG.md) · [Meta tooling used](docs/META-USE.md) · Questions or problems: [open an issue](https://github.com/Anshul48/trace/issues). License: Apache-2.0 ([LICENSE](LICENSE)). Passages in the library are English Wikipedia text under CC BY-SA 4.0.
+[CONTRIBUTING.md](.github/CONTRIBUTING.md) · [SECURITY.md](.github/SECURITY.md) · [CITATION.cff](docs/CITATION.cff) · [CHANGELOG.md](docs/CHANGELOG.md) · [Meta tooling used](docs/META-USE.md) · Questions or problems: [open an issue](https://github.com/Anshul48/trace/issues). License: Apache-2.0 ([LICENSE](LICENSE)). Passages in the library are English Wikipedia text under CC BY-SA 4.0.
