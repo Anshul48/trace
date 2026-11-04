@@ -6,7 +6,7 @@
   "labels": {
     "built": "Working today",
     "prototype": "Prototype",
-    "next": "Not built yet"
+    "next": "Planned"
   },
   "capabilities": [
     {
@@ -155,7 +155,7 @@
     },
     {
       "id": "reflex",
-      "title": "Reflex: a separate prototype that lets an assistant use a real web page",
+      "title": "Reflex: an AI that looks at a screen and finds the right button to press (SAM 3.1 with Muse Spark)",
       "status": "prototype",
       "evidence_note": "A separate project with its own short film."
     }

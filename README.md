@@ -38,7 +38,7 @@ Reflex is a line of work where an AI looks at a screen and finds the right butto
 
 **Watch the demo:** [open the replay demo](https://anshul48.github.io/demo-trace-anima-reflex/) (no login, pick the Reflex sample) or [watch the short film](https://anshul48.github.io/trace/demos/#reflex). [Early trial results](docs/reflex.md).
 
-**Recorded replay:** working today. **Browser mode:** prototype. **Public backend:** off. **Local kit:** not built yet.
+**Recorded replay:** working today. **Browser mode:** prototype. **Public backend:** off. **Local kit:** planned.
 
 | In 60 seconds | |
 |---|---|
@@ -85,7 +85,7 @@ Larger builds were earlier tests, shown separately under [Appendix: earlier test
 - **Run the explorer on your own computer** (Python 3, downloads nothing): `./tools/run-trace.sh` (Windows: `tools\run-trace.bat`). ![Working today](docs/badges/explorer-local.svg)
 - **Check that the published code is the code we tested** (207 files): `python3 tools/verify_freeze.py` should end with `entries=207 ok=207 missing=0 mismatch=0`. ![Working today](docs/badges/freeze-verify.svg)
 - **Run a small reproduction** (20,000 tokens, needs `numpy` and `blake3`): see [`repro-20k/README.md`](repro-20k/README.md). ![Working today](docs/badges/small-repro.svg)
-- **What you cannot do yet:** query the whole library yourself, or download it. ![Off](docs/badges/public-service.svg) ![Not built yet](docs/badges/local-kit.svg) Nobody outside our team has re-run our results. ![Not built yet](docs/badges/outside-check.svg)
+- **Planned:** query the whole library yourself, or download it. ![Off](docs/badges/public-service.svg) ![Planned](docs/badges/local-kit.svg) Nobody outside our team has re-run our results. ![Planned](docs/badges/outside-check.svg)
 
 ## Honest limits
 
@@ -117,14 +117,14 @@ Generated from [`docs/status.json`](docs/status.json), the one file that also dr
 | Earlier build: 504,480,146 tokens in 13 pieces (our records, machine shut down) | ![Earlier test](docs/badges/build-504m.svg) |
 | Separate October test: 1,531,809,092 tokens encoded into 7,134,906 vectors, group-picking only | ![Separate test](docs/badges/routing-1b.svg) |
 | TRACE as the shared memory for ANIMA coding agents | ![Prototype](docs/badges/anima-link.svg) |
-| Reflex: a separate prototype that lets an assistant use a real web page | ![Prototype](docs/badges/reflex.svg) |
-| A before-and-after measurement of the library's order as it grows | ![Not built yet](docs/badges/growth-curve.svg) |
+| Reflex: an AI that looks at a screen and finds the right button to press (SAM 3.1 with Muse Spark) | ![Prototype](docs/badges/reflex.svg) |
+| A before-and-after measurement of the library's order as it grows | ![Planned](docs/badges/growth-curve.svg) |
 | A public live service anyone can query | ![Off](docs/badges/public-service.svg) |
-| A download you run on your own computer for the whole library | ![Not built yet](docs/badges/local-kit.svg) |
-| TRACE itself run on public benchmarks (BEIR) | ![Not built yet](docs/badges/public-benchmarks.svg) |
-| Results checked by an outside party | ![Not built yet](docs/badges/outside-check.svg) |
-| A billion tokens through TRACE, searchable, with checkable records | ![Not built yet](docs/badges/billion-run.svg) |
-| The 3-minute film on YouTube | ![Not built yet](docs/badges/film-youtube.svg) |
+| A download you run on your own computer for the whole library | ![Planned](docs/badges/local-kit.svg) |
+| TRACE itself run on public benchmarks (BEIR) | ![Planned](docs/badges/public-benchmarks.svg) |
+| Results checked by an outside party | ![Planned](docs/badges/outside-check.svg) |
+| A billion tokens through TRACE, searchable, with checkable records | ![Planned](docs/badges/billion-run.svg) |
+| The 3-minute film on YouTube | ![Planned](docs/badges/film-youtube.svg) |
 
 ## Appendix: earlier tests, by us
 
@@ -141,7 +141,7 @@ A "piece" is one sealed part of a library. The cost to build on a smaller test c
 ## Also by this team
 
 - **[ANIMA](https://github.com/Anshul48/anima-substrate)** ![Prototype](docs/badges/anima-link.svg): a harness around AI coding agents, with a hidden checker no agent can see, a ladder of helpers and a recorded chain of decisions. TRACE is its shared memory through a prototype link. Validated for one kind of job so far (fixing a bug against hidden tests).
-- **Reflex** ![Prototype](docs/badges/reflex.svg): a separate prototype that lets an assistant use a real web page by reading the page's structure first. It has [its own short film](https://anshul48.github.io/trace/demos/#reflex).
+- **Reflex** ![Prototype](docs/badges/reflex.svg): a line of work where an AI looks at a screen and finds the right button to press (SAM 3.1 with Muse Spark). It has [its own short film](https://anshul48.github.io/trace/demos/#reflex) and [early trial results](docs/reflex.md).
 
 ## Where things are
 
