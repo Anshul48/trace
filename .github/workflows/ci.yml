@@ -52,7 +52,7 @@ jobs:
           PY: python3
       - name: Installer & Static Explorer verification
         run: |
-          bash install_and_run.sh --no-server
+          bash tools/install_and_run.sh --no-server
           python3 -c "import json; data = json.load(open('docs/explorer/local_20k_data.json')); assert data['manifest']['status'] == 'PASS'; assert data['manifest']['atoms_count'] == 144"
       - name: Secret scan (filenames)
         run: |

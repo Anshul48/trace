@@ -42,7 +42,7 @@ def resolve_run_dir(given_path=None):
         except Exception:
             pass
 
-    raise FileNotFoundError("No verified 20k run directory found. Run ./install_and_run.sh first.")
+    raise FileNotFoundError("No verified 20k run directory found. Run ./tools/install_and_run.sh first.")
 
 
 def load_doc_texts(data_dir=None):

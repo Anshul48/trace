@@ -5,7 +5,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "${SCRIPT_DIR}"
+ROOT_DIR="$(dirname "${SCRIPT_DIR}")"
+cd "${ROOT_DIR}"
 
 RERUN=0
 NO_SERVER=0
@@ -28,7 +29,7 @@ for arg in "$@"; do
             PORT="${PORT_VAL}"
             ;;
         --help|-h)
-            echo "Usage: ./install_and_run.sh [--rerun] [--no-server] [--port=PORT]"
+            echo "Usage: ./tools/install_and_run.sh [--rerun] [--no-server] [--port=PORT]"
             echo ""
             echo "Options:"
             echo "  --rerun      Execute a new frozen 20k pilot run into a new unique directory"
@@ -38,7 +39,7 @@ for arg in "$@"; do
             ;;
         *)
             echo "ERROR: Unknown option: $arg" >&2
-            echo "Run ./install_and_run.sh --help for usage." >&2
+            echo "Run ./tools/install_and_run.sh --help for usage." >&2
             exit 1
             ;;
     esac
@@ -87,7 +88,7 @@ else
 fi
 
 # 2. Isolated Virtual Environment (.trace-demo-env; preserve existing .venv)
-ENV_DIR="${SCRIPT_DIR}/.trace-demo-env"
+ENV_DIR="${ROOT_DIR}/.trace-demo-env"
 PYTHON_BIN="${ENV_DIR}/bin/python"
 
 echo ""
@@ -138,8 +139,8 @@ echo "[4/7] Verifying 207 immutable source files against SOURCEFREEZE..."
 # 5. Small-Scale Real Prefix Verification
 echo ""
 echo "[5/7] Verifying 20k token prefix data..."
-DATA_DIR="${SCRIPT_DIR}/docs/reproduction/repro-20k/data-20k"
-TAR_FILE="${SCRIPT_DIR}/docs/reproduction/repro-20k/small-prefix-20k.tar.gz"
+DATA_DIR="${ROOT_DIR}/docs/reproduction/repro-20k/data-20k"
+TAR_FILE="${ROOT_DIR}/docs/reproduction/repro-20k/small-prefix-20k.tar.gz"
 
 if [ ! -d "${DATA_DIR}" ]; then
     if [ ! -f "${TAR_FILE}" ]; then
@@ -152,7 +153,7 @@ fi
 "${PYTHON_BIN}" docs/reproduction/repro-20k/prep_small_prefix.py verify --tokens 20000 --cand freeze-src/cand --data-dir "${DATA_DIR}"
 
 # 6. Execute Frozen Product Pilot on 20k Prefix (Preserve all runs, NO deletions)
-RUNS_DIR="${SCRIPT_DIR}/local-runs"
+RUNS_DIR="${ROOT_DIR}/local-runs"
 mkdir -p "${RUNS_DIR}"
 ACTIVE_POINTER="${RUNS_DIR}/current_run.json"
 
@@ -212,11 +213,11 @@ if [ -z "${ACTIVE_RUN_DIR}" ] || [ "${RERUN}" -eq 1 ]; then
 
     echo "  Executing frozen harness product_pilot.py against data-20k..."
     PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH="${SCRIPT_DIR}/freeze-src/cand/fork/tl-sys:${SCRIPT_DIR}/freeze-src/cand/fork/tl-candidate-batch/candidate:${SCRIPT_DIR}/freeze-src/cand/tools" \
-    "${PYTHON_BIN}" -B "${SCRIPT_DIR}/freeze-src/cand/tools/product_pilot.py" \
+    PYTHONPATH="${ROOT_DIR}/freeze-src/cand/fork/tl-sys:${ROOT_DIR}/freeze-src/cand/fork/tl-candidate-batch/candidate:${ROOT_DIR}/freeze-src/cand/tools" \
+    "${PYTHON_BIN}" -B "${ROOT_DIR}/freeze-src/cand/tools/product_pilot.py" \
         --tokens 20000 --profile local \
         --out "${NEW_RUN_DIR}" \
-        --source-root "${SCRIPT_DIR}/freeze-src/cand" \
+        --source-root "${ROOT_DIR}/freeze-src/cand" \
         --data-dir "${DATA_DIR}"
 
     # Confirm verdict via safe argument passing
