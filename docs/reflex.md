@@ -18,4 +18,4 @@ Everything below is an early trial, a direction: small made-up screens, a handfu
 - [Open the replay demo](https://anshul48.github.io/demo-trace-anima-reflex/): no login, pick a Reflex sample.
 - [Watch the short film](https://anshul48.github.io/trace/demos/#reflex) (2:06, the owner-approved v3 cut).
 
-Reflex is one of three projects by one builder. [The ecosystem](../README.md#the-ecosystem): TRACE is the memory at the front, ANIMA and Reflex stand behind it.
+Reflex is one of three projects by one builder. [The ecosystem](../README.md#the-ecosystem): Reflex is a separate project and stands on its own.
