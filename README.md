@@ -14,13 +14,13 @@ TRACE organizes a 100M library by meaning, so developers and researchers can fin
 
 ## The 3-minute proof
 
-A question scored **0.79% of the library** and kept **99.85% of exact search's top ten**.
+A question scored **0.79% of rows on one of four equal library parts** and kept **99.85% of exact search's top ten**.
 
 *<small>Scope: 50 test searches; one of four equal library parts; passage-scoring work only. The full numbers, with every caveat, are on the [evidence page](https://anshul48.github.io/trace/evidence/).</small>*
 
 | | | | |
 |---|---|---|---|
-| **100M library** | **0.79% of the library scored** | **99.85% of exact top ten kept** | **670 recorded Muse Code worker jobs** |
+| **100M library** | **0.79% of rows on one of four equal library parts scored** | **99.85% of exact top ten kept** | **670 recorded Muse Code worker jobs** |
 | one frozen library behind every number | per question, passage-scoring work only | of exact meaning-based search's top ten | [what we used and did not use](docs/META-USE.md) |
 
 *<small>Fine print: 812,545 passages · 99,891,846 tokens — 0.11% short of the 100M target. Our library and our method, 50 test searches; no outside check yet. Every result carries a fingerprint your browser can re-check.</small>*
