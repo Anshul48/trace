@@ -1,3 +1,5 @@
+See also: [In-depth benchmarks](BENCHMARKS-DEEP.md).
+
 > Archived earlier material, kept for the record. Its numbers and claims are superseded by the main README. Current, checked results: [README](../README.md).
 
 # Earlier benchmarks (freeze `seam12a`)

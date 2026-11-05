@@ -1,0 +1,20 @@
+=== nested-n100000-s158500 ===
+N passages 100000 | K groups 11320 | groups per 1,000 passages 113.2 | mean group size 8.834 | median 7 | max 766 | single-passage groups 7.3%
+(a) where the exact top-10 neighbours sit
+ query set: passages as queries (2000)
+  real groups                        N groups 4.844 (sd 2.163)   H 1.839 bits (sd 0.817)   MAX 4.940   n=2000
+  arrival-order blocks (same K)      N groups 6.489 (sd 2.030)   H 2.452 bits (sd 0.576)   MAX 3.226   n=2000
+  shuffled group labels              N groups 9.991 (95% of shuffle means 9.987..9.995)   H 3.320 bits   MAX 1.009   (100 shuffles)
+ query set: filed query vectors (1000)
+  real groups                        N groups 7.440 (sd 1.778)   H 2.702 bits (sd 0.517)   MAX 2.807   n=1000
+  arrival-order blocks (same K)      N groups 8.419 (sd 1.461)   H 2.967 bits (sd 0.369)   MAX 2.098   n=1000
+  shuffled group labels              N groups 9.992 (95% of shuffle means 9.984..9.998)   H 3.320 bits   MAX 1.008   (100 shuffles)
+(b) cosine of stored vectors (5000 pairs per kind)
+  same group                       mean 0.5304 (se 0.0021)
+  random pair, different groups    mean 0.0456 (se 0.0013)
+  member of the NEAREST rival group mean 0.4454 (se 0.0021)
+  same arrival-order block (control) mean 0.4191 (se 0.0034)
+  ratios of means: same / random-different 11.63 ; same / nearest-rival 1.19 ; same / arrival-block 1.27
+tightness (mean cosine to own group centre): real 0.7662 | arrival-order blocks 0.6887 | shuffled labels 0.3785
+SUMMARY|nested-n100000-s158500|100000|11320|113.2|8.83|passages as queries (2000): N 4.84 H 1.84 blocks N 6.49 shuffled N 9.99;filed query vectors (1000): N 7.44 H 2.70 blocks N 8.42 shuffled N 9.99|0.5304|0.0456|0.4454|0.4191
+DONE

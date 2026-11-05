@@ -26,6 +26,7 @@ The website lives in this folder and is served by GitHub Pages at https://anshul
 - [CODE-TOUR.md](CODE-TOUR.md): a walk through the 207 tested files.
 - [SCALE-AND-MEMORY.md](SCALE-AND-MEMORY.md): the earlier scale and build-memory runs, with their raw records.
 - [BENCHMARKS.md](BENCHMARKS.md): the measurement records of the earlier build.
+- [BENCHMARKS-DEEP.md](BENCHMARKS-DEEP.md): in-depth benchmarks (recall, nDCG, abstention, RAM and CPU time, inside views), every number with its scope and record.
 
 These technical documents were written for an earlier, smaller experiment. Their numbers can differ from the website's; where they differ, the website and the root README are current.
 

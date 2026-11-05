@@ -58,7 +58,7 @@ Reflex is a separate line of work where an AI looks at a screen and finds the ri
 | [Receipts](receipts/) | The records of our runs: the qualification run, the earlier larger builds, the order measurement. The [evidence page](https://anshul48.github.io/trace/evidence/) tells the story they tell. |
 | [Reproduce](https://anshul48.github.io/trace/verify/) | The commands that re-check the code and the records, and a [small reproduction](docs/reproduction/repro-20k/README.md) that runs on your own computer. |
 | [Architecture](docs/ARCHITECTURE.md) | The design in technical terms, plus a [walk through the 207 tested files](docs/CODE-TOUR.md). |
-| [Research notes](docs/BENCHMARKS.md) | The measurement records of the earlier builds, and the [scale and build-memory runs](docs/SCALE-AND-MEMORY.md) with their raw records. |
+| [Research notes](docs/BENCHMARKS.md) | The measurement records of the earlier builds, and the [scale and build-memory runs](docs/SCALE-AND-MEMORY.md) with their raw records. [In-depth benchmarks](docs/BENCHMARKS-DEEP.md). |
 | [Status](https://anshul48.github.io/trace/built/) | Every capability with its Working today / Prototype / Planned badge, driven by [status.json](docs/status.json). |
 | [Contribute](.github/CONTRIBUTING.md) | The rules for changing this repository. |
 

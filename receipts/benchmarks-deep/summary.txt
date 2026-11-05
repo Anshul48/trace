@@ -1,0 +1,30 @@
+== M-fid recall@10 vs per-shard f64 GT ==
+guided s8-probe  n=40 mean=1.0000 min=1.0000 max=1.0000 sd=0.0000
+guided authored  n=160 mean=0.9981 min=0.9000 max=1.0000 sd=0.0136
+guided ALL       n=200 mean=0.9985 min=0.9000 max=1.0000 sd=0.0122
+flat   s8-probe  n=40 mean=1.0000 min=1.0000 max=1.0000 sd=0.0000
+flat   authored  n=160 mean=1.0000 min=1.0000 max=1.0000 sd=0.0000
+flat   ALL       n=200 mean=1.0000 min=1.0000 max=1.0000 sd=0.0000
+== M-src hit@10 / nDCG@10 (merged top-10, binary source) ==
+S1 s8-probe  hit=n=10 mean=0.5000 min=0.0000 max=1.0000 sd=0.5270 ndcg=n=10 mean=0.3964 min=0.0000 max=1.0000 sd=0.4640
+S1 authored  hit=n=40 mean=0.5250 min=0.0000 max=1.0000 sd=0.5057 ndcg=n=40 mean=0.4230 min=0.0000 max=1.0000 sd=0.4423
+S1 ALL       hit=n=50 mean=0.5200 min=0.0000 max=1.0000 sd=0.5047 ndcg=n=50 mean=0.4177 min=0.0000 max=1.0000 sd=0.4420
+S1b s8-probe  hit=n=10 mean=0.5000 min=0.0000 max=1.0000 sd=0.5270 ndcg=n=10 mean=0.3964 min=0.0000 max=1.0000 sd=0.4640
+S1b authored  hit=n=40 mean=0.5250 min=0.0000 max=1.0000 sd=0.5057 ndcg=n=40 mean=0.4230 min=0.0000 max=1.0000 sd=0.4423
+S1b ALL       hit=n=50 mean=0.5200 min=0.0000 max=1.0000 sd=0.5047 ndcg=n=50 mean=0.4177 min=0.0000 max=1.0000 sd=0.4420
+S3 s8-probe  hit=n=10 mean=0.5000 min=0.0000 max=1.0000 sd=0.5270 ndcg=n=10 mean=0.3964 min=0.0000 max=1.0000 sd=0.4640
+S3 authored  hit=n=40 mean=0.5250 min=0.0000 max=1.0000 sd=0.5057 ndcg=n=40 mean=0.4230 min=0.0000 max=1.0000 sd=0.4423
+S3 ALL       hit=n=50 mean=0.5200 min=0.0000 max=1.0000 sd=0.5047 ndcg=n=50 mean=0.4177 min=0.0000 max=1.0000 sd=0.4420
+S2: not run
+S0 s8-probe  hit=n=10 mean=0.0000 min=0.0000 max=0.0000 sd=0.0000 ndcg=n=10 mean=0.0000 min=0.0000 max=0.0000 sd=0.0000
+S0 authored  hit=n=40 mean=0.0000 min=0.0000 max=0.0000 sd=0.0000 ndcg=n=40 mean=0.0000 min=0.0000 max=0.0000 sd=0.0000
+S0 ALL       hit=n=50 mean=0.0000 min=0.0000 max=0.0000 sd=0.0000 ndcg=n=50 mean=0.0000 min=0.0000 max=0.0000 sd=0.0000
+== latency ms (single-thread, nice 10) ==
+lat_embed_ms n=50 p50=13.4 p95=16.7 max=18.4
+lat_search1_guided_ms n=200 p50=293.6 p95=368.6 max=525.4
+lat_search4_guided_ms n=50 p50=1217.6 p95=1423.4 max=1431.9
+lat_search1_flat_ms n=200 p50=334.8 p95=404.3 max=520.3
+lat_search4_flat_ms n=50 p50=1356.0 p95=1483.2 max=1555.4
+lat_S2_ms: not run
+S3 exact-GEMM batch-50 amortized per-shard mean=21.9ms/q (x4 shards = 87.5ms/q total, +embed)
+sidecars: dense=True bm25=False
