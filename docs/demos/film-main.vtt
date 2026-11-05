@@ -1,0 +1,211 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:03.080
+My AI agent forgot a critical
+
+00:00:03.080 --> 00:00:05.100
+constraint I gave it 200 turns
+
+00:00:05.100 --> 00:00:07.340
+ago because it didn't fit in
+
+00:00:07.340 --> 00:00:08.380
+its context window.
+
+00:00:09.040 --> 00:00:10.860
+To solve this I built trace
+
+00:00:10.860 --> 00:00:15.020
+a database which organizes itself proven
+
+00:00:15.020 --> 00:00:17.900
+at 100 million token context and
+
+00:00:17.900 --> 00:00:19.160
+actively scaling beyond
+
+00:00:21.224 --> 00:00:23.764
+It self organizes into a hierarchy
+
+00:00:23.764 --> 00:00:26.964
+and when retrieving data, it activates
+
+00:00:26.964 --> 00:00:28.604
+less than 1% of the
+
+00:00:28.604 --> 00:00:31.944
+corpus for fast and accurate retrieval.
+
+00:00:33.344 --> 00:00:35.884
+Because of this, my AI agents
+
+00:00:35.884 --> 00:00:37.884
+never solve the same problem twice.
+
+00:00:38.664 --> 00:00:40.724
+They look into their memory and
+
+00:00:40.724 --> 00:00:44.064
+find similar problems and use the
+
+00:00:44.064 --> 00:00:45.264
+same techniques here.
+
+00:00:46.070 --> 00:00:48.210
+To test this on real-world tasks
+
+00:00:48.210 --> 00:00:50.410
+I built Anima. It is a
+
+00:00:50.410 --> 00:00:52.230
+harness which plugs into your existing
+
+00:00:52.230 --> 00:00:54.870
+coding agents like Muse code or
+
+00:00:54.870 --> 00:00:57.270
+Claude code via the CLI and
+
+00:00:57.270 --> 00:00:58.890
+it uses trace to provide the
+
+00:00:58.890 --> 00:01:00.650
+right context at the right place
+
+00:01:00.650 --> 00:01:01.430
+and time.
+
+00:01:02.150 --> 00:01:05.450
+It never forgets anything. Anima uses
+
+00:01:05.450 --> 00:01:07.850
+a hard hierarchy of agents like
+
+00:01:07.850 --> 00:01:10.310
+architect agents and builder agents to
+
+00:01:10.310 --> 00:01:13.630
+get work done more efficiently and
+
+00:01:13.630 --> 00:01:15.850
+with higher quality.
+
+00:01:16.650 --> 00:01:18.530
+It allows the architect to operate
+
+00:01:18.530 --> 00:01:21.830
+mostly on the architectural plane, defining
+
+00:01:21.830 --> 00:01:24.630
+the system or fixing bugs instead
+
+00:01:24.630 --> 00:01:25.790
+of doing the grunt work.
+
+00:01:26.332 --> 00:01:28.552
+It has separate agents for persistent
+
+00:01:28.552 --> 00:01:31.832
+constraint enforcement and other things. It
+
+00:01:31.832 --> 00:01:33.432
+also comes with a visual dashboard
+
+00:01:33.432 --> 00:01:36.272
+which shows the state-space tree of
+
+00:01:36.272 --> 00:01:37.672
+all the projects you are working
+
+00:01:37.672 --> 00:01:38.092
+on.
+
+00:01:39.292 --> 00:01:41.012
+It tracks all the state in
+
+00:01:41.012 --> 00:01:42.992
+one place and allows us to
+
+00:01:42.992 --> 00:01:44.952
+revert from a weak branch and
+
+00:01:44.952 --> 00:01:46.392
+try a new branch while learning
+
+00:01:46.392 --> 00:01:47.272
+from our mistakes.
+
+00:01:47.952 --> 00:01:50.149
+This allows the human to stop
+
+00:01:50.149 --> 00:01:52.149
+acting as the manager and act
+
+00:01:52.149 --> 00:01:54.609
+as the lead architect pruning the
+
+00:01:54.609 --> 00:01:57.629
+state space tree and enforcing constraints.
+
+00:01:59.089 --> 00:02:01.249
+To provide hands to ANIMA, I
+
+00:02:01.249 --> 00:02:04.609
+built Reflex. It makes computer use
+
+00:02:04.609 --> 00:02:07.283
+more capable and efficient. It uses
+
+00:02:07.283 --> 00:02:08.403
+a ladder of escalation,
+
+00:02:09.083 --> 00:02:11.603
+using cheaper techniques like OS accessibility
+
+00:02:11.603 --> 00:02:14.663
+suites and OCR models fine-tuned
+
+00:02:14.663 --> 00:02:17.343
+on understanding UI elements like button
+
+00:02:17.343 --> 00:02:18.543
+on understanding a
+
+00:02:18.543 --> 00:02:20.703
+screen can scroll before calling a
+
+00:02:20.703 --> 00:02:23.023
+VLM and it uses its understanding
+
+00:02:23.023 --> 00:02:25.143
+to make the VLM calls cheaper
+
+00:02:25.143 --> 00:02:27.023
+when they are made. It doesn't
+
+00:02:27.023 --> 00:02:28.643
+feed the entire screen. It feeds
+
+00:02:28.643 --> 00:02:30.223
+parts of the screen to the
+
+00:02:30.223 --> 00:02:30.463
+VLM.
+
+00:02:31.783 --> 00:02:33.503
+It also uses a larger model
+
+00:02:33.503 --> 00:02:36.023
+like Muse Spark 1.3 as
+
+00:02:36.023 --> 00:02:38.743
+the planner for long context reasoning
+
+00:02:38.743 --> 00:02:41.663
+and healing from a failed trajectory.
+
+00:02:42.683 --> 00:02:45.643
+Live demos, benchmarks and technical papers
+
+00:02:45.643 --> 00:02:46.863
+can be found on my GitHub.
