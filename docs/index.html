@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TRACE: a memory that organizes itself</title>
-<meta name="description" content="TRACE organizes a 100M library by meaning, so developers and researchers can find the context their agents need. A question scored 0.79% of the library and kept 99.85% of exact search&#x27;s top ten.">
+<title>TRACE — a memory that organizes itself</title>
+<meta name="description" content="TRACE organizes a 100M library by meaning, so a question opens only the few groups most likely to hold an answer. A research prototype with recorded searches you can open and check.">
 <link rel="canonical" href="https://anshul48.github.io/trace/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="TRACE: a memory that organizes itself">
-<meta property="og:description" content="TRACE organizes a 100M library by meaning, so developers and researchers can find the context their agents need. A question scored 0.79% of the library and kept 99.85% of exact search&#x27;s top ten.">
+<meta property="og:title" content="TRACE — a memory that organizes itself">
+<meta property="og:description" content="TRACE organizes a 100M library by meaning, so a question opens only the few groups most likely to hold an answer. A research prototype with recorded searches you can open and check.">
 <meta property="og:url" content="https://anshul48.github.io/trace/">
 <meta property="og:image" content="https://anshul48.github.io/trace/img/social-preview.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -44,15 +44,20 @@
 <main id="main">
 <section class="hero">
   <div class="wrap">
-    <div class="stage">
+    <!-- LAYER 1: the 20-second opening -->
+    <div class="stage stage-light">
       <div class="pill-row"><span class="pill">Research prototype</span><span class="pill">Open source, Apache-2.0</span></div>
-      <h1>A memory that organizes itself.</h1>
-      <p class="lede">TRACE organizes a 100M library by meaning, so developers and researchers can find the context their agents need. Passages form their own groups, and a question opens only the groups most likely to hold an answer.</p>
+      <h1>TRACE: a memory that organizes itself.</h1>
+      <p class="lede">Nobody files the passages. TRACE lets them form their own groups by meaning, so developers and researchers can find the context their agents need. A question opens only the groups most likely to hold an answer, and every answer shows the page it came from. TRACE is a research prototype over one sealed 100M library, and every number here has its limits written down.</p>
       <div class="btn-row">
         <a class="btn btn-primary" href="explorer/">Open the explorer</a>
-        <a class="btn btn-quiet" href="demos/">Watch the 3-minute story</a>
+        <a class="text-link" href="demos/#film">Watch the working films</a>
       </div>
+      <p class="proof-line">0.79% scored; 0.9985 of exact search&rsquo;s top ten retained</p>
+      <p class="note">Scope: 50 test searches; one of four equal library parts; passage-scoring work only.</p>
 
+      <!-- SWAP: social preview image is docs/img/social-preview.png (replace that file, same name; used by every page as og:image). -->
+      <!-- SWAP: hero picture is docs/img/organizing-pile.png (replace that file; keep the name). The animated canvas draws over it when JavaScript runs. -->
       <div class="pile" data-pile>
         <div class="pile-canvas-wrap">
           <img class="static-pile" src="img/organizing-pile.png" width="1326" height="581" alt="Illustration: 20,000 dots in four equal parts, already sorted into groups. In the first part a question has lit 40 dots, with ten ringed as the best matches. All other dots are dim.">
@@ -70,15 +75,16 @@
           <button type="button" data-play aria-pressed="true">Pause</button>
         </div>
         <p class="pile-caption" aria-live="polite"><b>A library grows.</b> New passages just arrive, in no order. Nobody files them.</p>
-        <p class="pile-fine">Illustration of the grouping and search, not data. 20,000 dots stand in for the 812,545 passages of our sealed library (one dot is about 41 passages). Where each dot sits, and how many groups there are, is drawn. What is real is the proportion: four equal parts, and a question waking 0.79% of one of them (50 test searches, our library and method), drawn here as 40 of 5,000 dots.</p>
+        <p class="pile-fine"><b>Illustration of the grouping and search.</b> It is not data. 20,000 dots stand in for the 812,545 passages of our sealed library (one dot is about 41 passages). Where each dot sits, and how many groups there are, is drawn. What is real is the proportion: four equal parts, and a question waking 0.79% of one of them (50 test searches, our library and method), drawn here as 40 of 5,000 dots.</p>
       </div>
     </div>
   </div>
 </section>
 
+<!-- LAYER 2: the 3-minute proof -->
 <section class="section-tight" id="library">
   <div class="wrap">
-    <span class="eyebrow">The proof</span>
+    <span class="eyebrow">The proof, in three minutes</span>
     <h2>A question scored under one percent of the library.</h2>
     <div class="grid-4" style="margin-top: var(--space-5)">
       <div class="stat"><span class="num">100M</span><span class="what">library, one frozen copy behind every number</span></div>
@@ -86,10 +92,11 @@
       <div class="stat"><span class="num">99.85%</span><span class="what">of exact search's top ten kept</span></div>
       <div class="stat"><span class="num">670</span><span class="what">recorded Muse Code worker jobs behind this site</span></div>
     </div>
-    <p class="note">Scope: 50 test searches; one of four equal library parts; passage-scoring work only. Fine print: 812,545 passages · 99.9 million tokens — 0.11% short of the 100M target. <a href="evidence/">Every number, with its caveats.</a></p>
+    <p class="note">Scope: 50 test searches; one of four equal library parts; passage-scoring work only. Fine print: 812,545 passages · 99,891,846 tokens. <a href="evidence/">Every number, with its caveats.</a></p>
   </div>
 </section>
 
+<!-- SWAP: the main film is the entry with role "main" in docs/demos/films.json; set its youtube id or file there. Placeholder shows until then. -->
 <section class="section-tight" id="film">
   <div class="wrap">
     <p class="statusline" aria-label="What you can try today"><span class="sl-item"><b>Recorded replay</b> <span class="badge badge-built" data-status-id="explorer-replay">Working today</span></span> <span class="sl-item"><b>Browser mode</b> <span class="badge badge-proto" data-status-id="browser-mode">Prototype</span></span> <span class="sl-item"><b>Public backend</b> <span class="badge badge-next" data-status-id="public-service">Off</span></span> <span class="sl-item"><b>Local kit</b> <span class="badge badge-next" data-status-id="local-kit">Planned</span></span></p>
@@ -113,15 +120,15 @@
   </div>
 </section>
 
-<section class="section" id="beats">
+<section class="section" id="idea">
   <div class="wrap">
-    <span class="eyebrow">The idea in three beats</span>
+    <span class="eyebrow">The idea in three steps</span>
     <h2>Nobody files the books. A question walks to a few shelves. Every answer shows its page.</h2>
     <div class="grid-3" style="margin-top: var(--space-5)">
       <article class="card">
         <div class="card-head"><h3>1. It sorts itself</h3><span class="badge badge-built" data-status-id="groups-hold-matches">Measured by us</span></div>
         <p>Passages that mean alike end up on the same shelf, and no one adds labels. The order comes from the passages.</p>
-        <div class="stat"><span class="num">about 7</span><span class="what">shelves hold a search's ten best matches</span><span class="scope">At most 10 are possible; groups made at random would give 10. 50 test searches, our library and method.</span></div>
+        <div class="stat"><span class="what">Passages that mean alike land on the same shelf, with no labels added.</span><span class="scope">The grouping is measured in the evidence pages, with its limits. 50 test searches, our library and method.</span></div>
       </article>
       <article class="card">
         <div class="card-head"><h3>2. A question wakes a part</h3><span class="badge badge-built" data-status-id="sparse-search">Measured by us</span></div>
@@ -131,7 +138,7 @@
       <article class="card">
         <div class="card-head"><h3>3. Every answer has a record</h3><span class="badge badge-built" data-status-id="record-check">Working today</span></div>
         <p>Each result shows which article it came from, where in it, and a fingerprint your browser re-computes.</p>
-        <div class="stat"><span class="num">144</span><span class="what">real recorded searches you can open</span><span class="scope">Our own re-run matched on all claims. No outside party has checked it. <a href="explorer/">Open the explorer.</a></span></div>
+        <div class="stat"><span class="what">Real recorded searches you can open and check</span><span class="scope">Our own re-run matched on all claims. No outside party has checked it. <a href="explorer/">Open the explorer.</a></span></div>
       </article>
     </div>
     <p class="note" style="margin-top: var(--space-4)">The pictures and the plain-words walkthrough are on <a href="how-it-works/">How it works</a>.</p>
@@ -146,14 +153,15 @@
       <table>
         <thead><tr><th scope="col">Track</th><th scope="col">Watch today</th></tr></thead>
         <tbody>
-          <!-- VIDEO_SLOT: Flagship film - Replace href when rendered -->
-          <tr><td>Flagship film</td><td><a href="demos/">Watch the 3-minute story</a></td></tr>
-          <!-- VIDEO_SLOT: 60-second explorer tour - Replace href when rendered -->
+          <!-- SWAP: replace the href with the YouTube link once the main film is published (or leave: the Demos page reads docs/demos/films.json). -->
+          <tr><td>Flagship film</td><td><a href="demos/#film">Watch the working films</a></td></tr>
+          <!-- SWAP: replace this link with the 60-second tour once docs/demos/films.json entry "explorer-tour" has a file. -->
           <tr><td>60-second explorer tour</td><td><a href="explorer/">Open the explorer</a>, a replay of 144 recorded searches</td></tr>
-          <!-- VIDEO_SLOT: ANIMA state-tree replay - Replace href when rendered -->
+          <!-- SWAP: replace the href with the ANIMA recorded replay link if it moves (films.json entry "anima-replay"). -->
           <tr><td>ANIMA state-tree replay</td><td><a href="https://anshul48.github.io/anima-substrate/demo/">Recorded demo</a></td></tr>
-          <tr><td>Reflex clip</td><td><a href="demos/#reflex">Short film</a></td></tr>
-          <!-- VIDEO_SLOT: Module deep dives - Replace href when rendered -->
+          <!-- SWAP: Reflex clip file is docs/demos/reflex-v3-720p.mp4 (films.json entry "reflex"). -->
+          <tr><td>Reflex clip</td><td><a href="demos/#reflex">Reflex short film</a></td></tr>
+          <!-- SWAP: point this row at the deep-dive film when one exists. -->
           <tr><td>Module deep dives</td><td><a href="how-it-works/">How it works</a></td></tr>
         </tbody>
       </table>
@@ -164,53 +172,31 @@
 <section class="section" id="also">
   <div class="wrap">
     <span class="eyebrow">One ecosystem</span>
-    <h2>TRACE at the front, ANIMA and Reflex behind it</h2>
-    <p class="lede" style="max-width: 62ch">One builder, three projects. Each has its own demo.</p>
+    <h2>Three projects, one builder</h2>
+    <p class="lede" style="max-width: 62ch">TRACE is the memory. ANIMA is a prototype that can use it. Reflex is a separate project and does not use TRACE. Each has its own demo.</p>
     <figure>
-      <img src="assets/ecosystem.svg" width="640" height="360" alt="Diagram: TRACE in front as the memory, ANIMA and Reflex behind it.">
+      <!-- SWAP: replace docs/assets/ecosystem.svg (same name) with the final map. Reflex must carry no arrow to TRACE. -->
+      <img src="assets/ecosystem.svg" width="640" height="360" alt="Diagram of three projects. TRACE, the memory, is linked to ANIMA by a prototype link. Reflex stands alone, with no link to TRACE.">
+      <figcaption class="slot-caption">The three projects. Only TRACE and ANIMA are linked, and that link is a prototype.</figcaption>
     </figure>
     <div class="grid-3">
       <article class="card">
         <div class="card-head"><h3>TRACE: the memory</h3><span class="badge badge-built" data-status-id="explorer-replay">Working today</span></div>
         <p>A memory that sorts a huge pile of text into groups by itself, so a question opens only the few groups it needs. This site is its home.</p>
-        <p><a class="btn btn-quiet" href="explorer/">Open the explorer</a></p>
+        <p><a class="text-link" href="explorer/">Open the explorer</a></p>
       </article>
       <article class="card">
         <div class="card-head"><h3>ANIMA</h3><span class="badge badge-proto" data-status-id="anima-link">Prototype</span></div>
         <p>A layer on top of the coding agent you already use (Muse Code first, then Claude Code, Codex), giving it memory, a checker it cannot see, and a screen to watch it work. One-line install:</p>
         <p><code>curl -fsSL https://raw.githubusercontent.com/Anshul48/anima-substrate/main/install.sh | sh</code></p>
-        <p class="btn-row"><a class="btn btn-quiet" href="https://anshul48.github.io/anima-substrate/demo/">Recorded demo</a> <a class="btn btn-quiet" href="https://github.com/Anshul48/anima-substrate">ANIMA on GitHub</a></p>
+        <p class="btn-row"><a class="text-link" href="https://anshul48.github.io/anima-substrate/demo/">Recorded demo</a> <a class="text-link" href="https://github.com/Anshul48/anima-substrate">ANIMA on GitHub</a></p>
       </article>
       <article class="card">
         <div class="card-head"><h3>Reflex</h3><span class="badge badge-proto" data-status-id="reflex">Prototype</span></div>
         <p>A line of work where an AI looks at a screen and finds the right button to press (SAM 3.1 with Muse Spark). An early trial, a direction.</p>
-        <p class="btn-row"><a class="btn btn-quiet" href="https://anshul48.github.io/demo-trace-anima-reflex/">Replay</a> <a class="btn btn-quiet" href="demos/#reflex">Short film</a></p>
+        <p class="btn-row"><a class="text-link" href="https://anshul48.github.io/demo-trace-anima-reflex/">Replay</a> <a class="text-link" href="demos/#reflex">Short film</a></p>
       </article>
     </div>
-  </div>
-</section>
-
-<section class="section band" id="ladder">
-  <div class="wrap">
-    <span class="eyebrow">Scale</span>
-    <h2>How far it has been tested</h2>
-    <p class="lede" style="max-width: 62ch">Every number on this page comes from one sealed 100M-token library. A token is a word-sized piece of text.</p>
-    <div class="tier tier-main" aria-labelledby="tier-main-h">
-  <p class="tier-label" id="tier-main-h">Measured result: the sealed library</p>
-  <article class="rung rung-main">
-    <div>
-      <span class="badge badge-built" data-status-id="library-100m">Working today, our server</span>
-      <span class="size">99.9M<small>tokens in the sealed library: 812,545 passages</small></span>
-    </div>
-    <div>
-      <p class="did">The full measured pipeline: sorted into groups, searched, every answer with a checkable record, re-run on our own server. This is the library behind every number on this site that is not marked as an earlier test.</p>
-      <p class="caveat">Short of our 100M target by 0.11% (108,154 tokens). Our own library and method; not reproduced on public data; no outside party has checked it.</p>
-      <p class="links"><a href="evidence/#measured">The measurement</a> &middot; <a href="explorer/">Explorer</a></p>
-    </div>
-  </article>
-</div>
-
-    <p class="note">We also ran larger builds earlier, on a machine since shut down. They are separate tests with their own caveats and are never read together with the result above: <a href="evidence/#appendix">earlier tests</a>.</p>
   </div>
 </section>
 
@@ -218,11 +204,12 @@
   <div class="wrap">
     <span class="eyebrow">Straight answers</span>
     <h2>What TRACE is not.</h2>
-    <p class="lede" style="max-width: 62ch">Not a keyword-search replacement: ordinary keyword search found the right source more often than TRACE did. Not faster: a plain scan answers sooner. Not checked by anyone outside our team.</p>
-    <div class="btn-row"><a class="btn btn-primary" href="evidence/#limits">Every limit, with numbers</a><a class="btn btn-quiet" href="verify/">Check it yourself</a></div>
+    <p class="lede" style="max-width: 62ch">Not a keyword-search replacement: ordinary keyword search found the right source more often than TRACE did. No speed claim: a plain scan answers sooner. Not checked by anyone outside our team.</p>
+    <div class="btn-row"><a class="text-link" href="evidence/#limits">Every limit, with numbers</a> <a class="text-link" href="verify/">Check it yourself</a></div>
   </div>
 </section>
 
+<!-- LAYER 3: the deep end -->
 <section class="section band" id="deep">
   <div class="wrap">
     <span class="eyebrow">The deep end</span>
@@ -268,7 +255,7 @@
         </ul>
       </div>
     </div>
-    <p class="fine">Tested so far: a 100M-token library (measured: 812,545 passages · 99.9 million tokens; short of the 100M target by 0.11%). Earlier tests, by us and separate from it, with our own records: 310.5M and 504.5M-token builds, and a 1.53 billion-token group-picking test. Nobody outside our team has verified any of this. <a href="evidence/#appendix">Details and caveats</a>.</p>
+    <p class="fine">Tested so far: a 100M-token library (measured: 812,545 passages · 99,891,846 tokens). Earlier, larger tests are separate, with their own records. Nobody outside our team has verified any of this. <a href="evidence/#appendix">Details and caveats</a>.</p>
   </div>
 </footer>
 

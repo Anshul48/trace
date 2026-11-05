@@ -98,20 +98,20 @@
     return '<div class="film-frame"><div class="placeholder"><strong>The 3-minute film is being published</strong><span>It will appear here as soon as it is on YouTube. Until then, watch the working versions of the films on the Demos page.</span></div></div>';
   }
   function card(f, compact) {
-    var yt = f.youtube ? '<p><a class="btn btn-primary" href="https://www.youtube.com/watch?v=' + encodeURIComponent(f.youtube) + '" target="_blank" rel="noopener">Watch on YouTube (opens a new tab)</a></p>' : "";
+    var yt = f.youtube ? '<p><a class="text-link" href="https://www.youtube.com/watch?v=' + encodeURIComponent(f.youtube) + '" target="_blank" rel="noopener">Watch on YouTube (opens a new tab)</a></p>' : "";
     var meta = fmtMeta(f).map(function (b) { return "<span>" + esc(b) + "</span>"; }).join("");
     var copy = f.captions && !compact ? '<details class="copy" data-vtt="' + esc(root + "demos/" + f.captions) + '"><summary>Read the words of the film</summary><p class="note">Loading the written copy.</p></details>' : "";
     var action = "";
     if (!f.file && !f.youtube) {
       if (f.fallback_href) {
         var href = /^https?:\/\//.test(f.fallback_href) ? f.fallback_href : root + f.fallback_href;
-        action = '<p><a class="btn btn-primary" href="' + esc(href) + '">' + esc(f.fallback_label || "Open the working demo") + '</a></p>';
+        action = '<p><a class="text-link" href="' + esc(href) + '">' + esc(f.fallback_label || "Open the working demo") + '</a></p>';
       } else {
-        action = '<p><a class="btn btn-primary" href="' + root + 'demos/">Watch the working versions</a></p>';
+        action = '<p><a class="text-link" href="' + root + 'demos/#films">Watch the working films</a></p>';
       }
     }
     var h = compact ? "h2" : "h3";
-    return '<article class="card film-card" id="' + esc(f.id) + '">' + frame(f) + '<div><' + h + '>' + esc(f.title) + '</' + h + '><div class="film-meta">' + meta + '</div><p>' + esc(f.blurb || "") + "</p>" + yt + action + copy + "</div></article>";
+    return '<article class="card film-card' + (compact ? ' film-compact' : '') + '" id="' + esc(f.id) + '">' + frame(f) + '<div><' + h + '>' + esc(f.title) + '</' + h + '><div class="film-meta">' + meta + '</div><p>' + esc(f.blurb || "") + "</p>" + (f.file ? '<p class="slot-keys">Keyboard: Tab to the player, Space plays or pauses, arrow keys seek, M mutes, F opens full screen. Nothing plays until you press play.</p>' : "") + yt + action + copy + "</div></article>";
   }
   var slots = $$("[data-films]");
   if (slots.length && window.fetch) {
@@ -120,8 +120,10 @@
       slots.forEach(function (slot) {
         var which = slot.getAttribute("data-films"), list;
         if (which === "main") list = films.filter(function (f) { return f.role === "main"; }).slice(0, 1);
+        else if (which.indexOf("id:") === 0) list = films.filter(function (f) { return f.id === which.slice(3); }).slice(0, 1);
+        else if (which.indexOf("not:") === 0) { var skip = which.slice(4).split(","); list = films.filter(function (f) { return skip.indexOf(f.id) < 0; }); }
         else list = films.filter(function (f) { return f.role !== "main" || !f.hideOnDemos; });
-        slot.innerHTML = list.map(function (f) { return card(f, which === "main"); }).join("");
+        slot.innerHTML = list.map(function (f) { return card(f, which === "main" || which.indexOf("id:") === 0); }).join("");
         $$("details.copy", slot).forEach(function (d) {
           d.addEventListener("toggle", function () {
             if (!d.open || d.getAttribute("data-loaded")) return;

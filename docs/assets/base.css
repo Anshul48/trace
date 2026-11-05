@@ -261,3 +261,25 @@ tr:last-child td { border-bottom: 0; }
 
 /* ---------- print ---------- */
 @media print { .site-header, .pile-tabs, .btn-row, .theme-btn, .menu-btn { display: none !important; } body { background: #fff; color: #000; } }
+
+/* ---- J4: light hero, text links for films, slot captions ---- */
+.hero .stage.stage-light { background: var(--bg); color: var(--ink); border: 1px solid var(--line); }
+.stage-light a { color: var(--link); }
+.stage-light .btn-primary { background: var(--accent); color: var(--accent-ink); }
+.stage-light .eyebrow, .stage-light .pile-caption b { color: var(--accent); }
+.stage-light .lede, .stage-light .note, .stage-light .pile-fine { color: var(--muted); }
+.stage-light .pile-caption { color: var(--ink); }
+.stage-light .pill { color: var(--muted); border-color: var(--line); }
+.stage-light .pile-tabs button { color: var(--ink); border-color: var(--line-strong); }
+.stage-light .pile-tabs button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.proof-line { margin-top: var(--space-5); font-size: var(--step-1); font-weight: 650; max-width: 60ch; }
+.proof-line + .note { margin-top: var(--space-2); max-width: 70ch; }
+.text-link { font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
+.film-frame:has(> .placeholder) { background: var(--surface-2); border-color: var(--line); }
+.film-frame .placeholder { background: var(--surface-2); color: var(--ink); }
+.slot-caption { margin-top: var(--space-2); color: var(--muted); font-size: var(--step--1); max-width: 70ch; }
+.slot-keys { color: var(--muted); font-size: var(--step--1); }
+.film-frame .placeholder span { color: var(--muted); }
+.pile-canvas-wrap { background: #0a1124; }
+.stage-light .lede { max-width: 62ch; }
+.film-card.film-compact { grid-template-columns: 1fr; }
