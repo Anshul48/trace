@@ -46,7 +46,7 @@
   <div class="wrap">
     <span class="eyebrow">Demos</span>
     <h1>Watch it work.</h1>
-    <p class="lede" style="max-width: 62ch">The explorer is the real thing you can use. The films tell the same story in a few minutes.</p>
+    <p class="lede" style="max-width: 62ch">The explorer is the real thing you can use. The films tell the same story in a few minutes. <a class="text-link" href="#film">Watch the working films</a></p>
   </div>
 </section>
 
@@ -57,24 +57,63 @@
         <div class="card-head"><h2 style="font-size: var(--step-1)">The explorer</h2><span class="badge badge-built" data-status-id="explorer-replay">Working today</span></div>
         <p>Pick one of 144 real recorded searches, read the ten passages TRACE returned, and open a checkable record for each. Nothing to install, and the fingerprint check runs in your browser.</p>
       </div>
-      <p class="btn-row"><a class="btn btn-primary" href="../explorer/">Open the explorer</a><a class="btn btn-quiet" href="../try/">All the ways to try it</a></p>
+      <p class="btn-row"><a class="btn btn-primary" href="../explorer/">Open the explorer</a><a class="text-link" href="../try/">All the ways to try it</a></p>
     </article>
   </div>
 </section>
 
-<!-- VIDEO_SLOT: Flagship film - Replace href when rendered -->
-<!-- VIDEO_SLOT: 60-second explorer tour - Replace href when rendered -->
-<!-- VIDEO_SLOT: ANIMA state-tree replay - Replace href when rendered -->
-<!-- VIDEO_SLOT: Module deep dives - Replace href when rendered -->
-<section class="section" id="films">
+<!-- SWAP: hero film. Edit the entry with id "film-main" in docs/demos/films.json (youtube id, or file + poster + captions). The player loads only when pressed; nothing autoplays. -->
+<section class="section" id="film">
   <div class="wrap">
-    <span class="eyebrow">Media hub</span>
-    <h2>Films</h2>
-    <p class="lede" style="max-width: 62ch">One hub for every film. Slots without a cut yet open the working demo instead.</p>
-    <div class="grid-2" data-films="all" style="align-items: start">
+    <span class="eyebrow">The film</span>
+    <h2>The 3-minute film</h2>
+    <!-- SWAP: long source cuts of the film go in docs/media/film/ (current: trace-anima-reflex-film.mp4); the player uses files in docs/demos/. -->
+    <div data-films="id:film-main" style="max-width: 56rem"><p class="note">The film needs JavaScript to be listed here. The files are in <a href="https://github.com/Anshul48/trace/tree/main/docs/demos"><code>docs/demos/</code></a>.</p></div>
+    <p class="slot-caption">Caption: TRACE first, then the two companion projects. Until the cut is published, the working films are below.</p>
+  </div>
+</section>
+
+<!-- SWAP: 60-second explorer tour. Edit the entry with id "explorer-tour" in docs/demos/films.json (file, poster, captions; then delete fallback_href). -->
+<section class="section band" id="tour">
+  <div class="wrap">
+    <span class="eyebrow">Explorer tour</span>
+    <h2>The 60-second explorer tour</h2>
+    <div data-films="id:explorer-tour" style="max-width: 56rem"><p class="note">The tour needs JavaScript to be listed here. <a href="../explorer/">Open the explorer</a>.</p></div>
+    <p class="slot-caption">Caption: pick a recorded question, open a result, check its record in your browser. Placeholder until the cut is added.</p>
+  </div>
+</section>
+
+<!-- SWAP: Reflex clip. Replace docs/demos/reflex-v3-720p.mp4 and reflex-v3.jpg (films.json entry "reflex"). Reflex is a separate project; this slot never shows TRACE. -->
+<section class="section" id="reflex-slot">
+  <div class="wrap">
+    <span class="eyebrow">Reflex</span>
+    <h2>Reflex clip</h2>
+    <div data-films="id:reflex" style="max-width: 56rem"><p class="note">The clip needs JavaScript to be listed here. The file is <code>docs/demos/reflex-v3-720p.mp4</code>.</p></div>
+    <p class="slot-caption">Caption: an AI looks at a screen and finds the right button to press. Reflex is a separate project and does not use TRACE.</p>
+  </div>
+</section>
+
+<!-- SWAP: the other working films come from docs/demos/films.json; replace the named files and keep the names, or edit the names there. -->
+<section class="section band" id="films">
+  <div class="wrap">
+    <span class="eyebrow">More working films</span>
+    <h2>Working versions</h2>
+    <div class="grid-2" data-films="not:film-main,explorer-tour,reflex,ecosystem-map" style="align-items: start">
       <p class="note">The films need JavaScript to be listed here. The files are in <a href="https://github.com/Anshul48/trace/tree/main/docs/demos"><code>docs/demos/</code></a>.</p>
     </div>
-    <p class="note">Captions are included in the player. &ldquo;Read the words of the film&rdquo; shows the same words as text. YouTube links open in a new tab; we do not embed YouTube players, so this site loads nothing from outside.</p>
+    <p class="note">Captions are included in the player. &ldquo;Read the words of the film&rdquo; shows the same words as text. We do not embed YouTube players, so this site loads nothing from outside.</p>
+  </div>
+</section>
+
+<!-- SWAP: ecosystem map. Replace docs/assets/ecosystem.svg (same name). Reflex carries no link to TRACE. -->
+<section class="section" id="also">
+  <div class="wrap">
+    <span class="eyebrow">Ecosystem</span>
+    <h2>Three projects</h2>
+    <figure>
+      <img src="../assets/ecosystem.svg" width="640" height="400" alt="Diagram of three projects. TRACE, the memory, is linked to ANIMA by a prototype link. Reflex stands alone, with no link to TRACE.">
+      <figcaption class="slot-caption">Caption: only TRACE and ANIMA are linked, and that link is a prototype. Reflex is separate.</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -123,7 +162,7 @@
         </ul>
       </div>
     </div>
-    <p class="fine">Tested so far: a 100M-token library (measured: 812,545 passages · 99.9 million tokens; short of the 100M target by 0.11%). Earlier tests, by us and separate from it, with our own records: 310.5M and 504.5M-token builds, and a 1.53 billion-token group-picking test. Nobody outside our team has verified any of this. <a href="../evidence/#appendix">Details and caveats</a>.</p>
+    <p class="fine">Tested so far: a 100M-token library (measured: 812,545 passages · 99,891,846 tokens). Earlier, larger tests are separate, with their own records. Nobody outside our team has verified any of this. <a href="../evidence/#appendix">Details and caveats</a>.</p>
   </div>
 </footer>
 

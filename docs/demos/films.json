@@ -15,7 +15,8 @@
       "youtube": null,
       "source": "YouTube, set by the owner",
       "size": "",
-      "where": "Home page, Demos"
+      "where": "Home page, Demos",
+      "swap": "SWAP: set youtube to the video id, or file/poster/captions to files copied into docs/demos/ (large source cuts live in docs/media/film/)."
     },
     {
       "id": "explorer-tour",
@@ -32,7 +33,8 @@
       "fallback_label": "Open the explorer",
       "source": "slot: 60-second cut renders here",
       "size": "",
-      "where": "Demos"
+      "where": "Demos",
+      "swap": "SWAP: copy the 60-second cut (720p mp4, jpg poster, vtt) into docs/demos/ and set file, poster, captions; then delete fallback_href."
     },
     {
       "id": "anima-replay",
@@ -49,7 +51,8 @@
       "fallback_label": "Open the recorded demo",
       "source": "slot: replay cut renders here",
       "size": "",
-      "where": "Demos"
+      "where": "Demos",
+      "swap": "SWAP: copy the replay cut into docs/demos/ and set file, poster, captions; then delete fallback_href."
     },
     {
       "id": "ecosystem-map",
@@ -57,7 +60,7 @@
       "project": "trace",
       "title": "Ecosystem map",
       "length": "",
-      "blurb": "One builder, three projects: TRACE at the front, ANIMA and Reflex behind it.",
+      "blurb": "One builder, three projects: TRACE is the memory, ANIMA a prototype that can use it, and Reflex a separate project with no link to TRACE.",
       "file": null,
       "poster": null,
       "captions": null,
@@ -66,7 +69,8 @@
       "fallback_label": "See the map",
       "source": "diagram: docs/assets/ecosystem.svg",
       "size": "",
-      "where": "Demos"
+      "where": "Demos",
+      "swap": "SWAP: replace docs/assets/ecosystem.svg with the final map (same file name)."
     },
     {
       "id": "trace-v6",
@@ -74,14 +78,15 @@
       "project": "trace",
       "title": "TRACE, scale-led cut",
       "length": "2:20",
-      "blurb": "The scale ladder (504.5 million tokens, earlier test), the sealed library sorting itself into groups, a real recorded search, the numbers, and where TRACE does worse than plain search.",
+      "blurb": "The scale ladder (an earlier test), the sealed library sorting itself into groups, a real recorded search, the numbers, and where TRACE does worse than plain search.",
       "file": "trace-v6-720p.mp4",
       "poster": "trace-v6.jpg",
       "captions": "trace-v6.vtt",
       "youtube": null,
       "source": "READY/video-trace-v5/v6-720p.mp4",
       "size": "8.5 MB",
-      "where": "Demos"
+      "where": "Demos",
+      "swap": "SWAP: replace the three files named here and keep the names, or change the names."
     },
     {
       "id": "anima",
@@ -96,7 +101,8 @@
       "youtube": null,
       "source": "READY/video-anima-v5/v1-720p.mp4",
       "size": "5.0 MB",
-      "where": "Demos"
+      "where": "Demos",
+      "swap": "SWAP: replace the three files named here and keep the names, or change the names."
     },
     {
       "id": "reflex",
@@ -111,7 +117,8 @@
       "youtube": null,
       "source": "READY/reflex/reflex-v3-720p.mp4",
       "size": "2.5 MB",
-      "where": "Demos"
+      "where": "Demos",
+      "swap": "SWAP: replace reflex-v3-720p.mp4 and reflex-v3.jpg (add a captions vtt and set captions)."
     }
   ]
 }

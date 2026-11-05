@@ -71,19 +71,19 @@
   --st-limit: #a8283a;       --st-limit-bg: #fde4e7;
 
   /* ---------- light theme (default) ---------- */
-  --bg:        #f4f6fb;
-  --bg-2:      #e9edf6;      /* alternate band */
+  --bg:        #ffffff;
+  --bg-2:      #f6f8fc;      /* alternate band */
   --surface:   #ffffff;
-  --surface-2: #eef1f8;
+  --surface-2: #f3f5fa;
   --ink:       #0e1730;      /* 16.6:1 on --bg */
   --ink-2:     #27345a;
   --muted:     #46547a;      /* 7.0:1 on --bg */
   --line:      #d3d9e8;
   --line-strong: #aeb8d2;
-  --accent:    #07706a;      /* teal; 5.9:1 on --surface, 5.0:1 on the tinted bands */
+  --accent:    #1d4ed8;      /* the one blue accent; 6.7:1 on white */
   --accent-ink: #ffffff;
-  --accent-soft: #d8f1ee;
-  --link:      #0a6a8e;
+  --accent-soft: #e8eefc;
+  --link:      #1d4ed8;
   --focus:     #1d4ed8;
   --shadow:    0 1px 2px rgba(14, 23, 48, 0.06), 0 10px 30px rgba(14, 23, 48, 0.07);
 
@@ -104,9 +104,7 @@
   --stage-violet: #a597ff;
   --stage-green:  #4be0a0;
   --stage-rose:   #ff7f8d;
-  --stage-glow: radial-gradient(1200px 600px at 70% -10%, #17305e 0%, rgba(23, 48, 94, 0) 60%),
-                radial-gradient(900px 500px at 0% 110%, #0e2a4a 0%, rgba(14, 42, 74, 0) 55%),
-                linear-gradient(180deg, #0d1630 0%, #0a1124 100%);
+  --stage-glow: #0a1124;   /* flat, no gradient */
 
   /* canvas dots (read these from JS with getComputedStyle) */
   --dot:       #5d78b8;      /* resting dot on the stage */
