@@ -15,7 +15,7 @@ those stay out of this repo.
 | Metric | Definition | Pass bar (this run) |
 |---|---|---|
 | `status` | pilot verdict in `result.json` | `PASS` |
-| `actual_tokens` / `complete_documents` / `atoms` | TOK_V1 counts over the staged corpus | counts of the smaller test collection, in `receipts/result.json` |
+| `actual_tokens` / `complete_documents` / `atoms` | version-1 token counts over the staged corpus | counts of the smaller test collection, in `receipts/result.json` |
 | `pending_documents`, `repair_to_zero.final_debt` | unconverged docs / residual debt after bounded repair | both `0` |
 | `commits` (closed ledger) | ledger commits vs derived cap | 164,195 < 669,436 (`max_delta_entries`) |
 | `guided_recall10` / `flat_recall10` | Two recorded modes, 120 probes each: `all_sources` and `leave_source_out`; guided and flat score identical mean rows per mode (matched work) | see both-modes table below |

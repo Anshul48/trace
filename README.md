@@ -14,9 +14,9 @@ TRACE organizes a 100M library by meaning, so developers and researchers can fin
 
 ## The 3-minute proof
 
-A question scored **0.79% of rows on one of four equal library parts** and kept **99.85% of exact search's top ten**.
+Averaged over 50 test searches, TRACE scored **0.79% of rows on one of four equal library parts** and kept **99.85% of exact search's top ten** (average over 200 question–part pairs; merged top-10 identical on 50/50).
 
-*<small>Scope: 50 test searches; one of four equal library parts; passage-scoring work only. The full numbers, with every caveat, are on the [evidence page](https://anshul48.github.io/trace/evidence/).</small>*
+*<small>Scope: 50 test searches x 4 parts (200 question–part pairs averaged); the 0.79% work figure covers one of four equal library parts (shard0); passage-scoring work only. The full numbers, with every caveat, are on the [evidence page](https://anshul48.github.io/trace/evidence/).</small>*
 
 | | | | |
 |---|---|---|---|

@@ -2,10 +2,14 @@
 
 Scope: the NEW 20k-prefix numbers behind
 [BENCHMARKS-DEEP.md](../BENCHMARKS-DEEP.md) (sections 5-7) and the section-3
-replay aggregation. Environment: CPython 3, stdlib only, any OS. Run every
-command from the repo root. Observed on a laptop CPU: `run_20k.py` wall
+replay aggregation. Environment: CPython 3, stdlib only, Linux/WSL (tested
+scope; native Windows and macOS are untested). Run every
+command from the repo root in a Unix shell. Observed on a laptop CPU: `run_20k.py` wall
 ~6.4 s with peak resident set ~23.3 MB; the other two scripts finish in
-under a second.
+under a second. Platform note: `run_20k.py` imports the Unix-only
+`resource` module unconditionally and reads `ru_maxrss` as KiB
+(`results/run_20k.py:4`, `results/run_20k.py:219`), so other platforms
+would need platform-specific handling that is not shipped here.
 
 ## Commands (in order)
 
