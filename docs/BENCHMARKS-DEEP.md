@@ -167,10 +167,15 @@ genuinely similar. Thresholds preregistered blind.
 
 The full risk-coverage curve (120 swept thresholds per signal, pooled and
 held-out-only) is in `benchmarks-deep/results/run_20k.json` under
-`abstention_curves`, and plotted below. Notes: at 0.95/0.99 the top-1
-score separates this synthetic set perfectly (every answerable top-1 >=
-0.99, every unanswerable < 0.95) — real unanswerable questions will not
-separate this cleanly. Threshold 1.0 exactly is unusable (float
+`abstention_curves`, and plotted below. Read this as a mechanism check, not
+as a quality result: by construction every answerable query is a stored
+vector asked about itself, so its top-1 score is 1.0 (a self-match). The
+perfect separation at 0.95/0.99 (every answerable top-1 >= 0.99, every
+unanswerable < 0.95, precision 1.000, false-answer rate 0.000) therefore
+shows only that the answer/abstain code path works when the right answer is
+present; it says nothing about how real questions would separate. Real
+unanswerable questions will not separate this cleanly, and no abstention
+measurement on real user questions exists yet. Threshold 1.0 exactly is unusable (float
 normalization puts most self-matches at 0.9999999-1.0000002). The margin
 signal is markedly weaker than the top-1 score on this set.
 
@@ -270,6 +275,13 @@ numbers only; no general claim is drawn.
 - The 504.5M/310.5M/1.53B figures cannot be re-run (machines gone); the
   1.53B row's cluster-eval receipt is shipped in
   `../receipts/benchmarks-deep/`, the 109-piece manifest is not (large).
+- The 20k routing numbers (sections 5-6) are self-retrieval: each query is
+  a stored vector asked about itself (144 rows), so they check the routing
+  and abstention mechanics; they are not evidence about relevance or about
+  larger libraries.
+- Rank-aware scores (nDCG) with people's relevance labels exist only as the
+  50-search comparison in section 2 (our own protocol) and the stand-in rows
+  in section 9; there is no nDCG@10 for TRACE itself on a public benchmark.
 - TRACE has no public-benchmark result of its own; section 9 is a stand-in.
 
 ## 11. Comparison framing (plain readings, no adjectives)
