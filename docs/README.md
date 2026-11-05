@@ -20,7 +20,7 @@ One builder, three projects; TRACE is the memory at the front. The full picture 
 
 | | |
 |---|---|
-| [ANIMA on GitHub](https://github.com/Anshul48/anima-substrate) | The companion project: coding agents that remember. |
+| [ANIMA on GitHub](https://github.com/Anshul48/anima-substrate) | The companion project: a prototype memory link for coding agents. |
 | [ANIMA demo](https://anshul48.github.io/anima-substrate/demo/) | Check ANIMA's record in your browser, a replay of a recorded nine-job run. |
 | [Reflex demo](https://anshul48.github.io/demo-trace-anima-reflex/) | The companion line of work: an AI that finds the right button. No login. |
 | [Reflex: early trial results](reflex.md) | What Reflex is, and the numbers from the early trial (SAM 3.1 with Muse Spark). |

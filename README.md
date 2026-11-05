@@ -27,7 +27,7 @@ A question scored **0.79% of the library** and kept **99.85% of exact search's t
 
 ### The ecosystem
 
-One builder, three projects. TRACE is the memory at the front; ANIMA brings that memory into coding work; Reflex is a separate line of work on screens and buttons.
+One builder, three projects. TRACE is the memory at the front; ANIMA brings that memory into coding work through a prototype link; Reflex is a separate line of work on screens and buttons.
 
 | Project | Repository | Demo |
 |---|---|---|
@@ -37,7 +37,7 @@ One builder, three projects. TRACE is the memory at the front; ANIMA brings that
 
 TRACE is a memory that sorts a huge pile of text into groups by itself, so a question opens only the few groups it needs, and every result comes with a record you can check.
 
-ANIMA is a layer you install in one line on top of the coding agent you already use (Muse Code first, then Claude Code, Codex), giving it memory, a checker it cannot see, and a screen to watch it work. Install: `curl -fsSL https://raw.githubusercontent.com/Anshul48/anima-substrate/main/install.sh | sh`. Headless adapters exist for Muse Code, Claude Code and Codex; the screen shows the recorded state-tree of a run.
+ANIMA is a layer you install in one line on top of the coding agent you already use (Muse Code first, then Claude Code, Codex), giving it memory (a prototype link), a checker it cannot see, and a screen to watch it work. Install: `curl -fsSL https://raw.githubusercontent.com/Anshul48/anima-substrate/main/install.sh | sh`. Headless adapters exist for Muse Code, Claude Code and Codex; the screen shows the recorded state-tree of a run.
 
 Reflex is a line of work where an AI looks at a screen and finds the right button to press (SAM 3.1 with Muse Spark).
 
