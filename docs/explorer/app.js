@@ -186,7 +186,7 @@
     var li = document.createElement("li"); li.className = "card"; li.id = "r" + rank;
     var recId = "rec" + rank;
     li.innerHTML =
-      '<div class="chead"><div class="rank" aria-label="Rank ' + rank + '">' + rank + '</div><div>' +
+      '<div class="chead"><div class="rank"><span class="sr">Rank </span>' + rank + '</div><div>' +
       '<div class="ctitle">' + esc(p.ti || p.d) + '</div>' +
       '<div class="csub">English Wikipedia' + partOf(p) + ' &middot; <dfn class="g" tabindex="0">closeness<span class="tip" role="tooltip">How close this passage is in meaning to the question. Higher is closer.</span></dfn> ' + hit[1].toFixed(3) + '</div></div></div>' +
       '<p class="snippet">' + esc(snippet(p.tx, 300)) + '</p>' +
@@ -242,7 +242,7 @@
       '<button type="button" class="dl">Download this record</button></div>' +
       '<div class="verdict-slot" role="status" aria-live="polite"></div>' +
       '<p class="fine">A match shows the text on this page is unchanged since the library was sealed. It does not prove Wikipedia says the same today: pages change, so the link may show newer wording.</p>' +
-      '<h4>The full passage</h4><div class="fulltext"></div>' +
+      '<h4>The full passage</h4><div class="fulltext" tabindex="0" role="region" aria-label="Full passage text"></div>' +
       '<div class="actions"><button type="button" class="rawbtn">Show the text exactly as stored</button></div>';
     var ft = box.querySelector(".fulltext"); ft.textContent = clean(p.tx);
     var raw = false;
@@ -310,7 +310,7 @@
       if (g.length === f.length && g.every(function (o, i) { return o === f[i]; })) a.ord++; return a;
     }, { n: 0, sum: 0, all: 0, ord: 0 });
     $("compare").innerHTML =
-      '<h3><span class="n">4</span> Same answer as exact search?</h3>' +
+      '<h3><span class="n" aria-hidden="true">4</span> Same answer as exact search?</h3>' +
       '<div class="big ' + (same ? "" : "partial") + '">' + shared + ' of ' + n + ' <small>passages are the same</small></div>' +
       '<p>' + orderLine + ' We asked this question twice on the same library of ' + fmt(TOTAL) + ' passages: once with TRACE, which looks inside a small part of the library, and once with exact search, which checks every passage. Both lists are real recordings.</p>' +
       '<div class="cols">' + col("TRACE", gi, fi) + col("Exact search", fi, gi) + '</div>' +
