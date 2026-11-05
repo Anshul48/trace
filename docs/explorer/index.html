@@ -80,13 +80,13 @@
 </section>
 
 <section id="ask" class="wrap panel">
-  <h2><span class="n">1</span> Pick or type a question</h2>
+  <h2><span class="n" aria-hidden="true">1</span> Pick or type a question</h2>
   <form id="askform" autocomplete="off" role="search">
     <label for="q" class="sr">Your question</label>
-    <input id="q" name="q" type="search" placeholder="Try: Why is the sky blue?" enterkeyhint="search" spellcheck="false">
+    <input id="q" name="q" type="search" placeholder="Try: Why is the sky blue?" enterkeyhint="search" spellcheck="false" aria-describedby="qhint">
     <button type="submit" class="primary">Show the answer</button>
   </form>
-  <p class="hint">There is no live search, so your words are matched to the closest question we recorded. The page always says which one it used.</p>
+  <p class="hint" id="qhint">There is no live search, so your words are matched to the closest question we recorded. The page always says which one it used.</p>
   <div class="here" aria-label="How to get here">
     <h3>How to get here</h3>
     <ul>
@@ -97,12 +97,12 @@
   <div id="matchnote" class="matchnote" role="status" aria-live="polite" hidden></div>
 
   <div class="tabs" role="group" aria-label="Question topics" id="cattabs"></div>
-  <ul class="chips" id="chips" aria-label="Recorded questions"></ul>
+  <ul class="chips" id="chips" aria-label="Recorded questions" tabindex="0"></ul>
 </section>
 
-<section id="results" class="wrap" aria-live="polite">
+<section id="results" class="wrap" aria-labelledby="results-h">
   <div class="resultshead">
-    <h2><span class="n">2</span> Ranked passages for <span id="qtitle" class="qtitle"></span></h2>
+    <h2 id="results-h"><span class="n" aria-hidden="true">2</span> Ranked passages for <span id="qtitle" class="qtitle"></span> <span class="rtag">Recorded replay</span></h2>
     <p class="sub">Best match first. These ten <dfn class="g" tabindex="0">passages<span class="tip" role="tooltip">Short pieces of text, a few sentences each, cut from articles.</span></dfn> were returned by TRACE on the sealed library. Open any result to see its <dfn class="g" tabindex="0">checkable record<span class="tip" role="tooltip">Where a result came from: the article, its position, and a fingerprint your browser can re-check.</span></dfn>.</p>
     <p id="weaknote" class="matchnote" hidden></p>
     <p class="jump"><a href="#compare" id="jumpcmp">Jump to step 4: same answer as exact search?</a></p>

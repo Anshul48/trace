@@ -196,3 +196,78 @@
 .xp dfn.g:hover .tip,
 .xp dfn.g:focus .tip,
 .xp dfn.g.pin .tip{display:block}
+
+/* ---------- J3 polish: calm light default, one blue accent, roomy type, phone and keyboard use ----------
+   Look and feel only. Light is the default even under a dark system setting; the theme switch
+   (data-theme="dark") still restores the shared dark tokens. */
+:root:not([data-theme="dark"]) body:has(.xp){background:#fff}
+:root:not([data-theme="dark"]) .xp{
+  --brand:#1d4ed8; --brand-ink:#fff; --brand-soft:#eef3ff; --link:#1d4ed8;
+  --surface2:#f5f7fb; --shadow:none; --line:#dde2ee;
+}
+.xp{font-size:19px;line-height:1.65}
+.xp .wrap{padding:0 24px}
+.xp .xhero{padding-top:56px;padding-bottom:16px}
+.xp h1{max-width:20em;margin-bottom:.4em}
+.xp .lede{max-width:40em;line-height:1.6}
+.xp .panel{padding:36px 32px;margin-top:48px}
+.xp #results{margin-top:56px}
+.xp .guide{margin:32px 0 8px}
+.xp .guide-steps{gap:14px}
+.xp .guide-steps li{padding:16px;box-shadow:none}
+.xp .guide-steps li.active{box-shadow:none;border-width:2px}
+.xp .xsteps{margin:28px 0 8px}
+.xp .matchnote{background:var(--brand-soft);border:1px solid var(--line);border-left:4px solid var(--brand);margin-top:18px;padding:14px 18px;max-width:56em}
+.xp .replay-banner{background:#fff;color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--brand);padding:14px 18px;max-width:56em;margin-top:18px}
+.xp .rtag{display:inline-block;vertical-align:.2em;margin-left:.6em;padding:2px 12px;border:1px solid var(--brand);border-radius:999px;color:var(--brand);font-size:.78rem;font-weight:700;letter-spacing:.02em;line-height:1.5}
+.xp .card{padding:22px 24px;box-shadow:none}
+.xp .card.open{box-shadow:none;border-width:2px}
+.xp .cards{gap:18px}
+.xp .snippet{line-height:1.65;max-width:42em}
+.xp .compare{box-shadow:none;padding:24px}
+.xp .grid{gap:32px}
+.xp .record{padding-top:20px}
+.xp .caption{background:var(--brand-soft);border-color:var(--line);border-left:4px solid var(--brand)}
+.xp .recbtn{padding:10px 20px}
+.xp button.primary{min-height:56px}
+.xp .tabs{margin:28px 0 14px}
+.xp .chips{max-height:300px;padding:2px}
+.xp .chips button{min-height:48px}
+.xp details.more summary{min-height:44px;display:flex;align-items:center}
+.xp .jump a{display:inline-block;padding:10px 0}
+
+/* keyboard: one clear focus ring everywhere, including the question box */
+.xp :focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:6px}
+.xp #q:focus,.xp #q:focus-visible{border-color:var(--brand);outline:3px solid var(--focus);outline-offset:2px;box-shadow:none}
+.xp button.primary:focus-visible,.xp .tabs button[aria-pressed="true"]:focus-visible{outline-color:var(--focus);outline-offset:3px}
+.xp .chips:focus-visible,.xp .fulltext:focus-visible{outline-offset:2px}
+.xp button:hover{transition:none}
+.xp button.primary:hover{filter:none;background:#1a43bd}
+
+@media (max-width:900px){
+  .xp .panel{padding:28px 22px}
+  .xp .compare{padding:20px}
+}
+@media (max-width:560px){
+  .xp{font-size:18px}
+  .xp .wrap{padding:0 16px}
+  .xp .xhero{padding-top:32px}
+  .xp .panel{padding:22px 16px;margin-top:32px}
+  .xp #results{margin-top:36px}
+  .xp .card{padding:18px 16px}
+  .xp #askform{flex-direction:column}
+  .xp #q{flex:0 0 auto;width:100%;box-sizing:border-box}
+  .xp button.primary{width:100%}
+  .xp .chips{max-height:none;overflow:visible;flex-direction:column}
+  .xp .chips li,.xp .chips button{width:100%}
+  .xp .chips button{padding:12px 14px}
+  .xp .tabs button{flex:1 1 auto}
+  .xp .recbtn{width:100%}
+  .xp .actions{flex-direction:column;align-items:stretch}
+  .xp .actions button,.xp .actions a{justify-content:center;text-align:center;min-height:48px}
+  .xp .matchnote button.linkish{display:block;width:100%;margin:8px 0 0}
+  .xp .fulltext{max-height:280px}
+  .xp .rtag{display:table;margin:.5em 0 0}
+  .xp .compare{padding:18px 16px}
+}
+@media (prefers-reduced-motion:reduce){.xp *{scroll-behavior:auto;transition:none}}
