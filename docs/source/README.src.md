@@ -12,6 +12,13 @@ TRACE groups a sealed text library by meaning, so developers and researchers can
 
 *Illustration of the grouping and search. A field of dots stands in for the passages; where each dot sits is drawn. What is real is the proportion: four nearly equal parts, and a question waking under one percent of one of them.*
 
+## Run it in two commands
+
+```bash
+git clone https://github.com/Anshul48/trace
+python3 run_explorer.py --dataset 20k
+```
+
 ## The 3-minute proof
 
 Averaged over 50 test searches, TRACE scored **0.79% of rows on one of four nearly equal library parts** and kept **99.85% of exact search's top ten** (average over 200 question–part pairs; merged top-10 identical on 50/50).
