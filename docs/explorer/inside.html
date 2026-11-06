@@ -16,6 +16,7 @@
     <a class="brand" href="#/corpus"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0a1124"/><circle cx="16" cy="15" r="4" fill="#2fd6c2"/><g fill="#7fa6e8"><circle cx="16" cy="6" r="1.6"/><circle cx="24" cy="12" r="1.6"/><circle cx="21" cy="22" r="1.6"/><circle cx="11" cy="22" r="1.6"/><circle cx="8" cy="12" r="1.6"/></g></svg><span>TRACE <em>inside</em></span></a>
     <nav class="tabs" aria-label="Views">
       <a href="#/corpus" data-tab="corpus">Corpus</a>
+      <a href="#/library" data-tab="library">Library</a>
       <a href="#/trace" data-tab="trace">Query trace</a>
       <a href="#/memory" data-tab="memory">Memory</a>
       <a href="#/compare" data-tab="compare">Keyword vs TRACE</a>
@@ -75,6 +76,46 @@ network: this page reads only its own <code>data/</code> files.</p>
       <p class="muted" id="mapnote"></p>
     </div>
   </div>
+</section>
+
+<!-- ================= LIBRARY ================= -->
+<section class="view" id="view-library" data-view="library" aria-label="Library view" hidden>
+  <h1>Inside the library <span class="pill real">REAL</span> <span class="pill recorded">RECORDED</span> <span class="pill designed">DESIGNED</span></h1>
+  <p class="sub">Every dot is a real recorded sample passage, every bubble a real
+  group from the sealed library's own grouping (1,430 passages in 884 groups
+  across 4 parts). Group membership, titles, texts, fingerprints and the lit
+  top-10 lists are the recordings; only the bubble positions are our layout,
+  and the counter runs to the recorded aggregate (about 1,600 of 203,137 rows
+  on one part, 0.79%) because per-query scored-row lists were not recorded.</p>
+  <div class="stats" id="llibstats" role="status" aria-live="polite"></div>
+  <div class="lcontrols">
+    <label>Recorded question
+      <select id="lq"></select>
+    </label>
+    <div class="tbtns">
+      <button type="button" id="lplay" class="primary">▶ Play the routing (20 s)</button>
+      <button type="button" id="lclear">Clear the lights</button>
+    </div>
+    <label class="mp"><input type="checkbox" id="lfollow" checked> follow the routing (auto-zoom)</label>
+  </div>
+  <p class="muted" id="lqmeta"></p>
+  <div class="lcount" role="status" aria-live="polite">
+    <span id="lcount"></span>
+    <span class="lscope">Recorded aggregate on one of four equal parts. Our library. Fifty test searches.</span>
+  </div>
+  <p class="lpassline" id="lpass"></p>
+  <div class="mapbar">
+    <button type="button" id="lzin">Zoom in</button>
+    <button type="button" id="lzout">Zoom out</button>
+    <button type="button" id="lzreset">Overview</button>
+    <button type="button" id="lz1">Part</button>
+    <button type="button" id="lz2">Group</button>
+    <button type="button" id="lz3">Passages</button>
+  </div>
+  <div class="mapwrap"><canvas id="lmap" role="img" aria-label="Zoomable cluster map of the library sample"></canvas></div>
+  <p class="muted" id="lstatus" role="status">Drag to pan, scroll to zoom, click a bubble to dive in, click a passage dot to read it.</p>
+  <h2>Passage detail</h2>
+  <div class="detail" id="lpanel"><p class="muted">Click a glowing passage dot to read its text and check its fingerprint.</p></div>
 </section>
 
 <!-- ================= TRACE ================= -->
@@ -191,7 +232,8 @@ network: this page reads only its own <code>data/</code> files.</p>
 <footer class="foot">
   <h2>Receipts</h2>
   <p>Numbers on this page come from: <code>data/replay.js</code> (144 recorded
-  questions, sealed library 812,545 passages), <code>data/corpus.js</code> (local
+  questions, sealed library 812,545 passages; the Library tab maps its 1,430-sample,
+  884-group subset), <code>data/corpus.js</code> (local
   20k run: 144 atoms, 81 leaves, 51 parents, 240 eval probes),
   <code>docs/BENCHMARKS-DEEP.md §2</code>, <code>docs/SCALE-AND-MEMORY.md</code>.
   Stage shapes and flow animation are <span class="pill designed">DESIGNED</span>
@@ -203,5 +245,6 @@ network: this page reads only its own <code>data/</code> files.</p>
 <script src="data/replay.js"></script>
 <script src="data/corpus.js"></script>
 <script src="inside.js"></script>
+<script src="library.js"></script>
 </body>
 </html>

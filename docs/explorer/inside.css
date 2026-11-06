@@ -84,6 +84,29 @@ html[data-theme="dark"] .pill.concept{color:#b9c2d2}
 .mapbar{display:flex;gap:8px;margin:8px 0}
 .mapwrap{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--bg)}
 #cmap{width:100%;height:420px;display:block;touch-action:none;cursor:grab}
+/* library */
+.lcontrols{display:flex;gap:16px;flex-wrap:wrap;align-items:end;margin:1em 0}
+.lcontrols label{display:grid;gap:4px;font-size:.85rem;color:var(--muted)}
+.lcontrols select{font:inherit;color:var(--ink);padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);max-width:360px}
+.lcontrols .mp{display:flex}
+.lcount{display:flex;gap:14px;flex-wrap:wrap;align-items:baseline;background:var(--panel);
+  border:1px solid var(--line);border-radius:var(--radius);padding:10px 16px;margin:.6em 0}
+.lcount #lcount{font-size:1.25rem}
+.lcount #lcount b{font-size:1.5rem}
+.lscope{color:var(--muted);font-size:.82rem}
+.lpassline{font-size:1rem;margin:.4em 0}
+#lmap{width:100%;height:560px;display:block;touch-action:none;cursor:grab}
+.lpass-text{white-space:pre-wrap;font-size:.9rem}
+.lfacts{font-size:.85rem;margin:.6em 0}
+.lfacts dt{font-weight:700}
+.lfacts dd{margin:0 0 .4em}
+.lfacts code{word-break:break-all}
+.fine{color:var(--muted);font-size:.8rem;margin-top:4px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin:.6em 0}
+.verdict{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:8px}
+.verdict.pass{background:var(--goodbg)}
+.verdict.fail{background:var(--warnbg)}
+.mono{font-family:var(--mono);font-size:.85em}
 /* trace */
 .tcontrols{display:flex;gap:16px;flex-wrap:wrap;align-items:end;margin:1em 0}
 .tcontrols label{display:grid;gap:4px;font-size:.85rem;color:var(--muted)}

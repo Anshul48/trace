@@ -43,7 +43,7 @@ var RP = (R && R.passages) || {};
 })();
 
 /* ---------- router ---------- */
-var VIEWS = ["corpus", "trace", "memory", "compare"];
+var VIEWS = ["corpus", "library", "trace", "memory", "compare"];
 var curView = "corpus";
 function show(name) {
   if (VIEWS.indexOf(name) < 0) name = "corpus";
@@ -56,6 +56,7 @@ function show(name) {
     tabs[i].setAttribute("aria-current", tabs[i].getAttribute("data-tab") === name ? "page" : "false");
   if (name === "trace") Trace.enter();
   if (name === "corpus") Corpus.mapPaint();
+  if (name === "library" && window.__LIBRARY__) window.__LIBRARY__.enter();
 }
 window.addEventListener("hashchange", function () {
   show(window.location.hash.replace(/^#\/?/, "").split("?")[0]);
