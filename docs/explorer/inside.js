@@ -244,7 +244,7 @@ var Corpus = (function () {
     mapPaint();
     /* pan / zoom */
     var drag = null;
-    svg.addEventListener("pointerdown", function (e) { drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: 0 }; svg.setPointerCapture(e.pointerId); });
+    svg.addEventListener("pointerdown", function (e) { drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: 0, n: e.target && e.target.getAttribute ? e.target.getAttribute("data-n") : null }; svg.setPointerCapture(e.pointerId); });
     svg.addEventListener("pointermove", function (e) {
       if (!drag) return;
       var sc = view.w / svg.clientWidth;
@@ -255,9 +255,12 @@ var Corpus = (function () {
     });
     svg.addEventListener("pointerup", function (e) {
       var wasDrag = drag && drag.moved > 6;
+      /* setPointerCapture above retargets pointerup to the svg, so use the
+         node recorded at pointerdown; fall back to the event target only when
+         no pointerdown was seen (no capture active, target is trustworthy). */
+      var n = (drag && drag.n) || (e.target && e.target.getAttribute && e.target.getAttribute("data-n"));
       drag = null;
       if (wasDrag) return;
-      var n = e.target && e.target.getAttribute && e.target.getAttribute("data-n");
       select(n || null);
     });
     svg.addEventListener("wheel", function (e) {
