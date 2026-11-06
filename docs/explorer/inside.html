@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inside TRACE: corpus, mechanism, memory</title>
+<meta name="description" content="See inside TRACE: browse the corpus hierarchy, step a recorded query through routing to answer, and check memory and keyword-vs-TRACE numbers. Static page, no backend.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a1124'/%3E%3Ccircle cx='16' cy='15' r='4' fill='%232fd6c2'/%3E%3C/svg%3E">
+<script>(function(){try{var t=localStorage.getItem("trace-inside-theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}})();</script>
+<link rel="stylesheet" href="inside.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="top">
+  <div class="wrap topbar">
+    <a class="brand" href="#/corpus"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0a1124"/><circle cx="16" cy="15" r="4" fill="#2fd6c2"/><g fill="#7fa6e8"><circle cx="16" cy="6" r="1.6"/><circle cx="24" cy="12" r="1.6"/><circle cx="21" cy="22" r="1.6"/><circle cx="11" cy="22" r="1.6"/><circle cx="8" cy="12" r="1.6"/></g></svg><span>TRACE <em>inside</em></span></a>
+    <nav class="tabs" aria-label="Views">
+      <a href="#/corpus" data-tab="corpus">Corpus</a>
+      <a href="#/trace" data-tab="trace">Query trace</a>
+      <a href="#/memory" data-tab="memory">Memory</a>
+      <a href="#/compare" data-tab="compare">Keyword vs TRACE</a>
+    </nav>
+    <button class="theme" id="themebtn" type="button">Dark</button>
+  </div>
+</header>
+<main id="main" class="wrap">
+<p class="lede">See inside TRACE: the corpus it searches, the route a question takes,
+what is stored and what memory it uses, and where keyword search wins.
+Every panel carries a label: <span class="pill real">REAL</span> measured in the
+repo's receipts, <span class="pill recorded">RECORDED</span> replayed from a
+recording, <span class="pill designed">DESIGNED</span> our illustration of a real
+mechanism, <span class="pill concept">CONCEPT</span> not built. No backend, no
+network: this page reads only its own <code>data/</code> files.</p>
+
+<!-- ================= CORPUS ================= -->
+<section class="view" id="view-corpus" data-view="corpus" aria-label="Corpus view">
+  <h1>The corpus, browsable <span class="pill real">REAL</span></h1>
+  <p class="sub" id="corpus-scope">Local 20k reproduction run: the full hierarchy, small enough to show
+  every unit. Single shard (<code>s0</code>). The sealed 812,545-passage library is summarised from
+  the docs strip below it — different scope, kept apart.</p>
+  <div class="stats" id="corpus-stats" role="status" aria-live="polite"></div>
+  <div class="strip realbox">
+    <h2>Sealed library, for scale <span class="pill real">REAL</span></h2>
+    <p><b>812,545</b> passages · <b>99,891,846</b> tokens (0.11% short of 100M) ·
+    <b>4</b> equal parts. This page's replay sample covers
+    <b id="cov-pass">…</b> distinct passages in <b id="cov-grp">…</b> groups —
+    the sample only, never the full part sizes.</p>
+    <div class="parts" id="parts-strip" aria-label="Replay sample per part"></div>
+  </div>
+  <div class="cols2">
+    <div>
+      <h2>Browse the 144 passages</h2>
+      <form id="corpus-form" class="crow" role="search" onsubmit="return false">
+        <label class="sr" for="cq">Search passages</label>
+        <input id="cq" type="search" placeholder="Search title, snippet, id…" autocomplete="off">
+        <label class="sr" for="cpar">Filter by parent group</label>
+        <select id="cpar"><option value="">All parent groups</option></select>
+        <label class="mp"><input type="checkbox" id="cmp"> multi-parent leaves only</label>
+      </form>
+      <p class="count" id="ccount" role="status"></p>
+      <ol class="plist" id="plist"></ol>
+    </div>
+    <div>
+      <h2>Passage detail</h2>
+      <div class="detail" id="cdetail"><p class="muted">Pick a passage to see its tier and membership chain.</p></div>
+      <h2>Map: shard → parents → units <span class="pill real">REAL</span></h2>
+      <p class="muted">Counts computed from the data at load. Drag to pan, scroll to zoom,
+      click a node to highlight its members.</p>
+      <div class="mapbar">
+        <button type="button" id="zin">Zoom in</button>
+        <button type="button" id="zout">Zoom out</button>
+        <button type="button" id="zreset">Reset</button>
+      </div>
+      <div class="mapwrap"><svg id="cmap" role="img" aria-label="Hierarchy map"></svg></div>
+      <p class="muted" id="mapnote"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TRACE ================= -->
+<section class="view" id="view-trace" data-view="trace" aria-label="Query trace view" hidden>
+  <h1>One query, step by step <span class="pill recorded">RECORDED</span> <span class="pill designed">DESIGNED</span></h1>
+  <p class="sub">Counts are recorded receipts (evaluation rows from the 20k run, final
+  lists from the sealed replay). The stage shapes and the flow animation are our
+  illustration of the real centroid-router mechanism.</p>
+  <div class="tcontrols">
+    <label>Recorded question
+      <select id="tq"></select>
+    </label>
+    <label>Recorded eval probe
+      <select id="tp"></select>
+    </label>
+    <div class="tbtns">
+      <button type="button" id="tprev">◀ Prev</button>
+      <button type="button" id="tplay" class="primary">▶ Play (20 s)</button>
+      <button type="button" id="tnext">Next ▶</button>
+    </div>
+  </div>
+  <p class="muted" id="tprov"></p>
+  <ol class="stages" id="stages"></ol>
+  <div class="flowwrap"><svg id="flow" role="img" aria-label="Animated flow between stages"></svg></div>
+  <div class="answer" id="tanswer"></div>
+  <details class="receipts"><summary>Receipts (recorded rows behind this trace)</summary>
+    <h3>Evaluation row <span class="pill recorded">RECORDED</span></h3>
+    <pre id="treceipt">—</pre>
+    <h3>Final top-10 lists <span class="pill recorded">RECORDED</span></h3>
+    <pre id="treceipt2">—</pre>
+  </details>
+</section>
+
+<!-- ================= MEMORY ================= -->
+<section class="view" id="view-memory" data-view="memory" aria-label="Memory view" hidden>
+  <h1>What is stored, what memory is used <span class="pill real">REAL</span></h1>
+  <p class="diskwarn"><b>Disk is not memory.</b> Gigabyte figures below are stored
+  size on disk (<code>du -sb</code>). Memory figures are separate, and no
+  side-by-side memory comparison exists anywhere.</p>
+  <h2>Stored size on disk <span class="pill real">REAL</span></h2>
+  <div class="bars" role="img" aria-label="Stored size on disk: TRACE 2.28 GB, plain vectors 1.25 GB, keyword index 0.51 GB">
+    <div class="brow"><span class="blab">TRACE store</span><i class="bar"><b style="width:100%"></b></i><em>2.28 GB</em></div>
+    <div class="brow"><span class="blab">Plain vector copy</span><i class="bar"><b style="width:54.8%"></b></i><em>1.25 GB</em></div>
+    <div class="brow"><span class="blab">Keyword index</span><i class="bar"><b style="width:22.4%"></b></i><em>0.51 GB</em></div>
+  </div>
+  <p class="src">Source: BENCHMARKS-DEEP §2 table (sealed-library scope).</p>
+  <h2>Memory while answering <span class="pill real">REAL</span></h2>
+  <div class="bars" role="img" aria-label="Query process peak memory 1.03 GiB for the TRACE arm only">
+    <div class="brow"><span class="blab">Query peak (TRACE arm)</span><i class="bar"><b style="width:100%"></b></i><em>1.03 GiB VmHWM</em></div>
+    <div class="brow dim"><span class="blab">Keyword / exact arms</span><i class="bar"><b class="na" style="width:100%"></b></i><em>not measured — no comparison drawn</em></div>
+  </div>
+  <p class="src">Source: BENCHMARKS-DEEP §2 (0.91 GiB scope peak; TRACE arm only).</p>
+  <h2>Build-memory cut <span class="pill real">REAL</span></h2>
+  <table class="tbl">
+    <thead><tr><th scope="col">Run</th><th scope="col">Peak build memory (main)</th><th scope="col">Child peak</th><th scope="col">Wall</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">seam12a (small test collection)</th><td>8,489.1 MiB</td><td>7,169.2 MiB</td><td>9,494.9 s</td></tr>
+      <tr><th scope="row">older run (same collection)</th><td>22,565.5 MiB</td><td>15,668.8 MiB</td><td>12,973 s</td></tr>
+      <tr><th scope="row">local 20k (this page's corpus)</th><td>not recorded</td><td>—</td><td>25.9 s</td></tr>
+    </tbody>
+  </table>
+  <p class="src">Source: SCALE-AND-MEMORY.md. Build peaks are not serving memory.
+  Drain dominates the seam12a wall (~60%); that is the scaling risk, not publication.</p>
+  <h2>Earlier scale runs (separate scope) <span class="pill real">REAL</span></h2>
+  <table class="tbl">
+    <thead><tr><th scope="col">Run</th><th scope="col">Tokens</th><th scope="col">Shards</th><th scope="col">Stored size on disk</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">310.5M build</th><td>310,532,353</td><td>8</td><td>4,709,827,408 bytes</td></tr>
+      <tr><th scope="row">504.5M build</th><td>504,480,146</td><td>13</td><td>7,653,469,538 bytes</td></tr>
+    </tbody>
+  </table>
+  <p class="src">Source: SCALE-AND-MEMORY.md. Our own records, not outside-verified;
+  the cloud machine was shut down, so these cannot be re-run. Not the sealed library.</p>
+</section>
+
+<!-- ================= COMPARE ================= -->
+<section class="view" id="view-compare" data-view="compare" aria-label="Keyword versus TRACE view" hidden>
+  <h1>Keyword search wins this test <span class="pill real">REAL</span></h1>
+  <p class="sub">Same 50 searches, sealed library. TRACE is meaning-based search you can
+  verify — not a replacement for keyword search. The gap below is meaning-search
+  versus keywords: exact meaning-based search also got 52%.</p>
+  <h2>Rank-aware score (nDCG) <span class="pill real">REAL</span></h2>
+  <div class="bars" role="img" aria-label="nDCG: keyword 0.74, TRACE 0.42">
+    <div class="brow win"><span class="blab">Keyword</span><i class="bar"><b style="width:100%"></b></i><em>0.74 ✓</em></div>
+    <div class="brow"><span class="blab">TRACE</span><i class="bar"><b style="width:56.8%"></b></i><em>0.42</em></div>
+  </div>
+  <p class="src">Binary designated-source target (source passage = 1), not human
+  relevance judgments. Source: BENCHMARKS-DEEP §2.</p>
+  <h2>Right source passage in top ten <span class="pill real">REAL</span></h2>
+  <div class="bars" role="img" aria-label="Source in top ten: keyword 82 percent, TRACE 52 percent, exact 52 percent">
+    <div class="brow win"><span class="blab">Keyword</span><i class="bar"><b style="width:100%"></b></i><em>82% ✓</em></div>
+    <div class="brow"><span class="blab">TRACE</span><i class="bar"><b style="width:63.4%"></b></i><em>52%</em></div>
+    <div class="brow"><span class="blab">Exact (brute force)</span><i class="bar"><b style="width:63.4%"></b></i><em>52%</em></div>
+  </div>
+  <h2>Search-stage time per query <span class="pill real">REAL</span></h2>
+  <div class="bars" role="img" aria-label="Search-stage time: keyword 6 ms, exact 88 ms, TRACE 1.2 s">
+    <div class="brow win"><span class="blab">Keyword retrieval</span><i class="bar"><b style="width:3%"></b></i><em>p50 6 ms ✓</em></div>
+    <div class="brow"><span class="blab">Exact (batched mean)</span><i class="bar"><b style="width:12%"></b></i><em>~88 ms</em></div>
+    <div class="brow"><span class="blab">TRACE (4-shard calls)</span><i class="bar"><b style="width:100%"></b></i><em>p50 1.2 s</em></div>
+  </div>
+  <p class="src">Different protocols, not end-to-end; embedding timed separately
+  (p50 13.4 ms). Source: BENCHMARKS-DEEP §2.</p>
+  <h2>What this means</h2>
+  <ul class="plain">
+    <li>TRACE's shortcut works: it kept <b>0.9985</b> of exact search's top ten
+      while scoring <b>0.79%</b> of rows on one part (~127× less scoring work).</li>
+    <li>But on finding the right source passage, keywords win here — use the
+      right tool for the job.</li>
+  </ul>
+</section>
+
+<footer class="foot">
+  <h2>Receipts</h2>
+  <p>Numbers on this page come from: <code>data/replay.js</code> (144 recorded
+  questions, sealed library 812,545 passages), <code>data/corpus.js</code> (local
+  20k run: 144 atoms, 81 leaves, 51 parents, 240 eval probes),
+  <code>docs/BENCHMARKS-DEEP.md §2</code>, <code>docs/SCALE-AND-MEMORY.md</code>.
+  Stage shapes and flow animation are <span class="pill designed">DESIGNED</span>
+  illustrations. No outside party has verified any of it.</p>
+  <p><a href="index.html">Back to the original explorer replay</a></p>
+</footer>
+</main>
+<noscript><p class="wrap">This page needs JavaScript to render the views.</p></noscript>
+<script src="data/replay.js"></script>
+<script src="data/corpus.js"></script>
+<script src="inside.js"></script>
+</body>
+</html>

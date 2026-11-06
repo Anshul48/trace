@@ -47,6 +47,7 @@ Reflex is a separate line of work where an AI looks at a screen and finds the ri
 |---|---|
 | Flagship film | [Watch the working films](https://anshul48.github.io/trace/demos/) <!-- VIDEO_SLOT: Flagship film - Replace href when rendered --> |
 | 60-second explorer tour | [Open the explorer](https://anshul48.github.io/trace/explorer/), a replay of 144 recorded searches <!-- VIDEO_SLOT: 60-second explorer tour - Replace href when rendered --> |
+| Inside TRACE | [See inside TRACE](https://anshul48.github.io/trace/explorer/inside.html): browse the corpus, step a recorded query, and check the memory numbers — every number labelled REAL (measured) or RECORDED (replayed) |
 | ANIMA state-tree replay | [Recorded replay](https://anshul48.github.io/anima-substrate/demo/) <!-- VIDEO_SLOT: ANIMA state-tree replay - Replace href when rendered --> |
 | Reflex clip | [Short film](https://anshul48.github.io/trace/demos/#reflex) |
 | Module deep dives | [How it works](https://anshul48.github.io/trace/how-it-works/) <!-- VIDEO_SLOT: Module deep dives - Replace href when rendered --> |
