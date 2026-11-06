@@ -2,8 +2,8 @@
 <div class="xp">
 <section class="xhero wrap">
   <h1>The explorer: real searches, each with a checkable record</h1>
-  <p class="lede">A question wakes only a small part of the library: TRACE found nearly the same <dfn class="g" tabindex="0">passages<span class="tip" role="tooltip">Short pieces of text, a few sentences each, cut from articles.</span></dfn> as <dfn class="g" tabindex="0">exact, meaning-based search<span class="tip" role="tooltip">A second method that checks every one of the 812,545 passages. It is shown so you can compare.</span></dfn> while scoring 0.79% of the passages on one of four equal parts. Every result comes with a <strong>checkable record</strong> of where it came from.</p>
-  <p class="matchnote" role="note"><b>The library is fixed:</b> every number here comes from the same frozen <b>100M-token library</b> (812,545 passages · 99.9 million tokens). This explorer replays recorded searches over it. Measured on 50 test searches, one of four equal parts.</p>
+  <p class="lede">A question wakes only a small part of the library: TRACE found nearly the same <dfn class="g" tabindex="0">passages<span class="tip" role="tooltip">Short pieces of text, a few sentences each, cut from articles.</span></dfn> as <dfn class="g" tabindex="0">exact, meaning-based search<span class="tip" role="tooltip">A second method that checks every one of the 812,545 passages. It is shown so you can compare.</span></dfn> while scoring 0.79% of the passages on one of four nearly equal parts. Every result comes with a <strong>checkable record</strong> of where it came from.</p>
+  <p class="matchnote" role="note"><b>The library is fixed:</b> the headline search result uses the same frozen <b>sealed library</b> (812,545 passages · 99.9 million tokens; short of the 100M target by 0.11%). This explorer replays recorded searches over it. Measured on 50 test searches, one of four nearly equal parts; other tests have separate scopes.</p>
   <section class="guide" aria-label="What you are seeing">
     <h2 class="guide-h">What you are seeing</h2>
     <ol class="guide-steps">
@@ -17,14 +17,14 @@
       </li>
       <li data-step="3">
         <svg class="gi" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M5 9h9l3 3h10v11H5z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path class="lid" d="M5 9h9l3 3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><line class="beam" x1="11" y1="17" x2="21" y2="17" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-        <div><span class="gnum" aria-hidden="true">3</span><b>Only the few groups that fit your question open; the rest stay closed.</b> <span>On our 50 test searches, TRACE <dfn class="g" tabindex="0">scored<span class="tip" role="tooltip">Read closely and ranked for this question.</span></dfn> 0.79% of the passages.</span></div>
+        <div><span class="gnum" aria-hidden="true">3</span><b>Only the few groups that fit your question open; the rest stay closed.</b> <span>On our 50 test searches, TRACE <dfn class="g" tabindex="0">scored<span class="tip" role="tooltip">Read closely and ranked for this question.</span></dfn> 0.79% of passages on the measured library part.</span></div>
       </li>
       <li data-step="4">
         <svg class="gi" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M9 5h9l5 5v17H9z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path class="tick" d="M12.5 16.5l4 4 7-8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <div><span class="gnum" aria-hidden="true">4</span><b>Ten passages come back, each with a record.</b> <span>You can check each record on your own computer.</span></div>
       </li>
     </ol>
-    <p class="guide-note">The 0.79% counts passages scored per search, measured on one of the library&rsquo;s four equal parts, for the top 10 results.</p>
+    <p class="guide-note">The 0.79% counts passages scored per search, measured on one of the library&rsquo;s four nearly equal parts, for the top 10 results.</p>
   </section>
   <p class="replay-banner" role="note"><strong>This page is a replay.</strong> Every question below was really asked on a <dfn class="g" tabindex="0">sealed library<span class="tip" role="tooltip">A fixed copy of 812,545 passages that nobody can change, so every check can be repeated.</span></dfn> of 812,545 passages on our server, and the answers were recorded. No search is running live behind this page.</p>
   <p class="matchnote" role="note"><b>See inside TRACE:</b> <a href="inside.html">a companion page</a> to browse the corpus, step a recorded query, and check the memory numbers.</p>
@@ -82,8 +82,8 @@
         <li><span class="lead">Real searches, recorded.</span> Each question was asked on a sealed library of <b>812,545 passages</b> of English Wikipedia, and the answers are shown as they came back.</li>
         <li><span class="lead">A checkable record for every result.</span> Which article it came from, where in the article, and a <dfn class="g" tabindex="0">fingerprint<span class="tip" role="tooltip">A short code worked out from the exact text. Change one letter and the code changes completely.</span></dfn> your browser can re-check.</li>
         <li><span class="lead">A second opinion.</span> The same question asked with exact search, so you can see how close the two lists are.</li>
-        <li><span class="lead">A measured result.</span> On our 50 test searches, TRACE kept <b>0.9985</b> of exact search&rsquo;s results while scoring <b>0.79%</b> of the passages (about <b>127 times</b> less passage-scoring work; routing and building the groups are separate costs). The checkable records matched on all claims we re-ran on the live service. No outside party has verified this yet.
-          <details class="more"><summary>How the 50 test searches were made</summary><p>40 written questions plus 10 taken from passage openings. The 0.79% counts passages scored per search, measured on one of the library&rsquo;s four equal parts, for the top 10 results.</p></details></li>
+        <li><span class="lead">A measured result.</span> On our 50 test searches, TRACE kept <b>0.9985</b> of exact search&rsquo;s results while scoring <b>0.79%</b> of passages on the measured library part (about <b>127 times</b> less passage-scoring work; routing and building the groups are separate costs). The checkable records matched on all claims we re-ran on the live service. No outside party has verified this yet.
+          <details class="more"><summary>How the 50 test searches were made</summary><p>40 written questions plus 10 taken from passage openings. The 0.79% counts passages scored per search, measured on one of the library&rsquo;s four nearly equal parts, for the top 10 results.</p></details></li>
       </ul>
     </div>
     <div class="box warn">
@@ -120,7 +120,7 @@
     <div>
       <h3>The library</h3>
       <p>812,545 passages of English Wikipedia text, cut from articles into pieces of a few sentences. It holds about 99.9 million tokens. The planned 100-million-token gate was waived: it falls short by 108,154 tokens (0.11%).</p>
-      <p>The library is split into four equal parts, and inside each part similar passages are grouped together. To answer a question, TRACE picks the groups most likely to hold the answer and scores only the passages inside them. Exact search scores every passage.</p>
+      <p>The library is split into four nearly equal parts, and inside each part similar passages are grouped together. To answer a question, TRACE picks the groups most likely to hold the answer and scores only the passages inside them. Exact search scores every passage.</p>
     </div>
     <div>
       <h3>The recordings</h3>

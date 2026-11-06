@@ -50,7 +50,7 @@
       <p class="lede">Press the three steps below. Everything on this page is the same idea seen three ways: order, a small wake-up, proof.</p>
       <div class="pile" data-pile>
         <div class="pile-canvas-wrap">
-          <img class="static-pile" src="../img/organizing-pile.png" width="1326" height="581" alt="Illustration: 20,000 dots in four equal parts, sorted into groups. In the first part a question has lit 40 dots, with ten ringed as the best matches. All other dots are dim.">
+          <img class="static-pile" src="../img/organizing-pile.png" width="1326" height="581" alt="Illustration: 20,000 dots in four nearly equal parts, sorted into groups. In the first part a question has lit 40 dots, with ten ringed as the best matches. All other dots are dim.">
           <canvas width="1280" height="560" role="img" aria-label="Illustration of 20,000 dots that sort themselves into groups, then a question that lights a small part."></canvas>
           <div class="pile-hud" aria-hidden="true">
             <span class="chip" data-hud="count">Passages so far: 0</span>
@@ -65,7 +65,7 @@
           <button type="button" data-play aria-pressed="true">Pause</button>
         </div>
         <p class="pile-caption" aria-live="polite"><b>A library grows.</b> New passages just arrive, in no order. Nobody files them.</p>
-        <p class="pile-fine">An illustration, not data. 20,000 dots stand in for 812,545 passages. Where each dot sits and how many groups there are is drawn; the proportions are real (four equal parts; 0.79% of one part woken, drawn as 40 of 5,000 dots).</p>
+        <p class="pile-fine">An illustration, not data. 20,000 dots stand in for 812,545 passages. Where each dot sits and how many groups there are is drawn; the proportions are real (four nearly equal parts; 0.79% of one part woken, drawn as 40 of 5,000 dots).</p>
       </div>
     </div>
   </div>
@@ -83,7 +83,7 @@
       <span class="size">99.9M<small>tokens in the sealed library: 812,545 passages</small></span>
     </div>
     <div>
-      <p class="did">The full measured pipeline: sorted into groups, searched, every answer with a checkable record, re-run on our own server. This is the library behind every number on this site that is not marked as an earlier test.</p>
+      <p class="did">The full measured pipeline: sorted into groups, searched, every answer with a checkable record, re-run on our own server. The headline search result uses this library; other tests have separate scopes.</p>
       <p class="caveat">Short of our 100M target by 0.11% (108,154 tokens). Our own library and method; not reproduced on public data; no outside party has checked it.</p>
       <p class="links"><a href="../evidence/#measured">The measurement</a> &middot; <a href="../explorer/">Explorer</a></p>
     </div>
@@ -146,7 +146,7 @@
     <h2 id="wakes">2. A question wakes only a small part</h2>
     <p>Searching by meaning normally means comparing your question with every passage. TRACE first picks the groups most likely to hold the answer, then compares your question only with the passages inside them. The rest of the library is never scored for that question.</p>
     <div class="chart" style="margin-bottom: var(--space-4)">
-      <h3>Passages compared per search, in one of four equal parts</h3>
+      <h3>Passages compared per search, in one of four nearly equal parts</h3>
       <p class="sub">Bars start at zero. 50 test searches, top ten, our library and method.</p>
       <div class="bars">
         <div class="bar-row"><span class="lab">Exact search</span><div class="bar-track"><div class="bar-fill fill-exact" style="width:100%"></div><span class="bar-val">100%</span></div></div>
@@ -155,11 +155,11 @@
       <p class="note">About 127 times less passage-scoring work (routing and building the groups are separate costs), and TRACE kept 0.9985 of exact search's top ten (1 would mean identical).</p>
     </div>
     <p>This is what we call <b>sparse activation</b>: only a small share of the memory is woken per question. What it does not mean: faster. At this size a plain scan answers sooner (see the limits), because TRACE also has to pick the groups, and our measured TRACE search is vector search only, with no keyword part. What it buys is less passage-scoring work, which should matter once a library is too big to scan in the time or memory you have. We have not measured where that crossover is.</p>
-    <p class="note">The 0.79% was measured on one of the library's four equal parts, each about 203,000 passages. The same 50 test searches were not run as a random sample of all possible searches.</p>
+    <p class="note">The 0.79% was measured on one of the library's four nearly equal parts, each about 203,000 passages. The same 50 test searches were not run as a random sample of all possible searches.</p>
 
     <h2 id="record">3. Every answer carries a record you can check</h2>
     <p>Each result comes with a checkable record: the article it came from, where in the article (the character span), the licence, and a fingerprint. The fingerprint (SHA-256) is a short code worked out from the exact text, and your browser can recompute it. If one letter changed, the code would not match.</p>
-    <p><b>What a match proves:</b> the text on the page is the text that was sealed in the library. <b>What it does not prove:</b> that the search found the best passage, or that Wikipedia says the same today. The point is that you can check where an answer came from instead of taking it on trust.</p>
+    <p><b>What a match proves:</b> the raw text on the page matches the fingerprint published alongside it. This checks consistency, not an independently authenticated historical seal. <b>What it does not prove:</b> that the search found the best passage, or that Wikipedia says the same today. The point is that you can check where an answer came from instead of taking it on trust.</p>
     <p class="btn-row"><a class="btn btn-primary" href="../explorer/#q=how-do-vaccines-train-the-immune-system&amp;open=1">Try the check yourself</a></p>
 
     <h2 id="words">Words we use, in plain words</h2>
@@ -168,7 +168,7 @@
       <dt><b>Self-organization</b> <span class="badge badge-proto" data-status-id="self-organizing-store">Prototype</span></dt>
       <dd><p>Inspired by how order can arise without a conductor. In TRACE: the groups come from the passages themselves, not from labels people add. Measured: how ordered the finished groups are. Not measured: the order forming over time, or how it changes as the library grows.</p></dd>
       <dt><b>Sparse activation</b> <span class="badge badge-built" data-status-id="sparse-search">Measured by us</span></dt>
-      <dd><p>Inspired by the idea that only a small part of a memory fires for a given cue. In TRACE: a question scores 0.79% of one of four equal parts. Measured on 50 test searches, on our library and method.</p></dd>
+      <dd><p>Inspired by the idea that only a small part of a memory fires for a given cue. In TRACE: a question scores 0.79% of one of four nearly equal parts. Measured on 50 test searches, on our library and method.</p></dd>
       <dt><b>Recall</b></dt>
       <dd><p>In plain words: bringing a stored passage back. We never use it as the name of a score.</p></dd>
       <dt><b>A word we leave out</b></dt>

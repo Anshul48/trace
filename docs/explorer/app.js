@@ -241,7 +241,7 @@
       '<a href="' + esc(url) + '" target="_blank" rel="noopener">Open the Wikipedia article</a>' +
       '<button type="button" class="dl">Download this record</button></div>' +
       '<div class="verdict-slot" role="status" aria-live="polite"></div>' +
-      '<p class="fine">A match shows the text on this page is unchanged since the library was sealed. It does not prove Wikipedia says the same today: pages change, so the link may show newer wording.</p>' +
+      '<p class="fine">A match shows that the raw text agrees with the fingerprint published alongside it. It does not prove Wikipedia says the same today: pages change, so the link may show newer wording.</p>' +
       '<h4>The full passage</h4><div class="fulltext" tabindex="0" role="region" aria-label="Full passage text"></div>' +
       '<div class="actions"><button type="button" class="rawbtn">Show the text exactly as stored</button></div>';
     var ft = box.querySelector(".fulltext"); ft.textContent = clean(p.tx);
@@ -316,7 +316,7 @@
       '<div class="cols">' + col("TRACE", gi, fi) + col("Exact search", fi, gi) + '</div>' +
       '<p class="legend">Green edge: also in the other list. Amber edge: only in this list.</p>' +
       '<p class="fine">Time the server took when we recorded: TRACE ' + sec(q.tg) + ', the server&rsquo;s scan-everything mode ' + sec(q.tf) + '. We make no speed claim: what TRACE aims to save is scoring work, not time in this demo.</p>' +
-      '<div class="measured"><div class="bars" role="img" aria-label="Passages scored per search: exact search 100 percent, TRACE 0.79 percent"><div class="bar-row"><span>Exact search</span><i style="width:100%"></i><em>scores 100% of passages</em></div><div class="bar-row"><span>TRACE</span><i class="thin" style="width:max(0.79%,4px)"></i><em>scores 0.79% of passages</em></div></div><p><b>Our 50 test searches:</b> TRACE kept <b>0.9985</b> of exact search&rsquo;s results (1.0 would be identical) while scoring <b>0.79%</b> of the passages, about <b>127 times</b> less scoring work.</p>' +
+      '<div class="measured"><div class="bars" role="img" aria-label="Passages scored per search: exact search 100 percent, TRACE 0.79 percent"><div class="bar-row"><span>Exact search</span><i style="width:100%"></i><em>scores 100% of passages</em></div><div class="bar-row"><span>TRACE</span><i class="thin" style="width:max(0.79%,4px)"></i><em>scores 0.79% of passages on the measured library part</em></div></div><p><b>Our 50 test searches:</b> TRACE kept <b>0.9985</b> of exact search&rsquo;s results (1.0 would be identical) while scoring <b>0.79%</b> of passages on the measured library part, about <b>127 times</b> less scoring work.</p>' +
       '<p class="fine">Across the ' + all.n + ' questions recorded on this page: ' + all.all + ' gave identical top-10 sets (' + all.ord + ' in exactly the same order), and on average ' + (all.sum / all.n).toFixed(2) + ' of 10 passages were shared. These are only the questions we chose to record, so treat this as an illustration. The 50-search test above is the measurement.</p></div>';
   }
 

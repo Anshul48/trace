@@ -42,7 +42,7 @@ network: this page reads only its own <code>data/</code> files.</p>
   <div class="strip realbox">
     <h2>Sealed library, for scale <span class="pill real">REAL</span></h2>
     <p><b>812,545</b> passages · <b>99,891,846</b> tokens (0.11% short of 100M) ·
-    <b>4</b> equal parts. This page's replay sample covers
+    <b>4</b> nearly equal parts. This page's replay sample covers
     <b id="cov-pass">…</b> distinct passages in <b id="cov-grp">…</b> groups —
     the sample only, never the full part sizes.</p>
     <div class="parts" id="parts-strip" aria-label="Replay sample per part"></div>
@@ -79,7 +79,7 @@ network: this page reads only its own <code>data/</code> files.</p>
 
 <!-- ================= TRACE ================= -->
 <section class="view" id="view-trace" data-view="trace" aria-label="Query trace view" hidden>
-  <h1>One query, step by step <span class="pill recorded">RECORDED</span> <span class="pill designed">DESIGNED</span></h1>
+  <h1>Separate recordings: a small-run probe and a library search <span class="pill recorded">RECORDED</span> <span class="pill designed">DESIGNED</span></h1>
   <p class="sub">Counts are recorded receipts (evaluation rows from the 20k run, final
   lists from the sealed replay). The stage shapes and the flow animation are our
   illustration of the real centroid-router mechanism.</p>
@@ -127,7 +127,7 @@ network: this page reads only its own <code>data/</code> files.</p>
     <div class="brow dim"><span class="blab">Keyword / exact arms</span><i class="bar"><b class="na" style="width:100%"></b></i><em>not measured — no comparison drawn</em></div>
   </div>
   <p class="src">Source: BENCHMARKS-DEEP §2 (0.91 GiB scope peak; TRACE arm only).</p>
-  <h2>Build-memory cut <span class="pill real">REAL</span></h2>
+  <h2>Earlier build-memory observations <span class="pill real">REAL</span></h2>
   <table class="tbl">
     <thead><tr><th scope="col">Run</th><th scope="col">Peak build memory (main)</th><th scope="col">Child peak</th><th scope="col">Wall</th></tr></thead>
     <tbody>
@@ -137,6 +137,8 @@ network: this page reads only its own <code>data/</code> files.</p>
     </tbody>
   </table>
   <p class="src">Source: SCALE-AND-MEMORY.md. Build peaks are not serving memory.
+  One run each, with different settings, so the two rows are not like-for-like and not a controlled improvement:
+  the later run picked candidates with an approximate method and stored data in columns (see SCALE-AND-MEMORY.md).
   Drain dominates the seam12a wall (~60%); that is the scaling risk, not publication.</p>
   <h2>Earlier scale runs (separate scope) <span class="pill real">REAL</span></h2>
   <table class="tbl">

@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0
  * The organizing pile: 20,000 dots stand in for the 812,545 passages of the sealed library.
  * It is an ILLUSTRATION. Where each dot sits and how many groups there are is drawn.
- * What is real: the proportions (4 equal parts; a question wakes 0.79% of one part,
+ * What is real: the proportions (4 nearly equal parts; a question wakes 0.79% of one part,
  * drawn as 40 of 5,000 dots) and the counts quoted in the captions.
  * Plain JavaScript, no libraries, no network requests. Reads colours from tokens.css.
  */
@@ -17,9 +17,9 @@
          label: "A growing pile of 20,000 dots, one for every 41 passages, scattered with no order." },
     2: { name: "It sorts itself",
          text: "<b>The passages sort themselves into groups</b> of similar meaning. The order comes from the passages themselves, not from labels people add.",
-         label: "The same dots have drifted into groups, in four equal parts." },
+         label: "The same dots have drifted into groups, in four nearly equal parts." },
     3: { name: "A question wakes a part",
-         text: "<b>A question wakes only a small part.</b> Here: 40 of 5,000 dots in one of four equal parts (0.8%; our measured average is 0.79%). The ringed dots are the ten best matches. A plain scan would wake every dot.",
+         text: "<b>A question wakes only a small part.</b> Here: 40 of 5,000 dots in one of four nearly equal parts (0.8%; our measured average is 0.79%). The ringed dots are the ten best matches. A plain scan would wake every dot.",
          label: "A question has lit 40 dots in the first of the four parts, with ten ringed as best matches. All other dots are dim." }
   };
 

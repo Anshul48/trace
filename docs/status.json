@@ -43,12 +43,12 @@
       "status": "built",
       "badge_text": "Working today, our server",
       "evidence": "docs/explorer/data/replay.js",
-      "evidence_note": "The recorded searches are in the explorer. The raw measurement files stay on our build machine, not in this repository.",
+      "evidence_note": "The recorded searches are in the explorer. Aggregate records ship in receipts/benchmarks-deep/ (RESULTS.md, results.json, LOAD.md, D1 cluster-eval record); per-query files and the piece manifest are absent.",
       "checked": "2026-11-04"
     },
     {
       "id": "sparse-search",
-      "title": "A question scores 0.79% of one of four equal parts and keeps 0.9985 of exact search's top ten (50 test searches, our library and method)",
+      "title": "A question scores 0.79% of one of four nearly equal parts and keeps 0.9985 of exact search's top ten (50 test searches, our library and method)",
       "status": "built",
       "badge_text": "Measured by us",
       "evidence": "docs/explorer/data/replay.js",
@@ -155,7 +155,7 @@
     },
     {
       "id": "reflex",
-      "title": "Reflex: an AI that looks at a screen and finds the right button to press (SAM 3.1 with Muse Spark)",
+      "title": "Reflex: an AI that looks at a screen and finds the right button to press. Separate synthetic experiments used SAM and Muse Spark; the film's model is unconfirmed",
       "status": "prototype",
       "evidence_note": "A separate project with its own short film."
     }

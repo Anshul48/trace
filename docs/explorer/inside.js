@@ -101,7 +101,7 @@ var Corpus = (function () {
     ids.forEach(function (id) {
       var p = RP[id];
       if (p && p.sh !== undefined && sh[p.sh] !== undefined) sh[p.sh]++;
-      if (p && p.pa !== undefined) pa[p.pa] = 1;
+      if (p && p.pa !== undefined) pa[p.sh + ":" + p.pa] = 1;
     });
     $("cov-pass").textContent = fmt(ids.length);
     $("cov-grp").textContent = fmt(Object.keys(pa).length);

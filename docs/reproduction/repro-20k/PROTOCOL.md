@@ -60,7 +60,7 @@ Recall values are **public-harness probe recall / oracle agreement** only.
   measurements), `max_dedup_rows 1000000`, `max_delta_bytes 536870912`,
   `max_intake_backlog 10000`, `max_reservations 64`, deadline 5.0 s.
 - Hardware: VM `trace-build500`, n2-highmem-16 (16 vCPU, 125 GiB),
-  shared-VM walls; peak RSS parent 22.6 GiB (limit 46.8 GiB);
+  shared-VM walls; peak RSS parent 22.0 GiB (limit 46.8 GiB);
   `mem_available` 129,638,072 → 106,903,248 (KiB, receipt units).
 
 ## Harness recall — BOTH modes, with matched-flat controls (240 = 120 × 2)

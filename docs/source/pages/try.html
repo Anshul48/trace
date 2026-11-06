@@ -5,8 +5,8 @@
     <h1 style="font-size: var(--step-3)">Start with your browser. Nothing to install.</h1>
     <p class="lede" style="max-width: 52ch">Five ways in, ordered by effort. The first two take under a minute. The last one is planned, and we say so.</p>
     {{statusline}}
-    <p class="note">Tested so far: the 100M-token library (measured: 812,545 passages · 99.9 million tokens). Earlier tests, by us and separate from it: 310.5M and 504.5M-token builds and a 1.53B-token routing test. <a href="../evidence/#appendix">The earlier tests, with every caveat.</a></p>
-    <p class="note">The library is fixed: every number on this site comes from the same frozen 100M-token library (812,545 passages · 99.9 million tokens). Measured on 50 test searches, one of four equal parts.</p>
+    <p class="note">Tested so far: the sealed library (measured: 812,545 passages · 99.9 million tokens; short of the 100M target by 0.11%). Earlier tests, by us and separate from it: 310.5M and 504.5M-token builds and a 1.53B-token routing test. <a href="../evidence/#appendix">The earlier tests, with every caveat.</a></p>
+    <p class="note">The library is fixed: the headline search result uses the same sealed library (812,545 passages · 99.9 million tokens; short of the 100M target by 0.11%). Measured on 50 test searches, one of four nearly equal parts; other tests have separate scopes.</p>
   </div>
 </section>
 
@@ -36,7 +36,7 @@
         <li>It should say it matches.</li>
       </ol>
       <p class="btn-row"><a class="btn btn-primary" href="../explorer/#q=how-do-vaccines-train-the-immune-system&amp;open=1">Open a record already expanded</a></p>
-      <div class="callout callout-note"><p><b>What a match shows:</b> the text you see is unchanged since the library was sealed. <b>What it does not show:</b> that the search was right, or that Wikipedia says the same today.</p></div>
+      <div class="callout callout-note"><p><b>What a match shows:</b> the raw text matches its co-published fingerprint. <b>What it does not show:</b> that the search was right, or that Wikipedia says the same today.</p></div>
     </article>
 
     <div class="grid-2">
@@ -62,7 +62,7 @@ cd trace
     <article class="card" id="reproduce">
       <div class="card-head"><h2 style="font-size: var(--step-1); margin: 0">4. Re-check the code and run the small reproduction</h2><span>{{badge:freeze-verify}} {{badge:small-repro}}</span></div>
       <p><b>2 to ten minutes. Needs Python 3, git, and two small Python packages.</b></p>
-      <p>This confirms that the published code is byte for byte the code we tested (207 files), and runs the small reproduction at 20,000 tokens on your machine. It reproduces the method on a small slice. It does not reproduce the 99.9M-token result: that needs our corpus and billed cloud hardware.</p>
+      <p>This confirms that the published code is byte for byte the code we tested (207 files), and runs the small reproduction at 20,000 tokens on your machine. It reproduces the method on a small slice. It does not reproduce the sealed-library result: that needs our corpus and billed cloud hardware.</p>
       <p class="btn-row"><a class="btn btn-primary" href="../verify/">The exact commands, and what you should see</a></p>
     </article>
 

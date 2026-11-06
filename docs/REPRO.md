@@ -62,7 +62,7 @@ tree is present, the full set runs unchanged:
   a smaller test collection (counts in `receipts/result.json`). Vectors are FP32 cached,
   generated/cached at run time.
 - Hardware: shared VM, solo CPUs 0–1, ~2.6 h wall (9,494.9 s), 2.85 GiB
-  retained store, ~8.5 GB parent RSS peak. Do NOT relaunch that run
+  retained store, ~8.3 GiB parent RSS peak. Do NOT relaunch that run
   casually: it is a billed, multi-hour experiment, not a test.
 - Command (record, seam12a run): `taskset -c 0,1 nice -n 19
   runtime.sh tools/product_pilot.py --tokens 10000000 --profile vm

@@ -13,7 +13,7 @@ publication cycles (prepare → durable commit → ViewPool publish), then serve
 guided (hierarchy-routed) and flat (brute-force) similarity queries over the
 same vectors. The earlier receipt asserts the store stayed converged
 (`pending_documents 0`, `repair_to_zero.final_debt 0`), the ledger stayed
-under derived caps, and guided recall beat flat at matched scoring work.
+under derived caps, and guided and flat oracle-agreement scores differed at matched scoring work.
 
 ## The stack: 5 fixes on the speed candidate
 

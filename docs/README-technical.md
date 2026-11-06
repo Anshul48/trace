@@ -13,7 +13,7 @@
 
 **Your agent forgets everything outside its context window. TRACE remembers — a 100M library sorted into groups you can explore in your browser. [Open the explorer.](https://anshul48.github.io/trace/explorer/)**
 
-**New here? [Watch the map, two ways](https://anshul48.github.io/trace/recording/)** — 57 seconds of mechanism, 45 seconds of real replay — then replay a probe yourself. [Beyond that size?](https://anshul48.github.io/trace/future/) Measured, on-disk, and vision — all labeled.
+**New here? [Watch the map, two ways](https://anshul48.github.io/trace/demos/)** — 57 seconds of mechanism, 45 seconds of real replay — then replay a probe yourself. [Beyond that size?](https://anshul48.github.io/trace/vision/) Measured, on-disk, and vision — all labeled.
 
 [Watch it](#watch-it) · [Try it](#try-it-in-5-minutes) · [Proof](#proof-one-line) · [Deep dive](#go-deeper)
 
@@ -21,27 +21,27 @@
 |---|---|
 | Researchers | [Proof](#proof-one-line) · [Benchmarks](BENCHMARKS.md) · [Architecture](ARCHITECTURE.md) |
 | Developers | [Try it in 5 minutes](#try-it-in-5-minutes) · [Portable 20k reproduction](reproduction/repro-20k/README.md) · [Code tour](CODE-TOUR.md) |
-| Judges | [60-second tour](https://anshul48.github.io/trace/explorer/) · [Animated demo](https://anshul48.github.io/trace/recording/) · [Raw recorded run](https://anshul48.github.io/trace/recording/#raw-run) |
+| Judges | [60-second tour](https://anshul48.github.io/trace/explorer/) · [Animated demo](https://anshul48.github.io/trace/demos/) · [Raw recorded run](https://anshul48.github.io/trace/verify/) |
 
 ## What you can do with it today
 
-- **Replay a real run to PASS** — [the recording hub](https://anshul48.github.io/trace/recording/) walks install, frozen-file checks, and an engine run on the portable 20k prefix, with the unedited terminal capture kept as evidence.
+- **Replay a real run to PASS** — [the demos page](https://anshul48.github.io/trace/demos/) walks install, frozen-file checks, and an engine run on the portable 20k prefix.
 - **Run your own pilot in 5 minutes** — freeze check, package suite, and a genuine 10K-token pilot to `claim=measured, status=PASS` on your machine. [Jump in](#try-it-in-5-minutes).
 - **Build on content-addressed storage** — ingest once with the Python package and the `product_pilot` CLI, local-first in an isolated venv. No services, no containers.
 
 ## Watch it
 
-- 🎬 **[Demo suite](https://anshul48.github.io/trace/recording/)** — what TRACE is, how it works, and how to use it, in about a minute. Video file `docs/recording/trace.mp4` (720p H.264, captions + transcript on the page; voice is synthetic).
+- 🎬 **[Demo suite](https://anshul48.github.io/trace/demos/)** — what TRACE is, how it works, and how to use it, in about a minute. Working cuts on the demos page (720p H.264, captions + on-page text; voice is synthetic).
 - 🖱️ **[Live interactive twin](https://anshul48.github.io/trace/explorer/)** — the same story you can click: documents in, atoms, schemas, retrieval, self-repair, driven on the real graph.
-- 📊 **[Play with real data](https://anshul48.github.io/trace/play/)** — client-side querying of the recorded exports, honestly labeled recorded vs live.
+- 📊 **[Play with real data](https://anshul48.github.io/trace/explorer/)** — client-side querying of the recorded exports, honestly labeled recorded vs live.
 
 ## Proof (one line)
 
-Smaller test collection, ~8.5 GB peak, self-repairing — every figure measured and receipt-backed. Full records: [docs/BENCHMARKS.md](BENCHMARKS.md).
+Smaller test collection, ~8.3 GiB peak, self-repairing — every figure measured and receipt-backed. Full records: [docs/BENCHMARKS.md](BENCHMARKS.md).
 
 ## Try it in 5 minutes
 
-Fastest path — nothing to install beyond Python 3:
+Quick start — nothing to install beyond Python 3:
 
 1. `git clone https://github.com/Anshul48/trace.git`
 2. `cd trace`
@@ -189,4 +189,4 @@ Shared tokens: [docs/assets/tokens.css](assets/tokens.css),
 
 ## Related: ANIMA
 
-[ANIMA](https://github.com/Anshul48/anima) owns agent orchestration; TRACE owns the retrieval overlay. The two are separate systems with no shared runtime — this README covers TRACE only.
+[ANIMA](https://github.com/Anshul48/anima-substrate) owns agent orchestration; TRACE owns the retrieval overlay. The two are separate systems with no shared runtime — this README covers TRACE only.

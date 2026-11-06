@@ -21,14 +21,14 @@
 <section class="section band" id="measured">
   <div class="wrap-narrow">
     <span class="eyebrow">The measured result</span>
-    <h2>Routed retrieval kept 0.9985 of exact results while scoring 0.79% of passages</h2>
-    <p>The library holds 812,545 passages (99,891,846 tokens), sealed in four equal parts of about 203,000 passages. We ran 50 test searches (40 written questions and 10 taken from the openings of passages) against it and compared TRACE with exact search by meaning, which compares the question with every passage.</p>
+    <h2>Routed retrieval kept 0.9985 of exact results while scoring 0.79% of passages on the measured library part</h2>
+    <p>The library holds 812,545 passages (99,891,846 tokens), sealed in four nearly equal parts of about 203,000 passages. We ran 50 test searches (40 written questions and 10 taken from the openings of passages) against it and compared TRACE with exact search by meaning, which compares the question with every passage.</p>
     <div class="grid-3" style="margin: var(--space-5) 0">
-      <div class="card"><div class="stat"><span class="num">0.79%</span><span class="what">of passages scored</span><span class="scope">on one of four equal parts</span></div></div>
+      <div class="card"><div class="stat"><span class="num">0.79%</span><span class="what">of passages scored</span><span class="scope">on one of four nearly equal parts</span></div></div>
       <div class="card"><div class="stat"><span class="num">~127&times;</span><span class="what">less scoring work</span><span class="scope">than scoring every row</span></div></div>
       <div class="card"><div class="stat"><span class="num">0.9985</span><span class="what">of exact search's top ten kept</span><span class="scope">1 would mean identical</span></div></div>
     </div>
-    <p><b>Reported exact-top-ten retention: 0.9985 across 50 test searches; 0.79% passage scoring measured on one of four equal library parts.</b> This measures preservation of exact vector results, not answer quality or relevance. The 127-fold figure is passage-scoring work only: choosing the groups, building them and the end-to-end time are separate costs (end-to-end, a TRACE search took 1.2 s against 88 ms for an exact scan).</p>
+    <p><b>Reported exact-top-ten retention: 0.9985 across 50 test searches; 0.79% passage scoring measured on one of four nearly equal library parts.</b> This measures preservation of exact vector results, not answer quality or relevance. The 127-fold figure is passage-scoring work only: choosing the groups, building them and the end-to-end time are separate costs (the recorded search-stage protocols differ, and embedding is excluded).</p>
     <p>The library is short of our 100M-token target by 0.11% (108,154 tokens). We waived that gate and say so. On the live copy of the library on our server, the checkable records matched on all the claims we re-ran. No outside party has checked any of this.</p>
     <p class="note">The measured TRACE search is vector search only, with no keyword part. An older engine in the repository does combine the two, but we have no result for it on this library.</p>
   </div>
@@ -49,7 +49,7 @@
         </tbody>
       </table>
     </div>
-    <p class="note">First quarter of the library (the one the 0.79% and 0.9985 were measured on), 50 test searches; the other three quarters gave 7.1, 6.8 and 7.1, and 6.9 across all four. The edges are soft: a passage is about as close (0.47) to a member of the next-nearest group as to its own group-mates (0.55).</p>
+    <p class="note">First quarter of the library (where the passage-scoring work was measured; retention is averaged across the parts), 50 test searches; the other three quarters gave 7.1, 6.8 and 7.1, and 6.9 across all four. The edges are soft: a passage is about as close (0.47) to a member of the next-nearest group as to its own group-mates (0.55).</p>
     <p>Plainly: the best matches are held together far more than chance, and somewhat more than the order in which passages happened to arrive. They are not held in one or two groups. TRACE has to look inside many groups to keep 0.9985, and the 0.79% already counts that.</p>
     <h3 id="sizes">Does the order hold as the collection gets bigger?</h3>
     <p>We sorted the first N passages of one collection with one recipe, at five sizes, and asked the same question. The answer, at every size we tested, is the same: a band between 4.7 and 5.0 groups, with no trend either way.</p>
@@ -83,7 +83,7 @@
   <div class="wrap-narrow prose">
     <span class="eyebrow">A control: the grouping switched off</span>
     <h2>Cut the same passages into random groups, and the shortcut mostly stops working</h2>
-    <p>If the grouping did nothing, searching a small share of it at random groups would work as well. We tested that on the first quarter of the library (203,137 passages, 22,995 groups). We used 500 stored passages as the questions, each looking for its own ten closest passages (found by exact search). A simple router compared the question with the centre of every group, opened the nearest groups first, and stopped when a set share of the passages had been scored. We then asked how many of the true ten were inside what it scored. We did the same with the same group sizes cut three other ways.</p>
+    <p>If the grouping did nothing, searching a small share of it in random groups would work as well. We tested that on the first part of the library (203,137 passages, 22,995 groups), using 2,000 passages held out of the library as the questions, each looking for its own ten closest passages among the remaining 201,137 rows (found by exact search). A simple router compared the question with the centre of every group, opened the nearest groups first, and stopped when a set row budget had been scored. We then asked how many of the true ten were inside what it scored. We did the same with input-order blocks and shuffled labels. Script and output: <code>receipts/order-measure/order_measure_routing.py</code> and <code>receipts/order-measure/out-4-routing-ablation.txt</code>.</p>
     <div class="callout callout-limit">
       <p class="callout-title"><strong class="callout-title">Read this label first</strong></p>
       <p>Passages as questions, which stand in for real searches. A simplified nearest-group router, <b>not TRACE&rsquo;s own guided router</b>, and not the engine that produced the 0.9985. <b>The cost of choosing the groups is not counted</b> in &ldquo;passages scored&rdquo;, and no timings were taken. Our grouping, not checked by anyone outside our team.</p>
@@ -93,28 +93,26 @@
         <caption class="sr-only">Share of a passage's ten true closest matches found, by share of passages scored and by how the passages were grouped</caption>
         <thead><tr><th scope="col">Passages scored</th><th scope="col">Our groups</th><th scope="col">Random groups, same sizes</th><th scope="col">Blocks of consecutive passages (order of arrival)</th></tr></thead>
         <tbody>
-          <tr><th scope="row">0.5%</th><td><b>98.1%</b></td><td>28.5%</td><td>87.3%</td></tr>
-          <tr><th scope="row">1%</th><td><b>99.0%</b></td><td>36.9%</td><td>90.7%</td></tr>
-          <tr><th scope="row">2%</th><td><b>99.6%</b></td><td>46.8%</td><td>93.1%</td></tr>
-          <tr><th scope="row">5%</th><td><b>99.9%</b></td><td>61.6%</td><td>96.2%</td></tr>
-          <tr><th scope="row">Scored to find 90% of the true ten</th><td><b>0.09%</b></td><td>23.8%</td><td>0.86%</td></tr>
-          <tr><th scope="row">Scored to find 95% of the true ten</th><td><b>0.20%</b></td><td>35.6%</td><td>3.4%</td></tr>
+          <tr><th scope="row">0.80% (1,600 rows)</th><td><b>98.78%</b></td><td>33.27%</td><td>92.45%</td></tr>
+          <tr><th scope="row">1.99% (4,000 rows)</th><td><b>99.63%</b></td><td>45.69%</td><td>95.51%</td></tr>
+          <tr><th scope="row">4.97% (10,000 rows)</th><td><b>99.89%</b></td><td>61.11%</td><td>97.88%</td></tr>
+          <tr><th scope="row">9.94% (20,000 rows)</th><td><b>99.96%</b></td><td>74.45%</td><td>98.91%</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="note">Mean over 500 questions. Random groups: the real group labels shuffled (3 shuffles). Blocks: consecutive passages cut to the real group sizes (3 orders). A second library, the 200,000-passage collection from the size check above with its own sorting run, gave the same picture: 98.2%, 28.8% and 87.2% at 0.5% scored. With 500 passages held out of the library as the questions, the closer stand-in for a new question, it gave 95.9%, 21.7% and 83.1%.</p>
+    <p class="note">Mean over 2,000 held-out passage-queries on part 0 (<code>receipts/order-measure/out-4-routing-ablation.txt</code>). A separate stand-in control favoured grouping; the previously published table's second-collection and interpolation rows had no matching shipped output and are withdrawn.</p>
 
     <h3>What this shows, and what it does not</h3>
     <ul>
-      <li><b>The grouping matters.</b> At 1% of passages scored, our groups found 99.0% of the true ten. Random groups of the same sizes found 36.9%.</li>
-      <li><b>Part of the help is the order the passages arrive in.</b> Passages arrive in document order, so blocks of consecutive passages already found 87.3% at 0.5%. This is a hard control, not a &ldquo;no organization&rdquo; control: the random column is the true &ldquo;off&rdquo; arm. Our grouping adds the rest: to find 90%, it scored 0.09% of the passages against 0.86% for blocks, about a tenth.</li>
-      <li><b>Random groups are not at zero.</b> At 0.5% scored, picking passages at random would find 0.5%. Random groups found 28.5%, probably because the centre of about nine random passages still leans toward each of them. Weak, not nothing.</li>
-      <li><b>The cost of choosing the groups is not in these numbers.</b> This router compared each question with all 22,995 group centres, which is 11.3% of the quarter&rsquo;s passage count in dot products. That is the same for all three columns, so the comparison between them stands, but the absolute saving does not. A router that looks in two steps would cost less, and we did not measure it.</li>
+      <li><b>The grouping matters.</b> At about 0.8% of the part scored, our groups found 98.78% of the true ten. Random groups of the same sizes found 33.27%.</li>
+      <li><b>Part of the help is the order the passages arrive in.</b> Passages arrive in document order, so blocks of consecutive passages already found 92.45% at 0.80%. This is a hard control, not a &ldquo;no organization&rdquo; control: the random column is the true &ldquo;off&rdquo; arm.</li>
+      <li><b>Random groups are not at zero.</b> At 0.80% scored, picking passages at random would find about 0.8%. Random groups found 33.27%, probably because the centre of about nine random passages still leans toward each of them. Weak, not nothing.</li>
+      <li><b>The cost of choosing the groups is not in these numbers.</b> This router compared each question with all 22,995 group centres, which is 11.4% of the part&rsquo;s passage count (22,995 centres over 201,137 rows) in dot products. That is the same for all three columns, so the comparison between them stands, but the absolute saving does not. A router that looks in two steps would cost less, and we did not measure it.</li>
       <li><b>This is not TRACE&rsquo;s own router.</b> The groups come from ordinary k-means, and we put each passage in the group with the nearest centre in the same space the router uses, which favours our groups with this router. Nothing here separates a contribution of TRACE from ordinary k-means grouping. We did not run guided routing against ordinary k-means with a standard group count, or against other search indexes.</li>
     </ul>
     <h3>What we do not say</h3>
     <ul>
-      <li>That random groups &ldquo;do nothing&rdquo; (they found 28.5% at 0.5%).</li>
+      <li>That random groups &ldquo;do nothing&rdquo; (they found 33.27% at 0.80% of the part).</li>
       <li>That this is faster, or any speed-up: the cost of choosing the groups and the time were not measured.</li>
       <li>That TRACE&rsquo;s own algorithm, rather than ordinary k-means grouping, causes this.</li>
       <li>That it holds for real questions, or for the full 812,545-passage library as one memory.</li>
@@ -180,7 +178,7 @@
         </div>
       </div>
     </div>
-    <p class="note">What TRACE buys is less passage-scoring work, 0.79% of passages. These three bars are what it costs at this size. Stored size on disk; memory use was not compared.</p>
+    <p class="note">What TRACE buys is less passage-scoring work, 0.79% of passages on the measured library part. These three bars are what it costs at this size. Stored size on disk; memory use was not compared.</p>
   </div>
 </section>
 
@@ -254,7 +252,7 @@
       <p class="callout-title"><strong class="callout-title">Read before using</strong></p>
       <ul>
         <li>One run each. The later run was not like-for-like: it picked candidates with an approximate method and stored data in columns. Its find rate was 0.7367 against 0.7300, and it used about 6% more disk.</li>
-        <li>This is building the memory, not serving searches. The first run's record is in the repository (<code>receipts/result.json</code>); the second run's record is not published yet.</li>
+        <li>This is building the memory, not serving searches. The first run's record is in the repository (<code>receipts/result.json</code>); the second run's record is published at <code>receipts/earlier-runs/seam12a-result.json</code>.</li>
         <li>It was a test on a smaller collection. We did not measure it at larger sizes.</li>
       </ul>
     </div>

@@ -65,7 +65,7 @@ append ack→query 0.114 s. Readers: 2 threads, 27,796 requests, p50 74.7 ms.
 | tokens / docs / atoms | smaller test collection; counts in `receipts/result.json` |
 | leaves / parents | 9,177 / 3,711 |
 | closed ledger commits | 164,195 (derived cap `max_delta_entries` 669,436, measured from 37,117 commits / 7,035 atoms, margin 2.0) |
-| peak RAM | parent 8,489.1 MiB (~8.5 GB) / child 7,169.2 MiB; transient tree 9,700.9 MiB at t≈3,097 s (restart window); mem floor 3 GB |
+| peak RAM | parent 8,489.1 MiB (~8.3 GiB) / child 7,169.2 MiB; transient tree 9,700.9 MiB at t≈3,097 s (restart window); mem floor 3 GB |
 | retained disk | 3,058,624,883 B (2.85 GiB) |
 | kill + restart | writer kill + restart phase 516.5 s; repair converged 5,847 → 0 |
 | readers | 2 threads, 27,796 requests, p50 74.7 ms |

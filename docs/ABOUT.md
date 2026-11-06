@@ -27,7 +27,7 @@ The checkboxes below the topics: leave "Releases" and "Packages" unticked (there
 
 ## Social preview image
 
-Upload [`docs/img/social-preview.png`](img/social-preview.png) (1280 by 640 pixels) at Settings, General, "Social preview", "Edit", "Upload an image". GitHub does not allow setting it from a file in the repository or from the command line. The source is [`img/social.html`](img/social.html): open it in a browser window sized 1280 by 640 pixels and take a screenshot to regenerate the image.
+Upload [`docs/img/social-preview.png`](img/social-preview.png) (1200 by 630 pixels) at Settings, General, "Social preview", "Edit", "Upload an image". GitHub does not allow setting it from a file in the repository or from the command line. The source is [`img/social.html`](img/social.html): open it in a browser window sized 1200 by 630 pixels and take a screenshot to regenerate the image.
 
 ## GitHub Pages
 

@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TRACE — a memory that organizes itself</title>
-<meta name="description" content="TRACE organizes a 100M library by meaning, so a question opens only the few groups most likely to hold an answer. A research prototype with recorded searches you can open and check.">
+<meta name="description" content="TRACE groups a sealed text library by meaning, so a question opens only the few groups most likely to hold an answer. A research prototype with recorded searches you can open and check.">
 <link rel="canonical" href="https://anshul48.github.io/trace/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="TRACE — a memory that organizes itself">
-<meta property="og:description" content="TRACE organizes a 100M library by meaning, so a question opens only the few groups most likely to hold an answer. A research prototype with recorded searches you can open and check.">
+<meta property="og:description" content="TRACE groups a sealed text library by meaning, so a question opens only the few groups most likely to hold an answer. A research prototype with recorded searches you can open and check.">
 <meta property="og:url" content="https://anshul48.github.io/trace/">
 <meta property="og:image" content="https://anshul48.github.io/trace/img/social-preview.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -48,19 +48,19 @@
     <div class="stage stage-light">
       <div class="pill-row"><span class="pill">Research prototype</span><span class="pill">Open source, Apache-2.0</span></div>
       <h1>TRACE: a memory that organizes itself.</h1>
-      <p class="lede">Nobody files the passages. TRACE lets them form their own groups by meaning, so developers and researchers can find the context their agents need. A question opens only the groups most likely to hold an answer, and every answer shows the page it came from. TRACE is a research prototype over one sealed 100M library, and every number here has its limits written down.</p>
+      <p class="lede">Nobody files the passages. TRACE lets them form their own groups by meaning, so developers and researchers can find the context their agents need. A question opens only the groups most likely to hold an answer, and every answer shows the page it came from. TRACE is a research prototype over one sealed library, and every number here has its limits written down.</p>
       <div class="btn-row">
         <a class="btn btn-primary" href="explorer/">Open the explorer</a>
         <a class="text-link" href="demos/#film">Watch the working films</a>
       </div>
       <p class="proof-line">0.79% scored; 0.9985 of exact search&rsquo;s top ten retained</p>
-      <p class="note">Scope: 50 test searches; one of four equal library parts; passage-scoring work only.</p>
+      <p class="note">Scope: 50 test searches; passage-scoring work only, measured on one of four nearly equal library parts; retention averaged across the parts.</p>
 
       <!-- SWAP: social preview image is docs/img/social-preview.png (replace that file, same name; used by every page as og:image). -->
       <!-- SWAP: hero picture is docs/img/organizing-pile.png (replace that file; keep the name). The animated canvas draws over it when JavaScript runs. -->
       <div class="pile" data-pile>
         <div class="pile-canvas-wrap">
-          <img class="static-pile" src="img/organizing-pile.png" width="1326" height="581" alt="Illustration: 20,000 dots in four equal parts, already sorted into groups. In the first part a question has lit 40 dots, with ten ringed as the best matches. All other dots are dim.">
+          <img class="static-pile" src="img/organizing-pile.png" width="1326" height="581" alt="Illustration: 20,000 dots in four nearly equal parts, already sorted into groups. In the first part a question has lit 40 dots, with ten ringed as the best matches. All other dots are dim.">
           <canvas width="1280" height="560" role="img" aria-label="Illustration of 20,000 dots that sort themselves into groups, then a question that lights a small part."></canvas>
           <div class="pile-hud" aria-hidden="true">
             <span class="chip" data-hud="count">Passages so far: 0</span>
@@ -75,7 +75,7 @@
           <button type="button" data-play aria-pressed="true">Pause</button>
         </div>
         <p class="pile-caption" aria-live="polite"><b>A library grows.</b> New passages just arrive, in no order. Nobody files them.</p>
-        <p class="pile-fine"><b>Illustration of the grouping and search.</b> It is not data. 20,000 dots stand in for the 812,545 passages of our sealed library (one dot is about 41 passages). Where each dot sits, and how many groups there are, is drawn. What is real is the proportion: four equal parts, and a question waking 0.79% of one of them (50 test searches, our library and method), drawn here as 40 of 5,000 dots.</p>
+        <p class="pile-fine"><b>Illustration of the grouping and search.</b> It is not data. 20,000 dots stand in for the 812,545 passages of our sealed library (one dot is about 41 passages). Where each dot sits, and how many groups there are, is drawn. What is real is the proportion: four nearly equal parts, and a question waking 0.79% of one of them (50 test searches, our library and method), drawn here as 40 of 5,000 dots.</p>
       </div>
     </div>
   </div>
@@ -85,14 +85,14 @@
 <section class="section-tight" id="library">
   <div class="wrap">
     <span class="eyebrow">The proof, in three minutes</span>
-    <h2>A question scored under one percent of the library.</h2>
+    <h2>Passage scoring covered under one percent of the measured library part.</h2>
     <div class="grid-4" style="margin-top: var(--space-5)">
-      <div class="stat"><span class="num">100M</span><span class="what">library, one frozen copy behind every number</span></div>
-      <div class="stat"><span class="num">0.79%</span><span class="what">of the library scored per question</span></div>
+      <div class="stat"><span class="num">Sealed</span><span class="what">library behind the headline search result</span></div>
+      <div class="stat"><span class="num">0.79%</span><span class="what">of the measured library part scored per question</span></div>
       <div class="stat"><span class="num">99.85%</span><span class="what">of exact search's top ten kept</span></div>
       <div class="stat"><span class="num">670</span><span class="what">recorded Muse Code worker jobs behind this site</span></div>
     </div>
-    <p class="note">Scope: 50 test searches; one of four equal library parts; passage-scoring work only. Fine print: 812,545 passages · 99.9 million tokens — 0.11% short of the 100M target. <a href="evidence/">Every number, with its caveats.</a></p>
+    <p class="note">Scope: 50 test searches; passage-scoring work only, measured on one of four nearly equal library parts; retention averaged across the parts. Fine print: 812,545 passages · 99.9 million tokens — 0.11% short of the 100M target. <a href="evidence/">Every number, with its caveats.</a></p>
   </div>
 </section>
 
@@ -133,7 +133,7 @@
       <article class="card">
         <div class="card-head"><h3>2. A question wakes a part</h3><span class="badge badge-built" data-status-id="sparse-search">Measured by us</span></div>
         <p>A question is compared with the shelves first, and only the shelves most likely to hold the answer are searched.</p>
-        <div class="stat"><span class="num">0.79%</span><span class="what">of one of four equal parts is scored per search</span><span class="scope">Passage-scoring work only (choosing the shelves and building them are separate costs), and 99.85% of exact search's top ten kept. 50 test searches, our library and method.</span></div>
+        <div class="stat"><span class="num">0.79%</span><span class="what">of one of four nearly equal parts is scored per search</span><span class="scope">Passage-scoring work only (choosing the shelves and building them are separate costs), measured on one part; 99.85% of exact search's top ten kept, averaged across the parts. 50 test searches, our library and method.</span></div>
       </article>
       <article class="card">
         <div class="card-head"><h3>3. Every answer has a record</h3><span class="badge badge-built" data-status-id="record-check">Working today</span></div>
@@ -187,13 +187,12 @@
       </article>
       <article class="card">
         <div class="card-head"><h3>ANIMA</h3><span class="badge badge-proto" data-status-id="anima-link">Prototype</span></div>
-        <p>A layer on top of the coding agent you already use (Muse Code first, then Claude Code, Codex), giving it memory (a prototype link), a checker it cannot see, and a screen to watch it work. One-line install:</p>
-        <p><code>curl -fsSL https://raw.githubusercontent.com/Anshul48/anima-substrate/main/install.sh | sh</code></p>
+        <p>A prototype layer on top of the coding agent you already use (Muse Code first, then Claude Code, Codex), giving it memory (a prototype link), a checker it cannot see, and a screen to watch it work. Prototype integration; see the companion repository for its current installation status.</p>
         <p class="btn-row"><a class="text-link" href="https://anshul48.github.io/anima-substrate/demo/">Recorded demo</a> <a class="text-link" href="https://github.com/Anshul48/anima-substrate">ANIMA on GitHub</a></p>
       </article>
       <article class="card">
         <div class="card-head"><h3>Reflex</h3><span class="badge badge-proto" data-status-id="reflex">Prototype</span></div>
-        <p>A line of work where an AI looks at a screen and finds the right button to press (SAM 3.1 with Muse Spark). An early trial, a direction.</p>
+        <p>A line of work where an AI looks at a screen and finds the right button to press. An early trial, a direction. Separate synthetic experiments used SAM and Muse Spark; the film's model is unconfirmed.</p>
         <p class="btn-row"><a class="text-link" href="https://anshul48.github.io/demo-trace-anima-reflex/">Replay</a> <a class="text-link" href="demos/#reflex">Short film</a></p>
       </article>
     </div>
