@@ -13,8 +13,8 @@
       "poster": "film-main.jpg",
       "captions": "film-main.vtt",
       "youtube": null,
-      "source": "docs/media/film/film-main-1080p.mp4 (native 1080p Remotion render, 27.3 MB)",
-      "size": "14.7 MB",
+      "source": "docs/media/film/film-main-1080p.mp4 (native 1080p Remotion render, 36.7 MB)",
+      "size": "17.9 MB",
       "where": "Home page, Demos",
       "swap": "SWAP: replace the three files named here and keep the names (1080p source cut lives in docs/media/film/), or set youtube to the video id."
     },
