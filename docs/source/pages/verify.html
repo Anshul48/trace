@@ -21,7 +21,7 @@
     <p><b>What it does not prove:</b> that the search found the best passage, or that the source article still says the same today.</p>
 
     <h2 id="code">2. Check that the published code is the code we tested {{badge:freeze-verify}}</h2>
-    <p class="note">Needs: Python 3 and a copy of the repository (<code>git clone https://github.com/Anshul48/trace</code>). A few seconds.</p>
+    <p class="note">Needs: Python 3 and a copy of the repository (<code>git clone --depth 1 https://github.com/Anshul48/trace</code>). A few seconds.</p>
 <pre><code>python3 tools/verify_freeze.py
 python3 tools/check_receipts.py</code></pre>
     <p>The first re-computes the hash of each of the 207 files of the tested engine and compares it with the list we published. The expected end of the output is:</p>

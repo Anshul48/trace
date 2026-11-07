@@ -15,15 +15,17 @@ TRACE groups a sealed text library by meaning, so developers and researchers can
 ## Run it in two commands
 
 ```bash
-git clone https://github.com/Anshul48/trace
+git clone --depth 1 https://github.com/Anshul48/trace && cd trace
 python3 run_explorer.py --dataset 20k
 ```
+
+Scope: serves the small 20k sample (first 88 documents) shipped in this clone — this shallow clone currently has about 63 MB of packed Git data and about 74 MB of checked-out files, plus Git metadata (measured 2026-11-07 at 0d54088). After cloning, the replay needs no additional packages or data downloads. Clone time depends on the connection. The [quickstart](docs/quickstart/README.md) lists what ships and the honest limits; the [judge on-ramp](https://anshul48.github.io/trace/judge/) walks the full path.
 
 ## The 3-minute proof
 
 Averaged over 50 test searches, TRACE scored **0.79% of rows on one of four nearly equal library parts** and kept **99.85% of exact search's top ten** (average over 200 question–part pairs; merged top-10 identical on 50/50).
 
-*<small>Scope: 50 test searches x 4 parts (200 question–part pairs averaged); the 0.79% work figure covers one of four nearly equal library parts (shard0); passage-scoring work only. The full numbers, with every caveat, are on the [evidence page](https://anshul48.github.io/trace/evidence/).</small>*
+*<small>Scope: 50 test searches x 4 parts (200 question–part pairs averaged); the 0.79% work figure covers one of four nearly equal library parts (the first library part); passage-scoring work only. The full numbers, with every caveat, are on the [evidence page](https://anshul48.github.io/trace/evidence/).</small>*
 
 | | | | |
 |---|---|---|---|
@@ -63,7 +65,7 @@ Reflex is a separate line of work where an AI looks at a screen and finds the ri
 
 | Destination | What lives there |
 |---|---|
-| [Receipts](receipts/) | The records of our runs: the qualification run, the earlier larger builds, the order measurement. The [evidence page](https://anshul48.github.io/trace/evidence/) tells the story they tell. |
+| [Checkable records](receipts/) | The records of our runs: the qualification run, the earlier larger builds, the order measurement. The [evidence page](https://anshul48.github.io/trace/evidence/) tells the story they tell. |
 | [Reproduce](https://anshul48.github.io/trace/verify/) | The commands that re-check the code and the records, and a [small reproduction](docs/reproduction/repro-20k/README.md) that runs on your own computer. |
 | [Architecture](docs/ARCHITECTURE.md) | The design in technical terms, plus a [walk through the 207 files in the tested snapshot](docs/CODE-TOUR.md). |
 | [Research notes](docs/BENCHMARKS.md) | The measurement records of the earlier builds, and the [scale and build-memory runs](docs/SCALE-AND-MEMORY.md) with their raw records. [In-depth benchmarks](docs/BENCHMARKS-DEEP.md). |

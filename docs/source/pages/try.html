@@ -53,8 +53,7 @@
     <article class="card" id="local">
       <div class="card-head"><h2 style="font-size: var(--step-1); margin: 0">3. Run the explorer on your own computer</h2>{{badge:explorer-local}}</div>
       <p><b>2 minutes. Needs Python 3 and git.</b></p>
-<pre><code>git clone https://github.com/Anshul48/trace.git
-cd trace
+<pre><code>git clone --depth 1 https://github.com/Anshul48/trace && cd trace
 ./tools/run-trace.sh        # Windows: tools\run-trace.bat</code></pre>
       <p>It serves this site on your computer (no outside requests) and opens the explorer. It is the same replay as step 1, running locally.</p>
     </article>
@@ -62,7 +61,7 @@ cd trace
     <article class="card" id="reproduce">
       <div class="card-head"><h2 style="font-size: var(--step-1); margin: 0">4. Re-check the code and run the small reproduction</h2><span>{{badge:freeze-verify}} {{badge:small-repro}}</span></div>
       <p><b>2 to ten minutes. Needs Python 3, git, and two small Python packages.</b></p>
-      <p>This confirms that the published code is byte for byte the code we tested (207 files), and runs the small reproduction at 20,000 tokens on your machine. It reproduces the method on a small slice. It does not reproduce the sealed-library result: that needs our corpus and billed cloud hardware.</p>
+      <p>This confirms that the published code is byte for byte the code we tested (207 files), and runs the small reproduction at 20,000 tokens on your machine. It runs the earlier frozen engine's protocol on a small sample; it does not reproduce the measured library's vector-only search. It does not reproduce the sealed-library result: that needs our corpus and billed cloud hardware.</p>
       <p class="btn-row"><a class="btn btn-primary" href="../verify/">The exact commands, and what you should see</a></p>
     </article>
 

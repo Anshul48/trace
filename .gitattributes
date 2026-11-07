@@ -7,3 +7,4 @@ archive/** -text
 docs/reproduction/repro-20k/data-20k/** -text
 docs/reproduction/repro-20k/small-prefix-20k.tar.gz binary
 tools/demo-app/data/** -text
+tools/*.bat text eol=crlf

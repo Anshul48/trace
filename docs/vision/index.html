@@ -72,7 +72,7 @@
     <h3>What would have to be true first</h3>
     <ul class="needs">
       <li><b>The order must hold as the memory grows.</b> We checked collections of 10,000 to 200,000 passages in a controlled check (the largest set we sorted holds 233,000 passages) and found the order at every size, with no trend either way. We have not checked millions.</li>
-      <li><b>The right pieces must come quickly.</b> Today a TRACE search takes 1.2 seconds on our library, against 88 milliseconds for a plain scan.</li>
+      <li><b>The right pieces must come quickly.</b> Recorded search-stage times were 1.2 s for a TRACE search on our library and 88 ms for a plain scan; the setups differ, embedding is separate, and we make no speed claim.</li>
       <li><b>&ldquo;Right&rdquo; must mean useful.</b> On our 50 test searches, ordinary keyword search found the right source more often than TRACE (82% against 52%).</li>
     </ul>
   </div>

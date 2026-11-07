@@ -158,7 +158,7 @@ var Corpus = (function () {
     for (var i = 0; i < items.length; i++)
       items[i].setAttribute("aria-current", items[i].dataset.atom === atomId ? "true" : "false");
     if (!a) { box.innerHTML = "<p class='muted'>Pick a passage to see its tier and membership chain.</p>"; return; }
-    var chain = ["<span class='node'>shard 0 · 144 atoms</span>"]
+    var chain = ["<span class='node'>library part 0 · 144 passages</span>"]
       .concat(a._parents.map(function (pid) {
         var p = parentById[pid];
         return "<span aria-hidden='true'>→</span><span class='node' title='parent group'>" +
@@ -175,7 +175,7 @@ var Corpus = (function () {
       "<p class='muted' style='margin:.2em 0'>" + esc(a.snippet || "") + "</p>" +
       "<div class='chain'>" + chain + "</div>" +
       "<dl style='font-size:.85rem'>" +
-      "<dt>Tier</dt><dd>atom (passage) → leaf (unit) → parent (group) → shard</dd>" +
+      "<dt>Tier</dt><dd>atom (passage) → leaf (unit) → parent (group) → library part</dd>" +
       "<dt>Character span</dt><dd>" + esc(JSON.stringify(a.span)) + " in doc " + esc(a.doc_id) + "</dd>" +
       "<dt>Atom id</dt><dd><code style='word-break:break-all'>" + esc(a.id) + "</code></dd>" +
       "</dl>";
@@ -222,7 +222,7 @@ var Corpus = (function () {
     });
     mk("circle", { cx: 60, cy: H / 2, r: 16, fill: "#0a1124", "data-n": "shard" }, g);
     mk("text", { x: 60, y: H / 2 + 34, "text-anchor": "middle", "font-size": 11, fill: "currentColor" }, g)
-      .textContent = "shard 0 · 144";
+      .textContent = "part 0 · 144";
     C.parents.forEach(function (p) {
       var y = L.py[p.id], r = 4 + Math.sqrt(p.atom_count || 1) * 1.6;
       mk("circle", { cx: 250, cy: y, r: r, fill: "#0b5fff", opacity: 0.8,
@@ -237,7 +237,7 @@ var Corpus = (function () {
       t.textContent = shortId(l.id) + "·" + (leafAtoms[l.id] || 0);
     });
     var h1 = mk("text", { x: 60, y: 24, "text-anchor": "middle", "font-size": 12, "font-weight": "bold", fill: "currentColor" }, g);
-    h1.textContent = "shard";
+    h1.textContent = "library part";
     var h2 = mk("text", { x: 250, y: 24, "text-anchor": "middle", "font-size": 12, "font-weight": "bold", fill: "currentColor" }, g);
     h2.textContent = "51 parents";
     var h3 = mk("text", { x: 520, y: 24, "text-anchor": "middle", "font-size": 12, "font-weight": "bold", fill: "currentColor" }, g);
@@ -293,7 +293,7 @@ var Corpus = (function () {
     sel = n; paintSel();
     var note = $("mapnote");
     if (!n) { note.textContent = ""; return; }
-    if (n === "shard") { note.textContent = "shard 0: all 51 parents, 81 units, 144 atoms."; return; }
+    if (n === "shard") { note.textContent = "library part 0: all 51 parents, 81 units, 144 passages."; return; }
     var kind = n.slice(0, 2), id = n.slice(2);
     if (kind === "p:") {
       var p = parentById[id];
@@ -387,8 +387,10 @@ var Trace = (function () {
   }
   function probeLabel(i) {
     var e = evalRows()[i];
-    return "probe #" + e.probe + " · " + e.family + " · leave-source-out " +
-      (e.leave_source_out ? "on" : "off") + " · recall " + e.guided_recall10.toFixed(2);
+    return "check #" + e.probe + " · " + e.family + " · source passage left out: " +
+      (e.leave_source_out ? "yes" : "no") +
+      " · agreement with the ten highest-scoring passages (equal scores count as matches): " +
+      e.guided_recall10.toFixed(2);
   }
   function counts() {
     var e = evalRows()[probes[pi]], q = R.questions[qi];
@@ -398,7 +400,7 @@ var Trace = (function () {
       { n: e.work.children_scored + " units", d: "open best-matching units" },
       { n: e.work.atoms_scored + " atoms", d: e.work.member_visits + " member visits" },
       { n: e.guided_scoring_rows + " rows", d: "score C, keep top 10" },
-      { n: "10 passages", d: "recall@10 " + e.guided_recall10.toFixed(2) + " (recorded)" }
+      { n: "10 passages", d: "agreement with the ten highest-scoring passages (equal scores count as matches): " + e.guided_recall10.toFixed(2) + " (recorded)" }
     ];
   }
   function renderStages() {

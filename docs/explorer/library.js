@@ -27,7 +27,12 @@ var STATIC = P.static === "1";
  * scored-row lists were not recorded, so the lit passages below are the
  * recorded guided top-10 for the picked question, and the counter runs to the
  * recorded aggregate. */
-var SCORED = 1600, PART_ROWS = 203137, FRAC = "0.79%";
+var SCORED = 1600, PART_ROWS = 203137;
+/* Live percent: the label tracks the running counter, so a mid-run 1,155
+ * rows reads 0.57% and only the final 1,600 reads 0.79%. */
+function fracFor(n) {
+  return n <= 0 ? "0.00%" : (n / PART_ROWS * 100).toFixed(2) + "%";
+}
 
 if (!R || !R.questions || !R.passages) {
   var host = $("view-library");
@@ -219,9 +224,9 @@ function applyFrac(f) {
 }
 function paintCounter() {
   $("lcount").innerHTML = "<b>" + fmt(scored) + "</b> of " + fmt(PART_ROWS) +
-    " rows scored <b>(" + (scored ? FRAC : "0.00%") + ")</b>";
+    " rows scored <b>(" + fracFor(scored) + ")</b>";
   $("lpass").textContent = curQ ?
-    (litCount + " of 10 recorded top passages lit") : "pick a recorded question, then play the routing";
+    (litCount + " of 10 recorded top passages lit") : "press play to run the routing for the shown question";
 }
 
 /* ================= paint ================= */
@@ -234,18 +239,17 @@ function paint() {
   var h = camH();
   var vx0 = cam.x - 60, vy0 = cam.y - 60, vx1 = cam.x + cam.w + 60, vy1 = cam.y + h + 60;
   var s = CW / cam.w;   /* world -> device px */
-  /* shard blocks */
+  /* shard blocks (part labels are collected here, painted last over bubbles/dots) */
   ctx.textBaseline = "top";
+  var plabels = [];
   shardBlocks.forEach(function (b) {
     if (b.x + b.w < vx0 || b.x > vx1 || b.y + b.h < vy0 || b.y > vy1) return;
     ctx.strokeStyle = c.shard; ctx.lineWidth = Math.max(1, 1.5 * DPR);
     ctx.strokeRect(w2sx(b.x), w2sy(b.y), b.w * s, b.h * s);
-    ctx.fillStyle = c.mut; ctx.font = Math.max(10, 13 * DPR) + "px " +
-      "-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
     var hw = b.w * s;
-    ctx.fillText(hw > 430 * DPR
+    plabels.push({ t: hw > 430 * DPR
       ? "Part " + (b.sh + 1) + " of 4 \u00b7 " + fmt(b.n) + " sample passages (sample only)"
-      : "Part " + (b.sh + 1), w2sx(b.x) + 8 * DPR, w2sy(b.y) + 6 * DPR);
+      : "Part " + (b.sh + 1), x: w2sx(b.x) + 8 * DPR, y: w2sy(b.y) + 6 * DPR });
   });
   /* group bubbles */
   var i, g;
@@ -255,19 +259,39 @@ function paint() {
     var x = w2sx(g.x), y = w2sy(g.y), r = g.r * s;
     if (r < 1.5) continue;
     var glow = litG[g.key] || 0;
-    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832);
+    /* Lit groups scale up as they light; non-lit ones sink to ~10% opacity. */
+    var lr = r * (1 + 0.22 * glow);
+    if (glow > 0) {
+      /* soft outer glow: two expanding translucent rings */
+      ctx.beginPath(); ctx.arc(x, y, lr + 10 * DPR * glow, 0, 6.2832);
+      ctx.strokeStyle = c.litRing; ctx.lineWidth = Math.max(1, 6 * DPR);
+      ctx.globalAlpha = 0.22 * glow; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y, lr + 4 * DPR * glow, 0, 6.2832);
+      ctx.lineWidth = Math.max(1, 3 * DPR);
+      ctx.globalAlpha = 0.45 * glow; ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    ctx.beginPath(); ctx.arc(x, y, lr, 0, 6.2832);
+    ctx.globalAlpha = glow > 0 ? 1 : (dimK > 0 ? 1 - 0.90 * dimK : 1);
     ctx.fillStyle = c.bubble; ctx.fill();
-    ctx.lineWidth = Math.max(1, (glow > 0 ? 3 : 1.2) * DPR);
+    ctx.lineWidth = Math.max(1, (glow > 0 ? 3.5 : 1.2) * DPR);
     ctx.strokeStyle = glow > 0 ? c.litRing : c.ring;
-    ctx.globalAlpha = glow > 0 ? (0.35 + 0.65 * glow) : (dimK > 0 ? 1 - 0.45 * dimK : 1);
     ctx.stroke(); ctx.globalAlpha = 1;
-    /* label: real top term, only when it fits */
-    if (g.term && r * 2 > 40 * DPR && s > 0.28 * DPR) {
-      ctx.fillStyle = glow > 0 ? c.lit : c.mut;
-      ctx.font = (glow > 0 ? "bold " : "") + Math.max(9, 10.5 * DPR) + "px " +
+    /* label: real top term, only when it fits its bubble (lit labels always show) */
+    if (g.term && lr * 2 > 44 * DPR && s > 0.28 * DPR) {
+      ctx.font = (glow > 0 ? "bold " : "") + Math.max(12, 15 * DPR) + "px " +
         "-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(g.term.length > 14 ? g.term.slice(0, 14) + "\u2026" : g.term, x, y + r + 2 * DPR);
+      var wt = g.term.length > 14 ? g.term.slice(0, 14) + "\u2026" : g.term;
+      if (glow > 0 || ctx.measureText(wt).width <= lr * 2) {
+        ctx.globalAlpha = glow > 0 ? 1 : (dimK > 0 ? 1 - 0.90 * dimK : 1);
+        ctx.fillStyle = glow > 0 ? c.lit : c.mut;
+        var lx = x, ly = y + lr + 3 * DPR;
+        ctx.lineWidth = Math.max(1, 3 * DPR); ctx.strokeStyle = c.bg;
+        ctx.strokeText(wt, lx, ly);
+        ctx.fillText(wt, lx, ly);
+        ctx.globalAlpha = 1;
+      }
       ctx.textAlign = "left";
     }
   }
@@ -279,12 +303,22 @@ function paint() {
       var d = DOTS[i];
       if (d.x < vx0 || d.x > vx1 || d.y < vy0 || d.y > vy1) continue;
       var isLit = lit[d.pid], glow2 = litG[d.g.key] || 0;
-      ctx.beginPath(); ctx.arc(w2sx(d.x), w2sy(d.y), Math.max(1.1, dr), 0, 6.2832);
+      /* lit passages pop: nearly double radius plus a halo ring */
+      var pr = isLit ? Math.max(2.2, dr * 1.9) : Math.max(1.1, dr);
+      var px = w2sx(d.x), py = w2sy(d.y);
+      if (isLit && dr > 1.2) {
+        ctx.beginPath(); ctx.arc(px, py, pr + 3.2 * DPR, 0, 6.2832);
+        ctx.globalAlpha = 0.5; ctx.strokeStyle = c.litRing;
+        ctx.lineWidth = Math.max(1, 2 * DPR); ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      ctx.beginPath(); ctx.arc(px, py, pr, 0, 6.2832);
       if (isLit) { ctx.fillStyle = c.lit; }
       else if (dimK > 0) { ctx.fillStyle = glow2 > 0 ? c.dot : c.dim; }
       else { ctx.fillStyle = c.dot; }
-      ctx.fill();
-      if (isLit && dr > 2.4) {
+      if (!isLit && dimK > 0 && !(glow2 > 0)) ctx.globalAlpha = 1 - 0.90 * dimK;
+      ctx.fill(); ctx.globalAlpha = 1;
+      if (isLit && pr > 2.4) {
         ctx.lineWidth = Math.max(1, 1.4 * DPR); ctx.strokeStyle = "#ffffff";
         ctx.stroke();
       }
@@ -294,6 +328,20 @@ function paint() {
         ctx.stroke();
       }
     }
+  }
+  /* part labels last, each on an opaque chip: bubbles/dots can never cover them */
+  if (plabels.length) {
+    ctx.textBaseline = "top"; ctx.textAlign = "left";
+    ctx.font = Math.max(10, 13 * DPR) + "px " +
+      "-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+    plabels.forEach(function (lb) {
+      var pad = 4 * DPR, th = Math.max(10, 13 * DPR);
+      var tw = ctx.measureText(lb.t).width;
+      ctx.globalAlpha = 1; ctx.fillStyle = c.bg;
+      ctx.fillRect(lb.x - pad, lb.y - pad, tw + pad * 2, th + pad * 2);
+      ctx.fillStyle = c.mut;
+      ctx.fillText(lb.t, lb.x, lb.y);
+    });
   }
 }
 
@@ -533,7 +581,7 @@ window.__LIBRARY__ = {
   },
   litIds: function () { return Object.keys(lit).sort(function (a, b) { return (+a) - (+b); }); },
   litGroupCount: function () { return Object.keys(litG).length; },
-  counter: function () { return { scored: scored, total: PART_ROWS, frac: scored ? FRAC : "0.00%", lit: litCount }; },
+  counter: function () { return { scored: scored, total: PART_ROWS, frac: fracFor(scored), lit: litCount }; },
   camera: function () { return { x: cam.x, y: cam.y, w: cam.w }; },
   groupLabel: function (sh, pa) { var g = groups[sh + ":" + pa]; return g ? g.term : null; },
   groupOf: function (pid) { var p = RP[pid]; return p ? { sh: p.sh, pa: p.pa } : null; },
@@ -547,7 +595,7 @@ window.__LIBRARY__ = {
     return null;
   },
   guidedIds: function () { return guided(); },
-  setZoom: setZoom, play: play, stop: stop,
+  setZoom: setZoom, play: play, stop: stop, applyFrac: applyFrac,
   selectQuestion: selectQuestion, selectPassage: selectPassage,
   enter: function () {
     sizeCanvas();

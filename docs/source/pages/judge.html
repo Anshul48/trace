@@ -1,0 +1,74 @@
+<!--page {"title": "Judge's on-ramp", "desc": "The four-step judge path: clone, run, verify, look inside. Two commands to a running explorer, then the checks and the honest limits."} -->
+<section class="section-tight">
+  <div class="wrap-narrow">
+    <span class="eyebrow">For judges</span>
+    <h1 style="font-size: var(--step-3)">Open the recorded TRACE explorer locally in two commands.</h1>
+    <p class="lede" style="max-width: 52ch">TRACE is search that shows its work: it finds nearly the same passages as exact meaning-based search while looking at under 1% of the library, and every result comes with a checkable record. A research prototype over one sealed library, measured by us; no outside party has checked it yet.</p>
+    {{statusline}}
+    <p class="note">Needs git, Python 3.8 or newer, and a web browser. This shallow clone currently has about 63 MB of packed Git data and about 74 MB of checked-out files, plus Git metadata. After cloning, the replay needs no additional packages or data downloads. Clone time depends on the connection. (Sizes measured 2026-11-07 at 0d54088.)</p>
+<pre><code>git clone --depth 1 https://github.com/Anshul48/trace &amp;&amp; cd trace
+python3 run_explorer.py --dataset 20k</code></pre>
+    <p class="btn-row"><a class="btn btn-primary" href="../explorer/">Open the hosted explorer</a><a class="text-link" href="../verify/">The checks, in full</a></p>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="wrap-narrow" style="display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-5)">
+
+    <article class="card" id="clone">
+      <div class="card-head"><h2 style="font-size: var(--step-1); margin: 0">Step 1. Clone</h2>{{badge:explorer-local}}</div>
+      <p><b>About 63 MB of packed Git data to download, about 74 MB checked out. Needs git.</b></p>
+<pre><code>git clone --depth 1 https://github.com/Anshul48/trace &amp;&amp; cd trace</code></pre>
+      <p>The clone holds the explorer, the only shipped dataset (the 20k sample, the first 88 documents of our source text: 88 documents, 20,030 tokens, 144 passages with vectors), and the records of our runs. There is nothing else to fetch.</p>
+    </article>
+
+    <article class="card" id="run">
+      <div class="card-head"><h2 style="font-size: var(--step-1); margin: 0">Step 2. Run</h2>{{badge:explorer-replay}}</div>
+      <p><b>Seconds. Needs Python 3 only. Downloads nothing.</b></p>
+<pre><code>python3 run_explorer.py --dataset 20k</code></pre>
+      <p>It serves the explorer from your clone and opens it in your browser on the recorded-search replay page: a replay of 144 real searches TRACE answered on our own server, each result with a checkable record. It prints the explorer address, the Inside TRACE address, and <code>Dataset: 20k prefix shipped in this repo.</code> Press Ctrl+C to stop. On a machine with no browser, add <code>--no-browser</code> and open the printed address yourself.</p>
+    </article>
+
+    <article class="card" id="verify">
+      <div class="card-head"><h2 style="font-size: var(--step-1); margin: 0">Step 3. Verify</h2><span>{{badge:freeze-verify}} {{badge:record-check}}</span></div>
+      <p><b>Seconds. In the clone.</b></p>
+<pre><code>python3 tools/verify_freeze.py
+python3 tools/check_receipts.py</code></pre>
+      <p>Expected: <code>entries=207 ok=207 missing=0 mismatch=0</code> and <code>receipts ok: gates, both probe modes, matched work, caps, freeze digest</code>. <code>python3 tools/verify_20k.py</code> should print exactly one line: <code>IDENTICAL</code> (selected sample counts and statuses agree, and the explorer data files match the hashes pinned in this checker). The engine-file check above compares the 207 engine files with the published manifest. These checks do not establish that the explorer export and shipped pilot record are the same run. Then open any result's record in the explorer and press &ldquo;Check the fingerprint in my browser&rdquo;: your browser recomputes it and it should say it matches. <a href="../verify/">What each check proves, and what it does not.</a></p>
+    </article>
+
+    <article class="card" id="inside">
+      <div class="card-head"><h2 style="font-size: var(--step-1); margin: 0">Step 4. Look inside</h2>{{badge:library-100m}}</div>
+      <p><b>A few minutes. In the explorer.</b></p>
+      <p>Open the Inside TRACE address the server printed and switch to the Library tab: 1,430 real sample passages in 884 real groups across the 4 library parts. Pick a recorded question and watch it light its top 10 while the counter runs to the recorded aggregate (about 1,600 of 203,137 rows on one part, 0.79%). Group membership, titles, texts and fingerprints are the recordings; only the bubble positions are our layout.</p>
+      <p class="btn-row"><a class="btn btn-primary" href="../explorer/inside.html">See inside TRACE</a></p>
+    </article>
+
+  </div>
+</section>
+
+<section class="section-tight" id="not-shown">
+  <div class="wrap-narrow prose">
+    <h2>What this does not show</h2>
+    <p>The two commands above are real, but they are the on-ramp, not the whole story. The limits, plainly:</p>
+    <ul>
+      <li><b>Only the 20k prefix ships.</b> <code>--download 10m</code> and <code>--download 100m</code> stop with exit 2 and say no such kit exists. A download for the whole library is planned, so there is no size or hardware list yet. {{badge:local-kit}}</li>
+      <li><b>There is no live service.</b> The public backend is switched off: it failed a first test with many people using it at once. A later fix passed a local retest, but it stays off. {{badge:public-service}}</li>
+      <li><b>The headline result is ours, on our library, over 50 test searches.</b> Scoring 0.79% of rows on one of four nearly equal library parts while keeping 0.9985 of exact meaning-based search's top ten (about 127 times less passage-scoring work; choosing and building the groups are separate costs). The sealed library holds 812,545 passages and 99,891,846 tokens, 0.11% short of the 100M target. For our library and our method only; not reproduced on public data. {{badge:sparse-search}} {{badge:outside-check}}</li>
+      <li><b>Ordinary keyword search did better on this test.</b> On the 50 test searches it put the right source passage in its top ten for 82% of them; TRACE did for 52%, and exact search by meaning also got 52%, so the gap is meaning versus keywords, not our shortcut. On a stricter score that also rewards putting the source first, 0.74 against 0.42. Keyword search also took less search-stage time (6 ms against our 1.2 s; the recorded setups differ, and we make no speed claim). TRACE is meaning-based search you can verify, not a keyword-search replacement.</li>
+      <li><b>The measured search is vector search only,</b> with no keyword part combined in. The small 20k run runs the earlier frozen engine's protocol on a small sample; it does not reproduce the measured library's vector-only search; its numbers are not the sealed-library numbers.</li>
+      <li><b>Earlier, larger tests are ours and separate.</b> The 310.5M and 504.5M-token builds ran on a machine that has since been shut down, so only their records exist; the 1.53B-token item was a separate group-picking test; we have not run a billion tokens through TRACE. None of them is the sealed-library result. <a href="../evidence/#appendix">The earlier tests, with every caveat.</a></li>
+    </ul>
+    <h2>Where each number comes from</h2>
+    <ul>
+      <li>88 documents / 20,030 tokens / 144 vectors: <code>docs/reproduction/repro-20k/README.md:19,53-54</code></li>
+      <li>Only 20k ships; 10m/100m missing; Python 3.8+: <code>run_explorer.py:32,61,78,146-162</code></li>
+      <li>144 recorded searches: <code>docs/status.json:14</code></li>
+      <li>207 files + expected outputs: <code>tools/verify_freeze.py:5</code>, <code>tools/check_receipts.py:82</code></li>
+      <li>50 searches / 0.79% / 0.9985 / ~127x: <code>docs/status.json:51</code>, <code>docs/source/pages/explorer.html:85</code></li>
+      <li>812,545 / 99,891,846 / 0.11% short: <code>docs/status.json:42</code>, <code>docs/explorer/inside.html:45</code></li>
+      <li>82% / 52% / 52%, 0.74 vs 0.42, 6 ms vs 1.2 s: <code>docs/source/pages/evidence.html:136-137</code></li>
+      <li>1,430 / 884 / 4 parts; 1,600 of 203,137: <code>docs/explorer/inside.html:85-89</code>, <code>docs/explorer/library.js:26,30</code></li>
+    </ul>
+  </div>
+</section>

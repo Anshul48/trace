@@ -3,7 +3,7 @@
 
 The website lives in this folder and is served by GitHub Pages at https://anshul48.github.io/trace/. Its pages are generated from [`source/`](source/) by `python3 tools/build_site.py`; do not edit the generated `index.html` files by hand.
 
-## Receipts
+## Checkable records
 
 - [`receipts/`](../receipts/): the records of our runs (the folder is named *receipts*).
 - [`receipts/earlier-runs/`](../receipts/earlier-runs/): the earlier builds and the build-memory runs.

@@ -14,7 +14,7 @@ abstract: >-
   question wakes only a small part of it, and every answer carries a record
   that can be checked. On a sealed library of 812,545 passages (99.9 million
   tokens, short of the 100M target by 0.11%), a question scored 0.79% of the
-  rows on one of four equal parts and kept 0.9985 of exact search's top ten,
+  rows on one of four nearly equal parts and kept 0.9985 of exact search's top ten,
   over 50 test searches, with the team's own library and method. The tested
   engine is frozen (207 files, verifiable with tools/verify_freeze.py).
 keywords:

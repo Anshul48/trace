@@ -72,7 +72,7 @@ tree is present, the full set runs unchanged:
   --drain-bounded-k 32 --candidate-shadow-audit 8` with
   `SUP_REUSE_VIEW_POOL=1` and derived cap `max_delta_entries` 669,436.
 
-## Receipts
+## Checkable records
 
 `receipts/` carries the staged VM JSONs verbatim: `result.json`,
 `source-pin.json`, `input.json`, `cap-derivation.json`,

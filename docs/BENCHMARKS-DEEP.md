@@ -42,7 +42,7 @@ passage scored) and ordinary keyword search.
 | Comparison | Figure | Scope note |
 |---|---|---|
 | Share of exact search's top ten kept by TRACE | 0.9985 averaged over 200 question–part pairs | 50 searches x 4 parts, per-part top-10 vs exact; merged global top-10 identical on 50/50; preservation of exact results, not answer quality |
-| Passage rows scored by TRACE | 0.79% on one of four equal library parts (shard0) | single-part passage-scoring work only; group choice, build, and search-stage time are separate costs (~127x less scoring work) |
+| Passage rows scored by TRACE | 0.79% on one of four nearly equal library parts (the first library part) | single-part passage-scoring work only; group choice, build, and search-stage time are separate costs (~127x less scoring work) |
 | Right source passage in top ten | keyword 82%, TRACE 52%, exact 52% | same 50; the gap is meaning-search vs keywords, not the routing shortcut |
 | Rank-aware score (nDCG) | keyword 0.74, TRACE 0.42 | same 50; binary designated-source target, not human relevance judgments; never the 82/52 pair under an nDCG label |
 | Search-stage time per query (NOT end-to-end; protocols differ, embedding timed separately) | keyword retrieval p50 6 ms; exact batched mean ~88 ms; TRACE 4-shard search-call p50 1.2 s | same 50 searches; keyword batch-1 retrieval only; exact batch-50 amortized GEMM; TRACE 4 sequential search calls |
@@ -321,7 +321,7 @@ numbers only; no general claim is drawn.
 - On the sealed library's 50 searches, TRACE's shortcut preserved exact
   meaning-search results (0.9985 averaged over 200 question–part pairs;
   merged top-10 identical on 50/50) while scoring 0.79% of rows on one
-  part (shard0, single-part work only); on the same 50, keyword search
+  part (the first library part, single-part work only); on the same 50, keyword search
   placed the source passage in its top ten more often (82% vs 52%), with
   search-stage times (different protocols, not end-to-end; embedding
   excluded) of 6 ms keyword-retrieval p50, ~88 ms exact batched mean, and

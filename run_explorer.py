@@ -4,7 +4,7 @@
 
 Standard library only. No install, no downloads, no numpy::
 
-    git clone https://github.com/Anshul48/trace
+    git clone --depth 1 https://github.com/Anshul48/trace && cd trace
     python3 run_explorer.py --dataset 20k
 
 --dataset 20k serves the explorer plus the data files that ship in this
@@ -21,6 +21,7 @@ import errno
 import http.server
 import socketserver
 import sys
+import threading
 import webbrowser
 from pathlib import Path
 
@@ -130,6 +131,15 @@ def serve(host, port):
     return server, url
 
 
+def _open_browser(url):
+    """Open URL in the default browser; never raises (daemon-thread target)."""
+    try:
+        webbrowser.open(url)
+    except Exception as exc:  # browser launch must never kill serving
+        print("run_explorer.py: could not open a browser (%s); "
+              "open the URL above manually." % exc, flush=True)
+
+
 def main(argv=None):
     args = parse_args(argv)
 
@@ -174,16 +184,15 @@ def main(argv=None):
     inside_url = url + "inside.html"
     print("TRACE explorer serving docs/ at %s" % url.rsplit("/explorer/", 1)[0] + "/",
           flush=True)
-    print("Explorer (Ask tab):  %s" % url, flush=True)
+    print("Explorer (replay):   %s" % url, flush=True)
     print("Inside TRACE:        %s" % inside_url, flush=True)
     print("Dataset: 20k prefix shipped in this repo. Press Ctrl+C to stop.",
           flush=True)
     if not args.no_browser:
-        try:
-            webbrowser.open(url)
-        except Exception as exc:  # browser launch must never kill serving
-            print("run_explorer.py: could not open a browser (%s); "
-                  "open the URL above manually." % exc)
+        print("Opening the explorer in your default browser; if nothing opens, "
+              "open the URL above manually.", flush=True)
+        thread = threading.Thread(target=_open_browser, args=(url,), daemon=True)
+        thread.start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:

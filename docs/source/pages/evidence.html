@@ -134,8 +134,8 @@
     <h2>What we did not show</h2>
     <ol class="limits-list">
       <li><div><b class="lead">Ordinary keyword search finds the source more often.</b><p>On our 50 test searches, ordinary keyword search put the right source passage in its top ten for 82% of them. TRACE did for 52%, and exact search by meaning also got 52%, so the gap is meaning versus keywords, not our shortcut. On a stricter score that also rewards putting the source first, keyword search got 0.74 and TRACE 0.42. TRACE is for search by meaning that you can check, not a replacement for keyword search.</p></div></li>
-      <li><div><b class="lead">A plain scan takes less time per search, and our stored size on disk is bigger.</b><p>Per search: keyword 6 ms, exact scan 88 ms, TRACE 1.2 s. Stored size on disk: 2.28 GB for TRACE, 1.25 GB for plain vectors, 0.51 GB for the keyword index. Stored size on disk; memory use was not compared. TRACE's saving is passage-scoring work. We make no claim about speed or space.</p></div></li>
-      <li><div><b class="lead">We have no like-for-like measure of memory in use.</b><p>The one memory figure we measured is the live service's peak, 1.03 GiB, while answering the 50 real test questions. We did not measure the other methods the same way, so we compare nothing.</p></div></li>
+      <li><div><b class="lead">The recorded search-stage times use different setups, and our stored size on disk is bigger.</b><p>Recorded search-stage times were 6 ms for keyword search and 1.2 s for TRACE (88 ms for an exact scan); the setups differ, embedding is separate, and we make no speed claim. Stored size on disk: 2.28 GB for TRACE, 1.25 GB for plain vectors, 0.51 GB for the keyword index. Stored size on disk; memory use was not compared. TRACE's saving is passage-scoring work. We make no claim about space.</p></div></li>
+      <li><div><b class="lead">We have no like-for-like measure of memory in use.</b><p>The one memory figure we measured is the live service's peak, 1.03 GiB, while answering the 50 test searches. We did not measure the other methods the same way, so we compare nothing.</p></div></li>
       <li><div><b class="lead">The headline result is for our own library and method.</b><p>TRACE itself has not been run on public benchmarks. A simple stand-in of ours (not TRACE) that groups passages with ordinary k-means gave dataset-specific results on three small public sets (3,600 to 57,600 passages): FiQA kept about 95% of exact search's top ten at 7% of passages scored, SciFact about 95% at 24%, and NFCorpus 90% at 28% and 97% at 55%. Scoring under 1% (FiQA, one group) kept only 52%. So 0.79% at 0.9985 is not reproduced on public data, and it must not be read as a general property of grouping.</p></div></li>
       <li><div><b class="lead">Scale: not as far as it may sound.</b><p>We missed our 100M target by 0.11%. The 504.5M and 310.5M builds are earlier tests by us, on a cloud machine since shut down, so nobody can re-run them; they are in <a href="#appendix">a separate appendix</a>. The 1.53 billion item is a separate group-picking test. We have not run a billion tokens through TRACE.</p></div></li>
       <li><div><b class="lead">The groups come from an ordinary sorting step.</b><p>One run per quarter. We measured how ordered the finished groups are (above), not how they formed, and we have no growth curve: the order was present at every size we sorted, up to 233,000 passages, and did not clearly improve with size. The sorting takes real time up front.</p></div></li>
@@ -160,8 +160,8 @@
         </div>
       </div>
       <div class="chart">
-        <h3>Time per search</h3>
-        <p class="sub">Typical search, same library. Lower is better.</p>
+        <h3>Recorded search-stage time</h3>
+        <p class="sub">Different protocols; embedding timed separately. No speed claim.</p>
         <div class="bars">
           <div class="bar-row"><span class="lab">Keyword</span><div class="bar-track"><div class="bar-fill fill-keyword low" style="width:0.5%; --w:0.5%"></div><span class="bar-val">6 ms</span></div></div>
           <div class="bar-row"><span class="lab">Exact search</span><div class="bar-track"><div class="bar-fill fill-exact low" style="width:7.3%; --w:7.3%"></div><span class="bar-val">88 ms</span></div></div>

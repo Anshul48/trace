@@ -4,7 +4,8 @@
 
 Covers: tab renders with real counts; group labels are words from the real
 member titles; lit passages equal the recorded guided top-10; the counter runs
-to the recorded aggregate; clicking a lit passage shows its text and its
+to the recorded aggregate with the percent tracking the live count mid-run;
+clicking a lit passage shows its text and its
 fingerprint check passes in the browser; zoom presets narrow the camera; plus
 the screenshot set and the 20 s capture (record_tour.py style).
 
@@ -124,6 +125,21 @@ class LibraryViz(unittest.TestCase):
         self.assertEqual(counter, {"scored": 1600, "total": 203137, "frac": "0.79%", "lit": 10})
         self.assertIn("0.79%", self.page.locator("#lcount").inner_text())
         self.assertIn("10 of 10", self.page.locator("#lpass").inner_text())
+        self.assertEqual(self.errors, [])
+
+    def test_03b_percent_tracks_live_counter_mid_run(self):
+        # gate: mid-run 1,155 rows must read 0.57%; only final 1,600 reads 0.79%
+        self.goto_lib("?view=library&q=0&static=1")
+        self.page.evaluate("window.__LIBRARY__.applyFrac(0.6775)")
+        counter = self.page.evaluate("window.__LIBRARY__.counter()")
+        self.assertEqual(counter["scored"], 1155)
+        self.assertEqual(counter["total"], 203137)
+        self.assertEqual(counter["frac"], "0.57%")
+        self.assertIn("(0.57%)", self.page.locator("#lcount").inner_text())
+        self.assertIn("1,155", self.page.locator("#lcount").inner_text())
+        # scope wording stays "nearly equal", matching the rest of the explorer
+        self.assertIn("four nearly equal parts",
+                      self.page.locator(".lscope").inner_text())
         self.assertEqual(self.errors, [])
 
     def test_04_click_lit_passage_checks_fingerprint(self):

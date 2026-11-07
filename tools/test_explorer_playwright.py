@@ -1,50 +1,75 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Automated Playwright test suite for TRACE Research Explorer and Terminal Player.
+"""Automated Playwright test suite for the TRACE static-replay Explorer.
+
+Rewritten for the CURRENT UI (docs/explorer/index.html + inside.html). The old
+topology/20k/query-router/audit UI is gone; every selector below targets shipped
+elements, and every expected number is computed from the shipped data files
+(data/replay.js, data/corpus.js) at run time — never invented.
 
 Authoritative Integrated Verifications:
-1. Zero fictional IDs: Assert NO 'xpar-sample' anywhere in DOM or canvas.
-2. Visitor-first hero section: 3-step story cards and primary CTAs.
-3. Main authentic DAG dataset: 3,711 parents, 9,177 leaves, 63,441 atoms, 4,370 multi-parent leaves.
-4. Real Node Inspector: Interactive search by authentic ID, multi-parent overlap badge, and link navigation.
-5. Canvas CSS intrinsic scaling hit-testing, zoom, pan, and transform state checks.
-6. Local 20k verification: Switch to 20k, inspect SciFact abstract snippets and authentic linkages.
-7. Pure validation API: Test TRACE_VALIDATION fail-closed on tampered pin, hash, count, duplicate ID.
-8. Query replay stepper: Exact raw row comparison for multiple probes across both LSO modes.
-9. Mobile responsive layout (375x812 and 390x844): Verify scrollWidth <= innerWidth and visible content.
-10. Recording player: Authentic asciicast playback, controls, textContent rendering.
-11. Programmatic screenshots saved to channel and screenshot directories.
+1. Zero fictional IDs: assert NO 'xpar-sample' anywhere in the DOM.
+2. Visitor-first hero: 4-step guide, 4-step todo strip, category tabs.
+3. Recorded-question replay: chips pick a question, 10 ranked cards render.
+4. Real checkable records: per-result record with article ID, passage number,
+   SHA-256 fingerprint, and an in-browser fingerprint match, cross-checked in
+   Python with hashlib against the shipped text.
+5. Corpus view: real 20k stats, passage search, multi-parent filter, detail.
+6. Query-trace view: recorded eval row rendered byte-equal to shipped data,
+   stage counts match, stepper + play/pause work.
+7. Library view: zoomable canvas, zoom/pan/reset, passage click, fingerprint.
+8. Honest-numbers views: memory and keyword-compare figures present.
+9. Typed-question matching: closest-recorded note and no-match note.
+10. Mobile responsive layout (375x812 and 390x844) without overflow.
+11. Reduced-motion load.
+
+DROPPED (no shipped equivalent, see the commit message): old Test 7
+(TRACE_VALIDATION fail-closed API — no such object is shipped) and old Test 9
+(docs/recording terminal player — docs/recording/ is absent).
 """
 
+import hashlib
 import http.server
 import json
 import os
 import socketserver
 import sys
+import tempfile
 import threading
 import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 EXPLORER_DIR = ROOT / "docs" / "explorer"
-RECORDING_DIR = ROOT / "docs" / "recording"
-SHOTS_DIR = Path(os.environ.get("TRACE_SHOTS_DIR", "/tmp/trace-presentation-agy2-20261015/screenshots"))
-try:
-    SHOTS_DIR.mkdir(parents=True, exist_ok=True)
-except Exception:
-    SHOTS_DIR = ROOT / "docs" / "media" / "screenshots-final"
-FINAL_SHOTS_DIR = ROOT / "docs" / "media" / "screenshots-final"
-FINAL_SHOTS_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _default_shots_dir():
+    env = os.environ.get("TRACE_SHOTS_DIR")
+    if env:
+        p = Path(env)
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+    for base in ("/dev/shm", str(ROOT)):
+        try:
+            return Path(tempfile.mkdtemp(prefix="trace-suite-shots-", dir=base))
+        except Exception:
+            continue
+    p = ROOT / "trace-suite-shots"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+SHOTS_DIR = _default_shots_dir()
 
 from playwright.sync_api import sync_playwright
 
 sys.path.insert(0, str(ROOT))
 from tools.test_review_controls import (
-    verify_canvas_zoom,
-    verify_subset_labels,
-    verify_recording_player,
-    capture_scrolled_node_inspector_screenshot,
-    capture_scrolled_dag_screenshot,
+    expected_trace_probes,
+    load_shipped_data,
+    verify_corpus_labels,
+    verify_library_zoom,
+    verify_trace_stepper,
 )
 
 
@@ -68,381 +93,362 @@ def start_server():
 
 
 def save_screenshot(page, name, full_page=False):
-    p2 = str(FINAL_SHOTS_DIR / name)
-    page.screenshot(path=p2, full_page=full_page)
-    try:
-        p1 = str(SHOTS_DIR / name)
-        if Path(p1).resolve() != Path(p2).resolve():
-            page.screenshot(path=p1, full_page=full_page)
-    except Exception:
-        pass
-    return p2
+    p = str(SHOTS_DIR / name)
+    page.screenshot(path=p, full_page=full_page)
+    return p
 
 
 def main():
     server, port = start_server()
     explorer_url = f"http://127.0.0.1:{port}/explorer/index.html"
-    recording_url = f"http://127.0.0.1:{port}/recording/index.html"
+    inside_url = f"http://127.0.0.1:{port}/explorer/inside.html"
     print(f"Testing TRACE Explorer at {explorer_url}...")
-    print(f"Testing TRACE Recording at {recording_url}...")
+    print(f"Testing Inside TRACE at {inside_url}...")
+    print(f"Screenshots go to {SHOTS_DIR}")
+
+    replay, corpus = load_shipped_data()
+    questions = replay["questions"]
+    passages = replay["passages"]
+    cats = {}
+    for q in questions:
+        cats.setdefault(q["cat"], []).append(q)
 
     passed = 0
+    pageerrors = []
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
 
         # -------------------------------------------------------------
-        # Test 1: Desktop Viewport, Title, Hero & 3-Step Story
+        # Test 1: Desktop Viewport, Title, Hero & 4-Step Guide
         # -------------------------------------------------------------
-        print("\n--- Test 1: Desktop Viewport (1280x900), Hero & 3-Step Story ---")
+        print("\n--- Test 1: Desktop Viewport (1280x900), Hero & 4-Step Guide ---")
         page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.on("pageerror", lambda e: pageerrors.append(f"explorer: {e}"))
         page.goto(explorer_url)
-        page.wait_for_selector(".app-header h1")
+        page.wait_for_selector(".site-header")
         assert "TRACE" in page.title()
-        print("  PASS: Page title verified")
+        assert "TRACE" in page.locator(".site-header .brand").inner_text()
+        print("  PASS: Page title and header brand verified")
         passed += 1
 
-        # Check Hero 3-step story cards (opening collapsible details)
-        details = page.locator(".story-collapsible")
-        if details.count() > 0:
-            details.evaluate("el => el.open = true")
-        page.wait_for_selector(".story-grid .story-card", state="visible")
-        story_cards = page.locator(".story-grid .story-card").count()
-        assert story_cards == 3, f"Expected 3 story cards, got {story_cards}"
-        print("  PASS: 3-step visitor story cards verified")
+        hero_h1 = page.locator(".xhero h1").inner_text()
+        assert "checkable record" in hero_h1, f"Unexpected hero h1: {hero_h1}"
+        guide_steps = page.locator(".guide-steps li").count()
+        assert guide_steps == 4, f"Expected 4 guide steps, got {guide_steps}"
+        todo_steps = page.locator(".xsteps li").count()
+        assert todo_steps == 4, f"Expected 4 todo steps, got {todo_steps}"
+        print("  PASS: hero heading, 4-step guide and 4-step todo strip verified")
         passed += 1
 
-        # Check No Fictional xpar-sample IDs in HTML or scripts
         html_content = page.content()
-        assert "xpar-sample" not in html_content, "CRITICAL ERROR: Found fictional xpar-sample IDs in page!"
+        assert "xpar-sample" not in html_content, "CRITICAL: fictional xpar-sample IDs found!"
         print("  PASS: Strict referential integrity — zero xpar-sample fake IDs found")
         passed += 1
 
-        # Check phase bars rendered
-        page.wait_for_selector(".phase-seg")
-        segs = page.locator(".phase-seg").count()
-        assert segs >= 7, f"Expected >= 7 phase segments, got {segs}"
-        print(f"  PASS: {segs} phase duration segments rendered")
+        tab_btns = page.locator("#cattabs button")
+        assert tab_btns.count() == len(cats), \
+            f"Expected {len(cats)} category tabs, got {tab_btns.count()}"
+        for cat, qs in sorted(cats.items()):
+            btn = page.locator("#cattabs button", has_text=f"{cat} (")
+            assert btn.count() == 1, f"Missing tab for {cat}"
+            assert btn.inner_text() == f"{cat} ({len(qs)})", \
+                f"Wrong count on {cat} tab: {btn.inner_text()}"
+        print(f"  PASS: {len(cats)} category tabs with shipped question counts verified")
         passed += 1
 
-        save_screenshot(page, "desktop-main-overview.png", full_page=True)
+        meta_text = page.locator("#recmeta").inner_text()
+        assert f"{len(questions)} questions" in meta_text, f"Bad recmeta: {meta_text}"
+        assert page.locator(".status [data-status-id]").count() == 5
+        print("  PASS: recording meta and 5-row status table verified")
+        passed += 1
+
+        page.wait_for_function(
+            "document.getElementById('captiontext').textContent.indexOf('of 10 match exact search') > 0",
+            timeout=10000,
+        )
+        print("  PASS: live results caption rendered from replay data")
+        passed += 1
+
+        save_screenshot(page, "explorer-overview.png", full_page=True)
 
         # -------------------------------------------------------------
-        # Test 2: Hero CTA Navigation to Topology
+        # Test 2: Question Chips Navigate to a 10-Card Recorded Replay
         # -------------------------------------------------------------
-        print("\n--- Test 2: Primary CTA Navigation to Topology ---")
-        cta_btn = page.locator("#cta-explore-main")
-        cta_btn.click()
-        page.wait_for_selector("#tab-topology.active")
-        assert page.locator("#tab-topology").is_visible()
-        print("  PASS: Hero CTA navigated directly to Structural Topology (DAG) tab")
+        print("\n--- Test 2: Question Chips Navigate to a 10-Card Replay ---")
+        default_chips = page.locator("#chips li").count()
+        default_cat = next(q["cat"] for q in questions if q["id"] == "why-is-the-sky-blue")
+        assert default_chips == len(cats[default_cat]), \
+            f"Expected {len(cats[default_cat])} default chips, got {default_chips}"
+        print(f"  PASS: default chip list shows all {default_chips} {default_cat} questions")
         passed += 1
 
-        # -------------------------------------------------------------
-        # Test 3: main DAG Canvas & Real Node Inspector
-        # -------------------------------------------------------------
-        print("\n--- Test 3: main DAG Canvas & Real Node Inspector ---")
-        page.wait_for_selector("#topology-canvas")
-        time.sleep(1.0)  # Allow initial layout render
-
-        # Verify main cluster selector overview label shows structural preview of 64 of 3,711 parents
-        opt_main = page.locator("#cluster-focus-select option[value='overview']").inner_text()
-        assert "Overview: 64 of 3,711 Real Parents (Structural Preview)" in opt_main, f"Unexpected overview label: {opt_main}"
-        print("  PASS: main cluster selector overview label verified (64 of 3,711 Real Parents)")
+        target_cat = "History"
+        page.locator("#cattabs button", has_text=target_cat).click()
+        assert page.locator("#chips li").count() == len(cats[target_cat])
+        target_q = cats[target_cat][0]["q"]
+        page.locator("#chips li button").first.click()
+        page.wait_for_function(
+            f"document.getElementById('qtitle').textContent.indexOf({json.dumps(target_q)}) >= 0"
+        )
+        assert page.locator("#list .card").count() == 10, "Expected 10 ranked cards"
+        print(f"  PASS: chip navigated to recorded replay of {target_q!r} with 10 cards")
         passed += 1
 
-        # Search for authentic main parent cluster
-        search_input = page.locator("#node-search-input")
-        test_parent_id = "xpar-01f45e945309ff5cd92e-repair-parent-10428"
-        search_input.fill(test_parent_id)
-        time.sleep(0.3)
-
-        inspector_text = page.locator("#node-inspector-content").inner_text()
-        assert test_parent_id in inspector_text, f"Expected {test_parent_id} in inspector, got: {inspector_text}"
-        assert "PARENT CLUSTER CENTROID" in inspector_text
-        print(f"  PASS: Searched and inspected authentic parent cluster: {test_parent_id}")
-        passed += 1
-
-        # Search for authentic main multi-parent leaf
-        test_leaf_id = "xseg-10039688-s0"
-        search_input.fill(test_leaf_id)
-        time.sleep(0.3)
-
-        inspector_leaf_text = page.locator("#node-inspector-content").inner_text()
-        assert test_leaf_id in inspector_leaf_text
-        assert "Overlapping Membership: Connected to 2 Parent Clusters" in inspector_leaf_text
-        assert "xpar-1332250-s0" in inspector_leaf_text
-        capture_scrolled_node_inspector_screenshot(page, save_screenshot)
-        print(f"  PASS: Multi-parent leaf overlap badge and connections verified for {test_leaf_id}")
-        passed += 1
-
-        # Click parent link inside inspector to navigate DAG
-        parent_link = page.locator('.node-link[data-id="xpar-1332250-s0"]').first
-        parent_link.click()
-        time.sleep(0.3)
-
-        inspector_nav_text = page.locator("#node-inspector-content").inner_text()
-        assert "xpar-1332250-s0" in inspector_nav_text
-        assert "PARENT CLUSTER CENTROID" in inspector_nav_text
-        print("  PASS: Clicked parent connection link in inspector, navigated to parent cluster")
-        passed += 1
-
-        # Canvas Click Hit-Testing with CSS scaling
-        canvas_elem = page.locator("#topology-canvas")
-        canvas_elem.scroll_into_view_if_needed()
-        box = canvas_elem.bounding_box()
-        assert box is not None
-        # Click center-top where virtual UI entry root is drawn (canvas native 500, 50)
-        canvas_elem.click(position={"x": box["width"] * 0.5, "y": box["height"] * (50 / 520)})
-        time.sleep(0.3)
-        root_inspector = page.locator("#node-inspector-content").inner_text()
-        assert "VIRTUAL UI ENTRY POINT" in root_inspector
-        print("  PASS: Canvas click hit-testing verified on virtual entry point")
-        passed += 1
-
-        # Test Zoom & Pan Controls and actual transform change via focused helper
-        verify_canvas_zoom(page)
-        print("  PASS: Canvas ctx.scale and ctx.translate transform assertions verified")
-        passed += 1
-
-        capture_scrolled_dag_screenshot(page, save_screenshot)
-
-        # -------------------------------------------------------------
-        # Test 4: Switch Dataset to Local 20k Verified Reproduction
-        # -------------------------------------------------------------
-        print("\n--- Test 4: Switch Dataset to Local 20k Reproduction ---")
-        dataset_select = page.locator("#topology-dataset-select")
-        dataset_select.select_option("20k")
-        time.sleep(0.5)
-
-        # Verify cluster selector subset label for 20k
-        opt_20k = page.locator("#cluster-focus-select option[value='overview']").inner_text()
-        assert "51 of 51 Real Parents" in opt_20k, f"Unexpected 20k label: {opt_20k}"
-        print("  PASS: Local 20k cluster selector overview label verified (51 of 51 Real Parents)")
-        passed += 1
-
-        # Search authentic 20k leaf
-        search_input.fill("xseg-102662-s0")
-        time.sleep(0.3)
-        leaf_20k_text = page.locator("#node-inspector-content").inner_text()
-        assert "xseg-102662-s0" in leaf_20k_text
-        assert "xpar-102662-s0" in leaf_20k_text
-        print("  PASS: Local 20k dataset loaded with authentic node connections")
-        passed += 1
-
-        # Search authentic 20k atom (SciFact text snippet)
-        search_input.fill("0f6732739bec3a34e60c51f0fcd7a3dcc18b0e70e087597f06558af12f97da24")
-        time.sleep(0.3)
-        atom_20k_text = page.locator("#node-inspector-content").inner_text()
-        assert "DOCUMENT ATOM (CHUNK)" in atom_20k_text
-        assert "Document Title:" in atom_20k_text
-        assert "Gossypium" in atom_20k_text
-        print("  PASS: Local 20k atom inspected with licensed SciFact metadata")
+        big = " ".join(page.locator("#compare .big").text_content().split())
+        assert " of 10 " in big and "passages are the same" in big, f"Bad compare big: {big}"
+        assert page.locator("#compare .cols > div").count() == 2
+        print("  PASS: TRACE-vs-exact comparison panel rendered (shared count + 2 lists)")
         passed += 1
 
         # -------------------------------------------------------------
-        # Test 5: Query Routing Replay Controls & Exact Raw Row Equality
+        # Test 3: Checkable Record & In-Browser Fingerprint Match
         # -------------------------------------------------------------
-        print("\n--- Test 5: Query Routing Replay Controls & Exact Raw Row Equality ---")
-        tab_queries = page.locator("#tab-btn-queries")
-        tab_queries.click()
-        page.wait_for_selector("#tab-queries.active")
-
-        # Load raw evaluation queries from receipts/result.json for independent ground truth comparison
-        receipt_result = json.loads((ROOT / "receipts" / "result.json").read_text(encoding="utf-8"))
-        raw_queries = receipt_result["evaluation"]["queries"]
-        raw_map = {(q["probe"], q.get("leave_source_out", False)): q for q in raw_queries}
-
-        # Check probes dropdown
-        page.wait_for_selector("#query-select option", state="attached")
-        probe_opts = page.locator("#query-select option").count()
-        assert probe_opts >= 10, f"Expected probe options, got {probe_opts}"
-        print(f"  PASS: {probe_opts} probe options loaded in query router")
+        print("\n--- Test 3: Checkable Record & Fingerprint Match ---")
+        page.goto(explorer_url)  # clean state: default recorded question
+        page.wait_for_selector("#list .card")
+        q0 = next(q for q in questions if q["id"] == "why-is-the-sky-blue")
+        assert q0["q"] in page.locator("#qtitle").inner_text()
+        pid = str(q0["g"][0][0])
+        expected = passages[pid]
+        assert hashlib.sha256(expected["tx"].encode("utf-8")).hexdigest() == expected["h"], \
+            "shipped fingerprint does not match shipped text (data integrity)"
+        print("  PASS: shipped fingerprint matches shipped text in Python (hashlib)")
         passed += 1
 
-        # Test Probe 0 Standard mode (LSO false)
-        query_sel = page.locator("#query-select")
-        query_sel.select_option(index=0)
-        lso_off = page.locator("input[name='lso-mode'][value='false']")
-        lso_off.check()
-        time.sleep(0.2)
-
-        q0_false = raw_map[(0, False)]
-        # Step through stages
-        page.locator(".step-card[data-step='3']").click()
-        time.sleep(0.2)
-        s3_text = page.locator("#step-detail-panel").inner_text()
-        assert str(q0_false["work"]["children_scored"]) in s3_text, f"Expected children {q0_false['work']['children_scored']}"
-
-        page.locator(".step-card[data-step='4']").click()
-        time.sleep(0.2)
-        s4_text = page.locator("#step-detail-panel").inner_text()
-        assert str(q0_false["work"]["atoms_scored"]) in s4_text, f"Expected atoms {q0_false['work']['atoms_scored']}"
-        assert f"{q0_false['guided_scoring_rows']:,}" in s4_text, f"Expected scoring rows {q0_false['guided_scoring_rows']:,}"
-
-        page.locator(".step-card[data-step='5']").click()
-        time.sleep(0.2)
-        s5_text = page.locator("#step-detail-panel").inner_text()
-        assert f"{q0_false['guided_recall10'] * 100:.1f}%" in s5_text
-        print("  PASS: Probe 0 Standard mode matches exact raw query row work and recall")
+        page.locator("#r1 .recbtn").click()
+        page.wait_for_selector("#rec1:not([hidden])")
+        assert "Article ID" in page.locator("#rec1").inner_text()
+        shown_hash = page.locator("#rec1 .hash").inner_text()
+        assert shown_hash == expected["h"], f"page shows {shown_hash}, data has {expected['h']}"
+        print("  PASS: record shows article ID and the shipped 64-hex fingerprint")
         passed += 1
 
-        # Test Probe 0 Leave-Source-Out mode (LSO true)
-        lso_on = page.locator("input[name='lso-mode'][value='true']")
-        lso_on.check()
-        time.sleep(0.2)
 
-        q0_true = raw_map[(0, True)]
-        page.locator(".step-card[data-step='4']").click()
-        time.sleep(0.2)
-        s4_lso_text = page.locator("#step-detail-panel").inner_text()
-        assert str(q0_true["work"]["atoms_scored"]) in s4_lso_text, f"Expected LSO atoms {q0_true['work']['atoms_scored']}"
-        assert f"{q0_true['guided_scoring_rows']:,}" in s4_lso_text, f"Expected LSO scoring rows {q0_true['guided_scoring_rows']:,}"
-
-        page.locator(".step-card[data-step='5']").click()
-        time.sleep(0.2)
-        s5_lso_text = page.locator("#step-detail-panel").inner_text()
-        assert f"{q0_true['guided_recall10'] * 100:.1f}%" in s5_lso_text
-        print("  PASS: Probe 0 LSO mode matches exact raw query row work and recall")
+        page.locator("#rec1 .chk").click()
+        page.wait_for_selector("#rec1 .verdict.pass")
+        assert "Match" in page.locator("#rec1 .verdict.pass").inner_text()
+        print("  PASS: in-browser fingerprint check returned Match")
         passed += 1
 
-        # Test Probe 1 Standard mode (different work from Probe 0)
-        query_sel.select_option(index=1)
-        lso_off.check()
-        time.sleep(0.2)
-
-        q1_false = raw_map[(1, False)]
-        page.locator(".step-card[data-step='3']").click()
-        time.sleep(0.2)
-        s3_p1_text = page.locator("#step-detail-panel").inner_text()
-        assert str(q1_false["work"]["children_scored"]) in s3_p1_text, f"Expected Probe 1 children {q1_false['work']['children_scored']}"
-
-        page.locator(".step-card[data-step='4']").click()
-        time.sleep(0.2)
-        s4_p1_text = page.locator("#step-detail-panel").inner_text()
-        assert str(q1_false["work"]["atoms_scored"]) in s4_p1_text, f"Expected Probe 1 atoms {q1_false['work']['atoms_scored']}"
-        assert f"{q1_false['guided_scoring_rows']:,}" in s4_p1_text, f"Expected Probe 1 scoring rows {q1_false['guided_scoring_rows']:,}"
-        print("  PASS: Probe 1 Standard mode matches distinct raw query row work")
-        passed += 1
-
-        save_screenshot(page, "desktop-query-replay.png", full_page=True)
+        save_screenshot(page, "explorer-record.png")
 
         # -------------------------------------------------------------
-        # Test 6: Receipts & Gates Tab
+        # Test 4: Corpus View — Real 20k Stats, Search & Detail
         # -------------------------------------------------------------
-        print("\n--- Test 6: Receipts & Gates Tab ---")
-        page.locator("#tab-btn-audit").click()
-        page.wait_for_selector("#tab-audit.active")
-        audit_text = page.locator("#tab-audit").inner_text()
-        assert "38c66bef71fbc8768a2887024fecf1bf58ff90f3feaf3a922d4c8b51a43a0d54" in audit_text
-        assert "52e884393b2abd66b46ead13d1831238510dbf5f6738e5b398ea9334f0edca38" in audit_text
-        print("  PASS: Receipts & gates tab displays exact source freeze and store digests")
+        print("\n--- Test 4: Corpus View (Local 20k Reproduction) ---")
+        page.goto(inside_url)
+        page.wait_for_selector("#corpus-stats div")
+        verify_corpus_labels(page, corpus, replay)
+        print("  PASS: 20k stats, sealed strip and parent filter match shipped data")
         passed += 1
 
-        # -------------------------------------------------------------
-        # Test 7: Fail-Closed Validation via TRACE_VALIDATION API
-        # -------------------------------------------------------------
-        print("\n--- Test 7: Fail-Closed Validation via TRACE_VALIDATION API ---")
-        tamper_checks = page.evaluate("""() => {
-            const results = {};
-            const V = window.TRACE_VALIDATION;
-            if (!V) return { error: 'TRACE_VALIDATION API not exposed' };
-
-            // 1. Valid 20k check
-            const orig20k = V.getLocal20kData();
-            try {
-                V.validate20kData(orig20k);
-                results.valid_20k = 'PASS';
-            } catch (e) {
-                results.valid_20k = 'FAIL: ' + e.message;
-            }
-
-            // 2. Tampered pin check
-            try {
-                const badPin = JSON.parse(JSON.stringify(orig20k));
-                badPin.manifest.store_head_pin = ['bad-uuid', 0, 1, 'bad-uuid:0:2'];
-                V.validate20kData(badPin);
-                results.tamper_pin = 'FAIL: allowed inconsistent pin';
-            } catch (e) {
-                results.tamper_pin = 'PASS';
-            }
-
-            // 3. Tampered freeze digest check
-            try {
-                const badFreeze = JSON.parse(JSON.stringify(orig20k));
-                badFreeze.manifest.source_freeze_sha256 = 'bad-hash';
-                V.validate20kData(badFreeze);
-                results.tamper_freeze = 'FAIL: allowed bad freeze';
-            } catch (e) {
-                results.tamper_freeze = 'PASS';
-            }
-
-            // 4. Duplicate parent ID check
-            try {
-                const dupData = JSON.parse(JSON.stringify(orig20k));
-                dupData.parents.push(Object.assign({}, dupData.parents[0]));
-                V.validateGraphIntegrity(dupData, 'TEST', { parents: dupData.parents.length });
-                results.dup_parent = 'FAIL: allowed duplicate parent';
-            } catch (e) {
-                results.dup_parent = 'PASS';
-            }
-
-            // 5. Foreign / Missing edge reference
-            try {
-                const foreignData = JSON.parse(JSON.stringify(orig20k));
-                foreignData.parents[0].children.push('xseg-nonexistent-id');
-                V.validateGraphIntegrity(foreignData, 'TEST');
-                results.foreign_edge = 'FAIL: allowed foreign edge';
-            } catch (e) {
-                results.foreign_edge = 'PASS';
-            }
-
-            return results;
-        }""")
-        assert tamper_checks.get("valid_20k") == "PASS", f"Valid 20k failed: {tamper_checks}"
-        assert tamper_checks.get("tamper_pin") == "PASS"
-        assert tamper_checks.get("tamper_freeze") == "PASS"
-        assert tamper_checks.get("dup_parent") == "PASS"
-        assert tamper_checks.get("foreign_edge") == "PASS"
-        print("  PASS: TRACE_VALIDATION fail-closed verified across all integrity invariants")
+        atom = corpus["atoms"][0]
+        page.locator("#cq").fill(atom["id"])
+        page.wait_for_function(
+            "document.getElementById('ccount').textContent.indexOf('Showing 1 of') === 0"
+        )
+        assert page.locator("#ccount").inner_text() == \
+            f"Showing 1 of {len(corpus['atoms'])} passages."
+        page.locator("#plist li").first.click()
+        detail = page.locator("#cdetail").inner_text()
+        assert atom["doc_id"] in detail and "Tier" in detail
+        assert atom["id"] in detail
+        print(f"  PASS: searched authentic atom {atom['id'][:12]}…; detail shows tier chain")
         passed += 1
+
+        page.locator("#cq").fill("")
+        multi_leaves = {l["id"] for l in corpus["leaves"] if len(l["parent_ids"]) > 1}
+        expect_multi = sum(
+            1 for a in corpus["atoms"]
+            if any(lid in multi_leaves for lid in a["leaf_ids"])
+        )
+        page.locator("#cmp").check()
+        page.wait_for_function(
+            f"document.getElementById('ccount').textContent === "
+            f"'Showing {expect_multi} of {len(corpus['atoms'])} passages.'"
+        )
+        page.locator("#cmp").uncheck()
+        print(f"  PASS: multi-parent filter shows {expect_multi} passages (shipped data)")
+        passed += 1
+
+        save_screenshot(page, "corpus-view.png")
+
+        # -------------------------------------------------------------
+        # Test 5: Query-Trace View — Exact Recorded-Row Equality & Stepper
+        # -------------------------------------------------------------
+        print("\n--- Test 5: Query-Trace View & Exact Row Equality ---")
+        page.goto(inside_url + "#/trace")
+        page.wait_for_selector("#stages li")
+        probes = expected_trace_probes(corpus)
+        assert page.locator("#tq option").count() == len(questions)
+        assert page.locator("#tp option").count() == len(probes)
+        print(f"  PASS: {len(questions)} recorded questions, {len(probes)} eval probes listed")
+        passed += 1
+
+        rows = corpus["evaluation_queries"]
+        for opt_index in (0, 1):
+            page.locator("#tp").select_option(index=opt_index)
+            receipt = json.loads(page.locator("#treceipt").text_content())
+            assert receipt == rows[probes[opt_index]], \
+                f"trace receipt mismatch for probe option {opt_index}"
+        print("  PASS: rendered eval rows byte-equal shipped corpus rows (2 probes)")
+        passed += 1
+
+        page.locator("#tp").select_option(index=0)
+        e0 = rows[probes[0]]
+        stage3 = page.locator("#stages li").nth(2).inner_text()
+        assert str(e0["work"]["children_scored"]) in stage3
+        stage4 = page.locator("#stages li").nth(3).inner_text()
+        assert str(e0["work"]["atoms_scored"]) in stage4
+        assert str(e0["work"]["member_visits"]) in stage4
+        stage5 = page.locator("#stages li").nth(4).inner_text()
+        assert str(e0["guided_scoring_rows"]) in stage5
+        stage6 = page.locator("#stages li").nth(5).inner_text()
+        assert f"{e0['guided_recall10']:.2f}" in stage6
+        prov = page.locator("#tprov").inner_text()
+        assert f"eval row {probes[0]} of {len(rows)}" in prov
+        print("  PASS: stage counts and provenance match the recorded eval row")
+        passed += 1
+
+        verify_trace_stepper(page)
+        print("  PASS: trace stepper prev/next/play-pause verified")
+        passed += 1
+
+        q5 = questions[5]
+        page.locator("#tq").select_option("5")
+        assert q5["q"] in page.locator("#tanswer").inner_text()
+        assert page.locator("#tanswer ol > li").count() == 10
+        print("  PASS: recorded top-10 answer rendered for picked question")
+        passed += 1
+
+        save_screenshot(page, "trace-view.png")
+
+        # -------------------------------------------------------------
+        # Test 6: Library View — Zoomable Canvas, Passage Click, Fingerprint
+        # -------------------------------------------------------------
+        print("\n--- Test 6: Library View (Zoomable Cluster Canvas) ---")
+        page.goto(inside_url + "#/library")
+        page.wait_for_function(
+            "window.__LIBRARY__ && window.__LIBRARY__.ready() "
+            "&& window.__LIBRARY__.camera().w > 0"
+        )
+        assert page.locator("#lmap").is_visible()
+        box = page.locator("#lmap").bounding_box()
+        assert box is not None and box["width"] > 100 and box["height"] > 100
+        stats = page.evaluate("window.__LIBRARY__.stats()")
+        assert stats["passages"] == len(passages)
+        assert stats["questions"] == len(questions)
+        assert page.locator("#lq option").count() == len(questions)
+        print(f"  PASS: library canvas visible; {stats['passages']} passages, "
+              f"{stats['groups']} groups, {stats['questions']} questions")
+        passed += 1
+
+        verify_library_zoom(page)
+        print("  PASS: library zoom-in / pixel change / pan / reset verified")
+        passed += 1
+
+        page.locator("#lq").select_option("0")
+        assert "0 of 203,137 rows scored" in page.locator("#lcount").inner_text()
+        assert "0 of 10 recorded top passages lit" in page.locator("#lpass").inner_text()
+        page.locator("#lz3").click()  # Passages preset: dive to top guided group
+        lpid = str(questions[0]["g"][0][0])
+        page.locator("#lmap").scroll_into_view_if_needed()
+        pt = page.evaluate(f"window.__LIBRARY__.locate({lpid!r})")
+        assert pt is not None, f"guided passage {lpid} not locatable on canvas"
+        page.mouse.click(pt["x"], pt["y"])
+        page.wait_for_selector("#lchk")
+        lpanel = page.locator("#lpanel").inner_text()
+        assert passages[lpid]["ti"] in lpanel, f"panel missed title: {lpanel[:200]}"
+        assert passages[lpid]["h"] in lpanel
+        print("  PASS: canvas click opened the guided passage with title + fingerprint")
+        passed += 1
+
+        page.locator("#lchk").click()
+        page.wait_for_selector("#lverdict .verdict.pass")
+        assert "Match" in page.locator("#lverdict .verdict.pass").inner_text()
+        print("  PASS: library fingerprint check returned Match")
+        passed += 1
+
+        save_screenshot(page, "library-view.png")
+
+        # -------------------------------------------------------------
+        # Test 7: Memory & Keyword-Compare Honest Numbers
+        # -------------------------------------------------------------
+        print("\n--- Test 7: Memory & Keyword-Compare Views ---")
+        page.goto(inside_url + "#/memory")
+        page.wait_for_selector("#view-memory:not([hidden])")
+        mem_text = page.locator("#view-memory").inner_text()
+        assert "2.28 GB" in mem_text and "1.03 GiB" in mem_text
+        assert "not measured" in mem_text
+        print("  PASS: memory view shows stored sizes + no-comparison guard")
+        passed += 1
+
+        page.goto(inside_url + "#/compare")
+        page.wait_for_selector("#view-compare:not([hidden])")
+        cmp_text = page.locator("#view-compare").inner_text()
+        assert "0.74" in cmp_text and "0.42" in cmp_text
+        assert "82%" in cmp_text and "52%" in cmp_text
+        print("  PASS: keyword-compare view shows audited 0.74/0.42 and 82%/52%")
+        passed += 1
+
+        save_screenshot(page, "memory-view.png")
 
         # -------------------------------------------------------------
         # Test 8: Mobile Viewports (375x812 and 390x844)
         # -------------------------------------------------------------
         print("\n--- Test 8: Mobile Viewports (375x812 and 390x844) ---")
-        for width, height, fname in [(375, 812, "mobile-375x812.png"), (390, 844, "mobile-390x844.png")]:
+        for width, height, fname in [(375, 812, "mobile-375x812.png"),
+                                     (390, 844, "mobile-390x844.png")]:
             mob = browser.new_page(viewport={"width": width, "height": height})
+            mob.on("pageerror", lambda e: pageerrors.append(f"mobile: {e}"))
             mob.goto(explorer_url)
-            mob.wait_for_selector(".app-header h1")
+            mob.wait_for_selector(".site-header")
 
-            # Assert horizontal overflow invariant: documentElement.scrollWidth <= innerWidth
             scroll_width = mob.evaluate("document.documentElement.scrollWidth")
             inner_width = mob.evaluate("window.innerWidth")
-            assert scroll_width <= inner_width, f"Horizontal overflow on {width}px: scrollWidth {scroll_width} > innerWidth {inner_width}"
+            assert scroll_width <= inner_width, \
+                f"Horizontal overflow on {width}px: scrollWidth {scroll_width} > {inner_width}"
 
-            # Verify Explore CTA is visible near top on mobile
-            cta_main = mob.locator("#cta-explore-main")
-            assert cta_main.is_visible()
-            box = cta_main.bounding_box()
-            assert box is not None and box["y"] < height, f"CTA button offscreen at y={box['y']}"
+            brand = mob.locator(".site-header .brand")
+            assert brand.is_visible()
+            brand_box = brand.bounding_box()
+            assert brand_box is not None and brand_box["y"] < height, \
+                f"header brand offscreen at y={brand_box['y']}"
+
+            cta = mob.locator("#askform .primary")
+            cta.scroll_into_view_if_needed()
+            assert cta.is_visible()
+            assert cta.is_enabled()
+            assert mob.locator("#chips li").count() > 0
 
             save_screenshot(mob, fname, full_page=True)
             mob.close()
-            print(f"  PASS: Mobile {width}x{height} rendered cleanly without horizontal overflow")
+            print(f"  PASS: Mobile {width}x{height} rendered cleanly without overflow")
             passed += 1
 
         # -------------------------------------------------------------
-        # Test 9: Terminal Recording Player Verification
+        # Test 9: Typed-Question Matching (Closest-Recorded & No-Match)
         # -------------------------------------------------------------
-        print("\n--- Test 9: Terminal Recording Player (docs/recording) ---")
-        rec_page = browser.new_page(viewport={"width": 1280, "height": 900})
-        rec_page.goto(recording_url)
-        rec_page.wait_for_selector("#terminal-viewport")
-        time.sleep(0.5)
+        print("\n--- Test 9: Typed-Question Matching ---")
+        page.goto(explorer_url)
+        page.wait_for_selector("#list .card")
+        page.locator("#q").fill(questions[0]["q"])
+        page.locator("#askform button[type='submit']").click()
+        page.wait_for_selector("#matchnote:not([hidden])")
+        assert "closest to the recorded question" in page.locator("#matchnote").inner_text()
+        assert questions[0]["q"] in page.locator("#qtitle").inner_text()
+        print("  PASS: exact typed question matched to its recording")
+        passed += 1
 
-        verify_recording_player(rec_page, save_screenshot)
-        print("  PASS: Terminal recording player controls, textContent, timestamps, and PASS end marker functional")
+        page.locator("#q").fill("zzzzqqqxjv kvvzzwx qzxj")
+        page.locator("#askform button[type='submit']").click()
+        page.wait_for_function(
+            "document.getElementById('matchnote').hidden === false "
+            "&& document.getElementById('matchnote').textContent.indexOf("
+            "'No recorded question is a close match') >= 0"
+        )
+        print("  PASS: unrelated typed words show the honest no-match note")
         passed += 1
 
         # -------------------------------------------------------------
@@ -451,18 +457,22 @@ def main():
         print("\n--- Test 10: Prefers-Reduced-Motion Emulation ---")
         rm_page = browser.new_page(viewport={"width": 1280, "height": 900},
                                    reduced_motion="reduce")
+        rm_page.on("pageerror", lambda e: pageerrors.append(f"reduced-motion: {e}"))
         rm_page.goto(explorer_url)
-        rm_page.wait_for_selector(".app-header")
+        rm_page.wait_for_selector(".site-header")
+        rm_page.wait_for_selector("#chips li")
         print("  PASS: Loaded successfully under prefers-reduced-motion: reduce")
         passed += 1
+
+        assert not pageerrors, f"JS page errors seen: {pageerrors}"
 
         browser.close()
 
     server.shutdown()
     print(f"\n========================================================")
     print(f"ALL TESTS PASSED: {passed} automated assertions verified.")
-    print(f"Screenshots saved to {SHOTS_DIR} and {FINAL_SHOTS_DIR}:")
-    for f in sorted(FINAL_SHOTS_DIR.glob("*.png")):
+    print(f"Screenshots saved to {SHOTS_DIR}:")
+    for f in sorted(SHOTS_DIR.glob("*.png")):
         print(f"  - {f.name} ({f.stat().st_size} bytes)")
     print(f"========================================================")
 

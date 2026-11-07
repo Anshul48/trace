@@ -26,9 +26,9 @@
 </header>
 <main id="main" class="wrap">
 <p class="lede">See inside TRACE: the corpus it searches, the route a question takes,
-what is stored and what memory it uses, and where keyword search wins.
+what is stored and what memory it uses, and where keyword search did better.
 Every panel carries a label: <span class="pill real">REAL</span> measured in the
-repo's receipts, <span class="pill recorded">RECORDED</span> replayed from a
+repo's checkable records, <span class="pill recorded">RECORDED</span> replayed from a
 recording, <span class="pill designed">DESIGNED</span> our illustration of a real
 mechanism, <span class="pill concept">CONCEPT</span> not built. No backend, no
 network: this page reads only its own <code>data/</code> files.</p>
@@ -37,7 +37,7 @@ network: this page reads only its own <code>data/</code> files.</p>
 <section class="view" id="view-corpus" data-view="corpus" aria-label="Corpus view">
   <h1>The corpus, browsable <span class="pill real">REAL</span></h1>
   <p class="sub" id="corpus-scope">Local 20k reproduction run: the full hierarchy, small enough to show
-  every unit. Single shard (<code>s0</code>). The sealed 812,545-passage library is summarised from
+  every unit. One library part (called <code>s0</code> in the data). The sealed 812,545-passage library is summarised from
   the docs strip below it — different scope, kept apart.</p>
   <div class="stats" id="corpus-stats" role="status" aria-live="polite"></div>
   <div class="strip realbox">
@@ -64,7 +64,7 @@ network: this page reads only its own <code>data/</code> files.</p>
     <div>
       <h2>Passage detail</h2>
       <div class="detail" id="cdetail"><p class="muted">Pick a passage to see its tier and membership chain.</p></div>
-      <h2>Map: shard → parents → units <span class="pill real">REAL</span></h2>
+      <h2>Map: library part → groups → passages <span class="pill real">REAL</span></h2>
       <p class="muted">Counts computed from the data at load. Drag to pan, scroll to zoom,
       click a node to highlight its members.</p>
       <div class="mapbar">
@@ -101,7 +101,7 @@ network: this page reads only its own <code>data/</code> files.</p>
   <p class="muted" id="lqmeta"></p>
   <div class="lcount" role="status" aria-live="polite">
     <span id="lcount"></span>
-    <span class="lscope">Recorded aggregate on one of four equal parts. Our library. Fifty test searches.</span>
+    <span class="lscope">Recorded aggregate on one of four nearly equal parts. Our library. Fifty test searches.</span>
   </div>
   <p class="lpassline" id="lpass"></p>
   <div class="mapbar">
@@ -121,7 +121,7 @@ network: this page reads only its own <code>data/</code> files.</p>
 <!-- ================= TRACE ================= -->
 <section class="view" id="view-trace" data-view="trace" aria-label="Query trace view" hidden>
   <h1>Separate recordings: a small-run probe and a library search <span class="pill recorded">RECORDED</span> <span class="pill designed">DESIGNED</span></h1>
-  <p class="sub">Counts are recorded receipts (evaluation rows from the 20k run, final
+  <p class="sub">Counts are checkable recorded measurements (evaluation rows from the 20k run, final
   lists from the sealed replay). The stage shapes and the flow animation are our
   illustration of the real centroid-router mechanism.</p>
   <div class="tcontrols">
@@ -141,7 +141,7 @@ network: this page reads only its own <code>data/</code> files.</p>
   <ol class="stages" id="stages"></ol>
   <div class="flowwrap"><svg id="flow" role="img" aria-label="Animated flow between stages"></svg></div>
   <div class="answer" id="tanswer"></div>
-  <details class="receipts"><summary>Receipts (recorded rows behind this trace)</summary>
+  <details class="receipts"><summary>Checkable records (recorded rows behind this trace)</summary>
     <h3>Evaluation row <span class="pill recorded">RECORDED</span></h3>
     <pre id="treceipt">—</pre>
     <h3>Final top-10 lists <span class="pill recorded">RECORDED</span></h3>
@@ -183,7 +183,7 @@ network: this page reads only its own <code>data/</code> files.</p>
   Drain dominates the seam12a wall (~60%); that is the scaling risk, not publication.</p>
   <h2>Earlier scale runs (separate scope) <span class="pill real">REAL</span></h2>
   <table class="tbl">
-    <thead><tr><th scope="col">Run</th><th scope="col">Tokens</th><th scope="col">Shards</th><th scope="col">Stored size on disk</th></tr></thead>
+    <thead><tr><th scope="col">Run</th><th scope="col">Tokens</th><th scope="col">Library parts</th><th scope="col">Stored size on disk</th></tr></thead>
     <tbody>
       <tr><th scope="row">310.5M build</th><td>310,532,353</td><td>8</td><td>4,709,827,408 bytes</td></tr>
       <tr><th scope="row">504.5M build</th><td>504,480,146</td><td>13</td><td>7,653,469,538 bytes</td></tr>
@@ -195,12 +195,12 @@ network: this page reads only its own <code>data/</code> files.</p>
 
 <!-- ================= COMPARE ================= -->
 <section class="view" id="view-compare" data-view="compare" aria-label="Keyword versus TRACE view" hidden>
-  <h1>Keyword search wins this test <span class="pill real">REAL</span></h1>
+  <h1>Keyword search did better on this test <span class="pill real">REAL</span></h1>
   <p class="sub">Same 50 searches, sealed library. TRACE is meaning-based search you can
   verify — not a replacement for keyword search. The gap below is meaning-search
   versus keywords: exact meaning-based search also got 52%.</p>
-  <h2>Rank-aware score (nDCG) <span class="pill real">REAL</span></h2>
-  <div class="bars" role="img" aria-label="nDCG: keyword 0.74, TRACE 0.42">
+  <h2>Score that also rewards placing the source higher <span class="pill real">REAL</span></h2>
+  <div class="bars" role="img" aria-label="Score that also rewards placing the source higher: keyword 0.74, TRACE 0.42">
     <div class="brow win"><span class="blab">Keyword</span><i class="bar"><b style="width:100%"></b></i><em>0.74 ✓</em></div>
     <div class="brow"><span class="blab">TRACE</span><i class="bar"><b style="width:56.8%"></b></i><em>0.42</em></div>
   </div>
@@ -216,21 +216,21 @@ network: this page reads only its own <code>data/</code> files.</p>
   <div class="bars" role="img" aria-label="Search-stage time: keyword 6 ms, exact 88 ms, TRACE 1.2 s">
     <div class="brow win"><span class="blab">Keyword retrieval</span><i class="bar"><b style="width:3%"></b></i><em>p50 6 ms ✓</em></div>
     <div class="brow"><span class="blab">Exact (batched mean)</span><i class="bar"><b style="width:12%"></b></i><em>~88 ms</em></div>
-    <div class="brow"><span class="blab">TRACE (4-shard calls)</span><i class="bar"><b style="width:100%"></b></i><em>p50 1.2 s</em></div>
+    <div class="brow"><span class="blab">TRACE (calls to four library parts)</span><i class="bar"><b style="width:100%"></b></i><em>p50 1.2 s</em></div>
   </div>
   <p class="src">Different protocols, not end-to-end; embedding timed separately
   (p50 13.4 ms). Source: BENCHMARKS-DEEP §2.</p>
   <h2>What this means</h2>
   <ul class="plain">
     <li>TRACE's shortcut works: it kept <b>0.9985</b> of exact search's top ten
-      while scoring <b>0.79%</b> of rows on one part (~127× less scoring work).</li>
+      while scoring <b>0.79%</b> of rows on one part (~127× less passage-scoring work; choosing and building groups are separate costs).</li>
     <li>But on finding the right source passage, keywords win here — use the
       right tool for the job.</li>
   </ul>
 </section>
 
 <footer class="foot">
-  <h2>Receipts</h2>
+  <h2>Checkable records</h2>
   <p>Numbers on this page come from: <code>data/replay.js</code> (144 recorded
   questions, sealed library 812,545 passages; the Library tab maps its 1,430-sample,
   884-group subset), <code>data/corpus.js</code> (local

@@ -47,7 +47,7 @@
   <div class="here" aria-label="How to get here">
     <h3>How to get here</h3>
     <ul>
-      <li>This page lives at <a href="https://anshul48.github.io/trace/explorer/">https://anshul48.github.io/trace/explorer/</a>.</li>
+      <li>This page is also published at <a href="https://anshul48.github.io/trace/explorer/">https://anshul48.github.io/trace/explorer/</a>.</li>
       <li>It is a recorded replay: pick a question from the list below. There is no live search to run.</li>
     </ul>
   </div>
@@ -92,7 +92,7 @@
         <li><span class="lead">It is not live.</span> This is a replay of real queries recorded on the sealed corpus. The public live service is switched off.
           <details class="more"><summary>Why it is off</summary><p>It failed a first test with many people at once. A later fix passed a local retest, but we are still keeping the public service off.</p></details></li>
         <li><span class="lead">Keyword search did better on this test.</span> On the 50 test searches, ordinary <dfn class="g" tabindex="0">keyword search<span class="tip" role="tooltip">Search that matches the exact words you typed, instead of their meaning.</span></dfn> put the right source passage in its top ten for <b>82%</b> of them. TRACE did for <b>52%</b>. TRACE is for meaning-based search you can verify, not a replacement for keyword search.
-          <details class="more"><summary>More detail</summary><p>Exact meaning-based search also got 52%, so the gap is meaning-based search versus keywords, not TRACE&rsquo;s shortcut. On a stricter score that also rewards putting the right passage higher up, keyword search got 0.74 and TRACE 0.42. Keyword search also answered faster: 6 milliseconds, against 1.2 seconds for TRACE (88 milliseconds for exact meaning-based search).</p></details></li>
+          <details class="more"><summary>More detail</summary><p>Exact meaning-based search also got 52%, so the gap is meaning-based search versus keywords, not TRACE&rsquo;s shortcut. On a stricter score that also rewards putting the right passage higher up, keyword search got 0.74 and TRACE 0.42. Recorded search-stage times were 6 ms for keyword search and 1.2 s for TRACE (88 ms for exact meaning-based search); the setups differ, embedding is separate, and we make no speed claim.</p></details></li>
         <li><span class="lead">No speed or memory claim.</span> Stored size on disk: 2.28 GB for TRACE, against 1.25 GB for a plain vector copy and 0.51 GB for the keyword index. Stored size on disk; memory use was not compared. While answering questions, the live service peaked near 1 GB of memory (1.03 GiB).</li>
         <li><span class="lead">Not a random sample.</span> We wrote 144 everyday questions before asking, and kept every answer. The tab <b>Weaker matches</b> holds the 29 where the top results read less well.</li>
         <li><span class="lead">TRACE was not run on public benchmarks.</span> We did not test TRACE on the public search benchmarks researchers use (called BEIR), so this page says nothing about how it compares there. A simple stand-in of ours (not TRACE) gave dataset-specific results on three small public sets: FiQA about 95% of exact search&rsquo;s top ten at 7% of passages scored, SciFact about 95% at 24%, NFCorpus 90% at 28% and 97% at 55%.</li>
