@@ -8,6 +8,7 @@ The website lives in this folder and is served by GitHub Pages at https://anshul
 - [`receipts/`](../receipts/): the records of our runs (the folder is named *receipts*).
 - [`receipts/earlier-runs/`](../receipts/earlier-runs/): the earlier builds and the build-memory runs.
 - [`receipts/order-measure/`](../receipts/order-measure/): the measurement of how ordered the groups are.
+- [`receipts/filed-summaries/`](../receipts/filed-summaries/README.md): two result summaries (head-to-head against standard indexes, append against rebuild); raw files not published.
 - [Evidence and limits](https://anshul48.github.io/trace/evidence/): every number with its scope, the harder comparisons and the corrections.
 - [Verify it yourself](https://anshul48.github.io/trace/verify/): what each check proves, and what it does not.
 
@@ -25,6 +26,9 @@ The website lives in this folder and is served by GitHub Pages at https://anshul
 - [ARCHITECTURE.md](ARCHITECTURE.md): the design, in technical terms.
 - [CODE-TOUR.md](CODE-TOUR.md): a walk through the 207 tested files.
 - [SCALE-AND-MEMORY.md](SCALE-AND-MEMORY.md): the earlier scale and build-memory runs, with their raw records.
+- [../BENCHMARKS.md](../BENCHMARKS.md): every current number, with its scope and a line-level link to its record. Start here.
+- [EXPLAINER.md](EXPLAINER.md): how TRACE works, in a 10-minute read.
+- [FAQ.md](FAQ.md): the hard questions, answered with links to the records.
 - [BENCHMARKS.md](BENCHMARKS.md): the measurement records of the earlier build.
 - [BENCHMARKS-DEEP.md](BENCHMARKS-DEEP.md): in-depth benchmarks (recall, nDCG, abstention, RAM and CPU time, inside views), every number with its scope and record.
 

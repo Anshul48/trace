@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased (2026-11-09)
+
+A refresh of the front door for a public launch. No change to the tested engine:
+`freeze-src/` is untouched and `python3 tools/verify_freeze.py` still prints
+`entries=207 ok=207 missing=0 mismatch=0`.
+
+- `README.md` (generated from `docs/source/README.src.md`) rewritten: one-line
+  hook, where TRACE loses first, a quickstart that was run on a fresh clone,
+  a how-it-works diagram, a benchmarks table with record links, plain
+  limitations and a roadmap. The "670 worker jobs" tile and a sentence about
+  Reflex's experiments were removed from the front page; `docs/META-USE.md` is
+  still linked.
+- New `BENCHMARKS.md`: every number with its scope and a line-level link to its
+  record, losses first.
+- New `docs/EXPLAINER.md` (the 10-minute walkthrough) and `docs/FAQ.md` (the hard
+  questions).
+- New `receipts/filed-summaries/`: two result summaries (head-to-head against
+  standard indexes; append against rebuild), copied byte for byte, with hashes.
+  Their raw per-query files are not published.
+- `tools/check_links.py` now also checks `BENCHMARKS.md`.
+
 ## 0.2.0 (2026-11-04)
 
 A new front door. No change to the tested engine: `freeze-src/` is untouched and
