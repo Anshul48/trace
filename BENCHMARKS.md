@@ -85,7 +85,7 @@ Run on 2026-11-09 from a fresh `git clone --depth 1` of this repository, Python
 | The recorded gates match their receipts | `python3 tools/check_receipts.py` | `receipts ok: gates, both probe modes, matched work, caps, freeze digest` | RE-RUN |
 | The small explorer data matches its pinned hashes | `python3 tools/verify_20k.py` | `IDENTICAL` | RE-RUN |
 | The 20k demo (88 documents, 20,030 tokens, 144 passages) | `python3 run_explorer.py --dataset 20k` | Explorer served; pages answered HTTP 200 | RE-RUN |
-| Small reproduction of the earlier protocol (needs `numpy` and `blake3`) | [docs/reproduction/repro-20k/README.md](docs/reproduction/repro-20k/README.md) | `VERIFY PASS`; pilot `PASS` (recorded wall time 41.9 s, [result.json](docs/reproduction/repro-20k/pilot-20k-out2/result.json)) | RE-RUN |
+| Small reproduction of the earlier protocol (needs `numpy` and `blake3`) | [docs/reproduction/repro-20k/README.md](docs/reproduction/repro-20k/README.md) | `FREEZE PASS 207/207`, `VERIFY PASS`, and a pilot `PASS` in 45 s here (recorded: 41.9 s, [result.json](docs/reproduction/repro-20k/pilot-20k-out2/result.json)) | RE-RUN |
 | Confidence intervals in row A4 | `python3 -c "from math import sqrt as s;z=1.96;[print(k,round((k/50+z*z/100-z*s(k/50*(1-k/50)/50+z*z/10000))/(1+z*z/50),3),round((k/50+z*z/100+z*s(k/50*(1-k/50)/50+z*z/10000))/(1+z*z/50),3)) for k in (26,41)]"` | `26 0.385 0.652` and `41 0.692 0.902` | RE-RUN |
 
 The small reproduction runs the frozen engine's earlier protocol on 20,030
