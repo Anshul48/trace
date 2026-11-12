@@ -9,7 +9,9 @@ including the one download. You need only Python 3 and git; the unit tests
 need two packages (one install line, marked below).
 
 Folder names inside `paper/evidence` (for example `claude-sci`) are the
-workspaces of the AI coding agents that produced the runs.
+workspaces of the AI coding agents that produced the runs, and three notes
+name the lane that ran them (`glass-pavo`). Both are left as written: the
+files are hash-pinned evidence.
 
 ## 0. Clone
 
