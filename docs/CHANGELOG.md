@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased (item 4: series-compile experiment)
+
+New `experiments/series-compile/`: a synthetic repeated-task-series demo
+(detector, shadow check with controls, guard), runnable with one command
+plus a smoke suite, with the honesty limits stated in its README. Root
+README status table carries the verified history sentence (12 Nov 2026).
+
 ## Unreleased
 
 Judge-ready verification: `paper/` now ships the write-up HTML, the receipt
