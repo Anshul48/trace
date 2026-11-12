@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img">
+<title>TRACE architecture: sealed store, routing, exact scoring, and use feeding back</title>
+<rect width="1200" height="675" fill="#ffffff"/>
+<text x="80" y="88" font-size="22" letter-spacing="4" fill="#14324f" font-family="sans-serif" font-weight="bold">TRACE · SELF-ORGANISING MEMORY</text>
+<text x="80" y="150" font-size="54" fill="#14324f" font-family="sans-serif" font-weight="bold">How TRACE is built to work</text>
+
+<!-- card 1: the store -->
+<rect x="80" y="200" width="240" height="330" rx="14" fill="#ffffff" stroke="#14324f" stroke-width="2"/>
+<text x="200" y="252" font-size="26" fill="#14324f" font-family="sans-serif" font-weight="bold" text-anchor="middle">The store</text>
+<g fill="#dbe4ed">
+<rect x="128" y="280" width="26" height="26" rx="4"/><rect x="160" y="280" width="26" height="26" rx="4"/><rect x="192" y="280" width="26" height="26" rx="4"/><rect x="224" y="280" width="26" height="26" rx="4"/>
+<rect x="128" y="312" width="26" height="26" rx="4"/><rect x="160" y="312" width="26" height="26" rx="4"/><rect x="192" y="312" width="26" height="26" rx="4"/><rect x="224" y="312" width="26" height="26" rx="4"/>
+<rect x="128" y="344" width="26" height="26" rx="4"/><rect x="160" y="344" width="26" height="26" rx="4"/><rect x="192" y="344" width="26" height="26" rx="4"/><rect x="224" y="344" width="26" height="26" rx="4"/>
+<rect x="128" y="376" width="26" height="26" rx="4"/><rect x="160" y="376" width="26" height="26" rx="4"/><rect x="192" y="376" width="26" height="26" rx="4"/><rect x="224" y="376" width="26" height="26" rx="4"/>
+</g>
+<text x="200" y="448" font-size="21" fill="#14324f" font-family="sans-serif" text-anchor="middle">812,545 passages,</text>
+<text x="200" y="476" font-size="21" fill="#14324f" font-family="sans-serif" text-anchor="middle">sealed</text>
+
+<!-- arrow 1 -->
+<line x1="332" y1="365" x2="368" y2="365" stroke="#14324f" stroke-width="2"/>
+<polygon points="368,365 358,359 358,371" fill="#14324f"/>
+
+<!-- card 2: routing -->
+<rect x="380" y="200" width="240" height="330" rx="14" fill="#ffffff" stroke="#14324f" stroke-width="2"/>
+<text x="500" y="252" font-size="26" fill="#14324f" font-family="sans-serif" font-weight="bold" text-anchor="middle">Routing</text>
+<g fill="#dbe4ed">
+<rect x="428" y="280" width="26" height="26" rx="4"/><rect x="460" y="280" width="26" height="26" rx="4"/><rect x="524" y="280" width="26" height="26" rx="4"/>
+<rect x="428" y="312" width="26" height="26" rx="4"/><rect x="460" y="312" width="26" height="26" rx="4"/><rect x="492" y="312" width="26" height="26" rx="4"/><rect x="524" y="312" width="26" height="26" rx="4"/>
+<rect x="428" y="344" width="26" height="26" rx="4"/><rect x="460" y="344" width="26" height="26" rx="4"/><rect x="524" y="344" width="26" height="26" rx="4"/>
+<rect x="428" y="376" width="26" height="26" rx="4"/><rect x="460" y="376" width="26" height="26" rx="4"/><rect x="492" y="376" width="26" height="26" rx="4"/>
+</g>
+<g fill="#14324f">
+<rect x="492" y="280" width="26" height="26" rx="4"/>
+<rect x="492" y="344" width="26" height="26" rx="4"/>
+<rect x="524" y="376" width="26" height="26" rx="4"/>
+</g>
+<text x="500" y="448" font-size="21" fill="#14324f" font-family="sans-serif" text-anchor="middle">picks a shortlist:</text>
+<text x="500" y="476" font-size="21" fill="#14324f" font-family="sans-serif" text-anchor="middle">0.79% of rows</text>
+
+<!-- arrow 2 -->
+<line x1="632" y1="365" x2="668" y2="365" stroke="#14324f" stroke-width="2"/>
+<polygon points="668,365 658,359 658,371" fill="#14324f"/>
+
+<!-- card 3: exact scoring -->
+<rect x="680" y="200" width="240" height="330" rx="14" fill="#ffffff" stroke="#14324f" stroke-width="2"/>
+<text x="800" y="252" font-size="26" fill="#14324f" font-family="sans-serif" font-weight="bold" text-anchor="middle">Exact scoring</text>
+<rect x="724" y="290" width="152" height="26" rx="6" fill="#14324f"/>
+<rect x="724" y="326" width="108" height="26" rx="6" fill="#5b87b0"/>
+<rect x="724" y="362" width="64" height="26" rx="6" fill="#dbe4ed"/>
+<text x="800" y="448" font-size="21" fill="#14324f" font-family="sans-serif" text-anchor="middle">top ten,</text>
+<text x="800" y="476" font-size="21" fill="#14324f" font-family="sans-serif" text-anchor="middle">each with a record</text>
+
+<!-- arrow 3 -->
+<line x1="932" y1="365" x2="968" y2="365" stroke="#14324f" stroke-width="2"/>
+<polygon points="968,365 958,359 958,371" fill="#14324f"/>
+
+<!-- card 4: use feeds back (design: dashed border) -->
+<rect x="980" y="200" width="140" height="330" rx="14" fill="#ffffff" stroke="#5b87b0" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="1050" y="252" font-size="22" fill="#14324f" font-family="sans-serif" font-weight="bold" text-anchor="middle">Use feeds</text>
+<text x="1050" y="280" font-size="22" fill="#14324f" font-family="sans-serif" font-weight="bold" text-anchor="middle">back</text>
+<path d="M 1050 310 m -34 0 a 34 34 0 1 1 -12 26" fill="none" stroke="#5b87b0" stroke-width="5" stroke-linecap="round"/>
+<polygon points="1030,372 1042,352 1022,354" fill="#5b87b0"/>
+<text x="1050" y="448" font-size="20" fill="#5b87b0" font-family="sans-serif" text-anchor="middle">design:</text>
+<text x="1050" y="474" font-size="20" fill="#5b87b0" font-family="sans-serif" text-anchor="middle">reshapes</text>
+<text x="1050" y="500" font-size="20" fill="#5b87b0" font-family="sans-serif" text-anchor="middle">structure</text>
+
+<text x="80" y="586" font-size="21" fill="#8a8f98" font-family="sans-serif">Solid cards run today. The dashed card is the design goal, not yet tested.</text>
+<text x="1120" y="630" font-size="20" fill="#8a8f98" font-family="sans-serif" text-anchor="end">Anshul Raj · github.com/Anshul48/trace</text>
+</svg>

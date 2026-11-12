@@ -107,7 +107,7 @@
         var href = /^https?:\/\//.test(f.fallback_href) ? f.fallback_href : root + f.fallback_href;
         action = '<p><a class="text-link" href="' + esc(href) + '">' + esc(f.fallback_label || "Open the working demo") + '</a></p>';
       } else {
-        action = '<p><a class="text-link" href="' + root + 'demos/#films">Watch the working films</a></p>';
+        action = '<p><a class="text-link" href="' + root + 'demos/#films">Demo videos</a></p>';
       }
     }
     var h = compact ? "h2" : "h3";

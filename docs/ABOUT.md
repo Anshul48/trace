@@ -20,7 +20,7 @@ https://anshul48.github.io/trace/
 **Topics** (paste one by one, or with the GitHub CLI: `gh repo edit Anshul48/trace --add-topic ...`):
 
 ```
-ai-memory, semantic-search, vector-search, retrieval, self-organizing, sparse-activation, provenance, reproducible-research, research-prototype, apache-2-0
+ai-memory, semantic-search, vector-search, retrieval, self-organising, sparse-activation, provenance, reproducible-research, research-prototype, apache-2-0
 ```
 
 The checkboxes below the topics: leave "Releases" and "Packages" unticked (there are none); tick "Include in the home page" only if you want the Pages site shown.

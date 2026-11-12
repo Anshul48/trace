@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased (item 1: first screen)
+
+README first screen reworked from the wording review: new hook and design
+section in plain words, status and losses above the design goal, organiser
+row with its miss stated, British spelling, "Demo videos" link label, engine
+row noting the source is not yet published, and an architecture diagram.
+Quickstart carries real output from a fresh clone of main.
+
 ## Unreleased (public check wrapper + paper video)
 
 New `tools/verify_paper_public.py`: runs the paper receipt checker and
