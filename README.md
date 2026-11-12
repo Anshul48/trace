@@ -23,7 +23,7 @@ Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.githu
 | Area | State | Evidence |
 |---|---|---|
 | Sealed store: 812,545 passages / 99,891,846 tokens, fingerprinted | Runs today | Quickstart below, [BENCHMARKS.md](BENCHMARKS.md) |
-| Routed dense search: 0.79% of rows scored in one of four parts, 0.9985 of exact search's top ten kept | Runs today | [B1, B2](BENCHMARKS.md#b-what-the-method-does) |
+| Routed dense search: 0.79% of rows scored in each of the four parts, 0.9985 of exact search's top ten kept | Runs today | [B1, B2](BENCHMARKS.md#b-what-the-method-does) |
 | Receipts and audit tooling: frozen-code check, receipt gates, small reproduction | Runs today | The three check commands below |
 | Benchmark numbers: 50 searches, our library, our server | Runs today, self-measured | [BENCHMARKS.md](BENCHMARKS.md) |
 | Bottom-up organiser v1: groups code into modules without being told how many; score of 0.27 (adjusted Rand index: 1 is identical groupings, 0 is chance) against 0.30 for the standard method told the true count, on real code. The organiser did not beat it | Experimental | Reported 12 Nov; record not yet filed in this repo |
@@ -117,7 +117,7 @@ flowchart LR
     D -.-> F
 ```
 
-TRACE sorts a library into groups by meaning. A question opens only a few groups and scores only the passages inside them: **1,600 of 203,137 rows (0.79%)** in one of the four library parts, keeping **0.9985 of exact search's top ten** ([B1, B2](BENCHMARKS.md#b-what-the-method-does)). That is less scoring work, not less time. Every result comes with its article, character span, licence and a SHA-256 fingerprint that your browser can recompute. The 10-minute walkthrough is [docs/EXPLAINER.md](docs/EXPLAINER.md).
+TRACE sorts a library into groups by meaning. A question opens only a few groups and scores only the passages inside them: **1,600 rows in each of the four library parts (0.79%; 1,600 of 203,137 in the first)**, keeping **0.9985 of exact search's top ten** ([B1, B2](BENCHMARKS.md#b-what-the-method-does)). That is less scoring work, not less time. Every result comes with its article, character span, licence and a SHA-256 fingerprint that your browser can recompute. The 10-minute walkthrough is [docs/EXPLAINER.md](docs/EXPLAINER.md).
 
 ## Benchmarks
 
@@ -128,7 +128,7 @@ Each number in this table links to its record. Our library of **812,545 passages
 | Served latency, median, against HNSW | 1,236 ms against 0.66 ms (about 1,880x slower; same 26/50 hits) | [A1](BENCHMARKS.md#a-where-trace-loses) |
 | Right source in top ten: keyword against TRACE | 82% against 52% (50 searches) | [A4](BENCHMARKS.md#a-where-trace-loses) |
 | Search store size on disk | 2.279 GB, bigger than the 1.248 GB of exact vectors it approximates | [A6](BENCHMARKS.md#a-where-trace-loses) |
-| Rows scored per search, one of four parts | 1,600 of 203,137 (0.79%): work, not time | [B1](BENCHMARKS.md#b-what-the-method-does) |
+| Rows scored per search, each of four parts | 1,600 of 203,137 in the first part (0.79% in each): work, not time | [B1](BENCHMARKS.md#b-what-the-method-does) |
 | Agreement with exact search's top ten | 0.9985 on average; merged lists identical on 50 of 50 | [B2, B3](BENCHMARKS.md#b-what-the-method-does) |
 | Append against rebuild, 203,137 passages | about 18 s against 291 s, recall not worse; one run | [C1](BENCHMARKS.md#c-what-the-extra-time-buys) |
 
