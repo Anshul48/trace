@@ -2,11 +2,10 @@
 
 ## Unreleased (0.79% scope: all four parts)
 
-The 0.79% figure now reads "each of the four parts" everywhere (status
-table, how-it-works, benchmarks row, B1 scope cell, site index): the
-paper's evidence file per_shard.tsv on main shows 1,600 rows scored on
-each part, and the 200-row per-probe file was confirmed as the same 50
-searches on each part.
+The 0.79% figure now reads "each of the four parts" on the README,
+BENCHMARKS.md B1 and the site home page: the paper's evidence file
+per_shard.tsv shows 1,600 rows scored on each part. Other pages still
+give the narrower "one of four parts" scope.
 
 ## Unreleased (R5 wording follow-up)
 
