@@ -1,0 +1,5 @@
+> EXCERPT for judges. These are the two lines of the withheld file that the paper's receipts for the store size and the main positive result point to, copied unchanged. The rest of that file is an internal working note with a server address and is not published. An excerpt cannot match the receipt's hash; it is here so the values can be read.
+
+- Sealed corpus: 812,545 passages (units), 99,891,846 tokens (about 99.9 million). The planned 100-million-token gate was waived: it falls short by 108,154 tokens (0.11%). Any "99.9M" must carry that sentence nearby ("short of the 100M target by 0.11%").
+
+- Measured on 50 test searches over this corpus (40 written questions plus 10 taken from passage openings; say "50 test searches", not "50 questions"; the "under 1%" is scored rows per query on one shard, k=10): TRACE kept 0.9985 of exact meaning-based search's results while scoring 0.79% of rows (about 127 times less scoring work). The checkable records matched on all claims re-run on the live service (result still marked unverified by an outside party).
