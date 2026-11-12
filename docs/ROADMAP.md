@@ -5,9 +5,9 @@ Design direction, not promises. No dates. Most of this does not exist yet;
 what runs today is in the [status table](../README.md#status-what-runs-what-is-experimental-what-is-design)
 of the README.
 
-## The self-organizing store
+## The self-organising store
 
-- **Self-organizing ontology.** Atoms of meaning gather into clusters, clusters
+- **Self-organising ontology.** Atoms of meaning gather into clusters, clusters
   gather under centroids, and every atom keeps its links upward.
   Multi-membership: the same atom can sit under more than one parent.
   Use reshapes the structure: travelled edges gain energy, unused ones decay.

@@ -19,8 +19,9 @@ files are hash-pinned evidence.
 git clone --depth 1 https://github.com/Anshul48/trace && cd trace
 ```
 
-(Verified here with a sparse partial clone locally, 11 seconds, and a full
-130 MB clone on a second machine, then the identical commands below.)
+(Clone verified from a fresh clone of main at 36b8ef9 on 2026-11-12:
+147 MB in 9 seconds on a fast link; a sparse partial clone works too and
+is what was used locally.)
 
 ## 1. Repo checks (Python 3 only, no downloads)
 

@@ -57,7 +57,7 @@ These technical documents were written for an earlier, smaller experiment. Their
 
 - [Website: home](https://anshul48.github.io/trace/): what TRACE is, the measured result and the limits.
 - [TRACE explorer](https://anshul48.github.io/trace/explorer/): replay of real recorded searches.
-- [Watch the working films](https://anshul48.github.io/trace/demos/): the story and the working cuts.
+- [Demo videos](https://anshul48.github.io/trace/demos/): the story and the working cuts.
 - [ANIMA on GitHub](https://github.com/Anshul48/anima-substrate): a separate project, a prototype memory link for coding agents.
 - [ANIMA recorded demo](https://anshul48.github.io/anima-substrate/demo/): a recorded nine-job run, replayed in your browser.
 - [Reflex replay](https://anshul48.github.io/demo-trace-anima-reflex/): a separate project, an AI that finds the right button. No login.

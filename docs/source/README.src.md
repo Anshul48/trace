@@ -2,7 +2,7 @@
 <!-- GENERATED from docs/source/README.src.md by tools/build_site.py. Edit the source, then run: python3 tools/build_site.py -->
 # TRACE
 
-**A memory database for coding agents, becoming a store that organizes itself: use reshaping structure, slow deliberate work compiling into fast replay. What runs today is a sealed, checkable store; self-organizing memory is the design goal, not yet tested. This README says which is which.**
+**TRACE is a memory store for coding agents. What runs today is a sealed store: passages in, answers with checkable records out. A memory that organises itself as it is used is the design goal; it is not tested yet. This README says which parts run and which do not.**
 
 Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.github.io/trace/explorer/)** (no install) · [Paper](paper/checkable-memory-for-agents.pdf) · [Benchmarks](BENCHMARKS.md) · [FAQ](docs/FAQ.md) · [How it works](docs/EXPLAINER.md) · [Roadmap](docs/ROADMAP.md) · {{film}}
 <!-- PAPER: in-repo PDF linked above; swap to the Zenodo DOI URL once the preprint is public, then rebuild with tools/build_site.py -->
@@ -14,14 +14,9 @@ Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.githu
 
 *The explorer replays real searches we ran on our server. No search runs live behind it.* [60-second tour (video)](docs/media/tour-60s.mp4).
 
-## What TRACE is becoming
-
-The design we are building toward, in four parts:
-
-- **A self-organizing ontology.** The library is broken into small atoms of meaning; atoms gather into clusters, clusters gather under centroids, and every atom keeps its links upward. The same atom can belong to more than one parent, and use reshapes the structure: travelled edges gain energy, unused ones decay.
-- **A plastic layer.** Outcomes strengthen or weaken links, with rollback when a change hurts. Small toys only so far.
-- **Sleep consolidation.** Offline replay that compresses, distills and decays the store, behind a commit gate that can reject a bad proposal. Designed; a benefit is shown nowhere yet.
-- **System 2 to System 1 trace-to-skill.** Slow, correct, deliberate work is recorded, verified, and compiled into fast structure that replays without the slow path. As a capability this is not shown anywhere yet.
+<p align="center">
+  <img src="docs/img/architecture.svg" alt="TRACE architecture: a sealed store of passages, routing that picks a shortlist, exact scoring that returns a top ten with records, and use feeding back (design goal)." width="100%">
+</p>
 
 ## Status: what runs, what is experimental, what is design
 
@@ -31,16 +26,26 @@ The design we are building toward, in four parts:
 | Routed dense search: 0.79% of rows scored in one of four parts, 0.9985 of exact search's top ten kept | Runs today | [B1, B2](BENCHMARKS.md#b-what-the-method-does) |
 | Receipts and audit tooling: frozen-code check, receipt gates, small reproduction | Runs today | The three check commands below |
 | Benchmark numbers: 50 searches, our library, our server | Runs today, self-measured | [BENCHMARKS.md](BENCHMARKS.md) |
-| Bottom-up organiser v1: module agreement 0.27 against 0.30 for k-means told K, on real code | Experimental | Reported 12 Nov; record not yet filed in this repo |
+| Bottom-up organiser v1: groups code into modules without being told how many; score of 0.27 (adjusted Rand index: 1 is identical groupings, 0 is chance) against 0.30 for the standard method told the true count, on real code. The organiser did not beat it | Experimental | Reported 12 Nov; record not yet filed in this repo |
 | Repeated task to checked script. On our own task history, a script written from the task description and two recorded runs, with one fix after the first comparison, reproduced every data field of 121 past runs of a task that had been run 122 times (checked by rerun; in 113 of the 122 runs the inputs were the same as in the run before). Of thirteen repeated tasks tried, this one matched on all 121 past runs and two more matched most later runs (as reported by the builders, not yet rerun). Not shown: writing the script automatically, or a skill learned from varied work | Experimental | Reported by the builders, 12 Nov 2026; the task history is not in this repo. Synthetic demo of the checking steps: [experiments/series-compile](experiments/series-compile/README.md) |
 | Plastic layer beyond toys, sleep with measured benefit, society of cortexes, ontology at scale | Design only | [docs/ROADMAP.md](docs/ROADMAP.md) |
-| Resident server, whole-library download, public benchmarks, outside check | Not built | [docs/ROADMAP.md](docs/ROADMAP.md) |
+| Resident server, whole-library download, public benchmarks, outside check | Design | [docs/ROADMAP.md](docs/ROADMAP.md) |
+| C engine source (`cand_serve`) | Design | engine source: not yet published |
 
 ## Where it loses (read this first)
 
 - **Speed.** In our same-store head-to-head, TRACE's live service answered in a median of **1,236 ms**. The best standard index that matched its hit rate (HNSW) answered in **0.66 ms**: about **1,880 times** faster, with the same 26 of 50 hits. The comparison is not like for like (the index returns ids only; the service starts engine processes and returns passages), but it is still a loss. [BENCHMARKS A1](BENCHMARKS.md#a-where-trace-loses)
 - **Keywords.** On the same 50 test searches, plain keyword search put the right source passage in its top ten for **82%**; TRACE for **52%** (about +/- 11 and +/- 13 points). Exact meaning-based search also got 52%, so the gap is meaning versus keywords, not our shortcut. If you need exact words, use BM25. [A4](BENCHMARKS.md#a-where-trace-loses)
 - **You cannot re-run our 100M numbers.** The library, its search store and the C engine source are **not published**. The 100M figures are ours, from our own server, with no outside check. What you can run is below.
+
+## Design goal (not built yet)
+
+Four changes would turn this store into one that organises itself as it is used. The store does the first two badly today and the last two not at all.
+
+- **Outline.** Split the library into small pieces of meaning and let the pieces gather into groups, then groups of groups, with each piece keeping its links upward. The same piece may sit in more than one group, and use would reshape the grouping: travelled links strengthen, unused ones fade.
+- **Learning from outcomes.** Strengthen links that lead somewhere useful, weaken the rest, and roll a change back when it hurts. Small toys only so far.
+- **Sleep.** Replay the day's work offline, compressing, distilling and deleting, behind a gate that can reject a bad proposal. Designed; a benefit is shown nowhere yet.
+- **Repeated work to scripts.** Record slow, correct, deliberate work, verify it, and replace repeats with a fast script that replays it. Experimental on one task series (see the table); not shown as a general capability.
 
 ## Quickstart
 
@@ -49,7 +54,18 @@ git clone --depth 1 https://github.com/Anshul48/trace && cd trace
 python3 run_explorer.py --dataset 20k
 ```
 
-Needs Python 3.8 or newer and a browser; nothing else is installed or downloaded after the clone (about 130 MB with Git data; on our connection the clone took 16 to 36 seconds and the server was up in under a second). This serves the explorer from your clone at `http://127.0.0.1:8000/explorer/`. It is **demo scale**: a replay of 144 recorded searches plus a 20k-token sample (88 documents). It is not a live search of the 100M library. Add `--no-browser` on a machine without a browser.
+Needs Python 3.8 or newer and a browser; nothing else is installed or downloaded after the clone (147 MB with Git data, measured 2026-11-12). This serves the explorer from your clone at `http://127.0.0.1:8000/explorer/`, answering within seconds. It is **demo scale**: a replay of 144 recorded searches plus a 20k-token sample (88 documents). It is not a live search of the 100M library. Add `--no-browser` on a machine without a browser.
+
+The server prints (real output, fresh clone of main at 36b8ef9, 2026-11-12):
+
+```text
+TRACE explorer serving docs/ at http://127.0.0.1:8000/
+Explorer (replay):   http://127.0.0.1:8000/explorer/
+Inside TRACE:        http://127.0.0.1:8000/explorer/inside.html
+Dataset: 20k prefix shipped in this repo. Press Ctrl+C to stop.
+```
+
+`curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/explorer/` prints `200`.
 
 Then check us:
 
@@ -105,7 +121,7 @@ TRACE sorts a library into groups by meaning. A question opens only a few groups
 
 ## Benchmarks
 
-Every number links to a record. Our library of **812,545 passages / 99,891,846 tokens** (0.11% short of 100 million), our method, **50 test searches**, our server. Full table with scope and caveats: **[BENCHMARKS.md](BENCHMARKS.md)**.
+Each number in this table links to its record. Our library of **812,545 passages / 99,891,846 tokens** (0.11% short of 100 million), our method, **50 test searches**, our server. Full table with scope and caveats: **[BENCHMARKS.md](BENCHMARKS.md)**.
 
 | What | Number | Record |
 |---|---|---|
@@ -134,7 +150,7 @@ More in the [FAQ](docs/FAQ.md) and in [BENCHMARKS.md, "Not measured"](BENCHMARKS
 
 Design direction, not promises: no dates, and most of it does not exist yet. Full page: **[docs/ROADMAP.md](docs/ROADMAP.md)**.
 
-- **The self-organizing store**: ontology, organiser, top-down prediction, plastic layer, sleep, trace-to-skill. Experimental pieces and design; see the status table above.
+- **The store that organises itself**: grouping, organiser, top-down prediction, learning from outcomes, sleep, repeated work to scripts. Experimental pieces and design; see the status table above.
 - **A download of the whole library**, so anyone can re-run the 100M numbers. Not built.
 - **A resident search server** (open each part once, answer many questions). Designed; no speed number is claimed for it.
 - **TRACE on public benchmarks** (BEIR first) with full-run records, and **an outside check** of our numbers.
@@ -142,7 +158,7 @@ Design direction, not promises: no dates, and most of it does not exist yet. Ful
 
 ## The ecosystem
 
-One builder, three projects. TRACE is the memory at the front; ANIMA brings that memory into coding work through a prototype link; Reflex is a separate line of work on screens and buttons.
+One builder, three projects. TRACE is the memory at the front; other projects plug into it through the same checkable records. Reflex is a separate line of work on screens and buttons.
 
 | Project | Repository | Demo |
 |---|---|---|
@@ -150,7 +166,7 @@ One builder, three projects. TRACE is the memory at the front; ANIMA brings that
 | ANIMA | [Repository](https://github.com/Anshul48/anima-substrate) | [Recorded replay](https://anshul48.github.io/anima-substrate/demo/) |
 | Reflex | [Demo repository](https://github.com/Anshul48/demo-trace-anima-reflex) | [Replay](https://anshul48.github.io/demo-trace-anima-reflex/) |
 
-ANIMA is a prototype for one job type (fix a bug, judged by a hidden checker). It is a prototype layer on top of the coding agent you already use, giving it memory (a prototype link), a checker it cannot see, and a screen to watch it work. The Muse Code, Claude Code and Codex adapters are prototypes, and the screen shows the recorded state tree of a run (UI preview). See the companion repository for its installation status. Reflex does not use TRACE.
+ANIMA is a prototype for one job type (fix a bug, judged by a hidden checker). It plugs into TRACE as its memory link, adds a checker it cannot see, and shows its work on screen. The Muse Code, Claude Code and Codex adapters are prototypes. Memory link, checker and screen are all prototype. See the companion repository for its installation status. Reflex does not use TRACE.
 
 ## Where everything is
 
