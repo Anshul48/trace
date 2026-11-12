@@ -30,6 +30,7 @@ The website lives in this folder and is served by GitHub Pages at https://anshul
 - [EXPLAINER.md](EXPLAINER.md): how TRACE works, in a 10-minute read.
 - [FAQ.md](FAQ.md): the hard questions, answered with links to the records.
 - [ROADMAP.md](ROADMAP.md): where the design is headed; design, not promises.
+- [design/](design/README.md): five short design notes, each with its status, latest number and falsifier.
 - [BENCHMARKS.md](BENCHMARKS.md): the measurement records of the earlier build.
 - [BENCHMARKS-DEEP.md](BENCHMARKS-DEEP.md): in-depth benchmarks (recall, nDCG, abstention, RAM and CPU time, inside views), every number with its scope and record.
 
