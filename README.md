@@ -158,7 +158,7 @@ ANIMA is a prototype for one job type (fix a bug, judged by a hidden checker). I
 |---|---|
 | [BENCHMARKS.md](BENCHMARKS.md) | Every number, its scope and its record. |
 | [Paper](paper/checkable-memory-for-agents.pdf) | The preprint: what an agent-built memory store can honestly claim. |
-| [Paper video](paper/video/checkable-memory-for-agents.mp4) | The paper in 60-90 seconds ([narration script](paper/video/narration.txt), the paper's own sentences). |
+| [Paper video](paper/video/checkable-memory-for-agents.mp4) | The paper in 78 seconds, synthetic voice ([narration script](paper/video/narration.txt): sentences taken from the paper, some shortened). |
 | [docs/EXPLAINER.md](docs/EXPLAINER.md) · [docs/FAQ.md](docs/FAQ.md) | The 10-minute walkthrough and the hard questions. |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Where the design is headed; design, not promises. |
 | [Checkable records](receipts/) | The records of our runs: the qualification run, the earlier larger builds, the order measurement, the [filed summaries](receipts/filed-summaries/README.md). |

@@ -1,10 +1,7 @@
-# Narration script: "Checkable memory for agents" (paper video, 60-90 s)
-# Source: paper's own sentences from scratch/wave6/paper/build/PAPER-final-r4.txt
-# (abstract L9, problem L9/L13, store L15, audit L29, results L9/L52-L53, planted L9, next L89).
-# Numbers exactly as in the paper. Digit strings are expanded by the speech
-# synthesiser (e.g. 812,545 spoken as eight hundred twelve thousand ...).
-# Owner exception 12 Nov: narration audio explicitly requested for THIS video.
-# Word count: 187 (verified with wc -w; band 150-190).
+# Narration script for the paper video, "Checkable memory for agents" (78 seconds).
+# Every sentence is taken from the paper (paper/checkable-memory-for-agents.pdf); some are shortened.
+# Numbers are exactly as in the paper. The voice is synthetic; it reads digit strings as words.
+# Each block below is one card of the video.
 #
 # CARD cover (story-1-cover.png):
 Checkable memory for agents: an audit of what an agent-built memory store can honestly claim.
