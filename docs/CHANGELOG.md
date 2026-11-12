@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased (item 2: design notes)
+
+New `docs/design/`: five short notes (grouping, organiser, top-down guess,
+repeated work to scripts, sleep), each with status, latest measured number,
+what it does not show and what would prove it wrong. Status table: organiser
+row names its baseline and limits; design-only row in plain words. Site home
+title states what runs.
+
 ## Unreleased (0.79% scope: all four parts)
 
 The 0.79% figure now reads "each of the four parts" on the README,
