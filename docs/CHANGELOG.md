@@ -11,7 +11,7 @@ of the cited values. JUDGES.md updated to match.
 New `experiments/series-compile/`: a synthetic repeated-task-series demo
 (detector, shadow check with controls, guard), runnable with one command
 plus a smoke suite, with the honesty limits stated in its README. Root
-README status table carries the verified history sentence (12 Nov 2026).
+README status row reworded: the script was run beside the recorded work, nothing was switched over.
 
 ## Unreleased
 

@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-# series-compile: synthetic repeated-task-series demo
+# Repeated task to checked script: a synthetic demo
 
 ## Idea in plain words
 
@@ -18,6 +18,7 @@ python3 -I series_compile.py demo
 ```
 
 It builds five synthetic datasets in a temp dir, runs detect, shadow
+(shadow: run the script on past inputs and compare with the recorded outputs)
 and guard, prints one table, and removes the temp dir. Stdlib only.
 
 ## Expected output
@@ -59,9 +60,9 @@ new store value.
 
 ## What it does NOT show
 
-* The candidate script is written by hand, and it is the same function the generator uses to produce the recorded outputs of dataset (a). The 40 of 40 match is therefore by construction. The demo shows the checking harness (detection, shadow comparison with its two controls, the guard), not automatic writing of a script.
+* The candidate script is written in advance, not generated, and it is the same function the generator uses to produce the recorded outputs of dataset (a). The 40 of 40 match is therefore by construction. The demo shows the checking steps (detection, comparison on past inputs with its two controls, the guard), not automatic writing of a script.
 * The data is synthetic: stores, shipments, shelves, weights and worker
-  habits are invented by `gen` from fixed seeds. Repeats here prove
+  habits are invented by `gen` from fixed seeds. Repeats here say
   nothing about any real workload.
 * The method is tiny on purpose (count items, add weights). Real jobs
   need their own script and their own checks.
@@ -74,7 +75,7 @@ new store value.
 ## Layout
 
 * `series_compile.py` -- gen, detect, shadow, guard, demo in one file.
-* `tests/test_smoke.py` -- hermetic smoke suite; run it with
+* `tests/test_smoke.py` -- self-contained tests; run it with
   `python3 -W error::ResourceWarning -m unittest discover` from here.
 * `EXPECTED_OUTPUT.txt` -- byte-exact `demo` output; running `demo`
   twice must reproduce it byte for byte.
