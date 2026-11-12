@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased (R5 wording follow-up)
+
+ANIMA ecosystem text restored to "prototype memory link" wording; diagram
+kicker and title state what runs; engine-source row states the engine runs
+and only its source is unpublished; design section lead corrected.
+
 ## Unreleased (item 1: first screen)
 
 README first screen reworked from the wording review: new hook and design

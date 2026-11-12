@@ -29,8 +29,8 @@ Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.githu
 | Bottom-up organiser v1: groups code into modules without being told how many; score of 0.27 (adjusted Rand index: 1 is identical groupings, 0 is chance) against 0.30 for the standard method told the true count, on real code. The organiser did not beat it | Experimental | Reported 12 Nov; record not yet filed in this repo |
 | Repeated task to checked script. On our own task history, a script written from the task description and two recorded runs, with one fix after the first comparison, reproduced every data field of 121 past runs of a task that had been run 122 times (checked by rerun; in 113 of the 122 runs the inputs were the same as in the run before). Of thirteen repeated tasks tried, this one matched on all 121 past runs and two more matched most later runs (as reported by the builders, not yet rerun). Not shown: writing the script automatically, or a skill learned from varied work | Experimental | Reported by the builders, 12 Nov 2026; the task history is not in this repo. Synthetic demo of the checking steps: [experiments/series-compile](experiments/series-compile/README.md) |
 | Plastic layer beyond toys, sleep with measured benefit, society of cortexes, ontology at scale | Design only | [docs/ROADMAP.md](docs/ROADMAP.md) |
-| Resident server, whole-library download, public benchmarks, outside check | Design | [docs/ROADMAP.md](docs/ROADMAP.md) |
-| C engine source (`cand_serve`) | Design | engine source: not yet published |
+| Resident server, whole-library download, public benchmarks, outside check | Not built | [docs/ROADMAP.md](docs/ROADMAP.md) |
+| Engine source (C) | Not yet published | The engine runs on our server and produced the numbers above; its source is not in this repo |
 
 ## Where it loses (read this first)
 
@@ -40,9 +40,9 @@ Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.githu
 
 ## Design goal (not built yet)
 
-Four changes would turn this store into one that organises itself as it is used. The store does the first two badly today and the last two not at all.
+Four changes would turn this store into one that organises itself as it is used. None of them is part of the store measured in the paper, which is fixed. Each line below says how far it has got.
 
-- **Outline.** Split the library into small pieces of meaning and let the pieces gather into groups, then groups of groups, with each piece keeping its links upward. The same piece may sit in more than one group, and use would reshape the grouping: travelled links strengthen, unused ones fade.
+- **Outline.** Split the library into small pieces of meaning and let the pieces gather into groups, then groups of groups, with each piece keeping its links upward. The same piece may sit in more than one group, and use would reshape the grouping: travelled links strengthen, unused ones fade. *Design; one early experiment, see the status table.*
 - **Learning from outcomes.** Strengthen links that lead somewhere useful, weaken the rest, and roll a change back when it hurts. Small toys only so far.
 - **Sleep.** Replay the day's work offline, compressing, distilling and deleting, behind a gate that can reject a bad proposal. Designed; a benefit is shown nowhere yet.
 - **Repeated work to scripts.** Record slow, correct, deliberate work, verify it, and replace repeats with a fast script that replays it. Experimental on one task series (see the table); not shown as a general capability.
@@ -158,7 +158,7 @@ Design direction, not promises: no dates, and most of it does not exist yet. Ful
 
 ## The ecosystem
 
-One builder, three projects. TRACE is the memory at the front; other projects plug into it through the same checkable records. Reflex is a separate line of work on screens and buttons.
+One builder, three projects. TRACE is the memory store; ANIMA connects to it through a prototype memory link; Reflex is a separate line of work on screens and buttons.
 
 | Project | Repository | Demo |
 |---|---|---|
@@ -166,7 +166,7 @@ One builder, three projects. TRACE is the memory at the front; other projects pl
 | ANIMA | [Repository](https://github.com/Anshul48/anima-substrate) | [Recorded replay](https://anshul48.github.io/anima-substrate/demo/) |
 | Reflex | [Demo repository](https://github.com/Anshul48/demo-trace-anima-reflex) | [Replay](https://anshul48.github.io/demo-trace-anima-reflex/) |
 
-ANIMA is a prototype for one job type (fix a bug, judged by a hidden checker). It plugs into TRACE as its memory link, adds a checker it cannot see, and shows its work on screen. The Muse Code, Claude Code and Codex adapters are prototypes. Memory link, checker and screen are all prototype. See the companion repository for its installation status. Reflex does not use TRACE.
+ANIMA is a prototype for one job type (fix a bug, judged by a hidden checker). It is a prototype layer on top of the coding agent you already use, giving it memory (a prototype memory link), a checker it cannot see, and a screen to watch it work. The Muse Code, Claude Code and Codex adapters are prototypes, and the screen shows the recorded state tree of a run (UI preview). See the companion repository for its installation status. Reflex does not use TRACE.
 
 ## Where everything is
 
