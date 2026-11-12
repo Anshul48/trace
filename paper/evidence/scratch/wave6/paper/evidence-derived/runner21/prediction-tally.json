@@ -1,0 +1,297 @@
+{
+  "failed": 2,
+  "failed_word": "Two",
+  "rules": {
+    "P1": "P1: for D=2^20 and 2^16 the uniform gate passes (misses the divergence) in >= 85 % of seeds (theory 99.0 % and 85.9 %); for D=2^10 it passes in < 1 % (theory 0.006 %); D=2^13: theory 29.5 %, prediction within +-10 pp of theory.",
+    "P2": "P2: G_edge with uniformly random T behaves like G_uniform (within 3 pp); with structured T it catches the divergence in >= 99 % of seeds at every D.",
+    "P3": "P3: measured pass rates lie within the Wilson 95 % interval of theory for >= 7 of the 8 (D, uniform/edge-random) cells (a check that the harness does what the algebra says)."
+  },
+  "verdicts": {
+    "P1": false,
+    "P2": false,
+    "P3": true
+  },
+  "P1_conditions": {
+    "D1048576_at_least_85_percent": true,
+    "D65536_at_least_85_percent": false,
+    "D1024_below_1_percent": true,
+    "D8192_within_10pp_of_29p5_percent": true
+  },
+  "P2_conditions": {
+    "1024": {
+      "random_within_3pp": true,
+      "structured_catch_at_least_99_percent": true
+    },
+    "8192": {
+      "random_within_3pp": false,
+      "structured_catch_at_least_99_percent": true
+    },
+    "65536": {
+      "random_within_3pp": true,
+      "structured_catch_at_least_99_percent": true
+    },
+    "1048576": {
+      "random_within_3pp": true,
+      "structured_catch_at_least_99_percent": true
+    }
+  },
+  "P3_theory_in_recomputed_interval": 8,
+  "P3_rule_basis": "Saved harness convention: theory lies inside the Wilson interval computed from measured counts. The plan's phrase 'interval of theory' is ambiguous; this is not an independent ruling on that wording.",
+  "cells": {
+    "1024": {
+      "uniform_randomT": {
+        "k": 0,
+        "n": 200,
+        "pass_rate": "0",
+        "recomputed_wilson95": [
+          0.0,
+          0.018846005918320894
+        ],
+        "saved_theory_pass": 5.711770163265015e-05
+      },
+      "edge_randomT": {
+        "k": 0,
+        "n": 200,
+        "pass_rate": "0",
+        "recomputed_wilson95": [
+          0.0,
+          0.018846005918320894
+        ],
+        "saved_theory_pass": 0.0003973603580827054
+      },
+      "edge_structuredT": {
+        "k": 0,
+        "n": 200,
+        "pass_rate": "0",
+        "recomputed_wilson95": [
+          0.0,
+          0.018846005918320894
+        ],
+        "saved_theory_pass": 1.0315746967711435e-45
+      },
+      "uniform_structuredT": {
+        "k": 0,
+        "n": 200,
+        "pass_rate": "0",
+        "recomputed_wilson95": [
+          0.0,
+          0.018846005918320894
+        ],
+        "saved_theory_pass": 5.711770163265015e-05
+      }
+    },
+    "8192": {
+      "uniform_randomT": {
+        "k": 59,
+        "n": 200,
+        "pass_rate": "0.295",
+        "recomputed_wilson95": [
+          0.23613844271901735,
+          0.3615884197074943
+        ],
+        "saved_theory_pass": 0.2950006743036566
+      },
+      "edge_randomT": {
+        "k": 71,
+        "n": 200,
+        "pass_rate": "0.355",
+        "recomputed_wilson95": [
+          0.29198518653239286,
+          0.42348015518392024
+        ],
+        "saved_theory_pass": 0.376585492117857
+      },
+      "edge_structuredT": {
+        "k": 0,
+        "n": 200,
+        "pass_rate": "0",
+        "recomputed_wilson95": [
+          0.0,
+          0.018846005918320894
+        ],
+        "saved_theory_pass": 1.9186551780537276e-33
+      },
+      "uniform_structuredT": {
+        "k": 50,
+        "n": 200,
+        "pass_rate": "0.25",
+        "recomputed_wilson95": [
+          0.1950807681629653,
+          0.3143422347961952
+        ],
+        "saved_theory_pass": 0.2950006743036566
+      }
+    },
+    "65536": {
+      "uniform_randomT": {
+        "k": 166,
+        "n": 200,
+        "pass_rate": "0.83",
+        "recomputed_wilson95": [
+          0.7718399896049647,
+          0.8757216464889435
+        ],
+        "saved_theory_pass": 0.8584824385787477
+      },
+      "edge_randomT": {
+        "k": 171,
+        "n": 200,
+        "pass_rate": "0.855",
+        "recomputed_wilson95": [
+          0.7995121871510563,
+          0.897107148646936
+        ],
+        "saved_theory_pass": 0.8850854742498633
+      },
+      "edge_structuredT": {
+        "k": 0,
+        "n": 200,
+        "pass_rate": "0",
+        "recomputed_wilson95": [
+          0.0,
+          0.018846005918320894
+        ],
+        "saved_theory_pass": 3.513179082838432e-27
+      },
+      "uniform_structuredT": {
+        "k": 170,
+        "n": 200,
+        "pass_rate": "0.85",
+        "recomputed_wilson95": [
+          0.7939430617334484,
+          0.892864734123727
+        ],
+        "saved_theory_pass": 0.8584824385787477
+      }
+    },
+    "1048576": {
+      "uniform_randomT": {
+        "k": 200,
+        "n": 200,
+        "pass_rate": "1",
+        "recomputed_wilson95": [
+          0.9811539940816792,
+          1.0
+        ],
+        "saved_theory_pass": 0.9905085828504244
+      },
+      "edge_randomT": {
+        "k": 198,
+        "n": 200,
+        "pass_rate": "0.99",
+        "recomputed_wilson95": [
+          0.9642775148038205,
+          0.9972533993962251
+        ],
+        "saved_theory_pass": 0.9923996325365901
+      },
+      "edge_structuredT": {
+        "k": 0,
+        "n": 200,
+        "pass_rate": "0",
+        "recomputed_wilson95": [
+          0.0,
+          0.018846005918320894
+        ],
+        "saved_theory_pass": 5.750876669724071e-22
+      },
+      "uniform_structuredT": {
+        "k": 199,
+        "n": 200,
+        "pass_rate": "0.995",
+        "recomputed_wilson95": [
+          0.9722256001302287,
+          0.9991168540106339
+        ],
+        "saved_theory_pass": 0.9905085828504244
+      }
+    }
+  },
+  "scope": "Recount of saved aggregate results under recovered plan; no new gate run, no attestation of preregistration timing. P3 uses saved theory probabilities and independently recomputed Wilson intervals.",
+  "inputs": {
+    "e2-plan.md": {
+      "file": "raw/e2-plan.md",
+      "sha256": "86f0004d8fac182d6f2a296447810e0ff8dd077b26eda4b72051a014ceba0c05",
+      "bytes": 3409,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/bundle-rebuild-v2/repro-bundle-v2/repro/inputs/PREREG8-E2.md"
+    },
+    "e2-results.json": {
+      "file": "raw/e2-results.json",
+      "sha256": "1ee5162becc7c345f780d35aef117bbf145f43e71c135c8e7be373509e8e4955",
+      "bytes": 3794,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/e2/results.json"
+    },
+    "e2-original.log": {
+      "file": "raw/e2-original.log",
+      "sha256": "0597f54106d245c68479cd7809cb5b313a6cba68e997375a32621773136383e6",
+      "bytes": 1243,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/inputs/data/E2-original-run.log"
+    },
+    "e2-reproduced.log": {
+      "file": "raw/e2-reproduced.log",
+      "sha256": "0597f54106d245c68479cd7809cb5b313a6cba68e997375a32621773136383e6",
+      "bytes": 1243,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/e2/e2_repro.out"
+    },
+    "e3-original.log": {
+      "file": "raw/e3-original.log",
+      "sha256": "57e63d3f6c9a67af926b9f8f451ae2b4aa87d2379ef52c7e1a9243924324b4e1",
+      "bytes": 860,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/inputs/data/E3-original-run.log"
+    },
+    "e3-reproduced.log": {
+      "file": "raw/e3-reproduced.log",
+      "sha256": "57e63d3f6c9a67af926b9f8f451ae2b4aa87d2379ef52c7e1a9243924324b4e1",
+      "bytes": 860,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/e3/e3_repro.out"
+    },
+    "x1-original.log": {
+      "file": "raw/x1-original.log",
+      "sha256": "0d96e1c9109f0d330e1f6c65215656631d56e973a37e82c9728f711d9251d415",
+      "bytes": 484,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/inputs/data/X1-original.out"
+    },
+    "x1-reproduced.log": {
+      "file": "raw/x1-reproduced.log",
+      "sha256": "0d96e1c9109f0d330e1f6c65215656631d56e973a37e82c9728f711d9251d415",
+      "bytes": 484,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/x1/a/b/x1_verify_repro.out"
+    },
+    "x1-filed.md": {
+      "file": "raw/x1-filed.md",
+      "sha256": "492c12c17d22a0d013abef7033703f3d95903f51746a4ccb3e3efa29dd8aad6d",
+      "bytes": 18380,
+      "original_source": "/home/anshul/owner-hub/scratch/wave6/claude-sci/x1/vm/RESULT.md"
+    },
+    "x0-sources.jsonl": {
+      "file": "raw/x0-sources.jsonl",
+      "sha256": "f75cd98794e7cff67d034631c680a79f007831c1310bd641256844c915b6d789",
+      "bytes": 605129,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/bundle-rebuild-v2/repro-bundle-v2/plans/x0/sources_x0.jsonl"
+    },
+    "x0-queries.jsonl": {
+      "file": "raw/x0-queries.jsonl",
+      "sha256": "fab1d5e8996386520a0cb75c23b9f9f59f406245bb804d810fd0e60478a28b71",
+      "bytes": 108130,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/bundle-rebuild-v2/repro-bundle-v2/repro/inputs/data/queries_frozen.jsonl"
+    },
+    "xg-queries.jsonl": {
+      "file": "raw/xg-queries.jsonl",
+      "sha256": "ac87309c8625ea2bcd53968a9e74c7454bb0e8d20b6c9e94834211335c0eb6b4",
+      "bytes": 62430,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/bundle-rebuild-v2/repro-bundle-v2/plans/xg/queries_frozen_xg.jsonl"
+    },
+    "x0-report.md": {
+      "file": "raw/x0-report.md",
+      "sha256": "4dbc5e9715bf9cf456978da3eb4f9a9d78b066a0770c4c4c7892275cc170a203",
+      "bytes": 3497,
+      "original_source": "/home/anshul/owner-hub/scratch/wave6/paper/x0/X0-REPORT.md"
+    },
+    "e2-harness.py": {
+      "file": "raw/e2-harness.py",
+      "sha256": "267ead1f91861a8e1118416c902232830d082b99fd546099f5b210519b64e043",
+      "bytes": 3947,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/bundle-rebuild-v2/repro-bundle-v2/repro/inputs/e2_fuzz.py"
+    }
+  }
+}

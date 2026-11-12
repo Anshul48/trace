@@ -1,0 +1,61 @@
+python 3.12.3
+numpy 2.5.3
+metrics_sha256 aa8c8779f4016664bbb6c104672eca9a34f243763461088d30d9730ea0fcfeed
+bootstrap rng = numpy.random.default_rng(1); means = rng.choice(diffs, size=(5000, len(diffs)), replace=True).mean(axis=1); interval = numpy.percentile(means, [2.5, 97.5])
+dropped_ids none
+label_key expect_ordinal 10, source_ordinal read as expect_ordinal 40
+table main_hit_mean
+arm	pooled	authored	s8-probe
+n	50	40	10
+K	0.82	0.8	0.9
+G	0.52	0.525	0.5
+FUSE-RRF	0.76	0.75	0.8
+FUSE-MM	0.8	0.775	0.9
+table main_hit_count
+arm	pooled	authored	s8-probe
+n	50	40	10
+K	41	32	9
+G	26	21	5
+FUSE-RRF	38	30	8
+FUSE-MM	40	31	9
+table main_ndcg_mean
+arm	pooled	authored	s8-probe
+n	50	40	10
+K	0.7389316670280902	0.6986645837851129	0.9
+G	0.41765843492337607	0.42296646648160036	0.39642630869047907
+FUSE-RRF	0.5777672071025579	0.5836693221073614	0.5541587470833435
+FUSE-MM	0.6641621757353904	0.655524296152251	0.6987136940679479
+table xproxy_hit_mean
+arm	pooled	authored	s8-probe
+n	50	40	10
+X	0.52	0.525	0.5
+proxy-RRF	0.76	0.75	0.8
+proxy-MM	0.8	0.775	0.9
+table xproxy_hit_count
+arm	pooled	authored	s8-probe
+n	50	40	10
+X	26	21	5
+proxy-RRF	38	30	8
+proxy-MM	40	31	9
+table xproxy_ndcg_mean
+arm	pooled	authored	s8-probe
+n	50	40	10
+X	0.41765843492337607	0.42296646648160036	0.39642630869047907
+proxy-RRF	0.5777672071025579	0.5836693221073614	0.5541587470833435
+proxy-MM	0.6641621757353904	0.655524296152251	0.6987136940679479
+table contrast_hit
+contrast	pooled_mean	pooled_lo	pooled_hi	pooled_interval	pooled_degenerate	pooled_b_first_only	pooled_c_second_only	pooled_majority	pooled_p	pooled_lead	authored_mean	authored_lo	authored_hi	authored_interval	authored_degenerate	authored_b_first_only	authored_c_second_only	authored_majority	authored_p	authored_lead	s8-probe_mean	s8-probe_lo	s8-probe_hi	s8-probe_interval	s8-probe_degenerate	s8-probe_b_first_only	s8-probe_c_second_only	s8-probe_majority	s8-probe_p	s8-probe_lead
+K-G	0.3	0.14	0.44	interval excludes zero (descriptive)		17	2	17	0.000728607177734375	directional lead, not a confirmation	0.275	0.1	0.45	interval excludes zero (descriptive)		13	2	13	0.00738525390625	directional lead, not a confirmation	0.4	0.1	0.7	interval excludes zero (descriptive)		4	0	4	0.125	
+K-FUSE-RRF	0.06	-0.04	0.16	UNDETERMINED		5	2	5	0.453125		0.05	-0.075	0.175	UNDETERMINED		4	2	4	0.6875		0.1	0.0	0.3	UNDETERMINED		1	0	1	1.0	
+K-FUSE-MM	0.02	-0.060499999999999825	0.10049999999999273	UNDETERMINED		3	2	3	1.0		0.025	-0.075	0.125	UNDETERMINED		3	2	3	1.0		0.0	0.0	0.0	UNDETERMINED	degenerate (all resample means equal)	0	0	0	1.0	
+G-FUSE-RRF	-0.24	-0.38	-0.12	interval excludes zero (descriptive)		1	13	13	0.0018310546875	directional lead, not a confirmation	-0.225	-0.375	-0.075	interval excludes zero (descriptive)		1	10	10	0.01171875	directional lead, not a confirmation	-0.3	-0.6	-0.1	interval excludes zero (descriptive)		0	3	3	0.25	
+G-FUSE-MM	-0.28	-0.42	-0.14	interval excludes zero (descriptive)		1	15	15	0.000518798828125	directional lead, not a confirmation	-0.25	-0.4	-0.1	interval excludes zero (descriptive)		1	11	11	0.00634765625	directional lead, not a confirmation	-0.4	-0.7	-0.1	interval excludes zero (descriptive)		0	4	4	0.125	
+FUSE-RRF-FUSE-MM	-0.04	-0.12	0.04	UNDETERMINED		1	3	3	0.625		-0.025	-0.125	0.05	UNDETERMINED		1	2	2	1.0		-0.1	-0.3	0.0	UNDETERMINED		0	1	1	1.0	
+table contrast_ndcg
+contrast	pooled_mean	pooled_lo	pooled_hi	pooled_interval	pooled_degenerate	authored_mean	authored_lo	authored_hi	authored_interval	authored_degenerate	s8-probe_mean	s8-probe_lo	s8-probe_hi	s8-probe_interval	s8-probe_degenerate
+K-G	0.32127323210471415	0.1988385219730034	0.4456129173690437	interval excludes zero (descriptive)		0.2756981173035125	0.13918523971538457	0.416401571472263	interval excludes zero (descriptive)		0.5035736913095209	0.23333333333333334	0.7738140492857084	interval excludes zero (descriptive)	
+K-FUSE-RRF	0.1611644599255324	0.07727713673462047	0.24974127182383615	interval excludes zero (descriptive)		0.11499526167775138	0.027749741199794706	0.21236610335027392	interval excludes zero (descriptive)		0.3458412529166565	0.14226756160713563	0.5512017898809379	interval excludes zero (descriptive)	
+K-FUSE-MM	0.07476949129269986	0.004787123715199831	0.14476515898552889	interval excludes zero (descriptive)		0.04314028763286181	-0.033613691028390145	0.12019600770478324	UNDETERMINED		0.20128630593205205	0.05	0.36698405080160273	interval excludes zero (descriptive)	
+G-FUSE-RRF	-0.16010877217918174	-0.2364906863403448	-0.08745942660508352	interval excludes zero (descriptive)		-0.1607028556257611	-0.24768753565971696	-0.0748407296445846	interval excludes zero (descriptive)		-0.15773243839286438	-0.28749208041667684	-0.03333333333333333	interval excludes zero (descriptive)	
+G-FUSE-MM	-0.24650374081201432	-0.3391568888846841	-0.16115538739262966	interval excludes zero (descriptive)		-0.23255782967065067	-0.3334943063173227	-0.13260944329260482	interval excludes zero (descriptive)		-0.3022873853774689	-0.4595421981324824	-0.13690702464285426	interval excludes zero (descriptive)	
+FUSE-RRF-FUSE-MM	-0.08639496863283255	-0.13765425646135798	-0.03944287425790107	interval excludes zero (descriptive)		-0.07185497404488958	-0.12923167447614828	-0.02118978594719719	interval excludes zero (descriptive)		-0.1445549469846045	-0.25298863553569834	-0.029174586249989864	interval excludes zero (descriptive)	

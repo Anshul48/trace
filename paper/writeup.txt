@@ -1,0 +1,123 @@
+Checkable memory for agents: an audit of what an agent-built memory store can honestly claim
+
+Anshul Raj
+
+Research paper · November 2026
+
+Project repository: https://github.com/Anshul48/trace
+
+When coding agents write a system's code, run its experiments and also write the reports on those experiments, how does anyone know which of the reported results are true? The reports can agree with the code and both still be wrong. We describe a small audit procedure for agent-built software and apply it to our own system, TRACE, a memory store for coding agents that answers a query by scoring only a small, routed shortlist of stored passages instead of the whole store. The procedure records whether each study had a plan fixed before it ran, ties every reported number to an evidence file, and has a separate analyst recompute selected findings. One result held: routing scored 0.79 percent of rows on every shard (partition) and, averaged over 4 shards, kept 0.9985 of the exact top ten results (scoring work only, not speed; no plan file). Several did not: search by meaning found fewer labelled sources than plain keyword search (26/50 vs 41/50); two refinements did not beat keyword search; and the live service was far slower than a standard index. When we planted 18 errors in a copy of this paper, the automated check caught 10 and missed 8: it catches wrong values and misses wrong meanings. The results concern one project; downstream coding performance and the general effectiveness of the procedure were not evaluated.
+
+The problem: agents grading their own work
+
+A scientist reading a result wants to know: what would make this number wrong, and did anyone check? That gets harder when software agents do the work. In our project, coding agents wrote the code, ran the experiments and wrote the reports. A generated report can agree with the generated code while both measure the wrong thing, so agreement between them is not evidence. Early on, a summary quoted a keyword-search score that belonged to a different experimental arm (see Corrections and limits); nothing looked wrong until someone traced the number to its file.
+
+The system is TRACE, the memory layer of an agent system we are building. Its job is to let a coding agent find the right piece of a large body of project text (code, notes, reports) without reading all of it. The store studied here holds 812,545 passages of text, split into 4 separate partitions called shards, and was sealed, meaning no rows changed during the studies. Each passage is stored with an embedding, a list of numbers that encodes its meaning, so that passages with similar meaning lie close together. Searching by comparing embeddings is called dense search. TRACE answers a query in two steps: a routing step picks a shortlist of passages, and only that shortlist is compared exactly with the query. It then returns the wider text around each match, so the agent receives context and not a fragment.
+
+The longer-term design goal for TRACE is a memory that reorganises itself as it is used. Nothing in this paper tests that goal. We ask a narrower question about the store as it exists today: what can we honestly say it does?
+
+Related work
+
+The procedure borrows from reforms of empirical practice: fixing the analysis plan before seeing the data (Nosek et al.) and the reproducibility checklists of machine-learning venues (Pineau et al.). What differs is the subject: results produced by coding agents, where code, experiment and report have the same kind of author. Benchmarks for agentic software engineering such as SWE-bench (Jimenez et al.) measure whether a task was solved, not whether an agent's own reported results can be trusted. On the retrieval side, our negative result agrees with the BEIR benchmark (Thakur et al.), in which keyword scoring (Robertson and Zaragoza) stayed a strong baseline against dense retrievers (Karpukhin et al.); our rank fusion is reciprocal rank fusion (Cormack et al.). Agent memory systems such as MemGPT (Packer et al.) and retrieval-augmented generation (Lewis et al.) motivate the store itself.
+
+The audit procedure
+
+The procedure checks files, not intentions, and has four parts.
+
+Plan status. Each study is labelled by when its plan was fixed: frozen in advance (a plan file stating the question, the method, the measure and the rule for the verdict, fingerprinted with a hash before the run), historical (measured with no such plan file), or specified after looking at the data. A hash is a short fingerprint of a file that changes if the file changes. Ours are recorded locally, so they show a plan was not edited later only if that local record is itself untouched: the freezes are self-attested.
+
+Receipts. Every result written in digits in the prose carries a receipt: the file it came from, the hash of that file, and the line or key where the value sits. A build step, which we call the gate, fails when a digit-form number it recognises (outside its exemptions) has no receipt, when a pinned file has changed, or when the printed value differs from the receipted one. Numbers spelled out in words are invisible to the gate, so wording still needs review.
+
+Separate recomputation. A second analyst recomputed selected results from raw files: the head-to-head verdicts, the rank-fusion and hierarchy figures, and the oracle-gap study. Results recomputed this way are marked OBSERVED. Results backed only by a fingerprinted summary file are marked REPORTED; the score-fusion count, for example, was taken from the worker model (an AI agent) that ran it. Only selected results were recomputed, and recomputation checks values, not meaning.
+
+Wording limit. A fixed list restricts what the text may say about each result (for example, 'prove' is disallowed), and a table linking each claim to its evidence ships alongside the paper.
+
+Passing sampled tests is not equivalence. Agent workflows commonly accept a rewritten program when it agrees with the original on a sample of test inputs. We ran a control, planned in advance, on our own acceptance tests: at the largest declared input range, the tests passed while the two programs differed, in 200 of 200 seeds. So we label such acceptances sample-tested only: agreement on the inputs tried, not sameness. This is what sampling arithmetic predicts, not a discovery about real test suites. The figure shows the whole flow with three examples from this project.
+
+Claim flow: plan status, pinned evidence, separate recomputation or control, then allowed wording, correction, or retained failure. Lane A is a historical correction: keyword search quoted at 44/50 was the expanded-context arm, corrected to 41/50 for keyword search alone. Lane B is the control described above: gates passed while programs differed in 200 of 200 seeds, so such accept loops are sample-tested only. Lane C is a tested hypothesis kept as a null: parent expansion 31/50 against matched flat 34/50, no demonstrated gain here.
+
+What the gate catches, and what it misses
+
+To test the gate we seeded 18 faults into copies of an earlier snapshot of this paper (85 receipted numeric spans) and ran the gate on each copy, with 6/6 harmless control edits correctly passing. The gate caught 10 faults and missed 8. Every caught fault was mechanical: a digit-form number with no receipt, a changed pinned file, a span that differs from its receipted value, or a banned phrase. Every miss was semantic: a correct numeral attached to the wrong arm or denominator, a claim of prospective registration for a study whose table row says no plan file, a word-form number contradicting a receipted one, and a receipt id reused for a different quantity.
+
+We chose the fault set ourselves, so it gives no error rate. It shows that the gate checks values and hashes, and that meaning needs a reader.
+
+What survived the audit: results on the TRACE store
+
+Unless stated otherwise, results use 50 test searches over the sealed store. A search scores a source hit when the exact passage the query was labelled with appears among the returned results. Source hit measures finding a known source; it does not measure answer quality.
+
+Claim table. OBSERVED: recomputed from raw files, some by the second analyst. REPORTED: a summary-backed figure we did not recompute. The preservation figure is a mean over 200 query-by-shard pairs (queries repeat across shards), and the scoring fraction holds on every shard.
+
+Question and record level	Recorded result	What it allows us to say	Receipts
+Does guided routing preserve the dense ranking while scoring fewer rows? OBSERVED (no plan file)	Exact top-ten overlap 0.9985; scored fraction 0.79 percent on every shard	Routing preserved this retriever's results at a small fraction of the scoring work. No inference about latency or usefulness	e1a-recall-09985, e1a-rows-079
+Does dense search find the labelled source more often than keyword search? REPORTED, later reproduced as OBSERVED (frozen plan)	Keyword 41/50; dense 26/50	No. Keyword search found more labelled sources on these searches	e2d-bm25-41-50, e2d-dense-26-50
+Does hierarchy help at matched (same-size) context? OBSERVED (frozen plan)	Expanded 31/50; flat 34/50	No demonstrated hierarchy gain; no equivalence claim	e3a-e-hnsw-31-50, e3a-fk-hnsw-34-50
+Does combining keyword and dense scores beat keyword alone? OBSERVED (rank fusion, recomputed) and REPORTED (score-fusion count, taken from the worker) (frozen plan)	Rank fusion 38/50; score fusion 40/50; keyword 41/50	No gain over keyword in these fixed configurations; not a universal rejection of hybrids	e3b-rrf-38-50, e3b-minmax-40-50, e3b-bm25-41-50
+Could an ideal chooser between keyword and dense do better than dense alone? OBSERVED (frozen plan)	Oracle gap +0.068 over dense in equal-style-average source-hit rate	The two methods find different sources on this constructed set; an oracle uses labels and is not a deployed router	x1-gap
+Does fixed score fusion help inside the rows that routing admits? OBSERVED (stage 1 had no plan file; stages 2 to 6 were frozen before their runs, per our own freeze records)	The combination cleared its bar on 3 of the first 5 query sets and missed on 2	A mixed pattern (post-hoc tally, no joint test) with no established explanation	cf2-dhit, cf3-dhit, cf4-dhit, cf5-m-dhit, cf5-h-dhit
+
+A hash-pinned summary is weaker than a raw-data recomputation; the separate analyst recomputed rank fusion but took score-fusion counts from the worker.
+
+Routing does less scoring work and keeps the ranking. Guided routing scored 0.79 percent of rows on every shard and kept 0.9985 of the exact top ten, measured with 50 test searches keeping the top 10 per shard. This is a measure of scoring work, not of latency or usefulness, and the measured TRACE arm used routed dense search only, with no keyword component.
+
+Search by meaning finds fewer labelled sources than keyword search. Keyword (word-match) search found the labelled source in 41/50 searches and dense search in 26/50. A later frozen-protocol re-collection of the same searches by an independent evaluator reproduced both counts: keyword 41 of 50, routed dense search 26 of 50.
+
+Hierarchy and simple fusion did not help. Returning hierarchy-expanded parent context reached 31/50 against a flat arm of matched size at 34/50. Two ways of combining keyword and dense results, rank fusion and score fusion, reached 38/50 and 40/50 against keyword search alone at 41/50. These failures are kept at the same record level as the positive result.
+
+Labelled sources found, out of 50 test searches, by method. The values are those of the claim table: keyword 41/50, score fusion 40/50, rank fusion 38/50, flat context 34/50, parent expansion 31/50, routed dense 26/50. The bars come from three separate comparisons on the same searches, not one ranked experiment.
+
+Keyword and dense search are complementary on a constructed set. On a set of model-written queries, an ideal chooser that always picks the better of keyword and dense search (it cheats by using the labels) gains +0.068 in source-hit rate over dense search alone, averaged over three query styles (question, keyword, description). So the two methods find different sources: room for a chooser, not a working one. The test used one embedding model (MiniLM-L6-v2) on one corpus, without routing. On the original fifty searches the same ideal chooser gains only +2/50 over keyword search (REPORTED).
+
+Combining the two inside the route gave a mixed pattern. We then tested a fixed, equal-weight combination of keyword and dense scores on the rows that routing admits for a query (on average 13.4% of the store). Across the first five sets of model-written queries, each with its pass bar fixed before the run, the combination cleared the bar on 3 of 5 and missed on 2 (a tally made afterwards, with no joint test). Two follow-up tests did not explain it: the effect of who wrote the queries was +0.030 [-0.009,0.071], and the planned test of word overlap between query and passage gave +0.000 [-0.050,0.050]; both ranges include zero. Why the gains varied is unestablished; nothing here licenses a deployed hybrid.
+
+Speed: a standard index is far faster at the search stage. In the same-store head-to-head, the fastest quality-matched (same answer quality) standard-index configuration recorded a median of 0.66 milliseconds (search only, 1 thread, ids only, shared virtual machine) against 1236 milliseconds for the live guided service, a ratio of 1884. The preregistered verdict reads that guided search is dominated by a standard index on this store. Embedding on both sides leaves a ratio near 86. This compares search-stage cost only: the service returns parent text, the standard index ids only. Waiting on shard-engine processes, which run in sequence, took 88.8 to 91.2 percent of guided query time in a profile (REPORTED); launch and scoring were not separated. We make no general speed claim.
+
+Memory: the preregistered advantage criterion failed. In the memory-at-scale comparison, the ratio of TRACE's process memory to a standard graph index's was 0.1675 at small size, 0.1717 at middle size, and 0.1721 at a third, largest store size (one size is a worker figure we did not re-time). The ratio did not fall with scale, so it failed the preregistered memory-advantage criterion. This process memory omits the page cache, and we draw no memory claim.
+
+Corrections and limits
+
+One correction shows the procedure narrowing a claim. An earlier note quoted 44/50 for keyword search, which was the expanded-context arm; the keyword-only figure is 41/50. The error was found by reading receipts, not through the automated gate.
+
+Queries were authored, not sampled from user traffic; one model family both wrote and filtered the first synthetic set, so author and judge effects were never separated, and no synthetic query was written by a person. A different-model stand-in transfer check on three small public sets did not reproduce the headline recall and scoring work (REPORTED, words only), so the scoring-work figure may not transfer. Source hit counts only the exact source passage. The sealed-store studies use one corpus and a single embedding model (the memory comparison used another store), and 50 test searches give coarse resolution.
+
+Reproduction
+
+An experiment bundle re-derives the small-experiment results with one command (reruns on the author's host reproduced the shipped verdicts, with three analyses byte-identical; other systems are untested). The sealed-store runs need the author's virtual machine and index; for those, a receipt bundle holds the pinned result files and the checker confirms that each numeric span matches its file. It confirms values and hashes only.
+
+What the audit tells us to build next
+
+Each failure points at a specific change. None of the mechanisms below exists in the evaluated system; each is a hypothesis that must pass the same gate.
+
+Speed. Most of the guided query time went to waiting on shard processes started in sequence. Hypothesis: keeping those workers alive between queries removes most of the search-stage gap. Test: the same head-to-head, with the same verdict rule.
+
+Finding sources. Keyword search beat dense search, and an ideal chooser beat both on a constructed set. Hypothesis: a per-query chooser between the two recovers part of that gap. Test: a bar fixed in advance, on fresh queries written by people.
+
+The gate. Every planted error of meaning passed. Hypothesis: receipts that also record which experimental arm and which denominator a number belongs to will catch the right-number-wrong-arm class. Test: the planted-error challenge again, with errors written by someone else.
+
+A store that organises itself. The store studied here is static: fixed shards, fixed routing. Hypothesis: grouping passages that are retrieved together, and letting unused links fade, lowers scoring work further while preserving the ranking. Test: the same preservation measure that the one positive result here was held to.
+
+What we take from this
+
+For TRACE, the audit leaves one positive result standing and a plain list of things the current store does not do better than simple baselines. For agent-built software generally, a mechanical gate is cheap and catches mechanical errors, but it does not replace a reader: every error of meaning we planted passed it. Keeping the failures at the same record level as the successes is what made the one success credible to us.
+
+References
+
+B. Nosek et al. The preregistration revolution. PNAS, 2018.
+
+J. Pineau et al. Improving reproducibility in machine learning research. JMLR, 2021.
+
+C. E. Jimenez et al. SWE-bench: can language models resolve real-world GitHub issues? ICLR, 2024.
+
+N. Thakur et al. BEIR: a heterogeneous benchmark for zero-shot evaluation of information retrieval models. NeurIPS, 2021.
+
+S. Robertson, H. Zaragoza. The probabilistic relevance framework: BM25 and beyond. Foundations and Trends in IR, 2009.
+
+V. Karpukhin et al. Dense passage retrieval for open-domain question answering. EMNLP, 2020.
+
+G. Cormack et al. Reciprocal rank fusion outperforms Condorcet and individual rank learning methods. SIGIR, 2009.
+
+C. Packer et al. MemGPT: towards LLMs as operating systems. arXiv preprint, 2023.
+
+P. Lewis et al. Retrieval-augmented generation for knowledge-intensive NLP tasks. NeurIPS, 2020.
+
+AI-assistance disclosure Built with AI coding agents (Muse Code, Claude, Codex) under human architectural direction. Digit-form numbers are checked at build time against hash-pinned result files (some of them summaries); findings stated in words are not receipted.

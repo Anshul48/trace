@@ -1,0 +1,12 @@
+# sha256 571cd513aedd44609b4073bf67ba6d32d29a66c12a6c1194966ae26ef2b251f4 /home/anshul/owner-hub/scratch/wave6/paper/evidence-cfuse/c-fuse-2.result.md
+# sha256 8843f993f83384e9a9db46e3ce46a84f64e45d77445cdc6484cbceb73574ffa7 /home/anshul/owner-hub/scratch/wave6/paper/evidence-cfuse/c-fuse-3.result.md
+# sha256 506989417559e769428c86713255de3944481c6afa5302b5721e2bc124582329 /home/anshul/owner-hub/scratch/wave6/paper/evidence-cfuse/c-fuse-4.result.md
+# sha256 a559f63031c12262e9898eeb1c614d332bdb6ea335cc120037c157c351fff3cb /home/anshul/owner-hub/scratch/wave6/paper/evidence-cfuse/c-fuse-5/RESULT.md
+# sha256 46c489c6c156a7c9518022a7cbcb29d6bcc4e3625bd7b0ca8bac346b13ecc740 /home/anshul/owner-hub/scratch/wave6/claude-sci/x3/PREREG15-CFUSE-S6.md
+# rule: clears iff d_hit>=+0.04 and d_mrr>=+0.03 and both lower CI bounds>0 (bars read from PREREG15)
+X0 source-hit +0.055 [0.031,0.081] mrr +0.071 [0.041,0.102] verdict CLEARED
+XF source-hit +0.033 [0.001,0.066] mrr +0.037 [0.005,0.069] verdict MISSED
+XG source-hit +0.087 [0.050,0.125] mrr +0.120 [0.084,0.156] verdict CLEARED
+X2M source-hit +0.023 [0.003,0.044] mrr +0.060 [0.036,0.085] verdict MISSED
+X2H source-hit +0.053 [0.019,0.090] mrr +0.075 [0.045,0.106] verdict CLEARED
+cleared: 3 of 5 sets; missed: 2

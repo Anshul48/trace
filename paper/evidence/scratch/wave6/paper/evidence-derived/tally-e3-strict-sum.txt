@@ -1,0 +1,6 @@
+# sha256 57e63d3f6c9a67af926b9f8f451ae2b4aa87d2379ef52c7e1a9243924324b4e1 /home/anshul/owner-hub/scratch/wave6/claude-sci/e3/run.log
+# rule: sum the ENGINE and FETCH strict shares named in the paper sentence; round to nearest percent
+ENGINE strict share 0.944%
+FETCH strict share 0.022%
+sum 0.966%
+summed strict shares: 1 percent (0.966 rounded)

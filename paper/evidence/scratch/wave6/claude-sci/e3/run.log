@@ -1,0 +1,10 @@
+ROUTE     strict rho=0.0007 CI[0.0005,0.0010] p50ratio=0.0005 tax=0.075 ms share=0.005% | broad rho=0.5785 share=4.356%
+ENGINE    strict rho=0.0109 CI[0.0041,0.0230] p50ratio=0.0031 tax=13.539 ms share=0.944% | broad rho=0.0139 share=1.201%
+FETCH     strict rho=1.8312 CI[1.4195,2.3337] p50ratio=2.3077 tax=0.310 ms share=0.022% | broad rho=1.8312 share=0.022%
+RESPONSE  strict rho=0.0001 CI[0.0001,0.0001] p50ratio=0.0001 tax=0.156 ms share=0.011% | broad rho=0.0001 share=0.011%
+TRANSPORT strict rho=0.0021 CI[0.0019,0.0023] p50ratio=0.0018 tax=3.001 ms share=0.209% | broad rho=0.0021 share=0.209%
+
+NO MATERIAL SERIALIZATION/VALIDATION TAX (max strict rho among material edges = 0.0000; ratio-only exceedances: [('FETCH', 1.831, 0.022)])
+CONVERSION TAX (broad) PRESENT on ROUTE: rho=0.578, share=4.36 %
+KILL TEST: kill criterion not met
+P1 ok; P2 ok; P3 ok

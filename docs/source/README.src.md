@@ -61,6 +61,32 @@ python3 tools/verify_20k.py       # IDENTICAL
 
 These re-check the frozen code and the recorded gates (the first takes well under a second). A small reproduction of the earlier protocol (needs `numpy` and `blake3`, about a minute) is in [docs/reproduction/repro-20k](docs/reproduction/repro-20k/README.md). `python3 run_explorer.py --download 100m` exits with code 2: no whole-library download exists yet.
 
+## Verify this in 5 minutes
+
+Fresh clone to checked results in under 5 minutes (about 2 on our connection).
+Full transcript with real output: [JUDGES.md](JUDGES.md).
+
+```bash
+git clone --depth 1 https://github.com/Anshul48/trace && cd trace
+python3 tools/verify_freeze.py && python3 tools/check_receipts.py && python3 tools/verify_20k.py
+```
+
+Then the paper checker, from `paper/`:
+
+```bash
+cd paper && python3 check_receipts.py writeup-arxiv.html --receipts receipts.json --banned banned.txt
+```
+
+Expect exit code 1 from the paper checker: it lists 15 problems, and all 15
+are one evidence file we withheld because it contains a server address. The
+other 70 of the paper's 81 receipted numbers check out from the files in this
+repo (file present, hash matches, value found). The 11 that do not include
+the paper's main positive result; [JUDGES.md](JUDGES.md) says exactly which.
+
+The unit tests need one download (`python3 -m pip install numpy blake3`);
+[JUDGES.md](JUDGES.md) has their commands, what each check shows, what cannot
+be verified from this repo alone, and the organiser smoke test status.
+
 ## How it works
 
 ```mermaid

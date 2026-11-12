@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+Judge-ready verification: `paper/` now ships the write-up HTML, the receipt
+checker, receipts, the banned-word list and the pinned evidence files (one
+file withheld: it contains a server address; a redacted reading copy is
+included), plus the final PDF and a text write-up. New `JUDGES.md` with the
+exact verify commands and their real output, and a "Verify this in 5 minutes"
+README section (wording reviewed). `tools/check_links.py` now also checks
+`JUDGES.md`.
+
 ## Unreleased (2026-11-12)
 
 Reframed front door around the self-organizing memory database, with an honest

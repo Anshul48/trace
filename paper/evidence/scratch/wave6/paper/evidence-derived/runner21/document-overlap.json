@@ -1,0 +1,125 @@
+{
+  "shared_unused_documents": 4,
+  "shared_unused_docs_word": "four",
+  "stage4_vs_frozen_document_overlap": 0,
+  "pool_rows": 600,
+  "frozen_rows": 555,
+  "stage4_rows": 297,
+  "shared_document_evidence": [
+    {
+      "doc_id": "wikipedia:25084",
+      "pool_id": "X0-0035",
+      "pool_ordinal": 564537,
+      "stage4_id": "XG-0041",
+      "stage4_ordinal": 564544
+    },
+    {
+      "doc_id": "wikipedia:29036",
+      "pool_id": "X0-0150",
+      "pool_ordinal": 651883,
+      "stage4_id": "XG-0149",
+      "stage4_ordinal": 651918
+    },
+    {
+      "doc_id": "wikipedia:29426",
+      "pool_id": "X0-0532",
+      "pool_ordinal": 660988,
+      "stage4_id": "XG-0057",
+      "stage4_ordinal": 661014
+    },
+    {
+      "doc_id": "wikipedia:9030",
+      "pool_id": "X0-0420",
+      "pool_ordinal": 209388,
+      "stage4_id": "XG-0092",
+      "stage4_ordinal": 209390
+    }
+  ],
+  "scope": "Historical document identities in retained bundle files; different unit ordinals verified. Original check/freeze timestamps and probe exclusions are not attested.",
+  "inputs": {
+    "e2-plan.md": {
+      "file": "raw/e2-plan.md",
+      "sha256": "86f0004d8fac182d6f2a296447810e0ff8dd077b26eda4b72051a014ceba0c05",
+      "bytes": 3409,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/bundle-rebuild-v2/repro-bundle-v2/repro/inputs/PREREG8-E2.md"
+    },
+    "e2-results.json": {
+      "file": "raw/e2-results.json",
+      "sha256": "1ee5162becc7c345f780d35aef117bbf145f43e71c135c8e7be373509e8e4955",
+      "bytes": 3794,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/e2/results.json"
+    },
+    "e2-original.log": {
+      "file": "raw/e2-original.log",
+      "sha256": "0597f54106d245c68479cd7809cb5b313a6cba68e997375a32621773136383e6",
+      "bytes": 1243,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/inputs/data/E2-original-run.log"
+    },
+    "e2-reproduced.log": {
+      "file": "raw/e2-reproduced.log",
+      "sha256": "0597f54106d245c68479cd7809cb5b313a6cba68e997375a32621773136383e6",
+      "bytes": 1243,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/e2/e2_repro.out"
+    },
+    "e3-original.log": {
+      "file": "raw/e3-original.log",
+      "sha256": "57e63d3f6c9a67af926b9f8f451ae2b4aa87d2379ef52c7e1a9243924324b4e1",
+      "bytes": 860,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/inputs/data/E3-original-run.log"
+    },
+    "e3-reproduced.log": {
+      "file": "raw/e3-reproduced.log",
+      "sha256": "57e63d3f6c9a67af926b9f8f451ae2b4aa87d2379ef52c7e1a9243924324b4e1",
+      "bytes": 860,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/e3/e3_repro.out"
+    },
+    "x1-original.log": {
+      "file": "raw/x1-original.log",
+      "sha256": "0d96e1c9109f0d330e1f6c65215656631d56e973a37e82c9728f711d9251d415",
+      "bytes": 484,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/inputs/data/X1-original.out"
+    },
+    "x1-reproduced.log": {
+      "file": "raw/x1-reproduced.log",
+      "sha256": "0d96e1c9109f0d330e1f6c65215656631d56e973a37e82c9728f711d9251d415",
+      "bytes": 484,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/cs-repro-bundle-runall-v1/run-pinned/repro/x1/a/b/x1_verify_repro.out"
+    },
+    "x1-filed.md": {
+      "file": "raw/x1-filed.md",
+      "sha256": "492c12c17d22a0d013abef7033703f3d95903f51746a4ccb3e3efa29dd8aad6d",
+      "bytes": 18380,
+      "original_source": "/home/anshul/owner-hub/scratch/wave6/claude-sci/x1/vm/RESULT.md"
+    },
+    "x0-sources.jsonl": {
+      "file": "raw/x0-sources.jsonl",
+      "sha256": "f75cd98794e7cff67d034631c680a79f007831c1310bd641256844c915b6d789",
+      "bytes": 605129,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/bundle-rebuild-v2/repro-bundle-v2/plans/x0/sources_x0.jsonl"
+    },
+    "x0-queries.jsonl": {
+      "file": "raw/x0-queries.jsonl",
+      "sha256": "fab1d5e8996386520a0cb75c23b9f9f59f406245bb804d810fd0e60478a28b71",
+      "bytes": 108130,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/bundle-rebuild-v2/repro-bundle-v2/repro/inputs/data/queries_frozen.jsonl"
+    },
+    "xg-queries.jsonl": {
+      "file": "raw/xg-queries.jsonl",
+      "sha256": "ac87309c8625ea2bcd53968a9e74c7454bb0e8d20b6c9e94834211335c0eb6b4",
+      "bytes": 62430,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/bundle-rebuild-v2/repro-bundle-v2/plans/xg/queries_frozen_xg.jsonl"
+    },
+    "x0-report.md": {
+      "file": "raw/x0-report.md",
+      "sha256": "4dbc5e9715bf9cf456978da3eb4f9a9d78b066a0770c4c4c7892275cc170a203",
+      "bytes": 3497,
+      "original_source": "/home/anshul/owner-hub/scratch/wave6/paper/x0/X0-REPORT.md"
+    },
+    "e2-harness.py": {
+      "file": "raw/e2-harness.py",
+      "sha256": "267ead1f91861a8e1118416c902232830d082b99fd546099f5b210519b64e043",
+      "bytes": 3947,
+      "original_source": "/home/anshul/owner-hub/scratch/wave2/bundle-rebuild-v2/repro-bundle-v2/repro/inputs/e2_fuzz.py"
+    }
+  }
+}

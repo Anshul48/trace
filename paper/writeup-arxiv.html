@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Checkable memory for agents: an audit of what an agent-built memory store can honestly claim</title>
+<link rel="stylesheet" href="paper.css">
+</head>
+<body>
+<header>
+<h1 class="paper-title"><span class="t-main">Checkable memory for agents:</span> <span class="t-sub">an audit of what an agent-built memory store can honestly claim</span></h1>
+<p class="authors">Anshul Raj</p>
+<p class="dateline">Research paper · November 2026</p>
+<p class="repo">Project repository: <a href="https://github.com/Anshul48/trace">https://github.com/Anshul48/trace</a></p>
+</header>
+<p class="abstract">When coding agents write a system's code, run its experiments and also write the reports on those experiments, how does anyone know which of the reported results are true? The reports can agree with the code and both still be wrong. We describe a small audit procedure for agent-built software and apply it to our own system, TRACE, a memory store for coding agents that answers a query by scoring only a small, routed shortlist of stored passages instead of the whole store. The procedure records whether each study had a plan fixed before it ran, ties every reported number to an evidence file, and has a separate analyst recompute selected findings. One result held: routing scored <span class="n" data-receipt="e1a-rows-079">0.79</span> percent of rows on every shard (partition) and, averaged over <span class="n" data-receipt="num-shards-4">4</span> shards, kept <span class="n" data-receipt="e1a-recall-09985">0.9985</span> of the exact top ten results (scoring work only, not speed; no plan file). Several did not: search by meaning found fewer labelled sources than plain keyword search (<span class="n" data-receipt="e2d-dense-26-50">26/50</span> vs <span class="n" data-receipt="e2d-bm25-41-50">41/50</span>); two refinements did not beat keyword search; and the live service was far slower than a standard index. When we planted <span class="n" data-receipt="fc-seeded-18">18</span> errors in a copy of this paper, the automated check caught <span class="n" data-receipt="fc-caught-10">10</span> and missed <span class="n" data-receipt="fc-missed-8">8</span>: it catches wrong values and misses wrong meanings. The results concern one project; downstream coding performance and the general effectiveness of the procedure were not evaluated.</p>
+<section id="what-trace-is">
+<h2 class="section">The problem: agents grading their own work</h2>
+<p>A scientist reading a result wants to know: what would make this number wrong, and did anyone check? That gets harder when software agents do the work. In our project, coding agents wrote the code, ran the experiments and wrote the reports. A generated report can agree with the generated code while both measure the wrong thing, so agreement between them is not evidence. Early on, a summary quoted a keyword-search score that belonged to a different experimental arm (see Corrections and limits); nothing looked wrong until someone traced the number to its file.</p>
+<p>The system is TRACE, the memory layer of an agent system we are building. Its job is to let a coding agent find the right piece of a large body of project text (code, notes, reports) without reading all of it. The store studied here holds <span class="n" data-receipt="e1a-units-812545">812,545</span> passages of text, split into <span class="n" data-receipt="num-shards-4">4</span> separate partitions called shards, and was sealed, meaning no rows changed during the studies. Each passage is stored with an embedding, a list of numbers that encodes its meaning, so that passages with similar meaning lie close together. Searching by comparing embeddings is called dense search. TRACE answers a query in two steps: a routing step picks a shortlist of passages, and only that shortlist is compared exactly with the query. It then returns the wider text around each match, so the agent receives context and not a fragment.</p>
+<p>The longer-term design goal for TRACE is a memory that reorganises itself as it is used. Nothing in this paper tests that goal. We ask a narrower question about the store as it exists today: what can we honestly say it does?</p>
+</section>
+<section id="related">
+<h2 class="section">Related work</h2>
+<p>The procedure borrows from reforms of empirical practice: fixing the analysis plan before seeing the data (Nosek et al.) and the reproducibility checklists of machine-learning venues (Pineau et al.). What differs is the subject: results produced by coding agents, where code, experiment and report have the same kind of author. Benchmarks for agentic software engineering such as SWE-bench (Jimenez et al.) measure whether a task was solved, not whether an agent's own reported results can be trusted. On the retrieval side, our negative result agrees with the BEIR benchmark (Thakur et al.), in which keyword scoring (Robertson and Zaragoza) stayed a strong baseline against dense retrievers (Karpukhin et al.); our rank fusion is reciprocal rank fusion (Cormack et al.). Agent memory systems such as MemGPT (Packer et al.) and retrieval-augmented generation (Lewis et al.) motivate the store itself.</p>
+</section>
+<section id="procedure">
+<h2 class="section">The audit procedure</h2>
+<p>The procedure checks files, not intentions, and has four parts.</p>
+<p><strong>Plan status.</strong> Each study is labelled by when its plan was fixed: frozen in advance (a plan file stating the question, the method, the measure and the rule for the verdict, fingerprinted with a hash before the run), historical (measured with no such plan file), or specified after looking at the data. A hash is a short fingerprint of a file that changes if the file changes. Ours are recorded locally, so they show a plan was not edited later only if that local record is itself untouched: the freezes are self-attested.</p>
+<p><strong>Receipts.</strong> Every result written in digits in the prose carries a receipt: the file it came from, the hash of that file, and the line or key where the value sits. A build step, which we call the gate, fails when a digit-form number it recognises (outside its exemptions) has no receipt, when a pinned file has changed, or when the printed value differs from the receipted one. Numbers spelled out in words are invisible to the gate, so wording still needs review.</p>
+<p><strong>Separate recomputation.</strong> A second analyst recomputed selected results from raw files: the head-to-head verdicts, the rank-fusion and hierarchy figures, and the oracle-gap study. Results recomputed this way are marked OBSERVED. Results backed only by a fingerprinted summary file are marked REPORTED; the score-fusion count, for example, was taken from the worker model (an AI agent) that ran it. Only selected results were recomputed, and recomputation checks values, not meaning.</p>
+<p><strong>Wording limit.</strong> A fixed list restricts what the text may say about each result (for example, 'prove' is disallowed), and a table linking each claim to its evidence ships alongside the paper.</p>
+<p><strong>Passing sampled tests is not equivalence.</strong> Agent workflows commonly accept a rewritten program when it agrees with the original on a sample of test inputs. We ran a control, planned in advance, on our own acceptance tests: at the largest declared input range, the tests passed while the two programs differed, in <span class="n" data-receipt="e2fz-200of200-2e20">200 of 200</span> seeds. So we label such acceptances sample-tested only: agreement on the inputs tried, not sameness. This is what sampling arithmetic predicts, not a discovery about real test suites. The figure shows the whole flow with three examples from this project.</p>
+<figure class="fig" id="fig-claim-flow">
+<svg class="fig-svg" viewBox="0 0 720 418" role="img" aria-label="Claim flow figure: plan status, pinned evidence, separate recomputation or control, then allowed wording, correction, or retained failure. Lane A correction 44/50 to 41/50; lane B control 200 of 200; lane C retained null 31/50 versus 34/50." xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,1 L10,5 L0,9 Z" class="ah"/></marker></defs>
+<text x="360" y="15" class="f-title" text-anchor="middle">How a claim becomes a checkable conclusion</text>
+<rect x="0" y="26" width="156" height="54" class="stage"/>
+<text x="78.0" y="41.2" class="t-stage" text-anchor="middle">
+<tspan x="78.0" dy="0.0">plan status</tspan>
+<tspan x="78.0" dy="16.0">frozen, historical,</tspan>
+<tspan x="78.0" dy="16.0">or post-hoc</tspan>
+</text>
+<line x1="159" y1="53" x2="185" y2="53" class="arrow" marker-end="url(#ah)"/>
+<rect x="188" y="26" width="156" height="54" class="stage"/>
+<text x="266.0" y="41.2" class="t-stage" text-anchor="middle">
+<tspan x="266.0" dy="0.0">pinned evidence</tspan>
+<tspan x="266.0" dy="16.0">receipt: file,</tspan>
+<tspan x="266.0" dy="16.0">hash, line</tspan>
+</text>
+<line x1="347" y1="53" x2="373" y2="53" class="arrow" marker-end="url(#ah)"/>
+<rect x="376" y="26" width="156" height="54" class="stage"/>
+<text x="454.0" y="41.2" class="t-stage" text-anchor="middle">
+<tspan x="454.0" dy="0.0">separate recomputation</tspan>
+<tspan x="454.0" dy="16.0">or matched</tspan>
+<tspan x="454.0" dy="16.0">control</tspan>
+</text>
+<line x1="535" y1="53" x2="561" y2="53" class="arrow" marker-end="url(#ah)"/>
+<rect x="564" y="26" width="156" height="54" class="stage"/>
+<text x="642.0" y="41.2" class="t-stage" text-anchor="middle">
+<tspan x="642.0" dy="0.0">allowed wording,</tspan>
+<tspan x="642.0" dy="16.0">correction, or</tspan>
+<tspan x="642.0" dy="16.0">retained failure</tspan>
+</text>
+<text x="0" y="106" class="f-label">Examples (status labelled per lane):</text>
+<text x="0" y="132.0" class="t-chip">(A) REPORTED · correction ✎</text>
+<line x1="0" y1="139" x2="720" y2="139" class="lane-rule"/>
+<rect x="0" y="148" width="216" height="48" class="box"/>
+<text x="108.0" y="168.2" class="t-box" text-anchor="middle">
+<tspan x="108.0" dy="0.0">quoted 44/50</tspan>
+<tspan x="108.0" dy="16.0">for keyword search</tspan>
+</text>
+<line x1="219" y1="172" x2="249" y2="172" class="arrow" marker-end="url(#ah)"/>
+<rect x="252" y="148" width="216" height="48" class="box"/>
+<text x="360.0" y="168.2" class="t-box" text-anchor="middle">
+<tspan x="360.0" dy="0.0">receipt review:</tspan>
+<tspan x="360.0" dy="16.0">value belonged to expanded arm</tspan>
+</text>
+<line x1="471" y1="172" x2="501" y2="172" class="arrow" marker-end="url(#ah)"/>
+<rect x="504" y="148" width="216" height="48" class="box box-last"/>
+<text x="612.0" y="168.2" class="t-box" text-anchor="middle">
+<tspan x="612.0" dy="0.0">corrected keyword-only</tspan>
+<tspan x="612.0" dy="16.0">41/50</tspan>
+</text>
+<text x="0" y="228.0" class="t-chip">(B) REPORTED · counterexample control ✕</text>
+<line x1="0" y1="235" x2="720" y2="235" class="lane-rule"/>
+<rect x="0" y="244" width="216" height="48" class="box"/>
+<text x="108.0" y="264.2" class="t-box" text-anchor="middle">
+<tspan x="108.0" dy="0.0">gates pass on</tspan>
+<tspan x="108.0" dy="16.0">sampled tests</tspan>
+</text>
+<line x1="219" y1="268" x2="249" y2="268" class="arrow" marker-end="url(#ah)"/>
+<rect x="252" y="244" width="216" height="48" class="box"/>
+<text x="360.0" y="264.2" class="t-box" text-anchor="middle">
+<tspan x="360.0" dy="0.0">programs differ in</tspan>
+<tspan x="360.0" dy="16.0">200 of 200 seeds</tspan>
+</text>
+<line x1="471" y1="268" x2="501" y2="268" class="arrow" marker-end="url(#ah)"/>
+<rect x="504" y="244" width="216" height="48" class="box box-last"/>
+<text x="612.0" y="264.2" class="t-box" text-anchor="middle">
+<tspan x="612.0" dy="0.0">verdict:</tspan>
+<tspan x="612.0" dy="16.0">sample-tested only</tspan>
+</text>
+<text x="0" y="324.0" class="t-chip">(C) OBSERVED · tested hypothesis, null kept</text>
+<line x1="0" y1="331" x2="720" y2="331" class="lane-rule"/>
+<rect x="0" y="340" width="216" height="48" class="box"/>
+<text x="108.0" y="360.2" class="t-box" text-anchor="middle">
+<tspan x="108.0" dy="0.0">hierarchy helps?</tspan>
+<tspan x="108.0" dy="16.0">parent expansion 31/50</tspan>
+</text>
+<line x1="219" y1="364" x2="249" y2="364" class="arrow" marker-end="url(#ah)"/>
+<rect x="252" y="340" width="216" height="48" class="box"/>
+<text x="360.0" y="360.2" class="t-box" text-anchor="middle">
+<tspan x="360.0" dy="0.0">matched flat control</tspan>
+<tspan x="360.0" dy="16.0">34/50</tspan>
+</text>
+<line x1="471" y1="364" x2="501" y2="364" class="arrow" marker-end="url(#ah)"/>
+<rect x="504" y="340" width="216" height="48" class="box box-last"/>
+<text x="612.0" y="360.2" class="t-box" text-anchor="middle">
+<tspan x="612.0" dy="0.0">verdict: no</tspan>
+<tspan x="612.0" dy="16.0">demonstrated gain here</tspan>
+</text>
+</svg>
+<figcaption>Claim flow: plan status, pinned evidence, separate recomputation or control, then allowed wording, correction, or retained failure. Lane A is a historical correction: keyword search quoted at <span class="n" data-receipt="l8-bm25-44-50">44/50</span> was the expanded-context arm, corrected to <span class="n" data-receipt="l8-receipt-41-50">41/50</span> for keyword search alone. Lane B is the control described above: gates passed while programs differed in <span class="n" data-receipt="e2fz-200of200-2e20">200 of 200</span> seeds, so such accept loops are sample-tested only. Lane C is a tested hypothesis kept as a null: parent expansion <span class="n" data-receipt="e3a-e-hnsw-31-50">31/50</span> against matched flat <span class="n" data-receipt="e3a-fk-hnsw-34-50">34/50</span>, no demonstrated gain here.</figcaption>
+</figure>
+</section>
+<section id="gate-misses">
+<h2 class="section">What the gate catches, and what it misses</h2>
+<p>To test the gate we seeded <span class="n" data-receipt="fc-seeded-18">18</span> faults into copies of an earlier snapshot of this paper (<span class="n" data-receipt="fc-snapshot-85">85</span> receipted numeric spans) and ran the gate on each copy, with <span class="n" data-receipt="fc-controls-6">6/6</span> harmless control edits correctly passing. The gate caught <span class="n" data-receipt="fc-caught-10">10</span> faults and missed <span class="n" data-receipt="fc-missed-8">8</span>. Every caught fault was mechanical: a digit-form number with no receipt, a changed pinned file, a span that differs from its receipted value, or a banned phrase. Every miss was semantic: a correct numeral attached to the wrong arm or denominator, a claim of prospective registration for a study whose table row says no plan file, a word-form number contradicting a receipted one, and a receipt id reused for a different quantity.</p>
+<p>We chose the fault set ourselves, so it gives no error rate. It shows that the gate checks values and hashes, and that meaning needs a reader.</p>
+</section>
+<section id="results">
+<h2 class="section">What survived the audit: results on the TRACE store</h2>
+<p>Unless stated otherwise, results use <span class="n" data-receipt="e1a-n50">50</span> test searches over the sealed store. A search scores a source hit when the exact passage the query was labelled with appears among the returned results. Source hit measures finding a known source; it does not measure answer quality.</p>
+<div class="table-wrap" id="table-supports">
+<p class="table-caption">Claim table. OBSERVED: recomputed from raw files, some by the second analyst. REPORTED: a summary-backed figure we did not recompute. The preservation figure is a mean over <span class="n" data-receipt="mfid-n200">200</span> query-by-shard pairs (queries repeat across shards), and the scoring fraction holds on every shard.</p>
+<table class="data">
+<thead><tr><th>Question and record level</th><th>Recorded result</th><th>What it allows us to say</th><th>Receipts</th></tr></thead>
+<tbody>
+<tr><td>Does guided routing preserve the dense ranking while scoring fewer rows? OBSERVED (no plan file)</td><td>Exact top-ten overlap <span class="n" data-receipt="e1a-recall-09985">0.9985</span>; scored fraction <span class="n" data-receipt="e1a-rows-079">0.79</span> percent on every shard</td><td>Routing preserved this retriever's results at a small fraction of the scoring work. No inference about latency or usefulness</td><td data-allow="receipt">e1a-<wbr>recall-<wbr>09985, e1a-<wbr>rows-<wbr>079</td></tr>
+<tr><td>Does dense search find the labelled source more often than keyword search? REPORTED, later reproduced as OBSERVED (frozen plan)</td><td>Keyword <span class="n" data-receipt="e2d-bm25-41-50">41/50</span>; dense <span class="n" data-receipt="e2d-dense-26-50">26/50</span></td><td>No. Keyword search found more labelled sources on these searches</td><td data-allow="receipt">e2d-<wbr>bm25-<wbr>41-<wbr>50, e2d-<wbr>dense-<wbr>26-<wbr>50</td></tr>
+<tr><td>Does hierarchy help at matched (same-size) context? OBSERVED (frozen plan)</td><td>Expanded <span class="n" data-receipt="e3a-e-hnsw-31-50">31/50</span>; flat <span class="n" data-receipt="e3a-fk-hnsw-34-50">34/50</span></td><td>No demonstrated hierarchy gain; no equivalence claim</td><td data-allow="receipt">e3a-<wbr>e-<wbr>hnsw-<wbr>31-<wbr>50, e3a-<wbr>fk-<wbr>hnsw-<wbr>34-<wbr>50</td></tr>
+<tr><td>Does combining keyword and dense scores beat keyword alone? OBSERVED (rank fusion, recomputed) and REPORTED (score-fusion count, taken from the worker) (frozen plan)</td><td>Rank fusion <span class="n" data-receipt="e3b-rrf-38-50">38/50</span>; score fusion <span class="n" data-receipt="e3b-minmax-40-50">40/50</span>; keyword <span class="n" data-receipt="e3b-bm25-41-50">41/50</span></td><td>No gain over keyword in these fixed configurations; not a universal rejection of hybrids</td><td data-allow="receipt">e3b-<wbr>rrf-<wbr>38-<wbr>50, e3b-<wbr>minmax-<wbr>40-<wbr>50, e3b-<wbr>bm25-<wbr>41-<wbr>50</td></tr>
+<tr><td>Could an ideal chooser between keyword and dense do better than dense alone? OBSERVED (frozen plan)</td><td>Oracle gap <span class="n" data-receipt="x1-gap">+0.068</span> over dense in equal-style-average source-hit rate</td><td>The two methods find different sources on this constructed set; an oracle uses labels and is not a deployed router</td><td data-allow="receipt">x1-<wbr>gap</td></tr>
+<tr><td>Does fixed score fusion help inside the rows that routing admits? OBSERVED (stage 1 had no plan file; stages 2 to 6 were frozen before their runs, per our own freeze records)</td><td>The combination cleared its bar on <span class="n" data-receipt="dt-five-cleared-3">3</span> of the first <span class="n" data-receipt="num-five-sets-5">5</span> query sets and missed on <span class="n" data-receipt="dt-five-missed-2">2</span></td><td>A mixed pattern (post-hoc tally, no joint test) with no established explanation</td><td data-allow="receipt">cf2-<wbr>dhit, cf3-<wbr>dhit, cf4-<wbr>dhit, cf5-<wbr>m-<wbr>dhit, cf5-<wbr>h-<wbr>dhit</td></tr>
+</tbody>
+</table>
+<p class="table-note">A hash-pinned summary is weaker than a raw-data recomputation; the separate analyst recomputed rank fusion but took score-fusion counts from the worker.</p>
+</div>
+<p><strong>Routing does less scoring work and keeps the ranking.</strong> Guided routing scored <span class="n" data-receipt="e1a-rows-079">0.79</span> percent of rows on every shard and kept <span class="n" data-receipt="e1a-recall-09985">0.9985</span> of the exact top ten, measured with <span class="n" data-receipt="e1a-n50">50</span> test searches keeping the top <span class="n" data-receipt="e1a-k10">10</span> per shard. This is a measure of scoring work, not of latency or usefulness, and the measured TRACE arm used routed dense search only, with no keyword component.</p>
+<p><strong>Search by meaning finds fewer labelled sources than keyword search.</strong> Keyword (word-match) search found the labelled source in <span class="n" data-receipt="e2d-bm25-41-50">41/50</span> searches and dense search in <span class="n" data-receipt="e2d-dense-26-50">26/50</span>. A later frozen-protocol re-collection of the same searches by an independent evaluator reproduced both counts: keyword <span class="n" data-receipt="sealed50-k-41">41</span> of <span class="n" data-receipt="e1a-n50">50</span>, routed dense search <span class="n" data-receipt="sealed50-g-26">26</span> of <span class="n" data-receipt="e1a-n50">50</span>.</p>
+<p><strong>Hierarchy and simple fusion did not help.</strong> Returning hierarchy-expanded parent context reached <span class="n" data-receipt="e3a-e-hnsw-31-50">31/50</span> against a flat arm of matched size at <span class="n" data-receipt="e3a-fk-hnsw-34-50">34/50</span>. Two ways of combining keyword and dense results, rank fusion and score fusion, reached <span class="n" data-receipt="e3b-rrf-38-50">38/50</span> and <span class="n" data-receipt="e3b-minmax-40-50">40/50</span> against keyword search alone at <span class="n" data-receipt="e3b-bm25-41-50">41/50</span>. These failures are kept at the same record level as the positive result.</p>
+<figure class="fig" id="fig-sources-found">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="720" height="300" viewBox="0 0 720 300" role="img" aria-labelledby="chart-title">
+  <title id="chart-title">Labelled sources found, out of 50 test searches</title>
+  <g font-family="Times New Roman, Times, serif">
+    <!-- Chart title, left aligned -->
+    <text x="16" y="28" font-size="15" font-weight="bold" fill="#1a1a1a">Labelled sources found, out of 50 test searches</text>
+
+    <!-- Vertical gridlines at ticks 0, 10, ..., 50 (x = 258 + 8 * value) -->
+    <g stroke="#dcdcdc" stroke-width="1">
+      <line x1="258" y1="50" x2="258" y2="254"/>
+      <line x1="338" y1="50" x2="338" y2="254"/>
+      <line x1="418" y1="50" x2="418" y2="254"/>
+      <line x1="498" y1="50" x2="498" y2="254"/>
+      <line x1="578" y1="50" x2="578" y2="254"/>
+      <line x1="658" y1="50" x2="658" y2="254"/>
+    </g>
+
+    <!-- Bars: width = 8 * value; top bar in deep blue, others in light tint -->
+    <rect x="258" y="57" width="328" height="20" fill="#2b2b2b"/>
+    <rect x="258" y="91" width="320" height="20" fill="#a8a8a8"/>
+    <rect x="258" y="125" width="304" height="20" fill="#a8a8a8"/>
+    <rect x="258" y="159" width="272" height="20" fill="#a8a8a8"/>
+    <rect x="258" y="193" width="248" height="20" fill="#a8a8a8"/>
+    <rect x="258" y="227" width="208" height="20" fill="#a8a8a8"/>
+
+    <!-- Category labels, right aligned to x = 246 -->
+    <g font-size="13" fill="#1a1a1a" text-anchor="end">
+      <text x="246" y="72">Keyword search</text>
+      <text x="246" y="106">Score fusion (keyword + dense)</text>
+      <text x="246" y="140">Rank fusion (keyword + dense)</text>
+      <text x="246" y="174">Flat dense, matched context</text>
+      <text x="246" y="208">Parent expansion (hierarchy)</text>
+      <text x="246" y="242">Routed dense search</text>
+    </g>
+
+    <!-- Value labels: white backing keeps gridlines from running through the text -->
+    <g fill="#ffffff">
+      <rect x="590" y="60" width="38" height="16"/>
+      <rect x="582" y="94" width="38" height="16"/>
+      <rect x="566" y="128" width="38" height="16"/>
+      <rect x="534" y="162" width="38" height="16"/>
+      <rect x="510" y="196" width="38" height="16"/>
+      <rect x="470" y="230" width="38" height="16"/>
+    </g>
+    <g font-size="13" fill="#333333" text-anchor="start">
+      <text x="592" y="72">41/50</text>
+      <text x="584" y="106">40/50</text>
+      <text x="568" y="140">38/50</text>
+      <text x="536" y="174">34/50</text>
+      <text x="512" y="208">31/50</text>
+      <text x="472" y="242">26/50</text>
+    </g>
+
+    <!-- Value axis tick labels -->
+    <g font-size="12" fill="#555555" text-anchor="middle">
+      <text x="258" y="272">0</text>
+      <text x="658" y="272">50</text>
+    </g>
+  </g>
+</svg>
+
+<figcaption>Labelled sources found, out of <span class="n" data-receipt="e1a-n50">50</span> test searches, by method. The values are those of the claim table: keyword <span class="n" data-receipt="e2d-bm25-41-50">41/50</span>, score fusion <span class="n" data-receipt="e3b-minmax-40-50">40/50</span>, rank fusion <span class="n" data-receipt="e3b-rrf-38-50">38/50</span>, flat context <span class="n" data-receipt="e3a-fk-hnsw-34-50">34/50</span>, parent expansion <span class="n" data-receipt="e3a-e-hnsw-31-50">31/50</span>, routed dense <span class="n" data-receipt="e2d-dense-26-50">26/50</span>. The bars come from three separate comparisons on the same searches, not one ranked experiment.</figcaption>
+</figure>
+<p><strong>Keyword and dense search are complementary on a constructed set.</strong> On a set of model-written queries, an ideal chooser that always picks the better of keyword and dense search (it cheats by using the labels) gains <span class="n" data-receipt="x1-gap">+0.068</span> in source-hit rate over dense search alone, averaged over <span class="n" data-receipt="r21-x0-styles">three</span> query styles (question, keyword, description). So the two methods find different sources: room for a chooser, not a working one. The test used one embedding model (MiniLM-L6-v2) on one corpus, without routing. On the original fifty searches the same ideal chooser gains only <span class="n" data-receipt="old50-oracle-gain">+2/50</span> over keyword search (REPORTED).</p>
+<p><strong>Combining the two inside the route gave a mixed pattern.</strong> We then tested a fixed, equal-weight combination of keyword and dense scores on the rows that routing admits for a query (on average <span class="n" data-receipt="cf2-cand-pct">13.4%</span> of the store). Across the first five sets of model-written queries, each with its pass bar fixed before the run, the combination cleared the bar on <span class="n" data-receipt="dt-five-cleared-3">3</span> of <span class="n" data-receipt="num-five-sets-5">5</span> and missed on <span class="n" data-receipt="dt-five-missed-2">2</span> (a tally made afterwards, with no joint test). Two follow-up tests did not explain it: the effect of who wrote the queries was <span class="n" data-receipt="cf5-paired">+0.030 [-0.009,0.071]</span>, and the planned test of word overlap between query and passage gave <span class="n" data-receipt="cf6-d">+0.000 [-0.050,0.050]</span>; both ranges include zero. Why the gains varied is unestablished; nothing here licenses a deployed hybrid.</p>
+<p><strong>Speed: a standard index is far faster at the search stage.</strong> In the same-store head-to-head, the fastest quality-matched (same answer quality) standard-index configuration recorded a median of <span class="n" data-receipt="e2a-p50-066">0.66</span> milliseconds (search only, <span class="n" data-receipt="num-thread-1">1</span> thread, ids only, shared virtual machine) against <span class="n" data-receipt="e2b-guided-1236">1236</span> milliseconds for the live guided service, a ratio of <span class="n" data-receipt="e2b-r-1884">1884</span>. The preregistered verdict reads that guided search is dominated by a standard index on this store. Embedding on both sides leaves a ratio near <span class="n" data-receipt="e2b-rend2end-86">86</span>. This compares search-stage cost only: the service returns parent text, the standard index ids only. Waiting on shard-engine processes, which run in sequence, took <span class="n" data-receipt="lat-engine-888">88.8</span> to <span class="n" data-receipt="lat-engine-912">91.2</span> percent of guided query time in a profile (REPORTED); launch and scoring were not separated. We make no general speed claim.</p>
+<p><strong>Memory: the preregistered advantage criterion failed.</strong> In the memory-at-scale comparison, the ratio of TRACE's process memory to a standard graph index's was <span class="n" data-receipt="d3-ratio-0p8">0.1675</span> at small size, <span class="n" data-receipt="d3-ratio-3p2">0.1717</span> at middle size, and <span class="n" data-receipt="d3-ratio-5p0">0.1721</span> at a third, largest store size (one size is a worker figure we did not re-time). The ratio did not fall with scale, so it failed the preregistered memory-advantage criterion. This process memory omits the page cache, and we draw no memory claim.</p>
+</section>
+<section id="limits">
+<h2 class="section">Corrections and limits</h2>
+<p>One correction shows the procedure narrowing a claim. An earlier note quoted <span class="n" data-receipt="l8-bm25-44-50">44/50</span> for keyword search, which was the expanded-context arm; the keyword-only figure is <span class="n" data-receipt="l8-receipt-41-50">41/50</span>. The error was found by reading receipts, not through the automated gate.</p>
+<p>Queries were authored, not sampled from user traffic; one model family both wrote and filtered the first synthetic set, so author and judge effects were never separated, and no synthetic query was written by a person. A different-model stand-in transfer check on three small public sets did not reproduce the headline recall and scoring work (REPORTED, words only), so the scoring-work figure may not transfer. Source hit counts only the exact source passage. The sealed-store studies use one corpus and a single embedding model (the memory comparison used another store), and <span class="n" data-receipt="e1a-n50">50</span> test searches give coarse resolution.</p>
+</section>
+<section id="repro">
+<h2 class="section">Reproduction</h2>
+<p>An experiment bundle re-derives the small-experiment results with one command (reruns on the author's host reproduced the shipped verdicts, with <span class="n" data-receipt="r21-identical-analyses">three</span> analyses byte-identical; other systems are untested). The sealed-store runs need the author's virtual machine and index; for those, a receipt bundle holds the pinned result files and the checker confirms that each numeric span matches its file. It confirms values and hashes only.</p>
+</section>
+<section id="next">
+<h2 class="section">What the audit tells us to build next</h2>
+<p>Each failure points at a specific change. None of the mechanisms below exists in the evaluated system; each is a hypothesis that must pass the same gate.</p>
+<p><strong>Speed.</strong> Most of the guided query time went to waiting on shard processes started in sequence. Hypothesis: keeping those workers alive between queries removes most of the search-stage gap. Test: the same head-to-head, with the same verdict rule.</p>
+<p><strong>Finding sources.</strong> Keyword search beat dense search, and an ideal chooser beat both on a constructed set. Hypothesis: a per-query chooser between the two recovers part of that gap. Test: a bar fixed in advance, on fresh queries written by people.</p>
+<p><strong>The gate.</strong> Every planted error of meaning passed. Hypothesis: receipts that also record which experimental arm and which denominator a number belongs to will catch the right-number-wrong-arm class. Test: the planted-error challenge again, with errors written by someone else.</p>
+<p><strong>A store that organises itself.</strong> The store studied here is static: fixed shards, fixed routing. Hypothesis: grouping passages that are retrieved together, and letting unused links fade, lowers scoring work further while preserving the ranking. Test: the same preservation measure that the one positive result here was held to.</p>
+</section>
+<section id="takeaway">
+<h2 class="section">What we take from this</h2>
+<p>For TRACE, the audit leaves one positive result standing and a plain list of things the current store does not do better than simple baselines. For agent-built software generally, a mechanical gate is cheap and catches mechanical errors, but it does not replace a reader: every error of meaning we planted passed it. Keeping the failures at the same record level as the successes is what made the one success credible to us.</p>
+</section>
+<section id="references">
+<h2 class="section">References</h2>
+<p class="ref" data-allow="reference">B. Nosek et al. The preregistration revolution. PNAS, 2018.</p>
+<p class="ref" data-allow="reference">J. Pineau et al. Improving reproducibility in machine learning research. JMLR, 2021.</p>
+<p class="ref" data-allow="reference">C. E. Jimenez et al. SWE-bench: can language models resolve real-world GitHub issues? ICLR, 2024.</p>
+<p class="ref" data-allow="reference">N. Thakur et al. BEIR: a heterogeneous benchmark for zero-shot evaluation of information retrieval models. NeurIPS, 2021.</p>
+<p class="ref" data-allow="reference">S. Robertson, H. Zaragoza. The probabilistic relevance framework: BM25 and beyond. Foundations and Trends in IR, 2009.</p>
+<p class="ref" data-allow="reference">V. Karpukhin et al. Dense passage retrieval for open-domain question answering. EMNLP, 2020.</p>
+<p class="ref" data-allow="reference">G. Cormack et al. Reciprocal rank fusion outperforms Condorcet and individual rank learning methods. SIGIR, 2009.</p>
+<p class="ref" data-allow="reference">C. Packer et al. MemGPT: towards LLMs as operating systems. arXiv preprint, 2023.</p>
+<p class="ref" data-allow="reference">P. Lewis et al. Retrieval-augmented generation for knowledge-intensive NLP tasks. NeurIPS, 2020.</p>
+</section>
+<section class="ai-disclosure">
+<strong>AI-assistance disclosure</strong>
+<span>Built with AI coding agents (Muse Code, Claude, Codex) under human architectural direction. Digit-form numbers are checked at build time against hash-pinned result files (some of them summaries); findings stated in words are not receipted.</span>
+</section>
+<div class="page-footer"></div>
+</body>
+</html>

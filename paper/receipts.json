@@ -1,0 +1,1272 @@
+{
+  "bar-d": {
+    "file": "evidence/scratch/wave6/claude-sci/x3/PREREG15-CFUSE-S6.md",
+    "line_or_key": "18",
+    "sha256": "46c489c6c156a7c9518022a7cbcb29d6bcc4e3625bd7b0ca8bac346b13ecc740",
+    "tag": "VERIFIED",
+    "value": "+0.03"
+  },
+  "bar-hit": {
+    "file": "evidence/scratch/wave6/claude-sci/x3/PREREG15-CFUSE-S6.md",
+    "line_or_key": "17",
+    "sha256": "46c489c6c156a7c9518022a7cbcb29d6bcc4e3625bd7b0ca8bac346b13ecc740",
+    "tag": "VERIFIED",
+    "value": "+0.04"
+  },
+  "bar-mrr": {
+    "file": "evidence/scratch/wave6/claude-sci/x3/PREREG15-CFUSE-S6.md",
+    "line_or_key": "17",
+    "sha256": "46c489c6c156a7c9518022a7cbcb29d6bcc4e3625bd7b0ca8bac346b13ecc740",
+    "tag": "VERIFIED",
+    "value": "+0.03"
+  },
+  "bar-p2h": {
+    "file": "evidence/scratch/wave6/claude-sci/x3/PREREG15-CFUSE-S6.md",
+    "line_or_key": "17",
+    "sha256": "46c489c6c156a7c9518022a7cbcb29d6bcc4e3625bd7b0ca8bac346b13ecc740",
+    "tag": "VERIFIED",
+    "value": "+0.03"
+  },
+  "bar-p2m": {
+    "file": "evidence/scratch/wave6/claude-sci/x3/PREREG15-CFUSE-S6.md",
+    "line_or_key": "17",
+    "sha256": "46c489c6c156a7c9518022a7cbcb29d6bcc4e3625bd7b0ca8bac346b13ecc740",
+    "tag": "VERIFIED",
+    "value": "+0.02"
+  },
+  "cf1-admit-45": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-1.result.md",
+    "line_or_key": "Ceilings: old 50 admission",
+    "sha256": "8547c4ecfdf790fae6527a90048c3ccc3f47065da26c71cbf6575390b51e9576",
+    "tag": "OBSERVED",
+    "value": "45/50"
+  },
+  "cf2-cand-pct": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-2.result.md",
+    "line_or_key": "60",
+    "sha256": "571cd513aedd44609b4073bf67ba6d32d29a66c12a6c1194966ae26ef2b251f4",
+    "tag": "OBSERVED",
+    "value": "13.4%"
+  },
+  "cf2-depth-10": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-2.result.md",
+    "line_or_key": "14",
+    "sha256": "571cd513aedd44609b4073bf67ba6d32d29a66c12a6c1194966ae26ef2b251f4",
+    "tag": "OBSERVED",
+    "value": "10"
+  },
+  "cf2-dhit": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-2.result.md",
+    "line_or_key": "Verdict d_hit",
+    "sha256": "571cd513aedd44609b4073bf67ba6d32d29a66c12a6c1194966ae26ef2b251f4",
+    "tag": "OBSERVED",
+    "value": "+0.055"
+  },
+  "cf2-dmrr": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-2.result.md",
+    "line_or_key": "Verdict d_mrr",
+    "sha256": "571cd513aedd44609b4073bf67ba6d32d29a66c12a6c1194966ae26ef2b251f4",
+    "tag": "OBSERVED",
+    "value": "+0.071"
+  },
+  "cf2-n": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-2.result.md",
+    "line_or_key": "Primary comparison n",
+    "sha256": "571cd513aedd44609b4073bf67ba6d32d29a66c12a6c1194966ae26ef2b251f4",
+    "tag": "OBSERVED",
+    "value": "388"
+  },
+  "cf2-old50-br": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-2.result.md",
+    "line_or_key": "Old-50 replay Br",
+    "sha256": "571cd513aedd44609b4073bf67ba6d32d29a66c12a6c1194966ae26ef2b251f4",
+    "tag": "OBSERVED",
+    "value": "38/50"
+  },
+  "cf2-old50-mm": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-2.result.md",
+    "line_or_key": "Old-50 replay MMr",
+    "sha256": "571cd513aedd44609b4073bf67ba6d32d29a66c12a6c1194966ae26ef2b251f4",
+    "tag": "OBSERVED",
+    "value": "37/50"
+  },
+  "cf3-ci-hit": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-3.result.md",
+    "line_or_key": "5",
+    "sha256": "8843f993f83384e9a9db46e3ce46a84f64e45d77445cdc6484cbceb73574ffa7",
+    "tag": "OBSERVED",
+    "value": "[0.001,0.066]"
+  },
+  "cf3-ci-mrr": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-3.result.md",
+    "line_or_key": "5",
+    "sha256": "8843f993f83384e9a9db46e3ce46a84f64e45d77445cdc6484cbceb73574ffa7",
+    "tag": "OBSERVED",
+    "value": "[0.005,0.069]"
+  },
+  "cf3-dhit": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-3.result.md",
+    "line_or_key": "Verdict d_hit",
+    "sha256": "8843f993f83384e9a9db46e3ce46a84f64e45d77445cdc6484cbceb73574ffa7",
+    "tag": "OBSERVED",
+    "value": "+0.033"
+  },
+  "cf3-dmrr": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-3.result.md",
+    "line_or_key": "Verdict d_mrr",
+    "sha256": "8843f993f83384e9a9db46e3ce46a84f64e45d77445cdc6484cbceb73574ffa7",
+    "tag": "OBSERVED",
+    "value": "+0.037"
+  },
+  "cf3-n": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-3.result.md",
+    "line_or_key": "Primary comparison n",
+    "sha256": "8843f993f83384e9a9db46e3ce46a84f64e45d77445cdc6484cbceb73574ffa7",
+    "tag": "OBSERVED",
+    "value": "300"
+  },
+  "cf4-br-macro": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-4.result.md",
+    "line_or_key": "21",
+    "sha256": "506989417559e769428c86713255de3944481c6afa5302b5721e2bc124582329",
+    "tag": "OBSERVED",
+    "value": "0.719"
+  },
+  "cf4-ci-hit": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-4.result.md",
+    "line_or_key": "5",
+    "sha256": "506989417559e769428c86713255de3944481c6afa5302b5721e2bc124582329",
+    "tag": "OBSERVED",
+    "value": "[0.050,0.125]"
+  },
+  "cf4-dhit": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-4.result.md",
+    "line_or_key": "5",
+    "sha256": "506989417559e769428c86713255de3944481c6afa5302b5721e2bc124582329",
+    "tag": "OBSERVED",
+    "value": "+0.087"
+  },
+  "cf4-dmrr": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-4.result.md",
+    "line_or_key": "5",
+    "sha256": "506989417559e769428c86713255de3944481c6afa5302b5721e2bc124582329",
+    "tag": "OBSERVED",
+    "value": "+0.120"
+  },
+  "cf4-dr-macro": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-4.result.md",
+    "line_or_key": "20",
+    "sha256": "506989417559e769428c86713255de3944481c6afa5302b5721e2bc124582329",
+    "tag": "OBSERVED",
+    "value": "0.679"
+  },
+  "cf4-med-xf": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-4/OWN-CHECK.md",
+    "line_or_key": "4",
+    "sha256": "d8c5a9851d5bcf7e4f4423e779b3de14f6e3edbf4b2f3fdf18e8da698ae6c17e",
+    "tag": "VERIFIED",
+    "value": "0.444"
+  },
+  "cf4-med-xg": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-4/OWN-CHECK.md",
+    "line_or_key": "4",
+    "sha256": "d8c5a9851d5bcf7e4f4423e779b3de14f6e3edbf4b2f3fdf18e8da698ae6c17e",
+    "tag": "VERIFIED",
+    "value": "0.5"
+  },
+  "cf4-mm-vs-br": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-4.result.md",
+    "line_or_key": "46",
+    "sha256": "506989417559e769428c86713255de3944481c6afa5302b5721e2bc124582329",
+    "tag": "OBSERVED",
+    "value": "+0.047"
+  },
+  "cf4-n": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-4.result.md",
+    "line_or_key": "7",
+    "sha256": "506989417559e769428c86713255de3944481c6afa5302b5721e2bc124582329",
+    "tag": "OBSERVED",
+    "value": "297"
+  },
+  "cf4-ovl-xf": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-4/OWN-CHECK.md",
+    "line_or_key": "4",
+    "sha256": "d8c5a9851d5bcf7e4f4423e779b3de14f6e3edbf4b2f3fdf18e8da698ae6c17e",
+    "tag": "VERIFIED",
+    "value": "0.381"
+  },
+  "cf4-ovl-xg": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-4/OWN-CHECK.md",
+    "line_or_key": "4",
+    "sha256": "d8c5a9851d5bcf7e4f4423e779b3de14f6e3edbf4b2f3fdf18e8da698ae6c17e",
+    "tag": "VERIFIED",
+    "value": "0.506"
+  },
+  "cf5-h-ci-p1": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/RESULT.md",
+    "line_or_key": "7",
+    "sha256": "a559f63031c12262e9898eeb1c614d332bdb6ea335cc120037c157c351fff3cb",
+    "tag": "VERIFIED",
+    "value": "[0.019,0.090]"
+  },
+  "cf5-h-ci-p2": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/RESULT.md",
+    "line_or_key": "7",
+    "sha256": "a559f63031c12262e9898eeb1c614d332bdb6ea335cc120037c157c351fff3cb",
+    "tag": "VERIFIED",
+    "value": "[0.043,0.107]"
+  },
+  "cf5-h-dhit": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/RESULT.md",
+    "line_or_key": "7",
+    "sha256": "a559f63031c12262e9898eeb1c614d332bdb6ea335cc120037c157c351fff3cb",
+    "tag": "VERIFIED",
+    "value": "+0.053"
+  },
+  "cf5-h-p2": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/RESULT.md",
+    "line_or_key": "7",
+    "sha256": "a559f63031c12262e9898eeb1c614d332bdb6ea335cc120037c157c351fff3cb",
+    "tag": "VERIFIED",
+    "value": "+0.073"
+  },
+  "cf5-m-ci": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/RESULT.md",
+    "line_or_key": "5",
+    "sha256": "a559f63031c12262e9898eeb1c614d332bdb6ea335cc120037c157c351fff3cb",
+    "tag": "VERIFIED",
+    "value": "[0.003,0.044]"
+  },
+  "cf5-m-dhit": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/RESULT.md",
+    "line_or_key": "5",
+    "sha256": "a559f63031c12262e9898eeb1c614d332bdb6ea335cc120037c157c351fff3cb",
+    "tag": "VERIFIED",
+    "value": "+0.023"
+  },
+  "cf5-m-p2": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/RESULT.md",
+    "line_or_key": "5",
+    "sha256": "a559f63031c12262e9898eeb1c614d332bdb6ea335cc120037c157c351fff3cb",
+    "tag": "VERIFIED",
+    "value": "+0.013"
+  },
+  "cf5-n": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/RESULT.md",
+    "line_or_key": "20",
+    "sha256": "a559f63031c12262e9898eeb1c614d332bdb6ea335cc120037c157c351fff3cb",
+    "tag": "VERIFIED",
+    "value": "300"
+  },
+  "cf5-ovl-h": {
+    "file": "evidence/scratch/wave6/claude-sci/x2/AUTHORING-LOG.md",
+    "line_or_key": "8",
+    "sha256": "7ad109e27e873a945160c8ca2100f2c7976b43ffba9d54df4cf543a489269aa0",
+    "tag": "VERIFIED",
+    "value": "0.444"
+  },
+  "cf5-ovl-m": {
+    "file": "evidence/scratch/wave6/claude-sci/x2/AUTHORING-LOG.md",
+    "line_or_key": "8",
+    "sha256": "7ad109e27e873a945160c8ca2100f2c7976b43ffba9d54df4cf543a489269aa0",
+    "tag": "VERIFIED",
+    "value": "0.355"
+  },
+  "cf5-ovl-x0": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/OWN-CHECK.md",
+    "line_or_key": "6",
+    "sha256": "5d2812c93b2b1a43ba4c681e3e35e1d61f6d35dc63d66fee937bda507a925bce",
+    "tag": "VERIFIED",
+    "value": "0.460"
+  },
+  "cf5-paired": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/RESULT.md",
+    "line_or_key": "93",
+    "sha256": "a559f63031c12262e9898eeb1c614d332bdb6ea335cc120037c157c351fff3cb",
+    "tag": "VERIFIED",
+    "value": "+0.030 [-0.009,0.071]"
+  },
+  "cf6-br-h": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-6/RESULT.md",
+    "line_or_key": "74",
+    "sha256": "dcf4f6465587fbb817eec60c680529d35deafa5b8045301441ae4967090ac113",
+    "tag": "VERIFIED",
+    "value": "0.990"
+  },
+  "cf6-d": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-6/RESULT.md",
+    "line_or_key": "5",
+    "sha256": "dcf4f6465587fbb817eec60c680529d35deafa5b8045301441ae4967090ac113",
+    "tag": "VERIFIED",
+    "value": "+0.000 [-0.050,0.050]"
+  },
+  "cf6-dh": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-6/RESULT.md",
+    "line_or_key": "5",
+    "sha256": "dcf4f6465587fbb817eec60c680529d35deafa5b8045301441ae4967090ac113",
+    "tag": "VERIFIED",
+    "value": "+0.033"
+  },
+  "cf6-dl": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-6/RESULT.md",
+    "line_or_key": "5",
+    "sha256": "dcf4f6465587fbb817eec60c680529d35deafa5b8045301441ae4967090ac113",
+    "tag": "VERIFIED",
+    "value": "+0.033"
+  },
+  "cf6-dm": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-6/RESULT.md",
+    "line_or_key": "5",
+    "sha256": "dcf4f6465587fbb817eec60c680529d35deafa5b8045301441ae4967090ac113",
+    "tag": "VERIFIED",
+    "value": "+0.123 [0.076,0.170]"
+  },
+  "cf6-dr-h": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-6/RESULT.md",
+    "line_or_key": "73",
+    "sha256": "dcf4f6465587fbb817eec60c680529d35deafa5b8045301441ae4967090ac113",
+    "tag": "VERIFIED",
+    "value": "0.957"
+  },
+  "cf6-n": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-6/RESULT.md",
+    "line_or_key": "37",
+    "sha256": "dcf4f6465587fbb817eec60c680529d35deafa5b8045301441ae4967090ac113",
+    "tag": "VERIFIED",
+    "value": "300"
+  },
+  "cf6-ovl-h": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-6/RESULT.md",
+    "line_or_key": "107",
+    "sha256": "dcf4f6465587fbb817eec60c680529d35deafa5b8045301441ae4967090ac113",
+    "tag": "VERIFIED",
+    "value": "0.777"
+  },
+  "cf6-ovl-l": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-6/RESULT.md",
+    "line_or_key": "106",
+    "sha256": "dcf4f6465587fbb817eec60c680529d35deafa5b8045301441ae4967090ac113",
+    "tag": "VERIFIED",
+    "value": "0.216"
+  },
+  "corpus-shortfall": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": 22,
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "0.11%",
+    "note": "local copy of /mnt/c/hackathon-rescue-20261104/FACTS-AND-RULES.md (same sha256, copied 2026-11-07 by owner permission)"
+  },
+  "corpus-tokens": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": 22,
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "99,891,846",
+    "note": "local copy of /mnt/c/hackathon-rescue-20261104/FACTS-AND-RULES.md (same sha256, copied 2026-11-07 by owner permission)"
+  },
+  "d2-crash": {
+    "file": "evidence/scratch/wave6/claude-sci/append/VM-RESULT.md",
+    "line_or_key": 40,
+    "sha256": "651b6c03f9fda781137a424c3d308a9fb55dff3130da978e399d083628a57eca",
+    "tag": "OBSERVED",
+    "value": "3/3"
+  },
+  "d2-hadd-wall": {
+    "file": "evidence/scratch/wave6/claude-sci/append/VM-RESULT.md",
+    "line_or_key": 39,
+    "sha256": "651b6c03f9fda781137a424c3d308a9fb55dff3130da978e399d083628a57eca",
+    "tag": "OBSERVED",
+    "value": "85.2"
+  },
+  "d2-tapp-qn": {
+    "file": "evidence/scratch/wave6/claude-sci/append/VM-RESULT.md",
+    "line_or_key": 10,
+    "sha256": "651b6c03f9fda781137a424c3d308a9fb55dff3130da978e399d083628a57eca",
+    "tag": "OBSERVED",
+    "value": "0.9917"
+  },
+  "d2-tapp-wall": {
+    "file": "evidence/scratch/wave6/claude-sci/append/VM-RESULT.md",
+    "line_or_key": 39,
+    "sha256": "651b6c03f9fda781137a424c3d308a9fb55dff3130da978e399d083628a57eca",
+    "tag": "OBSERVED",
+    "value": "18.3"
+  },
+  "d2-treb-qn": {
+    "file": "evidence/scratch/wave6/claude-sci/append/VM-RESULT.md",
+    "line_or_key": 12,
+    "sha256": "651b6c03f9fda781137a424c3d308a9fb55dff3130da978e399d083628a57eca",
+    "tag": "OBSERVED",
+    "value": "0.9927"
+  },
+  "d2-treb-wall": {
+    "file": "evidence/scratch/wave6/claude-sci/append/VM-RESULT.md",
+    "line_or_key": 38,
+    "sha256": "651b6c03f9fda781137a424c3d308a9fb55dff3130da978e399d083628a57eca",
+    "tag": "OBSERVED",
+    "value": "291.1"
+  },
+  "d3-ratio-0p8": {
+    "file": "evidence/scratch/wave6/paper/d3/p0/FINDING-D3-0p8M.md",
+    "line_or_key": 9,
+    "sha256": "73a4e594ea5946a0cd76bf294f0e23e2ae7634e1a53f727f88e448503622a2a7",
+    "tag": "OBSERVED",
+    "value": "0.1675",
+    "note": "worker log value (FINDING-D3-0p8M.md line 9) independently recomputed from the raw memory files d3-0p8m raw_h_mem.jsonl and raw_t_mem.jsonl (1515765760 and 4 shard peaks summing to 253915136, ratio 0.167516) by the VM hand cs-vm-d3-small-point-locate-v1; read-only mirror in evidence-vm/d3-small-point/ (raw files sha bde42966 and 6641d9c2 equal the hand's input hashes; ratio.json S1). Not re-timed: the measurements are the worker's."
+  },
+  "d3-ratio-3p2": {
+    "file": "evidence/scratch/wave6/paper/d3/p1/FINDING-D3-3p2M.md",
+    "line_or_key": "Ratios per prereg",
+    "sha256": "ee58eae16ef10a85e0ec01a034e0278638e3fc3e2854bc1ff5da2dd74318c9ad",
+    "tag": "OBSERVED",
+    "value": "0.1717"
+  },
+  "e1a-k10": {
+    "claim_as_written": "k=10",
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": 23,
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "10",
+    "note": "local copy of /mnt/c/hackathon-rescue-20261104/FACTS-AND-RULES.md (same sha256, copied 2026-11-07 by owner permission)"
+  },
+  "e1a-n50": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": 23,
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "50",
+    "note": "local copy of /mnt/c/hackathon-rescue-20261104/FACTS-AND-RULES.md (same sha256, copied 2026-11-07 by owner permission)"
+  },
+  "e1a-recall-09985": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": 23,
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "OBSERVED",
+    "value": "0.9985",
+    "note": "local copy of /mnt/c/hackathon-rescue-20261104/FACTS-AND-RULES.md (same sha256, copied 2026-11-07 by owner permission) independently recomputed from the stored index by bl-cs-vm-e1a-preservation-recompute-v1 (1997/2000; 1600/203137); raw rows mirrored in evidence-vm/e1a-recompute/per_pair.jsonl (sha256 given in the mirror's file list)"
+  },
+  "e1a-rows-079": {
+    "claim_as_written": "0.79 percent of rows scored, each of the four shards",
+    "file": "evidence/scratch/wave6/paper/evidence-vm/shard-fraction-all/per_shard.tsv",
+    "line_or_key": 2,
+    "sha256": "78fb3c4db2298d3e01b34dafc4ac55dec3f7e6a56b89d461638a3c9762ab9964",
+    "tag": "OBSERVED",
+    "value": "0.79",
+    "note": "local copy of /mnt/c/hackathon-rescue-20261104/FACTS-AND-RULES.md (same sha256, copied 2026-11-07 by owner permission) independently recomputed from the stored index by bl-cs-vm-e1a-preservation-recompute-v1 (1997/2000; 1600/203137); raw rows mirrored in evidence-vm/e1a-recompute/per_pair.jsonl (sha256 given in the mirror's file list) Per-shard scored fraction measured on all four shards (VM job cs-vm-shard-fraction-all-v1, mirrored with sha match in evidence-vm/shard-fraction-all/: per_shard.tsv shows 1600 scored of 203137, 203136, 203136, 203136 rows, each 0.79 percent; per_probe.jsonl 200 rows; all-shard total 6400 of 812545); the Writeup and draft say the fraction holds on every shard on this basis. W1 re-point (freeze step): per_shard.tsv rows 2 to 5 give 1600 scored of 203137, 203136, 203136, 203136 rows, each 0.79 percent (all four shards; 6400 of 812545); the old cited FACTS-AND-RULES.md line 23 scopes the figure to one shard and is kept as the provenance of the 50-query run."
+  },
+  "e1a-units-812545": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": 22,
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "812,545",
+    "note": "local copy of /mnt/c/hackathon-rescue-20261104/FACTS-AND-RULES.md (same sha256, copied 2026-11-07 by owner permission)"
+  },
+  "e1cr-escapes": {
+    "file": "evidence/scratch/wave6/claude-sci/e1/run.log",
+    "line_or_key": 37,
+    "sha256": "642eae2249f9d810e3679314e9a971c2d4a8da0e305ef2528f9493421e6dce91",
+    "tag": "REPORTED",
+    "value": "5 of 5"
+  },
+  "e1cr-gate-holds": {
+    "file": "evidence/scratch/wave6/claude-sci/e1/run.log",
+    "line_or_key": 36,
+    "sha256": "642eae2249f9d810e3679314e9a971c2d4a8da0e305ef2528f9493421e6dce91",
+    "tag": "REPORTED",
+    "value": "CRANK GATE HOLDS ON COMMON BUGS"
+  },
+  "e1cr-speedup-counts": {
+    "file": "evidence/scratch/wave6/claude-sci/e1/run.log",
+    "line_or_key": 38,
+    "sha256": "642eae2249f9d810e3679314e9a971c2d4a8da0e305ef2528f9493421e6dce91",
+    "tag": "REPORTED",
+    "value": ">= 10x ON 4 of 5"
+  },
+  "e2a-hit-26-50": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/H2H-FINDING.md",
+    "line_or_key": 6,
+    "sha256": "ec162f0d51819ce311d11e553b28e23bca9f6d5f363dc614914a78bc2e33c9cd",
+    "tag": "OBSERVED",
+    "value": "26/50"
+  },
+  "e2a-p50-066": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/H2H-FINDING.md",
+    "line_or_key": 7,
+    "sha256": "ec162f0d51819ce311d11e553b28e23bca9f6d5f363dc614914a78bc2e33c9cd",
+    "tag": "OBSERVED",
+    "value": "0.66"
+  },
+  "e2a-recall-0992": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/H2H-FINDING.md",
+    "line_or_key": 6,
+    "sha256": "ec162f0d51819ce311d11e553b28e23bca9f6d5f363dc614914a78bc2e33c9cd",
+    "tag": "OBSERVED",
+    "value": "0.992"
+  },
+  "e2b-guided-1236": {
+    "claim_as_written": "1,236",
+    "file": "evidence/scratch/wave6/claude-sci/h2h/H2H-FINDING.md",
+    "line_or_key": 7,
+    "sha256": "ec162f0d51819ce311d11e553b28e23bca9f6d5f363dc614914a78bc2e33c9cd",
+    "tag": "OBSERVED",
+    "value": "1236"
+  },
+  "e2b-r-1884": {
+    "claim_as_written": "1,884",
+    "file": "evidence/scratch/wave6/claude-sci/h2h/H2H-FINDING.md",
+    "line_or_key": 7,
+    "sha256": "ec162f0d51819ce311d11e553b28e23bca9f6d5f363dc614914a78bc2e33c9cd",
+    "tag": "OBSERVED",
+    "value": "1884"
+  },
+  "e2b-rend2end-86": {
+    "claim_as_written": "~86x",
+    "file": "evidence/scratch/wave6/claude-sci/h2h/H2H-FINDING.md",
+    "line_or_key": 7,
+    "sha256": "ec162f0d51819ce311d11e553b28e23bca9f6d5f363dc614914a78bc2e33c9cd",
+    "tag": "OBSERVED",
+    "value": "86"
+  },
+  "e2d-bm25-082": {
+    "file": "evidence/scratch/wave6/claude-sci/hier/RESULT.md",
+    "line_or_key": 28,
+    "sha256": "e577ef0f71d69ee6f687079bffce66441619f3ed633a677a1a2e21ecd9578e37",
+    "tag": "REPORTED",
+    "value": "0.82"
+  },
+  "e2d-bm25-41-50": {
+    "file": "evidence/scratch/wave6/claude-sci/hier/RESULT.md",
+    "line_or_key": 42,
+    "sha256": "e577ef0f71d69ee6f687079bffce66441619f3ed633a677a1a2e21ecd9578e37",
+    "tag": "REPORTED",
+    "value": "41/50"
+  },
+  "e2d-dense-052": {
+    "file": "evidence/scratch/wave6/claude-sci/hier/RESULT.md",
+    "line_or_key": 28,
+    "sha256": "e577ef0f71d69ee6f687079bffce66441619f3ed633a677a1a2e21ecd9578e37",
+    "tag": "REPORTED",
+    "value": "0.52"
+  },
+  "e2d-dense-26-50": {
+    "file": "evidence/scratch/wave6/claude-sci/hier/summary_hl.json",
+    "line_or_key": "F10_hnsw.hits/F10_hnsw.n",
+    "sha256": "c5c3fea0d7b9b6e3af6d757d3936b25695fcf1e0bdb3dbf0fe894dff96d81cb2",
+    "tag": "REPORTED",
+    "value": "26/50"
+  },
+  "e2fz-166of200-2e16": {
+    "file": "evidence/scratch/wave6/claude-sci/e2/run.log",
+    "line_or_key": 5,
+    "sha256": "0597f54106d245c68479cd7809cb5b313a6cba68e997375a32621773136383e6",
+    "tag": "REPORTED",
+    "value": "166 of 200"
+  },
+  "e2fz-200of200-2e20": {
+    "file": "evidence/scratch/wave6/claude-sci/e2/run.log",
+    "line_or_key": 7,
+    "sha256": "0597f54106d245c68479cd7809cb5b313a6cba68e997375a32621773136383e6",
+    "tag": "REPORTED",
+    "value": "200 of 200"
+  },
+  "e2fz-59of200-2e13": {
+    "file": "evidence/scratch/wave6/claude-sci/e2/run.log",
+    "line_or_key": 3,
+    "sha256": "0597f54106d245c68479cd7809cb5b313a6cba68e997375a32621773136383e6",
+    "tag": "REPORTED",
+    "value": "59 of 200"
+  },
+  "e3-engine-pct": {
+    "file": "evidence/scratch/wave6/claude-sci/e3/run.log",
+    "line_or_key": 2,
+    "sha256": "57e63d3f6c9a67af926b9f8f451ae2b4aa87d2379ef52c7e1a9243924324b4e1",
+    "tag": "REPORTED",
+    "value": "0.944%"
+  },
+  "e3-fetch-pct": {
+    "file": "evidence/scratch/wave6/claude-sci/e3/run.log",
+    "line_or_key": 3,
+    "sha256": "57e63d3f6c9a67af926b9f8f451ae2b4aa87d2379ef52c7e1a9243924324b4e1",
+    "tag": "REPORTED",
+    "value": "0.022%"
+  },
+  "e3-route-broad-pct": {
+    "file": "evidence/scratch/wave6/claude-sci/e3/run.log",
+    "line_or_key": 1,
+    "sha256": "57e63d3f6c9a67af926b9f8f451ae2b4aa87d2379ef52c7e1a9243924324b4e1",
+    "tag": "REPORTED",
+    "value": "4.356%"
+  },
+  "e3a-e-hnsw-31-50": {
+    "file": "evidence/scratch/wave6/claude-sci/hier/RESULT.md",
+    "line_or_key": 40,
+    "sha256": "e577ef0f71d69ee6f687079bffce66441619f3ed633a677a1a2e21ecd9578e37",
+    "tag": "OBSERVED",
+    "value": "31/50"
+  },
+  "e3a-fk-hnsw-34-50": {
+    "file": "evidence/scratch/wave6/claude-sci/hier/RESULT.md",
+    "line_or_key": 40,
+    "sha256": "e577ef0f71d69ee6f687079bffce66441619f3ed633a677a1a2e21ecd9578e37",
+    "tag": "OBSERVED",
+    "value": "34/50"
+  },
+  "e3b-bm25-41-50": {
+    "file": "evidence/scratch/wave6/claude-sci/hier/HIER-FINDING.md",
+    "line_or_key": 11,
+    "sha256": "d3af34951771c1789833b4dbeed3996bfccf238a3c870e7e689651c08c6805e4",
+    "tag": "OBSERVED",
+    "value": "41/50"
+  },
+  "e3b-minmax-40-50": {
+    "file": "evidence/scratch/wave6/claude-sci/hier/HIER-FINDING.md",
+    "line_or_key": 11,
+    "sha256": "d3af34951771c1789833b4dbeed3996bfccf238a3c870e7e689651c08c6805e4",
+    "tag": "REPORTED",
+    "value": "40/50",
+    "note": "retagged REPORTED 2026-11-07: hierarchy verifier took the score-fusion hit count (40) from the worker (HIER-FINDING.md line 14)"
+  },
+  "e3b-rrf-38-50": {
+    "file": "evidence/scratch/wave6/claude-sci/hier/HIER-FINDING.md",
+    "line_or_key": 11,
+    "sha256": "d3af34951771c1789833b4dbeed3996bfccf238a3c870e7e689651c08c6805e4",
+    "tag": "OBSERVED",
+    "value": "38/50"
+  },
+  "fc-caught-10": {
+    "file": "evidence/scratch/wave6/paper/evidence-fc/RESULT.md",
+    "line_or_key": "Headline: Checker caught 10",
+    "sha256": "bcee2ab877f478ffb32cfd7eaf89ab336c70035cefd05271ac27594becaf7477",
+    "tag": "REPORTED",
+    "value": "10"
+  },
+  "fc-controls-6": {
+    "file": "evidence/scratch/wave6/paper/evidence-fc/RESULT.md",
+    "line_or_key": "Controls 6/6 pass",
+    "sha256": "bcee2ab877f478ffb32cfd7eaf89ab336c70035cefd05271ac27594becaf7477",
+    "tag": "REPORTED",
+    "value": "6/6"
+  },
+  "fc-missed-8": {
+    "file": "evidence/scratch/wave6/paper/evidence-fc/RESULT.md",
+    "line_or_key": "Headline: missed 8",
+    "sha256": "bcee2ab877f478ffb32cfd7eaf89ab336c70035cefd05271ac27594becaf7477",
+    "tag": "REPORTED",
+    "value": "8"
+  },
+  "fc-seeded-18": {
+    "file": "evidence/scratch/wave6/paper/evidence-fc/RESULT.md",
+    "line_or_key": "Headline: Seeded faults: 18",
+    "sha256": "bcee2ab877f478ffb32cfd7eaf89ab336c70035cefd05271ac27594becaf7477",
+    "tag": "REPORTED",
+    "value": "18"
+  },
+  "fc-snapshot-85": {
+    "file": "evidence/scratch/wave6/paper/evidence-fc/RESULT.md",
+    "line_or_key": "11",
+    "sha256": "bcee2ab877f478ffb32cfd7eaf89ab336c70035cefd05271ac27594becaf7477",
+    "tag": "REPORTED",
+    "value": "85"
+  },
+  "h2h-depth-10": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/H2H-FINDING.md",
+    "line_or_key": "16",
+    "sha256": "ec162f0d51819ce311d11e553b28e23bca9f6d5f363dc614914a78bc2e33c9cd",
+    "tag": "REPORTED",
+    "value": "10"
+  },
+  "l1-partition-0-40": {
+    "file": "evidence/scratch/wave6/claude-sci/RULING-500M-REDO.md",
+    "line_or_key": 69,
+    "sha256": "75af2de32b8ade8a3e14f37e524cc3a15dc41328d0085f3b62c91b51504628cb",
+    "tag": "REPORTED",
+    "value": "0/40"
+  },
+  "l1-retract-334": {
+    "claim_as_written": "\"334 ms\"",
+    "file": "evidence/scratch/wave6/claude-sci/RULING-500M-REDO.md",
+    "line_or_key": 69,
+    "sha256": "75af2de32b8ade8a3e14f37e524cc3a15dc41328d0085f3b62c91b51504628cb",
+    "tag": "REPORTED",
+    "value": "334"
+  },
+  "l2-mt-141": {
+    "claim_as_written": "1.41x",
+    "file": "evidence/scratch/wave6/claude-sci/RULING-500M-REDO.md",
+    "line_or_key": 64,
+    "sha256": "75af2de32b8ade8a3e14f37e524cc3a15dc41328d0085f3b62c91b51504628cb",
+    "tag": "REPORTED",
+    "value": "1.41"
+  },
+  "l3-tau-0": {
+    "claim_as_written": "tau == 0",
+    "file": "evidence/scratch/wave6/claude-sci/FINDING-GUARD-MARGIN.md",
+    "line_or_key": 5,
+    "sha256": "0f7890a895487b29b1a9bd45b02b0b837e79f338f00149dbb6aab5622b980f71",
+    "tag": "OBSERVED",
+    "value": "0"
+  },
+  "l3-trivial-148-150": {
+    "file": "evidence/scratch/wave6/claude-sci/FINDING-GUARD-MARGIN.md",
+    "line_or_key": 12,
+    "sha256": "0f7890a895487b29b1a9bd45b02b0b837e79f338f00149dbb6aab5622b980f71",
+    "tag": "OBSERVED",
+    "value": "148/150"
+  },
+  "l3-veto-62": {
+    "claim_as_written": "~62 %",
+    "file": "evidence/scratch/wave6/claude-sci/FINDING-GUARD-MARGIN.md",
+    "line_or_key": 6,
+    "sha256": "0f7890a895487b29b1a9bd45b02b0b837e79f338f00149dbb6aab5622b980f71",
+    "tag": "OBSERVED",
+    "value": "62"
+  },
+  "l8-bm25-44-50": {
+    "claim_as_written": "\"44/50\"",
+    "file": "evidence/scratch/wave6/paper/positions/corrections.md",
+    "line_or_key": 2,
+    "sha256": "466a524fc5255db18fc02264a39f6895b4bf959715c005bec925956569f0a8a4",
+    "tag": "REPORTED",
+    "value": "44/50"
+  },
+  "l8-receipt-41-50": {
+    "file": "evidence/scratch/wave6/paper/positions/corrections.md",
+    "line_or_key": 2,
+    "sha256": "466a524fc5255db18fc02264a39f6895b4bf959715c005bec925956569f0a8a4",
+    "tag": "REPORTED",
+    "value": "41/50"
+  },
+  "memdisk-bm25-507": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/baselines-mirror/RESULTS.md",
+    "line_or_key": 75,
+    "sha256": "0d6f09952ac72d71960153562cd794f302ea176c0c9b1f9842683a9dafc24912",
+    "tag": "REPORTED",
+    "value": "507"
+  },
+  "memdisk-f32-1248": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/baselines-mirror/RESULTS.md",
+    "line_or_key": 70,
+    "sha256": "0d6f09952ac72d71960153562cd794f302ea176c0c9b1f9842683a9dafc24912",
+    "tag": "REPORTED",
+    "value": "1.248"
+  },
+  "memdisk-trace-2279": {
+    "claim_as_written": "~2.279 GB",
+    "file": "evidence/scratch/wave6/claude-sci/h2h/baselines-mirror/RESULTS.md",
+    "line_or_key": 72,
+    "sha256": "0d6f09952ac72d71960153562cd794f302ea176c0c9b1f9842683a9dafc24912",
+    "tag": "REPORTED",
+    "value": "2.279"
+  },
+  "mfid-merged-5050": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/baselines-mirror/RESULTS.md",
+    "line_or_key": 41,
+    "sha256": "0d6f09952ac72d71960153562cd794f302ea176c0c9b1f9842683a9dafc24912",
+    "tag": "REPORTED",
+    "value": "50/50"
+  },
+  "mfid-min-090": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/baselines-mirror/RESULTS.md",
+    "line_or_key": 25,
+    "sha256": "0d6f09952ac72d71960153562cd794f302ea176c0c9b1f9842683a9dafc24912",
+    "tag": "REPORTED",
+    "value": "0.90"
+  },
+  "mfid-n200": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/baselines-mirror/RESULTS.md",
+    "line_or_key": 23,
+    "sha256": "0d6f09952ac72d71960153562cd794f302ea176c0c9b1f9842683a9dafc24912",
+    "tag": "REPORTED",
+    "value": "200"
+  },
+  "mfid-sd-00122": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/baselines-mirror/RESULTS.md",
+    "line_or_key": 25,
+    "sha256": "0d6f09952ac72d71960153562cd794f302ea176c0c9b1f9842683a9dafc24912",
+    "tag": "REPORTED",
+    "value": "0.0122"
+  },
+  "old50-oracle-gain": {
+    "file": "evidence/scratch/wave6/paper/positions/corrections.md",
+    "line_or_key": "3",
+    "sha256": "466a524fc5255db18fc02264a39f6895b4bf959715c005bec925956569f0a8a4",
+    "tag": "REPORTED",
+    "value": "+2/50"
+  },
+  "ph-ovl-cut": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/POSTHOC-OVERLAP.md",
+    "line_or_key": "2",
+    "sha256": "8195882705b419c9e8c82b8184516442e076812e7da6143feeb800a3dbb7c7b3",
+    "tag": "VERIFIED",
+    "value": "0.45"
+  },
+  "ph-ovl-diff": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/POSTHOC-OVERLAP.md",
+    "line_or_key": "4",
+    "sha256": "8195882705b419c9e8c82b8184516442e076812e7da6143feeb800a3dbb7c7b3",
+    "tag": "VERIFIED",
+    "value": "+0.087 [0.051,0.124]"
+  },
+  "ph-ovl-n": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/POSTHOC-OVERLAP.md",
+    "line_or_key": "2",
+    "sha256": "8195882705b419c9e8c82b8184516442e076812e7da6143feeb800a3dbb7c7b3",
+    "tag": "VERIFIED",
+    "value": "897"
+  },
+  "pr4b-cut045": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 173,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "0.45"
+  },
+  "pr4b-ov-ci": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 173,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "[+0.051,+0.123]"
+  },
+  "pr4b-ov-diff": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 173,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "+0.087"
+  },
+  "pr4b-pub-ci": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 241,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "[0.051,0.124]"
+  },
+  "pr4b-pub-diff": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 241,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "+0.087"
+  },
+  "pr4b-t0": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 182,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "0.221"
+  },
+  "pr4b-t1": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 183,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "0.815"
+  },
+  "pr4b-t2": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 184,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "0.869"
+  },
+  "pr4b-x2d": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 198,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "+0.093"
+  },
+  "pr4b-x2d-ci": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 198,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "[+0.029,+0.156]"
+  },
+  "pr4b-x3-ci": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 213,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "[-0.050,+0.050]"
+  },
+  "pr4b-x3-d": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 213,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "+0.000"
+  },
+  "pr4b-x3-mrr": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 215,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "+0.123"
+  },
+  "pr4b-x3-mrr-ci": {
+    "file": "evidence/coord/outbox/paired-reanalysis-v1.result.md",
+    "line_or_key": 215,
+    "sha256": "291ae7f1bbd526ca3189e24590b54df8c0af51f68246124f270bba5f342204aa",
+    "tag": "REPORTED",
+    "value": "[+0.076,+0.170]"
+  },
+  "rows-1600": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/baselines-mirror/RESULTS.md",
+    "line_or_key": 64,
+    "sha256": "0d6f09952ac72d71960153562cd794f302ea176c0c9b1f9842683a9dafc24912",
+    "tag": "REPORTED",
+    "value": "1600"
+  },
+  "rows-203137": {
+    "claim_as_written": "203,137",
+    "file": "evidence/scratch/wave6/claude-sci/h2h/baselines-mirror/RESULTS.md",
+    "line_or_key": 64,
+    "sha256": "0d6f09952ac72d71960153562cd794f302ea176c0c9b1f9842683a9dafc24912",
+    "tag": "REPORTED",
+    "value": "203137"
+  },
+  "sealed50-g-26": {
+    "file": "evidence/scratch/wave2/sealed-eval-stage2b-v1/metrics-report.txt",
+    "line_or_key": 18,
+    "sha256": "092da4856d110d02743dc044404112c1d8189472a37d6a928fd41c8b8d917543",
+    "tag": "OBSERVED",
+    "value": "26",
+    "note": "Legend: in metrics-report.txt line 18, G is the routed dense (guided) arm; 26 = 21 + 5. Legend recorded from sealed-eval-stage2b-v1/EVAL-STAGE2B.md; reproduction of the frozen protocol, no superiority claim."
+  },
+  "sealed50-k-41": {
+    "file": "evidence/scratch/wave2/sealed-eval-stage2b-v1/metrics-report.txt",
+    "line_or_key": 17,
+    "sha256": "092da4856d110d02743dc044404112c1d8189472a37d6a928fd41c8b8d917543",
+    "tag": "OBSERVED",
+    "value": "41",
+    "note": "Legend: in metrics-report.txt line 17, K is the keyword (BM25) arm; columns are correct, wrong, no-answer counts (41 = 32 + 9). Legend recorded from sealed-eval-stage2b-v1/EVAL-STAGE2B.md; reproduction of the frozen protocol, no superiority claim."
+  },
+  "x0-n": {
+    "file": "evidence/scratch/wave6/paper/x0/X0-REPORT.md",
+    "line_or_key": 3,
+    "sha256": "4dbc5e9715bf9cf456978da3eb4f9a9d78b066a0770c4c4c7892275cc170a203",
+    "tag": "REPORTED",
+    "value": "555"
+  },
+  "x1-ci": {
+    "file": "evidence/scratch/wave6/claude-sci/x1/vm/RESULT.md",
+    "line_or_key": 19,
+    "note": "hand x1-headroom result, recomputed by claude-sci (independently re-derived by the VM hands cs-vm-evidence-recompute-v1, cs-vm-bootstrap-recompute-v1 and cs-vm-stage-sign-tests-v1; read-only mirror evidence-vm/x1-recompute/cs-vm-bootstrap-recompute-v1.numbers.tsv rows 2-3 (x1-gap-lo 0.04383, x1-gap-hi 0.09394, MATCH at seed 20261109; the cs-vm-evidence-recompute-v1.numbers.tsv row 103 could not recompute it without numpy))",
+    "sha256": "492c12c17d22a0d013abef7033703f3d95903f51746a4ccb3e3efa29dd8aad6d",
+    "tag": "OBSERVED",
+    "value": "[0.044, 0.094]"
+  },
+  "x1-gap": {
+    "file": "evidence/scratch/wave6/claude-sci/x1/vm/RESULT.md",
+    "line_or_key": 19,
+    "note": "hand x1-headroom result, recomputed by claude-sci (independently re-derived by the VM hands cs-vm-evidence-recompute-v1, cs-vm-bootstrap-recompute-v1 and cs-vm-stage-sign-tests-v1; read-only mirror evidence-vm/x1-recompute/cs-vm-evidence-recompute-v1.numbers.tsv row 102 (x1-gap, MATCH))",
+    "sha256": "492c12c17d22a0d013abef7033703f3d95903f51746a4ccb3e3efa29dd8aad6d",
+    "tag": "OBSERVED",
+    "value": "+0.068"
+  },
+  "x1-mm-d": {
+    "file": "evidence/scratch/wave6/claude-sci/x1/vm/RESULT.md",
+    "line_or_key": 21,
+    "note": "hand x1-headroom result, recomputed by claude-sci (independently re-derived by the VM hands cs-vm-evidence-recompute-v1, cs-vm-bootstrap-recompute-v1 and cs-vm-stage-sign-tests-v1; read-only mirror evidence-vm/x1-recompute/cs-vm-evidence-recompute-v1.numbers.tsv row 105 (x1-x2-MM, MATCH) and cs-vm-stage-sign-tests-v1.SIGN.md row x1-MM at line 88)",
+    "sha256": "492c12c17d22a0d013abef7033703f3d95903f51746a4ccb3e3efa29dd8aad6d",
+    "tag": "OBSERVED",
+    "value": "+0.054"
+  },
+  "x1-pd-d": {
+    "file": "evidence/scratch/wave6/claude-sci/x1/vm/RESULT.md",
+    "line_or_key": 22,
+    "note": "hand x1-headroom result, recomputed by claude-sci (independently re-derived by the VM hands cs-vm-evidence-recompute-v1, cs-vm-bootstrap-recompute-v1 and cs-vm-stage-sign-tests-v1; read-only mirror evidence-vm/x1-recompute/cs-vm-evidence-recompute-v1.numbers.tsv row 106 (x1-x2-PD, MATCH))",
+    "sha256": "492c12c17d22a0d013abef7033703f3d95903f51746a4ccb3e3efa29dd8aad6d",
+    "tag": "OBSERVED",
+    "value": "+0.013"
+  },
+  "x1-rrf-d": {
+    "file": "evidence/scratch/wave6/claude-sci/x1/vm/RESULT.md",
+    "line_or_key": 20,
+    "note": "hand x1-headroom result, recomputed by claude-sci (independently re-derived by the VM hands cs-vm-evidence-recompute-v1, cs-vm-bootstrap-recompute-v1 and cs-vm-stage-sign-tests-v1; read-only mirror evidence-vm/x1-recompute/cs-vm-evidence-recompute-v1.numbers.tsv row 104 (x1-x2-RRF, MATCH))",
+    "sha256": "492c12c17d22a0d013abef7033703f3d95903f51746a4ccb3e3efa29dd8aad6d",
+    "tag": "OBSERVED",
+    "value": "+0.059"
+  },
+  "x1-style2": {
+    "file": "evidence/scratch/wave6/claude-sci/x1/vm/RESULT.md",
+    "line_or_key": 24,
+    "note": "hand x1-headroom result, recomputed by claude-sci (independently re-derived by the VM hands cs-vm-evidence-recompute-v1, cs-vm-bootstrap-recompute-v1 and cs-vm-stage-sign-tests-v1; read-only mirror evidence-vm/x1-recompute/cs-vm-evidence-recompute-v1.numbers.tsv rows 108-109 (x1-rev s2=B, x1-dev-s2 B 0.9420 over D 0.8696, MATCH))",
+    "sha256": "492c12c17d22a0d013abef7033703f3d95903f51746a4ccb3e3efa29dd8aad6d",
+    "tag": "OBSERVED",
+    "value": "style2=B"
+  },
+  "num-shards-4": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/baselines-mirror/RESULTS.md",
+    "line_or_key": 9,
+    "sha256": "0d6f09952ac72d71960153562cd794f302ea176c0c9b1f9842683a9dafc24912",
+    "tag": "REPORTED",
+    "value": "4",
+    "note": "sealed-store shard count; line 9 states '812,545 units (4 shards x ~203k)'"
+  },
+  "num-five-sets-5": {
+    "file": "evidence/scratch/wave6/paper/evidence-cfuse/c-fuse-5/OWN-CHECK.md",
+    "line_or_key": 6,
+    "sha256": "5d2812c93b2b1a43ba4c681e3e35e1d61f6d35dc63d66fee937bda507a925bce",
+    "tag": "REPORTED",
+    "value": "5",
+    "note": "five-set post-hoc frame (X0,XG,X2H,XF,X2M); line 6 ends '(post-hoc, n=5, no test)'"
+  },
+  "num-ci-zero-0": {
+    "file": "evidence/scratch/wave6/claude-sci/x3/PREREG15-CFUSE-S6.md",
+    "line_or_key": 17,
+    "sha256": "46c489c6c156a7c9518022a7cbcb29d6bcc4e3625bd7b0ca8bac346b13ecc740",
+    "tag": "REPORTED",
+    "value": "0",
+    "note": "clearance rule 'lower CIs > 0' (same line as bar-hit/bar-mrr, which use tag VERIFIED; REPORTED used per task spec)"
+  },
+  "num-thread-1": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/H2H-FINDING.md",
+    "line_or_key": 7,
+    "sha256": "ec162f0d51819ce311d11e553b28e23bca9f6d5f363dc614914a78bc2e33c9cd",
+    "tag": "REPORTED",
+    "value": "1",
+    "note": "latency-measurement thread count; line 7 states '(search only, 1 thread)'"
+  },
+  "numd-verbatim-10": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": "23",
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "10"
+  },
+  "numd-plan100-100": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": "22",
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "100"
+  },
+  "numd-fiqa7-7": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": "24",
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "7"
+  },
+  "numd-scifact24-24": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": "24",
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "24"
+  },
+  "numd-nf90-90": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": "24",
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "90"
+  },
+  "numd-nf28-28": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": "24",
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "28"
+  },
+  "numd-nf97-97": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": "24",
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "97"
+  },
+  "numd-nf55-55": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": "24",
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "55"
+  },
+  "numd-stand95-95": {
+    "file": "evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.md",
+    "line_or_key": "24",
+    "sha256": "6a4434c26ab20e7e6ffa2876b5e02fcec3c59e498342a731b74f4a57de7ef249",
+    "tag": "REPORTED",
+    "value": "95"
+  },
+  "numd-shards-4": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/baselines-mirror/RESULTS.md",
+    "line_or_key": "9",
+    "sha256": "0d6f09952ac72d71960153562cd794f302ea176c0c9b1f9842683a9dafc24912",
+    "tag": "REPORTED",
+    "value": "4"
+  },
+  "numd-thread-1": {
+    "file": "evidence/scratch/wave6/claude-sci/h2h/H2H-FINDING.md",
+    "line_or_key": "7",
+    "sha256": "ec162f0d51819ce311d11e553b28e23bca9f6d5f363dc614914a78bc2e33c9cd",
+    "tag": "REPORTED",
+    "value": "1"
+  },
+  "numd-combos-4": {
+    "file": "evidence/scratch/wave6/claude-sci/x1/vm/RESULT.md",
+    "line_or_key": "71",
+    "sha256": "492c12c17d22a0d013abef7033703f3d95903f51746a4ccb3e3efa29dd8aad6d",
+    "tag": "REPORTED",
+    "value": "4"
+  },
+  "dt-five-cleared-3": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/tally-five-sets.txt",
+    "line_or_key": 12,
+    "sha256": "bec3c4376e98b750ec12aefbff3583a1e60cf29934a8efc6c0b176cb9eed6a99",
+    "tag": "REPORTED",
+    "value": "3",
+    "note": "count recomputed by script from the source files listed (with hashes) at the head of the tally file"
+  },
+  "dt-five-missed-2": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/tally-five-sets.txt",
+    "line_or_key": 12,
+    "sha256": "bec3c4376e98b750ec12aefbff3583a1e60cf29934a8efc6c0b176cb9eed6a99",
+    "tag": "REPORTED",
+    "value": "2",
+    "note": "count recomputed by script from the source files listed (with hashes) at the head of the tally file"
+  },
+  "dt-x1-add-2": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/tally-x1-combos.txt",
+    "line_or_key": 7,
+    "sha256": "99fef3c6b04be69dcf3a9db52bc4efd52cdbd295ea0166952d43355130e1b343",
+    "tag": "REPORTED",
+    "value": "2",
+    "note": "count recomputed by script from the source files listed (with hashes) at the head of the tally file"
+  },
+  "dt-x1-nodiff-2": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/tally-x1-combos.txt",
+    "line_or_key": 7,
+    "sha256": "99fef3c6b04be69dcf3a9db52bc4efd52cdbd295ea0166952d43355130e1b343",
+    "tag": "REPORTED",
+    "value": "2",
+    "note": "count recomputed by script from the source files listed (with hashes) at the head of the tally file"
+  },
+  "dt-e1-short-1": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/tally-e1-tenfold.txt",
+    "line_or_key": 8,
+    "sha256": "18a9a7665a48f6c43210807f77243f399b153c2d855211c6e1531821136f89e8",
+    "tag": "OBSERVED",
+    "value": "1",
+    "note": "count recomputed by script from the source files listed (with hashes) at the head of the tally file"
+  },
+  "dt-e1-wrong-1": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/tally-e1-shipped-wrong.txt",
+    "line_or_key": 8,
+    "sha256": "cbcd36c60e3b48a73f33864033b8b8cec894c78a66a148c81e0865e03007c965",
+    "tag": "OBSERVED",
+    "value": "1",
+    "note": "count recomputed by script from the source files listed (with hashes) at the head of the tally file"
+  },
+  "dt-e3-sum-1": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/tally-e3-strict-sum.txt",
+    "line_or_key": 6,
+    "sha256": "24bfa5bde7a30c9dfe44ecd35c01fb6f5c30d82e701cbb501599512555cce3d1",
+    "tag": "OBSERVED",
+    "value": "1",
+    "note": "count recomputed by script from the source files listed (with hashes) at the head of the tally file"
+  },
+  "lat-engine-888": {
+    "file": "evidence/scratch/wave6/paper/evidence-vm/latency-profile-r2/vm-trace-latency-profile-v1-r2.result.md",
+    "line_or_key": 13,
+    "sha256": "a6d9344841a093f9f03c812004564770daf39800a4aeaaf68c945efdac09d14e",
+    "tag": "REPORTED",
+    "value": "88.8",
+    "note": "share of guided query time in engine child wall (4 shard processes, sequential); stage timers 88.8, wall samples 91.2; VM hand summary, contended machine"
+  },
+  "lat-engine-912": {
+    "file": "evidence/scratch/wave6/paper/evidence-vm/latency-profile-r2/vm-trace-latency-profile-v1-r2.result.md",
+    "line_or_key": 13,
+    "sha256": "a6d9344841a093f9f03c812004564770daf39800a4aeaaf68c945efdac09d14e",
+    "tag": "REPORTED",
+    "value": "91.2",
+    "note": "share of guided query time in engine child wall (4 shard processes, sequential); stage timers 88.8, wall samples 91.2; VM hand summary, contended machine"
+  },
+  "d3-ratio-5p0": {
+    "file": "evidence/scratch/wave6/paper/evidence-vm/d3-5m-r5/d3-5p0m-v1-r5.result.md",
+    "line_or_key": 173,
+    "sha256": "a8d51d768757e87c86a2a4b18fe32f68d4cf3fd1979f391542901d59a8ef0632",
+    "tag": "OBSERVED",
+    "value": "0.1721",
+    "note": "VM hand d3-5p0m-v1-r5 COMPLETE result line 173 (1564852224/9091145728); copy of coord/outbox/d3-5p0m-v1-r5.result.md sha a8d51d76; ratio recomputed by me from raw_h_mem.jsonl and raw_t_mem.jsonl = 0.17214; I recall 0.6049 and I-R 0.9490 also recomputed by me from raw ret files vs gt_top10 (read-only on VM); also independently recomputed 0.172129 from raw files by cs-vm-d3-ratio-recompute-v1 and by cs-vm-d3-small-point-locate-v1 (read-only mirror evidence-vm/d3-small-point/ratio.json S3)"
+  },
+  "d3-add2-n5": {
+    "file": "evidence/scratch/wave6/paper/evidence-vm/d3-addendum-2/PREREG6-ADDENDUM-2.md",
+    "line_or_key": 2,
+    "sha256": "a4edb7245755332e397baba63270ef2571471374ef4d06c38c004d458c9d0c24",
+    "tag": "REPORTED",
+    "note": "CHANGE 1 of PREREG6 addendum 2, read directly in a read-only copy from the VM lease d3-5p0m-v1 (sha a4edb724; the VM file has the same sha). A plan text is quoted, not recomputed, so REPORTED.",
+    "value": "5,000,000"
+  },
+  "d3-add2-n7": {
+    "file": "evidence/scratch/wave6/paper/evidence-vm/d3-addendum-2/PREREG6-ADDENDUM-2.md",
+    "line_or_key": 2,
+    "sha256": "a4edb7245755332e397baba63270ef2571471374ef4d06c38c004d458c9d0c24",
+    "tag": "REPORTED",
+    "note": "CHANGE 1 of PREREG6 addendum 2, read directly in a read-only copy from the VM lease d3-5p0m-v1 (sha a4edb724; the VM file has the same sha). A plan text is quoted, not recomputed, so REPORTED.",
+    "value": "7,133,906"
+  },
+  "r21-failed-predictions": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/runner21/prediction-tally.json",
+    "line_or_key": "failed_word",
+    "sha256": "7f023243fc7dbe033b4c47b8df92c7dcaf2a9a7751f2aed6010683a3dfdc5aca",
+    "tag": "REPORTED",
+    "value": "Two",
+    "note": "Runner 21 recount from retained, hash-pinned inputs. Run evidence-derived/runner21/derive_receipts.py --raw evidence-derived/runner21/raw --pins evidence-derived/runner21/raw-pins.json --out a fresh temporary directory and compare outputs. No new experiment or historical freeze attestation; old receipt labels unchanged."
+  },
+  "r21-overlap-documents": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/runner21/document-overlap.json",
+    "line_or_key": "shared_unused_docs_word",
+    "sha256": "95127b4b71215e26cdd7d3ce86730694c419a83e4c668b8fcb15e4222c3ffde9",
+    "tag": "REPORTED",
+    "value": "four",
+    "note": "Runner 21 recount from retained, hash-pinned inputs. Run evidence-derived/runner21/derive_receipts.py --raw evidence-derived/runner21/raw --pins evidence-derived/runner21/raw-pins.json --out a fresh temporary directory and compare outputs. No new experiment or historical freeze attestation; old receipt labels unchanged."
+  },
+  "r21-interval-unit": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/runner21/reproduction-tally.json",
+    "line_or_key": "abs_third_dec_units_word",
+    "sha256": "a7d49239d4efe01758581e6549f860edaf9c642816a3f0842a6137ad3c13f032",
+    "tag": "REPORTED",
+    "value": "one",
+    "note": "Runner 21 recount from retained, hash-pinned inputs. Run evidence-derived/runner21/derive_receipts.py --raw evidence-derived/runner21/raw --pins evidence-derived/runner21/raw-pins.json --out a fresh temporary directory and compare outputs. No new experiment or historical freeze attestation; old receipt labels unchanged."
+  },
+  "r21-identical-analyses": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/runner21/reproduction-tally.json",
+    "line_or_key": "identical_analyses_word",
+    "sha256": "a7d49239d4efe01758581e6549f860edaf9c642816a3f0842a6137ad3c13f032",
+    "tag": "REPORTED",
+    "value": "three",
+    "note": "Runner 21 recount from retained, hash-pinned inputs. Run evidence-derived/runner21/derive_receipts.py --raw evidence-derived/runner21/raw --pins evidence-derived/runner21/raw-pins.json --out a fresh temporary directory and compare outputs. No new experiment or historical freeze attestation; old receipt labels unchanged."
+  },
+  "r21-x0-dev-rows": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/runner21/query-split.json",
+    "line_or_key": "dev_words",
+    "sha256": "a6bcb3c04b568897a0b757114d1445255545e88eaf21bccd7d7e2eda6adce093",
+    "tag": "REPORTED",
+    "value": "one hundred sixty-seven",
+    "note": "Runner 21 recount from retained, hash-pinned inputs. Run evidence-derived/runner21/derive_receipts.py --raw evidence-derived/runner21/raw --pins evidence-derived/runner21/raw-pins.json --out a fresh temporary directory and compare outputs. No new experiment or historical freeze attestation; old receipt labels unchanged."
+  },
+  "r21-x0-test-rows": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/runner21/query-split.json",
+    "line_or_key": "test_words",
+    "sha256": "a6bcb3c04b568897a0b757114d1445255545e88eaf21bccd7d7e2eda6adce093",
+    "tag": "REPORTED",
+    "value": "three hundred eighty-eight",
+    "note": "Runner 21 recount from retained, hash-pinned inputs. Run evidence-derived/runner21/derive_receipts.py --raw evidence-derived/runner21/raw --pins evidence-derived/runner21/raw-pins.json --out a fresh temporary directory and compare outputs. No new experiment or historical freeze attestation; old receipt labels unchanged."
+  },
+  "r21-x0-styles": {
+    "file": "evidence/scratch/wave6/paper/evidence-derived/runner21/query-split.json",
+    "line_or_key": "style_count_word",
+    "sha256": "a6bcb3c04b568897a0b757114d1445255545e88eaf21bccd7d7e2eda6adce093",
+    "tag": "REPORTED",
+    "value": "three",
+    "note": "Runner 21 recount from retained, hash-pinned inputs. Run evidence-derived/runner21/derive_receipts.py --raw evidence-derived/runner21/raw --pins evidence-derived/runner21/raw-pins.json --out a fresh temporary directory and compare outputs. No new experiment or historical freeze attestation; old receipt labels unchanged."
+  }
+}

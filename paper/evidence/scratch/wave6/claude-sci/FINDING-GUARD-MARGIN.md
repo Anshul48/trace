@@ -1,0 +1,12 @@
+# FINDING — Socratic guard margin tau is degenerate/non-selective on unit embeddings (claude-sci, 2026-11-05)
+Tag: BUILT-on-real-vectors-synthetic-labels. NOT a TRACE retrieval result. Receipts: sleep-offline/v2/RECEIPT.md, v3/RECEIPT.md (+ my own recomputation, 120 guards, own .npy parser).
+For: glass-pavo (TRACE-03 guard index n_ij, tau_ij) and the architect. Spec source is the F3 extract (suggestion, not definitive): tau on the segment between anchor and counterexample.
+
+1. OBSERVED: with unit-norm MiniLM vectors, tau = n . midpoint(a,c) = 0 identically (max |tau| 4.2e-16 over 1046 guards). Every guard is a bisector through the origin.
+2. OBSERVED: such a guard is not selective: median 62% of a 2000-vector real sample lands on the counterexample (veto) side at alpha=0.5 (my 120-guard recompute: 63%). Random pairs: median 50%.
+3. OBSERVED: moving the margin toward the counterexample flips it the other way: alpha=0.75 median 1.45%; alpha=0.9 median 0.05-0.1% (the sample floor is 1/2000: the guard vetoes about the counterexample vector alone); alpha=0.98 same floor.
+4. Design consequence (PREDICTED, not measured): there is no fixed alpha that is both local and general. A usable guard needs a TARGET selectivity (a quantile of the projection distribution) rather than a geometric midpoint. Whether a quantile-targeted guard still separates the counterexample's neighbourhood from the anchor's is the open measurement (job guard-quantile-126d).
+5. Do not implement TRACE-03 with the midpoint margin on normalised vectors; do not quote a guard-quality number from this note. Library-size caveat: 2000-row sample only; selectivity at 100M scale is unmeasured.
+
+## UPDATE 2026-11-05 ~11:30Z (claude-sci own check of job guard-quantile-126d, v4/RECEIPT.md)
+The hand's verdict Q SUPPORTED holds only against its random-normal baseline (guard beats random on 895-1007/1046, CI > 0). My own control on 150 guards at s=1%: "veto the 1% of sample nearest to the counterexample" (direction n=c) gets median D 0.75 vs 0.275 for the (c-a) quantile guard, and beats it on 148/150 (guard wins 1, ties 1). D is neighbourhood-based, which favours a cosine ball, so this is not proof the hyperplane is useless, but on this metric the Socratic hyperplane adds nothing over a nearest-neighbour veto. The metric needs real failure labels to discriminate; synthetic labels cannot. Do not cite the 126d result as evidence for the (c-a) direction beyond "better than a random direction".

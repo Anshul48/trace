@@ -1,0 +1,7 @@
+# sha256 492c12c17d22a0d013abef7033703f3d95903f51746a4ccb3e3efa29dd8aad6d /home/anshul/owner-hub/scratch/wave6/claude-sci/x1/vm/RESULT.md
+# rule: count X2 verdict strings; FUSION ADDS iff corrected sign test significant (p_Holm<0.05)
+RRF vs D: +0.059, p_Holm=0.001818 -> FUSION ADDS
+MM vs D: +0.054, p_Holm=0.0001969 -> FUSION ADDS
+PD vs D: +0.013, p_Holm=0.5758 -> NO DETECTABLE DIFFERENCE
+G vs D: -0.036, p_Holm=0.2177 -> NO DETECTABLE DIFFERENCE
+add: 2 of 4 combos; no-difference: 2
