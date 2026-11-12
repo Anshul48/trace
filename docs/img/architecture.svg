@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img">
 <title>TRACE architecture: sealed store, routing, exact scoring, and use feeding back</title>
 <rect width="1200" height="675" fill="#ffffff"/>
-<text x="80" y="88" font-size="22" letter-spacing="4" fill="#14324f" font-family="sans-serif" font-weight="bold">TRACE · SELF-ORGANISING MEMORY</text>
-<text x="80" y="150" font-size="54" fill="#14324f" font-family="sans-serif" font-weight="bold">How TRACE is built to work</text>
+<text x="80" y="88" font-size="22" letter-spacing="4" fill="#14324f" font-family="sans-serif" font-weight="bold">TRACE · MEMORY STORE FOR CODING AGENTS</text>
+<text x="80" y="150" font-size="54" fill="#14324f" font-family="sans-serif" font-weight="bold">How a TRACE search works</text>
 
 <!-- card 1: the store -->
 <rect x="80" y="200" width="240" height="330" rx="14" fill="#ffffff" stroke="#14324f" stroke-width="2"/>
