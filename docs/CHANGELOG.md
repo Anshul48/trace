@@ -12,6 +12,8 @@ status table. No change to the tested engine: `freeze-src/` is untouched and
   roadmap pointer. Loss-first section, quickstart, checks, benchmarks and
   limitations unchanged.
 - New `docs/ROADMAP.md`: the design direction in one page; design, not promises.
+- New `paper/checkable-memory-for-agents.pdf`: the final preprint, linked from
+  the README (link line, roadmap, file index).
 - `receipts/filed-summaries/`: two internal identifiers redacted in place
   (same line numbers; hashes below updated), so no working-tree path or worker
   name ships in the repo.

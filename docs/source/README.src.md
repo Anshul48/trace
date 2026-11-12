@@ -2,10 +2,10 @@
 <!-- GENERATED from docs/source/README.src.md by tools/build_site.py. Edit the source, then run: python3 tools/build_site.py -->
 # TRACE
 
-**A memory database for agents that organizes itself: the store reshapes with use, and slow deliberate work compiles into fast structure. What runs today is a sealed, checkable store; the self-organizing parts are experimental or design only. This README says which is which.**
+**A memory database for coding agents, becoming a store that organizes itself: use reshaping structure, slow deliberate work compiling into fast replay. What runs today is a sealed, checkable store; self-organizing memory is the design goal, not yet tested. This README says which is which.**
 
-Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.github.io/trace/explorer/)** (no install) · [Benchmarks](BENCHMARKS.md) · [FAQ](docs/FAQ.md) · [How it works](docs/EXPLAINER.md) · [Roadmap](docs/ROADMAP.md) · {{film}}
-<!-- PAPER-LINK: once the preprint is public, add a Paper link (the Zenodo DOI URL) to the line above, then rebuild with tools/build_site.py -->
+Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.github.io/trace/explorer/)** (no install) · [Paper](paper/checkable-memory-for-agents.pdf) · [Benchmarks](BENCHMARKS.md) · [FAQ](docs/FAQ.md) · [How it works](docs/EXPLAINER.md) · [Roadmap](docs/ROADMAP.md) · {{film}}
+<!-- PAPER: in-repo PDF linked above; swap to the Zenodo DOI URL once the preprint is public, then rebuild with tools/build_site.py -->
 
 <p align="center">
   <a href="https://anshul48.github.io/trace/explorer/"><img src="docs/img/explorer.png" alt="The TRACE explorer: a replay of real searches, each result with a checkable record. The page says it is a replay and that no search is running live." width="100%"></a>
@@ -111,7 +111,7 @@ Design direction, not promises: no dates, and most of it does not exist yet. Ful
 - **A download of the whole library**, so anyone can re-run the 100M numbers. Not built.
 - **A resident search server** (open each part once, answer many questions). Designed; no speed number is claimed for it.
 - **TRACE on public benchmarks** (BEIR first) with full-run records, and **an outside check** of our numbers.
-- **A preprint**, "Checkable memory for agents: work reduction, provenance, and where guided dense retrieval falls short", on the audit method and these results (in preparation; the PDF will be linked here once final).
+- **A preprint**, ["Checkable memory for agents: an audit of what an agent-built memory store can honestly claim"](paper/checkable-memory-for-agents.pdf), on the audit method and these results.
 
 ## The ecosystem
 
@@ -130,6 +130,7 @@ ANIMA is a prototype for one job type (fix a bug, judged by a hidden checker). I
 | Destination | What lives there |
 |---|---|
 | [BENCHMARKS.md](BENCHMARKS.md) | Every number, its scope and its record. |
+| [Paper](paper/checkable-memory-for-agents.pdf) | The preprint: what an agent-built memory store can honestly claim. |
 | [docs/EXPLAINER.md](docs/EXPLAINER.md) · [docs/FAQ.md](docs/FAQ.md) | The 10-minute walkthrough and the hard questions. |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Where the design is headed; design, not promises. |
 | [Checkable records](receipts/) | The records of our runs: the qualification run, the earlier larger builds, the order measurement, the [filed summaries](receipts/filed-summaries/README.md). |
