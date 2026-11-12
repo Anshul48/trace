@@ -2,9 +2,9 @@
 <!-- GENERATED from docs/source/README.src.md by tools/build_site.py. Edit the source, then run: python3 tools/build_site.py -->
 # TRACE
 
-**Meaning-based search over a sealed 100M-token library, where every result carries a record you can check. It is slower than a standard index, and this README says so before anything else.**
+**A memory database for agents that organizes itself: the store reshapes with use, and slow deliberate work compiles into fast structure. What runs today is a sealed, checkable store; the self-organizing parts are experimental or design only. This README says which is which.**
 
-Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.github.io/trace/explorer/)** (no install) · [Benchmarks](BENCHMARKS.md) · [FAQ](docs/FAQ.md) · [How it works](docs/EXPLAINER.md) · [Watch the working films](https://anshul48.github.io/trace/demos/)
+Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.github.io/trace/explorer/)** (no install) · [Benchmarks](BENCHMARKS.md) · [FAQ](docs/FAQ.md) · [How it works](docs/EXPLAINER.md) · [Roadmap](docs/ROADMAP.md) · [Watch the working films](https://anshul48.github.io/trace/demos/)
 <!-- PAPER-LINK: once the preprint is public, add a Paper link (the Zenodo DOI URL) to the line above, then rebuild with tools/build_site.py -->
 
 <p align="center">
@@ -13,6 +13,28 @@ Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.githu
 <!-- GIF-SLOT: replace the screenshot above with docs/img/explorer-lit.gif (8-12 s, a question lights a few groups) when the cut is delivered. Keep the link and the alt text. -->
 
 *The explorer replays real searches we ran on our server. No search runs live behind it.* [60-second tour (video)](docs/media/tour-60s.mp4).
+
+## What TRACE is becoming
+
+The design we are building toward, in four parts:
+
+- **A self-organizing ontology.** The library is broken into small atoms of meaning; atoms gather into clusters, clusters gather under centroids, and every atom keeps its links upward. The same atom can belong to more than one parent, and use reshapes the structure: travelled edges gain energy, unused ones decay.
+- **A plastic layer.** Outcomes strengthen or weaken links, with rollback when a change hurts. Small toys only so far.
+- **Sleep consolidation.** Offline replay that compresses, distills and decays the store, behind a commit gate that can reject a bad proposal. Designed; a benefit is shown nowhere yet.
+- **System 2 to System 1 trace-to-skill.** Slow, correct, deliberate work is recorded, verified, and compiled into fast structure that replays without the slow path. As a capability this is not shown anywhere yet.
+
+## Status: what runs, what is experimental, what is design
+
+| Area | State | Evidence |
+|---|---|---|
+| Sealed store: 812,545 passages / 99,891,846 tokens, fingerprinted | Runs today | Quickstart below, [BENCHMARKS.md](BENCHMARKS.md) |
+| Routed dense search: 0.79% of rows scored in one of four parts, 0.9985 of exact search's top ten kept | Runs today | [B1, B2](BENCHMARKS.md#b-what-the-method-does) |
+| Receipts and audit tooling: frozen-code check, receipt gates, small reproduction | Runs today | The three check commands below |
+| Benchmark numbers: 50 searches, our library, our server | Runs today, self-measured | [BENCHMARKS.md](BENCHMARKS.md) |
+| Bottom-up organiser v1: module agreement 0.27 against 0.30 for k-means told K, on real code | Experimental | Reported 12 Nov; record not yet filed in this repo |
+| Skill compile on one card series: 23 of 23 shadow match, one series only | Experimental | Reported 12 Nov; record not yet filed in this repo |
+| Plastic layer beyond toys, sleep with measured benefit, society of cortexes, ontology at scale | Design only | [docs/ROADMAP.md](docs/ROADMAP.md) |
+| Resident server, whole-library download, public benchmarks, outside check | Not built | [docs/ROADMAP.md](docs/ROADMAP.md) |
 
 ## Where it loses (read this first)
 
@@ -83,13 +105,13 @@ More in the [FAQ](docs/FAQ.md) and in [BENCHMARKS.md, "Not measured"](BENCHMARKS
 
 ## Roadmap
 
-Planned or under way. None of this exists today, and there are no dates.
+Design direction, not promises: no dates, and most of it does not exist yet. Full page: **[docs/ROADMAP.md](docs/ROADMAP.md)**.
 
+- **The self-organizing store**: ontology, organiser, top-down prediction, plastic layer, sleep, trace-to-skill. Experimental pieces and design; see the status table above.
 - **A download of the whole library**, so anyone can re-run the 100M numbers. Not built.
 - **A resident search server** (open each part once, answer many questions). Designed; no speed number is claimed for it.
-- **Publishing the C engine source** into this repository. Under consideration.
 - **TRACE on public benchmarks** (BEIR first) with full-run records, and **an outside check** of our numbers.
-- **A preprint**, "Checkable memory for agents", on the audit method and these results (in preparation).
+- **A preprint**, "Checkable memory for agents: work reduction, provenance, and where guided dense retrieval falls short", on the audit method and these results (in preparation; the PDF will be linked here once final).
 
 ## The ecosystem
 
@@ -109,6 +131,7 @@ ANIMA is a prototype for one job type (fix a bug, judged by a hidden checker). I
 |---|---|
 | [BENCHMARKS.md](BENCHMARKS.md) | Every number, its scope and its record. |
 | [docs/EXPLAINER.md](docs/EXPLAINER.md) · [docs/FAQ.md](docs/FAQ.md) | The 10-minute walkthrough and the hard questions. |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Where the design is headed; design, not promises. |
 | [Checkable records](receipts/) | The records of our runs: the qualification run, the earlier larger builds, the order measurement, the [filed summaries](receipts/filed-summaries/README.md). |
 | [Reproduce](https://anshul48.github.io/trace/verify/) | The commands that re-check the code and the records, and a [small reproduction](docs/reproduction/repro-20k/README.md). |
 | [Architecture](docs/ARCHITECTURE.md) | The design in technical terms, plus a [walk through the 207 files in the tested snapshot](docs/CODE-TOUR.md). |

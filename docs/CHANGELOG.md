@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased (2026-11-12)
+
+Reframed front door around the self-organizing memory database, with an honest
+status table. No change to the tested engine: `freeze-src/` is untouched and
+`python3 tools/verify_freeze.py` still prints
+`entries=207 ok=207 missing=0 mismatch=0`.
+
+- `README.md` (generated from `docs/source/README.src.md`) reframed: what TRACE
+  is becoming, a status table (runs today / experimental / design only), and a
+  roadmap pointer. Loss-first section, quickstart, checks, benchmarks and
+  limitations unchanged.
+- New `docs/ROADMAP.md`: the design direction in one page; design, not promises.
+- `receipts/filed-summaries/`: two internal identifiers redacted in place
+  (same line numbers; hashes below updated), so no working-tree path or worker
+  name ships in the repo.
+
 ## Unreleased (2026-11-09)
 
 A refresh of the front door for a public launch. No change to the tested engine:
