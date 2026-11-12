@@ -1,0 +1,8 @@
+# sha256 642eae2249f9d810e3679314e9a971c2d4a8da0e305ef2528f9493421e6dce91 /home/anshul/owner-hub/scratch/wave6/claude-sci/e1/run.log
+# rule: highest-speed gate-passing candidate per function; WRONG iff hidden_fail_of_200 > 0
+unique_count top oob-trigger speedup 677.9899625110987 hidden-fail 200 verdict WRONG
+substr_count top find-loop speedup 5.681749778950487 hidden-fail 0 verdict RIGHT
+isort top sorted speedup 878.3761107902999 hidden-fail 0 verdict RIGHT
+join top dict-index speedup 97.75437611467524 hidden-fail 0 verdict RIGHT
+fib top memo speedup 113158.46700507615 hidden-fail 0 verdict RIGHT
+wrong: 1 of 5 functions; right: 4

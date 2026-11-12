@@ -1,0 +1,8 @@
+# sha256 642eae2249f9d810e3679314e9a971c2d4a8da0e305ef2528f9493421e6dce91 /home/anshul/owner-hub/scratch/wave6/claude-sci/e1/run.log
+# rule: prereg bar all five clear tenfold; SHORT iff best speedup < 10 (summary line '>= 10x ON 4 of 5' agrees)
+unique_count best 676.0980502630179 verdict CLEAR
+substr_count best 5.681749778950487 verdict SHORT
+isort best 878.3761107902999 verdict CLEAR
+join best 97.75437611467524 verdict CLEAR
+fib best 113158.46700507615 verdict CLEAR
+short-of-tenfold: 1 of 5 functions; cleared: 4

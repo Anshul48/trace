@@ -1,0 +1,299 @@
+/* paper.css (arXiv / LaTeX-article look) -- presentation only.
+ * One serif family (Times New Roman: no Latin Modern / CMU / Termes installed), monochrome, links dark blue.
+ * Automatic hyphenation stays OFF (clean PDF text layer).
+ */
+:root {
+  --serif: "Times New Roman", "Liberation Serif", Georgia, serif;
+  --mono: Consolas, "DejaVu Sans Mono", monospace;
+  --link: #14307a;
+}
+
+@page {
+  size: A4;
+  margin: 26mm 25mm 28mm 25mm;
+  @bottom-center {
+    content: counter(page);
+    font: 10pt "Times New Roman", "Liberation Serif", serif;
+    color: #000;
+    vertical-align: top;
+    padding-top: 7mm;
+  }
+}
+
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+body {
+  font-family: var(--serif);
+  font-size: 10.5pt;
+  line-height: 1.26;
+  color: #000;
+  background: #fff;
+  margin: 0;
+  padding: 0;
+  counter-reset: section figure table;
+  text-align: justify;
+  orphans: 2;
+  widows: 2;
+  font-kerning: normal;
+}
+
+p {
+  margin: 0;
+  text-indent: 1.5em;
+  orphans: 2;
+  widows: 2;
+}
+a { color: var(--link); text-decoration: none; }
+
+/* ---------- title block ---------- */
+header {
+  text-align: center;
+  margin: 6mm 0 7mm 0;
+  text-indent: 0;
+}
+.paper-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  margin: 0 0 12pt 0;
+  text-align: center;
+  color: #000;
+}
+.paper-title .t-main { display: block; font-size: 18pt; line-height: 1.2; }
+.paper-title .t-sub { display: block; font-size: 15pt; line-height: 1.22; margin-top: 3pt; }
+.authors {
+  font-size: 13pt;
+  margin: 0 0 6pt 0;
+  text-indent: 0;
+  text-align: center;
+}
+.dateline, .repo {
+  display: inline;
+  font-size: 11pt;
+  text-indent: 0;
+  margin: 0;
+}
+.dateline::after { content: "\00a0\00a0\00b7\00a0\00a0"; }
+
+/* ---------- abstract ---------- */
+.abstract {
+  margin: 0 10% 12pt 10%;
+  text-indent: 0;
+  font-size: 10pt;
+  line-height: 1.25;
+}
+.abstract::before {
+  content: "Abstract";
+  display: block;
+  text-align: center;
+  font-weight: 700;
+  font-size: 11pt;
+  margin-bottom: 4pt;
+}
+
+/* ---------- sections ---------- */
+h2.section {
+  counter-increment: section;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 13pt;
+  line-height: 1.2;
+  margin: 15pt 0 6pt 0;
+  text-align: left;
+  break-after: avoid;
+}
+h2.section::before { content: counter(section) "\00a0\00a0\00a0"; }
+h2.section + p, h2.section + figure, .abstract + h2 { text-indent: 0; }
+section p > strong:first-child {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 10.5pt;
+  color: #000;
+}
+section p:has(> strong:first-child) { text-indent: 0; margin-top: 6pt; }
+h2.section + p:has(> strong:first-child) { margin-top: 0; }
+
+/* ---------- figure ---------- */
+figure { margin: 10pt 0 10pt 0; break-inside: avoid; }
+figure.fig { counter-increment: figure; }
+svg.fig-svg { display: block; width: 100%; height: auto; margin: 0; }
+figcaption {
+  margin-top: 6pt;
+  font-size: 10pt;
+  line-height: 1.22;
+  text-align: justify;
+}
+figcaption::before { content: "Figure " counter(figure) ":"; font-weight: 700; margin-right: 4pt; }
+
+svg.fig-svg text { font-family: "Times New Roman", "Liberation Serif", serif; fill: #000; }
+svg.fig-svg .f-title { font-size: 14.5px; font-weight: 700; }
+svg.fig-svg .f-label { font-size: 13.5px; font-style: italic; }
+svg.fig-svg .stage { fill: #fff; stroke: #000; stroke-width: 1; }
+svg.fig-svg .t-stage { font-size: 14px; }
+svg.fig-svg .t-chip { font-size: 14px; font-weight: 700; }
+svg.fig-svg .lane-rule { stroke: #000; stroke-width: 0.5; }
+svg.fig-svg .box { fill: #fff; stroke: #000; stroke-width: 0.8; }
+svg.fig-svg .box-last { stroke-width: 1.7; }
+svg.fig-svg .t-box { font-size: 14px; }
+svg.fig-svg .arrow { stroke: #000; stroke-width: 1; }
+svg.fig-svg .ah { fill: #000; }
+
+/* ---------- Table 1 (booktabs) ---------- */
+.table-wrap { margin: 10pt 0 10pt 0; counter-increment: table; }
+.table-caption {
+  font-size: 10pt;
+  line-height: 1.22;
+  margin: 0 0 5pt 0;
+  text-indent: 0;
+  text-align: justify;
+  break-after: avoid;
+}
+.table-caption::before { content: "Table " counter(table) ":"; font-weight: 700; margin-right: 4pt; }
+table.data {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 9pt;
+  line-height: 1.2;
+  text-align: left;
+  border-top: 1.2pt solid #000;
+  border-bottom: 1.2pt solid #000;
+  margin: 0;
+}
+table.data thead th {
+  font-weight: 700;
+  text-align: left;
+  vertical-align: bottom;
+  padding: 3pt 5pt 3pt 0;
+  border: none;
+  border-bottom: 0.6pt solid #000;
+  background: none;
+  color: #000;
+}
+table.data thead th:nth-child(1) { width: 27%; }
+table.data thead th:nth-child(2) { width: 25%; }
+table.data thead th:nth-child(3) { width: 31%; }
+table.data thead th:nth-child(4) { width: 17%; }
+table.data td {
+  padding: 3.5pt 5pt 3.5pt 0;
+  vertical-align: top;
+  text-align: left;
+  border: none;
+  overflow-wrap: break-word;
+}
+table.data tr { break-inside: avoid; }
+table.data td[data-allow="receipt"] {
+  font-family: var(--mono);
+  font-size: 7.2pt;
+  line-height: 1.22;
+  overflow-wrap: anywhere;
+  padding-right: 0;
+}
+.table-note {
+  font-size: 9pt;
+  line-height: 1.2;
+  margin: 5pt 0 0 0;
+  text-indent: 0;
+  text-align: left;
+}
+
+span.n { font-variant-numeric: lining-nums; }
+
+.ai-disclosure {
+  margin: 12pt 0 0 0;
+  border-top: 0.5pt solid #000;
+  padding-top: 5pt;
+  font-size: 10pt;
+  line-height: 1.22;
+  text-align: justify;
+  break-inside: avoid;
+}
+.ai-disclosure > strong { display: block; font-weight: 700; margin-bottom: 1pt; }
+
+.page-footer { display: none; }
+a.ref-url { color: inherit; text-decoration: none; word-break: break-all; }
+a.ref-url::after { content: attr(href); }
+
+/* ---------- Appendix A (portrait, compact) ---------- */
+section#receipt-appendix { break-before: page; margin: 0; padding: 0; text-align: left; }
+section#receipt-appendix h2.appendix-title {
+  font-weight: 700;
+  font-size: 13pt;
+  margin: 0 0 6pt 0;
+  break-after: avoid;
+}
+section#receipt-appendix h2.appendix-title .ax { margin-right: 10pt; }
+section#receipt-appendix h3 { font-size: 11pt; margin: 10pt 0 3pt 0; }
+section#receipt-appendix p {
+  font-size: 8.5pt;
+  line-height: 1.2;
+  text-indent: 0;
+  text-align: justify;
+  margin: 0 0 6pt 0;
+}
+table.receipts {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 7.4pt;
+  line-height: 8.4pt;
+  text-align: left;
+  border-top: 1.1pt solid #000;
+  border-bottom: 1.1pt solid #000;
+}
+table.receipts th {
+  font-weight: 700;
+  font-size: 7.4pt;
+  padding: 2.5pt 3pt;
+  text-align: left;
+  vertical-align: bottom;
+  border: none;
+  border-bottom: 0.6pt solid #000;
+  background: none;
+  color: #000;
+}
+table.receipts td {
+  padding: 1.6pt 3pt;
+  vertical-align: top;
+  border: none;
+  border-bottom: 0.25pt solid #999;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+table.receipts tr { break-inside: avoid; }
+table.receipts thead { display: table-header-group; }
+table.receipts th:nth-child(1){width:3.5%} table.receipts th:nth-child(2){width:14%} table.receipts th:nth-child(3){width:8.5%}
+table.receipts th:nth-child(4){width:10.6%} table.receipts th:nth-child(5){width:18.9%} table.receipts th:nth-child(6){width:9%}
+table.receipts th:nth-child(7){width:13.4%} table.receipts th:nth-child(8){width:13.4%} table.receipts th:nth-child(9){width:8.7%}
+table.receipts td:nth-child(2), table.receipts td:nth-child(5), table.receipts td:nth-child(6) {
+  font-family: var(--mono);
+  font-size: 6.4pt;
+  line-height: 7.6pt;
+}
+table.receipts td.hash {
+  font-family: var(--mono);
+  font-size: 6pt;
+  line-height: 7.4pt;
+  word-break: break-all;
+}
+table.receipts td.hash span.hx { display: block; width: 16ch; line-height: 7.4pt; }
+.st-match, .st-mismatch, .st-missing, .st-unknown { color: #000; font-weight: 400; font-size: 7pt; }
+.st-mismatch, .st-missing, .st-unknown { font-weight: 700; }
+.note { font-size: 0.92em; font-style: italic; }
+footer#provenance {
+  margin: 10pt 0 0 0;
+  padding: 4pt 0 0 0;
+  border-top: 0.5pt solid #000;
+  font-family: var(--mono);
+  font-size: 5.8pt;
+  line-height: 1.35;
+  text-align: left;
+  overflow-wrap: anywhere;
+  break-inside: avoid;
+}
+footer#provenance p { margin: 0; text-indent: 0; font-size: inherit; }
+
+/* owner-review-r2: no automatic hyphenation (keeps the PDF text layer clean) */
+* { hyphens: manual !important; -webkit-hyphens: manual !important; }
+
+/* references: hanging style, no first-line indent */
+p.ref { text-indent: 0 !important; margin: 0 0 3px 0 !important; padding-left: 1.2em; text-indent: -1.2em !important; }

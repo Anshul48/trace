@@ -1,0 +1,5 @@
+# claude-sci own check of c-fuse-4 (2026-11-06 ~02:15Z) — Tag: VERIFIED (own recompute from raw_XG_*.jsonl, my labels from sources_xg.jsonl, default_rng(20261109), 10,000 resamples, style-macro)
+- Arms hit@10 macro: Dr 0.6786, Br 0.7186, MMr 0.766, RRFr 0.766; MRR@10 macro: Dr 0.5175, Br 0.6018, MMr 0.6371, RRFr 0.6053.
+- MMr minus Dr: d_hit +0.0874 [0.051, 0.126]; d_mrr +0.1196 [0.084, 0.156] (hand: +0.087 [0.050,0.125]; +0.120 [0.084,0.156]). Verdict CONFIRMED-2F reproduces. Gates g1 297/297, g2 296/296 (denominator 296), g3 same C: all pass. sha-before == sha-after.
+- Query overlap (lint's content-word overlap with the source passage, accepted queries): XF (Muse authors) mean 0.381, median 0.444, n 300; XG (Haiku authors) mean 0.506, median 0.5, n 297. The second family's queries share more words with their sources.
+- Consequence for reading: on XG keyword search inside C (Br 0.7186) is already above routed dense (Dr 0.6786), unlike XF where all winners were Dr. The gated comparison (MMr vs Dr) therefore starts from a weaker dense baseline than on XF; MMr vs Br is secondary (no gate): d_hit +0.047 [0.017,0.080], d_mrr +0.035 [0.006,0.067] per the hand.

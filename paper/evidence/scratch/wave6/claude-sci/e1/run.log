@@ -1,0 +1,40 @@
+unique_count: X0 48.46 ms best ('set', 676.0980502630179, 'FAST')
+    {'cand': 'set', 'kind': 'FAST', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 676.0980502630179}
+    {'cand': 'sorted-scan', 'kind': 'FAST', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 143.50732517233666}
+    {'cand': 'list-seen', 'kind': 'CONTROL', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 6.851956489118372}
+    {'cand': 'empty-off', 'kind': 'BUG', 'gate_pass': False, 'hidden_fail_of_200': 0, 'speedup': None}
+    {'cand': 'adjacent-only', 'kind': 'BUG', 'gate_pass': False, 'hidden_fail_of_200': 133, 'speedup': None}
+    {'cand': 'oob-trigger', 'kind': 'RARE', 'gate_pass': True, 'hidden_fail_of_200': 200, 'speedup': 677.9899625110987}
+substr_count: X0 27.19 ms best ('find-loop', 5.681749778950487, 'FAST')
+    {'cand': 'find-loop', 'kind': 'FAST', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 5.681749778950487}
+    {'cand': 'find-loop-2', 'kind': 'FAST', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 4.984835193224498}
+    {'cand': 'startswith', 'kind': 'CONTROL', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 1.1591724106697971}
+    {'cand': 'non-overlap', 'kind': 'BUG', 'gate_pass': False, 'hidden_fail_of_200': 0, 'speedup': None}
+    {'cand': 'empty-pat', 'kind': 'BUG', 'gate_pass': False, 'hidden_fail_of_200': 0, 'speedup': None}
+    {'cand': 'oob-trigger', 'kind': 'RARE', 'gate_pass': True, 'hidden_fail_of_200': 200, 'speedup': 5.503916086939695}
+isort: X0 255.50 ms best ('sorted', 878.3761107902999, 'FAST')
+    {'cand': 'sorted', 'kind': 'FAST', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 878.3761107902999}
+    {'cand': 'bisect', 'kind': 'FAST', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 154.04016417135946}
+    {'cand': 'bubble', 'kind': 'CONTROL', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 0.5391259952503556}
+    {'cand': 'dedup', 'kind': 'BUG', 'gate_pass': False, 'hidden_fail_of_200': 200, 'speedup': None}
+    {'cand': 'drop-last', 'kind': 'BUG', 'gate_pass': False, 'hidden_fail_of_200': 200, 'speedup': None}
+    {'cand': 'oob-trigger', 'kind': 'RARE', 'gate_pass': True, 'hidden_fail_of_200': 200, 'speedup': 783.9752112721839}
+join: X0 103.91 ms best ('dict-index', 97.75437611467524, 'FAST')
+    {'cand': 'dict-index', 'kind': 'FAST', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 97.75437611467524}
+    {'cand': 'dict-append', 'kind': 'FAST', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 95.29949569461648}
+    {'cand': 'swap-loops', 'kind': 'CONTROL', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 0.4992473541151901}
+    {'cand': 'first-only', 'kind': 'BUG', 'gate_pass': False, 'hidden_fail_of_200': 170, 'speedup': None}
+    {'cand': 'order', 'kind': 'BUG', 'gate_pass': False, 'hidden_fail_of_200': 200, 'speedup': None}
+    {'cand': 'oob-trigger', 'kind': 'RARE', 'gate_pass': True, 'hidden_fail_of_200': 200, 'speedup': 93.69976691619894}
+fib: X0 34.06 ms best ('memo', 113158.46700507615, 'FAST')
+    {'cand': 'memo', 'kind': 'FAST', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 113158.46700507615}
+    {'cand': 'iter', 'kind': 'FAST', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 26777.898548237637}
+    {'cand': 'recursive-copy', 'kind': 'CONTROL', 'gate_pass': True, 'hidden_fail_of_200': 0, 'speedup': 1.0154725812336032}
+    {'cand': 'zero-off', 'kind': 'BUG', 'gate_pass': False, 'hidden_fail_of_200': 0, 'speedup': None}
+    {'cand': 'shift', 'kind': 'BUG', 'gate_pass': False, 'hidden_fail_of_200': 200, 'speedup': None}
+    {'cand': 'oob-trigger', 'kind': 'RARE', 'gate_pass': True, 'hidden_fail_of_200': 200, 'speedup': 14221.899527897778}
+CRANK GATE HOLDS ON COMMON BUGS
+RARE-TRIGGER ESCAPES: 5 of 5
+SPEEDUP >= 2x ON 5 of 5; >= 10x ON 4 of 5
+H1-D9 (all 5 >= 10x), template tier only: FAILS
+P1 ok; P2 ok; P3 ok; P4 ok

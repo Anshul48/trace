@@ -1,0 +1,17 @@
+# D3 at N=3,200,000 — T arm completed and verified (claude-sci, 2026-11-06 ~00:25Z)
+Source: VM hand d3-3p2m (lease scratch/wave2/d3-3p2m: raw_t_sweep/mem/ret/build.jsonl; RESULT.md written before the T arm finished, T rows were never appended — I append them here). Correction to my own earlier poll: I reported the T sweep as "running" for ~2 h; `pgrep -f run_t.sh` matched my own ssh command line. Driver log says T-DRIVER DONE 22:15:30Z. Tag: OBSERVED (my reads and recompute).
+## T arm (16 shards, sequential fan-out), recall vs exact cosine, 1000 held-out queries
+- Sweep (np,S) from 100 to 3000: recall 0.986 at np=100 (S 200 and 400 identical), 0.9936 / 0.9978 / 0.999 / 0.9995 / 1.0 as np rises 200/400/750/1500/3000; exact (10/10) 0.888 at np=100. The grid starts at np=100, so the operating point is the lowest grid cell (OPERATING_T = 100 400), not a minimal-effort point; recall there (0.986) is above the 0.95 gate.
+- My recompute from raw_t_ret.jsonl (1000 lists) against gt_top10.int32.npy: mean recall@10 0.986, exact 0.888 — equals the hand's sweep row. Q-line: "REACHES 0.95 at np100 S400 (recall 0.986)" (lowest tested setting).
+- Memory at the operating setting (sum over 16 shard processes, batch serves): VmRSS 1,001,578,496 B; RssAnon 942,231,552 B; RssFile 59,346,944 B; logical read bytes (rchar delta) 15,110,408,864 B; summed resident file pages 5,269,553,376 B (overlapping categories, upper bounds, do not add). Served-store bytes (sealed est_bytes summed over 16 shards): 8,085,548,528 B = disk footprint, not memory needed.
+- Ratios per prereg: T/H RSS = 1,001,578,496 / 5,834,838,016 = 0.1717; T/I-R = 1,001,578,496 / 2,697,568,256 = 0.371.
+- Latency (sum over shards of batch ms/query + merge): 227.6 ms/query vs H p50 0.278 ms -> T SLOWER by 819x; vs I-R 8.643 ms -> T SLOWER by 26x. Batch means, not persistent-service p50.
+- Build wall (sum of recorded ops): 2118.1 s vs H 1512.2 s -> 1.40x slower; vs I-R 919.9 s -> 2.3x slower.
+## Trend arithmetic (derived, prereg rule)
+T/H RSS ratio: 0.8M 0.1675 -> 3.2M 0.1717 (it did NOT decrease). The M-line "MEMORY ADVANTAGE" needs RSS_T/RSS_H strictly decreasing across all three N, so it is already excluded by the first two points whatever 7.13M gives. The 7.13M point could only decide between "LOWER MEMORY, NO TREND" and "NO MEMORY ADVANTAGE" (and fill the slope). Against I-R, T/I-R: 0.351 -> 0.371 (also not decreasing).
+## What this does and does not say (binding)
+- Not a memory claim for TRACE vs HNSW (FACTS-AND-RULES): the T figure is process RSS of batch serves that read through the page cache (RssFile 59 MB of an 8.1 GB store, rchar 15.1 GB per batch) while HNSW holds its index in process memory. T is also 819x slower on this measure. Not a speed claim of any kind.
+- Operating point is the lowest grid cell, so memory at a smaller effort/lower recall cannot be read from this.
+- Per-arm retrieval lists exist for T (kept per the addendum); H/I/I-R lists at the operating point were kept by the hand per ADDENDUM-1 — not re-verified here beyond the hand's own sweep rows.
+## Decision input for 7.13M
+Do NOT launch the 7.13M point for this paper window: (1) the headline M-line cannot become "MEMORY ADVANTAGE" any more; (2) it needs ~10 h exclusive VM and 35 GB (> the frozen 30 GB cap) and deletions; (3) codex2 D recommends deferral. Report: two points (0.8M, 3.2M), M-line "INCONCLUSIVE at 7.13M (T not run); trend criterion for MEMORY ADVANTAGE already unmet by the first two points", slope not computed from three points.
