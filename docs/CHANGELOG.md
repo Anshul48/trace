@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased (public check wrapper + paper video)
+
+New `tools/verify_paper_public.py`: runs the paper receipt checker and
+prints one OK line (exit 0) only when every problem is the known withheld
+file, else the checker's own output (exit 1). JUDGES.md and the README
+verify path lead with it. New `paper/video/`: the paper video (8.7 MB)
+with its narration script.
+
 ## Unreleased (P0: reading-copy fix)
 
 Replaced the full redacted reading copy of the withheld FACTS file (an

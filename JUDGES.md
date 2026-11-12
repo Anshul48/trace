@@ -44,9 +44,22 @@ numbers, which need the unpublished library.
 
 ## 2. Paper receipt checker (Python 3 only, no downloads)
 
-This command exits with code 1 in this repo, on purpose. It reports 15
-missing-file problems, and all 15 point to one evidence file that we withheld
-because it contains a server address. Nothing else fails.
+Start with the wrapper, from the repo root. It runs the checker and sorts
+the result: exit 0 with one OK line only if every problem is the known
+withheld file; anything else prints the checker's own output and exits 1.
+
+```bash
+python3 tools/verify_paper_public.py
+```
+
+Real output (exit 0):
+
+```text
+PUBLIC CHECK OK: 70 of 81 receipted spans verified against published files; 11 spans cite 1 withheld file (contains a server address); 0 other problems
+```
+
+The raw checker, for the full detail (exits 1 here, on purpose: 15
+missing-file problems, all the same withheld file, nothing else fails):
 
 ```bash
 cd paper
