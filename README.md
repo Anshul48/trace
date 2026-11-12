@@ -71,17 +71,18 @@ git clone --depth 1 https://github.com/Anshul48/trace && cd trace
 python3 tools/verify_freeze.py && python3 tools/check_receipts.py && python3 tools/verify_20k.py
 ```
 
-Then the paper checker, from `paper/`:
+Then the paper check, from the repo root:
 
 ```bash
-cd paper && python3 check_receipts.py writeup-arxiv.html --receipts receipts.json --banned banned.txt
+python3 tools/verify_paper_public.py
 ```
 
-Expect exit code 1 from the paper checker: it lists 15 problems, and all 15
-are one evidence file we withheld because it contains a server address. The
-other 70 of the paper's 81 receipted numbers check out from the files in this
-repo (file present, hash matches, value found). The 11 that do not include
-the paper's main positive result; [JUDGES.md](JUDGES.md) says exactly which.
+Expect one line: 70 of the paper's 81 receipted numbers check out from the
+files in this repo (file present, hash matches, value found). The 11 that do
+not include the paper's main positive result: they cite one evidence file we
+withheld because it contains a server address. [JUDGES.md](JUDGES.md) shows
+the raw checker output (exit 1, all 15 problems that same file) and says
+exactly which numbers are affected.
 
 The unit tests need one download (`python3 -m pip install numpy blake3`);
 [JUDGES.md](JUDGES.md) has their commands, what each check shows, what cannot
@@ -157,6 +158,7 @@ ANIMA is a prototype for one job type (fix a bug, judged by a hidden checker). I
 |---|---|
 | [BENCHMARKS.md](BENCHMARKS.md) | Every number, its scope and its record. |
 | [Paper](paper/checkable-memory-for-agents.pdf) | The preprint: what an agent-built memory store can honestly claim. |
+| [Paper video](paper/video/checkable-memory-for-agents.mp4) | The paper in 60-90 seconds ([narration script](paper/video/narration.txt), the paper's own sentences). |
 | [docs/EXPLAINER.md](docs/EXPLAINER.md) · [docs/FAQ.md](docs/FAQ.md) | The 10-minute walkthrough and the hard questions. |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Where the design is headed; design, not promises. |
 | [Checkable records](receipts/) | The records of our runs: the qualification run, the earlier larger builds, the order measurement, the [filed summaries](receipts/filed-summaries/README.md). |
