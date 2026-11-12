@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased (P0: reading-copy fix)
+
+Replaced the full redacted reading copy of the withheld FACTS file (an
+internal briefing that did not belong in public) with a two-line excerpt
+of the cited values. JUDGES.md updated to match.
+
 ## Unreleased (item 4: series-compile experiment)
 
 New `experiments/series-compile/`: a synthetic repeated-task-series demo
@@ -11,8 +17,8 @@ README status table carries the verified history sentence (12 Nov 2026).
 
 Judge-ready verification: `paper/` now ships the write-up HTML, the receipt
 checker, receipts, the banned-word list and the pinned evidence files (one
-file withheld: it contains a server address; a redacted reading copy is
-included), plus the final PDF and a text write-up. New `JUDGES.md` with the
+file withheld: it contains a server address; a two-line excerpt of it is
+included for reading), plus the final PDF and a text write-up. New `JUDGES.md` with the
 exact verify commands and their real output, and a "Verify this in 5 minutes"
 README section (wording reviewed). `tools/check_links.py` now also checks
 `JUDGES.md`.

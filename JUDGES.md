@@ -99,9 +99,11 @@ The spans that cannot be checked from this repo include the paper's main
 positive result (0.9985 of the exact top ten kept, 50 searches, top 10) and
 the store size (812,545 passages). The other result in that sentence of the
 paper, 0.79 percent of rows scored, does verify from the public files
-(`evidence/.../shard-fraction-all/per_shard.tsv`). A redacted reading copy
-of the withheld file (address removed; its hash does not match the receipt)
-is at `evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.redacted.md`.
+(`evidence/.../shard-fraction-all/per_shard.tsv`). The two lines of the
+withheld file that these receipts point to are copied, unchanged, in
+`evidence/scratch/wave6/paper/evidence-facts/FACTS-AND-RULES.excerpt.md`.
+An excerpt cannot match the receipt's hash; it is there so the values can
+be read.
 
 Published evidence files keep their original `/home/...` build paths inside
 (they cannot be changed without breaking the pinned hashes); they are build
