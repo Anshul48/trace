@@ -63,25 +63,29 @@ These re-check the frozen code and the recorded gates (the first takes well unde
 
 ## Verify this in 5 minutes
 
-Fresh clone to checked results in about two minutes. Full transcript with real
-output: [JUDGES.md](JUDGES.md).
+Fresh clone to checked results in under 5 minutes (about 2 on our connection).
+Full transcript with real output: [JUDGES.md](JUDGES.md).
 
 ```bash
 git clone --depth 1 https://github.com/Anshul48/trace && cd trace
+python3 tools/verify_freeze.py && python3 tools/check_receipts.py && python3 tools/verify_20k.py
+```
+
+Then the paper checker, from `paper/`:
+
+```bash
 cd paper && python3 check_receipts.py writeup-arxiv.html --receipts receipts.json --banned banned.txt
 ```
 
-The checker reports 15 problems, all one evidence file we withheld because it
-contains a server address; everything else passes, and 70 of 81 receipted
-spans verify end to end. Then, from the repo root:
+Expect exit code 1 from the paper checker: it lists 15 problems, and all 15
+are one evidence file we withheld because it contains a server address. The
+other 70 of the paper's 81 receipted numbers check out from the files in this
+repo (file present, hash matches, value found). The 11 that do not include
+the paper's main positive result; [JUDGES.md](JUDGES.md) says exactly which.
 
-```bash
-python3 tools/verify_freeze.py && python3 tools/check_receipts.py && python3 tools/verify_20k.py
-python3 -m pip install numpy blake3   # unit tests only; the one download
-```
-
-[JUDGES.md](JUDGES.md) has the unit-test commands, what each check proves, what
-cannot be verified from this repo alone, and the organiser smoke test status.
+The unit tests need one download (`python3 -m pip install numpy blake3`);
+[JUDGES.md](JUDGES.md) has their commands, what each check shows, what cannot
+be verified from this repo alone, and the organiser smoke test status.
 
 ## How it works
 
