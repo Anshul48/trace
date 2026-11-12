@@ -32,7 +32,7 @@ The design we are building toward, in four parts:
 | Receipts and audit tooling: frozen-code check, receipt gates, small reproduction | Runs today | The three check commands below |
 | Benchmark numbers: 50 searches, our library, our server | Runs today, self-measured | [BENCHMARKS.md](BENCHMARKS.md) |
 | Bottom-up organiser v1: module agreement 0.27 against 0.30 for k-means told K, on real code | Experimental | Reported 12 Nov; record not yet filed in this repo |
-| Skill compile on one card series: 23 of 23 shadow match, one series only | Experimental | Reported 12 Nov; record not yet filed in this repo |
+| On our own task history, one repeated series of 122 runs was replaced by a script that reproduced every data field of 121 past runs (checked by rerun). Of eight repeated series tried, two could be scripted and matched, two could be scripted but the human-directed runs disagreed with each other, three needed judgment, one had no recorded outputs (as reported by the builders; three more pending). 12 Nov 2026 | Experimental | [experiments/series-compile](experiments/series-compile/README.md) |
 | Plastic layer beyond toys, sleep with measured benefit, society of cortexes, ontology at scale | Design only | [docs/ROADMAP.md](docs/ROADMAP.md) |
 | Resident server, whole-library download, public benchmarks, outside check | Not built | [docs/ROADMAP.md](docs/ROADMAP.md) |
 

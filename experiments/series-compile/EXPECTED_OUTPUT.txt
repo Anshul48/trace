@@ -1,0 +1,21 @@
+SYNTHETIC repeated-task-series to checked-script demo (SYNTHETIC DATA ONLY)
+dataset | check           | outcome
+--------+-----------------+--------
+a       | detect          | SERIES count=40 template="Packing summary for DEMO store <ID> on <DATE>: shipment <ID> staged at <PATH>. Count items and total weight."
+a       | shadow-script   | matched=40 mismatched=0
+a       | copy-previous   | matched=0/39 control: repeat last output
+b       | detect          | SERIES count=40 template="Packing summary for DEMO store <ID> on <DATE>: shipment <ID> staged at <PATH>. Count items and total weight."
+b       | shadow-script   | matched=20 mismatched=20 mismatch-block=runs-021-to-040 method-changed-after-run-20
+b       | copy-previous   | matched=0/39 control: repeat last output
+c       | detect          | NO-SERIES briefs=40 max-group=1 need>=5
+c       | shadow-script   | SKIPPED no-series
+d       | detect          | SERIES count=40 template="Packing summary for DEMO store <ID> on <DATE>: shipment <ID> staged at <PATH>. Count items and total weight."
+d       | shadow-script   | matched=39 corrupted=1 corrupted-run=017
+d       | guard-corrupted | REFUSED corrupted-input weight='N/A' -> handoff-to-person
+e       | detect          | SERIES count=30 template="Shipping estimate for DEMO store <ID> on <DATE>: shipment <ID> staged at <PATH>. Total weight by worker convention."
+e       | shadow-script   | vs-alpha=30/30 vs-beta=0/30 vs-gamma=0/30 matches-one-worker-only
+e       | worker-agree    | alpha-beta=0/30 alpha-gamma=0/30 beta-gamma=0/30
+guard   | valid-input     | ALLOWED {"item_count":20,"total_weight":116.33}
+guard   | new-schema      | REFUSED new-schema -> handoff-to-person
+guard   | new-slot-value  | REFUSED new-slot-value store="WH-99" not-in-series -> handoff-to-person
+SYNTHETIC DATA ONLY: invented stores, shipments and weights; no claim about any real workload.
