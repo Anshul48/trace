@@ -2,6 +2,8 @@
 <!-- GENERATED from docs/source/README.src.md by tools/build_site.py. Edit the source, then run: python3 tools/build_site.py -->
 # TRACE
 
+[![verify](https://github.com/Anshul48/trace/actions/workflows/ci.yml/badge.svg)](https://github.com/Anshul48/trace/actions)
+
 **TRACE is a memory store for coding agents. What runs today is a sealed store: passages in, answers with checkable records out. A memory that organises itself as it is used is the design goal; it is not tested yet. This README says which parts run and which do not.**
 
 Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.github.io/trace/explorer/)** (no install) · [Paper](paper/checkable-memory-for-agents.pdf) · [Benchmarks](BENCHMARKS.md) · [FAQ](docs/FAQ.md) · [How it works](docs/EXPLAINER.md) · [Roadmap](docs/ROADMAP.md) · [Demo videos](https://anshul48.github.io/trace/demos/)

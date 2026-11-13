@@ -42,6 +42,14 @@ jobs:
           # test_changed_set excluded: its final assert compares against the
           # original build host's /tmp/fix1stage/ (not part of the freeze);
           # all in-freeze asserts (manifest, drift, markers) pass locally.
+      - name: Paper bundle tests
+        run: python3 -m pytest paper/tests -q
+      - name: Series-compile experiment (demo + smoke)
+        run: |
+          cd experiments/series-compile
+          python3 -I series_compile.py demo | cmp - EXPECTED_OUTPUT.txt
+          python3 -I -W error::ResourceWarning -m unittest discover -s tests
+      # Organiser experiment smoke lands with item 3 (experiments/organiser-on-code).
       - name: Fix1 + existing suites
         run: |
           mkdir -p /tmp/baseline-venv/bin
