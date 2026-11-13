@@ -1,6 +1,26 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 # paper/
 
+When coding agents write a system's code, run its experiments and also
+write the reports on those experiments, how does anyone know which of the
+reported results are true? The reports can agree with the code and both
+still be wrong. We describe a small audit procedure for agent-built
+software and apply it to our own system, TRACE, a memory store for coding
+agents that answers a query by scoring only a small, routed shortlist of
+stored passages instead of the whole store. The procedure records whether
+each study had a plan fixed before it ran, ties every reported number to
+an evidence file, and has a separate analyst recompute selected findings.
+One result held: routing scored 0.79 percent of rows on every shard
+(partition) and, averaged over 4 shards, kept 0.9985 of the exact top ten
+results (scoring work only, not speed; no plan file). Several did not:
+search by meaning found fewer labelled sources than plain keyword search
+(26/50 vs 41/50); two refinements did not beat keyword search; and the
+live service was far slower than a standard index. When we planted 18
+errors in a copy of this paper, the automated check caught 10 and missed
+8: it catches wrong values and misses wrong meanings. The results concern
+one project; downstream coding performance and the general effectiveness
+of the procedure were not evaluated.
+
 Everything behind the preprint "Checkable memory for agents: an audit of
 what an agent-built memory store can honestly claim", in one folder.
 
@@ -22,16 +42,14 @@ what an agent-built memory store can honestly claim", in one folder.
 - `tests/` — smoke tests for this folder (public check passes, all files
   present, receipts resolve).
 
-Build commands, from the repo root:
+Check commands, from the repo root:
 
 ```bash
-uv run python -m pytest paper/tests -q
+python3 -m unittest discover -s paper/tests
 cd paper && python3 check_receipts.py writeup-arxiv.html --receipts receipts.json --banned banned.txt
 python3 tools/verify_paper_public.py
 ```
 
-The first must print `3 passed`; the second exits 1 here, listing only the
-withheld file (it must run inside `paper/`: receipt paths resolve from the
-working directory); the third prints one `PUBLIC CHECK OK` line. (The plan
-draft had the checker line without `cd paper`; that form reports all 174
-receipts missing and is wrong.)
+The first must print `OK` (3 tests); the second exits 1 here, listing only
+the withheld file (it must run inside `paper/`: receipt paths resolve from
+the working directory); the third prints one `PUBLIC CHECK OK` line.

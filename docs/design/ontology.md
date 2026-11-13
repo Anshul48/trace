@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 # The grouping: an outline that builds and rebuilds itself
 
-**FOR A NEW READER.** TRACE keeps knowledge in a grouping shaped like an outline: small pieces of meaning gather into groups, groups gather into bigger groups, and every piece keeps its links back down to the raw text it came from. The same piece may sit in more than one group, and using the store reshapes the grouping: pieces used together move together. No person writes or maintains this outline; the store builds it from the material itself.
+**FOR A NEW READER.** The design: TRACE would keep its text in a grouping shaped like an outline. Small pieces of meaning would gather into groups, groups into bigger groups, and every piece would keep its link back to the raw text it came from. The same piece could sit in more than one group, and use would reshape the grouping: pieces used together would move together. No person would write or maintain this outline; the store would build it from the material. None of this runs today.
 
 ## What exists today
 
@@ -9,7 +9,7 @@ DESIGN. The full structure above does not run anywhere. One piece of it is EXPER
 
 ## Latest measured number
 
-On 12 November, on real code (180 functions per draw, 5 draws), the grouping program scored 0.27, where the score is 1 for groupings identical to the true modules and 0 for chance. Beside it, the standard method told the true number of groups scored 0.30. The new program did not beat that baseline, and it made 18 to 23 groups where there are 12 modules. Development data only; no held-out test.
+The only measured piece is the organiser: 0.27 against 0.30 for k-means told the number of groups, on Python standard-library code. Details and limits: [organiser.md](organiser.md).
 
 ## What it does not show
 

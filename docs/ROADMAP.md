@@ -7,26 +7,27 @@ of the README.
 
 ## The self-organising store
 
-- **Self-organising ontology.** Atoms of meaning gather into clusters, clusters
-  gather under centroids, and every atom keeps its links upward.
-  Multi-membership: the same atom can sit under more than one parent.
-  Use reshapes the structure: travelled edges gain energy, unused ones decay.
-- **Bottom-up organiser.** Builds the clusters and centroids from the atoms,
-  without being told how many groups there are. Experimental.
-- **Top-down predictor and prediction error.** A cheap guess places each new
-  atom; the distance between the guess and the build drives local
-  restructuring. Designed.
-- **Plastic layer.** Outcomes strengthen or weaken links, with rollback when a
-  change hurts. Small toys only so far.
-- **Sleep consolidation.** Offline replay that compresses, distills and decays
-  the store, behind a commit gate that can reject a bad proposal. Designed;
-  a benefit is shown nowhere yet.
-- **System 2 to System 1 trace-to-skill.** Slow, correct, deliberate work is
-  recorded, verified, and compiled into fast structure that replays without
-  the slow path. As a capability this is not shown anywhere yet.
-- **Society of cortexes.** Several stores built at different times over one
-  byte-exact vault, with views that need not agree. Designed; phase 2, after
-  one cortex works.
+- **Outline.** Split the library into small pieces of meaning and let the
+  pieces gather into groups, then groups of groups, with each piece keeping
+  its links upward. The same piece may sit in more than one group, and use
+  would reshape the grouping: travelled links strengthen, unused ones fade.
+  *Design; one early experiment, see the status table.*
+- **Learning from outcomes.** Strengthen links that lead somewhere useful,
+  weaken the rest, and roll a change back when it hurts. Small toys only
+  so far.
+- **Sleep.** Replay the day's work offline, compressing, distilling and
+  deleting, behind a gate that can reject a bad proposal. Designed; a
+  benefit is shown nowhere yet.
+- **Repeated work to scripts.** Record slow, correct, deliberate work,
+  verify it, and replace repeats with a fast script that replays it.
+  Experimental on one task series (see the table); not shown as a general
+  capability.
+- **Top-down prediction.** A cheap guess places each new piece; where the
+  guess and the built grouping disagree, the grouping is rebuilt locally.
+  Designed.
+- **Several stores.** Several stores built at different times over one
+  unchanged copy of the text, with views that need not agree. Designed;
+  after one store works.
 
 ## How the design is tested
 

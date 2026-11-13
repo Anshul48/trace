@@ -10,3 +10,6 @@ what it does not show, and what would prove it wrong.
 - [The top-down guess](top-down-prediction.md): placing new pieces cheaply.
 - [Repeated work to scripts](system2-system1.md): replacing slow repeats.
 - [Sleep](sleep.md): an offline tidy that must earn its keep.
+
+Learning from outcomes has no note yet: it has been tried on toy data
+only and has no number to report.

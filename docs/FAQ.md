@@ -81,11 +81,13 @@ for a stronger model on these 50 searches.
 
 ### What does "0.79% of rows" mean? Is that a speed claim?
 
-No. In one of the four library parts, a search scored 1,600 rows where exact
-search scores 203,137 ([B1](../BENCHMARKS.md#b-what-the-method-does)). That is
-scoring *work*. Choosing the groups and building them are separate costs, and
-the service is slower than a plain scan on this library. We have no per-part
-figures for the other three parts in this repo.
+No. In each of the four library parts, a search scored 1,600 rows where
+exact search scores about 203,137
+([B1](../BENCHMARKS.md#b-what-the-method-does)). That is scoring *work*.
+Choosing the groups and building them are separate costs, and the service
+is slower than a plain scan on this library. Per-part figures for all four
+parts are in the paper's evidence file
+[per_shard.tsv](../paper/evidence/scratch/wave6/paper/evidence-vm/shard-fraction-all/per_shard.tsv).
 
 ### What does "99.85% of exact top ten" mean?
 

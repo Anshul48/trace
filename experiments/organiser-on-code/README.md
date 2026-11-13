@@ -22,6 +22,10 @@ Five fixed draws (seeds 61-65) take 4 packages x 3 modules x 15 atoms =
 The table reports per-seed module ARI, purity and the organiser's group
 count, plus the mean row.
 
+Result: the organiser scores below k-means told the number of groups in
+both modes (0.228 against 0.245 with the one command; 0.265 against
+0.295 with the precomputed vectors).
+
 ## The one command
 
 From this directory:
@@ -40,8 +44,10 @@ shape (five draws, organiser untold vs baselines told 12) does not.
 
 ## Precomputed-vectors mode
 
+The vectors file is not published yet, so this mode cannot be run from this repo today. `EXPECTED_OUTPUT_vectors.txt` is the recorded output of the run described below.
+
 Python-only code cannot recompute MiniLM vectors, so the measured table
-ships as a small sidecar asset (NOT in this directory): 2250 atoms x
+is kept as a small sidecar asset (NOT in this directory): 2250 atoms x
 384 dims, float32, with the id list and package/module labels:
 
 ```
@@ -76,9 +82,9 @@ Model: `sentence-transformers/all-MiniLM-L6-v2`, unit-normalised.
   other seeds, other draw sizes, or other corpora.
 - Development packages only: the six packages above; other packages
   were never built into a corpus here and none is evaluated.
-- Told-K baselines: k-means and average-link are told 12 groups per
-  draw while the organiser is not, so their scores are not comparable
-  as discovery methods.
+- Told-K baselines: k-means and average-link are given the answer's
+  size (12 groups) and the organiser is not; the organiser still
+  scores below k-means.
 - 18-23 groups for 12 modules: on the measured (vectors) table the
   organiser returns 18-23 level-1 groups per draw where the truth has
   12 modules; it over-splits.
