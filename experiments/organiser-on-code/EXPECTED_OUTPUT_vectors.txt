@@ -1,0 +1,13 @@
+organiser-on-code: group 180 code atoms by module (12 per draw)
+mode: precomputed unit vectors (sentence-transformers/all-MiniLM-L6-v2)
+draws: seeds 61-65; 4 packages x 3 modules x 15 atoms = 180 each
+score: module labels; organiser is not told K, baselines told 12
+corpus: 2250 atoms x 384 dims, 43 eligible modules
+seed  org_ARI  org_pur  org_K  km_ARI   km_pur   al_ARI   al_pur   rnd_ARI  rnd_pur
+61    0.2373   0.4944   19     0.2929   0.5389   0.2782   0.4556   -0.0005  0.2222
+62    0.2833   0.5667   23     0.3403   0.5556   0.2043   0.4111   -0.0220  0.1778
+63    0.2384   0.5056   18     0.2367   0.4778   0.2410   0.4833   -0.0039  0.2056
+64    0.2429   0.5000   20     0.2034   0.3944   0.1939   0.3778   -0.0031  0.2056
+65    0.3215   0.5833   23     0.4010   0.5722   0.1318   0.3111   0.0124   0.2167
+mean  0.2647   0.5300   20.6   0.2948   0.5078   0.2098   0.4078   -0.0034  0.2056
+mean module ARI over seeds 61,62,63,64,65: organiser 0.265, k-means-12 0.295, avg-link-12 0.210, random-12 -0.003
