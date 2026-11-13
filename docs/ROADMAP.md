@@ -20,8 +20,8 @@ of the README.
   benefit is shown nowhere yet.
 - **Repeated work to scripts.** Record slow, correct, deliberate work,
   verify it, and replace repeats with a fast script that replays it.
-  Experimental on one task series (see the table); not shown as a general
-  capability.
+  Experimental on one task series (see the status table in the README);
+  not shown as a general capability.
 - **Top-down prediction.** A cheap guess places each new piece; where the
   guess and the built grouping disagree, the grouping is rebuilt locally.
   Designed.

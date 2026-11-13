@@ -46,10 +46,10 @@ Check commands, from the repo root:
 
 ```bash
 python3 -m unittest discover -s paper/tests
-cd paper && python3 check_receipts.py writeup-arxiv.html --receipts receipts.json --banned banned.txt
 python3 tools/verify_paper_public.py
+(cd paper && python3 check_receipts.py writeup-arxiv.html --receipts receipts.json --banned banned.txt)
 ```
 
-The first must print `OK` (3 tests); the second exits 1 here, listing only
-the withheld file (it must run inside `paper/`: receipt paths resolve from
-the working directory); the third prints one `PUBLIC CHECK OK` line.
+The first must print `OK` (3 tests); the second prints one `PUBLIC CHECK
+OK` line; the third exits 1 here, listing only the withheld file (it must
+run inside `paper/`: receipt paths resolve from the working directory).
