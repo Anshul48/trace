@@ -17,8 +17,8 @@ of the README.
   development data (real library code, simulated feedback): a gain only
   when the correct answer is fed back (see [docs/design](design/README.md)).
 - **Sleep.** Replay the day's work offline, compressing, distilling and
-  deleting, behind a gate that can reject a bad proposal. Designed; a
-  benefit is shown nowhere yet.
+  deleting, behind a gate that can reject a bad proposal. Tried offline
+  in four tests; no benefit shown (see [docs/design](design/sleep.md)).
 - **Repeated work to scripts.** Record slow, correct, deliberate work,
   verify it, and replace repeats with a fast script that replays it.
   Experimental on one task series (see the status table in the README);

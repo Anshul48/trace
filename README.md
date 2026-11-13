@@ -46,7 +46,7 @@ Four changes would turn this store into one that organises itself as it is used.
 
 - **Outline.** Split the library into small pieces of meaning and let the pieces gather into groups, then groups of groups, with each piece keeping its links upward. The same piece may sit in more than one group, and use would reshape the grouping: travelled links strengthen, unused ones fade. *Design; one early experiment, see the status table.*
 - **Learning from outcomes.** Strengthen links that lead somewhere useful, weaken the rest, and roll a change back when it hurts. Tried on development data (real library code, simulated feedback): a gain only when the correct answer is fed back (see [docs/design](docs/design/README.md)).
-- **Sleep.** Replay the day's work offline, compressing, distilling and deleting, behind a gate that can reject a bad proposal. Designed; a benefit is shown nowhere yet.
+- **Sleep.** Replay the day's work offline, compressing, distilling and deleting, behind a gate that can reject a bad proposal. Tried offline in four tests; no benefit shown (see [docs/design](docs/design/sleep.md)).
 - **Repeated work to scripts.** Record slow, correct, deliberate work, verify it, and replace repeats with a fast script that replays it. Experimental on one task series (see the table); not shown as a general capability.
 
 ## Quickstart
