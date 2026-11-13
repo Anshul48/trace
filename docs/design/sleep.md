@@ -5,7 +5,7 @@
 
 ## What exists today
 
-DESIGN. No sleep cycle runs anywhere. The raw material it would work on (usage logs, repeated run records) exists only as scattered run records.
+DESIGN. No sleep cycle runs anywhere. The raw material it would work on (usage logs and records of repeated runs) exists only in scattered form.
 
 ## Latest measured number
 
