@@ -13,8 +13,9 @@ of the README.
   would reshape the grouping: travelled links strengthen, unused ones fade.
   *Design; one early experiment, see the status table.*
 - **Learning from outcomes.** Strengthen links that lead somewhere useful,
-  weaken the rest, and roll a change back when it hurts. Small toys only
-  so far.
+  weaken the rest, and roll a change back when it hurts. Tried on
+  development data (real library code, simulated feedback): a gain only
+  when the correct answer is fed back (see [docs/design](design/README.md)).
 - **Sleep.** Replay the day's work offline, compressing, distilling and
   deleting, behind a gate that can reject a bad proposal. Designed; a
   benefit is shown nowhere yet.

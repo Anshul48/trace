@@ -5,15 +5,15 @@
 
 ## What exists today
 
-DESIGN. No sleep cycle runs anywhere. The raw material it would work on (usage logs and records of repeated runs) exists only in scattered form.
+EXPERIMENTAL, no benefit shown. Sleep passes have been run in four tests, each offline on development data or on a copy of a store. The safety parts work: the gate, exact rollback, and blocking a deliberately corrupted pass. Nothing is switched on in any served store.
 
 ## Latest measured number
 
-None. No sleep run has shown a benefit anywhere as of 12 November. The next step, before any new build, is to define the benefit and the control given the same computing time that would show it: a sleep that beats doing nothing, beats keeping a random sample, and beats keeping only recent material, with the rollback gate switched on.
+On 12 to 13 November, four tests showed no benefit that could be put down to sleep. Where numbers improved after a sleep pass, a control without sleep matched them: once a random control (cost fell 49 percent in both), once a better search. (As reported by the builders, not yet rerun.)
 
 ## What it does not show
 
-Everything about sleep is unshown: no tidier store, no cheaper repeats after a cycle, no gate catching a bad proposal, no links between distant groups proposed and kept. The design notes for the other four pieces describe what little is measured there.
+No benefit of sleep is shown: no tidier store, no cheaper repeats after a cycle, no links between distant groups proposed and kept. The design notes for the other four pieces describe what little is measured there.
 
 ## What would prove it wrong
 

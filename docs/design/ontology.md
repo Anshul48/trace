@@ -9,7 +9,7 @@ DESIGN. The full structure above does not run anywhere. One piece of it is EXPER
 
 ## Latest measured number
 
-The only measured piece is the organiser: 0.27 against 0.30 for k-means told the number of groups, on Python standard-library code. Details and limits: [organiser.md](organiser.md).
+The only measured piece is the organiser: 0.27 against 0.30 for k-means told the number of groups, on Python standard-library code. Details and limits: [organiser.md](organiser.md). A first test of use reshaping the grouping was negative: adding which functions are called together did not improve grouping by module or package, and a shuffled control did as well. The same signal did help predict which functions a caller also calls (0.167 against 0.115 in the top five for content alone). On this evidence use helps prediction, not grouping. (As reported by the builders, not yet rerun.)
 
 ## What it does not show
 
