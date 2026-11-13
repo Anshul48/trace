@@ -13,7 +13,7 @@ On 12 November, on our own task history: a script written from the task descript
 
 The recorded runs were done by AI worker agents. On equal inputs they agreed with each other on 0.998 of fields in that series, on 1.0 and 0.82 in two others, and on 0.20 in a fourth, where the written brief left the method open.
 
-In simulation, a checking rule that always re-checks a new input and otherwise checks less and less often let through 0 to 5 wrong outputs per faulty script, at a cost of 12 to 13 percent of calls. (As reported by the builders, not yet rerun.)
+In simulation, a checking rule that always re-checks a new input and otherwise checks less and less often let through 0 to 5 wrong outputs per faulty script, while re-checking 12 to 13 percent of calls (when 7 percent of inputs are new). (As reported by the builders, not yet rerun.)
 
 Not shown: writing the script automatically, or a skill learned from varied work.
 

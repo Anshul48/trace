@@ -5,11 +5,11 @@
 
 ## What exists today
 
-EXPERIMENTAL, no benefit shown. Sleep passes have been run in five tests on development data. The safety parts work: the gate, exact rollback, and blocking a deliberately corrupted pass. Nothing is switched on in any served store.
+EXPERIMENTAL, no benefit shown. Sleep passes have been run in four tests, each offline on development data or on a copy of a store. The safety parts work: the gate, exact rollback, and blocking a deliberately corrupted pass. Nothing is switched on in any served store.
 
 ## Latest measured number
 
-On 12 to 13 November, five tests showed no benefit. In the one test where cost fell by 49 percent, a random control cut cost by as much, so the saving came from re-ordering candidates and not from consolidation. (As reported by the builders, not yet rerun.)
+On 12 to 13 November, four tests showed no benefit that could be put down to sleep. Where numbers improved after a sleep pass, a control without sleep matched them: once a random control (cost fell 49 percent in both), once a better search. (As reported by the builders, not yet rerun.)
 
 ## What it does not show
 

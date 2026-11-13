@@ -28,9 +28,9 @@ Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.githu
 | Routed dense search: 0.79% of rows scored in each of the four parts, 0.9985 of exact search's top ten kept | Runs today | [B1, B2](BENCHMARKS.md#b-what-the-method-does) |
 | Receipts and audit tooling: frozen-code check, receipt gates, small reproduction | Runs today | The three check commands below |
 | Benchmark numbers: 50 searches, our library, our server | Runs today, self-measured | [BENCHMARKS.md](BENCHMARKS.md) |
-| Organiser, first version, on real code (Python standard library, 180 functions per draw, 5 draws): grouping functions by module without being told the number of groups, it scored 0.27 (adjusted Rand index: 1 is identical groupings, 0 is chance) against 0.30 for k-means told the number of groups. It did not beat that baseline, and it made 18 to 23 groups where there are 12 modules. Development data only; no held-out test | Experimental | Reported 12 Nov; record not yet filed in this repo |
+| Organiser, first version, on real code (Python standard library, 180 functions per draw, mean of 5 draws): grouping functions by module without being told the number of groups. The runnable copy in this repo scores 0.23 (adjusted Rand index: 1 is identical groupings, 0 is chance) against 0.25 for k-means told the number of groups, and makes 11 to 19 groups where there are 12 modules (word-count vectors built by Python alone; CPython 3.12.3). With sentence-embedding vectors, from a file not published yet, it scored 0.27 against 0.30 and made 18 to 23 groups. It did not beat k-means in either. Development data only; no held-out test | Experimental | [experiments/organiser-on-code/](experiments/organiser-on-code/) |
 | Repeated task to checked script. On our own task history, a script written from the task description and two recorded runs, with one fix after the first comparison, reproduced every data field of 121 past runs of a task that had been run 122 times (checked by rerun; in 113 of the 122 runs the inputs were the same as in the run before). Of thirteen repeated tasks tried, this one matched on all 121 past runs and two more matched most later runs (as reported by the builders, not yet rerun). Not shown: writing the script automatically, or a skill learned from varied work | Experimental | Reported by the builders, 12 Nov 2026; the task history is not in this repo. Synthetic demo of the checking steps: [experiments/series-compile](experiments/series-compile/README.md) |
-| Learning from outcomes beyond toy data; sleep with a measured benefit; several stores working together; the organiser at full library size | Design only | [docs/ROADMAP.md](docs/ROADMAP.md) |
+| Learning from outcomes inside a served store; sleep with a measured benefit; several stores working together; the organiser at full library size | Design only | [docs/ROADMAP.md](docs/ROADMAP.md) |
 | Resident server, whole-library download, public benchmarks, outside check | Not built | [docs/ROADMAP.md](docs/ROADMAP.md) |
 | Engine source (C) | Not yet published | The engine runs on our server and produced the numbers above; its source is not in this repo |
 
@@ -45,7 +45,7 @@ Research prototype · Apache-2.0 · **[Open the explorer](https://anshul48.githu
 Four changes would turn this store into one that organises itself as it is used. None of them is part of the store measured in the paper, which is fixed. Each line below says how far it has got.
 
 - **Outline.** Split the library into small pieces of meaning and let the pieces gather into groups, then groups of groups, with each piece keeping its links upward. The same piece may sit in more than one group, and use would reshape the grouping: travelled links strengthen, unused ones fade. *Design; one early experiment, see the status table.*
-- **Learning from outcomes.** Strengthen links that lead somewhere useful, weaken the rest, and roll a change back when it hurts. Small toys only so far.
+- **Learning from outcomes.** Strengthen links that lead somewhere useful, weaken the rest, and roll a change back when it hurts. Tried on development data (real library code, simulated feedback): a gain only when the correct answer is fed back (see [docs/design](docs/design/README.md)).
 - **Sleep.** Replay the day's work offline, compressing, distilling and deleting, behind a gate that can reject a bad proposal. Designed; a benefit is shown nowhere yet.
 - **Repeated work to scripts.** Record slow, correct, deliberate work, verify it, and replace repeats with a fast script that replays it. Experimental on one task series (see the table); not shown as a general capability.
 
@@ -152,7 +152,7 @@ More in the [FAQ](docs/FAQ.md) and in [BENCHMARKS.md, "Not measured"](BENCHMARKS
 
 Design direction, not promises: no dates, and most of it does not exist yet. Full page: **[docs/ROADMAP.md](docs/ROADMAP.md)**.
 
-- **The store that organises itself**: grouping, organiser, top-down prediction, learning from outcomes, sleep, repeated work to scripts. Experimental pieces and design; see the status table above.
+- **The store that organises itself**: the organiser, top-down prediction, learning from outcomes, sleep, repeated work to scripts. Experimental pieces and design; see the status table above.
 - **A download of the whole library**, so anyone can re-run the 100M numbers. Not built.
 - **A resident search server** (open each part once, answer many questions). Designed; no speed number is claimed for it.
 - **TRACE on public benchmarks** (BEIR first) with full-run records, and **an outside check** of our numbers.
