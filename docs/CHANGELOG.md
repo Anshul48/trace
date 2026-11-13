@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased (item 7: hygiene + repo settings)
+
+Repo About box synced to the live settings (honest description, five
+topics, Pages homepage). Hygiene verified: Apache-2.0 LICENSE present,
+gitignore covers caches and venvs, no junk files in the 564-file tree.
+
 ## Unreleased (item 6: CI badge + experiment smoke)
 
 CI `verify` job now also runs the paper bundle tests and the

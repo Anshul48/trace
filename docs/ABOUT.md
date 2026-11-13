@@ -8,7 +8,7 @@ These are the exact strings to paste into the repository's settings. They are ke
 **Description** (under 350 characters):
 
 ```
-Research prototype: a memory that sorts itself into groups so a question wakes only a small part of it, with a checkable record on every answer. Explorer of 144 real recorded searches. Apache-2.0.
+TRACE: a checkable memory store for coding agents, built toward a memory that organises itself (research code)
 ```
 
 **Website:**
