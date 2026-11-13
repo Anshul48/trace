@@ -11,5 +11,9 @@ what it does not show, and what would prove it wrong.
 - [Repeated work to scripts](system2-system1.md): replacing slow repeats.
 - [Sleep](sleep.md): an offline tidy that must earn its keep.
 
-Learning from outcomes has no note yet: it has been tried on toy data
-only and has no number to report.
+Learning from outcomes has no note yet. Latest result (12 to 13 November,
+development data, as reported by the builders, not yet rerun): learned
+links raised accuracy by 0.10 to 0.18 over fixed groups only when the
+correct answer was fed back after every query. With only right-or-wrong
+feedback the gain was 0.03; with feedback on a fifth of queries, or late,
+about 0. No gain is shown without being given the correct answers.

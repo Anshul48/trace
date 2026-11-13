@@ -9,7 +9,13 @@ EXPERIMENTAL. For one repeated task from our own task history, a script was writ
 
 ## Latest measured number
 
-On 12 November, on our own task history: a script written from the task description and two recorded runs, with one fix after the first comparison, reproduced every data field of 121 past runs of a task that had been run 122 times (checked by rerun; in 113 of the 122 runs the inputs were the same as in the run before). Of thirteen repeated tasks tried, this one matched on all 121 past runs and two more matched most later runs (as reported by the builders, not yet rerun). On equal inputs, the agents that produced the runs agreed with each other on 0.998 of fields in that series, 1.0 and 0.82 in two others, and 0.20 in a fourth, where the written brief left the method open. In simulation, a checking rule that always re-checks a new input and otherwise checks at a decaying rate delivered 0 to 5 wrong outputs per faulty script at a cost of 12 to 13 percent of calls (as reported by the builders, not yet rerun). Not shown: writing the script automatically, or a skill learned from varied work.
+On 12 November, on our own task history: a script written from the task description and two recorded runs, with one fix after the first comparison, reproduced every data field of 121 past runs of a task that had been run 122 times (checked by rerun; in 113 of the 122 runs the inputs were the same as in the run before). Of thirteen repeated tasks tried, this one matched on all 121 past runs and two more matched most later runs (as reported by the builders, not yet rerun).
+
+The recorded runs were done by AI worker agents. On equal inputs they agreed with each other on 0.998 of fields in that series, on 1.0 and 0.82 in two others, and on 0.20 in a fourth, where the written brief left the method open.
+
+In simulation, a checking rule that always re-checks a new input and otherwise checks less and less often let through 0 to 5 wrong outputs per faulty script, at a cost of 12 to 13 percent of calls. (As reported by the builders, not yet rerun.)
+
+Not shown: writing the script automatically, or a skill learned from varied work.
 
 ## What it does not show
 
