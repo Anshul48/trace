@@ -49,7 +49,11 @@ jobs:
           cd experiments/series-compile
           python3 -I series_compile.py demo | cmp - EXPECTED_OUTPUT.txt
           python3 -I -W error::ResourceWarning -m unittest discover -s tests
-      # Organiser experiment smoke lands with item 3 (experiments/organiser-on-code).
+      - name: Organiser experiment (tests + run exit code; no output compare)
+        run: |
+          cd experiments/organiser-on-code
+          python3 -I -B -W error::ResourceWarning -m unittest discover -s tests
+          python3 -I run.py > /dev/null
       - name: Fix1 + existing suites
         run: |
           mkdir -p /tmp/baseline-venv/bin

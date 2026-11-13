@@ -155,14 +155,29 @@ final assert compares against the original build host's path.)
 
 ## 4. Organiser smoke test
 
-Not in the repo yet. This section will hold the command and its output when
-the experiment is published.
+From a fresh clone:
+
+```
+cd experiments/organiser-on-code
+python3 -I -B -W error::ResourceWarning -m unittest discover -s tests
+python3 -I run.py
+```
+
+Shows: the tests print `OK` (18 tests, a few seconds). The second command
+prints the module-grouping table; on CPython 3.12.3 it is byte-identical to
+`EXPECTED_OUTPUT.txt` (mean module ARI: organiser 0.228, k-means told 12:
+0.245). Does not show: other Python versions print slightly different
+numbers because the standard-library text differs (shape unchanged); the
+0.27-against-0.30 table needs a vectors file that is not published yet (see
+the experiment's README).
 
 ## What you can and cannot verify from this repo alone
 
 - CAN: the paper's numbers pinned to shipped evidence (checker above, minus
   the 1 withheld file); the frozen code, the recorded gates and the 20k
-  reproduction (step 1); the unit tests (step 3).
+  reproduction (step 1); the unit tests (step 3); the organiser
+  experiment's tests and one-command table (step 4, with the
+  Python-version caveat stated there).
 - CANNOT here: the sealed-store runs themselves (they need the author's
   machine; the evidence files above are provided instead); the 11 numbers
   whose receipts point to the withheld file.
