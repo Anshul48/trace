@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased (item 6: CI badge + experiment smoke)
+
+CI `verify` job now also runs the paper bundle tests and the
+series-compile demo + smoke suite (organiser smoke lands with item 3).
+README carries the verify badge.
+
 ## Unreleased (item 5: paper figures + README)
 
 `paper/figures/` carries the six story images, byte-identical, and
