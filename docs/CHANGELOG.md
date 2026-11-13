@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased (wording: R8 + R9 follow-up)
+
+Design notes corrected (no "replaced" script, design stated as design,
+organiser runnable copy now linked); paper README gains the abstract and
+unittest-only check commands; ROADMAP in plain words; FAQ 0.79% scope now
+matches the per-part evidence file; About-box topics synced to live.
+
+## Unreleased (item 3: organiser-on-code experiment)
+
+New `experiments/organiser-on-code/`: the 10 verified files (streaming
+organiser against told-K baselines on standard-library code). Status table
+row links the record: the one command prints 0.23 against 0.25 (TF-IDF);
+0.27 against 0.30 needs the unpublished vectors file. JUDGES.md step 4 and
+a CI smoke step (tests + run exit code, no output compare).
+
 ## Unreleased (item 7: hygiene + repo settings)
 
 Repo About box synced to the live settings (honest description, five

@@ -1,11 +1,11 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 # Repeated work to scripts: replacing slow repeats with fast replays
 
-**FOR A NEW READER.** Some work repeats: the same task, nearly the same inputs, solved slowly each time. The design records these slow runs, and where they agree it replaces the repeat with a fast script that replays the recorded answers. The slow path stays available as fallback, and a script that ever disagrees is discarded.
+**FOR A NEW READER.** Some work repeats: the same task, nearly the same inputs, solved slowly each time. The design records these slow runs, and where they agree it would replace the repeat with a fast script that recomputes the same outputs. The slow path would stay available as a fallback, and a script that ever disagrees would be discarded.
 
 ## What exists today
 
-EXPERIMENTAL. One repeated task from our own task history was replaced by a script; a synthetic demo of the checking steps ships in this repo at `experiments/series-compile`. Nothing else runs.
+EXPERIMENTAL. For one repeated task from our own task history, a script was written that reproduced the recorded outputs. It ran beside the recorded work; nothing was switched over. A synthetic demo of the checking steps ships in this repo at `experiments/series-compile`. Nothing else runs.
 
 ## Latest measured number
 

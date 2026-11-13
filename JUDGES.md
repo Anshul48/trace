@@ -164,12 +164,13 @@ python3 -I run.py
 ```
 
 Shows: the tests print `OK` (18 tests, a few seconds). The second command
-prints the module-grouping table; on CPython 3.12.3 it is byte-identical to
-`EXPECTED_OUTPUT.txt` (mean module ARI: organiser 0.228, k-means told 12:
-0.245). Does not show: other Python versions print slightly different
-numbers because the standard-library text differs (shape unchanged); the
-0.27-against-0.30 table needs a vectors file that is not published yet (see
-the experiment's README).
+prints the module-grouping table; on CPython 3.12.3 it is byte-identical
+to `EXPECTED_OUTPUT.txt` (mean adjusted Rand index: organiser 0.228,
+k-means told 12 groups 0.245; the organiser is below the baseline). Other
+Python versions print different numbers because the standard-library text
+differs; only 3.12.3 was checked. Does not show: the 0.27-against-0.30
+table, which needs a vectors file that is not published yet (see the
+experiment's README); anything on held-out code.
 
 ## What you can and cannot verify from this repo alone
 

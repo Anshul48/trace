@@ -5,15 +5,15 @@
 
 ## What exists today
 
-DESIGN. No sleep cycle runs anywhere. The raw material it would work on (usage logs, repeated traces) exists only as scattered run records.
+DESIGN. No sleep cycle runs anywhere. The raw material it would work on (usage logs, repeated run records) exists only as scattered run records.
 
 ## Latest measured number
 
-None. No sleep run has shown a benefit anywhere as of 12 November. The next step, before any new build, is to define the benefit and the compute-matched control that would show it: a sleep that beats doing nothing, beats keeping a random sample, and beats keeping only recent material, with the rollback gate switched on.
+None. No sleep run has shown a benefit anywhere as of 12 November. The next step, before any new build, is to define the benefit and the control given the same computing time that would show it: a sleep that beats doing nothing, beats keeping a random sample, and beats keeping only recent material, with the rollback gate switched on.
 
 ## What it does not show
 
-Everything about sleep is unshown: no tidier store, no cheaper repeats after a cycle, no gate catching a bad proposal, no cross-region links proposed and kept. The design notes for the other four pieces describe what little is measured there.
+Everything about sleep is unshown: no tidier store, no cheaper repeats after a cycle, no gate catching a bad proposal, no links between distant groups proposed and kept. The design notes for the other four pieces describe what little is measured there.
 
 ## What would prove it wrong
 
