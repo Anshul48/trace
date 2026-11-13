@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased (item 5: paper figures + README)
+
+`paper/figures/` carries the six story images, byte-identical, and
+`paper/README.md` documents every build file with its build commands.
+New `paper/tests/` smoke suite (public check passes, files present,
+receipts resolve), green under pytest and unittest.
+
 ## Unreleased (item 2: design notes)
 
 New `docs/design/`: five short notes (grouping, organiser, top-down guess,
